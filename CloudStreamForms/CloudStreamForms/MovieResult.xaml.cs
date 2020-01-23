@@ -401,6 +401,10 @@ namespace CloudStreamForms
                 MainChrome.GetAllChromeDevices();
             }
 
+            RecStack.SizeChanged += (o, e) => {
+                print("DAAAAAAAAAAAAAAAAAAa");
+                SetRecs();
+            };
 
 
             //ViewToggle.Source = GetImageSource("viewOnState.png");
@@ -831,20 +835,20 @@ namespace CloudStreamForms
                 }
                 Recommendations.Children.Clear();
 
+                /*
                 double multi = 1.75;
                 int height = 100;
                 int width = 65;
                 if (Device.RuntimePlatform == Device.UWP) {
                     height = 130;
                     width = 85;
-                }
+                }*/
 
-                height = (int)Math.Round(height * multi);
-                width = (int)Math.Round(width * multi);
+                int height = RecPosterHeight; //(int)Math.Round(height * multi);
+                int width = RecPosterWith;//(int)Math.Round(width * multi);
 
                 int pheight = (int)Math.Round(height * 4 * posterRezMulti);
                 int pwidth = (int)Math.Round(width * 4 * posterRezMulti);
-                Recommendations.HeightRequest = height*4;
                 for (int i = 0; i < RecomendedPosters.Count; i++) {
                     Poster p = e.title.recomended[i];
                     string posterURL = p.posterUrl.Replace(",76,113_AL", "," + pwidth + "," + pheight + "_AL").Replace("UY113", "UY" + pheight).Replace("UX76", "UX" + pwidth);
@@ -917,12 +921,11 @@ namespace CloudStreamForms
                             }
                         }
                     };
-                }
 
-                for (int i = 0; i < Recommendations.Children.Count; i++) { // GRID
-                    Grid.SetColumn(Recommendations.Children[i], i%3);
-                    Grid.SetRow(Recommendations.Children[i], (int)Math.Floor(i/3.0));
                 }
+                Device.BeginInvokeOnMainThread(() => { SetRecs(); });
+
+
 
                 SetRows();
             });
@@ -930,6 +933,28 @@ namespace CloudStreamForms
 
 
         }
+
+        double _RecPosterMulit = 1.75;
+        int _RecPosterHeight = 100;
+        int _RecPosterWith = 65;
+        int RecPosterHeight { get { return (int)Math.Round(_RecPosterHeight * _RecPosterMulit); } }
+        int RecPosterWith { get { return (int)Math.Round(_RecPosterWith * _RecPosterMulit); } }
+
+        void SetRecs()
+        {
+            Device.BeginInvokeOnMainThread(() => {
+                const int total = 12;
+                int perCol = (Application.Current.MainPage.Width < Application.Current.MainPage.Height) ? 3 : 6;
+                Recommendations.HeightRequest = RecPosterHeight * (total / perCol);
+
+                for (int i = 0; i < Recommendations.Children.Count; i++) { // GRID
+                    Grid.SetColumn(Recommendations.Children[i], i % perCol);
+                    Grid.SetRow(Recommendations.Children[i], (int)Math.Floor(i / (double)perCol));
+                }
+            });
+        }
+
+
         Guid guidIdRecomendations = new Guid();
         int extraZRecomend;
         double extraScrollPos = 0;
@@ -1680,16 +1705,10 @@ namespace CloudStreamForms
         void ChangedRecState(int state, bool overrideCheck = false)
         {
             if (state == showState && !overrideCheck) return;
-
             showState = state;
             stateScale = 0;
-            System.Timers.Timer timer = new System.Timers.Timer(10);
-            timer.Elapsed += (sender, args) => {
-                stateScale += 0.5;
-                if (stateScale > 1) {
-                    stateScale = 1;
-                    timer.Stop();
-                }
+            Device.BeginInvokeOnMainThread(() => {
+                Grid.SetRow(EpPickers, (state == 0) ? 1 : 0);
 
                 episodeView.Scale = (state == 0) ? 1 : 0;
                 episodeView.IsEnabled = state == 0;
@@ -1698,6 +1717,22 @@ namespace CloudStreamForms
                 RecStack.Scale = state == 1 ? 1 : 0;
                 RecStack.IsEnabled = state == 1;
                 SetHeight(state == 1);
+                if (state == 1) {
+                    SetRecs();
+                }
+
+            });
+
+   
+            System.Timers.Timer timer = new System.Timers.Timer(10);
+            timer.Elapsed += (sender, args) => {
+
+                
+                stateScale += 0.5;
+                if (stateScale > 1) {
+                    stateScale = 1;
+                    timer.Stop();
+                }
 
                 if (state == 0) {
                     EPISODESBar.ScaleX = stateScale;
@@ -1707,10 +1742,12 @@ namespace CloudStreamForms
                     EPISODESBar.ScaleX = 1 - stateScale;
                     RECOMMENDATIONSBar.ScaleX = stateScale;
                 }
+                
             };
 
             timer.Start();
 
+        
         }
 
         private void Episodes_Clicked(object sender, EventArgs e)

@@ -179,12 +179,12 @@ xmlns:ffTransformations="clr-namespace:FFImageLoading.Transformations;assembly=F
                         <StackLayout Orientation="Horizontal" TranslationX="10" >
                             <Grid>
                                 <Button x:Name="SeasonBtt"  InputTransparent="True" BackgroundColor="#333333" Text="Season 1" TextColor="#e7e7e7" FontAttributes="Bold" FontSize="Body" CornerRadius="5" HeightRequest="37" ></Button>
-                                <Picker x:Name="SeasonPicker" TitleColor="Blue" IsVisible="False" VerticalOptions="Center" HorizontalOptions="Start"  FontAttributes="Bold" FontSize="Body" TextColor="Transparent"  ></Picker>
+                                <Picker x:Name="SeasonPicker"  TranslationX="13" TextColor="Transparent" IsVisible="False" VerticalOptions="Center" HorizontalOptions="Start"  FontAttributes="Bold" FontSize="Body" ></Picker>
 
                             </Grid>
                             <Grid>
                                 <Button x:Name="DubBtt" InputTransparent="True" BackgroundColor="#333333" Text="Dub" TextColor="#e7e7e7" FontAttributes="Bold" FontSize="Body" CornerRadius="5" HeightRequest="37" WidthRequest="60" ></Button>
-                                <Picker x:Name="DubPicker" IsVisible="False" VerticalOptions="Center" HorizontalOptions="Start"  FontAttributes="Bold" FontSize="Body" TextColor="Transparent"></Picker>
+                                <Picker x:Name="DubPicker" IsVisible="False" VerticalOptions="Center" HorizontalOptions="Start"  FontAttributes="Bold" FontSize="Body" TextColor="Transparent" TranslationX="13"></Picker>
                             </Grid>
                         </StackLayout>
 
@@ -320,11 +320,11 @@ xmlns:ffTransformations="clr-namespace:FFImageLoading.Transformations;assembly=F
                     </ListView.ItemTemplate>
 
                 </ListView>
-                <StackLayout Margin="0,-60,0,0" x:Name="RecStack">
+                <StackLayout Margin="0,0,0,0" x:Name="RecStack">
                   <!--  <Label x:Name="RText" Text="Recommendations" FontAttributes="Bold" TranslationX="10" VerticalOptions="Start" FontSize="Medium" TextColor="White"></Label>-->
-                    <ScrollView Orientation="Horizontal" x:Name="MScroll" VerticalOptions="Start" HorizontalScrollBarVisibility="Never">
+                    <ScrollView Orientation="Vertical" x:Name="MScroll" VerticalOptions="Start" HorizontalScrollBarVisibility="Never">
                         <StackLayout>
-                            <Grid x:Name="Recommendations" VerticalOptions="Start" HorizontalOptions="Fill" HeightRequest="130" RowSpacing="0" >
+                            <Grid x:Name="Recommendations" VerticalOptions="Start" HorizontalOptions="Fill" HeightRequest="130" RowSpacing="10" >
 
                             </Grid>
                         </StackLayout>

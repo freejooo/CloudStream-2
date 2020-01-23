@@ -151,8 +151,13 @@ namespace CloudStreamForms
         {
             mainPoster = _mainPoster;
             Page p = new MovieResult();// { mainPoster = mainPoster };
+            try {
+                await navigation.PushModalAsync(p, false);
 
-            await navigation.PushModalAsync(p, false);
+            }
+            catch (Exception) {
+
+            }
         }
 
         private void SearchBar_TextChanged(object sender, TextChangedEventArgs e)
