@@ -10,6 +10,8 @@ namespace CloudStreamForms.Models
         public int Id { set; get; }
         public string Title { set; get; }
         public string Rating { set; get; }
+        public string RatingStar { get { return (Rating.Replace(" ","") == "" ? "Rating Unavailable" :  "★ " + Rating); } } // ★
+
         public string PosterUrl { set; get; }
 
         public string extraInfo { set; get; }
@@ -31,7 +33,7 @@ namespace CloudStreamForms.Models
         public string MainTextColor { set; get; } = "#ffffff";
         public string MainDarkTextColor { get; set; } = "#808080"; 
         public string ExtraColor { get; set; } = "#808080"; 
-        public string ogTitle { set; get; }
+        public string OgTitle { set; get; }
         public double TranslateYOffset
         {
             get {

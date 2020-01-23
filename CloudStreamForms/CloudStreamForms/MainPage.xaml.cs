@@ -1322,7 +1322,7 @@ namespace CloudStreamForms
                 }
                 catch {
                     activeMovie.title.MALData.japName = "error";
-                    throw;
+                   // throw;
                 }
                 finally {
                     JoinThred(tempThred);
@@ -2425,7 +2425,7 @@ namespace CloudStreamForms
                 }
             }
             catch (Exception) {
-                throw;
+              //  throw;
             }
             return baseUrls;
         }
@@ -2598,7 +2598,7 @@ namespace CloudStreamForms
                             string _lookFor = "\"file\":\"";
                             while (dl.Contains(_lookFor)) {
                                 string __link = FindHTML(dl, _lookFor, "\"");
-                                AddPotentialLink(normlaEpisode, __link, "HD FMovies", 30);
+                                AddPotentialLink(normlaEpisode, __link, "HD FMovies", 30); // https://bharadwajpro.github.io/m3u8-player/player/#
                                 dl = RemoveOne(dl, _lookFor);
                             }
                             d = RemoveOne(d, lookFor);
@@ -3902,7 +3902,7 @@ namespace CloudStreamForms
                             engine.Execute(@funct);
                             if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
                                                                          //GetAPI(realXToken, tokenCode, _token, tempThred, episode);
-
+                            print("PAssed js test" + realXToken);
                             System.Uri myUri = new System.Uri("https://" + GOMOURL + "/decoding_v3.php"); // Can't DownloadString because of RequestHeaders (Anti-bot)
                             HttpWebRequest webRequest = (HttpWebRequest)HttpWebRequest.Create(myUri);
 
@@ -3917,7 +3917,7 @@ namespace CloudStreamForms
                             webRequest.Headers.Add("Pragma", "Trailers");
                             webRequest.ContentType = "application/x-www-form-urlencoded";
                             done = false;
-
+                            print("Passed token");
 
                             webRequest.BeginGetRequestStream(new AsyncCallback((IAsyncResult callbackResult) => {
                                 HttpWebRequest _webRequest = (HttpWebRequest)callbackResult.AsyncState;
@@ -3929,6 +3929,7 @@ namespace CloudStreamForms
 
                                 postStream.Write(byteArray, 0, byteArray.Length);
                                 postStream.Close();
+                                print("PASSED TOKENPOST");
 
                                 if (!GetThredActive(tempThred)) { return; };
 
@@ -3940,16 +3941,15 @@ namespace CloudStreamForms
                                     HttpWebResponse response = (HttpWebResponse)request.EndGetResponse(_callbackResult);
                                     using (StreamReader httpWebStreamReader = new StreamReader(response.GetResponseStream())) {
                                         if (!GetThredActive(tempThred)) { print(":("); return; };
-
+                                        print("GOT RESPONSE:");
                                         string result = httpWebStreamReader.ReadToEnd();
-
+                                        print("RESULT:::" + result);
                                         try {
                                             if (result != "") {
 
                                                 // --------------- GOT RESULT!!!!! ---------------
 
                                                 WebClient client = new WebClient();
-                                                //XbHP6duxDnD~1558891507~83.186.0.0~c5i0DlNs
 
                                                 // --------------- MIRROR LINKS ---------------
                                                 string veryURL = FindHTML(result, "https:\\/\\/verystream.com\\/e\\/", "\"");
@@ -3964,13 +3964,7 @@ namespace CloudStreamForms
 
                                                 gogoStream = gogoStream.Replace(",,&noneemb", "").Replace("\\", "");
 
-                                                // ------ EXAMPLE ------
-                                                //["https:\/\/redirector.googlevideo.com\/videoplayback?id=3559ed25eabf374d&itag=22&source=picasa&begin=0&requiressl=yes&mm=30&mn=sn-4g5ednsy&ms=nxu&mv=u&pl=44&sc=yes&ei=oenhXN27O62S8gOI07awBA&susc=ph&app=fife&mime=video\/mp4&cnr=14&dur=7561.903&lmt=1557947360209526&mt=1558308859&ipbits=0&keepalive=yes&ratebypass=yes&ip=2a01:4f8:110:3447::2&expire=1558316481&sparams=ip,ipbits,expire,id,itag,source,requiressl,mm,mn,ms,mv,pl,sc,ei,susc,app,mime,cnr,dur,lmt&signature=9ABF4766E7C2573C0171F8D1C6F0761B289483F1B9704140A09090666F4EED83.25A52B55EF6070C25DB2608CFBF0994166D1CA477F85D0CD71994980976993C6&key=us0","
-                                                //https:\/\/gomostream.com\/vid\/?v=eyJ0eXBlIjoibW92aWUiLCJpbWQiOiJ0dDAzNzE3NDYiLCJfIjoiMTI5NjUwODg1NTE3IiwidG9rZW4iOiI5MzExNTIifQ,,&noneemb",
-                                                //"https:\/\/verystream.com\/e\/XbHP6duxDnD",
-                                                //"https:\/\/hqq.tv\/player\/embed_player.php?vid=WDc5TjcvTkxXTFpBbXRLYzFSazFMUT09&autoplay=no",
-                                                //"https:\/\/gounlimited.to\/embed-xjje1taiv02x.html",
-                                                //"https:\/\/vcstream.to\/embed\/5cb01ff305468"]
+                                
 
                                                 Episode ep = activeMovie.episodes[episode];
                                                 if (ep.links == null) {

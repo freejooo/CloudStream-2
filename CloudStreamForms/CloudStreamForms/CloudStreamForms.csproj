@@ -38,6 +38,7 @@
     <None Remove="Resource\homeIcon.png" />
     <None Remove="Resource\imdbIcon.png" />
     <None Remove="Resource\MALIcon.png" />
+    <None Remove="Resource\nexflixPlayBtt.png" />
     <None Remove="Resource\notBookmarkedBtt.png" />
     <None Remove="Resource\playBtt.png" />
     <None Remove="Resource\play_png.png" />
@@ -101,6 +102,7 @@
     <EmbeddedResource Include="Resource\homeIcon.png" />
     <EmbeddedResource Include="Resource\imdbIcon.png" />
     <EmbeddedResource Include="Resource\MALIcon.png" />
+    <EmbeddedResource Include="Resource\nexflixPlayBtt.png" />
     <EmbeddedResource Include="Resource\notBookmarkedBtt.png" />
     <EmbeddedResource Include="Resource\play_png.png" />
     <EmbeddedResource Include="Resource\round_add_white_48dp.png" />
