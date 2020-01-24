@@ -61,11 +61,11 @@ xmlns:ffTransformations="clr-namespace:FFImageLoading.Transformations;assembly=F
 
                         </ff:CachedImage>
                         <ImageButton x:Name="ChromeCastBtt" BackgroundColor="Transparent" Clicked="ChromeCastBtt_Clicked"  WidthRequest="40" HeightRequest="40" TranslationY="-6" VerticalOptions="Start" HorizontalOptions="Start"></ImageButton>
-                        <Label x:Name="NameLabel" FontSize="Title" Text="Iron Man" FontAttributes="Bold" HorizontalOptions="Start" Margin="10,10,10,10" TranslationY="-10" TextColor="White" ></Label>
+                        <Label x:Name="NameLabel" FontSize="Title" Text="Iron Man" FontAttributes="Bold" HorizontalOptions="Start" Margin="10,10,10,10" TranslationY="-10" TextColor="#e7e7e7" ></Label>
                     </Grid>
 
                     <Grid Grid.Row="2"  Grid.Column="0">
-                        <Label x:Name="RatingLabel" Text="" FontAttributes="Bold" HorizontalOptions="Start" TranslationX="10" TranslationY="-20" TextColor="White"></Label>
+                        <Label x:Name="RatingLabel" Text="" FontAttributes="Bold" HorizontalOptions="Start" TranslationX="10" TranslationY="-20" TextColor="#e7e7e7"></Label>
                     </Grid>
 
 
@@ -193,18 +193,21 @@ xmlns:ffTransformations="clr-namespace:FFImageLoading.Transformations;assembly=F
                     <Grid Grid.Row="0"  Grid.Column="0">
                         <Image x:Name="OffBar" InputTransparent="True" VerticalOptions="Start"></Image>
 
-                        <StackLayout Orientation="Horizontal" HorizontalOptions="Start" VerticalOptions="Start" TranslationY="-8">
+                        <StackLayout Orientation="Horizontal" HorizontalOptions="Start" VerticalOptions="Start" TranslationY="-8" Margin="0,5">
                             <Grid >
 
-                                <ProgressBar x:Name="EPISODESBar" Progress="1.0" ProgressColor="#303F9F" BackgroundColor="Transparent" InputTransparent="True" TranslationY="-8"></ProgressBar>
-                                <Button x:Name="EPISODES" Margin="10"  TranslationY="10" BackgroundColor="Transparent" Text="LOADING" TextColor="#e7e7e7" FontAttributes="Bold" FontSize="14" CornerRadius="5" HeightRequest="37" Clicked="Episodes_Clicked" ></Button>
+                                <ProgressBar x:Name="EPISODESBar" ScaleX="0" Progress="1.0" ProgressColor="#303F9F" BackgroundColor="Transparent" InputTransparent="True" TranslationY="-8"></ProgressBar>
+                                <Button x:Name="EPISODES" Margin="5"  TranslationY="10" BackgroundColor="Transparent" Text="LOADING" TextColor="#e7e7e7" FontAttributes="Bold" FontSize="14" CornerRadius="5" HeightRequest="37" Clicked="Episodes_Clicked" ></Button>
 
                             </Grid>
                             <Grid >
-                                <ProgressBar x:Name="RECOMMENDATIONSBar" Progress="1.0" ProgressColor="#303F9F"  BackgroundColor="Transparent" InputTransparent="True" TranslationY="-8"></ProgressBar>
-                                <Button x:Name="RECOMMENDATIONS" Margin="10"  TranslationY="10" BackgroundColor="Transparent" Text="RECOMMENDATIONS" TextColor="#e7e7e7" FontAttributes="Bold" FontSize="14" CornerRadius="5" HeightRequest="37" Clicked="Recommendations_Clicked" ></Button>
+                                <ProgressBar x:Name="RECOMMENDATIONSBar" ScaleX="0" Progress="1.0" ProgressColor="#303F9F"  BackgroundColor="Transparent" InputTransparent="True" TranslationY="-8"></ProgressBar>
+                                <Button x:Name="RECOMMENDATIONS" Margin="5"  TranslationY="10" BackgroundColor="Transparent" Text="RECOMMENDATIONS" TextColor="#e7e7e7" FontAttributes="Bold" FontSize="14" CornerRadius="5" HeightRequest="37" Clicked="Recommendations_Clicked" ></Button>
                             </Grid>
-
+                            <Grid >
+                                <ProgressBar x:Name="TRAILERSBar" ScaleX="0" Progress="1.0" ProgressColor="#303F9F"  BackgroundColor="Transparent" InputTransparent="True" TranslationY="-8"></ProgressBar>
+                                <Button x:Name="TRAILERS" Margin="5"  TranslationY="10" BackgroundColor="Transparent" Text="TRAILERS" TextColor="#e7e7e7" FontAttributes="Bold" FontSize="14" CornerRadius="5" HeightRequest="37" Clicked="Trailers_Clicked" ></Button>
+                            </Grid>
                         </StackLayout>
                     </Grid>
 
@@ -217,15 +220,15 @@ xmlns:ffTransformations="clr-namespace:FFImageLoading.Transformations;assembly=F
                    > -->
                 <Grid>
                     
-                <ListView ItemsSource="{Binding MyEpisodeResultCollection}"
-                             CachingStrategy="RecycleElement" 
-                ItemTapped="ListView_ItemTapped" RowHeight="175" HasUnevenRows="false"
-                    x:Name="episodeView" SeparatorColor="Transparent" VerticalScrollBarVisibility="Never">
+                    <ListView ItemsSource="{Binding MyEpisodeResultCollection}"
+                                 CachingStrategy="RecycleElement" 
+                    ItemTapped="ListView_ItemTapped" RowHeight="175" HasUnevenRows="false"
+                        x:Name="episodeView" SeparatorColor="Transparent" VerticalScrollBarVisibility="Never">
 
 
 
-                    <ListView.ItemTemplate>
-                        <DataTemplate >
+                        <ListView.ItemTemplate>
+                            <DataTemplate >
                             <ViewCell Tapped="ViewCell_Tapped">
                                 <Grid RowSpacing="0"  Padding="0"  HorizontalOptions="Fill" >
                                     <!--SizeChanged="ViewCell_SizeChanged"-->
@@ -317,19 +320,67 @@ xmlns:ffTransformations="clr-namespace:FFImageLoading.Transformations;assembly=F
 
                             </ViewCell>
                         </DataTemplate>
-                    </ListView.ItemTemplate>
+                        </ListView.ItemTemplate>
 
-                </ListView>
-                <StackLayout Margin="0,0,0,0" x:Name="RecStack">
-                  <!--  <Label x:Name="RText" Text="Recommendations" FontAttributes="Bold" TranslationX="10" VerticalOptions="Start" FontSize="Medium" TextColor="White"></Label>-->
-                    <ScrollView Orientation="Vertical" x:Name="MScroll" VerticalOptions="Start" HorizontalScrollBarVisibility="Never">
-                        <StackLayout>
-                            <Grid x:Name="Recommendations" VerticalOptions="Start" HorizontalOptions="Fill" HeightRequest="130" RowSpacing="10" >
+                    </ListView>
+                    <!--
+                    <ListView ItemsSource="{Binding CurrentTrailers}"
+                                 CachingStrategy="RecycleElement" 
+                    ItemTapped="ListView_ItemTapped" RowHeight="5000" HasUnevenRows="False" 
+                        x:Name="trailerView" SeparatorColor="Transparent" VerticalScrollBarVisibility="Never">
+                        <ListView.ItemTemplate>
+                            <DataTemplate >
+                                <ViewCell>
+                                    <Grid  RowSpacing="0"  HorizontalOptions="Start" TranslationY="0" >
 
-                            </Grid>
-                        </StackLayout>
-                    </ScrollView>
-                    <ActivityIndicator x:Name="RecomendationLoaded" IsRunning="True" IsVisible="True" IsEnabled="True" ></ActivityIndicator>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                        </Grid.RowDefinitions>
+                                        <Grid Grid.Row="0"  Grid.Column="0" TranslationY="10" VerticalOptions="Fill">
+
+                                        <ImageButton  BackgroundColor="Transparent"  HorizontalOptions="Fill" VerticalOptions="Fill"  Scale="1"></ImageButton>
+
+                                            <ff:CachedImage  Source="{Binding PosterUrl}" InputTransparent="True" Scale="1" Margin="0,10">
+
+                                        </ff:CachedImage>
+                               
+                                    </Grid>
+                                        <ff:CachedImage PropertyChanging="Image_PropertyChanging" InputTransparent="True" BackgroundColor="Transparent" Scale="0.2"  >
+
+                                        </ff:CachedImage>
+                                        <Grid  Grid.Row="1">
+
+                                            <Label Text="{Binding Name}"  TextColor="#e7e7e7" FontAttributes="Bold" FontSize="Body" TranslationY="0"  />
+                                        </Grid>
+
+                                    </Grid>
+                                </ViewCell>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
+-->
+                    <StackLayout>
+                        <Grid x:Name="trailerView" VerticalOptions="Start" HorizontalOptions="Fill" RowSpacing="10" >
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+                        </Grid>
+                    </StackLayout>
+                    
+                    <StackLayout Margin="0,0,0,0" x:Name="RecStack">
+                      <!--  <Label x:Name="RText" Text="Recommendations" FontAttributes="Bold" TranslationX="10" VerticalOptions="Start" FontSize="Medium" TextColor="White"></Label>-->
+                        <ScrollView Orientation="Vertical" x:Name="MScroll" VerticalOptions="Start" HorizontalScrollBarVisibility="Never">
+                            <StackLayout>
+                                <Grid x:Name="Recommendations" VerticalOptions="Start" HorizontalOptions="Fill" HeightRequest="130" RowSpacing="10" >
+
+                                </Grid>
+                            </StackLayout>
+                        </ScrollView>
+                        <ActivityIndicator x:Name="RecomendationLoaded" IsRunning="True" IsVisible="True" IsEnabled="True" ></ActivityIndicator>
                     </StackLayout>
                 </Grid>
 

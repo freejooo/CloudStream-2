@@ -221,7 +221,7 @@ namespace CloudStreamForms
                         Id = i,
                         Title = episodeTitle + extra,
                         ExtraProgress = dprogress,
-                        MainTextColor = stuckDownload ? "#D10E3C" : "#FFFFFF",
+                        MainTextColor = stuckDownload ? "#D10E3C" : "#e7e7e7",
                         ExtraColor = stuckDownload ? "#D10E3C" : "#303F9F",
                         MainDarkTextColor = stuckDownload ? "#7D0824" : "#808080",
 

@@ -27,7 +27,6 @@ namespace CloudStreamForms
         public int WithSize { get; set; } = 50;
 
 
-
         public Poster mainPoster;
         public string trailerUrl = "";
         List<Button> recBtts = new List<Button>();
@@ -107,7 +106,7 @@ namespace CloudStreamForms
             });
 
         }
-        public MainEpisodeView epView;
+        public MovieResultMainEpisodeView epView;
 
         bool setKey = false;
         void SetKey()
@@ -447,7 +446,7 @@ namespace CloudStreamForms
             DubBtt.IsVisible = false;
             SeasonBtt.IsVisible = false;
 
-            epView = new MainEpisodeView();
+            epView = new MovieResultMainEpisodeView();
             SetHeight();
 
             if (Device.RuntimePlatform == Device.UWP) {
@@ -474,6 +473,8 @@ namespace CloudStreamForms
 
             ChangedRecState(0, true);
         }
+
+
 
         private void MainPage_SizeChanged(object sender, EventArgs e)
         {
@@ -519,8 +520,8 @@ namespace CloudStreamForms
                     string posterUrl = "";
                     try {
                         if (activeMovie.title.trailers.Count > 0) {
-                            if (activeMovie.title.trailers[0].posterUrl != null) {
-                                posterUrl = activeMovie.title.trailers[0].posterUrl;
+                            if (activeMovie.title.trailers[0].PosterUrl != null) {
+                                posterUrl = activeMovie.title.trailers[0].PosterUrl;
                             }
                         }
                     }
@@ -604,6 +605,11 @@ namespace CloudStreamForms
         {
             //  episodeView.HeightRequest = episodeView.Bounds.Height;
             Device.BeginInvokeOnMainThread(() => episodeView.HeightRequest = ((setNull ?? showState != 0) ? 0 : (epView.MyEpisodeResultCollection.Count * episodeView.RowHeight + 20)));
+        }
+
+        void SetTrailerRec(bool? setNull = null)
+        {
+            // Device.BeginInvokeOnMainThread(() => trailerView.HeightRequest = ((setNull ?? showState != 0) ? 0 : (epView.CurrentTrailers.Count * trailerView.RowHeight + 20)));
         }
 
 
@@ -763,9 +769,8 @@ namespace CloudStreamForms
                 EPISODES.Text = isMovie ? "MOVIE" : "EPISODES";
 
                 try {
-                    string souceUrl = e.title.trailers.First().posterUrl;
+                    string souceUrl = e.title.trailers.First().PosterUrl;
                     if (CheckIfURLIsValid(souceUrl)) {
-
                         TrailerBtt.Source = souceUrl;
                     }
                     else {
@@ -887,6 +892,7 @@ namespace CloudStreamForms
                 for (int i = 0; i < recBtts.Count; i++) {
 
                     // --- TOAST ---
+                    /*
                     recBtts[i].Pressed += (o, _e) => {
                         for (int z = 0; z < recBtts.Count; z++) {
                             if (((Button)o).Id == recBtts[z].Id) {
@@ -903,6 +909,7 @@ namespace CloudStreamForms
                             }
                         }
                     };
+                    */
                     recBtts[i].Released += (o, _e) => {
                         guidIdRecomendations = new Guid();
                     };
@@ -1157,11 +1164,63 @@ namespace CloudStreamForms
         }
 
 
-        private void MovieResult_trailerLoaded(object sender, string e)
+        private void MovieResult_trailerLoaded(object sender, List<Trailer> e)
         {
             if (!SameAsActiveMovie()) return;
+            if (e.Count > 4) return;
 
-            trailerUrl = e;
+            if (trailerUrl == "") {
+                trailerUrl = e[0].Url;
+            }
+
+            currentMovie.title.trailers = e;
+            epView.CurrentTrailers.Clear();
+            for (int i = 0; i < e.Count; i++) {
+                epView.CurrentTrailers.Add(e[i]);
+            }
+
+            Device.BeginInvokeOnMainThread(() => {
+                trailerView.Children.Clear();
+
+                for (int i = 0; i < e.Count; i++) {
+                    string p = e[i].PosterUrl;
+                    if (CheckIfURLIsValid(p)) {
+
+                        Grid stackLayout = new Grid();
+                        Button imageButton = new Button() { BackgroundColor = Color.Transparent, VerticalOptions = LayoutOptions.Fill, HorizontalOptions = LayoutOptions.Fill };
+                        Label textLb = new Label() { Text = e[i].Name, TextColor = Color.FromHex("#e7e7e7"), FontAttributes = FontAttributes.Bold, FontSize = 15,TranslationX=10 };
+                        Image playBtt = new Image() { Source = GetImageSource("nexflixPlayBtt.png"), VerticalOptions = LayoutOptions.Center, HorizontalOptions = LayoutOptions.Center, Scale = 0.5 };
+                        var ff = new FFImageLoading.Forms.CachedImage {
+                            Source = p,
+                            BackgroundColor = Color.Transparent,
+                            VerticalOptions = LayoutOptions.Fill,
+                            HorizontalOptions = LayoutOptions.Fill,
+                            Transformations = {
+                            //  new FFImageLoading.Transformations.RoundedTransformation(10,1,1.5,10,"#303F9F")
+                            new FFImageLoading.Transformations.RoundedTransformation(1, 1.7, 1, 0, "#303F9F")
+
+                        },
+                            InputTransparent = true,
+                        };
+
+                        //Source = p.posterUrl
+                        //recBtts.Add(imageButton);
+
+                        stackLayout.Children.Add(ff);
+                        stackLayout.Children.Add(imageButton);
+                        stackLayout.Children.Add(playBtt);
+
+                        trailerView.Children.Add(stackLayout);
+                        trailerView.Children.Add(textLb);
+                        Grid.SetRow(stackLayout, (i + 1) * 2 - 2);
+                        Grid.SetRow(textLb, (i + 1) * 2 - 1);
+                        //         Device.BeginInvokeOnMainThread(() => { /*Grid.SetRow(stackLayout, (int)Math.Round(i / 3.0));*/ Grid.SetColumn(stackLayout,i); });
+
+                    }
+                }
+            });
+
+            //  trailerView.Children.Add(new )
             /*
             MainThread.BeginInvokeOnMainThread(() => {
                 Trailer trailer = activeMovie.title.trailers.First();
@@ -1701,9 +1760,10 @@ namespace CloudStreamForms
         /// </summary>
         int showState = 0;
         double stateScale = 0;
-
+        int prevState = 0;
         void ChangedRecState(int state, bool overrideCheck = false)
         {
+            prevState = int.Parse(showState.ToString());
             if (state == showState && !overrideCheck) return;
             showState = state;
             stateScale = 0;
@@ -1712,42 +1772,59 @@ namespace CloudStreamForms
 
                 episodeView.Scale = (state == 0) ? 1 : 0;
                 episodeView.IsEnabled = state == 0;
+
+                trailerView.Scale = (state == 2) ? 1 : 0;
+                trailerView.IsEnabled = state == 2;
+                trailerView.IsVisible = state == 2;
+                trailerView.InputTransparent = state != 2;
+
                 EpPickers.IsEnabled = state == 0;
                 EpPickers.Scale = state == 0 ? 1 : 0;
+
                 RecStack.Scale = state == 1 ? 1 : 0;
                 RecStack.IsEnabled = state == 1;
+                RecStack.InputTransparent = state != 1;
+
                 SetHeight(state == 1);
+                SetTrailerRec(state == 2);
+
                 if (state == 1) {
                     SetRecs();
                 }
 
             });
 
-   
-            System.Timers.Timer timer = new System.Timers.Timer(10);
-            timer.Elapsed += (sender, args) => {
 
-                
+            System.Timers.Timer timer = new System.Timers.Timer(10);
+            ProgressBar GetBar(int _state)
+            {
+                switch (_state) {
+                    case 0:
+                        return EPISODESBar;
+                    case 1:
+                        return RECOMMENDATIONSBar;
+                    case 2:
+                        return TRAILERSBar;
+                    default:
+                        return null;
+                }
+            }
+            timer.Elapsed += (sender, args) => {
                 stateScale += 0.5;
                 if (stateScale > 1) {
                     stateScale = 1;
                     timer.Stop();
                 }
+                print("PREVSTATE:" + prevState);
+                print("NOWSTATE:" + state);
+                GetBar(prevState).ScaleX = 1 - stateScale;
+                GetBar(state).ScaleX = stateScale;
 
-                if (state == 0) {
-                    EPISODESBar.ScaleX = stateScale;
-                    RECOMMENDATIONSBar.ScaleX = 1 - stateScale;
-                }
-                else if (state == 1) {
-                    EPISODESBar.ScaleX = 1 - stateScale;
-                    RECOMMENDATIONSBar.ScaleX = stateScale;
-                }
-                
             };
 
             timer.Start();
 
-        
+
         }
 
         private void Episodes_Clicked(object sender, EventArgs e)
@@ -1759,22 +1836,32 @@ namespace CloudStreamForms
         {
             ChangedRecState(1);
         }
+
+        private void Trailers_Clicked(object sender, EventArgs e)
+        {
+            ChangedRecState(2);
+        }
     }
 
 }
 
-public class MainEpisodeView
+public class MovieResultMainEpisodeView
 {
+    public ObservableCollection<Trailer> CurrentTrailers { get; set; }
+
     private ObservableCollection<EpisodeResult> _MyEpisodeResultCollection;
     public ObservableCollection<EpisodeResult> MyEpisodeResultCollection { set { Added?.Invoke(null, null); _MyEpisodeResultCollection = value; } get { return _MyEpisodeResultCollection; } }
 
     public event EventHandler Added;
 
-    public MainEpisodeView()
+    public MovieResultMainEpisodeView()
     {
         MyEpisodeResultCollection = new ObservableCollection<EpisodeResult>();
+        CurrentTrailers = new ObservableCollection<Trailer>();
     }
 }
+
+
 
 
 

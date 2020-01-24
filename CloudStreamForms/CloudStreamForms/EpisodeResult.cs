@@ -30,7 +30,7 @@ namespace CloudStreamForms.Models
         public bool epVis { set; get; }
        // public LoadResult loadResult { set; get; }
         public bool LoadedLinks { set; get; }
-        public string MainTextColor { set; get; } = "#ffffff";
+        public string MainTextColor { set; get; } = "#e7e7e7";
         public string MainDarkTextColor { get; set; } = "#808080"; 
         public string ExtraColor { get; set; } = "#808080"; 
         public string OgTitle { set; get; }

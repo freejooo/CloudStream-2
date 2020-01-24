@@ -690,9 +690,9 @@ namespace CloudStreamForms
         [Serializable]
         public struct Trailer
         {
-            public string name;
-            public string url;
-            public string posterUrl;
+            public string Name { get; set; }
+            public string Url { get; set; }
+            public string PosterUrl { get; set; }
         }
 
         [Serializable]
@@ -909,7 +909,7 @@ namespace CloudStreamForms
         public static event EventHandler<Poster> addedSeachResult;
         public static event EventHandler<Movie> titleLoaded;
         public static event EventHandler<List<Poster>> searchLoaded;
-        public static event EventHandler<string> trailerLoaded;
+        public static event EventHandler<List<Trailer>> trailerLoaded;
         public static event EventHandler<List<Episode>> episodeLoaded;
         public static event EventHandler<Link> linkAdded;
         public static event EventHandler<MALData> malDataLoaded;
@@ -1322,7 +1322,7 @@ namespace CloudStreamForms
                 }
                 catch {
                     activeMovie.title.MALData.japName = "error";
-                   // throw;
+                    // throw;
                 }
                 finally {
                     JoinThred(tempThred);
@@ -1379,10 +1379,10 @@ namespace CloudStreamForms
                         alreadyAdded.Add(id);
                         try {
                             print("SEASON::" + season + "PART" + part);
-                            var ms = activeMovie.title.MALData.seasonData[season].seasons[part-1];
+                            var ms = activeMovie.title.MALData.seasonData[season].seasons[part - 1];
                             ms.dubbedAnimeData.dubExists = true;
                             ms.dubbedAnimeData.slug = slug;
-                            activeMovie.title.MALData.seasonData[season].seasons[part-1] = ms;
+                            activeMovie.title.MALData.seasonData[season].seasons[part - 1] = ms;
                             print("ÖÖ>>");
                             print(activeMovie.title.MALData.seasonData[season].seasons[part - 1].dubbedAnimeData.dubExists);
                         }
@@ -1620,11 +1620,11 @@ namespace CloudStreamForms
 
                                 };
 
-                                activeMovie.title.trailers.Add(new Trailer() { url = trailerUrl, posterUrl = trailerImg, name = trailerName });
+                                activeMovie.title.trailers.Add(new Trailer() { Url = trailerUrl, PosterUrl = trailerImg, Name = trailerName });
 
                             }
                             try {
-                                if (autoSearchTrailer) { GetRealTrailerLinkFromImdb(activeMovie.title.trailers[0].url); }
+                                if (autoSearchTrailer) { GetRealTrailerLinkFromImdb(true); }
                             }
                             catch (Exception) {
 
@@ -2195,8 +2195,28 @@ namespace CloudStreamForms
             tempThred.Thread.Name = "YesMoviesMetaData";
             tempThred.Thread.Start();
         }
+        public static void GetRealTrailerLinkFromImdbSingle(string url, int index, TempThred tempThred) // LOOK AT https://www.imdb.com/title/tt4508902/trailers/;; ///video/imdb/vi3474439449
+        {
+            url = url.Replace("video/imdb", "videoplayer");
+            string d = GetHTML(url);
+            if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
+            string key = FindHTML(d, "playbackDataKey\":[\"", "\"");
+            d = GetHTML("https://www.imdb.com/ve/data/VIDEO_PLAYBACK_DATA?key=" + key);
+            if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
 
-        public static void GetRealTrailerLinkFromImdb(string url, bool purgeCurrentTrailerThread = true)
+            string realURL = FindHTML(d, "\"video/mp4\",\"url\":\"", "\"");
+            try {
+                Trailer t = activeMovie.title.trailers[index];
+                activeMovie.title.trailers[index] = new Trailer() { Name = t.Name, PosterUrl = t.PosterUrl, Url = realURL };
+
+            }
+            catch (Exception) {
+                return;
+            }
+        }
+
+
+        public static void GetRealTrailerLinkFromImdb(bool purgeCurrentTrailerThread = false) // LOOK AT https://www.imdb.com/title/tt4508902/trailers/;; ///video/imdb/vi3474439449
         {
             if (purgeCurrentTrailerThread) {
                 PurgeThreds(5);
@@ -2205,6 +2225,38 @@ namespace CloudStreamForms
             tempThred.typeId = 5; // MAKE SURE THIS IS BEFORE YOU CREATE THE THRED
             tempThred.Thread = new System.Threading.Thread(() => {
                 try {
+
+                    string d = DownloadString("https://www.imdb.com/title/" + activeMovie.title.id + "/trailers/");
+                    if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
+                    print(d);
+                    string lookfor = "viconst=\"";
+                    int index = 0;
+                    while (d.Contains(lookfor)) {
+                        string viUrl = FindHTML(d, lookfor, "\"");
+                        string poster = FindHTML(d, "loadlate=\"", "\"");
+                        string rep = FindHTML(poster, "._", "_.");
+                        poster = poster.Replace("._" + rep + "_", "._V1_UY2000_UX2000_AL_");
+
+                        d = RemoveOne(d, lookfor);
+                        string name = FindHTML(d, "class=\"video-modal\" >", "<");
+                        var cT = new Trailer() { Name = name, PosterUrl = poster, Url = "" };
+                        if (activeMovie.title.trailers.Count > index) {
+                            activeMovie.title.trailers[index] = cT;
+                        }
+                        else {
+                            activeMovie.title.trailers.Add(cT);
+                        }
+
+                        GetRealTrailerLinkFromImdbSingle("https://imdb.com/video/imdb/" + viUrl, index, tempThred);
+                        print("TRAILER::" + viUrl + "|" + name + "|" + poster);
+
+                        index++;
+                        trailerLoaded?.Invoke(null, activeMovie.title.trailers);
+
+                        print(viUrl + "|" + name);
+                    }
+
+                    /*
                     url = url.Replace("video/imdb", "videoplayer");
                     string d = GetHTML(url);
                     if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
@@ -2222,7 +2274,7 @@ namespace CloudStreamForms
                     }
                     catch (Exception) {
 
-                    }
+                    }*/
 
                 }
                 finally {
@@ -2389,7 +2441,7 @@ namespace CloudStreamForms
             }
 
             if (isDub) {
-              //  activeMovie.title.MALData.currentActiveDubbedMaxEpsPerSeason = new List<int>();
+                //  activeMovie.title.MALData.currentActiveDubbedMaxEpsPerSeason = new List<int>();
                 List<int> dubbedSum = new List<int>();
                 List<string> dubbedAnimeLinks = GetAllDubbedAnimeLinks(currentMovie, currentSeason);
                 if (!GetThredActive(tempThred)) { return max; }; // COPY UPDATE PROGRESS
@@ -2398,7 +2450,7 @@ namespace CloudStreamForms
                     DubbedAnimeEpisode ep = GetDubbedAnimeEpisode(dubbedAnimeLinks[i], 1);
                     print("EPOS:" + ep.totalEp);
                     dubbedSum.Add(ep.totalEp);
-                   // activeMovie.title.MALData.currentActiveDubbedMaxEpsPerSeason.Add(ep.totalEp);
+                    // activeMovie.title.MALData.currentActiveDubbedMaxEpsPerSeason.Add(ep.totalEp);
                 }
                 maxDubbed = dubbedSum.Sum();
                 activeMovie.title.MALData.currentActiveDubbedMaxEpsPerSeason = dubbedSum;
@@ -2425,7 +2477,7 @@ namespace CloudStreamForms
                 }
             }
             catch (Exception) {
-              //  throw;
+                //  throw;
             }
             return baseUrls;
         }
@@ -2806,7 +2858,7 @@ namespace CloudStreamForms
                             Thread.Sleep(100);
                             if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
                         }
-                        
+
                         int _episode = int.Parse(episode.ToString()); // READ ONLY
 
                         if (isDub) {
@@ -3572,8 +3624,8 @@ namespace CloudStreamForms
                     return "";
                 }
                 string _f = FindHTML(d, name + smallAdd, "\",");
-                if(_f == "") {
-                     _f = FindHTML(d, name + "\":", ",");
+                if (_f == "") {
+                    _f = FindHTML(d, name + "\":", ",");
                 }
                 return _f;
             }
@@ -3964,7 +4016,7 @@ namespace CloudStreamForms
 
                                                 gogoStream = gogoStream.Replace(",,&noneemb", "").Replace("\\", "");
 
-                                
+
 
                                                 Episode ep = activeMovie.episodes[episode];
                                                 if (ep.links == null) {
