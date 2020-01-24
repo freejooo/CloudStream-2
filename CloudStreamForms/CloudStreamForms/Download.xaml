@@ -120,7 +120,7 @@
                                                 <ff:CachedImage WidthRequest="126" HeightRequest="80" Source="{Binding PosterUrl}" InputTransparent="True"   >
 
                                                     <ff:CachedImage.Transformations>
-                                                        <ffTransformations:RoundedTransformation BorderSize="10" BorderHexColor="#303F9F" CropWidthRatio="1.5"  >
+                                                        <ffTransformations:RoundedTransformation BorderSize="0" Radius="1" BorderHexColor="#303F9F" CropWidthRatio="1.77"  >
 
                                                         </ffTransformations:RoundedTransformation>
                                                     </ff:CachedImage.Transformations>
@@ -150,7 +150,7 @@
                                                         <Label Text="{Binding Title}" TextColor="{Binding MainTextColor}" FontAttributes="Bold" FontSize="13"/>
                                                     </Grid>
                                                     <Grid Grid.Row="1"  Grid.Column="0" >
-                                                        <Label Text="{Binding Description}"  TextColor="{Binding MainDarkTextColor}" MaxLines="4"  />
+                                                        <Label Text="{Binding Description}"  TextColor="{Binding MainDarkTextColor}" MaxLines="3"  />
                                                     </Grid>
                                                 </Grid>
                                             </Grid>

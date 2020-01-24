@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 
@@ -7,6 +8,7 @@ using Android.App;
 using Android.Content;
 using Android.Content.Res;
 using Android.Graphics;
+using Android.Graphics.Drawables;
 using Android.OS;
 using Android.Runtime;
 using Android.Views;
@@ -58,8 +60,12 @@ namespace CloudStreamForms.Droid
         {
             this.context = context;
         }
-
-
+        /*
+        protected override void OnElementPropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            base.OnElementPropertyChanged(sender, e);
+            SetControlStyle();
+        }*/
         protected override void OnElementChanged(ElementChangedEventArgs<Picker> e)
         {
             base.OnElementChanged(e);
@@ -70,13 +76,24 @@ namespace CloudStreamForms.Droid
             //Control.back
             //Control.Typeface = Control.IsFocused ? Typeface.DefaultBold : Typeface.Default;
             //for example ,change the line to red:
-
+          //  SetControlStyle();
             var c = Android.Graphics.Color.Transparent;
             if (Build.VERSION.SdkInt >= BuildVersionCodes.Lollipop)
                 Control.BackgroundTintList = ColorStateList.ValueOf(c);
             else
                 Control.Background.SetColorFilter(c, PorterDuff.Mode.SrcAtop);
         }
+
+        /*
+        private void SetControlStyle()
+        {
+            if (Control != null) {
+                Drawable imgDropDownArrow = Resources.GetDrawable(Resource.Drawable.dropdownLow);
+                imgDropDownArrow.SetBounds(5, 5, 5, 5);
+                imgDropDownArrow.
+                Control.SetCompoundDrawablesRelativeWithIntrinsicBounds(null, null, imgDropDownArrow, null);
+            }
+        }*/
 
     }
 }

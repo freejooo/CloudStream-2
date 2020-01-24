@@ -215,6 +215,7 @@ namespace CloudStreamForms
             MovieTypePicker.SelectedIndex = 0;
             UpdateBookmarks();
 
+
             ImdbTypePicker.SelectedIndexChanged += (o, e) => {
                 ClearEpisodes();
                 PurgeThreds(21);
@@ -225,7 +226,11 @@ namespace CloudStreamForms
                 else {
                     GetFetch();
                 }
+            //    ImdbTypePickerBtt.Text = ImdbTypePicker.Items[ImdbTypePicker.SelectedIndex];
+
             };
+
+           // MovieTypePickerBtt.Text = MovieTypePicker.Items[MovieTypePicker.SelectedIndex];
             MovieTypePicker.SelectedIndexChanged += (o, e) => {
                 ClearEpisodes(!IsRecommended);
                 if (IsRecommended) {
@@ -237,6 +242,7 @@ namespace CloudStreamForms
                     Fething = false;
                     GetFetch();
                 }
+            //    MovieTypePickerBtt.Text = MovieTypePicker.Items[MovieTypePicker.SelectedIndex];
                 //GetFetchRecomended
                 //  print(MovieTypePicker.SelectedIndex + "<<Selected");
             };
@@ -252,8 +258,8 @@ namespace CloudStreamForms
 
 
             if (Device.RuntimePlatform == Device.UWP) {
-                BlueSeperator.IsVisible = false;
-                BlueSeperator.IsEnabled = false;
+               // BlueSeperator.IsVisible = false;
+               // BlueSeperator.IsEnabled = false;
                 OffBar.IsVisible = false;
                 OffBar.IsEnabled = false;
             }
@@ -393,7 +399,7 @@ namespace CloudStreamForms
         List<BookmarkPoster> bookmarkPosters = new List<BookmarkPoster>();
         void UpdateBookmarks()
         {
-            double multi = 1.2;
+            double multi = 1.5;
             int height = 100;
             int width = 65;
             if (Device.RuntimePlatform == Device.UWP) {
@@ -429,7 +435,7 @@ namespace CloudStreamForms
                             BackgroundColor = Color.Transparent,
                             VerticalOptions = LayoutOptions.Start,
                             Transformations = {
-                                new FFImageLoading.Transformations.RoundedTransformation(10,1,1.5,10,"#303F9F")
+                                new FFImageLoading.Transformations.RoundedTransformation(1,1,1.5,0,"#303F9F")
                             },
                             InputTransparent = true,
                         };

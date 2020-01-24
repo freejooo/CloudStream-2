@@ -372,7 +372,7 @@ namespace CloudStreamForms
 
             if (play_btts.Where(t => t.Id == image.Id).Count() == 0) {
                 play_btts.Add(image);
-                image.Source = ImageSource.FromResource("CloudStreamForms.Resource.playBtt.png", Assembly.GetExecutingAssembly());
+                image.Source = image.Source = App.GetImageSource("nexflixPlayBtt.png");//ImageSource.FromResource("CloudStreamForms.Resource.playBtt.png", Assembly.GetExecutingAssembly());
                 if (Device.RuntimePlatform == Device.Android) {
                     image.Scale = 0.5f;
                 }
@@ -396,7 +396,7 @@ namespace CloudStreamForms
 
             c.Transformations.Clear();
             var ep = ((EpisodeResult)c.BindingContext);
-            c.Transformations = new List<FFImageLoading.Work.ITransformation>() { new FFImageLoading.Transformations.RoundedTransformation() { BorderHexColor = ep.ExtraColor, BorderSize = 10,CropWidthRatio=1.5 } };
+            c.Transformations = new List<FFImageLoading.Work.ITransformation>() { new FFImageLoading.Transformations.RoundedTransformation() { BorderHexColor = ep.ExtraColor, BorderSize = 0, Radius=1,CropWidthRatio=1.77 } };
 
         }
     }

@@ -204,7 +204,7 @@ xmlns:ffTransformations="clr-namespace:FFImageLoading.Transformations;assembly=F
                                 <ProgressBar x:Name="RECOMMENDATIONSBar" ScaleX="0" Progress="1.0" ProgressColor="#303F9F"  BackgroundColor="Transparent" InputTransparent="True" TranslationY="-8"></ProgressBar>
                                 <Button x:Name="RECOMMENDATIONS" Margin="5"  TranslationY="10" BackgroundColor="Transparent" Text="RECOMMENDATIONS" TextColor="#e7e7e7" FontAttributes="Bold" FontSize="14" CornerRadius="5" HeightRequest="37" Clicked="Recommendations_Clicked" ></Button>
                             </Grid>
-                            <Grid >
+                            <Grid x:Name="TRAILERSTAB" IsEnabled="False" IsVisible="False">
                                 <ProgressBar x:Name="TRAILERSBar" ScaleX="0" Progress="1.0" ProgressColor="#303F9F"  BackgroundColor="Transparent" InputTransparent="True" TranslationY="-8"></ProgressBar>
                                 <Button x:Name="TRAILERS" Margin="5"  TranslationY="10" BackgroundColor="Transparent" Text="TRAILERS" TextColor="#e7e7e7" FontAttributes="Bold" FontSize="14" CornerRadius="5" HeightRequest="37" Clicked="Trailers_Clicked" ></Button>
                             </Grid>
@@ -361,9 +361,26 @@ xmlns:ffTransformations="clr-namespace:FFImageLoading.Transformations;assembly=F
                         </ListView.ItemTemplate>
                     </ListView>
 -->
-                    <StackLayout>
-                        <Grid x:Name="trailerView" VerticalOptions="Start" HorizontalOptions="Fill" RowSpacing="10" >
+                    <StackLayout  x:Name="trailerStack" >
+                        <Grid x:Name="trailerView" VerticalOptions="Start" HorizontalOptions="CenterAndExpand" Margin="10" RowSpacing="10" >
                             <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
                                 <RowDefinition Height="Auto" />
                                 <RowDefinition Height="Auto" />
                                 <RowDefinition Height="Auto" />

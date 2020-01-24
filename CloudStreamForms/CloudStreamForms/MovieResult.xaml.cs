@@ -1167,29 +1167,34 @@ namespace CloudStreamForms
         private void MovieResult_trailerLoaded(object sender, List<Trailer> e)
         {
             if (!SameAsActiveMovie()) return;
-            if (e.Count > 4) return;
-
-            if (trailerUrl == "") {
-                trailerUrl = e[0].Url;
-            }
-
+            if (e == null) return;
             currentMovie.title.trailers = e;
             epView.CurrentTrailers.Clear();
             for (int i = 0; i < e.Count; i++) {
                 epView.CurrentTrailers.Add(e[i]);
             }
 
-            Device.BeginInvokeOnMainThread(() => {
-                trailerView.Children.Clear();
+            if (e.Count > 4) return; // MAX 4 TRAILERS
 
+            if (trailerUrl == "") {
+                trailerUrl = e[0].Url;
+            }
+
+        
+
+            Device.BeginInvokeOnMainThread(() => {
+                TRAILERSTAB.IsVisible = true;
+                TRAILERSTAB.IsEnabled = true;
+                trailerView.Children.Clear();
+                trailerView.HeightRequest = e.Count * 300;
                 for (int i = 0; i < e.Count; i++) {
                     string p = e[i].PosterUrl;
                     if (CheckIfURLIsValid(p)) {
 
                         Grid stackLayout = new Grid();
                         Button imageButton = new Button() { BackgroundColor = Color.Transparent, VerticalOptions = LayoutOptions.Fill, HorizontalOptions = LayoutOptions.Fill };
-                        Label textLb = new Label() { Text = e[i].Name, TextColor = Color.FromHex("#e7e7e7"), FontAttributes = FontAttributes.Bold, FontSize = 15,TranslationX=10 };
-                        Image playBtt = new Image() { Source = GetImageSource("nexflixPlayBtt.png"), VerticalOptions = LayoutOptions.Center, HorizontalOptions = LayoutOptions.Center, Scale = 0.5 };
+                        Label textLb = new Label() { Text = e[i].Name, TextColor = Color.FromHex("#e7e7e7"), FontAttributes = FontAttributes.Bold, FontSize = 15, TranslationX = 10 };
+                        Image playBtt = new Image() { Source = GetImageSource("nexflixPlayBtt.png"), VerticalOptions = LayoutOptions.Center, HorizontalOptions = LayoutOptions.Center, Scale = 0.5, InputTransparent = true };
                         var ff = new FFImageLoading.Forms.CachedImage {
                             Source = p,
                             BackgroundColor = Color.Transparent,
@@ -1205,7 +1210,16 @@ namespace CloudStreamForms
 
                         //Source = p.posterUrl
                         //recBtts.Add(imageButton);
+                        int _sel = int.Parse(i.ToString());
+                        imageButton.Clicked += (o, _e) => {
+                            try {
+                                var _t = epView.CurrentTrailers[_sel];
+                                PlayVLCWithSingleUrl(_t.Url, _t.Name);
+                            }
+                            catch (Exception) {
 
+                            }
+                        };
                         stackLayout.Children.Add(ff);
                         stackLayout.Children.Add(imageButton);
                         stackLayout.Children.Add(playBtt);
@@ -1771,12 +1785,13 @@ namespace CloudStreamForms
                 Grid.SetRow(EpPickers, (state == 0) ? 1 : 0);
 
                 episodeView.Scale = (state == 0) ? 1 : 0;
-                episodeView.IsEnabled = state == 0;
+                //episodeView.IsEnabled = state == 0;
 
-                trailerView.Scale = (state == 2) ? 1 : 0;
-                trailerView.IsEnabled = state == 2;
-                trailerView.IsVisible = state == 2;
-                trailerView.InputTransparent = state != 2;
+                trailerStack.Scale = (state == 2) ? 1 : 0;
+                trailerStack.IsEnabled = state == 2;
+                trailerStack.IsVisible = state == 2;
+                trailerStack.InputTransparent = state != 2;
+                // trailerView.HeightRequest = state == 2 ? Math.Min(epView.CurrentTrailers.Count, 4) * 350 : 0;
 
                 EpPickers.IsEnabled = state == 0;
                 EpPickers.Scale = state == 0 ? 1 : 0;
@@ -1785,8 +1800,8 @@ namespace CloudStreamForms
                 RecStack.IsEnabled = state == 1;
                 RecStack.InputTransparent = state != 1;
 
-                SetHeight(state == 1);
-                SetTrailerRec(state == 2);
+                SetHeight(state != 0);
+                //SetTrailerRec(state == 2);
 
                 if (state == 1) {
                     SetRecs();

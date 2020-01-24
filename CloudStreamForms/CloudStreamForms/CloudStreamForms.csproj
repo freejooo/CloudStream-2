@@ -32,6 +32,7 @@
   <ItemGroup>
     <None Remove="Resource\baseline_settings_applications_white_48dp_inverted.png" />
     <None Remove="Resource\bookmarkedBtt.png" />
+    <None Remove="Resource\dropdown.png" />
     <None Remove="Resource\gradient.png" />
     <None Remove="Resource\gradientGray.png" />
     <None Remove="Resource\gradientSelected.png" />
@@ -96,6 +97,7 @@
   <ItemGroup>
     <EmbeddedResource Include="Resource\baseline_settings_applications_white_48dp_inverted.png" />
     <EmbeddedResource Include="Resource\bookmarkedBtt.png" />
+    <EmbeddedResource Include="Resource\dropdown.png" />
     <EmbeddedResource Include="Resource\gradient.png" />
     <EmbeddedResource Include="Resource\gradientGray.png" />
     <EmbeddedResource Include="Resource\gradientSelected.png" />

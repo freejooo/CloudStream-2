@@ -16,7 +16,7 @@
                 <ff:CachedImage x:Name="Poster" HeightRequest="225" WidthRequest="150"  InputTransparent="True" Margin="20">
 
                     <ff:CachedImage.Transformations>
-                        <ffTransformations:RoundedTransformation BorderSize="4" BorderHexColor="#303F9F" CropWidthRatio="0.67" Radius="6">
+                        <ffTransformations:RoundedTransformation BorderSize="0" BorderHexColor="#303F9F" CropWidthRatio="0.67" Radius="1">
 
                         </ffTransformations:RoundedTransformation>
                     </ff:CachedImage.Transformations>

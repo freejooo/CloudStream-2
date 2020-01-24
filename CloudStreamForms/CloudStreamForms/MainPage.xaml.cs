@@ -2235,11 +2235,12 @@ namespace CloudStreamForms
                         string viUrl = FindHTML(d, lookfor, "\"");
                         string poster = FindHTML(d, "loadlate=\"", "\"");
                         string rep = FindHTML(poster, "._", "_.");
-                        poster = poster.Replace("._" + rep + "_", "._V1_UY2000_UX2000_AL_");
+                        poster = poster.Replace("._" + rep + "_", "._V1_UY1000_UX1000_AL_");
 
                         d = RemoveOne(d, lookfor);
                         string name = FindHTML(d, "class=\"video-modal\" >", "<");
                         var cT = new Trailer() { Name = name, PosterUrl = poster, Url = "" };
+                        if (activeMovie.title.trailers == null) return;
                         if (activeMovie.title.trailers.Count > index) {
                             activeMovie.title.trailers[index] = cT;
                         }
@@ -2248,6 +2249,8 @@ namespace CloudStreamForms
                         }
 
                         GetRealTrailerLinkFromImdbSingle("https://imdb.com/video/imdb/" + viUrl, index, tempThred);
+                        if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
+
                         print("TRAILER::" + viUrl + "|" + name + "|" + poster);
 
                         index++;

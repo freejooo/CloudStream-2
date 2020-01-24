@@ -11,7 +11,7 @@
         <Label Margin="3" Text="Home" HorizontalOptions="Center"  FontSize="Large" FontAttributes="Bold" ></Label>
         <!--TextColor="#303F9F"-->
         <!--   <Label Text="Bookmarks" FontAttributes="Italic" TranslationX="10" VerticalOptions="Start" HorizontalOptions="FillAndExpand" FontSize="Small"  x:Name="BTxt"></Label>-->
-        <FlexLayout Margin="0,0,0,-10">
+        <FlexLayout Margin="0,0,0,0">
             
            
             <!--<BoxView HeightRequest="1" Color="#303F9F"></BoxView>-->
@@ -26,32 +26,44 @@
             <!--   <BoxView HeightRequest="1" Color="#303F9F"></BoxView>-->
            
         </FlexLayout>
+        <BoxView  HeightRequest="3" Color="#303F9F" TranslationY="10"></BoxView>
+
         <StackLayout x:Name="Top100Stack">
 
             <FlexLayout>
 
 
-                <Grid>
+                <Grid TranslationY="10">
                     <Grid.ColumnDefinitions >
                         <ColumnDefinition Width="Auto" />
                         <ColumnDefinition Width="Auto" />
-                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
-                    <Grid Grid.Row="0"  Grid.Column="1">
-                        <Picker x:Name="MovieTypePicker" HorizontalOptions="Start" TranslationX="10">
-                        </Picker>
-
+                    <Grid Grid.Row="0"  Grid.Column="1" TranslationX="0" Margin="50,0">
+                      <!--  <Button x:Name="MovieTypePickerBtt" InputTransparent="True" Text="Sci-Fi" TextColor="#e7e7e7" FontAttributes="Bold" FontSize="Body" CornerRadius="5" HeightRequest="30" BackgroundColor="Transparent" ></Button>-->
+                        <Picker x:Name="MovieTypePicker" HorizontalOptions="Start" TranslationX="10" TextColor="#e7e7e7" FontAttributes="Bold" FontSize="Body"> </Picker>
+                        <Image Source="dropdown.png" WidthRequest="10" HorizontalOptions="End" TranslationX="22" InputTransparent="True" />
                     </Grid>
                     <Grid Grid.Row="0"  Grid.Column="0">
-                        <Picker x:Name="ImdbTypePicker" HorizontalOptions="Start" TranslationX="10">
+                      <!--  <Button x:Name="ImdbTypePickerBtt" InputTransparent="True"  Text="Recommendations" TextColor="#e7e7e7" FontAttributes="Bold" FontSize="Body" CornerRadius="5" HeightRequest="30" BackgroundColor="Transparent" ></Button>
+-->
+
+                        <Picker x:Name="ImdbTypePicker" HorizontalOptions="Start" TranslationX="10" TextColor="#e7e7e7" FontAttributes="Bold" FontSize="Body">
                         </Picker>
+                        <Image Source="dropdown.png" WidthRequest="10" HorizontalOptions="End"  TranslationX="22"  InputTransparent="True" />
+
 
                     </Grid>
 
+                    <!--
                     <Grid Grid.Row="0"  Grid.Column="2">
                         <BoxView x:Name="BlueSeperator" Color="#303F9F" VerticalOptions="Center" HeightRequest="2" WidthRequest="10000" Margin="10"></BoxView>
                     </Grid>
-
+-->
                 </Grid>
             </FlexLayout>
 
@@ -108,14 +120,13 @@
                                                     <ColumnDefinition Width="Auto" />
                                                     <ColumnDefinition Width="Auto" />
                                                 </Grid.ColumnDefinitions>
-                                                <Grid Grid.Row="0"  Grid.Column="0"  WidthRequest="67" TranslationY="{Binding TranslateYOffsetVertical}">
-
+                                                
+                                                <Grid Grid.Row="0"  Grid.Column="1"  WidthRequest="67" TranslationY="{Binding TranslateYOffsetVertical}">
                                                     <ImageButton Clicked="ImageButton_Clicked" BackgroundColor="Transparent" ></ImageButton>
-
                                                     <ff:CachedImage WidthRequest="67" HeightRequest="98" Source="{Binding PosterUrl}" InputTransparent="True" >
 
                                                         <ff:CachedImage.Transformations>
-                                                            <ffTransformations:RoundedTransformation BorderSize="10" BorderHexColor="#303F9F" CropWidthRatio="0.75" >
+                                                            <ffTransformations:RoundedTransformation BorderSize="0" Radius="1" BorderHexColor="#303F9F" CropWidthRatio="0.7" >
 
                                                             </ffTransformations:RoundedTransformation>
                                                         </ff:CachedImage.Transformations>
@@ -128,7 +139,11 @@
 
 
                                                 </Grid>
-                                                <Grid  Grid.Row="0"  Grid.Column="1">
+                                                <Grid  Grid.Row="0"  Grid.Column="0">
+                                                    <BoxView WidthRequest="3" HeightRequest="10" Color="#303F9F"></BoxView>
+                                                </Grid>
+
+                                                <Grid  Grid.Row="0"  Grid.Column="2">
                                                     <Grid RowSpacing="0" Padding="0" >
                                                         <Grid.RowDefinitions >
                                                             <RowDefinition Height="Auto" />
@@ -141,6 +156,7 @@
                                                             <ColumnDefinition Width="Auto" />
                                                         </Grid.ColumnDefinitions>
                                                         <Grid Grid.Row="0"  Grid.Column="0" >
+
                                                             <Label Text="{Binding Title}" TextColor="{Binding MainTextColor}" FontAttributes="Bold" FontSize="13"/>
                                                         </Grid>
                                                         <Grid Grid.Row="1"  Grid.Column="0" >
