@@ -15,17 +15,18 @@
                 <PanGestureRecognizer PanUpdated="PanGestureRecognizer_PanUpdated"  />
             </Grid.GestureRecognizers>
             <AbsoluteLayout >
-                
-                <vlc:VideoView x:Name="vvideo" InputTransparent="True" AbsoluteLayout.LayoutBounds="0,0,1,1" AbsoluteLayout.LayoutFlags="All">
+
+                <vlc:VideoView x:Name="vvideo" InputTransparent="True" AbsoluteLayout.LayoutBounds="0,0,1,1" AbsoluteLayout.LayoutFlags="All"   >
 
                 </vlc:VideoView>
+               <!-- <vlc:MediaPlayerElement MediaPlayer="{Binding Player}" LibVLC="{Binding VLC}" EnableRendererDiscovery="True" />-->
                 <Label x:Name="SeekTxt" Text="Hello" AbsoluteLayout.LayoutBounds=".5,1,1,.1" AbsoluteLayout.LayoutFlags="All" FontSize="20" LineBreakMode="WordWrap" TextColor="White" />
             </AbsoluteLayout>
-            <Button Clicked="PausePlayBtt_Clicked"  VerticalOptions="Center" WidthRequest="80" HeightRequest="80" HorizontalOptions="Center" BackgroundColor="Transparent"></Button>
-            <ff:CachedImage x:Name="PausePlayBtt" VerticalOptions="Center" WidthRequest="80" HeightRequest="80" HorizontalOptions="Center" BackgroundColor="Transparent" InputTransparent="True">
+            <Button Clicked="PausePlayBtt_Clicked"  VerticalOptions="Center" WidthRequest="60" HeightRequest="60" HorizontalOptions="Center" BackgroundColor="Transparent"></Button>
+            <ff:CachedImage x:Name="PausePlayBtt" VerticalOptions="Center" WidthRequest="60" HeightRequest="60" HorizontalOptions="Center" BackgroundColor="Transparent" InputTransparent="True">
 
             </ff:CachedImage>
-            <ActivityIndicator x:Name="LoadingCir" IsVisible="False" IsEnabled="False" InputTransparent="True" IsRunning="True" WidthRequest="80" HeightRequest="80" VerticalOptions="Center" HorizontalOptions="Center"></ActivityIndicator>
+            <ActivityIndicator x:Name="LoadingCir" IsVisible="False" InputTransparent="True" IsRunning="True" WidthRequest="60" HeightRequest="60" VerticalOptions="Center" HorizontalOptions="Center"></ActivityIndicator>
         </Grid>
 
     </ContentPage.Content>

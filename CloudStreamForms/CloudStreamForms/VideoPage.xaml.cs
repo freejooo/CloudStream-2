@@ -1,4 +1,5 @@
-﻿using LibVLCSharp.Shared;
+﻿using LibVLCSharp.Forms.Shared;
+using LibVLCSharp.Shared;
 using MediaElement;
 using System;
 using System.Collections.Generic;
@@ -20,42 +21,71 @@ namespace CloudStreamForms
         const string PLAY_IMAGE = "baseline_play_arrow_white_48dp.png";
         const string PAUSE_IMAGE = "baseline_pause_white_48dp.png";
 
+        MediaPlayer Player { get { return vvideo.MediaPlayer; } set { vvideo.MediaPlayer = value; } }
+
+        LibVLC _libVLC;
+        MediaPlayer _mediaPlayer;
+
         public VideoPage()
         {
 
             InitializeComponent();
             Core.Initialize();
 
-            var libVLC = new LibVLC();
 
-            var media = new Media(libVLC,
-                "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4",
-                FromType.FromLocation);
+            _libVLC = new LibVLC();
+            _mediaPlayer = new MediaPlayer(_libVLC) { EnableHardwareDecoding = true };
 
-            vvideo.MediaPlayer = new MediaPlayer(media) { EnableHardwareDecoding = true };
-            vvideo.MediaPlayer.Play();
+            vvideo.MediaPlayer = _mediaPlayer; // = new VideoView() { MediaPlayer = _mediaPlayer };
+            var media = new Media(_libVLC, "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4", FromType.FromLocation);
+            vvideo.MediaPlayer.Play(media);
+
 
 
             PausePlayBtt.Source = App.GetImageSource(PAUSE_IMAGE);
 
-            vvideo.MediaPlayer.Paused += (o, e) => {
-                PausePlayBtt.Source = App.GetImageSource(PLAY_IMAGE);
+            void SetIsPaused(bool paused)
+            {
+                PausePlayBtt.Source = App.GetImageSource(paused ? PLAY_IMAGE : PAUSE_IMAGE);
                 PausePlayBtt.IsVisible = true;
                 LoadingCir.IsVisible = false;
-                LoadingCir.IsEnabled = false;
+            }
+
+            Player.Paused += (o, e) => {
+                Device.BeginInvokeOnMainThread(() => {
+                    SetIsPaused(true);
+                    //   LoadingCir.IsEnabled = false;
+                });
+
             };
-            vvideo.MediaPlayer.Playing += (o, e) => {
-                PausePlayBtt.Source = App.GetImageSource(PAUSE_IMAGE);
-                PausePlayBtt.IsVisible = true;
-                LoadingCir.IsVisible = false;
-                LoadingCir.IsEnabled = false;
+            Player.Playing += (o, e) => {
+                Device.BeginInvokeOnMainThread(() => {
+                    SetIsPaused(false);
+
+                });
+
+                //   LoadingCir.IsEnabled = false;
             };
-            vvideo.MediaPlayer.Buffering += (o, e) => {
-                PausePlayBtt.IsVisible = false;
-                PausePlayBtt.IsEnabled = false;
-                LoadingCir.IsVisible = true;
-                LoadingCir.IsEnabled = false;
+            Player.TimeChanged += (o, e) => {
+
             };
+            Player.Buffering += (o, e) => {
+                Device.BeginInvokeOnMainThread(() => {
+                    if (e.Cache == 100) {
+                        SetIsPaused(!Player.IsPlaying);
+                    }
+                    else {
+                        PausePlayBtt.IsVisible = false;
+                        LoadingCir.IsVisible = true;
+                    }
+                });
+
+            };
+            Player.EncounteredError += (o, e) => {
+                // SKIP TO NEXT
+                App.ShowToast("Error when loading media");
+            };
+            //  Player.AddSlave(MediaSlaveType.Subtitle,"") // ADD SUBTITLEs
         }
 
         protected override void OnAppearing()
@@ -75,16 +105,16 @@ namespace CloudStreamForms
         protected override void OnDisappearing()
         {
             App.ShowStatusBar();
-            vvideo.MediaPlayer.Stop();
+            Player.Stop();
+            Player.Dispose();
             base.OnDisappearing();
         }
 
 
-        private void PausePlayBtt_Clicked(object sender, EventArgs e)
+        public void PausePlayBtt_Clicked(object sender, EventArgs e)
         {
-            if (vvideo.MediaPlayer.CanPause) {
-                vvideo.MediaPlayer.SetPause(vvideo.MediaPlayer.IsPlaying);
-            }
+            //Player.SetPause(true);
+            Player.Pause();
         }
 
 
@@ -140,7 +170,7 @@ namespace CloudStreamForms
                 case GestureStatus.Running:
                     if (e.TotalX < 0 && Math.Abs(e.TotalX) > Math.Abs(e.TotalY)) {
                         var timeDiff = Convert.ToInt64(e.TotalX * 1000);
-                        _finalTime = vvideo.MediaPlayer.Time + timeDiff;
+                        _finalTime = Player.Time + timeDiff;
 
                         if (WillOverflow)
                             break;
@@ -150,7 +180,7 @@ namespace CloudStreamForms
                     }
                     else if (e.TotalX > 0 && Math.Abs(e.TotalX) > Math.Abs(e.TotalY)) {
                         var timeDiff = Convert.ToInt64(e.TotalX * 1000);
-                        _finalTime = vvideo.MediaPlayer.Time + timeDiff;
+                        _finalTime = Player.Time + timeDiff;
 
                         if (WillOverflow)
                             break;
@@ -159,14 +189,14 @@ namespace CloudStreamForms
                         _timeChanged = true;
                     }
                     else if (e.TotalY < 0 && Math.Abs(e.TotalY) > Math.Abs(e.TotalX)) {
-                        var volume = (int)(vvideo.MediaPlayer.Volume + e.TotalY * -1);
+                        var volume = (int)(Player.Volume + e.TotalY * -1);
                         _finalVolume = VolumeRangeCheck(volume);
 
                         Message = FormatVolumeMessage(_finalVolume, Direction.Top);
                         _volumeChanged = true;
                     }
                     else if (e.TotalY > 0 && e.TotalY > Math.Abs(e.TotalX)) {
-                        var volume = (int)(vvideo.MediaPlayer.Volume + e.TotalY * -1);
+                        var volume = (int)(Player.Volume + e.TotalY * -1);
                         _finalVolume = VolumeRangeCheck(volume);
 
                         Message = FormatVolumeMessage(_finalVolume, Direction.Bottom);
@@ -179,9 +209,9 @@ namespace CloudStreamForms
                     break;
                 case GestureStatus.Completed:
                     if (_timeChanged)
-                        vvideo.MediaPlayer.Time = _finalTime;
-                    if (_volumeChanged && vvideo.MediaPlayer.Volume != _finalVolume)
-                        vvideo.MediaPlayer.Volume = _finalVolume;
+                        Player.Time = _finalTime;
+                    if (_volumeChanged && Player.Volume != _finalVolume)
+                        Player.Volume = _finalVolume;
 
                     Message = string.Empty;
                     _timeChanged = false;
