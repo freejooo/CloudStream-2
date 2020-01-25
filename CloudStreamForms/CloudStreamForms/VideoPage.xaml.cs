@@ -16,6 +16,10 @@ namespace CloudStreamForms
     [XamlCompilation(XamlCompilationOptions.Compile)]
     public partial class VideoPage : ContentPage
     {
+
+        const string PLAY_IMAGE = "baseline_play_arrow_white_48dp.png";
+        const string PAUSE_IMAGE = "baseline_pause_white_48dp.png";
+
         public VideoPage()
         {
 
@@ -32,13 +36,33 @@ namespace CloudStreamForms
             vvideo.MediaPlayer.Play();
 
 
+            PausePlayBtt.Source = App.GetImageSource(PAUSE_IMAGE);
+
+            vvideo.MediaPlayer.Paused += (o, e) => {
+                PausePlayBtt.Source = App.GetImageSource(PLAY_IMAGE);
+                PausePlayBtt.IsVisible = true;
+                LoadingCir.IsVisible = false;
+                LoadingCir.IsEnabled = false;
+            };
+            vvideo.MediaPlayer.Playing += (o, e) => {
+                PausePlayBtt.Source = App.GetImageSource(PAUSE_IMAGE);
+                PausePlayBtt.IsVisible = true;
+                LoadingCir.IsVisible = false;
+                LoadingCir.IsEnabled = false;
+            };
+            vvideo.MediaPlayer.Buffering += (o, e) => {
+                PausePlayBtt.IsVisible = false;
+                PausePlayBtt.IsEnabled = false;
+                LoadingCir.IsVisible = true;
+                LoadingCir.IsEnabled = false;
+            };
         }
 
         protected override void OnAppearing()
         {
             base.OnAppearing();
             Hide();
-   
+
         }
 
         async void Hide()
@@ -56,6 +80,15 @@ namespace CloudStreamForms
         }
 
 
+        private void PausePlayBtt_Clicked(object sender, EventArgs e)
+        {
+            if (vvideo.MediaPlayer.CanPause) {
+                vvideo.MediaPlayer.SetPause(vvideo.MediaPlayer.IsPlaying);
+            }
+        }
+
+
+        // =========================================================================== LOGIC ====================================================================================================
 
 
         string _message = string.Empty;
@@ -100,8 +133,8 @@ namespace CloudStreamForms
         public event PropertyChangedEventHandler PropertyChanged;
         private void PanGestureRecognizer_PanUpdated(object sender, PanUpdatedEventArgs e)
         {
-          //  float brighness = vvideo.MediaPlayer.AdjustFloat(VideoAdjustOption.Brightness);
-           // print("BRIGHNESS::" + brighness);
+            //  float brighness = vvideo.MediaPlayer.AdjustFloat(VideoAdjustOption.Brightness);
+            // print("BRIGHNESS::" + brighness);
             //vvideo.MediaPlayer.SetAdjustFloat(VideoAdjustOption.Brightness, 0);
             switch (e.StatusType) {
                 case GestureStatus.Running:

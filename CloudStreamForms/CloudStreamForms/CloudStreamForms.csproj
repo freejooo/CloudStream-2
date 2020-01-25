@@ -30,7 +30,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Remove="Resource\baseline_pause_white_48dp.png" />
+    <None Remove="Resource\baseline_play_arrow_white_48dp.png" />
     <None Remove="Resource\baseline_settings_applications_white_48dp_inverted.png" />
+    <None Remove="Resource\baseline_skip_next_white_48dp.png" />
+    <None Remove="Resource\baseline_skip_previous_white_48dp.png" />
+    <None Remove="Resource\baseline_subtitles_white_48dp.png" />
     <None Remove="Resource\bookmarkedBtt.png" />
     <None Remove="Resource\dropdown.png" />
     <None Remove="Resource\gradient.png" />
@@ -95,7 +100,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="Resource\baseline_pause_white_48dp.png" />
+    <EmbeddedResource Include="Resource\baseline_play_arrow_white_48dp.png" />
     <EmbeddedResource Include="Resource\baseline_settings_applications_white_48dp_inverted.png" />
+    <EmbeddedResource Include="Resource\baseline_skip_next_white_48dp.png" />
+    <EmbeddedResource Include="Resource\baseline_skip_previous_white_48dp.png" />
+    <EmbeddedResource Include="Resource\baseline_subtitles_white_48dp.png" />
     <EmbeddedResource Include="Resource\bookmarkedBtt.png" />
     <EmbeddedResource Include="Resource\dropdown.png" />
     <EmbeddedResource Include="Resource\gradient.png" />

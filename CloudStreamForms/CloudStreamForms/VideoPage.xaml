@@ -3,22 +3,29 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:local="clr-namespace:MediaElement"
              xmlns:vlc="clr-namespace:LibVLCSharp.Forms.Shared;assembly=LibVLCSharp.Forms"
+             xmlns:ff="clr-namespace:FFImageLoading.Forms;assembly=FFImageLoading.Forms"
              x:Class="CloudStreamForms.VideoPage">
     <ContentPage.Content NavigationPage.HasNavigationBar="false">
-        
 
- 
 
-        <Grid>
+
+
+        <Grid HorizontalOptions="FillAndExpand" VerticalOptions="FillAndExpand">
             <Grid.GestureRecognizers>
                 <PanGestureRecognizer PanUpdated="PanGestureRecognizer_PanUpdated"  />
             </Grid.GestureRecognizers>
-            <AbsoluteLayout HorizontalOptions="FillAndExpand" VerticalOptions="FillAndExpand">
+            <AbsoluteLayout >
+                
                 <vlc:VideoView x:Name="vvideo" InputTransparent="True" AbsoluteLayout.LayoutBounds="0,0,1,1" AbsoluteLayout.LayoutFlags="All">
 
                 </vlc:VideoView>
                 <Label x:Name="SeekTxt" Text="Hello" AbsoluteLayout.LayoutBounds=".5,1,1,.1" AbsoluteLayout.LayoutFlags="All" FontSize="20" LineBreakMode="WordWrap" TextColor="White" />
             </AbsoluteLayout>
+            <Button Clicked="PausePlayBtt_Clicked"  VerticalOptions="Center" WidthRequest="80" HeightRequest="80" HorizontalOptions="Center" BackgroundColor="Transparent"></Button>
+            <ff:CachedImage x:Name="PausePlayBtt" VerticalOptions="Center" WidthRequest="80" HeightRequest="80" HorizontalOptions="Center" BackgroundColor="Transparent" InputTransparent="True">
+
+            </ff:CachedImage>
+            <ActivityIndicator x:Name="LoadingCir" IsVisible="False" IsEnabled="False" InputTransparent="True" IsRunning="True" WidthRequest="80" HeightRequest="80" VerticalOptions="Center" HorizontalOptions="Center"></ActivityIndicator>
         </Grid>
 
     </ContentPage.Content>
