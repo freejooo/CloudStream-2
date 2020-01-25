@@ -36,7 +36,10 @@ namespace CloudStreamForms
             StorageInfo GetStorageInformation(string path = "");
             int ConvertDPtoPx(int dp);
             string GetExternalStoragePath();
+            void HideStatusBar();
+            void ShowStatusBar();
         }
+
         public class StorageInfo
         {
             public long TotalSpace = 0;
@@ -56,6 +59,15 @@ namespace CloudStreamForms
 
 
         public static IPlatformDep platformDep;
+
+        public static void HideStatusBar()
+        {
+            platformDep.HideStatusBar();
+        }
+        public static void ShowStatusBar()
+        {
+            platformDep.ShowStatusBar();
+        }
 
         public App()
         {
@@ -170,7 +182,7 @@ namespace CloudStreamForms
                 if (myApp.Properties.ContainsKey(path)) {
                     CloudStreamCore.print("GETKEY::" + myApp.Properties[path]);
                     CloudStreamCore.print("GETKEY::" + typeof(T).ToString() + "||" + ConvertToObject<T>(myApp.Properties[path] as string, defVal));
-                    return (T)ConvertToObject<T>(myApp.Properties[path] as string,defVal);
+                    return (T)ConvertToObject<T>(myApp.Properties[path] as string, defVal);
                 }
                 else {
                     return defVal;
@@ -179,7 +191,7 @@ namespace CloudStreamForms
             catch (Exception) {
                 return defVal;
             }
-          
+
         }
 
         public static List<T> GetKeys<T>(string folder)
@@ -244,7 +256,7 @@ namespace CloudStreamForms
             BinaryFormatter bf = new BinaryFormatter();
             using (MemoryStream ms = new MemoryStream(rawValue)) {
                 return (T)bf.Deserialize(ms);
-                }
+            }
         }
 
         static string ConvertToString(object o)
@@ -262,7 +274,7 @@ namespace CloudStreamForms
                 return ms.ToArray();
             }
         }
-        
+
 
         public static void ShowNotification(string title, string body)
         {

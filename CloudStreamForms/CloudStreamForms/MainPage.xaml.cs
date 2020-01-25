@@ -95,6 +95,7 @@ namespace CloudStreamForms
         }
         public MainPage()
         {
+            print("DAAAAAAAAAAAAAAAAAAAAAAAA");
             InitializeComponent(); mainPage = this;
             CheckGitHubUpdate();
             MainChrome.StartImageChanger();
@@ -110,11 +111,16 @@ namespace CloudStreamForms
                 Children[i].IconImageSource = icons[i];
             }
             On<Xamarin.Forms.PlatformConfiguration.Android>().SetToolbarPlacement(ToolbarPlacement.Bottom);
+            
+
+            Page p = new VideoPage();// { mainPoster = mainPoster };
+            Navigation.PushModalAsync(p, false);
+            print("DAAAAAAAAAAAAAAAAAAAAAAA2A");
+
 
             // Page p = new ChromeCastPage();// { mainPoster = mainPoster };
             // Navigation.PushModalAsync(p, false);
-
-            //PushPageFromUrlAndName("tt4869896", "Overlord");
+            //  PushPageFromUrlAndName("tt4869896", "Overlord");
             // PushPageFromUrlAndName("tt0371746", "Iron Man");
         }
         public static void PushPageFromUrlAndName(string url, string name)

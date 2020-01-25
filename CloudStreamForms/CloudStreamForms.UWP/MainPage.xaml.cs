@@ -290,10 +290,10 @@ namespace CloudStreamForms.UWP
             bool success = GetDiskFreeSpaceEx(ApplicationData.Current.LocalFolder.Path,
                                               out FreeBytesAvailable,
                                               out TotalNumberOfBytes,
-                                              out TotalNumberOfFreeBytes);            
+                                              out TotalNumberOfFreeBytes);
             //  var drive = DriveInfo.GetDrives().Where(t => t.Name == path).ToList()[0];
 
-            return new _App.StorageInfo() { AvailableSpace=(long) FreeBytesAvailable, FreeSpace= (long)TotalNumberOfFreeBytes, TotalSpace= (long)TotalNumberOfBytes };//AvailableSpace = drive.AvailableFreeSpace, FreeSpace = drive.TotalFreeSpace, TotalSpace = drive.TotalSize };
+            return new _App.StorageInfo() { AvailableSpace = (long)FreeBytesAvailable, FreeSpace = (long)TotalNumberOfFreeBytes, TotalSpace = (long)TotalNumberOfBytes };//AvailableSpace = drive.AvailableFreeSpace, FreeSpace = drive.TotalFreeSpace, TotalSpace = drive.TotalSize };
 
         }
         [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Auto)]
@@ -312,6 +312,16 @@ namespace CloudStreamForms.UWP
         public int ConvertDPtoPx(int dp)
         {
             return dp;
+        }
+
+        public void HideStatusBar()
+        {
+            throw new NotImplementedException();
+        }
+
+        public void ShowStatusBar()
+        {
+            throw new NotImplementedException();
         }
     }
 

@@ -21,6 +21,8 @@ using Android.Provider;
 using Acr.UserDialogs;
 using static CloudStreamForms.App;
 using Plugin.LocalNotifications;
+using LibVLCSharp.Shared;
+using LibVLCSharp.Forms.Shared;
 
 namespace CloudStreamForms.Droid
 {
@@ -50,11 +52,18 @@ namespace CloudStreamForms.Droid
             // int intHeight = (int)(Resources.DisplayMetrics.HeightPixels / Resources.DisplayMetrics.Density);
             //int intWidth = (int)(Resources.DisplayMetrics.WidthPixels / Resources.DisplayMetrics.Density);
 
-            Xamarin.Essentials.Platform.Init(this, savedInstanceState);
-            global::Xamarin.Forms.Forms.Init(this, savedInstanceState);
+
+
+            // ======================================= INIT =======================================
+         
             FFImageLoading.Forms.Platform.CachedImageRenderer.Init(enableFastRenderer: true);
             Rg.Plugins.Popup.Popup.Init(this, savedInstanceState);
             UserDialogs.Init(this);
+            LibVLCSharpFormsRenderer.Init();
+
+            Xamarin.Essentials.Platform.Init(this, savedInstanceState);
+            global::Xamarin.Forms.Forms.Init(this, savedInstanceState);
+
 
             LocalNotificationsImplementation.NotificationIconId = Resource.Drawable.bicon;
 
@@ -79,6 +88,7 @@ namespace CloudStreamForms.Droid
 
             base.OnRequestPermissionsResult(requestCode, permissions, grantResults);
         }
+
 
         public static int REQUEST_WRITE_STORAGE = 112;
         public static int REQUEST_INSTALL = 113;
@@ -109,7 +119,64 @@ namespace CloudStreamForms.Droid
     }
     public class MainDroid : App.IPlatformDep
     {
+        static bool hidden = false;
+        static int baseShow = 0;
 
+
+
+        public void ShowStatusBar()
+        {
+            if (!hidden) return;
+
+            Window window = MainActivity.activity.Window;
+            window.ClearFlags(WindowManagerFlags.TurnScreenOn);
+            window.ClearFlags(WindowManagerFlags.KeepScreenOn);
+
+            window.DecorView.SystemUiVisibility = (StatusBarVisibility)baseShow;
+        }
+
+        public void HideStatusBar()
+        {
+            if (hidden) return;
+            hidden = true;
+
+            Window window = MainActivity.activity.Window;
+            window.AddFlags(WindowManagerFlags.TurnScreenOn);
+            window.AddFlags(WindowManagerFlags.KeepScreenOn);
+
+            int uiOptions = (int)window.DecorView.SystemUiVisibility;
+            baseShow = uiOptions;
+
+            uiOptions |= (int)SystemUiFlags.LowProfile;
+            uiOptions |= (int)SystemUiFlags.Fullscreen;
+            uiOptions |= (int)SystemUiFlags.HideNavigation;
+            uiOptions |= (int)SystemUiFlags.ImmersiveSticky;
+
+            window.DecorView.SystemUiVisibility = (StatusBarVisibility)uiOptions;
+            /*
+            var activity = (Activity)Forms.Context;
+            var window = activity.Window;
+            var attrs = window.Attributes;
+            attrs.Flags |= Android.Views.WindowManagerFlags.Fullscreen;
+            window.Attributes = attrs;
+
+            window.ClearFlags(WindowManagerFlags.ForceNotFullscreen);
+            window.AddFlags(WindowManagerFlags.Fullscreen);
+
+            var decorView = window.DecorView;
+
+            var uiOptions =
+                (int)Android.Views.SystemUiFlags.LayoutStable |
+                (int)Android.Views.SystemUiFlags.LayoutHideNavigation |
+                (int)Android.Views.SystemUiFlags.LayoutFullscreen |
+                (int)Android.Views.SystemUiFlags.HideNavigation |
+                (int)Android.Views.SystemUiFlags.Fullscreen |
+                (int)Android.Views.SystemUiFlags.Immersive;
+
+            decorView.SystemUiVisibility = (Android.Views.StatusBarVisibility)uiOptions;
+
+            window.DecorView.SystemUiVisibility = StatusBarVisibility.Hidden;*/
+        }
         public StorageInfo GetStorageInformation(string path = "")
         {
             StorageInfo storageInfo = new StorageInfo();

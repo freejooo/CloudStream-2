@@ -1,4 +1,6 @@
-﻿using System;
+﻿using LibVLCSharp.Forms.Shared;
+using LibVLCSharp.Shared;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -54,12 +56,16 @@ namespace CloudStreamForms.UWP
 
                 rootFrame.NavigationFailed += OnNavigationFailed;
 
-                Xamarin.Forms.Forms.Init(e);
-                ((Style)this.Resources["TabbedPageStyle"]).Setters[0] = ((Style)this.Resources["TabbedPageStyle2"]).Setters[0];
+
                 // ((Style)this.Resources["TabbedPageStyle"]).Setters[2] = ((Style)this.Resources["TabbedPageStyle2"]).Setters[1];
 
+                // ======================================= INIT =======================================
                 FFImageLoading.Forms.Platform.CachedImageRenderer.Init();
                 Rg.Plugins.Popup.Popup.Init();
+                LibVLCSharpFormsRenderer.Init();
+
+                Xamarin.Forms.Forms.Init(e);
+                ((Style)this.Resources["TabbedPageStyle"]).Setters[0] = ((Style)this.Resources["TabbedPageStyle2"]).Setters[0];
 
                 if (e.PreviousExecutionState == ApplicationExecutionState.Terminated) {
                     //TODO: Load state from previously suspended application
