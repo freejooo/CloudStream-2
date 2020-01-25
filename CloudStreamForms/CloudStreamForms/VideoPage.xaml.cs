@@ -26,12 +26,23 @@ namespace CloudStreamForms
         LibVLC _libVLC;
         MediaPlayer _mediaPlayer;
 
+        /// <summary>
+        /// 0-1
+        /// </summary>
+        /// <param name="time"></param>
+        public void ChangeTime(double time)
+        {
+            StartTxt.Text = CloudStreamCore.ConvertTimeToString((Player.Length / 1000) * time);
+            EndTxt.Text = CloudStreamCore.ConvertTimeToString(((Player.Length) / 1000) - (Player.Length / 1000) * time);
+        }
+
+
         public VideoPage()
         {
 
             InitializeComponent();
             Core.Initialize();
-
+            
 
             _libVLC = new LibVLC();
             _mediaPlayer = new MediaPlayer(_libVLC) { EnableHardwareDecoding = true };
@@ -49,6 +60,8 @@ namespace CloudStreamForms
                 PausePlayBtt.Source = App.GetImageSource(paused ? PLAY_IMAGE : PAUSE_IMAGE);
                 PausePlayBtt.IsVisible = true;
                 LoadingCir.IsVisible = false;
+                BufferBar.IsVisible = false;
+
             }
 
             Player.Paused += (o, e) => {
@@ -67,14 +80,23 @@ namespace CloudStreamForms
                 //   LoadingCir.IsEnabled = false;
             };
             Player.TimeChanged += (o, e) => {
+                Device.BeginInvokeOnMainThread(() => {
 
+                    double val = ((double)(Player.Time / 1000) / (double)(Player.Length / 1000));
+                    ChangeTime(val);
+                    VideoSlider.Value = val;
+                });
             };
+
+
             Player.Buffering += (o, e) => {
                 Device.BeginInvokeOnMainThread(() => {
                     if (e.Cache == 100) {
                         SetIsPaused(!Player.IsPlaying);
                     }
                     else {
+                        BufferBar.Progress = e.Cache / 100;
+                        BufferBar.IsVisible = true;
                         PausePlayBtt.IsVisible = false;
                         LoadingCir.IsVisible = true;
                     }
@@ -114,7 +136,9 @@ namespace CloudStreamForms
         public void PausePlayBtt_Clicked(object sender, EventArgs e)
         {
             //Player.SetPause(true);
-            Player.Pause();
+            if (!dragingVideo) {
+                Player.Pause();
+            }
         }
 
 
@@ -228,5 +252,24 @@ namespace CloudStreamForms
             Bottom
         }
 
+        static bool dragingVideo = false;
+        private void VideoSlider_DragStarted(object sender, EventArgs e)
+        {
+            Player.SetPause(true);
+            dragingVideo = true;
+        }
+
+        private void VideoSlider_DragCompleted(object sender, EventArgs e)
+        {
+            long len = (long)((VideoSlider.Value * (double)(Player.Length / 1000)) * 1000);
+            Player.Time = len;
+            Player.SetPause(false);
+            dragingVideo = false;
+        }
+
+        private void VideoSlider_ValueChanged(object sender, ValueChangedEventArgs e)
+        {
+            ChangeTime(e.NewValue);
+        }
     }
 }

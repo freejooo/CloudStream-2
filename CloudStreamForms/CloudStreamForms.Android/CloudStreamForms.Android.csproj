@@ -84,6 +84,7 @@
     <PackageReference Include="Xamarin.Essentials" Version="1.1.0" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CustomSliderRenderer.cs" />
     <Compile Include="CustomTextCellRenderer.cs" />
     <Compile Include="CustomTableViewRenderer.cs" />
     <Compile Include="CustomSwitchCellRenderer.cs" />

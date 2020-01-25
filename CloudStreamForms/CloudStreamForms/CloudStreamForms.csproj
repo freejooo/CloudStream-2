@@ -94,6 +94,7 @@
     <None Remove="Resource\subtitleIcon.png" />
     <None Remove="Resource\viewOffIcon.png" />
     <None Remove="Resource\viewOnIcon.png" />
+    <None Remove="Resource\wcir.png" />
     <None Remove="Resource\wStar.png" />
     <None Remove="Resource\ytIcon.png" />
     <None Remove="star.png" />
@@ -163,6 +164,7 @@
     <EmbeddedResource Include="Resource\subtitleIcon.png" />
     <EmbeddedResource Include="Resource\viewOffIcon.png" />
     <EmbeddedResource Include="Resource\viewOnIcon.png" />
+    <EmbeddedResource Include="Resource\wcir.png" />
     <EmbeddedResource Include="Resource\wStar.png" />
   </ItemGroup>
 

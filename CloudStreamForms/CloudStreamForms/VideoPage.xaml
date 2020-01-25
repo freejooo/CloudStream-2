@@ -27,6 +27,23 @@
 
             </ff:CachedImage>
             <ActivityIndicator x:Name="LoadingCir" IsVisible="False" InputTransparent="True" IsRunning="True" WidthRequest="60" HeightRequest="60" VerticalOptions="Center" HorizontalOptions="Center"></ActivityIndicator>
+           
+            
+            
+            <Grid HorizontalOptions="Fill" ColumnSpacing="0" Padding="10,0" Margin="0" VerticalOptions="End">
+                <Grid.ColumnDefinitions >
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <Label Grid.Row="0" Grid.Column="0" x:Name="StartTxt" Text="11:13" HorizontalOptions="Start"></Label>
+                <Slider x:Name="VideoSlider" Grid.Column="1" MinimumTrackColor="#303F9F" ThumbColor="#303F9F" HorizontalOptions="Fill" Margin="0,0,0,10" Maximum="1" DragStarted="VideoSlider_DragStarted" DragCompleted="VideoSlider_DragCompleted" ValueChanged="VideoSlider_ValueChanged" ></Slider>
+                <Label Grid.Row="0" Grid.Column="2" x:Name="EndTxt" Text="54:27" HorizontalOptions="End"></Label>
+            </Grid>
+            
+            
+            
+            <ProgressBar x:Name="BufferBar" Progress="0" ProgressColor="#303F9F" IsVisible="False" VerticalOptions="End"></ProgressBar>
         </Grid>
 
     </ContentPage.Content>
