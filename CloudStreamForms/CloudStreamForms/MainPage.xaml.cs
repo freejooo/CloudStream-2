@@ -113,9 +113,9 @@ namespace CloudStreamForms
             On<Xamarin.Forms.PlatformConfiguration.Android>().SetToolbarPlacement(ToolbarPlacement.Bottom);
             
 
-            Page p = new VideoPage();// { mainPoster = mainPoster };
-            Navigation.PushModalAsync(p, false);
-            print("DAAAAAAAAAAAAAAAAAAAAAAA2A");
+          //  Page p = new VideoPage();// { mainPoster = mainPoster };
+           // Navigation.PushModalAsync(p, false);
+            //print("DAAAAAAAAAAAAAAAAAAAAAAA2A");
 
 
             // Page p = new ChromeCastPage();// { mainPoster = mainPoster };

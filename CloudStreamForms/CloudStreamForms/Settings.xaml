@@ -21,9 +21,7 @@
                             <TableSection>
                                 <TextCell x:Name="DataTxt2"  Detail="|FONTSIZE:17: BOLD:: BLACK:: POSY:30:|" DetailColor="Transparent" Text="General" TextColor="#FFFFFF" ></TextCell>
                             </TableSection>
-                            <TableSection >
-                                <SwitchCell Text="Force black background (Restart recommended)" x:Name="BlackBgToggle" OnColor="{Binding MainColor}"></SwitchCell>
-                            </TableSection>
+                      
                             <TableSection>
                                 <SwitchCell Text="Instant search" x:Name="SearchToggle" OnColor="{Binding MainColor}"></SwitchCell>
                             </TableSection>
@@ -42,6 +40,9 @@
                            
                             <TableSection>
                                 <TextCell  Detail="|FONTSIZE:17: BOLD:: BLACK:: POSY:30:|" DetailColor="Transparent" Text="UI" TextColor="#FFFFFF" ></TextCell>
+                            </TableSection>
+                            <TableSection >
+                                <SwitchCell Text="Force black background (Restart recommended)" x:Name="BlackBgToggle" OnColor="{Binding MainColor}"></SwitchCell>
                             </TableSection>
                             <TableSection>
                                 <SwitchCell Text="Top 100 enabled" x:Name="TopToggle" OnColor="{Binding MainColor}"></SwitchCell>

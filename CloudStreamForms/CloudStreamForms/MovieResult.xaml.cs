@@ -604,7 +604,9 @@ namespace CloudStreamForms
         void SetHeight(bool? setNull = null)
         {
             //  episodeView.HeightRequest = episodeView.Bounds.Height;
-            Device.BeginInvokeOnMainThread(() => episodeView.HeightRequest = ((setNull ?? showState != 0) ? 0 : (epView.MyEpisodeResultCollection.Count * episodeView.RowHeight + 20)));
+            print("EPSHOW:" + Settings.EpDecEnabled);
+            episodeView.RowHeight = Settings.EpDecEnabled ? 175 : 100;
+            Device.BeginInvokeOnMainThread(() => episodeView.HeightRequest = ((setNull ?? showState != 0) ? 0 : (epView.MyEpisodeResultCollection.Count * ( episodeView.RowHeight ) + 20)));
         }
 
         void SetTrailerRec(bool? setNull = null)
