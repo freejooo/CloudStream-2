@@ -7,8 +7,19 @@
     <ContentPage.Content NavigationPage.HasNavigationBar="false">
         
 
-    <vlc:VideoView x:Name="vvideo" >
+ 
 
-    </vlc:VideoView>
+        <Grid>
+            <Grid.GestureRecognizers>
+                <PanGestureRecognizer PanUpdated="PanGestureRecognizer_PanUpdated"  />
+            </Grid.GestureRecognizers>
+            <AbsoluteLayout HorizontalOptions="FillAndExpand" VerticalOptions="FillAndExpand">
+                <vlc:VideoView x:Name="vvideo" InputTransparent="True" AbsoluteLayout.LayoutBounds="0,0,1,1" AbsoluteLayout.LayoutFlags="All">
+
+                </vlc:VideoView>
+                <Label x:Name="SeekTxt" Text="Hello" AbsoluteLayout.LayoutBounds=".5,1,1,.1" AbsoluteLayout.LayoutFlags="All" FontSize="20" LineBreakMode="WordWrap" TextColor="White" />
+            </AbsoluteLayout>
+        </Grid>
+
     </ContentPage.Content>
 </ContentPage>
