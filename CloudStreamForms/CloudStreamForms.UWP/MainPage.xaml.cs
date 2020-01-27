@@ -143,7 +143,7 @@ namespace CloudStreamForms.UWP
                 MainUWP.OpenPathAsVideo(url, name, subtitleLoc);
             }
             catch (Exception) {
-                CloudStreamForms.App.OpenBrowser(url);
+               // CloudStreamForms.App.OpenBrowser(url);
             }
         }
         public void PlayVlc(List<string> url, List<string> name, string subtitleLoc)
@@ -151,10 +151,9 @@ namespace CloudStreamForms.UWP
             //MainUWP.OpenPathAsVideo(url,name);
             try {
                 MainUWP.OpenPathsAsVideo(url, name, subtitleLoc);
-
             }
             catch (Exception) {
-                CloudStreamForms.App.OpenBrowser(url.FirstOrDefault());
+               // CloudStreamForms.App.OpenBrowser(url.FirstOrDefault());
             }
         }
 

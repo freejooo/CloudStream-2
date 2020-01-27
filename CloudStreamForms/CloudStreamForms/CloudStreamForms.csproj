@@ -30,7 +30,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Remove="Resource\baseline_get_app_white_48dp.png" />
+    <None Remove="Resource\baseline_keyboard_arrow_down_white_48dp.png" />
     <None Remove="Resource\baseline_pause_white_48dp.png" />
+    <None Remove="Resource\baseline_playlist_play_white_48dp.png" />
     <None Remove="Resource\baseline_play_arrow_white_48dp.png" />
     <None Remove="Resource\baseline_settings_applications_white_48dp_inverted.png" />
     <None Remove="Resource\baseline_skip_next_white_48dp.png" />
@@ -95,13 +98,18 @@
     <None Remove="Resource\viewOffIcon.png" />
     <None Remove="Resource\viewOnIcon.png" />
     <None Remove="Resource\wcir.png" />
+    <None Remove="Resource\wlockLocked.png" />
+    <None Remove="Resource\wlockUnLocked.png" />
     <None Remove="Resource\wStar.png" />
     <None Remove="Resource\ytIcon.png" />
     <None Remove="star.png" />
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="Resource\baseline_get_app_white_48dp.png" />
+    <EmbeddedResource Include="Resource\baseline_keyboard_arrow_down_white_48dp.png" />
     <EmbeddedResource Include="Resource\baseline_pause_white_48dp.png" />
+    <EmbeddedResource Include="Resource\baseline_playlist_play_white_48dp.png" />
     <EmbeddedResource Include="Resource\baseline_play_arrow_white_48dp.png" />
     <EmbeddedResource Include="Resource\baseline_settings_applications_white_48dp_inverted.png" />
     <EmbeddedResource Include="Resource\baseline_skip_next_white_48dp.png" />
@@ -165,6 +173,8 @@
     <EmbeddedResource Include="Resource\viewOffIcon.png" />
     <EmbeddedResource Include="Resource\viewOnIcon.png" />
     <EmbeddedResource Include="Resource\wcir.png" />
+    <EmbeddedResource Include="Resource\wlockLocked.png" />
+    <EmbeddedResource Include="Resource\wlockUnLocked.png" />
     <EmbeddedResource Include="Resource\wStar.png" />
   </ItemGroup>
 

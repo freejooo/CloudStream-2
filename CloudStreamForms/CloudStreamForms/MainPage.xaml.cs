@@ -111,11 +111,11 @@ namespace CloudStreamForms
                 Children[i].IconImageSource = icons[i];
             }
             On<Xamarin.Forms.PlatformConfiguration.Android>().SetToolbarPlacement(ToolbarPlacement.Bottom);
-            
 
-          //  Page p = new VideoPage();// { mainPoster = mainPoster };
-           // Navigation.PushModalAsync(p, false);
-            //print("DAAAAAAAAAAAAAAAAAAAAAAA2A");
+
+            Page p = new VideoPage(new VideoPage.PlayVideo() {descript="",name="Black Bunny",episode=-1, season=-1,MirrorNames= new List<string>() { "Googlevid" },MirrorUrls= new List<string>() { "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" },Subtitles= new List<string>(),SubtitlesNames= new List<string>() });//new List<string>() { "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" }, new List<string>() { "Black" }, new List<string>() { });// { mainPoster = mainPoster };
+            Navigation.PushModalAsync(p, false);
+            print("DAAAAAAAAAAAAAAAAAAAAAAA2A");
 
 
             // Page p = new ChromeCastPage();// { mainPoster = mainPoster };
@@ -2674,7 +2674,7 @@ namespace CloudStreamForms
             tempThred.Thread.Start();
         }
 
-        static void GetLiveMovies123Links(int normalEpisode, int episode, int season, bool isMovie)
+        static void GetLiveMovies123Links(int normalEpisode, int episode, int season, bool isMovie, string provider = "https://c123movies.com") // https://movies123.live & https://c123movies.com
         {
             TempThred tempThred = new TempThred();
 
@@ -2683,7 +2683,7 @@ namespace CloudStreamForms
                 try {
                     string _title = ToDown(activeMovie.title.name, replaceSpace: "-");
 
-                    string _url = (isMovie ? "https://movies123.live/movies/" + _title : "https://movies123.live/episodes/" + _title + "-season-" + season + "-episode-" + episode);
+                    string _url = (isMovie ? (provider + "/movies/" + _title) : (provider + "/episodes/" + _title + "-season-" + season + "-episode-" + episode));
                     print("___URL::" + _url);
 
                     string d = DownloadString(_url);
@@ -3016,7 +3016,8 @@ namespace CloudStreamForms
                             GetWatchTV(season, episode, normalEpisode);
                         }
                         GetFmoviesLinks(normalEpisode, episode, season);
-                        GetLiveMovies123Links(normalEpisode, episode, season, isMovie);
+                        GetLiveMovies123Links(normalEpisode, episode, season, isMovie, "https://movies123.live");
+                        GetLiveMovies123Links(normalEpisode, episode, season, isMovie, "https://c123movies.com");
 
                         if (activeMovie.title.yesmoviessSeasonDatas != null) {
                             for (int i = 0; i < activeMovie.title.yesmoviessSeasonDatas.Count; i++) {

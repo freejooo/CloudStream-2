@@ -27,22 +27,98 @@
 
             </ff:CachedImage>
             <ActivityIndicator x:Name="LoadingCir" IsVisible="False" InputTransparent="True" IsRunning="True" WidthRequest="60" HeightRequest="60" VerticalOptions="Center" HorizontalOptions="Center"></ActivityIndicator>
-           
             
             
-            <Grid HorizontalOptions="Fill" ColumnSpacing="0" Padding="10,0" Margin="0" VerticalOptions="End">
+            <Label x:Name="EpisodeLabel"  Text="S12:E3 Iron Man" VerticalOptions="Start" HorizontalOptions="Center" FontSize="14" TextColor="#e7e7e7" TranslationY="20"></Label>
+            <Grid x:Name="VideoSettings" VerticalOptions="Start" HorizontalOptions="End" TranslationY="20" ColumnSpacing="20" Scale="0.7">
                 <Grid.ColumnDefinitions >
                     <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
-                <Label Grid.Row="0" Grid.Column="0" x:Name="StartTxt" Text="11:13" HorizontalOptions="Start"></Label>
-                <Slider x:Name="VideoSlider" Grid.Column="1" MinimumTrackColor="#303F9F" ThumbColor="#303F9F" HorizontalOptions="Fill" Margin="0,0,0,10" Maximum="1" DragStarted="VideoSlider_DragStarted" DragCompleted="VideoSlider_DragCompleted" ValueChanged="VideoSlider_ValueChanged" ></Slider>
-                <Label Grid.Row="0" Grid.Column="2" x:Name="EndTxt" Text="54:27" HorizontalOptions="End"></Label>
+                <ff:CachedImage x:Name="LockImg" Grid.Column="0" VerticalOptions="Center" TranslationY="-2" InputTransparent="True" BackgroundColor="Transparent" WidthRequest="27" HeightRequest="27" ></ff:CachedImage>
+                <Image x:Name="SubtitlesImg" Grid.Column="1" TranslationX="10" InputTransparent="True" ></Image>
+                <Image x:Name="MirrosImg" Grid.Column="2"  TranslationX="10" InputTransparent="True" Scale="1.2"></Image>
+                <Image x:Name="DownloadImg" Grid.Column="3" TranslationX="10" InputTransparent="True" Scale="1"></Image>
+
             </Grid>
             
-            
-            
+            <Grid x:Name="VideoSliderAndSettings"  VerticalOptions="End" >
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+
+                </Grid.RowDefinitions>
+              <!--  <Image x:Name="GradientBottom" Grid.Row="1" HorizontalOptions="Fill" HeightRequest="80" TranslationY="0" VerticalOptions="End" Rotation="180" InputTransparent="True" ScaleX="100" Opacity="1" ScaleY="3"></Image>
+-->
+                <Grid HorizontalOptions="Fill" ColumnSpacing="0" Padding="10,0" Margin="0,0,0,-40" VerticalOptions="End" Grid.Row="0" >
+                    <Grid.ColumnDefinitions >
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <Label Grid.Row="0" Grid.Column="0" x:Name="StartTxt" Text="11:13" HorizontalOptions="Start"></Label>
+                    <Slider x:Name="VideoSlider" Grid.Column="1" MinimumTrackColor="#303F9F" ThumbColor="#303F9F" HorizontalOptions="Fill" Margin="0,0,0,10" Maximum="1" DragStarted="VideoSlider_DragStarted" DragCompleted="VideoSlider_DragCompleted" ValueChanged="VideoSlider_ValueChanged" ></Slider>
+                    <Label Grid.Row="0" Grid.Column="2" x:Name="EndTxt" Text="54:27" HorizontalOptions="End"></Label>
+                </Grid>
+                <!--
+                <Grid x:Name="VideoSettings" VerticalOptions="End" HorizontalOptions="Center" Grid.Row="1" TranslationY="20">
+                    <Grid.ColumnDefinitions >
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    
+                    
+                    <Grid Grid.Column="0">
+                        <Grid.ColumnDefinitions >
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <ff:CachedImage x:Name="LockImg" Grid.Column="0" VerticalOptions="Center" TranslationY="-2" InputTransparent="True" BackgroundColor="Transparent" WidthRequest="27" HeightRequest="27" ></ff:CachedImage>
+                        <Button Text="Lock view"  Grid.Column="2" BackgroundColor="Transparent"></Button>
+                    </Grid>
+
+                    <Grid Grid.Column="1">
+                        <Grid.ColumnDefinitions >
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <Image x:Name="SubtitlesImg" Grid.Column="1" VerticalOptions="Center" TranslationX="10" InputTransparent="True" ></Image>
+                        <Button Text="Subtitles"  Grid.Column="2" BackgroundColor="Transparent"></Button>
+                    </Grid>
+                    <Grid Grid.Column="2">
+                        <Grid.ColumnDefinitions >
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <Image x:Name="MirrosImg" Grid.Column="0" VerticalOptions="Center" TranslationX="10" InputTransparent="True" Scale="1.2"></Image>
+                        <Button Text="Mirrors"  Grid.Column="1" BackgroundColor="Transparent"></Button>
+                    </Grid>
+                    <Grid Grid.Column="3">
+                        <Grid.ColumnDefinitions >
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <Image x:Name="DownloadImg" Grid.Column="0" VerticalOptions="Center" TranslationX="10" InputTransparent="True" Scale="1"></Image>
+                        <Button Text="Download"  Grid.Column="1" BackgroundColor="Transparent"></Button>
+                    </Grid>
+                </Grid>
+                -->
+            </Grid>
             <ProgressBar x:Name="BufferBar" Progress="0" ProgressColor="#303F9F" IsVisible="False" VerticalOptions="End"></ProgressBar>
         </Grid>
 

@@ -37,22 +37,96 @@ namespace CloudStreamForms
         }
 
 
-        public VideoPage()
+        /// <summary>
+        /// Holds info about the current video
+        /// </summary>
+        /// 
+        [System.Serializable]
+        public struct PlayVideo
         {
+            public List<string> MirrorUrls;
+            public List<string> MirrorNames;
+            public List<string> Subtitles;
+            public List<string> SubtitlesNames;
+            public string name;
+            public string descript;
+            public int episode; //-1 = null, movie  
+            public int season; //-1 = null, movie  
+        }
+
+        /// <summary>
+        /// IF MOVIE, 1 else number of episodes in season
+        /// </summary>
+        public static int maxEpisodes = 0;
+        public static int currentMirrorId = 0;
+        public static int currentSubtitlesId = 0;
+        public static PlayVideo currentVideo;
+
+        const string NONE_SUBTITLES = "None";
+        const string ADD_BEFORE_EPISODE = "\"";
+        const string ADD_AFTER_EPISODE = "\"";
+        public static bool IsSeries { get { return !(currentVideo.season == -1 || currentVideo.episode == -1); } }
+        public static string BeforeAddToName { get { return IsSeries ? ("S" + currentVideo.season + ":E" + currentVideo.episode + " ") : ""; } }
+        public static string CurrentDisplayName { get { return BeforeAddToName + (IsSeries ? ADD_BEFORE_EPISODE : "") + currentVideo.name + (IsSeries ? ADD_AFTER_EPISODE : ""); } }
+        public static string CurrentMirrorName { get { return currentVideo.MirrorNames[currentMirrorId]; } }
+        public static string CurrentMirrorUrl { get { return currentVideo.MirrorUrls[currentMirrorId]; } }
+        public static string CurrentSubtitles { get { if (currentSubtitlesId == -1) { return ""; } else { return currentVideo.Subtitles[currentMirrorId]; } } }
+        public static string CurrentSubtitlesNames { get { if (currentSubtitlesId == -1) { return NONE_SUBTITLES; } else { return currentVideo.SubtitlesNames[currentMirrorId]; } } }
+        public static List<string> AllSubtitlesNames { get { var f = new List<string>() { NONE_SUBTITLES }; f.AddRange(currentVideo.SubtitlesNames); return f; } }
+        public static List<string> AllSubtitlesUrls { get { var f = new List<string>() { "" }; f.AddRange(currentVideo.Subtitles); return f; } }
+        public static List<string> AllMirrorsNames { get { return currentVideo.MirrorNames; } }
+        public static List<string> AllMirrorsUrls { get { return currentVideo.MirrorUrls; } }
+
+        public void SelectMirror(int mirror)
+        {
+            currentMirrorId = mirror;
+            var media = new Media(_libVLC, CurrentMirrorUrl, FromType.FromLocation);
+            vvideo.MediaPlayer.Play(media);
+
+            EpisodeLabel.Text = CurrentDisplayName;
+        }
+
+        /// <summary>
+        /// -1 = none
+        /// </summary>
+        /// <param name="subtitles"></param>
+        public void SelectSubtitles(int subtitles = -1)
+        {
+            currentSubtitlesId = subtitles;
+        }
+
+        /// <summary>
+        /// Subtitles are in full
+        /// </summary>
+        /// <param name="urls"></param>
+        /// <param name="name"></param>
+        /// <param name="subtitles"></param>
+        public VideoPage(PlayVideo video, int _maxEpisodes = 1)
+        {
+            currentVideo = video;
+            maxEpisodes = _maxEpisodes;
 
             InitializeComponent();
             Core.Initialize();
-            
+
+            // ======================= SETUP =======================
 
             _libVLC = new LibVLC();
             _mediaPlayer = new MediaPlayer(_libVLC) { EnableHardwareDecoding = true };
 
             vvideo.MediaPlayer = _mediaPlayer; // = new VideoView() { MediaPlayer = _mediaPlayer };
-            var media = new Media(_libVLC, "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4", FromType.FromLocation);
-            vvideo.MediaPlayer.Play(media);
+
+            SelectMirror(0);
 
 
+            // ========== IMGS ==========
+            SubtitlesImg.Source = App.GetImageSource("baseline_subtitles_white_48dp.png");
+            MirrosImg.Source = App.GetImageSource("baseline_playlist_play_white_48dp.png");
+          //  GradientBottom.Source = App.GetImageSource("gradient.png");
+            DownloadImg.Source = App.GetImageSource("round_more_vert_white_48dp.png");
+            LockImg.Source = App.GetImageSource("wlockUnLocked.png");
 
+            // ================================================================================ UI ================================================================================
             PausePlayBtt.Source = App.GetImageSource(PAUSE_IMAGE);
 
             void SetIsPaused(bool paused)
