@@ -113,8 +113,8 @@ namespace CloudStreamForms
             On<Xamarin.Forms.PlatformConfiguration.Android>().SetToolbarPlacement(ToolbarPlacement.Bottom);
 
 
-            Page p = new VideoPage(new VideoPage.PlayVideo() {descript="",name="Black Bunny",episode=-1, season=-1,MirrorNames= new List<string>() { "Googlevid" },MirrorUrls= new List<string>() { "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" },Subtitles= new List<string>(),SubtitlesNames= new List<string>() });//new List<string>() { "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" }, new List<string>() { "Black" }, new List<string>() { });// { mainPoster = mainPoster };
-            Navigation.PushModalAsync(p, false);
+            //  Page p = new VideoPage(new VideoPage.PlayVideo() {descript="",name="Black Bunny",episode=-1, season=-1,MirrorNames= new List<string>() { "Googlevid" },MirrorUrls= new List<string>() { "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" },Subtitles= new List<string>(),SubtitlesNames= new List<string>() });//new List<string>() { "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" }, new List<string>() { "Black" }, new List<string>() { });// { mainPoster = mainPoster };
+            //   Navigation.PushModalAsync(p, false);
             print("DAAAAAAAAAAAAAAAAAAAAAAA2A");
 
 
@@ -512,6 +512,7 @@ namespace CloudStreamForms
         public static bool globalSubtitlesEnabled { get { return Settings.SubtitlesEnabled; } }
         public const bool GOMOSTEAM_ENABLED = true;
         public const bool SUBHDMIRROS_ENABLED = true;
+        public const bool FMOVIES_ENABLED = false;
         public const bool BAN_SUBTITLE_ADS = true;
 
         public const bool PLAY_SELECT_ENABLED = false;
@@ -521,6 +522,7 @@ namespace CloudStreamForms
         public const int MIRROR_COUNT = 10;
         public const int HD_MIRROR_COUNT = 4;
         public const int ANIME_MIRRORS_COUNT = 1;
+
 
         public const string loadingImage = "https://i.giphy.com/media/u2Prjtt7QYD0A/200.webp"; // from https://media0.giphy.com/media/u2Prjtt7QYD0A/200.webp?cid=790b7611ff76f40aaeea5e73fddeb8408c4b018b6307d9e3&rid=200.webp
 
@@ -820,6 +822,8 @@ namespace CloudStreamForms
             public List<FMoviesData> fmoviesMetaData;// NOT SORTED; MAKE SURE TO SEARCH ALL
 
             public string shortEpView;
+
+            public bool IsMovie { get { return (movieType == MovieType.AnimeMovie || movieType == MovieType.Movie); } }
         }
 
         [Serializable]
@@ -1892,6 +1896,8 @@ namespace CloudStreamForms
 
         public static void FishFmovies()
         {
+            if (!FMOVIES_ENABLED) return;
+
             TempThred tempThred = new TempThred();
             tempThred.typeId = 2; // MAKE SURE THIS IS BEFORE YOU CREATE THE THRED
             tempThred.Thread = new System.Threading.Thread(() => {
@@ -2577,6 +2583,8 @@ namespace CloudStreamForms
 
         static void GetFmoviesLinks(int normlaEpisode, int episode, int season)
         {
+            if (!FMOVIES_ENABLED) return;
+
             TempThred tempThred = new TempThred();
 
             tempThred.typeId = 3; // MAKE SURE THIS IS BEFORE YOU CREATE THE THRED
@@ -2659,7 +2667,10 @@ namespace CloudStreamForms
                             string _lookFor = "\"file\":\"";
                             while (dl.Contains(_lookFor)) {
                                 string __link = FindHTML(dl, _lookFor, "\"");
-                                AddPotentialLink(normlaEpisode, __link, "HD FMovies", 30); // https://bharadwajpro.github.io/m3u8-player/player/#
+                                if (__link != "") {
+
+                                    AddPotentialLink(normlaEpisode, __link, "HD FMovies", -1);  //"https://bharadwajpro.github.io/m3u8-player/player/#"+ __link, "HD FMovies", 30); // https://bharadwajpro.github.io/m3u8-player/player/#
+                                }
                                 dl = RemoveOne(dl, _lookFor);
                             }
                             d = RemoveOne(d, lookFor);
@@ -2702,7 +2713,7 @@ namespace CloudStreamForms
                         string live = FindHTML(d, "getlink(\'", "\'");
                         print("LIVE::" + live);
                         if (live != "") {
-                            string url = "https://movies123.live/ajax/get-link.php?id=" + live + "&type=" + (isMovie ? "movie" : "tv") + "&link=sw&" + (isMovie ? "season=undefined&episode=undefined" : ("season=" + season + "&episode=" + episode));
+                            string url = provider + "/ajax/get-link.php?id=" + live + "&type=" + (isMovie ? "movie" : "tv") + "&link=sw&" + (isMovie ? "season=undefined&episode=undefined" : ("season=" + season + "&episode=" + episode));
                             print("MegaURL:" + url);
                             d = DownloadString(url); if (!GetThredActive(tempThred)) { return; };
 
@@ -2721,7 +2732,7 @@ namespace CloudStreamForms
             tempThred.Thread.Start();
         }
 
-        static void AddEpisodesFromMirrors(TempThred tempThred, string d, int normalEpisode)
+        static void AddEpisodesFromMirrors(TempThred tempThred, string d, int normalEpisode) // DONT DO THEVIDEO provider, THEY USE GOOGLE CAPTCH TO VERIFY AUTOR; LOOK AT https://vev.io/api/serve/video/qy3pw89xwmr7 IT IS A POST REQUEST
         {
             string mp4 = "https://www.mp4upload.com/embed-" + FindHTML(d, "data-video=\"https://www.mp4upload.com/embed-", "\"");
             if (mp4 != "https://www.mp4upload.com/embed-") {
@@ -2811,6 +2822,33 @@ namespace CloudStreamForms
                 print("Error :(");
             }
         }
+
+
+        static void GetThe123movies(int normalEpisode,int episode, int season, bool isMovie)
+        {
+            TempThred tempThred = new TempThred();
+
+            tempThred.typeId = 3; // MAKE SURE THIS IS BEFORE YOU CREATE THE THRED
+            tempThred.Thread = new System.Threading.Thread(() => {
+                try {
+                    string extra = ToDown(activeMovie.title.name, true, "-") + (isMovie ? ( "-" + activeMovie.title.ogYear) : ("-" + season + "x" + episode));
+                    string d = DownloadString("https://on.the123movies.eu/" + extra);
+                    if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
+                    string ts = FindHTML(d, "data-vs=\"", "\"");
+                    print("DATATS::" + ts);
+                    d = DownloadString(ts);
+                    if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
+                    AddEpisodesFromMirrors(tempThred,d, normalEpisode);
+                }
+                finally {
+                    JoinThred(tempThred);
+                }
+            });
+            tempThred.Thread.Name = "GetThe123movies Thread";
+            tempThred.Thread.Start();
+
+        }
+
 
         public static void GetEpisodeLink(int episode = -1, int season = 1, bool purgeCurrentLinkThread = true, bool onlyEpsCount = false, bool isDub = true)
         {
@@ -2930,9 +2968,6 @@ namespace CloudStreamForms
                                             }
                                             serverUrls = RemoveOne(serverUrls, sLookFor);
                                         }
-
-
-
                                     }
                                 }
                                 finally {
@@ -3018,6 +3053,7 @@ namespace CloudStreamForms
                         GetFmoviesLinks(normalEpisode, episode, season);
                         GetLiveMovies123Links(normalEpisode, episode, season, isMovie, "https://movies123.live");
                         GetLiveMovies123Links(normalEpisode, episode, season, isMovie, "https://c123movies.com");
+                        GetThe123movies(normalEpisode, episode, season, isMovie);
 
                         if (activeMovie.title.yesmoviessSeasonDatas != null) {
                             for (int i = 0; i < activeMovie.title.yesmoviessSeasonDatas.Count; i++) {

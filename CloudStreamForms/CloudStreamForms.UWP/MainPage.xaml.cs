@@ -315,12 +315,10 @@ namespace CloudStreamForms.UWP
 
         public void HideStatusBar()
         {
-            throw new NotImplementedException();
         }
 
         public void ShowStatusBar()
         {
-            throw new NotImplementedException();
         }
     }
 
