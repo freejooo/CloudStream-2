@@ -1,15 +1,11 @@
 ﻿using CloudStreamForms.Models;
+using Rg.Plugins.Popup.Services;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
-using static CloudStreamForms.CloudStreamCore;
 using static CloudStreamForms.App;
-using Rg.Plugins.Popup.Services;
+using static CloudStreamForms.CloudStreamCore;
 using static CloudStreamForms.MainChrome;
 
 namespace CloudStreamForms
@@ -22,9 +18,9 @@ namespace CloudStreamForms
 
         public string TitleName { set { NameLabel.Text = value; } }
         public string DescriptName { set { EpsodeName.Text = value; } }
-        public string EpisodeTitleName { set { EpTitleLabel.Text = value; } } 
-        public string EpisodePosterUrl { set {/* EpisodePoster.Source = value; */} } 
-        public string EpisodeDescription { set { EpTitleDescript.Text = value; /* EpisodePoster.Source = value; */} } 
+        public string EpisodeTitleName { set { EpTitleLabel.Text = value; } }
+        public string EpisodePosterUrl { set {/* EpisodePoster.Source = value; */} }
+        public string EpisodeDescription { set { EpTitleDescript.Text = value; /* EpisodePoster.Source = value; */} }
 
         public string PosterUrl { set { Poster.Source = value; } }
         public int IconSize { set; get; } = 48;

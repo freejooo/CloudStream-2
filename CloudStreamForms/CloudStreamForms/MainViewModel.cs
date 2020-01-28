@@ -1,6 +1,5 @@
-﻿using System.ComponentModel;
-using LibVLCSharp.Shared;
-using static CloudStreamForms.CloudStreamCore;
+﻿using LibVLCSharp.Shared;
+using System.ComponentModel;
 
 namespace MediaElement
 {

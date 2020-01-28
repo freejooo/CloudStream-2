@@ -1,22 +1,9 @@
-﻿using System;
+﻿using Android.Graphics;
+using Android.Widget;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
-using System.Text;
-
-using Android.App;
-using Android.Content;
-using Android.Content.Res;
-using Android.Graphics;
-using Android.OS;
-using Android.Runtime;
-using Android.Support.V4.Content.Res;
-using Android.Views;
-using Android.Widget;
-using CloudStreamForms.Droid;
 using Xamarin.Forms;
 using Xamarin.Forms.Platform.Android;
-using static Java.Util.ResourceBundle;
 using static CloudStreamForms.CloudStreamCore;
 
 [assembly: ExportRenderer(typeof(TextCell), typeof(CustomTextCellRenderer))]
@@ -36,7 +23,7 @@ public class CustomTextCellRenderer : TextCellRenderer
         TextView t = (TextView)layout.GetChildAt(0);
         TextView t2 = (TextView)layout.GetChildAt(1);
 
-        List<string> attributes = new List<string>() { "FONTSIZE", "BOLD", "BLACK", "POSX","POSY" };
+        List<string> attributes = new List<string>() { "FONTSIZE", "BOLD", "BLACK", "POSX", "POSY" };
         bool applyCanges = false;
         string resTxt = t2.Text;
         List<bool> values = new List<bool>();
@@ -58,7 +45,7 @@ public class CustomTextCellRenderer : TextCellRenderer
         }
         t.Typeface = values[1] ? Typeface.DefaultBold : Typeface.Default;
         t.TextSize = values[0] ? ftts[0] : 14;
-    
+
         t.TranslationX = values[3] ? ftts[3] : 0;
         t.TranslationY = values[4] ? ftts[4] : 0;
         backColor = values[2] ? new Android.Graphics.Color(17, 17, 17) : new Android.Graphics.Color(20, 20, 20);

@@ -1,17 +1,13 @@
-﻿using System;
+﻿using CloudStreamForms.Models;
+using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
-using static CloudStreamForms.MainPage;
 using static CloudStreamForms.CloudStreamCore;
-using CloudStreamForms.Models;
-using System.Collections.ObjectModel;
-using System.Reflection;
-using System.IO;
+using static CloudStreamForms.MainPage;
 
 namespace CloudStreamForms
 {
@@ -124,7 +120,7 @@ namespace CloudStreamForms
             Fething = true;
             TempThred tempThred = new TempThred();
             tempThred.typeId = 21; // MAKE SURE THIS IS BEFORE YOU CREATE THE THRED
-            tempThred.Thread = new System.Threading.Thread( () => {
+            tempThred.Thread = new System.Threading.Thread(() => {
                 try {
                     var f = FetchTop100(new List<string>() { genres[MovieTypePicker.SelectedIndex] }, start);
                     if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
@@ -226,11 +222,11 @@ namespace CloudStreamForms
                 else {
                     GetFetch();
                 }
-            //    ImdbTypePickerBtt.Text = ImdbTypePicker.Items[ImdbTypePicker.SelectedIndex];
+                //    ImdbTypePickerBtt.Text = ImdbTypePicker.Items[ImdbTypePicker.SelectedIndex];
 
             };
 
-           // MovieTypePickerBtt.Text = MovieTypePicker.Items[MovieTypePicker.SelectedIndex];
+            // MovieTypePickerBtt.Text = MovieTypePicker.Items[MovieTypePicker.SelectedIndex];
             MovieTypePicker.SelectedIndexChanged += (o, e) => {
                 ClearEpisodes(!IsRecommended);
                 if (IsRecommended) {
@@ -242,7 +238,7 @@ namespace CloudStreamForms
                     Fething = false;
                     GetFetch();
                 }
-            //    MovieTypePickerBtt.Text = MovieTypePicker.Items[MovieTypePicker.SelectedIndex];
+                //    MovieTypePickerBtt.Text = MovieTypePicker.Items[MovieTypePicker.SelectedIndex];
                 //GetFetchRecomended
                 //  print(MovieTypePicker.SelectedIndex + "<<Selected");
             };
@@ -258,8 +254,8 @@ namespace CloudStreamForms
 
 
             if (Device.RuntimePlatform == Device.UWP) {
-               // BlueSeperator.IsVisible = false;
-               // BlueSeperator.IsEnabled = false;
+                // BlueSeperator.IsVisible = false;
+                // BlueSeperator.IsEnabled = false;
                 OffBar.IsVisible = false;
                 OffBar.IsEnabled = false;
             }
@@ -416,8 +412,8 @@ namespace CloudStreamForms
             bookmarkPosters = new List<BookmarkPoster>();
             Bookmarks.Children.Clear();
             for (int i = 0; i < keys.Count; i++) {
-                string __key = App.ConvertToObject<string>(keys[i],"");
-                if(__key == "") {
+                string __key = App.ConvertToObject<string>(keys[i], "");
+                if (__key == "") {
                     continue;
                 }
                 string name = FindHTML(__key, "Name=", "|||");

@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
 using Xamarin.Forms;
 
 namespace CloudStreamForms.Models
@@ -10,7 +8,7 @@ namespace CloudStreamForms.Models
         public int Id { set; get; }
         public string Title { set; get; }
         public string Rating { set; get; }
-        public string RatingStar { get { return (Rating.Replace(" ","") == "" ? "Rating Unavailable" :  "★ " + Rating); } } // ★
+        public string RatingStar { get { return (Rating.Replace(" ", "") == "" ? "Rating Unavailable" : "★ " + Rating); } } // ★
 
         public string PosterUrl { set; get; }
 
@@ -22,17 +20,17 @@ namespace CloudStreamForms.Models
 
         string _Description = "";
         public string Description { set { _Description = Settings.EpDecEnabled ? value : ""; } get { return _Description; } }
-        public double Progress { set; get; } 
+        public double Progress { set; get; }
         public List<string> Mirros { set; get; }
         public List<string> mirrosUrls { set; get; }
         public List<string> subtitles { set; get; }
         public List<string> subtitlesUrls { set; get; }
         public bool epVis { set; get; }
-       // public LoadResult loadResult { set; get; }
+        // public LoadResult loadResult { set; get; }
         public bool LoadedLinks { set; get; }
         public string MainTextColor { set; get; } = "#e7e7e7";
-        public string MainDarkTextColor { get; set; } = "#808080"; 
-        public string ExtraColor { get; set; } = "#808080"; 
+        public string MainDarkTextColor { get; set; } = "#808080";
+        public string ExtraColor { get; set; } = "#808080";
         public string OgTitle { set; get; }
         public double TranslateYOffset
         {

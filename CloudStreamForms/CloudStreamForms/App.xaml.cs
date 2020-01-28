@@ -1,18 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Xamarin.Forms;
-using Xamarin.Forms.Xaml;
-using System.Linq;
-using System.Reflection;
-using Xamarin.Essentials;
-using System.Net;
-using System.IO;
-using Plugin.LocalNotifications;
-using System.Runtime.Serialization.Formatters.Binary;
-using Plugin.Settings.Abstractions;
+﻿using Plugin.LocalNotifications;
 using Plugin.Settings;
-using System.Runtime.InteropServices;
+using Plugin.Settings.Abstractions;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Net;
+using System.Reflection;
+using System.Runtime.Serialization.Formatters.Binary;
+using System.Text;
+using Xamarin.Essentials;
+using Xamarin.Forms;
 
 namespace CloudStreamForms
 {

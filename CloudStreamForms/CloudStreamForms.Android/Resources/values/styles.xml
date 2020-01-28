@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8" ?>
+
 <resources>
 
   <style name="MainTheme" parent="MainTheme.Base">
@@ -22,6 +23,7 @@
 
     <item name="android:windowBackground">@color/windowBackground</item>
     <item name="colorAccent">#1976D2</item>
+
     <!--1976D2-->
 
     <item name="android:navigationBarColor">@color/mtrl_btn_transparent_bg_color</item>

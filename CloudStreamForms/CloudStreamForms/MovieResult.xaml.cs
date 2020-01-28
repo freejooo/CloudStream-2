@@ -1,22 +1,19 @@
-﻿using System;
+﻿using Acr.UserDialogs;
+using CloudStreamForms.Models;
+using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
-using System.Text;
+using System.Reflection;
+using System.Threading;
 using System.Threading.Tasks;
-
+using Xamarin.Essentials;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
-using static CloudStreamForms.CloudStreamCore;
-using System.Reflection;
-using System.Collections.ObjectModel;
-using CloudStreamForms.Models;
-using Xamarin.Essentials;
-using CloudStreamForms;
 using static CloudStreamForms.App;
+using static CloudStreamForms.CloudStreamCore;
 using static CloudStreamForms.MainPage;
 using static CloudStreamForms.Settings;
-using System.Threading;
-using Acr.UserDialogs;
 
 namespace CloudStreamForms
 {
@@ -606,7 +603,7 @@ namespace CloudStreamForms
             //  episodeView.HeightRequest = episodeView.Bounds.Height;
             print("EPSHOW:" + Settings.EpDecEnabled);
             episodeView.RowHeight = Settings.EpDecEnabled ? 175 : 100;
-            Device.BeginInvokeOnMainThread(() => episodeView.HeightRequest = ((setNull ?? showState != 0) ? 0 : (epView.MyEpisodeResultCollection.Count * ( episodeView.RowHeight ) + 20)));
+            Device.BeginInvokeOnMainThread(() => episodeView.HeightRequest = ((setNull ?? showState != 0) ? 0 : (epView.MyEpisodeResultCollection.Count * (episodeView.RowHeight) + 20)));
         }
 
         void SetTrailerRec(bool? setNull = null)
@@ -1182,7 +1179,7 @@ namespace CloudStreamForms
                 trailerUrl = e[0].Url;
             }
 
-        
+
 
             Device.BeginInvokeOnMainThread(() => {
                 TRAILERSTAB.IsVisible = true;

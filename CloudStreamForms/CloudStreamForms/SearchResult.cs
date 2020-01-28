@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace CloudStreamForms.Models
+﻿namespace CloudStreamForms.Models
 {
     public class SearchResult
     {

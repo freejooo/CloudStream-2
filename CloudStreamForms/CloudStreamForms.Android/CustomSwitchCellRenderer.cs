@@ -1,23 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Text;
-
-using Android.App;
-using Android.Content;
-using Android.Content.Res;
-using Android.Graphics;
-using Android.OS;
-using Android.Runtime;
-using Android.Support.V4.Content.Res;
-using Android.Views;
+﻿using Android.Graphics;
 using Android.Widget;
-using CloudStreamForms.Droid;
+using System;
+using System.ComponentModel;
 using Xamarin.Forms;
 using Xamarin.Forms.Platform.Android;
-using static Java.Util.ResourceBundle;
-using static CloudStreamForms.CloudStreamCore;
 
 [assembly: ExportRenderer(typeof(SwitchCell), typeof(CustomSwitchCellRenderer))]
 public class CustomSwitchCellRenderer : SwitchCellRenderer
@@ -49,12 +35,12 @@ public class CustomSwitchCellRenderer : SwitchCellRenderer
         try {
             Android.Widget.Switch child0 = (Android.Widget.Switch)((LinearLayout)cell).GetChildAt(2);
             child0.LayoutChange += (o, e) => {
-               // print("AAAAAAAAAAAAAAAAAAAAA-->>");
+                // print("AAAAAAAAAAAAAAAAAAAAA-->>");
                 SetColorOfToggle(o);
 
             };
             child0.Click += (o, e) => {
-               // CloudStreamForms.Main.print("__> DDAAAAAAAAAAAAA");
+                // CloudStreamForms.Main.print("__> DDAAAAAAAAAAAAA");
                 // CloudStreamForms.Main.print("----> " + .Checked);
                 SetColorOfToggle(o);
             };
@@ -77,7 +63,7 @@ public class CustomSwitchCellRenderer : SwitchCellRenderer
     {
         try {
             var _c = ((Android.Widget.Switch)o);
-           // _c.(_c.Checked ? Android.Graphics.Color.ParseColor("#5D73FF") : Android.Graphics.Color.White);
+            // _c.(_c.Checked ? Android.Graphics.Color.ParseColor("#5D73FF") : Android.Graphics.Color.White);
             //_c.ThumbDrawable.SetColorFilter(Android.Graphics.Color.White, PorterDuff.Mode.Multiply);//(_c.Checked ? Android.Graphics.Color.ParseColor("#1363b1") : Android.Graphics.Color.White), PorterDuff.Mode.Multiply);
             _c.ThumbDrawable.SetColorFilter(_c.Checked ? Android.Graphics.Color.ParseColor("#1363b1") : Android.Graphics.Color.White, PorterDuff.Mode.Multiply);
         }

@@ -5,23 +5,5 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d"
              x:Class="CloudStreamForms.Search">
-    
-    <!--
-    <SearchBar x:Name="MainSearchBar" TextChanged="MainSearchBar_TextChanged">
-
-    </SearchBar>
-    -->
-    <!--
-    <ContentPage.Content>
-        <ListView x:Name="MainSearchResultList" ItemTapped="MainSearchResultList_ItemTapped" ItemsSource="{Binding mySearchResultCollection}" HasUnevenRows="True" BackgroundColor="Green" SeparatorVisibility="None" VerticalOptions="FillAndExpand">
-            <ListView.ItemTemplate>
-                <DataTemplate>
-                    <TextCell Text="{Binding title}" Detail="{Binding extra}"></TextCell>
-                </DataTemplate>
-            </ListView.ItemTemplate>
-
-        </ListView>
-
-    </ContentPage.Content>
-    -->
+<!-- EVERYTHING IS MADE IN CODE -->
 </ContentPage>

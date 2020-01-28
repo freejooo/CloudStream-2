@@ -1,16 +1,11 @@
-﻿using LibVLCSharp.Forms.Shared;
-using LibVLCSharp.Shared;
-using MediaElement;
+﻿using LibVLCSharp.Shared;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
-using static CloudStreamForms.CloudStreamCore;
 
 namespace CloudStreamForms
 {
@@ -122,7 +117,7 @@ namespace CloudStreamForms
             // ========== IMGS ==========
             SubtitlesImg.Source = App.GetImageSource("baseline_subtitles_white_48dp.png");
             MirrosImg.Source = App.GetImageSource("baseline_playlist_play_white_48dp.png");
-          //  GradientBottom.Source = App.GetImageSource("gradient.png");
+            //  GradientBottom.Source = App.GetImageSource("gradient.png");
             DownloadImg.Source = App.GetImageSource("round_more_vert_white_48dp.png");
             LockImg.Source = App.GetImageSource("wlockUnLocked.png");
 

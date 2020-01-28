@@ -1,25 +1,19 @@
-﻿using CloudStreamForms.Models;
+﻿using Acr.UserDialogs;
+using CloudStreamForms.Models;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
-using System.Reflection;
-using System.Text;
 using System.Threading.Tasks;
-
+using Xamarin.Essentials;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
+using YoutubeExplode;
+using YoutubeExplode.Models;
+using YoutubeExplode.Models.MediaStreams;
 using static CloudStreamForms.CloudStreamCore;
 using static CloudStreamForms.MainPage;
-using YoutubeExplode;
-using YoutubeExplode.Converter;
-using YoutubeExplode.Models;
-using YoutubeExplode.Exceptions;
-using YoutubeExplode.Models.MediaStreams;
-using Acr.UserDialogs;
-using Xamarin.Essentials;
-using System.Text.RegularExpressions;
-using System.IO;
 
 namespace CloudStreamForms
 {
@@ -159,8 +153,8 @@ namespace CloudStreamForms
             epView.MyEpisodeResultCollection.Clear();
 
             for (int i = 0; i < keys.Count; i++) {
-                string __key = App.ConvertToObject<string>(keys[i],"");
-                if(__key == "") {
+                string __key = App.ConvertToObject<string>(keys[i], "");
+                if (__key == "") {
                     try {
                         App.RemoveKey(keysPaths[i]);
                     }
@@ -212,8 +206,8 @@ namespace CloudStreamForms
                         }
                     }
                     bool isYouTube = __key.Contains("isYouTube=" + true);
-                    
-                    if(downloadDone) { stuckDownload = false; }
+
+                    if (downloadDone) { stuckDownload = false; }
 
                     AddEpisode(new EpisodeResult() {
                         Description = episodeDescript,
@@ -396,7 +390,7 @@ namespace CloudStreamForms
 
             c.Transformations.Clear();
             var ep = ((EpisodeResult)c.BindingContext);
-            c.Transformations = new List<FFImageLoading.Work.ITransformation>() { new FFImageLoading.Transformations.RoundedTransformation() { BorderHexColor = ep.ExtraColor, BorderSize = 0, Radius=1,CropWidthRatio=1.77 } };
+            c.Transformations = new List<FFImageLoading.Work.ITransformation>() { new FFImageLoading.Transformations.RoundedTransformation() { BorderHexColor = ep.ExtraColor, BorderSize = 0, Radius = 1, CropWidthRatio = 1.77 } };
 
         }
     }

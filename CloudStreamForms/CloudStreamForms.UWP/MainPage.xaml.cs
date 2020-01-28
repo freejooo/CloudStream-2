@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.IO.IsolatedStorage;
-using System.Linq;
-using System.Management;
 using System.Net;
 using System.Reflection;
 using System.Runtime.InteropServices;
@@ -143,7 +140,7 @@ namespace CloudStreamForms.UWP
                 MainUWP.OpenPathAsVideo(url, name, subtitleLoc);
             }
             catch (Exception) {
-               // CloudStreamForms.App.OpenBrowser(url);
+                // CloudStreamForms.App.OpenBrowser(url);
             }
         }
         public void PlayVlc(List<string> url, List<string> name, string subtitleLoc)
@@ -153,7 +150,7 @@ namespace CloudStreamForms.UWP
                 MainUWP.OpenPathsAsVideo(url, name, subtitleLoc);
             }
             catch (Exception) {
-               // CloudStreamForms.App.OpenBrowser(url.FirstOrDefault());
+                // CloudStreamForms.App.OpenBrowser(url.FirstOrDefault());
             }
         }
 

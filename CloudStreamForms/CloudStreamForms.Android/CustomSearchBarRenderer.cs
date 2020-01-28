@@ -1,21 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-using Android.App;
-using Android.Content;
-using Android.Content.Res;
-using Android.Graphics;
-using Android.OS;
-using Android.Runtime;
+﻿using Android.Content;
 using Android.Text;
-using Android.Views;
 using Android.Widget;
 using CloudStreamForms.Droid;
 using Xamarin.Forms;
 using Xamarin.Forms.Platform.Android;
-using static Java.Util.ResourceBundle;
 using G = Android.Graphics;
 
 
@@ -55,7 +43,7 @@ namespace CloudStreamForms.Droid
             // Customize frame color
             int frameId = searchView.Context.Resources.GetIdentifier("android:id/search_plate", null, null);
             Android.Views.View frameView = (searchView.FindViewById(frameId) as Android.Views.View);
-              frameView.SetBackgroundColor(G.Color.ParseColor(CloudStreamForms.Settings.MainBackgroundColor));
+            frameView.SetBackgroundColor(G.Color.ParseColor(CloudStreamForms.Settings.MainBackgroundColor));
             //frameView.SetBackgroundColor(G.Color.Rgb(96, 96, 96));
 
             /*

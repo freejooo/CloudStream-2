@@ -1,28 +1,26 @@
-﻿using System;
+﻿using Acr.UserDialogs;
+using Android;
 using Android.App;
+using Android.Content;
 using Android.Content.PM;
+using Android.OS;
 using Android.Runtime;
+using Android.Support.V4.App;
+using Android.Support.V4.Content;
 using Android.Views;
 using Android.Widget;
-using Android.OS;
-using Android.Content;
+using LibVLCSharp.Forms.Shared;
+using Plugin.LocalNotifications;
+using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.IO;
-using Android.Support.V4.Content;
-using Android;
-using Android.Support.V4.App;
-using Xamarin.Forms;
-using System.Threading.Tasks;
+using System.Linq;
 using System.Net;
 using System.Text.RegularExpressions;
-using static CloudStreamForms.CloudStreamCore;
-using Android.Provider;
-using Acr.UserDialogs;
+using System.Threading.Tasks;
+using Xamarin.Forms;
 using static CloudStreamForms.App;
-using Plugin.LocalNotifications;
-using LibVLCSharp.Shared;
-using LibVLCSharp.Forms.Shared;
+using static CloudStreamForms.CloudStreamCore;
 
 namespace CloudStreamForms.Droid
 {
@@ -55,7 +53,7 @@ namespace CloudStreamForms.Droid
 
 
             // ======================================= INIT =======================================
-         
+
             FFImageLoading.Forms.Platform.CachedImageRenderer.Init(enableFastRenderer: true);
             Rg.Plugins.Popup.Popup.Init(this, savedInstanceState);
             UserDialogs.Init(this);

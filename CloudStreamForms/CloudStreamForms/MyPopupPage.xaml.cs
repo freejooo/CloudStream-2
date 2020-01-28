@@ -1,12 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using Xamarin.Forms;
+﻿using System.Threading.Tasks;
 using Xamarin.Forms.Xaml;
-using Rg.Plugins.Popup.Pages;
 
 namespace CloudStreamForms
 {
@@ -19,12 +12,12 @@ namespace CloudStreamForms
         public MyPopupPage()
         {
             InitializeComponent();
-            
+
             LowVol.Source = App.GetImageSource("round_volume_mute_white_48dp.png");
             MaxVol.Source = App.GetImageSource("round_volume_up_white_48dp.png");
             VolSolider.Value = (double)MainChrome.Volume;
-            VolSolider.ValueChanged +=  (o, e) => {
-                 MainChrome.Volume = ((float)e.NewValue);
+            VolSolider.ValueChanged += (o, e) => {
+                MainChrome.Volume = ((float)e.NewValue);
             };
         }
 

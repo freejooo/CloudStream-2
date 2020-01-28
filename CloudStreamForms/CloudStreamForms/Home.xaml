@@ -88,7 +88,7 @@
                 <ActivityIndicator x:Name="LoadingIndicator" TranslationY="30"></ActivityIndicator>
 
                 <Grid Grid.Row="1"  Grid.Column="0">
-                    <ListView ItemsSource="{Binding MyEpisodeResultCollection}"
+                    <ListView ItemsSource="{Binding MyEpisodeResultCollection}" 
                              CachingStrategy="RecycleElement" 
                 ItemTapped="episodeView_ItemTapped" RowHeight="100"
                     x:Name="episodeView"  SeparatorColor="Transparent"  VerticalOptions="Start" VerticalScrollBarVisibility="Never"     >

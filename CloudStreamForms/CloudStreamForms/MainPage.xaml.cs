@@ -1,30 +1,23 @@
-﻿using System;
+﻿using GoogleCast;
+using GoogleCast.Channels;
+using GoogleCast.Models.Media;
+using Jint;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using Xamarin.Forms;
-using Jint;
 using System.IO;
+using System.Linq;
 using System.Net;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
-using static CloudStreamForms.CloudStreamCore;
 //using Android.Util;
 //using Android.Content;
-using Xamarin.Essentials;
-using System.Security.Cryptography.X509Certificates;
-using System.Net.Security;
-using System.Collections.ObjectModel;
 using System.Threading.Tasks;
+using Xamarin.Forms;
 using Xamarin.Forms.PlatformConfiguration.AndroidSpecific;
+using static CloudStreamForms.CloudStreamCore;
 using Button = Xamarin.Forms.Button;
-using Application = Xamarin.Forms.Application;
-using GoogleCast;
-using GoogleCast.Models.Media;
-using GoogleCast.Channels;
-using Acr.UserDialogs;
-
 
 namespace CloudStreamForms
 {
@@ -95,11 +88,7 @@ namespace CloudStreamForms
         }
         public MainPage()
         {
-            print("DAAAAAAAAAAAAAAAAAAAAAAAA");
             InitializeComponent(); mainPage = this;
-            CheckGitHubUpdate();
-            MainChrome.StartImageChanger();
-            MainChrome.GetAllChromeDevices();
 
             List<string> names = new List<string>() { "Home", "Search", "Downloads", "Settings" };
             List<string> icons = new List<string>() { "homeIcon.png", "searchIcon.png", "downloadIcon.png", "baseline_settings_applications_white_48dp_inverted_big.png" };
@@ -110,19 +99,29 @@ namespace CloudStreamForms
                 Children[i].Title = names[i];
                 Children[i].IconImageSource = icons[i];
             }
+
+            LateCheck();
+
+            //Page p = new VideoPage(new VideoPage.PlayVideo() {descript="",name="Black Bunny",episode=-1, season=-1,MirrorNames= new List<string>() { "Googlevid" },MirrorUrls= new List<string>() { "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" },Subtitles= new List<string>(),SubtitlesNames= new List<string>() });//new List<string>() { "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" }, new List<string>() { "Black" }, new List<string>() { });// { mainPoster = mainPoster };
+           //  Navigation.PushModalAsync(p, false);
+
             On<Xamarin.Forms.PlatformConfiguration.Android>().SetToolbarPlacement(ToolbarPlacement.Bottom);
-
-
-            //  Page p = new VideoPage(new VideoPage.PlayVideo() {descript="",name="Black Bunny",episode=-1, season=-1,MirrorNames= new List<string>() { "Googlevid" },MirrorUrls= new List<string>() { "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" },Subtitles= new List<string>(),SubtitlesNames= new List<string>() });//new List<string>() { "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" }, new List<string>() { "Black" }, new List<string>() { });// { mainPoster = mainPoster };
-            //   Navigation.PushModalAsync(p, false);
-            print("DAAAAAAAAAAAAAAAAAAAAAAA2A");
-
-
             // Page p = new ChromeCastPage();// { mainPoster = mainPoster };
             // Navigation.PushModalAsync(p, false);
             //  PushPageFromUrlAndName("tt4869896", "Overlord");
             // PushPageFromUrlAndName("tt0371746", "Iron Man");
         }
+
+
+        async void LateCheck()
+        {
+            await Task.Delay(5000);
+
+            CheckGitHubUpdate();
+            MainChrome.StartImageChanger();
+            MainChrome.GetAllChromeDevices();
+        }
+
         public static void PushPageFromUrlAndName(string url, string name)
         {
             try {
@@ -519,9 +518,7 @@ namespace CloudStreamForms
 
         public const bool DEBUG_WRITELINE = true;
         public const string USERAGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/67.0.3396.87 Safari/537.36";
-        public const int MIRROR_COUNT = 10;
-        public const int HD_MIRROR_COUNT = 4;
-        public const int ANIME_MIRRORS_COUNT = 1;
+        public const int MIRROR_COUNT = 10; // SUB HD MIRRORS
 
 
         public const string loadingImage = "https://i.giphy.com/media/u2Prjtt7QYD0A/200.webp"; // from https://media0.giphy.com/media/u2Prjtt7QYD0A/200.webp?cid=790b7611ff76f40aaeea5e73fddeb8408c4b018b6307d9e3&rid=200.webp
@@ -885,7 +882,6 @@ namespace CloudStreamForms
             public string description;
             public string date;
             public string posterUrl;
-            public int maxProgress;
             public string id;
 
             //private int _progress;
@@ -2824,21 +2820,21 @@ namespace CloudStreamForms
         }
 
 
-        static void GetThe123movies(int normalEpisode,int episode, int season, bool isMovie)
+        static void GetThe123movies(int normalEpisode, int episode, int season, bool isMovie)
         {
             TempThred tempThred = new TempThred();
 
             tempThred.typeId = 3; // MAKE SURE THIS IS BEFORE YOU CREATE THE THRED
             tempThred.Thread = new System.Threading.Thread(() => {
                 try {
-                    string extra = ToDown(activeMovie.title.name, true, "-") + (isMovie ? ( "-" + activeMovie.title.ogYear) : ("-" + season + "x" + episode));
+                    string extra = ToDown(activeMovie.title.name, true, "-") + (isMovie ? ("-" + activeMovie.title.ogYear) : ("-" + season + "x" + episode));
                     string d = DownloadString("https://on.the123movies.eu/" + extra);
                     if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
                     string ts = FindHTML(d, "data-vs=\"", "\"");
                     print("DATATS::" + ts);
                     d = DownloadString(ts);
                     if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
-                    AddEpisodesFromMirrors(tempThred,d, normalEpisode);
+                    AddEpisodesFromMirrors(tempThred, d, normalEpisode);
                 }
                 finally {
                     JoinThred(tempThred);
@@ -2871,9 +2867,6 @@ namespace CloudStreamForms
                     bool animeSeach = activeMovie.title.movieType == MovieType.Anime && ANIME_ENABLED; // || activeMovie.title.movieType == MovieType.AnimeMovie &&
                     bool movieSearch = activeMovie.title.movieType == MovieType.Movie || activeMovie.title.movieType == MovieType.AnimeMovie || activeMovie.title.movieType == MovieType.TVSeries;
 
-                    int maxProgress = 0;
-                    if (movieSearch) { maxProgress += MIRROR_COUNT + HD_MIRROR_COUNT; }
-                    if (animeSeach) { maxProgress += ANIME_MIRRORS_COUNT; }
 
 
                     // --------- CLEAR EPISODE ---------
@@ -2889,8 +2882,6 @@ namespace CloudStreamForms
                     Episode cEpisode = activeMovie.episodes[normalEpisode];
                     activeMovie.episodes[normalEpisode] = new Episode() {
                         links = new List<Link>(),
-                        maxProgress = maxProgress,
-                        //Progress = 0,
                         posterUrl = cEpisode.posterUrl,
                         rating = cEpisode.rating,
                         name = cEpisode.name,

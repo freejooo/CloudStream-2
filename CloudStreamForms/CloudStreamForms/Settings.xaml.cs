@@ -1,14 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
-using System.Reflection;
-using System.Net;
-using static CloudStreamForms.CloudStreamCore;
 using static CloudStreamForms.MainPage;
 
 namespace CloudStreamForms
@@ -237,8 +230,8 @@ namespace CloudStreamForms
             Device.BeginInvokeOnMainThread(() => {
                 SetSliderTime();
                 SetSliderChromeTime();
-                LoadingSlider.Value = ((LoadingMiliSec - MIN_LOADING_TIME) / (MAX_LOADING_TIME-MIN_LOADING_TIME));
-                CastSlider.Value = ((LoadingChromeSec - MIN_LOADING_CHROME) / (MAX_LOADING_CHROME-MIN_LOADING_CHROME));
+                LoadingSlider.Value = ((LoadingMiliSec - MIN_LOADING_TIME) / (MAX_LOADING_TIME - MIN_LOADING_TIME));
+                CastSlider.Value = ((LoadingChromeSec - MIN_LOADING_CHROME) / (MAX_LOADING_CHROME - MIN_LOADING_CHROME));
                 SubtitesToggle.On = SubtitlesEnabled;
                 DubToggle.On = DefaultDub;
                 ViewHistoryToggle.On = !ViewHistory;
@@ -287,7 +280,7 @@ namespace CloudStreamForms
 
         private void Slider_DragCompleted(object sender, EventArgs e)
         {
-            LoadingMiliSec = (int)(Math.Round((Math.Round(((Slider)sender).Value * (MAX_LOADING_TIME-MIN_LOADING_TIME)) + MIN_LOADING_TIME)/Math.Pow(10, ROUND_LOADING_DECIMALES))* Math.Pow(10, ROUND_LOADING_DECIMALES));
+            LoadingMiliSec = (int)(Math.Round((Math.Round(((Slider)sender).Value * (MAX_LOADING_TIME - MIN_LOADING_TIME)) + MIN_LOADING_TIME) / Math.Pow(10, ROUND_LOADING_DECIMALES)) * Math.Pow(10, ROUND_LOADING_DECIMALES));
             SetSliderTime();
         }
         private void Slider_DragCompleted2(object sender, EventArgs e)
