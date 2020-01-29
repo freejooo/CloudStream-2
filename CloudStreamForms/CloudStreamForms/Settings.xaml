@@ -94,13 +94,13 @@
 
             <!--  =================== BUTTONS =================== -->
 
-            <Grid >
-                <Button Grid.Column="0" Text="Set Theme - Restart Recommended" InputTransparent="True" HeightRequest="70" BackgroundColor="#2593ff"></Button>
+            <Grid HeightRequest="74">
+                <Button   Text="Set Theme - Restart Recommended" InputTransparent="True" HeightRequest="74" BackgroundColor="#2593ff"></Button>
                 <Picker  x:Name="ColorPicker" TextColor="Transparent"></Picker>
             </Grid>
 
-            <Button Text="Update To..." x:Name="UpdateBtt" IsEnabled="False" IsVisible="False" BackgroundColor="#1976D2" HeightRequest="40"></Button>
-            <Button Text="Star me on Github" x:Name="StarMe" BackgroundColor="#303F9F">
+            <Button Text="Update To..." x:Name="UpdateBtt" IsEnabled="False" IsVisible="False" BackgroundColor="#1976D2" HeightRequest="37"></Button>
+            <Button Text="Star me on Github" x:Name="StarMe" BackgroundColor="#303F9F" HeightRequest="37">
                 <!--★-->
             </Button>
         </StackLayout>
