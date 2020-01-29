@@ -5,7 +5,7 @@
   <color name="colorPrimaryDark">#303F9F</color>
   <color name="colorAccent">#1976D2</color>
   <color name="navigationBarColor">#101010</color>
-  <color name="statusBarColor">#080808</color>
+  <color name="statusBarColor">#101010</color>
   <color name="windowBackground">#111111</color>
   <color name="ListViewHighlighted">#232d6f</color>
   <color name="ListViewSelected">#232d6f</color>
