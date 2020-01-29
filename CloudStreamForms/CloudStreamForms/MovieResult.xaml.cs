@@ -343,7 +343,7 @@ namespace CloudStreamForms
 
         public static ImageSource GetGradient()
         {
-            return GetImageSource(BlackBg ? "gradient.png" : "gradientGray.png");
+            return GetImageSource("gradient" + Settings.BlackColor + ".png");//BlackBg ? "gradient.png" : "gradientGray.png");
         }
 
         public MovieResult()
@@ -431,9 +431,13 @@ namespace CloudStreamForms
             if (Device.RuntimePlatform == Device.UWP) {
                 //QuickMenu.WidthRequest = 500;
             }
+
+            BackgroundColor = Settings.BlackRBGColor;
+            
+            /*
             if (Settings.BlackBg) {
                 BackgroundColor = Color.Black;
-            }
+            }*/
             // Gradient.Opacity = BlackBg ? 1 : 0.5;
 
             MALBtt.IsVisible = false;

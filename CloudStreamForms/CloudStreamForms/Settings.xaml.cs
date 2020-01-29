@@ -1,5 +1,5 @@
 ﻿using System;
-
+using System.Collections.Generic;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 using static CloudStreamForms.MainPage;
@@ -49,16 +49,47 @@ namespace CloudStreamForms
             }
         }
 
-
-        public static bool BlackBg
+        public static bool HasStatusBar
         {
             set {
-                App.SetKey("Settings", nameof(BlackBg), value);
+                App.SetKey("Settings", nameof(HasStatusBar), value);
             }
             get {
-                return App.GetKey("Settings", nameof(BlackBg), false);
+                return App.GetKey("Settings", nameof(HasStatusBar), false);
             }
         }
+
+        /// <summary>
+        /// 0 = Almond black, 1 = Dark, 2 = Netflix, 3 = YouTube
+        /// </summary>
+        public static int BlackBgType
+        {
+            set {
+                App.SetKey("Settings", nameof(BlackBgType), value);
+            }
+            get {
+                return App.GetKey("Settings", nameof(BlackBgType), 1);
+            }
+        }
+
+        /// <summary>
+        /// Almond black = 0, Dark = 17, Netflix = 26, YouTube = 40
+        /// </summary>
+        public static int BlackColor
+        {
+            get {
+                int[] colors = { 0, 17, 26, 40 };
+                return colors[BlackBgType];
+            }
+        }
+
+        public static Color BlackRBGColor
+        {
+            get {
+                return Color.FromRgb(BlackColor, BlackColor, BlackColor);
+            }
+        }
+
 
         public static bool ViewHistory
         {
@@ -119,20 +150,19 @@ namespace CloudStreamForms
         }
 
         public string MainColor { get { return Device.RuntimePlatform == Device.UWP ? "#303F9F" : "#515467"; } }
-
+        private static String HexConverter(Color c)
+        {
+            return c.ToHex(); //"#" + c.R.ToString("X2") + c.G.ToString("X2") + c.B.ToString("X2");
+        }
         public static string MainBackgroundColor
         {
             get {
-                if (BlackBg) {
-                    return "#000000";
-                }
-                string color = "#111111";
                 if (Device.RuntimePlatform == Device.UWP) {
                     return "#000000";
-                    color = "#000811";
+                    // color = "#000811";
                 }
 
-                return color;
+                return HexConverter(Color.FromRgba(BlackColor, BlackColor, BlackColor, 255));
             }
         }
 
@@ -154,7 +184,9 @@ namespace CloudStreamForms
         public Settings()
         {
             InitializeComponent();
-            BackgroundColor = Color.FromHex(Settings.MainBackgroundColor);
+            BackgroundColor = Settings.BlackRBGColor;
+
+
             if (Device.RuntimePlatform == Device.UWP) {
                 OffBar.IsVisible = false;
                 OffBar.IsEnabled = false;
@@ -179,9 +211,9 @@ namespace CloudStreamForms
             DubToggle.OnChanged += (o, e) => {
                 DefaultDub = e.Value;
             };
-            BlackBgToggle.OnChanged += (o, e) => {
-                BlackBg = e.Value;
-            };
+            //  BlackBgToggle.OnChanged += (o, e) => {
+            //     BlackBg = e.Value;
+            //  };
             SubtitesToggle.OnChanged += (o, e) => {
                 SubtitlesEnabled = e.Value;
             };
@@ -200,12 +232,24 @@ namespace CloudStreamForms
             TopToggle.OnChanged += (o, e) => {
                 Top100Enabled = e.Value;
             };
+            StaturBarToggle.OnChanged += (o, e) => {
+                HasStatusBar = e.Value;
+                App.UpdateStatusBar();
+            };
+
+            ColorPicker.SelectedIndexChanged += (o, e) => {
+                if (ColorPicker.SelectedIndex != -1) {
+                    BlackBgType = ColorPicker.SelectedIndex;
+                    App.UpdateBackground();
+                }
+            };
 
             UpdateBtt.Clicked += (o, e) => {
                 if (NewGithubUpdate) {
                     App.DownloadNewGithubUpdate(githubUpdateTag);
                 }
             };
+
             if (Device.RuntimePlatform != Device.Android) {
                 for (int i = 0; i < SettingsTable.Count; i++) {
                     if (i >= SettingsTable.Count) break;
@@ -218,6 +262,7 @@ namespace CloudStreamForms
                 }
             }
         }
+
         const double MAX_LOADING_TIME = 30000;
         const double MIN_LOADING_TIME = 1000;
         const double MIN_LOADING_CHROME = 5;
@@ -240,14 +285,18 @@ namespace CloudStreamForms
                 SearchToggle.On = SearchEveryCharEnabled;
                 CacheToggle.On = CacheData;
                 TopToggle.On = Top100Enabled;
+                StaturBarToggle.On = HasStatusBar;
 
-                if (Device.RuntimePlatform == Device.UWP) {
-                    BlackBgToggle.IsEnabled = false;
-                    BlackBgToggle.On = true;
-                }
-                else {
-                    BlackBgToggle.On = BlackBg;
-                }
+                ColorPicker.ItemsSource = new List<string> { "Black", "Dark", "Netflix", "YouTube" };
+                ColorPicker.SelectedIndex = BlackBgType;
+
+                /* if (Device.RuntimePlatform == Device.UWP) {
+                     BlackBgToggle.IsEnabled = false;
+                     BlackBgToggle.On = true;
+                 }
+                 else {
+                     BlackBgToggle.On = BlackBg;
+                 }*/
                 /*
                 if (Device.RuntimePlatform == Device.UWP) {
                     DataTxt.Detail = DataTxt.Detail.Replace("|" + FindHTML(DataTxt.Text, "|", "|") + "|", "");
@@ -272,7 +321,7 @@ namespace CloudStreamForms
                 UpdateBtt.IsEnabled = NewGithubUpdate;
                 UpdateBtt.IsVisible = NewGithubUpdate;
                 UpdateBtt.Text = "Update " + App.GetBuildNumber() + " to " + githubUpdateTag.Replace("v", "") + " · " + githubUpdateText;
-                BackgroundColor = Color.FromHex(Settings.MainBackgroundColor);
+                BackgroundColor = Settings.BlackRBGColor;
             }
 
         }

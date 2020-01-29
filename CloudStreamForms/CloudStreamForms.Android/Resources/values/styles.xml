@@ -21,13 +21,13 @@
     <!-- colorAccent is used as the default value for colorControlActivated
          which is used to tint widgets -->
 
-    <item name="android:windowBackground">@color/windowBackground</item>
     <item name="colorAccent">#1976D2</item>
 
     <!--1976D2-->
 
-    <item name="android:navigationBarColor">@color/mtrl_btn_transparent_bg_color</item>
-    <item name="android:statusBarColor">@color/mtrl_btn_transparent_bg_color</item>
+    <item name="android:windowBackground">@color/navigationBarColor</item>
+    <item name="android:navigationBarColor">@color/navigationBarColor</item>
+    <item name="android:statusBarColor">@color/statusBarColor</item>
     
     <item name="android:colorLongPressedHighlight">@color/ListViewHighlighted</item>
 

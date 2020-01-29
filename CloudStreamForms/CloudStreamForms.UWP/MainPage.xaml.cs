@@ -39,6 +39,15 @@ namespace CloudStreamForms.UWP
 
     public class MainUWP : _App.IPlatformDep
     {
+        public void UpdateBackground()
+        {
+            // DO NOTHING
+        }
+
+        public void UpdateStatusBar()
+        {
+            // DO NOTHING
+        }
 
         public static string GetPath(string filename)
         {

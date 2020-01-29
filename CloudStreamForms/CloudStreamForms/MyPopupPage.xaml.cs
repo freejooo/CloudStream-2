@@ -13,8 +13,8 @@ namespace CloudStreamForms
         {
             InitializeComponent();
 
-            LowVol.Source = App.GetImageSource("round_volume_mute_white_48dp.png");
-            MaxVol.Source = App.GetImageSource("round_volume_up_white_48dp.png");
+            LowVol.Source = App.GetImageSource(ChromeCastPage.RoundedPrefix + "_volume_mute_white_48dp.png");
+            MaxVol.Source = App.GetImageSource(ChromeCastPage.RoundedPrefix + "_volume_up_white_48dp.png");
             VolSolider.Value = (double)MainChrome.Volume;
             VolSolider.ValueChanged += (o, e) => {
                 MainChrome.Volume = ((float)e.NewValue);

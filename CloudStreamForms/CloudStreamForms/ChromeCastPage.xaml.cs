@@ -216,21 +216,25 @@ namespace CloudStreamForms
             }
         }
 
+        const bool IsRounded = false;
+        public static string RoundedPrefix { get { return IsRounded ? "round" : "baseline"; } }
+
+
         void SetPause(bool paused)
         {
-            Pause.Source = paused ? GetImageSource("round_play_arrow_white_48dp.png") : GetImageSource("round_pause_white_48dp.png");
+            Pause.Source = paused ? GetImageSource(RoundedPrefix+ "_play_arrow_white_48dp.png") : GetImageSource(RoundedPrefix+"_pause_white_48dp.png");
         }
 
         protected override void OnAppearing()
         {
             base.OnAppearing();
-            PlayList.Source = GetImageSource("round_playlist_play_white_48dp.png");
-            StopAll.Source = GetImageSource("round_stop_white_48dp.png");
-            BackForward.Source = GetImageSource("round_replay_white_48dp.png");
-            FastForward.Source = GetImageSource("round_replay_white_48dp_mirror.png");
-            SkipBack.Source = GetImageSource("round_skip_previous_white_48dp.png");
-            SkipForward.Source = GetImageSource("round_skip_next_white_48dp.png");
-            Audio.Source = GetImageSource("round_volume_up_white_48dp.png");
+            PlayList.Source = GetImageSource(RoundedPrefix+"_playlist_play_white_48dp.png");
+            StopAll.Source = GetImageSource(RoundedPrefix + "_stop_white_48dp.png");
+            BackForward.Source = GetImageSource(RoundedPrefix + "_replay_white_48dp.png");
+            FastForward.Source = GetImageSource(RoundedPrefix + "_replay_white_48dp_mirror.png"); 
+            SkipBack.Source = GetImageSource(RoundedPrefix + "_skip_previous_white_48dp.png");
+            SkipForward.Source = GetImageSource(RoundedPrefix + "_skip_next_white_48dp.png");
+            Audio.Source = GetImageSource(RoundedPrefix + "_volume_up_white_48dp.png");
             SetPause(IsPaused);
         }
 
@@ -246,12 +250,14 @@ namespace CloudStreamForms
             PauseAndPlay(!IsPaused);
             PauseScale();
         }
+
         async void PauseScale()
         {
             Pause.Scale = 2.0;
             await Pause.ScaleTo(2.4, 50, Easing.SinOut);
             await Pause.ScaleTo(2, 50, Easing.SinOut);
         }
+
         async void ListScale()
         {
             PlayList.Scale = 1.4;

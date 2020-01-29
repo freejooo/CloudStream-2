@@ -25,7 +25,6 @@ using static CloudStreamForms.CloudStreamCore;
 namespace CloudStreamForms.Droid
 {
     [Activity(Label = "CloudStream 2", Icon = "@drawable/bicon", Theme = "@style/MainTheme", MainLauncher = true, ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation), IntentFilter(new[] { Intent.ActionView }, DataScheme = "cloudstreamforms", Categories = new[] { Intent.CategoryDefault, Intent.CategoryBrowsable })]
-
     public class MainActivity : global::Xamarin.Forms.Platform.Android.FormsAppCompatActivity
     {
         MainDroid mainDroid;
@@ -36,8 +35,6 @@ namespace CloudStreamForms.Droid
             TabLayoutResource = Resource.Layout.Tabbar;
             ToolbarResource = Resource.Layout.Toolbar;
 
-            Window window = this.Window;
-            window.AddFlags(WindowManagerFlags.Fullscreen); // REMOVES STATUS BAR
 
             base.OnCreate(savedInstanceState);
             string data = Intent?.Data?.EncodedAuthority;
@@ -87,7 +84,6 @@ namespace CloudStreamForms.Droid
             base.OnRequestPermissionsResult(requestCode, permissions, grantResults);
         }
 
-
         public static int REQUEST_WRITE_STORAGE = 112;
         public static int REQUEST_INSTALL = 113;
         public static int REQUEST_INSTALL2 = 113;
@@ -112,15 +108,35 @@ namespace CloudStreamForms.Droid
                  REQUEST_INSTALL2);
             }
         }
-
-
     }
+
     public class MainDroid : App.IPlatformDep
     {
         static bool hidden = false;
         static int baseShow = 0;
 
+        public void UpdateBackground()
+        {
+            /*
+            Window window = MainActivity.activity.Window;
+            int color = Settings.BlackColor - 5;
+            if(color > 255) { color = 255; }
+            if(color < 0) { color = 0; }
+            window.SetNavigationBarColor(Android.Graphics.Color.Rgb(color, color, color));*/
+        }
 
+        public void UpdateStatusBar()
+        {
+            Window window = MainActivity.activity.Window;
+
+            if (!Settings.HasStatusBar) {
+                print("REMOVE STATUS BAR::::");
+                window.AddFlags(WindowManagerFlags.Fullscreen); // REMOVES STATUS BAR
+            }
+            else {
+                window.ClearFlags(WindowManagerFlags.Fullscreen); // ADD STATUS BAR
+            }
+        }
 
         public void ShowStatusBar()
         {
@@ -129,6 +145,9 @@ namespace CloudStreamForms.Droid
             Window window = MainActivity.activity.Window;
             window.ClearFlags(WindowManagerFlags.TurnScreenOn);
             window.ClearFlags(WindowManagerFlags.KeepScreenOn);
+            if (Settings.HasStatusBar) {
+                window.ClearFlags(WindowManagerFlags.Fullscreen);
+            }
 
             window.DecorView.SystemUiVisibility = (StatusBarVisibility)baseShow;
         }
@@ -141,12 +160,15 @@ namespace CloudStreamForms.Droid
             Window window = MainActivity.activity.Window;
             window.AddFlags(WindowManagerFlags.TurnScreenOn);
             window.AddFlags(WindowManagerFlags.KeepScreenOn);
+            if (Settings.HasStatusBar) {
+                window.AddFlags(WindowManagerFlags.Fullscreen);
+            }
 
             int uiOptions = (int)window.DecorView.SystemUiVisibility;
             baseShow = uiOptions;
 
             uiOptions |= (int)SystemUiFlags.LowProfile;
-            uiOptions |= (int)SystemUiFlags.Fullscreen;
+            // uiOptions |= (int)SystemUiFlags.Fullscreen;
             uiOptions |= (int)SystemUiFlags.HideNavigation;
             uiOptions |= (int)SystemUiFlags.ImmersiveSticky;
 

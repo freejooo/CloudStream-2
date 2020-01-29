@@ -20,12 +20,12 @@ namespace CloudStreamForms
         protected override void OnAppearing()
         {
             base.OnAppearing();
-            BackgroundColor = Color.FromHex(Settings.MainBackgroundColor);
+            BackgroundColor = Settings.BlackRBGColor;
         }
         public Search()
         {
             InitializeComponent();
-            BackgroundColor = Color.FromHex(Settings.MainBackgroundColor);
+            BackgroundColor = Settings.BlackRBGColor;
 
             searchLoaded += Search_searchLoaded;
 

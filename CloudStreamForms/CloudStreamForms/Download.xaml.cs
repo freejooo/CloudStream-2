@@ -87,13 +87,13 @@ namespace CloudStreamForms
             epView = new MainEpisodeView();
             BindingContext = epView;
 
-            BackgroundColor = Color.FromHex(Settings.MainBackgroundColor);
+            BackgroundColor = Settings.BlackRBGColor;
         }
 
         protected override void OnAppearing()
         {
             base.OnAppearing();
-            BackgroundColor = Color.FromHex(Settings.MainBackgroundColor);
+            BackgroundColor = Settings.BlackRBGColor;
             UpdateDownloads();
 
 

@@ -36,6 +36,8 @@ namespace CloudStreamForms
             string GetExternalStoragePath();
             void HideStatusBar();
             void ShowStatusBar();
+            void UpdateStatusBar();
+            void UpdateBackground();
         }
 
         public class StorageInfo
@@ -57,6 +59,16 @@ namespace CloudStreamForms
 
 
         public static IPlatformDep platformDep;
+
+        public static void UpdateStatusBar()
+        {
+            platformDep.UpdateStatusBar();
+        }
+
+        public static void UpdateBackground()
+        {
+            platformDep.UpdateBackground();
+        }
 
         public static void HideStatusBar()
         {
@@ -308,10 +320,14 @@ namespace CloudStreamForms
         {
             string _s = "#EXTM3U";
             if (isSubtitleEnabled) {
-                _s += "\n#EXTVLCOPT:sub-file=" + beforePath + baseSubtitleName;
+                _s += "\n";
+                _s += "\n";
+              //  _s += "#EXT-X-MEDIA:TYPE=SUBTITLES,GROUP-ID=\"subs\",NAME=\"English\",DEFAULT=YES,AUTOSELECT=YES,FORCED=NO,LANGUAGE=\"en\",CHARACTERISTICS=\"public.accessibility.transcribes-spoken-dialog, public.accessibility.describes-music-and-sound\",URI=" + beforePath + baseSubtitleName + "\"";
+                _s += "#EXTVLCOPT:sub-file=" + beforePath + baseSubtitleName;
+                _s += "\n";
             }
             for (int i = 0; i < path.Count; i++) {
-                _s += "\n#EXTINF:" + ", " + name[i].Replace("-", "").Replace("  ", " ") + "\n" + path[i];
+                _s += "\n#EXTINF:" + ", " + name[i].Replace("-", "").Replace("  ", " ") + "\n" + path[i]; //+ (isSubtitleEnabled ? ",SUBTITLES=\"subs\"" : "");
             }
             return _s;
         }

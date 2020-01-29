@@ -205,7 +205,7 @@ namespace CloudStreamForms
             epView = new MainEpisodeView();
             BindingContext = epView;
 
-            BackgroundColor = Color.FromHex(Settings.MainBackgroundColor);
+            BackgroundColor = Settings.BlackRBGColor;
             MovieTypePicker.ItemsSource = genresNames;
             ImdbTypePicker.ItemsSource = recomendationTypes;
             MovieTypePicker.SelectedIndex = 0;
@@ -380,6 +380,9 @@ namespace CloudStreamForms
             SaveData();
             base.OnAppearing();
             if (!hasAppered) {
+                App.UpdateStatusBar();
+                App.UpdateBackground();
+
                 /*
                 Application.Current.MainPage.SizeChanged += (o, e) => {
                     SetHeight();
@@ -388,7 +391,8 @@ namespace CloudStreamForms
             UpdateBookmarks();
             Top100Stack.IsEnabled = Settings.Top100Enabled;
             Top100Stack.IsVisible = Settings.Top100Enabled;
-            BackgroundColor = Color.FromHex(Settings.MainBackgroundColor);
+            BackgroundColor = Settings.BlackRBGColor;
+            //Color.FromHex(Settings.MainBackgroundColor);
             hasAppered = true;
         }
 

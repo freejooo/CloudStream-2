@@ -41,8 +41,12 @@
                             <TableSection>
                                 <TextCell  Detail="|FONTSIZE:17: BOLD:: BLACK:: POSY:30:|" DetailColor="Transparent" Text="UI" TextColor="#FFFFFF" ></TextCell>
                             </TableSection>
-                            <TableSection >
+                        <!--    <TableSection >
+                                
                                 <SwitchCell Text="Force black background (Restart recommended)" x:Name="BlackBgToggle" OnColor="{Binding MainColor}"></SwitchCell>
+                            </TableSection>-->
+                            <TableSection >
+                                <SwitchCell Text="Show status bar" x:Name="StaturBarToggle" OnColor="{Binding MainColor}"></SwitchCell>
                             </TableSection>
                             <TableSection>
                                 <SwitchCell Text="Top 100 enabled" x:Name="TopToggle" OnColor="{Binding MainColor}"></SwitchCell>
@@ -79,12 +83,22 @@
                     <Image x:Name="OffBar" InputTransparent="True" VerticalOptions="Start"></Image>
                 </Grid>
             </Grid>
+           
+
             <Label Text="Chrome skip time" x:Name="CastTime" TranslationX="5"></Label>
             <Slider ValueChanged="Slider_DragCompleted2" BackgroundColor="Transparent" x:Name="CastSlider" MinimumTrackColor="#303F9F" ThumbColor="#303F9F"></Slider>
             <Label Text="Loading Time" x:Name="LoadingTime" TranslationX="5"></Label>
             <Slider ValueChanged="Slider_DragCompleted" BackgroundColor="Transparent" x:Name="LoadingSlider" MinimumTrackColor="#303F9F" ThumbColor="#303F9F"></Slider>
             <Label Text="Build Version: " x:Name="BuildNumber" TranslationX="5"></Label>
             <Label Text="Github: https://github.com/LagradOst/CloudStream-2" TranslationX="5" ></Label>
+
+            <!--  =================== BUTTONS =================== -->
+
+            <Grid >
+                <Button Grid.Column="0" Text="Set Theme - Restart Recommended" InputTransparent="True" HeightRequest="70" BackgroundColor="#2593ff"></Button>
+                <Picker  x:Name="ColorPicker" TextColor="Transparent"></Picker>
+            </Grid>
+
             <Button Text="Update To..." x:Name="UpdateBtt" IsEnabled="False" IsVisible="False" BackgroundColor="#1976D2" HeightRequest="40"></Button>
             <Button Text="Star me on Github" x:Name="StarMe" BackgroundColor="#303F9F">
                 <!--★-->
