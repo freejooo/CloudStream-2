@@ -1,6 +1,6 @@
 # CloudStream 2
 
-CloudStream 2 is the successor to https://github.com/LagradOst/CloudStream, and focuses more on appearance and usability. CloudStream 2 can also be used on Windows, instead of only on android.
+CloudStream 2 is the successor to https://github.com/LagradOst/CloudStream, and focuses more on appearance and usability. CloudStream 2 can also be used on Windows, instead of only on android. (Can't get Windows UWP signing to work, so the Windows version has to be compiled on your own)
 
 **FEATURES:**
 + **AdFree**, No ads whatsoever
@@ -18,6 +18,9 @@ CloudStream 2 is the successor to https://github.com/LagradOst/CloudStream, and 
 + Chromecast
 + Top 100 movies 
 + YouTube Download
+
+**COMING SOON:**
++ InApp video player using https://github.com/videolan/libvlcsharp
 
 **REQUIREMENTS:**
 + On Android, you must have VLC or any other video player that can play .m3u8 files installed. 
