@@ -102,13 +102,15 @@ namespace CloudStreamForms
 
             LateCheck();
 
-            //Page p = new VideoPage(new VideoPage.PlayVideo() {descript="",name="Black Bunny",episode=-1, season=-1,MirrorNames= new List<string>() { "Googlevid" },MirrorUrls= new List<string>() { "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" },Subtitles= new List<string>(),SubtitlesNames= new List<string>() });//new List<string>() { "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" }, new List<string>() { "Black" }, new List<string>() { });// { mainPoster = mainPoster };
-            //  Navigation.PushModalAsync(p, false);
+            //  Page p = new VideoPage(new VideoPage.PlayVideo() { descript = "", name = "Black Bunny", episode = -1, season = -1, MirrorNames = new List<string>() { "Googlevid" }, MirrorUrls = new List<string>() { "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" }, Subtitles = new List<string>(), SubtitlesNames = new List<string>() });//new List<string>() { "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" }, new List<string>() { "Black" }, new List<string>() { });// { mainPoster = mainPoster };
+            //   Navigation.PushModalAsync(p, false);
 
             On<Xamarin.Forms.PlatformConfiguration.Android>().SetToolbarPlacement(ToolbarPlacement.Bottom);
+
             // Page p = new ChromeCastPage();// { mainPoster = mainPoster };
             // Navigation.PushModalAsync(p, false);
-            //  PushPageFromUrlAndName("tt4869896", "Overlord");
+            // PushPageFromUrlAndName("tt4869896", "Overlord");
+             PushPageFromUrlAndName("tt9054364", "That Time I Got Reincarnated as a Slime");
             // PushPageFromUrlAndName("tt0371746", "Iron Man");
         }
 

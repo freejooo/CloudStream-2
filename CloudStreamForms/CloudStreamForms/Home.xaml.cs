@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
+using XamEffects;
 using static CloudStreamForms.CloudStreamCore;
 using static CloudStreamForms.MainPage;
 
@@ -163,15 +164,20 @@ namespace CloudStreamForms
         private void ImageButton_Clicked(object sender, EventArgs e)
         {
             EpisodeResult episodeResult = ((EpisodeResult)((ImageButton)sender).BindingContext);
+            PushPage(episodeResult);
+            //  PlayEpisode(episodeResult);
+        }
+
+        public void PushPage(EpisodeResult episodeResult)
+        {
             PushPageFromUrlAndName(FindShortend(episodeResult.extraInfo, "Id"), FindShortend(episodeResult.extraInfo, "Name"));
 
-            //  PlayEpisode(episodeResult);
         }
 
         private void ViewCell_Tapped(object sender, EventArgs e)
         {
             EpisodeResult episodeResult = (EpisodeResult)(((ViewCell)sender).BindingContext);
-            PushPageFromUrlAndName(FindShortend(episodeResult.extraInfo, "Id"), FindShortend(episodeResult.extraInfo, "Name"));
+            PushPage(episodeResult);
 
             // EpsodeShow(episodeResult);
             //EpisodeResult episodeResult = ((EpisodeResult)((ImageButton)sender).BindingContext);
@@ -198,9 +204,10 @@ namespace CloudStreamForms
             }
 
         }
-
+        public Command TapCommand { set; get; } = new Command((o) => { print("Hello:"); });
         public Home()
         {
+
             InitializeComponent();
             epView = new MainEpisodeView();
             BindingContext = epView;
@@ -210,7 +217,6 @@ namespace CloudStreamForms
             ImdbTypePicker.ItemsSource = recomendationTypes;
             MovieTypePicker.SelectedIndex = 0;
             UpdateBookmarks();
-
 
             ImdbTypePicker.SelectedIndexChanged += (o, e) => {
                 ClearEpisodes();
@@ -278,7 +284,7 @@ namespace CloudStreamForms
             //MovieTypePicker.IsVisible = false;
         }
 
-        static string FindShortend(string d, string key)
+        public static string FindShortend(string d, string key)
         {
             return FindHTML(d, key + "=", "|||");
         }
@@ -466,6 +472,21 @@ namespace CloudStreamForms
         }
         public double currentWidth { get { return Application.Current.MainPage.Width; } }
 
+
+
+        private void Grid_BindingContextChanged(object sender, EventArgs e)
+        {
+            var s = ((Grid)sender);
+            Commands.SetTap(s, new Command((o) => {
+                var episodeResult = ((EpisodeResult)o);
+                PushPageFromUrlAndName(FindShortend(episodeResult.extraInfo, "Id"), FindShortend(episodeResult.extraInfo, "Name"));
+                PushPage(episodeResult);
+
+                //do something
+            }));
+            Commands.SetTapParameter(s, (EpisodeResult)s.BindingContext);
+            //s.BindingContext = this;
+        }
     }
     public class MainEpisode100View
     {

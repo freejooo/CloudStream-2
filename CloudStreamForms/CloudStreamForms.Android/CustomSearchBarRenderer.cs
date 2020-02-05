@@ -25,6 +25,7 @@ namespace CloudStreamForms.Droid
             SearchView searchView = (base.Control as SearchView);
             searchView.SetInputType(InputTypes.ClassText | InputTypes.TextVariationNormal);
 
+
             // Access search textview within control
             int textViewId = searchView.Context.Resources.GetIdentifier("android:id/search_src_text", null, null);
             EditText textView = (searchView.FindViewById(textViewId) as EditText);
@@ -46,6 +47,14 @@ namespace CloudStreamForms.Droid
             int frameId = searchView.Context.Resources.GetIdentifier("android:id/search_plate", null, null);
             Android.Views.View frameView = (searchView.FindViewById(frameId) as Android.Views.View);
             frameView.SetBackgroundColor(G.Color.Transparent);//G.Color.ParseColor(CloudStreamForms.Settings.MainBackgroundColor));
+
+
+            var searchIconId = searchView.Resources.GetIdentifier("android:id/search_mag_icon", null, null);
+            if (searchIconId > 0) {
+                var searchPlateIcon = searchView.FindViewById(searchIconId);
+                (searchPlateIcon as ImageView).SetColorFilter(G.Color.Rgb(190, 190, 190));
+            }
+
             //frameView.SetBackgroundColor(G.Color.Rgb(96, 96, 96));
 
             /*

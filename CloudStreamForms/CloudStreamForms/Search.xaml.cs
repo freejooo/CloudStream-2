@@ -36,6 +36,7 @@ namespace CloudStreamForms
 
             SearchBar searchBar = new SearchBar() {
                 Placeholder = "Movie Search...",
+                CancelButtonColor = Color.FromRgb(190,190,190),
             };
             searchBar.TextChanged += SearchBar_TextChanged;
             searchBar.SearchButtonPressed += SearchBar_SearchButtonPressed;
@@ -146,6 +147,8 @@ namespace CloudStreamForms
 
         public static async void PushPage(Poster _mainPoster, INavigation navigation)
         {
+            if (mainPoster.url == _mainPoster.url) return;
+
             mainPoster = _mainPoster;
             Page p = new MovieResult();// { mainPoster = mainPoster };
             try {

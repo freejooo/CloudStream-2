@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using Xamarin.Essentials;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
+using XamEffects;
 using static CloudStreamForms.App;
 using static CloudStreamForms.CloudStreamCore;
 using static CloudStreamForms.MainPage;
@@ -61,11 +62,12 @@ namespace CloudStreamForms
             }
         }
 
-
         List<Episode> currentEpisodes { set { currentMovie.episodes = value; } get { return currentMovie.episodes; } }
 
         protected override bool OnBackButtonPressed()
         {
+            Search.mainPoster = new Poster();
+
             print("STARTBACK");
             if (lastMovie != null) {
                 if (lastMovie.Count > 1) {
@@ -345,6 +347,19 @@ namespace CloudStreamForms
         {
             return GetImageSource("gradient" + Settings.BlackColor + ".png");//BlackBg ? "gradient.png" : "gradientGray.png");
         }
+        private void Grid_BindingContextChanged(object sender, EventArgs e)
+        {
+            var s = ((Grid)sender);
+            Commands.SetTap(s, new Command((o) => {
+                var episodeResult = ((EpisodeResult)o);
+                PlayEpisodeRes(episodeResult);
+
+                //do something
+            }));
+            Commands.SetTapParameter(s, (EpisodeResult)s.BindingContext);
+            //s.BindingContext = this;
+        }
+
 
         public MovieResult()
         {
@@ -433,7 +448,7 @@ namespace CloudStreamForms
             }
 
             BackgroundColor = Settings.BlackRBGColor;
-            
+
             /*
             if (Settings.BlackBg) {
                 BackgroundColor = Color.Black;
@@ -606,8 +621,8 @@ namespace CloudStreamForms
         {
             //  episodeView.HeightRequest = episodeView.Bounds.Height;
             print("EPSHOW:" + Settings.EpDecEnabled);
-            episodeView.RowHeight = Settings.EpDecEnabled ? 175 : 100;
-            Device.BeginInvokeOnMainThread(() => episodeView.HeightRequest = ((setNull ?? showState != 0) ? 0 : (epView.MyEpisodeResultCollection.Count * (episodeView.RowHeight) + 20)));
+            episodeView.RowHeight = Settings.EpDecEnabled ? 180 : 100;
+            Device.BeginInvokeOnMainThread(() => episodeView.HeightRequest = ((setNull ?? showState != 0) ? 0 : (epView.MyEpisodeResultCollection.Count * (episodeView.RowHeight) + 40)));
         }
 
         void SetTrailerRec(bool? setNull = null)
@@ -878,11 +893,31 @@ namespace CloudStreamForms
                             InputTransparent = true,
                         };
 
+                        // ================================================================ RECOMMENDATIONS CLICKED ================================================================
+                        stackLayout.SetValue(XamEffects.TouchEffect.ColorProperty, Color.White);
+                        Commands.SetTap(stackLayout, new Command((o) => {
+                            int z = (int)o;
+                            if (Search.mainPoster.url != RecomendedPosters[z].url) {
+                                if (lastMovie == null) {
+                                    lastMovie = new List<Movie>();
+                                }
+                                lastMovie.Add(activeMovie);
+                                Search.mainPoster = RecomendedPosters[z];
+                                Page _p = new MovieResult();// { mainPoster = mainPoster };
+                                Navigation.PushModalAsync(_p);
+                            }
+                            //do something
+                        }));
+                        Commands.SetTapParameter(stackLayout, i);
+
+
+
                         //Source = p.posterUrl
                         recBtts.Add(imageButton);
 
                         stackLayout.Children.Add(ff);
                         stackLayout.Children.Add(imageButton);
+                        //  stackLayout.Children.Add(borderView);
 
                         Recommendations.Children.Add(stackLayout);
 
@@ -918,19 +953,22 @@ namespace CloudStreamForms
                     };
 
                     // --- RECOMMENDATIONS CLICKED -----
+                    /*
                     recBtts[i].Clicked += (o, _e) => {
                         for (int z = 0; z < recBtts.Count; z++) {
                             if (((Button)o).Id == recBtts[z].Id) {
-                                if (lastMovie == null) {
-                                    lastMovie = new List<Movie>();
+                                if (Search.mainPoster.url != RecomendedPosters[z].url) {
+                                    if (lastMovie == null) {
+                                        lastMovie = new List<Movie>();
+                                    }
+                                    lastMovie.Add(activeMovie);
+                                    Search.mainPoster = RecomendedPosters[z];
+                                    Page p = new MovieResult();// { mainPoster = mainPoster };
+                                    Navigation.PushModalAsync(p);
                                 }
-                                lastMovie.Add(activeMovie);
-                                Search.mainPoster = RecomendedPosters[z];
-                                Page p = new MovieResult();// { mainPoster = mainPoster };
-                                Navigation.PushModalAsync(p);
                             }
                         }
-                    };
+                    };*/
 
                 }
                 Device.BeginInvokeOnMainThread(() => { SetRecs(); });
@@ -1190,6 +1228,8 @@ namespace CloudStreamForms
                 TRAILERSTAB.IsEnabled = true;
                 trailerView.Children.Clear();
                 trailerView.HeightRequest = e.Count * 300;
+                PlayBttGradient.Source = GetImageSource("nexflixPlayBtt.png");
+
                 for (int i = 0; i < e.Count; i++) {
                     string p = e[i].PosterUrl;
                     if (CheckIfURLIsValid(p)) {
@@ -1308,6 +1348,17 @@ namespace CloudStreamForms
             ep.LoadedLinks = true;
         }
 
+        void PlayEpisodeRes(EpisodeResult episodeResult)
+        {
+            string hasDownloadedFile = App.GetKey("Download", GetId(episodeResult), "");
+            if (hasDownloadedFile != "") {
+                Download.PlayFile(hasDownloadedFile, episodeResult.Title);
+            }
+            else {
+                LoadLinksForEpisode(episodeResult);
+            }
+        }
+
         private void ImageButton_Clicked(object sender, EventArgs e) // LOAD
         {
             if (!SameAsActiveMovie()) return;
@@ -1316,13 +1367,8 @@ namespace CloudStreamForms
             //ProgressBar progressBar = (ProgressBar)((Grid)((Grid)((ImageButton)sender).Children.ElementAt(0)).Children.ElementAt(0)).Children.ElementAt(2)).Children.ElementAt(0);
 
             EpisodeResult episodeResult = ((EpisodeResult)((ImageButton)sender).BindingContext);
-            string hasDownloadedFile = App.GetKey("Download", GetId(episodeResult), "");
-            if (hasDownloadedFile != "") {
-                Download.PlayFile(hasDownloadedFile, episodeResult.Title);
-            }
-            else {
-                LoadLinksForEpisode(episodeResult);
-            }
+            PlayEpisodeRes(episodeResult);
+
             episodeView.SelectedItem = null;
             //MainThread.BeginInvokeOnMainThread(() => {
             //   epView.MyEpisodeResultCollection[((EpisodeResult)((ImageButton)sender).BindingContext).Id].Progress = 1;

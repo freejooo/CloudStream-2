@@ -115,10 +115,10 @@ namespace CloudStreamForms
 
 
             // ========== IMGS ==========
-            SubtitlesImg.Source = App.GetImageSource("baseline_subtitles_white_48dp.png");
+            SubtitlesImg.Source = App.GetImageSource("netflixSubtitlesCut.png"); //App.GetImageSource("baseline_subtitles_white_48dp.png");
             MirrosImg.Source = App.GetImageSource("baseline_playlist_play_white_48dp.png");
             //  GradientBottom.Source = App.GetImageSource("gradient.png");
-            DownloadImg.Source = App.GetImageSource("round_more_vert_white_48dp.png");
+            DownloadImg.Source = App.GetImageSource("episodesNetflix2.png");//App.GetImageSource("round_more_vert_white_48dp.png");
             LockImg.Source = App.GetImageSource("wlockUnLocked.png");
 
             // ================================================================================ UI ================================================================================

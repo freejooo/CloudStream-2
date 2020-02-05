@@ -5,7 +5,7 @@
              xmlns:vlc="clr-namespace:LibVLCSharp.Forms.Shared;assembly=LibVLCSharp.Forms"
              xmlns:ff="clr-namespace:FFImageLoading.Forms;assembly=FFImageLoading.Forms"
              x:Class="CloudStreamForms.VideoPage">
-    <ContentPage.Content NavigationPage.HasNavigationBar="false">
+    <ContentPage.Content >
 
 
 
@@ -19,16 +19,21 @@
                 <vlc:VideoView x:Name="vvideo" InputTransparent="True" AbsoluteLayout.LayoutBounds="0,0,1,1" AbsoluteLayout.LayoutFlags="All"   >
 
                 </vlc:VideoView>
-               <!-- <vlc:MediaPlayerElement MediaPlayer="{Binding Player}" LibVLC="{Binding VLC}" EnableRendererDiscovery="True" />-->
+                <!-- <vlc:MediaPlayerElement MediaPlayer="{Binding Player}" LibVLC="{Binding VLC}" EnableRendererDiscovery="True" />-->
                 <Label x:Name="SeekTxt" Text="Hello" AbsoluteLayout.LayoutBounds=".5,1,1,.1" AbsoluteLayout.LayoutFlags="All" FontSize="20" LineBreakMode="WordWrap" TextColor="White" />
             </AbsoluteLayout>
+
+            <Button BackgroundColor="Black" Opacity="0.3" InputTransparent="True" HorizontalOptions="FillAndExpand" VerticalOptions="FillAndExpand"></Button>
+
+
+
             <Button Clicked="PausePlayBtt_Clicked"  VerticalOptions="Center" WidthRequest="60" HeightRequest="60" HorizontalOptions="Center" BackgroundColor="Transparent"></Button>
             <ff:CachedImage x:Name="PausePlayBtt" VerticalOptions="Center" WidthRequest="60" HeightRequest="60" HorizontalOptions="Center" BackgroundColor="Transparent" InputTransparent="True">
 
             </ff:CachedImage>
             <ActivityIndicator x:Name="LoadingCir" IsVisible="False" InputTransparent="True" IsRunning="True" WidthRequest="60" HeightRequest="60" VerticalOptions="Center" HorizontalOptions="Center"></ActivityIndicator>
-            
-            
+
+
             <Label x:Name="EpisodeLabel"  Text="S12:E3 Iron Man" VerticalOptions="Start" HorizontalOptions="Center" FontSize="14" TextColor="#e7e7e7" TranslationY="20"></Label>
             <Grid x:Name="VideoSettings" VerticalOptions="Start" HorizontalOptions="End" TranslationY="20" ColumnSpacing="20" Scale="0.7">
                 <Grid.ColumnDefinitions >
@@ -45,7 +50,7 @@
                 <Image x:Name="DownloadImg" Grid.Column="3" TranslationX="10" InputTransparent="True" Scale="1"></Image>
 
             </Grid>
-            
+
             <Grid x:Name="VideoSliderAndSettings"  VerticalOptions="End" >
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
@@ -58,7 +63,7 @@
                     <RowDefinition Height="Auto" />
 
                 </Grid.RowDefinitions>
-              <!--  <Image x:Name="GradientBottom" Grid.Row="1" HorizontalOptions="Fill" HeightRequest="80" TranslationY="0" VerticalOptions="End" Rotation="180" InputTransparent="True" ScaleX="100" Opacity="1" ScaleY="3"></Image>
+                <!--  <Image x:Name="GradientBottom" Grid.Row="1" HorizontalOptions="Fill" HeightRequest="80" TranslationY="0" VerticalOptions="End" Rotation="180" InputTransparent="True" ScaleX="100" Opacity="1" ScaleY="3"></Image>
 -->
                 <Grid HorizontalOptions="Fill" ColumnSpacing="0" Padding="10,0" Margin="0,0,0,-40" VerticalOptions="End" Grid.Row="0" >
                     <Grid.ColumnDefinitions >
@@ -120,6 +125,8 @@
                 -->
             </Grid>
             <ProgressBar x:Name="BufferBar" Progress="0" ProgressColor="#303F9F" IsVisible="False" VerticalOptions="End"></ProgressBar>
+            <!--     <Button BackgroundColor="Blue" HorizontalOptions="FillAndExpand" VerticalOptions="FillAndExpand"></Button>-->
+
         </Grid>
 
     </ContentPage.Content>
