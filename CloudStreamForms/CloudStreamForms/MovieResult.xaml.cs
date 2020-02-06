@@ -349,11 +349,11 @@ namespace CloudStreamForms
         }
         private void Grid_BindingContextChanged(object sender, EventArgs e)
         {
+            print("DA");
             var s = ((Grid)sender);
             Commands.SetTap(s, new Command((o) => {
                 var episodeResult = ((EpisodeResult)o);
                 PlayEpisodeRes(episodeResult);
-
                 //do something
             }));
             Commands.SetTapParameter(s, (EpisodeResult)s.BindingContext);
@@ -480,6 +480,7 @@ namespace CloudStreamForms
                 App.RemoveKey("CacheImdb", currentMovie.title.id);
                 App.RemoveKey("CacheMAL", currentMovie.title.id);
                 Navigation.PopModalAsync(false);
+                Search.mainPoster = new Poster();
                 PushPageFromUrlAndName(currentMovie.title.id, currentMovie.title.name);
             };
             ReloadAllBtt.Source = GetImageSource("round_refresh_white_48dp.png");
@@ -555,7 +556,8 @@ namespace CloudStreamForms
             pheight = (int)Math.Round(pheight * mMulti * posterRezMulti);
             pwidth = (int)Math.Round(pwidth * mMulti * posterRezMulti);*/
             print(episodeResult.PosterUrl);
-            episodeResult.PosterUrl = CloudStreamCore.ConvertIMDbImagesToHD(episodeResult.PosterUrl, 126, 224); //episodeResult.PosterUrl.Replace(",126,224_AL", "," + pwidth + "," + pheight + "_AL").Replace("UY126", "UY" + pheight).Replace("UX224", "UX" + pwidth);
+            //224; 126
+            episodeResult.PosterUrl = CloudStreamCore.ConvertIMDbImagesToHD(episodeResult.PosterUrl, 224, 126 ); //episodeResult.PosterUrl.Replace(",126,224_AL", "," + pwidth + "," + pheight + "_AL").Replace("UY126", "UY" + pheight).Replace("UX224", "UX" + pwidth);
             print(episodeResult.PosterUrl);
             //print(episodeResult.PosterUrl);
             print("OGTITLE:" + episodeResult.OgTitle);
@@ -621,7 +623,7 @@ namespace CloudStreamForms
         {
             //  episodeView.HeightRequest = episodeView.Bounds.Height;
             print("EPSHOW:" + Settings.EpDecEnabled);
-            episodeView.RowHeight = Settings.EpDecEnabled ? 180 : 100;
+            episodeView.RowHeight = Settings.EpDecEnabled ? 170 : 100;
             Device.BeginInvokeOnMainThread(() => episodeView.HeightRequest = ((setNull ?? showState != 0) ? 0 : (epView.MyEpisodeResultCollection.Count * (episodeView.RowHeight) + 40)));
         }
 
@@ -1227,7 +1229,7 @@ namespace CloudStreamForms
                 TRAILERSTAB.IsVisible = true;
                 TRAILERSTAB.IsEnabled = true;
                 trailerView.Children.Clear();
-                trailerView.HeightRequest = e.Count * 300;
+                trailerView.HeightRequest = e.Count * 240 + 200;
                 PlayBttGradient.Source = GetImageSource("nexflixPlayBtt.png");
 
                 for (int i = 0; i < e.Count; i++) {
@@ -1254,7 +1256,7 @@ namespace CloudStreamForms
                         //Source = p.posterUrl
                         //recBtts.Add(imageButton);
                         int _sel = int.Parse(i.ToString());
-                        imageButton.Clicked += (o, _e) => {
+                       /* imageButton.Clicked += (o, _e) => {
                             try {
                                 var _t = epView.CurrentTrailers[_sel];
                                 PlayVLCWithSingleUrl(_t.Url, _t.Name);
@@ -1262,13 +1264,33 @@ namespace CloudStreamForms
                             catch (Exception) {
 
                             }
-                        };
+                        };*/
                         stackLayout.Children.Add(ff);
                         stackLayout.Children.Add(imageButton);
                         stackLayout.Children.Add(playBtt);
-
                         trailerView.Children.Add(stackLayout);
                         trailerView.Children.Add(textLb);
+
+                        stackLayout.SetValue(XamEffects.TouchEffect.ColorProperty, new Color(1,1,1,0.3) );
+                        Commands.SetTap(stackLayout, new Command((o) => {
+                            int z = (int)o;
+                            var _t = epView.CurrentTrailers[z];
+                            PlayVLCWithSingleUrl(_t.Url, _t.Name);
+                            /*
+                            if (Search.mainPoster.url != RecomendedPosters[z].url) {
+                                if (lastMovie == null) {
+                                    lastMovie = new List<Movie>();
+                                }
+                                lastMovie.Add(activeMovie);
+                                Search.mainPoster = RecomendedPosters[z];
+                                Page _p = new MovieResult();// { mainPoster = mainPoster };
+                                Navigation.PushModalAsync(_p);
+                            }*/
+                            //do something
+                        }));
+                        Commands.SetTapParameter(stackLayout, _sel);
+
+                       
                         Grid.SetRow(stackLayout, (i + 1) * 2 - 2);
                         Grid.SetRow(textLb, (i + 1) * 2 - 1);
                         //         Device.BeginInvokeOnMainThread(() => { /*Grid.SetRow(stackLayout, (int)Math.Round(i / 3.0));*/ Grid.SetColumn(stackLayout,i); });

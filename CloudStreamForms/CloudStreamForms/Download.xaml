@@ -5,7 +5,8 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:ff="clr-namespace:FFImageLoading.Forms;assembly=FFImageLoading.Forms"
              xmlns:ffTransformations="clr-namespace:FFImageLoading.Transformations;assembly=FFImageLoading.Transformations"
-             mc:Ignorable="d"
+             mc:Ignorable="d"                         
+             xmlns:xe="clr-namespace:XamEffects;assembly=XamEffects"
              x:Class="CloudStreamForms.Download">
     <StackLayout>
         <ProgressBar x:Name="SpaceProgress" HorizontalOptions="Fill" Progress="0.7" ProgressColor="#303F9F" ></ProgressBar>
@@ -115,7 +116,7 @@
                                             </Grid.ColumnDefinitions>
                                             <Grid Grid.Row="0"  Grid.Column="0"  WidthRequest="126" TranslationY="{Binding TranslateYOffset}" BindingContextChanged="Grid_BindingContextChanged">
 
-                                                <ImageButton Clicked="ImageButton_Clicked" BackgroundColor="Transparent" WidthRequest="126"></ImageButton>
+                                            <ImageButton Clicked="ImageButton_Clicked" BackgroundColor="Transparent" WidthRequest="126"></ImageButton> 
 
                                                 <ff:CachedImage WidthRequest="126" HeightRequest="80" Source="{Binding PosterUrl}" InputTransparent="True"   >
 
@@ -128,7 +129,8 @@
                                                 <ff:CachedImage PropertyChanging="Image_PropertyChanging" InputTransparent="True" BackgroundColor="Transparent">
 
                                                 </ff:CachedImage>
-
+                                                <Grid  xe:TouchEffect.Color="White" Opacity="0.5" WidthRequest="127" HeightRequest="72" Margin="0,4" BackgroundColor="Transparent" xe:EffectsConfig.ChildrenInputTransparent="False" SizeChanged="Grid_PlayVid" >
+                                                </Grid>
 
 
 

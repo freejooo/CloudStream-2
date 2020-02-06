@@ -2248,7 +2248,7 @@ namespace CloudStreamForms
                         poster = poster.Replace("._" + rep + "_", "._V1_UY1000_UX1000_AL_");
 
                         d = RemoveOne(d, lookfor);
-                        string name = FindHTML(d, "class=\"video-modal\" >", "<");
+                        string name = FindHTML(d, "class=\"video-modal\" >", "<",decodeToNonHtml:true);
                         var cT = new Trailer() { Name = name, PosterUrl = poster, Url = "" };
                         if (activeMovie.title.trailers == null) return;
                         if (activeMovie.title.trailers.Count > index) {

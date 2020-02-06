@@ -308,18 +308,18 @@ xmlns:ffTransformations="clr-namespace:FFImageLoading.Transformations;assembly=F
                                                     <ff:CachedImage PropertyChanging="Image_PropertyChanging" InputTransparent="True"  BackgroundColor="Transparent">
 
                                                     </ff:CachedImage>
-                                                    <Grid  xe:TouchEffect.Color="White" Opacity="0.5" WidthRequest="127" HeightRequest="72" Margin="0,12" BackgroundColor="Transparent" xe:EffectsConfig.ChildrenInputTransparent="False" BindingContextChanged="Grid_BindingContextChanged" >
+                                                    <Grid  xe:TouchEffect.Color="White" Opacity="0.5" WidthRequest="127" HeightRequest="72" Margin="0,10" BackgroundColor="Transparent" xe:EffectsConfig.ChildrenInputTransparent="False" SizeChanged="Grid_BindingContextChanged" >
                                                     </Grid>
                                                     <!-- Source="{Binding PosterUrl}"-->
                                                 </Grid>
                                             </Grid>
                                         </Grid>
-                                        <Grid Grid.Row="1" Grid.Column="0" HorizontalOptions="Fill" VerticalOptions="Fill"  >
+                                        <Grid Grid.Row="1" Grid.Column="0" HorizontalOptions="Fill" VerticalOptions="Fill"  Padding="0,0,0,0" Margin="10,0">
                                             <!--Margin="10,-5"-->
-                                            <!-- Padding="10,0,20,0" Margin="0,-10,0,0">-->
+                                            <!-- >-->
                                             <StackLayout >
                                                 
-                                            <Label Text="{Binding Description}"  TextColor="{Binding MainDarkTextColor}"    />
+                                            <Label Text="{Binding Description}"  TextColor="{Binding MainDarkTextColor}" LineHeight="1"  TranslationY="-5"  MaxLines="4"  />
                                                 
                                             </StackLayout>
                                         </Grid>

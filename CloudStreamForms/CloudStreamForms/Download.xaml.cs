@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using Xamarin.Essentials;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
+using XamEffects;
 using YoutubeExplode;
 using YoutubeExplode.Models;
 using YoutubeExplode.Models.MediaStreams;
@@ -293,6 +294,21 @@ namespace CloudStreamForms
             //App.PlayVLCWithSingleUrl(episodeResult.mirrosUrls[0], episodeResult.Title);
             //episodeView.SelectedItem = null;
         }
+
+        private void Grid_PlayVid(object sender, EventArgs e)
+        {
+            print("DA");
+            var s = ((Grid)sender);
+            Commands.SetTap(s, new Command((o) => {
+                var episodeResult = ((EpisodeResult)o);
+                PlayEpisode(episodeResult);
+             //   PlayEpisodeRes(episodeResult);
+                //do something
+            }));
+            Commands.SetTapParameter(s, (EpisodeResult)s.BindingContext);
+            //s.BindingContext = this;
+        }
+
 
         async void EpsodeShow(EpisodeResult episodeResult)
         {
