@@ -129,7 +129,7 @@
                                                 <ff:CachedImage PropertyChanging="Image_PropertyChanging" InputTransparent="True" BackgroundColor="Transparent">
 
                                                 </ff:CachedImage>
-                                                <Grid  xe:TouchEffect.Color="White" Opacity="0.5" WidthRequest="127" HeightRequest="72" Margin="0,4" BackgroundColor="Transparent" xe:EffectsConfig.ChildrenInputTransparent="False" SizeChanged="Grid_PlayVid" >
+                                                <Grid  xe:TouchEffect.Color="White" Opacity="0.5" WidthRequest="127" HeightRequest="72" Margin="0,4" BackgroundColor="Transparent" xe:EffectsConfig.ChildrenInputTransparent="False" BindingContextChanged="Grid_PlayVid" >
                                                 </Grid>
 
 

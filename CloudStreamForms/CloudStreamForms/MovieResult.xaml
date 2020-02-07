@@ -54,7 +54,7 @@ xmlns:ffTransformations="clr-namespace:FFImageLoading.Transformations;assembly=F
 
                         <ff:CachedImage x:Name="TrailerBtt" BackgroundColor="Transparent" HorizontalOptions="Fill" Aspect="AspectFill" ></ff:CachedImage>
                         <ImageButton x:Name="Gradient" HorizontalOptions="Fill" Aspect="AspectFill" Rotation="180" Opacity="1" Source="gradient.png" BackgroundColor="Transparent"></ImageButton>
-                        <ImageButton x:Name="PlayBttGradient" HorizontalOptions="Fill" Aspect="AspectFit" Scale="0.3"  Opacity="1"  BackgroundColor="Transparent"></ImageButton>
+                        <ImageButton x:Name="PlayBttGradient" HorizontalOptions="Fill" Aspect="AspectFit" Scale="0.3"  Opacity="1"  BackgroundColor="Transparent" InputTransparent="True"></ImageButton>
                         <ImageButton x:Name="ReloadAllBtt" BackgroundColor="Transparent" HorizontalOptions="End" HeightRequest="30" WidthRequest="30" VerticalOptions="Start" TranslationX="-10" TranslationY="10"></ImageButton>
 
                         <!--  <Image x:Name="FakePlayBtt"  WidthRequest="100" VerticalOptions="Start"  TranslationY="75"></Image> -->
@@ -294,7 +294,7 @@ xmlns:ffTransformations="clr-namespace:FFImageLoading.Transformations;assembly=F
                                             </ff:CachedImage>-->
                                                 <Grid Grid.Row="0"  Grid.Column="0"  WidthRequest="127" TranslationY="{Binding TranslateYOffset}" >
 
-                                                  <!--  <ImageButton  Clicked="ImageButton_Clicked" BackgroundColor="Transparent" WidthRequest="127"></ImageButton> -->
+                                                    <!--  <ImageButton  Clicked="ImageButton_Clicked" BackgroundColor="Transparent" WidthRequest="127"></ImageButton> -->
 
                                                     <ff:CachedImage WidthRequest="127" HeightRequest="72" Source="{Binding PosterUrl}" InputTransparent="True" >
 
@@ -303,12 +303,12 @@ xmlns:ffTransformations="clr-namespace:FFImageLoading.Transformations;assembly=F
 
                                                             </ffTransformations:RoundedTransformation>
                                                         </ff:CachedImage.Transformations>
-                                                     
+
                                                     </ff:CachedImage>
                                                     <ff:CachedImage PropertyChanging="Image_PropertyChanging" InputTransparent="True"  BackgroundColor="Transparent">
 
                                                     </ff:CachedImage>
-                                                    <Grid  xe:TouchEffect.Color="White" Opacity="0.5" WidthRequest="127" HeightRequest="72" Margin="0,10" BackgroundColor="Transparent" xe:EffectsConfig.ChildrenInputTransparent="False" SizeChanged="Grid_BindingContextChanged" >
+                                                    <Grid  xe:TouchEffect.Color="White" Opacity="0.5" WidthRequest="127" HeightRequest="72" Margin="0,10" BackgroundColor="Transparent" xe:EffectsConfig.ChildrenInputTransparent="False" BindingContextChanged="Grid_BindingContextChanged" >
                                                     </Grid>
                                                     <!-- Source="{Binding PosterUrl}"-->
                                                 </Grid>
@@ -318,9 +318,9 @@ xmlns:ffTransformations="clr-namespace:FFImageLoading.Transformations;assembly=F
                                             <!--Margin="10,-5"-->
                                             <!-- >-->
                                             <StackLayout >
-                                                
-                                            <Label Text="{Binding Description}"  TextColor="{Binding MainDarkTextColor}" LineHeight="1"  TranslationY="-5"  MaxLines="4"  />
-                                                
+
+                                                <Label Text="{Binding Description}"  TextColor="{Binding MainDarkTextColor}" LineHeight="1"  TranslationY="-5"  MaxLines="4"  />
+
                                             </StackLayout>
                                         </Grid>
                                         <!--
