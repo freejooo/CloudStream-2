@@ -2248,7 +2248,7 @@ namespace CloudStreamForms
                         poster = poster.Replace("._" + rep + "_", "._V1_UY1000_UX1000_AL_");
 
                         d = RemoveOne(d, lookfor);
-                        string name = FindHTML(d, "class=\"video-modal\" >", "<",decodeToNonHtml:true);
+                        string name = FindHTML(d, "class=\"video-modal\" >", "<", decodeToNonHtml: true);
                         var cT = new Trailer() { Name = name, PosterUrl = poster, Url = "" };
                         if (activeMovie.title.trailers == null) return;
                         if (activeMovie.title.trailers.Count > index) {
@@ -2560,6 +2560,10 @@ namespace CloudStreamForms
             string source = "https://www.fembed.com";
             string _ref = "www.fembed.com";
 
+            print("FMEMEDOSOOS:" + d);
+
+
+
             string fembed = FindHTML(d, "data-video=\"https://www.fembed.com/v/", "\"");
             if (fembed == "") {
                 fembed = FindHTML(d, "data-video=\"https://gcloud.live/v/", "\"");
@@ -2570,6 +2574,15 @@ namespace CloudStreamForms
             }
             if (fembed != "") {
                 GetFembed(fembed, tempThred, normalEpisode, source, _ref);
+            }
+            string lookFor = "file: \'";
+            int prio = 5;
+            while (d.Contains(lookFor)) {
+                string ur = FindHTML(d, lookFor, "\'");
+                d = RemoveOne(d, lookFor);
+                string label = FindHTML(d, "label: \'", "\'").Replace("hls P", "live").Replace(" P", "p");
+                prio--;
+                AddPotentialLink(normalEpisode, ur, "Fembed " + label, prio);
             }
             return fembed != "";
         }
@@ -2745,7 +2758,7 @@ namespace CloudStreamForms
             }
             string __d = d.ToString();
             string lookFor = "https://redirector.googlevideo.com/";
-            int prio = 10;
+            int prio = 11;
             while (__d.Contains(lookFor)) {
                 prio++;
                 __d = "|:" + RemoveOne(__d, lookFor);
@@ -2795,10 +2808,15 @@ namespace CloudStreamForms
                 if (!GetThredActive(tempThred)) { return; };
 
                 GetVidNode(_d, normalEpisode, nameId);
-                if (!fembedAdded) {
-                    string ___d = DownloadString(dLink.Replace("download", "streaming"), tempThred);
-                    LookForFembedInString(tempThred, normalEpisode, ___d);
-                }
+                // if (!fembedAdded) {
+                string fMds = dLink.Replace("download", "streaming.php");
+                print("FMEMEDST: " + fMds);
+                string ___d = DownloadString(fMds, tempThred);
+                if (!GetThredActive(tempThred)) { return; };
+                LookForFembedInString(tempThred, normalEpisode, ___d);
+                // }
+
+
 
                 /* // OLD CODE, ONLY 403 ERROR DOSEN'T WORK ANYMORE
                 vid = "http://vidstreaming.io/streaming.php?" + vid;
@@ -3175,7 +3193,7 @@ namespace CloudStreamForms
         public static void GetFembed(string fembed, TempThred tempThred, int normalEpisode, string urlType = "https://www.fembed.com", string referer = "www.fembed.com")
         {
             if (fembed != "") {
-                int prio = 5;
+                int prio = 10;
                 string _d = PostRequest(urlType + "/api/source/" + fembed, urlType + "/v/" + fembed, "r=&d=" + referer, tempThred);
                 if (_d != "") {
                     string lookFor = "\"file\":\"";
@@ -3214,7 +3232,7 @@ namespace CloudStreamForms
                     if (link != "") {
                         double dSize = GetFileSize(link);
                         if (dSize > 100) { // TO REMOVE TRAILERS
-                            AddPotentialLink(episode, link, "HD FullMovies", 10);
+                            AddPotentialLink(episode, link, "HD FullMovies", 13);
                         }
                     }
                 }
@@ -3616,6 +3634,9 @@ namespace CloudStreamForms
 
         public static bool AddPotentialLink(int normalEpisode, string _url, string _name, int _priority)
         {
+            if (_url == "http://error.com") return false; // ERROR
+            if (_url.Replace(" ", "") == "") return false;
+
             _name = _name.Replace("  ", " ");
             _url = _url.Replace(" ", "%20");
             if (!LinkListContainsString(activeMovie.episodes[normalEpisode].links, _url)) {
@@ -4047,6 +4068,36 @@ namespace CloudStreamForms
                                                 string gunURL = "https://gounlimited.to/" + FindHTML(result, "https:\\/\\/gounlimited.to\\/", ".html") + ".html";
                                                 string onlyURL = "https://onlystream.tv" + FindHTML(result, "https:\\/\\/onlystream.tv", "\"").Replace("\\", "");
                                                 string gogoStream = FindHTML(result, "https:\\/\\/" + GOMOURL, "\"");
+                                                string upstream = FindHTML(result, "https:\\/\\/upstream.to\\/embed-","\"");
+                                                string mightyupload = FindHTML(result, "http:\\/\\/mightyupload.com\\/", "\"").Replace("\\/","/");
+
+                                                if (upstream != "") {
+                                                    string _d = DownloadString("https://upstream.to/embed-" + upstream);
+                                                    if (!GetThredActive(tempThred)) { return; };
+                                                    string lookFor = "file:\"";
+                                                    int prio = 16;
+                                                    while (_d.Contains(lookFor)) {
+                                                        prio--;
+                                                        string ur = FindHTML(_d, lookFor, "\"");
+                                                        _d = RemoveOne(_d, lookFor);
+                                                        string label = FindHTML(_d, "label:\"", "\"");
+                                                        AddPotentialLink(episode, ur, "HD Upstream "  +label, prio);
+                                                    }
+                                                }
+
+                                                if(mightyupload != "") {
+                                                    print("MIGHT" + mightyupload);
+                                                    string baseUri = "http://mightyupload.com/" + mightyupload;
+                                                    //string _d = DownloadString("http://mightyupload.com/" + mightyupload);
+                                                    string post = "op=download1&usr_login=&id=" + FindHTML("|" + mightyupload, "|", "/") + "&fname=" + FindHTML(mightyupload, "/", ".html") + "&referer=&method_free=Free+Download+%3E%3E";
+
+                                                    string _d = PostRequest(baseUri, baseUri,post, tempThred);//op=download1&usr_login=&id=k9on84m2bvr9&fname=tt0371746_play.mp4&referer=&method_free=Free+Download+%3E%3E
+                                                    print("RESMIGHT:" + _d);
+                                                    if (!GetThredActive(tempThred)) { return; };
+                                                    string ur = FindHTML(_d, "<source src=\"", "\"");
+                                                    AddPotentialLink(episode, ur, "HD MightyUpload", 16);
+                                                }
+
                                                 if (gogoStream.EndsWith(",&noneemb")) {
                                                     result = RemoveOne(result, ",&noneemb");
                                                     gogoStream = FindHTML(result, "https:\\/\\/" + GOMOURL, "\"");

@@ -297,7 +297,7 @@ namespace CloudStreamForms
 
         private void Grid_PlayVid(object sender, EventArgs e)
         {
-            print("DA");
+            //print("DA");
             var s = ((Grid)sender);
             Commands.SetTap(s, new Command((o) => {
                 var episodeResult = ((EpisodeResult)o);
