@@ -44,7 +44,7 @@ namespace CloudStreamForms
             public string name;
             public string posterUrl;
             public string id;
-            public Button button;
+          //  public Button button;
         }
 
         public static bool NewGithubUpdate

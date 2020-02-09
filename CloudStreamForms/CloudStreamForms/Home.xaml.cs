@@ -216,7 +216,7 @@ namespace CloudStreamForms
             MovieTypePicker.ItemsSource = genresNames;
             ImdbTypePicker.ItemsSource = recomendationTypes;
             MovieTypePicker.SelectedIndex = 0;
-            UpdateBookmarks();
+            //   UpdateBookmarks();
 
             ImdbTypePicker.SelectedIndexChanged += (o, e) => {
                 ClearEpisodes();
@@ -405,17 +405,7 @@ namespace CloudStreamForms
         List<BookmarkPoster> bookmarkPosters = new List<BookmarkPoster>();
         void UpdateBookmarks()
         {
-            double multi = 1.5;
-            int height = 100;
-            int width = 65;
-            if (Device.RuntimePlatform == Device.UWP) {
-                height = 130;
-                width = 85;
-            }
-
-            height = (int)Math.Round(height * multi);
-            width = (int)Math.Round(width * multi);
-
+            int height = 150;
             Bookmarks.HeightRequest = height;
             List<string> keys = App.GetKeys<string>("BookmarkData");
             List<string> data = new List<string>();
@@ -429,15 +419,20 @@ namespace CloudStreamForms
                 string name = FindHTML(__key, "Name=", "|||");
                 print("BOOKMARK:" + name);
                 string posterUrl = FindHTML(__key, "PosterUrl=", "|||");
+                posterUrl = ConvertIMDbImagesToHD(posterUrl, 182, 268);
+                print("POSTERURL:::" + posterUrl);
+
                 string id = FindHTML(__key, "Id=", "|||");
                 if (name != "" && posterUrl != "" && id != "") {
                     if (CheckIfURLIsValid(posterUrl)) {
                         Grid stackLayout = new Grid();
-                        Button imageButton = new Button() { HeightRequest = height, WidthRequest = width, BackgroundColor = Color.Transparent, VerticalOptions = LayoutOptions.Start };
+
+
+                      //  Button imageButton = new Button() { HeightRequest = 150, WidthRequest = 90, BackgroundColor = Color.Transparent, VerticalOptions = LayoutOptions.Start };
                         var ff = new FFImageLoading.Forms.CachedImage {
                             Source = posterUrl,
                             HeightRequest = height,
-                            WidthRequest = width,
+                            WidthRequest = 90,
                             BackgroundColor = Color.Transparent,
                             VerticalOptions = LayoutOptions.Start,
                             Transformations = {
@@ -449,19 +444,27 @@ namespace CloudStreamForms
                         //Source = p.posterUrl
 
                         stackLayout.Children.Add(ff);
-                        stackLayout.Children.Add(imageButton);
-                        bookmarkPosters.Add(new BookmarkPoster() { button = imageButton, id = id, name = name, posterUrl = posterUrl });
+                       // stackLayout.Children.Add(imageButton);
+                        bookmarkPosters.Add(new BookmarkPoster() { id = id, name = name, posterUrl = posterUrl });
                         Grid.SetColumn(stackLayout, Bookmarks.Children.Count);
                         Bookmarks.Children.Add(stackLayout);
 
                         // --- RECOMMENDATIONS CLICKED -----
+                        stackLayout.SetValue(XamEffects.TouchEffect.ColorProperty, Color.White);
+                        Commands.SetTap(stackLayout, new Command((o) => {
+                            int z = (int)o;
+                            PushPageFromUrlAndName(bookmarkPosters[z].id, bookmarkPosters[z].name);
+                            //do something
+                        }));
+                        Commands.SetTapParameter(stackLayout, i);
+                        /*
                         imageButton.Clicked += (o, _e) => {
                             for (int z = 0; z < bookmarkPosters.Count; z++) {
                                 if (((Button)o).Id == bookmarkPosters[z].button.Id) {
                                     PushPageFromUrlAndName(bookmarkPosters[z].id, bookmarkPosters[z].name);
                                 }
                             }
-                        };
+                        };*/
                     }
                 }
                 // data.Add(App.GetKey("BookmarkData"))
