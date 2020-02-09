@@ -241,7 +241,6 @@ namespace CloudStreamForms
         private void AudioClicked(object sender, EventArgs e)
         {
             PopupNavigation.Instance.PushAsync(new CloudStreamForms.MyPopupPage());
-
         }
 
         private void Pause_Clicked(object sender, EventArgs e)

@@ -31,10 +31,8 @@
 
         <StackLayout x:Name="Top100Stack">
 
-            <FlexLayout>
-
-
-                <Grid TranslationY="10">
+            <FlexLayout Margin="0,5"> 
+                <Grid TranslationY="10"  HorizontalOptions="Center">
                     <Grid.ColumnDefinitions >
                         <ColumnDefinition Width="Auto" />
                         <ColumnDefinition Width="Auto" />
@@ -44,22 +42,21 @@
                         <ColumnDefinition Width="Auto" />
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
-                    <Grid Grid.Row="0"  Grid.Column="1" TranslationX="0" Margin="50,0">
-                      <!--  <Button x:Name="MovieTypePickerBtt" InputTransparent="True" Text="Sci-Fi" TextColor="#e7e7e7" FontAttributes="Bold" FontSize="Body" CornerRadius="5" HeightRequest="30" BackgroundColor="Transparent" ></Button>-->
-                        <Picker x:Name="MovieTypePicker" HorizontalOptions="Start" TranslationX="10" TextColor="#e7e7e7" FontAttributes="Bold" FontSize="Body"> </Picker>
-                        <Image Source="dropdown.png" WidthRequest="10" HorizontalOptions="End" TranslationX="22" InputTransparent="True" />
+                    <Grid Grid.Row="0"  Grid.Column="1" TranslationX="0">
+                        <Button x:Name="MovieTypePickerBtt" InputTransparent="False" Text="Sci-Fi" TextColor="#e7e7e7" FontAttributes="Bold" FontSize="Body" CornerRadius="5" HeightRequest="40" BackgroundColor="#333333" ></Button>
+                      <!--  <Picker x:Name="MovieTypePicker" HorizontalOptions="Start" TranslationX="10" TextColor="#e7e7e7" FontAttributes="Bold" FontSize="Body"> </Picker>-->
+                        <!--    <Image Source="dropdown.png" WidthRequest="10" HorizontalOptions="Start" TranslationX="0" InputTransparent="True" /> -->
                     </Grid>
-                    <Grid Grid.Row="0"  Grid.Column="0">
-                      <!--  <Button x:Name="ImdbTypePickerBtt" InputTransparent="True"  Text="Recommendations" TextColor="#e7e7e7" FontAttributes="Bold" FontSize="Body" CornerRadius="5" HeightRequest="30" BackgroundColor="Transparent" ></Button>
--->
+                    <Grid Grid.Row="0"  Grid.Column="0"  Margin="10,0">
+                        <Button x:Name="ImdbTypePickerBtt" InputTransparent="False"  Text="Recommendations" TextColor="#e7e7e7" FontAttributes="Bold" FontSize="Body" CornerRadius="5" HeightRequest="40" BackgroundColor="#333333" ></Button>
 
-                        <Picker x:Name="ImdbTypePicker" HorizontalOptions="Start" TranslationX="10" TextColor="#e7e7e7" FontAttributes="Bold" FontSize="Body">
-                        </Picker>
-                        <Image Source="dropdown.png" WidthRequest="10" HorizontalOptions="End"  TranslationX="22"  InputTransparent="True" />
+                      <!--  <Picker x:Name="ImdbTypePicker" HorizontalOptions="Start" TranslationX="10" TextColor="#e7e7e7" FontAttributes="Bold" FontSize="Body">
+                        </Picker>-->
+                     <!--   <Image Source="dropdown.png" WidthRequest="10" HorizontalOptions="Start"  TranslationX="0"  InputTransparent="True" />-->
 
 
                     </Grid>
-
+              
                     <!--
                     <Grid Grid.Row="0"  Grid.Column="2">
                         <BoxView x:Name="BlueSeperator" Color="#303F9F" VerticalOptions="Center" HeightRequest="2" WidthRequest="10000" Margin="10"></BoxView>

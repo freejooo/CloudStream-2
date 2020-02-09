@@ -13473,10 +13473,13 @@ namespace CloudStreamForms.Droid
 			public const int splash_background = 2131165522;
 			
 			// aapt resource value: 0x7F070153
-			public const int tooltip_frame_dark = 2131165523;
+			public const int splash_background_remove = 2131165523;
 			
 			// aapt resource value: 0x7F070154
-			public const int tooltip_frame_light = 2131165524;
+			public const int tooltip_frame_dark = 2131165524;
+			
+			// aapt resource value: 0x7F070155
+			public const int tooltip_frame_light = 2131165525;
 			
 			static Drawable()
 			{

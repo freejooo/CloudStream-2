@@ -1,4 +1,5 @@
 ﻿using CloudStreamForms.Models;
+using Rg.Plugins.Popup.Services;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -24,7 +25,8 @@ namespace CloudStreamForms
 
         readonly List<string> recomendationTypes = new List<string> { "Recommended", "Top 100" };
 
-
+        LabelList MovieTypePicker;
+        LabelList ImdbTypePicker;
 
         public bool IsRecommended { get { return ImdbTypePicker.SelectedIndex == 0; } }
 
@@ -213,10 +215,18 @@ namespace CloudStreamForms
             BindingContext = epView;
 
             BackgroundColor = Settings.BlackRBGColor;
-            MovieTypePicker.ItemsSource = genresNames;
-            ImdbTypePicker.ItemsSource = recomendationTypes;
-            MovieTypePicker.SelectedIndex = 0;
+
+            MovieTypePicker = new LabelList(MovieTypePickerBtt, genresNames);
+            ImdbTypePicker = new LabelList(ImdbTypePickerBtt, recomendationTypes);
+
+            // MovieTypePicker.ItemsSource = genresNames;
+           // ImdbTypePicker.ItemsSource = recomendationTypes;
             //   UpdateBookmarks();
+
+            MovieTypePicker.SelectedIndex = 0;
+            ImdbTypePicker.SelectedIndex = -1;
+
+            
 
             ImdbTypePicker.SelectedIndexChanged += (o, e) => {
                 ClearEpisodes();
@@ -233,6 +243,7 @@ namespace CloudStreamForms
             };
 
             // MovieTypePickerBtt.Text = MovieTypePicker.Items[MovieTypePicker.SelectedIndex];
+
             MovieTypePicker.SelectedIndexChanged += (o, e) => {
                 ClearEpisodes(!IsRecommended);
                 if (IsRecommended) {
@@ -248,7 +259,6 @@ namespace CloudStreamForms
                 //GetFetchRecomended
                 //  print(MovieTypePicker.SelectedIndex + "<<Selected");
             };
-            ImdbTypePicker.SelectedIndex = bookmarkPosters.Count > 0 ? 0 : 1;
 
             episodeView.Scrolled += (o, e) => {
                 double maxY = episodeView.HeightRequest - episodeView.Height;
@@ -400,7 +410,12 @@ namespace CloudStreamForms
             BackgroundColor = Settings.BlackRBGColor;
             //Color.FromHex(Settings.MainBackgroundColor);
             hasAppered = true;
+
+
         }
+
+        //            await PopupNavigation.Instance.PushAsync(new SelectPopup(new List<string>() { "Season 1", "Season 2", "Season 3", "Season 3", "Season 3", }, 1));
+
 
         List<BookmarkPoster> bookmarkPosters = new List<BookmarkPoster>();
         void UpdateBookmarks()
@@ -428,7 +443,7 @@ namespace CloudStreamForms
                         Grid stackLayout = new Grid();
 
 
-                      //  Button imageButton = new Button() { HeightRequest = 150, WidthRequest = 90, BackgroundColor = Color.Transparent, VerticalOptions = LayoutOptions.Start };
+                        //  Button imageButton = new Button() { HeightRequest = 150, WidthRequest = 90, BackgroundColor = Color.Transparent, VerticalOptions = LayoutOptions.Start };
                         var ff = new FFImageLoading.Forms.CachedImage {
                             Source = posterUrl,
                             HeightRequest = height,
@@ -444,7 +459,7 @@ namespace CloudStreamForms
                         //Source = p.posterUrl
 
                         stackLayout.Children.Add(ff);
-                       // stackLayout.Children.Add(imageButton);
+                        // stackLayout.Children.Add(imageButton);
                         bookmarkPosters.Add(new BookmarkPoster() { id = id, name = name, posterUrl = posterUrl });
                         Grid.SetColumn(stackLayout, Bookmarks.Children.Count);
                         Bookmarks.Children.Add(stackLayout);
@@ -471,6 +486,11 @@ namespace CloudStreamForms
             }
 
             MScroll.HeightRequest = keys.Count > 0 ? 130 : 0;
+            if (ImdbTypePicker.SelectedIndex == -1) {
+
+                ImdbTypePicker.SelectedIndex = bookmarkPosters.Count > 0 ? 0 : 1;
+            }
+            
 
         }
         public double currentWidth { get { return Application.Current.MainPage.Width; } }

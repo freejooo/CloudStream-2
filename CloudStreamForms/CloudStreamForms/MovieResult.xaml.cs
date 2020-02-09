@@ -24,6 +24,9 @@ namespace CloudStreamForms
         public int SmallFontSize { get; set; } = 11;
         public int WithSize { get; set; } = 50;
 
+        LabelList SeasonPicker;
+        LabelList DubPicker;
+
 
         public Poster mainPoster;
         public string trailerUrl = "";
@@ -373,6 +376,9 @@ namespace CloudStreamForms
             ShareBtt.Source = GetImageSource("round_reply_white_48dp_inverted.png");
             StarBtt.Source = GetImageSource("notBookmarkedBtt.png");
             SubtitleBtt.Source = GetImageSource("round_subtitles_white_48dp.png");
+
+            SeasonPicker = new LabelList(SeasonBtt, new List<string>());
+            DubPicker = new LabelList(DubBtt, new List<string>());
 
             // -------------- CHROMECASTING THINGS --------------
 
@@ -831,13 +837,19 @@ namespace CloudStreamForms
                 SeasonPicker.SelectedIndexChanged += SeasonPicker_SelectedIndexChanged;
                 DubPicker.SelectedIndexChanged += DubPicker_SelectedIndexChanged;
                 if (haveSeasons) {
-                    SeasonPicker.Items.Clear();
+
+                    List<string> season = new List<string>();
+
+                    //SeasonPicker.ItemsSource.Clear();
                     for (int i = 1; i <= e.title.seasons; i++) {
-                        SeasonPicker.Items.Add("Season " + i);
+                        season.Add("Season " + i);
+                      //  SeasonPicker.ItemsSource.Add("Season " + i);
                     }
+                    SeasonPicker.ItemsSource = season;
+
                     int selIndex = App.GetKey<int>("SeasonIndex", activeMovie.title.id, 0);
                     try {
-                        SeasonPicker.SelectedIndex = Math.Min(selIndex, SeasonPicker.Items.Count - 1);
+                        SeasonPicker.SelectedIndex = Math.Min(selIndex, SeasonPicker.ItemsSource.Count - 1);
                     }
                     catch (Exception) {
                         SeasonPicker.SelectedIndex = 0; // JUST IN CASE
@@ -1016,10 +1028,10 @@ namespace CloudStreamForms
 
 
 
-        private void DubPicker_SelectedIndexChanged(object sender, EventArgs e)
+        private void DubPicker_SelectedIndexChanged(object sender, int e)
         {
             try {
-                isDub = "Dub" == DubPicker.Items[DubPicker.SelectedIndex];
+                isDub = "Dub" == DubPicker.ItemsSource[DubPicker.SelectedIndex];
                 SetDubExist();
             }
             catch (Exception) {
@@ -1028,7 +1040,7 @@ namespace CloudStreamForms
 
         }
 
-        private void SeasonPicker_SelectedIndexChanged(object sender, EventArgs e)
+        private void SeasonPicker_SelectedIndexChanged(object sender, int e)
         {
             ClearEpisodes();
             currentSeason = SeasonPicker.SelectedIndex + 1;
@@ -1037,8 +1049,8 @@ namespace CloudStreamForms
             GetImdbEpisodes(currentSeason);
 
 
-            SeasonBtt.Text = SeasonPicker.Items[SeasonPicker.SelectedIndex];
-            SeasonBtt.IsVisible = SeasonPicker.IsVisible;
+           // SeasonBtt.Text = SeasonPicker.ItemsSource[SeasonPicker.SelectedIndex];
+           // SeasonBtt.IsVisible = SeasonPicker.IsVisible;
             // myEpisodeResultCollection.Clear();
         }
 
@@ -1072,7 +1084,7 @@ namespace CloudStreamForms
 
                 //episodeView.HeightRequest = myEpisodeResultCollection.Count * heightRequestPerEpisode + (RunningWindows ? heightRequestAddEpisode : heightRequestAddEpisodeAndroid);
 
-                DubPicker.Items.Clear();
+                DubPicker.ItemsSource.Clear();
 
                 if (isAnime) {
                     bool dubExists = false;
@@ -1114,20 +1126,20 @@ namespace CloudStreamForms
 
                     if (Settings.DefaultDub) {
                         if (dubExists) {
-                            DubPicker.Items.Add("Dub");
+                            DubPicker.ItemsSource.Add("Dub");
                         }
                     }
 
                     if (subExists) {
-                        DubPicker.Items.Add("Sub");
+                        DubPicker.ItemsSource.Add("Sub");
                     }
                     if (!Settings.DefaultDub) {
                         if (dubExists) {
-                            DubPicker.Items.Add("Dub");
+                            DubPicker.ItemsSource.Add("Dub");
                         }
                     }
 
-                    if (DubPicker.Items.Count > 0) {
+                    if (DubPicker.ItemsSource.Count > 0) {
                         DubPicker.SelectedIndex = 0;
                     }
 
@@ -1138,7 +1150,7 @@ namespace CloudStreamForms
 
                 }
 
-                DubPicker.IsVisible = DubPicker.Items.Count > 0;
+                DubPicker.IsVisible = DubPicker.ItemsSource.Count > 0;
                 print(DubPicker.IsVisible + "ENABLED");
 
 
@@ -1171,7 +1183,7 @@ namespace CloudStreamForms
                         print("CLEAR AND ADD");
                         MainThread.BeginInvokeOnMainThread(() => {
                             try {
-                                DubBtt.Text = DubPicker.Items[DubPicker.SelectedIndex];
+                                DubBtt.Text = DubPicker.ItemsSource[DubPicker.SelectedIndex];
                             }
                             catch (Exception) {
 

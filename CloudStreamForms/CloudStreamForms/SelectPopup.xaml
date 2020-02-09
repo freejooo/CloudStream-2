@@ -1,0 +1,70 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<pages:PopupPage 
+    xmlns="http://xamarin.com/schemas/2014/forms"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:pages="clr-namespace:Rg.Plugins.Popup.Pages;assembly=Rg.Plugins.Popup"
+    xmlns:animations="clr-namespace:Rg.Plugins.Popup.Animations;assembly=Rg.Plugins.Popup"            xmlns:ff="clr-namespace:FFImageLoading.Forms;assembly=FFImageLoading.Forms"  
+
+             x:Class="CloudStreamForms.SelectPopup">
+    <!--You can set an animation in the xaml file or in the csharp code behind-->
+    <!--
+    <pages:PopupPage.Animation>
+        <animations:ScaleAnimation 
+            PositionIn="Center"
+            PositionOut="Center"
+            ScaleIn="1.2"
+            ScaleOut="0.8"
+            DurationIn="400"
+            DurationOut="300"
+            EasingIn="SpringIn"
+            EasingOut="SpringOut"
+            HasBackgroundAnimation="False"/>
+    </pages:PopupPage.Animation>-->
+    <!--You can use any elements here which are extended from Xamarin.Forms.View-->
+    <StackLayout>
+
+        <AbsoluteLayout x:Name="TheStack" HorizontalOptions="Center" VerticalOptions="CenterAndExpand" BackgroundColor="Transparent">
+            <Grid  RowSpacing="0" VerticalOptions="Center"    >
+                <Grid.RowDefinitions >
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"></ColumnDefinition>
+                    <ColumnDefinition Width="Auto"></ColumnDefinition>
+                    <ColumnDefinition Width="Auto"></ColumnDefinition>
+                </Grid.ColumnDefinitions>
+                <ListView x:Name="epview"  Grid.Row="0" Grid.Column="0" ItemsSource="{Binding MyNameCollection}" SeparatorColor="Transparent"  VerticalOptions="Center"    RowHeight="40" Margin="0,60" ItemSelected="epview_ItemSelected" BackgroundColor="Transparent" >
+                    <ListView.ItemTemplate >
+                        <DataTemplate >
+                            <ViewCell >
+                                <Label Text="{Binding Name}"  TextColor="#e6e6e6" HorizontalOptions="Center" VerticalOptions="Center"  FontAttributes="{Binding FontAtt}" FontSize="19"></Label>
+                            </ViewCell>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
+                <!-- <Button Grid.Row="1" Text="d">
+                
+            </Button>-->
+
+            </Grid>
+
+
+        </AbsoluteLayout>
+        <AbsoluteLayout HorizontalOptions="Center" VerticalOptions="End" BackgroundColor="Transparent"  TranslationY="-40">
+            <Grid>
+
+                <Button   x:Name="CancelButtonBtt" BackgroundColor="Transparent" HeightRequest="60" WidthRequest="60" Padding="0"  VerticalOptions="End"  HorizontalOptions="Center">
+
+                </Button>
+                <ff:CachedImage x:Name="CancelButton" InputTransparent="True" BackgroundColor="Transparent" HeightRequest="60" WidthRequest="60"   VerticalOptions="End"  HorizontalOptions="Center">
+
+                </ff:CachedImage>
+            </Grid>
+
+        </AbsoluteLayout>
+    </StackLayout>
+
+</pages:PopupPage>

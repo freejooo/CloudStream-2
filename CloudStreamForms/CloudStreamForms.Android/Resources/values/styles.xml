@@ -5,7 +5,7 @@
   <style name="MainTheme" parent="MainTheme.Base">
   </style>
   <style name="MainTheme.Splash" parent="MainTheme.Base">
-    <item name="android:windowBackground">@drawable/splash_background</item>
+     <item name="android:windowBackground">@drawable/splash_background</item>
   </style>
   <!-- Base theme applied no matter what API -->
   <style name="MainTheme.Base" parent="Theme.Design.NoActionBar">

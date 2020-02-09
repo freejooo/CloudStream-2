@@ -61,6 +61,7 @@
     <None Remove="Resource\homeIcon.png" />
     <None Remove="Resource\imdbIcon.png" />
     <None Remove="Resource\MALIcon.png" />
+    <None Remove="Resource\netflixCancel.png" />
     <None Remove="Resource\nexflixPlayBtt.png" />
     <None Remove="Resource\notBookmarkedBtt.png" />
     <None Remove="Resource\round_add_white_48dp.png" />
@@ -148,6 +149,7 @@
     <EmbeddedResource Include="Resource\homeIcon.png" />
     <EmbeddedResource Include="Resource\imdbIcon.png" />
     <EmbeddedResource Include="Resource\MALIcon.png" />
+    <EmbeddedResource Include="Resource\netflixCancel.png" />
     <EmbeddedResource Include="Resource\nexflixPlayBtt.png" />
     <EmbeddedResource Include="Resource\notBookmarkedBtt.png" />
     <EmbeddedResource Include="Resource\round_add_white_48dp.png" />
@@ -280,6 +282,9 @@
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <EmbeddedResource Update="Search.xaml">
+      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="SelectPopup.xaml">
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
     </EmbeddedResource>
     <EmbeddedResource Update="Settings.xaml">

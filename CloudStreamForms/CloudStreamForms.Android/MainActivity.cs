@@ -35,7 +35,6 @@ namespace CloudStreamForms.Droid
             TabLayoutResource = Resource.Layout.Tabbar;
             ToolbarResource = Resource.Layout.Toolbar;
 
-
             base.OnCreate(savedInstanceState);
             string data = Intent?.Data?.EncodedAuthority;
 
@@ -75,6 +74,9 @@ namespace CloudStreamForms.Droid
                 }
             }
             RequestPermission(this);
+
+           // Window.DecorView.SetBackgroundResource(Resource.Drawable.splash_background_remove);//Resources.GetDrawable(Resource.Drawable.splash_background_remove);
+
         }
 
 
