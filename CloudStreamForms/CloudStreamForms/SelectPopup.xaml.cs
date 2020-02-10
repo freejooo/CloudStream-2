@@ -88,6 +88,7 @@ namespace CloudStreamForms
 
             CancelButton.Source = GetImageSource("netflixCancel.png");
             CancelButtonBtt.Clicked += (o, e) => {
+                OnSelectedChanged = null;
                 PopupNavigation.PopAsync(true);
             };
 
