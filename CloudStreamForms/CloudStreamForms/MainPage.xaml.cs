@@ -44,7 +44,7 @@ namespace CloudStreamForms
             public string name;
             public string posterUrl;
             public string id;
-          //  public Button button;
+            //  public Button button;
         }
 
         public static bool NewGithubUpdate
@@ -4067,9 +4067,10 @@ namespace CloudStreamForms
                                                 string veryURL = FindHTML(result, "https:\\/\\/verystream.com\\/e\\/", "\"");
                                                 string gunURL = "https://gounlimited.to/" + FindHTML(result, "https:\\/\\/gounlimited.to\\/", ".html") + ".html";
                                                 string onlyURL = "https://onlystream.tv" + FindHTML(result, "https:\\/\\/onlystream.tv", "\"").Replace("\\", "");
-                                                string gogoStream = FindHTML(result, "https:\\/\\/" + GOMOURL, "\"");
-                                                string upstream = FindHTML(result, "https:\\/\\/upstream.to\\/embed-","\"");
-                                                string mightyupload = FindHTML(result, "http:\\/\\/mightyupload.com\\/", "\"").Replace("\\/","/");
+                                                //string gogoStream = FindHTML(result, "https:\\/\\/" + GOMOURL, "\"");
+                                                string upstream = FindHTML(result, "https:\\/\\/upstream.to\\/embed-", "\"");
+                                                string mightyupload = FindHTML(result, "http:\\/\\/mightyupload.com\\/", "\"").Replace("\\/", "/");
+                                                //["https:\/\/upstream.to\/embed-05mzggpp3ohg.html","https:\/\/gomo.to\/vid\/eyJ0eXBlIjoidHYiLCJzIjoiMDEiLCJlIjoiMDEiLCJpbWQiOiJ0dDA5NDQ5NDciLCJfIjoiMzQyMDk0MzQzMzE4NTEzNzY0IiwidG9rZW4iOiI2NjQ0MzkifQ,,&noneemb","https:\/\/hqq.tv\/player\/embed_player.php?vid=SGVsWVI5aUNlVTZxTTdTV09RY0x6UT09&autoplay=no",""]
 
                                                 if (upstream != "") {
                                                     string _d = DownloadString("https://upstream.to/embed-" + upstream);
@@ -4081,23 +4082,23 @@ namespace CloudStreamForms
                                                         string ur = FindHTML(_d, lookFor, "\"");
                                                         _d = RemoveOne(_d, lookFor);
                                                         string label = FindHTML(_d, "label:\"", "\"");
-                                                        AddPotentialLink(episode, ur, "HD Upstream "  +label, prio);
+                                                        AddPotentialLink(episode, ur, "HD Upstream " + label, prio);
                                                     }
                                                 }
 
-                                                if(mightyupload != "") {
+                                                if (mightyupload != "") {
                                                     print("MIGHT" + mightyupload);
                                                     string baseUri = "http://mightyupload.com/" + mightyupload;
                                                     //string _d = DownloadString("http://mightyupload.com/" + mightyupload);
                                                     string post = "op=download1&usr_login=&id=" + FindHTML("|" + mightyupload, "|", "/") + "&fname=" + FindHTML(mightyupload, "/", ".html") + "&referer=&method_free=Free+Download+%3E%3E";
 
-                                                    string _d = PostRequest(baseUri, baseUri,post, tempThred);//op=download1&usr_login=&id=k9on84m2bvr9&fname=tt0371746_play.mp4&referer=&method_free=Free+Download+%3E%3E
+                                                    string _d = PostRequest(baseUri, baseUri, post, tempThred);//op=download1&usr_login=&id=k9on84m2bvr9&fname=tt0371746_play.mp4&referer=&method_free=Free+Download+%3E%3E
                                                     print("RESMIGHT:" + _d);
                                                     if (!GetThredActive(tempThred)) { return; };
                                                     string ur = FindHTML(_d, "<source src=\"", "\"");
                                                     AddPotentialLink(episode, ur, "HD MightyUpload", 16);
                                                 }
-
+                                                /*
                                                 if (gogoStream.EndsWith(",&noneemb")) {
                                                     result = RemoveOne(result, ",&noneemb");
                                                     gogoStream = FindHTML(result, "https:\\/\\/" + GOMOURL, "\"");
@@ -4106,7 +4107,7 @@ namespace CloudStreamForms
 
                                                 gogoStream = gogoStream.Replace(",,&noneemb", "").Replace("\\", "");
 
-
+                                                */
 
                                                 Episode ep = activeMovie.episodes[episode];
                                                 if (ep.links == null) {
@@ -4148,45 +4149,50 @@ namespace CloudStreamForms
                                                 }
                                                 //   activeMovie.episodes[episode] = SetEpisodeProgress(activeMovie.episodes[episode]);
 
+                                                string __lookFor = "https:\\/\\/gomo.to\\/vid\\/";
+                                                while (result.Contains(__lookFor)) {
+                                                    string gogoStream = FindHTML(result, __lookFor, "\"");
+                                                    result = RemoveOne(result, __lookFor);
+                                                    if (gogoStream != "") {
+                                                        debug(gogoStream);
+                                                        try {
+                                                            if (!GetThredActive(tempThred)) { return; };
+                                                            string trueUrl = "https://" + GOMOURL + "/vid/" + gogoStream;
+                                                            print(trueUrl);
+                                                            d = client.DownloadString(trueUrl);
+                                                            print("-->><<__" + d);
+                                                            if (!GetThredActive(tempThred)) { return; };
 
-                                                if (gogoStream != "") {
-                                                    debug(gogoStream);
-                                                    try {
-                                                        if (!GetThredActive(tempThred)) { return; };
-                                                        string trueUrl = "https://" + GOMOURL + gogoStream;
-                                                        print(trueUrl);
-                                                        d = client.DownloadString(trueUrl);
-                                                        print("-->><<__" + d);
-                                                        if (!GetThredActive(tempThred)) { return; };
+                                                            //print(d);
+                                                            // print("https://gomostream.com" + gogoStream);
+                                                            //https://v16.viduplayer.com/vxokfmpswoalavf4eqnivlo2355co6iwwgaawrhe7je3fble4vtvcgek2jha/v.mp4
+                                                            debug("-------------------- HD --------------------");
+                                                            url = GetViduplayerUrl(d);
+                                                            debug(url);
+                                                            if (!url.EndsWith(".viduplayer.com/urlset/v.mp4") && !url.EndsWith(".viduplayer.com/vplayer/v.mp4") && !url.EndsWith(".viduplayer.com/adb/v.mp4")) {
+                                                                /*if (!LinkListContainsString(activeMovie.episodes[episode].links, url)) {
+                                                                    //print(activeMovie.episodes[episode].Progress);
+                                                                    activeMovie.episodes[episode].links.Add(new Link() { url = url, priority = 9, name = "HD Viduplayer" });
+                                                                    linkAdded?.Invoke(null, 1);
 
-                                                        //print(d);
-                                                        // print("https://gomostream.com" + gogoStream);
-                                                        //https://v16.viduplayer.com/vxokfmpswoalavf4eqnivlo2355co6iwwgaawrhe7je3fble4vtvcgek2jha/v.mp4
-                                                        debug("-------------------- HD --------------------");
-                                                        url = GetViduplayerUrl(d);
-                                                        debug(url);
-                                                        if (!url.EndsWith(".viduplayer.com/urlset/v.mp4") && !url.EndsWith(".viduplayer.com/vplayer/v.mp4") && !url.EndsWith(".viduplayer.com/adb/v.mp4")) {
-                                                            /*if (!LinkListContainsString(activeMovie.episodes[episode].links, url)) {
-                                                                //print(activeMovie.episodes[episode].Progress);
-                                                                activeMovie.episodes[episode].links.Add(new Link() { url = url, priority = 9, name = "HD Viduplayer" });
-                                                                linkAdded?.Invoke(null, 1);
+                                                                }*/
+                                                                debug("ADDED");
+                                                                AddPotentialLink(episode, url, "HD Viduplayer", 19);
 
-                                                            }*/
-                                                            debug("ADDED");
-                                                            AddPotentialLink(episode, url, "HD Viduplayer", 19);
-
+                                                            }
+                                                            debug("--------------------------------------------");
+                                                            debug("");
                                                         }
-                                                        debug("--------------------------------------------");
+                                                        catch (System.Exception) {
+                                                        }
+
+                                                    }
+                                                    else {
+                                                        debug("HD Viduplayer Link error (Read api)");
                                                         debug("");
                                                     }
-                                                    catch (System.Exception) {
-                                                    }
+                                                }
 
-                                                }
-                                                else {
-                                                    debug("HD Viduplayer Link error (Read api)");
-                                                    debug("");
-                                                }
                                                 // activeMovie.episodes[episode] = SetEpisodeProgress(activeMovie.episodes[episode]);
 
                                                 if (gunURL != "" && gunURL != "https://gounlimited.to/") {
@@ -4435,27 +4441,28 @@ namespace CloudStreamForms
             }*/
 
             string server = "";
-            string[] serverStart = { "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z" };
-            for (int s = 0; s < serverStart.Length; s++) {
+            string _ser = FindHTML(source, "<img src=\"https://", ".viduplayer.com");
+            if (_ser != "") {
+                server = _ser;
+            }
+
+            if (server == "") {
+                string[] serverStart = { "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z" };
+                for (int s = 0; s < serverStart.Length; s++) {
+                    for (int i = 0; i < 100; i++) {
+                        if (source.Contains("|" + serverStart[s] + i + "|")) {
+                            server = serverStart[s] + i;
+                        }
+                    }
+                }
+
                 for (int i = 0; i < 100; i++) {
-                    if (source.Contains("|" + serverStart[s] + i + "|")) {
-                        server = serverStart[s] + i;
+                    if (source.Contains("|www" + i + "|")) {
+                        server = "www" + i;
                     }
                 }
             }
 
-            for (int i = 0; i < 100; i++) {
-                if (source.Contains("|www" + i + "|")) {
-                    server = "www" + i;
-                }
-            }
-
-            if (server == "") {
-                return "Error, server not found";
-            }
-            if (inter == "") {
-                return "Error, index not found";
-            }
             if (inter.Length < 5) {
                 inter = FindReverseHTML(source, "|" + server + "|", "|");
             }
@@ -4464,6 +4471,17 @@ namespace CloudStreamForms
             }
 
             //https://v16.viduplayer.com/vxokfmpswoalavf4eqnivlo2355co6iwwgaawrhe7je3fble4vtvcgek2jha/v.mp4
+            //100||vxokfmpswoalavf4eqnivlo2355co6iwwgaawrhe7je3fsxmxsx2ovpk34ua|1000
+            if (inter.Length <= 5) {
+                inter = FindHTML(source, "100|", "|1000");
+            }
+            if (server == "") {
+                return "Error, server not found";
+            }
+            if (inter == "") {
+                return "Error, index not found";
+            }
+
             return "https://" + server + ".viduplayer.com/" + inter + "/v.mp4";
         }
 
