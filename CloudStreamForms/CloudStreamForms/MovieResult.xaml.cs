@@ -175,7 +175,7 @@ namespace CloudStreamForms
                 copyTxt = "https://www.imdb.com/title/" + currentMovie.title.id;
             }
             else if (a == "Title") {
-                copyTxt = currentMovie.title.name + "\n" + currentMovie.title.description;
+                copyTxt = currentMovie.title.name;
             }
             else if (a == "MAL Link") {
                 copyTxt = CurrentMalLink;
