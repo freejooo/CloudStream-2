@@ -8,6 +8,7 @@ using System.Collections.ObjectModel;
 using Rg.Plugins.Popup.Services;
 using System.Linq;
 using static CloudStreamForms.CloudStreamCore;
+using static CloudStreamForms.SelectPopup;
 
 namespace CloudStreamForms
 {
@@ -29,8 +30,8 @@ namespace CloudStreamForms
             button = _Button;
             ItemsSource = _ItemSource;
 
-            button.Clicked += (o, e) => {
-                PopupNavigation.Instance.PushAsync(new SelectPopup(ItemsSource, SelectedIndex));
+            button.Clicked += async (o, e) => {
+                await PopupNavigation.Instance.PushAsync(new SelectPopup(ItemsSource, SelectedIndex));
                 SelectPopup.OnSelectedChanged += (_o, _e) => {
                     SelectedIndex = _e;
                 };
@@ -58,6 +59,7 @@ namespace CloudStreamForms
         public static int selected = -1;
         public static EventHandler<int> OnSelectedChanged;
         public static bool isOpen = false;
+        SelectLabelView selectBinding;
 
         List<string> currentOptions = new List<string>();
         void UpdateScreenRot()
@@ -85,12 +87,12 @@ namespace CloudStreamForms
 
 
 
-
             CancelButton.Source = GetImageSource("netflixCancel.png");
             CancelButtonBtt.Clicked += (o, e) => {
                 OnSelectedChanged = null;
                 PopupNavigation.PopAsync(true);
             };
+
 
             epview.ItemSelected += (o, e) => {
                 if (selected != e.SelectedItemIndex) {
@@ -101,30 +103,49 @@ namespace CloudStreamForms
                 PopupNavigation.PopAsync(true);
             };
 
-            MyNameCollection = new ObservableCollection<PopupName>();
+
+            selectBinding = new SelectLabelView();
+            BindingContext = selectBinding;
+
+            for (int i = 0; i < currentOptions.Count; i++) {
+                bool isSel = i == selected;
+
+                selectBinding.MyNameCollection.Add(new PopupName() { IsSelected = isSel, Name = currentOptions[i] });
+                //  MyNameCollection.Add(p);
+            }
+            epview.ScrollTo(selectBinding.MyNameCollection[selected], ScrollToPosition.Center, false);
+
+            // MyNameCollection = new ObservableCollection<PopupName>();
+
+            /*
             for (int i = 0; i < options.Count; i++) {
                 bool isSel = i == selected;
-                PopupName p = new PopupName() { IsSelected = isSel, Name = options[i], FontAtt = isSel ? FontAttributes.Bold : FontAttributes.None };
-                MyNameCollection.Add(p);
-            }
-            BindingContext = this;
-            epview.ScrollTo(MyNameCollection[selected], ScrollToPosition.Center, false);
+                PopupName p = new PopupName() { IsSelected = isSel, Name = options[i] };//, FontAtt = isSel ? FontAttributes.Bold : FontAttributes.None };
+                selectBinding.MyNameCollection.Add(p);
+                //  MyNameCollection.Add(p);
+            }*/
 
+
+            //   print("EPC:" + selectBinding.MyNameCollection.Count);
+            //   epview.ItemsSource = MyNameCollection;
+
+            /*
+
+                       */
         }
+
+
 
         public class PopupName
         {
-            public string Name { set; get; }
-            public bool IsSelected { set; get; }
-            public FontAttributes FontAtt { set; get; }
+            public string Name { set; get; } = "Hello";
+            public bool IsSelected { set; get; } = false;
+            public FontAttributes FontAtt { get { return IsSelected ? FontAttributes.Bold : FontAttributes.None; } }
+            public int FontSize { get { return IsSelected ? 21 : 19; } }
         }
-        public ObservableCollection<PopupName> MyNameCollection { set; get; }
 
 
-        private void epview_ItemSelected(object sender, SelectedItemChangedEventArgs e)
-        {
 
-        }
 
         protected override void OnAppearing()
         {
@@ -197,6 +218,18 @@ namespace CloudStreamForms
         {
             // Return false if you don't want to close this popup page when a background of the popup page is clicked
             return base.OnBackgroundClicked();
+        }
+    }
+    public class SelectLabelView
+    {
+        public ObservableCollection<PopupName> MyNameCollection { set { Added?.Invoke(null, null); _MyNameCollection = value; } get { return _MyNameCollection; } }
+        private ObservableCollection<PopupName> _MyNameCollection { set; get; }
+
+        public event EventHandler Added;
+
+        public SelectLabelView()
+        {
+            MyNameCollection = new ObservableCollection<PopupName>();
         }
     }
 }

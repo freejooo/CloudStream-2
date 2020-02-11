@@ -90,6 +90,7 @@ namespace CloudStreamForms
         {
             InitializeComponent(); mainPage = this;
 
+            
             List<string> names = new List<string>() { "Home", "Search", "Downloads", "Settings" };
             List<string> icons = new List<string>() { "homeIcon.png", "searchIcon.png", "downloadIcon.png", "baseline_settings_applications_white_48dp_inverted_big.png" };
             List<Page> pages = new List<Page>() { new Home(), new Search(), new Download(), new Settings(), };
@@ -2417,7 +2418,7 @@ namespace CloudStreamForms
             }
         }
 
-        public static int GetMaxEpisodesInAnimeSeason(Movie currentMovie, int currentSeason, bool isDub, TempThred tempThred)
+        public static int GetMaxEpisodesInAnimeSeason(Movie currentMovie, int currentSeason, bool isDub, TempThred? tempThred = null)
         {
             int max = 0;
             int maxGogo = 0;
@@ -2432,8 +2433,9 @@ namespace CloudStreamForms
                     dstring = dstring.Replace("-dub", "") + (isDub ? "-dub" : "");
                     string d = DownloadString("https://www9.gogoanime.io/category/" + dstring);
                     if (d != "") {
-
-                        if (!GetThredActive(tempThred)) { return max; }; // COPY UPDATE PROGRESS
+                        if (tempThred != null) {
+                            if (!GetThredActive((TempThred)tempThred)) { return max; }; // COPY UPDATE PROGRESS
+                        }
                         string subMax = FindHTML(d, "class=\"active\" ep_start = \'", ">");
                         string maxEp = FindHTML(subMax, "ep_end = \'", "\'");//FindHTML(d, "<a href=\"#\" class=\"active\" ep_start = \'0\' ep_end = \'", "\'");
                         print(i + "MAXEP" + maxEp);
@@ -2457,7 +2459,9 @@ namespace CloudStreamForms
                 //  activeMovie.title.MALData.currentActiveDubbedMaxEpsPerSeason = new List<int>();
                 List<int> dubbedSum = new List<int>();
                 List<string> dubbedAnimeLinks = GetAllDubbedAnimeLinks(currentMovie, currentSeason);
-                if (!GetThredActive(tempThred)) { return max; }; // COPY UPDATE PROGRESS
+                if (tempThred != null) {
+                    if (!GetThredActive((TempThred)tempThred)) { return max; }; // COPY UPDATE PROGRESS
+                }
                 for (int i = 0; i < dubbedAnimeLinks.Count; i++) {
                     print("LINKOS:" + dubbedAnimeLinks[i]);
                     DubbedAnimeEpisode ep = GetDubbedAnimeEpisode(dubbedAnimeLinks[i], 1);
