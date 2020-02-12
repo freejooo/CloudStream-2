@@ -90,7 +90,7 @@ namespace CloudStreamForms
         {
             InitializeComponent(); mainPage = this;
 
-            
+
             List<string> names = new List<string>() { "Home", "Search", "Downloads", "Settings" };
             List<string> icons = new List<string>() { "homeIcon.png", "searchIcon.png", "downloadIcon.png", "baseline_settings_applications_white_48dp_inverted_big.png" };
             List<Page> pages = new List<Page>() { new Home(), new Search(), new Download(), new Settings(), };
@@ -737,6 +737,7 @@ namespace CloudStreamForms
 
             public GogoAnimeData gogoData;
             public DubbedAnimeData dubbedAnimeData;
+            public KickassAnimeData kickassAnimeData;
         }
         [Serializable]
         public struct GogoAnimeData
@@ -745,8 +746,18 @@ namespace CloudStreamForms
             public bool subExists;
             public string subUrl;
             public string dubUrl;
-
         }
+        [Serializable]
+        public struct KickassAnimeData
+        {
+            public bool dubExists;
+            public bool subExists;
+            public string subUrl;
+            public string dubUrl;
+            public List<string> dubEpisodesUrls;
+            public List<string> subEpisodesUrls;
+        }
+
         [Serializable]
 
         public struct DubbedAnimeData
@@ -767,11 +778,13 @@ namespace CloudStreamForms
         {
             public string japName;
             public string engName;
+            public string firstName;
             public List<MALSeasonData> seasonData;
             public bool done;
             public bool loadSeasonEpCountDone;
             public List<int> currentActiveGoGoMaxEpsPerSeason;
             public List<int> currentActiveDubbedMaxEpsPerSeason;
+            public List<int> currentActiveKickassMaxEpsPerSeason;
             public string currentSelectedYear;
         }
 
@@ -1209,18 +1222,21 @@ namespace CloudStreamForms
                         while (_d.Contains(lookFor) && !done) { // TO FIX MY HERO ACADIMEA CHOOSING THE SECOND SEASON BECAUSE IT WAS FIRST SEARCHRESULT
                             string name = FindHTML(_d, lookFor, "\"");
                             print("NAME FOUND: " + name);
-                            string _url = FindHTML(_d, "url\":\"", "\"").Replace("\\/", "/");
-                            string startYear = FindHTML(_d, "start_year\":", ",");
-                            string aired = FindHTML(_d, "aired\":\"", "\"");
-                            string _aired = FindHTML(aired, ", ", " ", readToEndOfFile: true);
-                            string score = FindHTML(_d, "score\":\"", "\"");
-                            print("SCORE:" + score);
-                            if (!name.Contains(" Season") && year == _aired && score != "N\\/A") {
-                                print("URL FOUND: " + _url);
-                                print(_d);
-                                url = _url;
-                                done = true;
-                                currentSelectedYear = _aired;
+                            if (!name.EndsWith("Specials")) {
+                                string _url = FindHTML(_d, "url\":\"", "\"").Replace("\\/", "/");
+                                string startYear = FindHTML(_d, "start_year\":", ",");
+                                string aired = FindHTML(_d, "aired\":\"", "\"");
+                                string _aired = FindHTML(aired, ", ", " ", readToEndOfFile: true);
+                                string score = FindHTML(_d, "score\":\"", "\"");
+                                print("SCORE:" + score);
+                                if (!name.Contains(" Season") && year == _aired && score != "N\\/A") {
+                                    print("URL FOUND: " + _url);
+                                    print(_d);
+                                    url = _url;
+                                    done = true;
+                                    currentSelectedYear = _aired;
+                                }
+
                             }
                             _d = RemoveOne(_d, lookFor);
                             _d = RemoveOne(_d, "\"id\":");
@@ -1245,6 +1261,7 @@ namespace CloudStreamForms
 
                         string jap = FindHTML(d, "Japanese:</span> ", "<").Replace("  ", "").Replace("\n", ""); // JAP NAME IS FOR SEARCHING, BECAUSE ALL SEASONS USE THE SAME NAME
                         string eng = FindHTML(d, "English:</span> ", "<").Replace("  ", "").Replace("\n", "");
+                        string firstName = FindHTML(d, " itemprop=\"name\">", "<").Replace("  ", "").Replace("\n", "");
 
                         string currentName = FindHTML(d, "<span itemprop=\"name\">", "<");
                         List<MALSeasonData> data = new List<MALSeasonData>() { new MALSeasonData() { malUrl = url, seasons = new List<MALSeason>() } };
@@ -1304,6 +1321,7 @@ namespace CloudStreamForms
                             seasonData = data,
                             japName = jap,
                             engName = eng,
+                            firstName = firstName,
                             done = false,
                             currentSelectedYear = currentSelectedYear,
                         };
@@ -1317,6 +1335,7 @@ namespace CloudStreamForms
                     print("FISHING DATA");
                     FishGogoAnime(currentSelectedYear, tempThred);
                     FishDubbedAnime();
+                    FishKickassAnime(activeMovie.title.MALData.firstName);
                     print("DONE FISHING DATA");
                     MALData md = activeMovie.title.MALData;
 
@@ -1339,6 +1358,125 @@ namespace CloudStreamForms
             });
             tempThred.Thread.Name = "MAL Search";
             tempThred.Thread.Start();
+        }
+
+        static void FishKickassAnime(string query)
+        {
+
+
+            /*
+             *  for (int i = 0; i < activeMovie.title.MALData.seasonData.Count; i++) {
+                            for (int q = 0; q < activeMovie.title.MALData.seasonData[i].seasons.Count; q++) {
+                                MALSeason ms = activeMovie.title.MALData.seasonData[i].seasons[q];
+
+                                bool containsSyno = false;
+                                for (int s = 0; s < ms.synonyms.Count; s++) {
+                                    if (ToLowerAndReplace(ms.synonyms[s]) == ToLowerAndReplace(animeTitle)) {
+                                        containsSyno = true;
+                                    }
+                                    //  print("SYNO: " + ms.synonyms[s]);
+                                }
+
+                                //  print(animeTitle.ToLower() + "|" + ms.name.ToLower() + "|" + ms.engName.ToLower() + "|" + ___year + "___" + ___year2 + "|" + containsSyno);
+
+                                if (ToLowerAndReplace(ms.name) == ToLowerAndReplace(animeTitle) || ToLowerAndReplace(ms.engName) == ToLowerAndReplace(animeTitle) || containsSyno) {*/
+            string url = "https://www.kickassanime.rs/search?q=" + query;//activeMovie.title.name.Replace(" ", "%20");
+            print("COMPAREURL:" + url);
+            string d = DownloadString(url);
+            print("DOWNLOADEDDDD::" + d);
+            string lookfor = "\"name\":\"";
+            while (d.Contains(lookfor)) {
+                string animeTitle = FindHTML(d, lookfor, "\"");
+                const string dubTxt = "(Dub)";
+                const string cenTxt = "(Censored)";
+                bool isDub = animeTitle.Contains(dubTxt);
+                bool cencored = animeTitle.Contains(cenTxt);
+
+                animeTitle = animeTitle.Replace(cenTxt, "").Replace(dubTxt, "").Replace(" ", "");
+
+                d = RemoveOne(d, lookfor);
+                string slug = "https://www.kickassanime.rs" + FindHTML(d, "\"slug\":\"", "\"").Replace("\\/", "/");
+
+                for (int i = 0; i < activeMovie.title.MALData.seasonData.Count; i++) {
+                    for (int q = 0; q < activeMovie.title.MALData.seasonData[i].seasons.Count; q++) {
+                        MALSeason ms = activeMovie.title.MALData.seasonData[i].seasons[q];
+
+                        string compareName = ms.name.Replace(" ", "");
+                        bool containsSyno = false;
+                        for (int s = 0; s < ms.synonyms.Count; s++) {
+                            if (ToLowerAndReplace(ms.synonyms[s]) == ToLowerAndReplace(animeTitle)) {
+                                containsSyno = true;
+                            }
+                            //  print("SYNO: " + ms.synonyms[s]);
+                        }
+
+                        //  print(animeTitle.ToLower() + "|" + ms.name.ToLower() + "|" + ms.engName.ToLower() + "|" + ___year + "___" + ___year2 + "|" + containsSyno);
+                        print("COMPARE: " + compareName + "|" + animeTitle);
+                        if (ToLowerAndReplace(compareName) == ToLowerAndReplace(animeTitle) || ToLowerAndReplace(ms.engName.Replace(" ", "")) == ToLowerAndReplace(animeTitle) || containsSyno || (animeTitle.ToLower().Replace(compareName.ToLower(), "").Length / (float)animeTitle.Length) < 0.3f) { // OVER 70 MATCH
+                            print("FINISHED:::::" + slug);
+
+                            string _d = DownloadString(slug);
+                            // print(d);
+                            string _lookfor = "\"epnum\":\"";
+                            List<string> episodes = new List<string>();
+                            while (_d.Contains(_lookfor)) {
+                                //epnum":"Preview","name":null,"slug":"\/anime\/dr-stone-901389\/preview-170620","createddate":"2019-05-30 00:27:49"
+                                string epNum = FindHTML(_d, _lookfor, "\"");
+                                _d = RemoveOne(_d, _lookfor);
+
+                                string _slug = "https://www.kickassanime.rs" + FindHTML(_d, "\"slug\":\"", "\"").Replace("\\/", "/");
+                                print("SLUGOS:" + _slug + "|" + epNum);
+                                string createDate = FindHTML(_d, "\"createddate\":\"", "\"");
+                                // string name = FindHTML(d, lookfor, "\"");
+                                //string slug = FindHTML(d, "\"slug\":\"", "\"").Replace("\\/", "/");
+                                if (epNum.StartsWith("Episode")) {
+                                    int cEP = int.Parse(epNum.Replace("Episode ", ""));
+                                    int change = Math.Max(cEP - episodes.Count, 0);
+                                    for (int z = 0; z < change; z++) {
+                                        episodes.Add("");
+                                    }
+
+                                    episodes[cEP - 1] = _slug;
+
+
+                                }
+                                print(epNum + "|" + slug + "|" + createDate);
+                            }
+                            print("EPISODES::::" + episodes.Count);
+                            var baseData = activeMovie.title.MALData.seasonData[i].seasons[q];
+                            if (!isDub) {
+                                baseData.kickassAnimeData.subExists = true;
+                                baseData.kickassAnimeData.subUrl = slug;
+                                baseData.kickassAnimeData.subEpisodesUrls = episodes;
+
+                            }
+                            else {
+                                baseData.kickassAnimeData.dubExists = true;
+                                baseData.kickassAnimeData.dubUrl = slug;
+                                baseData.kickassAnimeData.dubEpisodesUrls = episodes;
+                            }
+
+                            activeMovie.title.MALData.seasonData[i].seasons[q] = baseData;
+
+                        }
+                    }
+                }
+
+
+                print(slug + "|" + animeTitle);
+            }
+            for (int i = 0; i < activeMovie.title.MALData.seasonData.Count; i++) {
+                for (int q = 0; q < activeMovie.title.MALData.seasonData[i].seasons.Count; q++) {
+                    var ms = activeMovie.title.MALData.seasonData[i].seasons[q];
+
+                    if (ms.kickassAnimeData.dubExists) {
+                        print(i + ". " + ms.name + " | Dub E" + ms.kickassAnimeData.dubUrl);
+                    }
+                    if (ms.kickassAnimeData.subExists) {
+                        print(i + ". " + ms.name + " | Sub E" + ms.kickassAnimeData.subUrl);
+                    }
+                }
+            }
         }
 
         static void FishDubbedAnime()
@@ -2423,6 +2561,7 @@ namespace CloudStreamForms
             int max = 0;
             int maxGogo = 0;
             int maxDubbed = 0;
+            int maxKickass = 0;
 
             List<int> saved = new List<int>();
             //activeMovie.title.MALData.currentActiveGoGoMaxEpsPerSeason = new List<int>();
@@ -2455,6 +2594,10 @@ namespace CloudStreamForms
 
             }
 
+            List<string> baseUrlsKickass = GetAllKickassLinksFromAnime(currentMovie, currentSeason, isDub);
+            maxKickass = baseUrlsKickass.Count;
+            //activeMovie.title.MALData.currentActiveKickassMaxEpsPerSeason = baseUrlsKickass.Count;
+
             if (isDub) {
                 //  activeMovie.title.MALData.currentActiveDubbedMaxEpsPerSeason = new List<int>();
                 List<int> dubbedSum = new List<int>();
@@ -2472,8 +2615,9 @@ namespace CloudStreamForms
                 maxDubbed = dubbedSum.Sum();
                 activeMovie.title.MALData.currentActiveDubbedMaxEpsPerSeason = dubbedSum;
             }
+
             print("MAX:" + maxDubbed + "|" + maxGogo);
-            max = Math.Max(maxDubbed, maxGogo);
+            max = Math.Max(maxDubbed, Math.Max(maxGogo, maxKickass));
             return max;
         }
 
@@ -2513,6 +2657,26 @@ namespace CloudStreamForms
                         if (!baseUrls.Contains(burl)) {
                             baseUrls.Add(burl);
                         }
+                        //print("BASEURL " + ms.baseUrl);
+                    }
+                }
+            }
+            catch (Exception) {
+            }
+            return baseUrls;
+        }
+        public static List<string> GetAllKickassLinksFromAnime(Movie currentMovie, int currentSeason, bool isDub)
+        {
+            List<string> baseUrls = new List<string>();
+
+            try {
+                for (int q = 0; q < currentMovie.title.MALData.seasonData[currentSeason].seasons.Count; q++) {
+                    var ms = currentMovie.title.MALData.seasonData[currentSeason].seasons[q].kickassAnimeData;
+
+                    if ((ms.dubExists && isDub) || (ms.subExists && !isDub)) {
+                        //  dstring = ms.baseUrl;
+                        baseUrls.AddRange(isDub ? ms.dubEpisodesUrls : ms.subEpisodesUrls);
+
                         //print("BASEURL " + ms.baseUrl);
                     }
                 }
@@ -2869,6 +3033,203 @@ namespace CloudStreamForms
 
         }
 
+        static void GetKickassVideoFromURL(string url, int normalEpisode)
+        {
+            print("GETLINK;;;::" + url);
+            TempThred tempThred = new TempThred();
+            tempThred.typeId = 3; // MAKE SURE THIS IS BEFORE YOU CREATE THE THRED
+            tempThred.Thread = new System.Threading.Thread(() => {
+                try {
+
+
+
+
+                    string CorrectURL(string u)
+                    {
+                        if (u.StartsWith("//")) {
+                            u = "https:" + u;
+                        }
+                        return u.Replace("\\/", "/");
+                    }
+                    string Base64Decode(string base64EncodedData)
+                    {
+                        var base64EncodedBytes = System.Convert.FromBase64String(base64EncodedData);
+                        return System.Text.Encoding.UTF8.GetString(base64EncodedBytes);
+                    }
+                    string GetCode(string _d)
+                    {
+                        string res = FindHTML(_d, "Base64.decode(\"", "\"");
+                        return Base64Decode(res);
+                    }
+
+                    void GetSources(string _s)
+                    {
+                        print("DECODED: " + _s);
+                        string daly = "https://www.dailymotion.com/embed";
+                        string dalyKey = FindHTML(_s, daly, "\"");
+                        if (dalyKey != "") {
+                            dalyKey = daly + dalyKey;
+                            string f = DownloadString(dalyKey);
+                            if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
+
+                            print(f);
+
+                            string qulitys = FindHTML(f, "qualities\":{", "]}");
+                            string find = "\"url\":\"";
+                            while (qulitys.Contains(find)) {
+                                string burl = FindHTML(qulitys, find, "\"").Replace("\\/", "/");
+                                qulitys = RemoveOne(qulitys, find);
+                                if (qulitys.Replace(" ", "") != "") {
+                                    AddPotentialLink(normalEpisode, burl, "KickassDaily", 0);
+                                }
+                                print("URL::" + burl);
+                            }
+                        }
+
+                        string mp4Upload = "<source src=\"";
+                        string __s = "<source" + FindHTML(_s, "<source", "</video>");
+                        while (__s.Contains(mp4Upload)) {
+                            string mp4UploadKey = FindHTML(__s, mp4Upload, "\"");
+                            print("UR: " + mp4UploadKey);
+                            __s = RemoveOne(__s, mp4Upload);
+                            string label = FindHTML(__s, "label=\"", "\"");
+                            AddPotentialLink(normalEpisode, mp4UploadKey, "KickassMp4 " + label, 2);
+
+                        }
+
+
+                        // =================== GETS LINKS WITH AUDIO SEPARATED FROM LINK :( ===================
+                        /* 
+                        string kickass = "playlist: [{file:\"";
+                        string kickKey = FindHTML(_s, kickass, "\"").Replace("https:", "").Replace("http:", "");
+                        if (kickKey != "") {
+                            string s = RemoveHtmlChars(DownloadString("https:" + kickKey));
+                            string lookFor = "<BaseURL>";
+                            while (s.Contains(lookFor)) {
+                                string label = FindHTML(s, "FBQualityLabel=\"", "\"");
+
+                                string uri = FindHTML(s, lookFor, "<");
+                                print("UR: " + label + "|" + uri);
+                                AddPotentialLink(normalEpisode, uri, "KickassPlay " + label, 1);
+
+                                s = RemoveOne(s, lookFor);
+                            }
+                        }*/
+
+
+                        //file:"
+
+                        if (_s.Contains("sources: [{file:\"")) {
+                            string s = _s.ToString();
+                            string lookFor = "file:\"";
+
+                            while (s.Contains(lookFor)) {
+                                string uri = FindHTML(s, lookFor, "\"");
+                                s = RemoveOne(s, lookFor);
+                                string label = FindHTML(s, "label:\"", "\"");
+                                if (label.Replace(" ", "") != "") {
+                                    AddPotentialLink(normalEpisode, uri, "KickassSource " + label, 1);
+                                }
+                                print("UR: " + label + "|" + uri);
+                            }
+                        }
+                    }
+
+                    void UrlDecoder(string _d, string _url)
+                    {
+                        if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
+
+                        string _s = GetCode(_d);
+                        if (_s != "") {
+                            GetSources(_s);
+                        }
+                        GetSources(_d);
+
+
+
+
+                        string img = FindHTML(_d, "src=\"pref.php", "\"");
+                        string beforeAdd = "pref.php";
+                        if (img == "") {
+                            img = FindHTML(_d, "<iframe src=\"", "\"");
+                            beforeAdd = "";
+                        }
+                        print("IMG:" + img);
+                        if (img != "") {
+                            img = beforeAdd + img;
+                            string next = GetBase(_url) + "/" + img;
+                            string __d = DownloadString(next);
+                            print(__d);
+                            UrlDecoder(__d, next);
+                        }
+                        else {
+                            string wLoc = "window.location = \'";
+                            string subURL = FindHTML(_d, "adComplete", wLoc);
+                            print("SUBFILE:" + subURL);
+                            string subEr = CorrectURL(FindHTML(_d, subURL + wLoc, "\'"));
+                            print("ED:" + subEr);
+                            if (subEr != "") {
+                                print("URI:" + subEr);
+                                if (subEr.StartsWith("https://vidstreaming.io")) {
+                                    string dEr = DownloadString(subEr);
+                                    if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
+                                    AddEpisodesFromMirrors(tempThred, dEr, normalEpisode);
+                                }
+                                else {
+                                    UrlDecoder(DownloadString(subEr, repeats: 2, waitTime: 100), subEr);
+                                }
+                            }
+                        }
+
+
+                    }
+
+                    string GetBase(string _url)
+                    {
+                        string from = FindHTML(_url, "/", "?");
+                        int _i = from.LastIndexOf("/");
+                        from = from.Substring(_i, from.Length - _i);
+                        return FindHTML("|" + _url, "|", "/" + from.Replace("/", ""));
+                    }
+
+                    string d = DownloadString(url);
+                    if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
+
+                    //"link":"
+
+                    string link1 = FindHTML(d, "link1\":\"", "\"").Replace("\\/", "/");
+                    link1 = CorrectURL(link1);
+                    string look1 = "\"link\":\"";
+                    string main = DownloadString(link1);
+                    if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
+
+                    UrlDecoder(main, link1);
+                    string look = "\"src\":\"";
+                    while (main.Contains(look)) {
+                        string source = FindHTML(main, look, "\"").Replace("\\/", "/");
+                        UrlDecoder(DownloadString(source), source);
+                        if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
+                        main = RemoveOne(main, look);
+                    }
+
+                    while (d.Contains(look1)) {
+                        string source = FindHTML(d, look1, "\"").Replace("\\/", "/");
+                        print(source);
+                        UrlDecoder(DownloadString(source), source);
+                        if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
+                        d = RemoveOne(d, look1);
+                    }
+
+                }
+                finally {
+                    JoinThred(tempThred);
+                }
+            });
+            tempThred.Thread.Name = "QuickSearch";
+            tempThred.Thread.Start();
+
+        }
+
 
         public static void GetEpisodeLink(int episode = -1, int season = 1, bool purgeCurrentLinkThread = true, bool onlyEpsCount = false, bool isDub = true)
         {
@@ -2962,7 +3323,7 @@ namespace CloudStreamForms
                                             print(burl);
                                             string _d = DownloadString(burl);
                                             print("SSC:" + _d);
-                                            int prio = 20;
+                                            int prio = -10; // SOME LINKS ARE EXPIRED, CAUSING VLC TO EXIT
 
                                             string enlink = "\'";
                                             if (_d.Contains("<source src=\"")) {
@@ -2975,8 +3336,10 @@ namespace CloudStreamForms
                                                     vUrl = "https:" + vUrl;
                                                 }
                                                 string label = FindHTML(_d, "label=" + enlink, enlink);
-                                                print(vUrl + "|" + label);
+                                                print("DUBBEDANIMECHECK:" + vUrl + "|" + label);
+                                                //if (GetFileSize(vUrl) > 0) {
                                                 AddPotentialLink(normalEpisode, vUrl, "DubbedAnime " + label.Replace("0p", "0") + "p", prio);
+                                                //}
 
                                                 _d = RemoveOne(_d, lookFor);
                                                 _d = RemoveOne(_d, "label=" + enlink);
@@ -2994,6 +3357,14 @@ namespace CloudStreamForms
 
                         }
 
+                        var kickAssLinks = GetAllKickassLinksFromAnime(activeMovie, season, isDub);
+                        print("KICKASSOS:" + normalEpisode);
+                        for (int i = 0; i < kickAssLinks.Count; i++) {
+                            print("KICKASSLINK:" + i + ". |" + kickAssLinks[i]);
+                        }
+                        if (normalEpisode < kickAssLinks.Count) {
+                            GetKickassVideoFromURL(kickAssLinks[normalEpisode], normalEpisode);
+                        }
 
                         try {
                             if (episode <= activeMovie.title.MALData.currentActiveGoGoMaxEpsPerSeason.Sum()) {
@@ -3324,14 +3695,19 @@ namespace CloudStreamForms
             try {
                 var webRequest = HttpWebRequest.Create(new System.Uri(url));
                 webRequest.Method = "HEAD";
+                print("RESPONSEGET:");
 
                 using (var webResponse = webRequest.GetResponse()) {
+                    print("RESPONSE:");
                     var fileSize = webResponse.Headers.Get("Content-Length");
                     var fileSizeInMegaByte = Math.Round(Convert.ToDouble(fileSize) / Math.Pow((double)App.GetSizeOfJumpOnSystem(), 2.0), 2);
+                    print("GETFILESIZE: " + fileSizeInMegaByte);
+
                     return fileSizeInMegaByte;
                 }
             }
             catch (Exception) {
+                print("ERRORGETFILESIZE: " + url);
                 return -1;
             }
         }
@@ -3645,6 +4021,7 @@ namespace CloudStreamForms
             _url = _url.Replace(" ", "%20");
             if (!LinkListContainsString(activeMovie.episodes[normalEpisode].links, _url)) {
                 if (CheckIfURLIsValid(_url)) {
+                    // if (GetFileSize(_url) > 0) {
                     print("ADD LINK:" + normalEpisode + "|" + _name + "|" + _priority + "|" + _url);
                     Episode ep = activeMovie.episodes[normalEpisode];
                     if (ep.links == null) {
@@ -3670,6 +4047,7 @@ namespace CloudStreamForms
                     activeMovie.episodes[normalEpisode].links.Add(link); // [MIRRORCOUNTER] IS LATER REPLACED WITH A NUMBER TO MAKE IT EASIER TO SEPERATE THEM, CAN'T DO IT HERE BECAUSE IT MUST BE ABLE TO RUN SEPARETE THREADS AT THE SAME TIME
                     linkAdded?.Invoke(null, link);
                     return true;
+                    //}
                 }
             }
             return false;
@@ -4520,18 +4898,18 @@ namespace CloudStreamForms
         /// <param name="url"></param>
         /// <param name="UTF8Encoding"></param>
         /// <returns></returns>
-        public static string DownloadString(string url, TempThred? tempThred = null, bool UTF8Encoding = true, int repeats = 5)
+        public static string DownloadString(string url, TempThred? tempThred = null, bool UTF8Encoding = true, int repeats = 5, int waitTime = 1000)
         {
             string s = "";
             for (int i = 0; i < repeats; i++) {
                 if (s == "") {
-                    s = DownloadStringOnce(url, tempThred, UTF8Encoding);
+                    s = DownloadStringOnce(url, tempThred, UTF8Encoding, waitTime);
                 }
             }
             return s;
         }
 
-        public static string DownloadStringOnce(string url, TempThred? tempThred = null, bool UTF8Encoding = true)
+        public static string DownloadStringOnce(string url, TempThred? tempThred = null, bool UTF8Encoding = true, int waitTime = 1000)
         {
             try {
                 WebClient client = new WebClient();
@@ -4560,7 +4938,7 @@ namespace CloudStreamForms
                     }
                 };
                 client.DownloadStringTaskAsync(url);
-                for (int i = 0; i < 1000; i++) {
+                for (int i = 0; i < waitTime; i++) {
                     Thread.Sleep(10);
                     try {
                         if (tempThred != null) {

@@ -1114,6 +1114,17 @@ namespace CloudStreamForms
                             catch (Exception) {
 
                             }
+                            try {
+                                if (ms.kickassAnimeData.dubExists) {
+                                    dubExists = true;
+                                }
+                                if (ms.kickassAnimeData.subExists) {
+                                    subExists = true;
+                                }
+                            }
+                            catch (Exception) {
+
+                            }
 
 
                         }
