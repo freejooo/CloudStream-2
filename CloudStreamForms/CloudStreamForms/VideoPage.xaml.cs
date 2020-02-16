@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
+using XamEffects;
+using static CloudStreamForms.CloudStreamCore;
 
 namespace CloudStreamForms
 {
@@ -115,12 +117,18 @@ namespace CloudStreamForms
 
 
             // ========== IMGS ==========
-            SubtitlesImg.Source = App.GetImageSource("netflixSubtitlesCut.png"); //App.GetImageSource("baseline_subtitles_white_48dp.png");
+           // SubtitlesImg.Source = App.GetImageSource("netflixSubtitlesCut.png"); //App.GetImageSource("baseline_subtitles_white_48dp.png");
             MirrosImg.Source = App.GetImageSource("baseline_playlist_play_white_48dp.png");
+            EpisodesImg.Source = App.GetImageSource("netflixEpisodesCut.png");
+            NextImg.Source = App.GetImageSource("baseline_skip_next_white_48dp.png");
             //  GradientBottom.Source = App.GetImageSource("gradient.png");
-            DownloadImg.Source = App.GetImageSource("episodesNetflix2.png");//App.GetImageSource("round_more_vert_white_48dp.png");
+            // DownloadImg.Source = App.GetImageSource("netflixEpisodesCut.png");//App.GetImageSource("round_more_vert_white_48dp.png");
             LockImg.Source = App.GetImageSource("wlockUnLocked.png");
-
+            Commands.SetTap(EpisodesTap, new Command(() => {
+                //do something
+                print("Hello");
+            }));
+            //Commands.SetTapParameter(view, someObject);
             // ================================================================================ UI ================================================================================
             PausePlayBtt.Source = App.GetImageSource(PAUSE_IMAGE);
 

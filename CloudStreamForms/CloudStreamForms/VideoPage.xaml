@@ -4,6 +4,7 @@
              xmlns:local="clr-namespace:MediaElement"
              xmlns:vlc="clr-namespace:LibVLCSharp.Forms.Shared;assembly=LibVLCSharp.Forms"
              xmlns:ff="clr-namespace:FFImageLoading.Forms;assembly=FFImageLoading.Forms"
+                                      xmlns:xe="clr-namespace:XamEffects;assembly=XamEffects"
              x:Class="CloudStreamForms.VideoPage">
     <ContentPage.Content >
 
@@ -35,7 +36,7 @@
 
 
             <Label x:Name="EpisodeLabel"  Text="S12:E3 Iron Man" VerticalOptions="Start" HorizontalOptions="Center" FontSize="14" TextColor="#e7e7e7" TranslationY="20"></Label>
-            <Grid x:Name="VideoSettings" VerticalOptions="Start" HorizontalOptions="End" TranslationY="20" ColumnSpacing="20" Scale="0.7">
+            <!--  <Grid x:Name="VideoSettings" VerticalOptions="Start" HorizontalOptions="End" TranslationY="20" ColumnSpacing="20" Scale="0.7">
                 <Grid.ColumnDefinitions >
                     <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="Auto" />
@@ -49,7 +50,7 @@
                 <Image x:Name="MirrosImg" Grid.Column="2"  TranslationX="10" InputTransparent="True" Scale="1.2"></Image>
                 <Image x:Name="DownloadImg" Grid.Column="3" TranslationX="10" InputTransparent="True" Scale="1"></Image>
 
-            </Grid>
+            </Grid>-->
 
             <Grid x:Name="VideoSliderAndSettings"  VerticalOptions="End" >
                 <Grid.RowDefinitions>
@@ -65,7 +66,7 @@
                 </Grid.RowDefinitions>
                 <!--  <Image x:Name="GradientBottom" Grid.Row="1" HorizontalOptions="Fill" HeightRequest="80" TranslationY="0" VerticalOptions="End" Rotation="180" InputTransparent="True" ScaleX="100" Opacity="1" ScaleY="3"></Image>
 -->
-                <Grid HorizontalOptions="Fill" ColumnSpacing="0" Padding="10,0" Margin="0,0,0,-40" VerticalOptions="End" Grid.Row="0" >
+                <Grid HorizontalOptions="Fill" ColumnSpacing="0" Padding="10,0" Margin="0,0,0,-20" VerticalOptions="End" Grid.Row="0" >
                     <Grid.ColumnDefinitions >
                         <ColumnDefinition Width="Auto" />
                         <ColumnDefinition Width="*" />
@@ -75,8 +76,8 @@
                     <Slider x:Name="VideoSlider" Grid.Column="1" MinimumTrackColor="#303F9F" ThumbColor="#303F9F" HorizontalOptions="Fill" Margin="0,0,0,10" Maximum="1" DragStarted="VideoSlider_DragStarted" DragCompleted="VideoSlider_DragCompleted" ValueChanged="VideoSlider_ValueChanged" ></Slider>
                     <Label Grid.Row="0" Grid.Column="2" x:Name="EndTxt" Text="54:27" HorizontalOptions="End"></Label>
                 </Grid>
-                <!--
-                <Grid x:Name="VideoSettings" VerticalOptions="End" HorizontalOptions="Center" Grid.Row="1" TranslationY="20">
+
+                <Grid x:Name="VideoSettings" VerticalOptions="End" HorizontalOptions="Center" Grid.Row="1" TranslationY="20" ColumnSpacing="20" TranslationX="20">
                     <Grid.ColumnDefinitions >
                         <ColumnDefinition Width="Auto" />
                         <ColumnDefinition Width="Auto" />
@@ -85,8 +86,103 @@
                         <ColumnDefinition Width="Auto" />
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
-                    
-                    
+
+                    <!--
+                    <Grid Grid.Column="0" xe:TouchEffect.Color="White" x:Name="EpisodesTap" >
+                        <Grid.ColumnDefinitions >
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <ff:CachedImage x:Name="EpisodesImg" Grid.Column="0" VerticalOptions="Center" TranslationY="-2" InputTransparent="True" BackgroundColor="Transparent" WidthRequest="27" HeightRequest="27" ></ff:CachedImage>
+                        <Button Text="Episodes"  Grid.Column="2" BackgroundColor="Transparent"></Button>
+                    </Grid>-->
+                    <xe:BorderView x:Name="LockTap" Grid.Column="0" TranslationX="-30"
+          HeightRequest="35"
+          WidthRequest="35"
+                                    xe:TouchEffect.Color="White" 
+          HorizontalOptions="Center"
+          VerticalOptions="Center"
+          BackgroundColor="Transparent"
+          CornerRadius="2"
+          BorderColor="Transparent"
+          BorderWidth="0">
+                     
+                            <ff:CachedImage x:Name="LockImg" Grid.Column="0" VerticalOptions="Center"  TranslationX="0"  InputTransparent="True" BackgroundColor="Transparent" WidthRequest="23" HeightRequest="23"  ></ff:CachedImage>
+                            
+                    </xe:BorderView>
+                    <xe:BorderView x:Name="EpisodesTap" Grid.Column="1"
+          HeightRequest="35"
+          WidthRequest="110"
+                                    xe:TouchEffect.Color="White" 
+          HorizontalOptions="Center"
+          VerticalOptions="Center"
+          BackgroundColor="Transparent"
+          CornerRadius="2"
+          BorderColor="Transparent"
+          BorderWidth="0">
+                        <Grid Grid.Column="0" HorizontalOptions="Center" ColumnSpacing="0" >
+                            <Grid.ColumnDefinitions >
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <ff:CachedImage x:Name="EpisodesImg" Grid.Column="0" VerticalOptions="Center"  TranslationX="-7"  InputTransparent="True" BackgroundColor="Transparent" WidthRequest="28" HeightRequest="28" Aspect="AspectFill"></ff:CachedImage>
+                            <!--<Button Text="Episodes"  Grid.Column="1" BackgroundColor="Transparent"></Button>-->
+                            <Label Text="Episodes" Grid.Column="1" VerticalOptions="Center" TextColor="White"></Label>
+                        </Grid>
+                    </xe:BorderView>
+
+
+                    <xe:BorderView x:Name="MirrorsTap" Grid.Column="2"
+          HeightRequest="35"
+          WidthRequest="100"
+                                    xe:TouchEffect.Color="White" 
+          HorizontalOptions="Center"
+          VerticalOptions="Center"
+          BackgroundColor="Transparent"
+          CornerRadius="2"
+          BorderColor="Transparent"
+          BorderWidth="0">
+                        <Grid Grid.Column="0" HorizontalOptions="Center" ColumnSpacing="0" >
+                            <Grid.ColumnDefinitions >
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <ff:CachedImage x:Name="MirrosImg" Grid.Column="0" VerticalOptions="Center" TranslationX="-5" TranslationY="1.5" InputTransparent="True" BackgroundColor="Transparent" WidthRequest="32" HeightRequest="32" Aspect="AspectFill"></ff:CachedImage>
+                            <!--  <Button Text="Mirrors"  Grid.Column="1" BackgroundColor="Transparent"></Button>-->
+                            <Label Text="Mirrors" Grid.Column="1" VerticalOptions="Center" TextColor="White"></Label>
+
+                        </Grid>
+                    </xe:BorderView>
+                    <xe:BorderView x:Name="NextEpisodeTap" Grid.Column="3"
+          HeightRequest="35"
+          WidthRequest="120"
+                                    xe:TouchEffect.Color="White" 
+          HorizontalOptions="Center"
+          VerticalOptions="Center"
+          BackgroundColor="Transparent"
+          CornerRadius="2"
+          BorderColor="Transparent"
+          BorderWidth="0">
+                        <Grid Grid.Column="0" HorizontalOptions="Center" ColumnSpacing="0" >
+                            <Grid.ColumnDefinitions >
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <ff:CachedImage x:Name="NextImg" Grid.Column="0" VerticalOptions="Center" TranslationX="-5"  InputTransparent="True" BackgroundColor="Transparent" WidthRequest="35" HeightRequest="35"   Aspect="AspectFill"></ff:CachedImage>
+                            <!--  <Button Text="Mirrors"  Grid.Column="1" BackgroundColor="Transparent"></Button>-->
+                            <Label Text="Next Episode"  Grid.Column="1" VerticalOptions="Center" TextColor="White"></Label>
+
+                        </Grid>
+                    </xe:BorderView>
+                    <!--<Grid Grid.Column="1">
+                        <Grid.ColumnDefinitions >
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <ff:CachedImage x:Name="MirrosImg" Grid.Column="0" VerticalOptions="Center" TranslationY="-2" InputTransparent="True" BackgroundColor="Transparent" WidthRequest="27" HeightRequest="27" ></ff:CachedImage>
+                        <Button Text="Mirrors"  Grid.Column="2" BackgroundColor="Transparent"></Button>
+                    </Grid>-->
+                    <!--
                     <Grid Grid.Column="0">
                         <Grid.ColumnDefinitions >
                             <ColumnDefinition Width="Auto" />
@@ -121,8 +217,9 @@
                         <Image x:Name="DownloadImg" Grid.Column="0" VerticalOptions="Center" TranslationX="10" InputTransparent="True" Scale="1"></Image>
                         <Button Text="Download"  Grid.Column="1" BackgroundColor="Transparent"></Button>
                     </Grid>
-                </Grid>
                 -->
+                </Grid>
+
             </Grid>
             <ProgressBar x:Name="BufferBar" Progress="0" ProgressColor="#303F9F" IsVisible="False" VerticalOptions="End"></ProgressBar>
             <!--     <Button BackgroundColor="Blue" HorizontalOptions="FillAndExpand" VerticalOptions="FillAndExpand"></Button>-->
