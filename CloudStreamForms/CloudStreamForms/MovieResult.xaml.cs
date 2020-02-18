@@ -223,7 +223,7 @@ namespace CloudStreamForms
             }
             StarBtt.Source = GetImageSource((keyExists ? "bookmarkedBtt.png" : "notBookmarkedBtt.png"));
             Device.BeginInvokeOnMainThread(() => {
-                StarBtt.Transformations = new List<FFImageLoading.Work.ITransformation>() { (new FFImageLoading.Transformations.TintTransformation(keyExists ? DARK_BLUE_COLOR : LIGHT_BLACK_COLOR)) };
+                StarBtt.Transformations = new List<FFImageLoading.Work.ITransformation>() { (new FFImageLoading.Transformations.TintTransformation(keyExists ? DARK_BLUE_COLOR : LIGHT_LIGHT_BLACK_COLOR)) };
             });
 
         }
@@ -231,6 +231,7 @@ namespace CloudStreamForms
         {
             bool res = false;
             if (overrideBool == null) {
+
                 res = SubtitlesEnabled;
             }
             else {
@@ -239,7 +240,7 @@ namespace CloudStreamForms
             }
 
             Device.BeginInvokeOnMainThread(() => {
-                SubtitleBtt.Transformations = new List<FFImageLoading.Work.ITransformation>() { (new FFImageLoading.Transformations.TintTransformation(res ? DARK_BLUE_COLOR : LIGHT_BLACK_COLOR)) };
+                SubtitleBtt.Transformations = new List<FFImageLoading.Work.ITransformation>() { (new FFImageLoading.Transformations.TintTransformation(res ? DARK_BLUE_COLOR : LIGHT_LIGHT_BLACK_COLOR)) };
             });
         }
 
@@ -352,7 +353,7 @@ namespace CloudStreamForms
         }
         private void Grid_BindingContextChanged(object sender, EventArgs e)
         {
-           // print("DA");
+            // print("DA");
             var s = ((Grid)sender);
             Commands.SetTap(s, new Command((o) => {
                 var episodeResult = ((EpisodeResult)o);
@@ -371,11 +372,12 @@ namespace CloudStreamForms
             mainPoster = Search.mainPoster;
 
             Gradient.Source = GetGradient();
-            IMDbBtt.Source = GetImageSource("imdbIcon.png");
-            MALBtt.Source = GetImageSource("MALIcon.png");
-            ShareBtt.Source = GetImageSource("round_reply_white_48dp_inverted.png");
+            IMDbBtt.Source = GetImageSource("IMDbWhite.png");//"imdbIcon.png");
+            MALBtt.Source = GetImageSource("MALWhite.png");//"MALIcon.png");
+            ShareBtt.Source = GetImageSource("baseline_share_white_48dp.png");//GetImageSource("round_reply_white_48dp_inverted.png");
             StarBtt.Source = GetImageSource("notBookmarkedBtt.png");
-            SubtitleBtt.Source = GetImageSource("round_subtitles_white_48dp.png");
+            SubtitleBtt.Source = GetImageSource("outline_subtitles_white_48dp.png"); //GetImageSource("round_subtitles_white_48dp.png");
+                                                                                     //  IMDbBlue.Source = GetImageSource("IMDbBlue.png"); //GetImageSource("round_subtitles_white_48dp.png");
 
             SeasonPicker = new LabelList(SeasonBtt, new List<string>());
             DubPicker = new LabelList(DubBtt, new List<string>());
@@ -461,10 +463,14 @@ namespace CloudStreamForms
             }*/
             // Gradient.Opacity = BlackBg ? 1 : 0.5;
 
-            MALBtt.IsVisible = false;
-            MALBtt.IsEnabled = false;
-            MALTxt.IsVisible = false;
-            MALTxt.IsEnabled = false;
+
+            MALB.IsVisible = false;
+            MALB.IsEnabled = false;
+            MALA.IsVisible = false;
+            MALA.IsEnabled = false;
+            Grid.SetColumn(MALB, 0);
+            Grid.SetColumn(MALA, 0);
+
             DubBtt.IsVisible = false;
             SeasonBtt.IsVisible = false;
 
@@ -563,7 +569,7 @@ namespace CloudStreamForms
             pwidth = (int)Math.Round(pwidth * mMulti * posterRezMulti);*/
             print(episodeResult.PosterUrl);
             //224; 126
-            episodeResult.PosterUrl = CloudStreamCore.ConvertIMDbImagesToHD(episodeResult.PosterUrl, 224, 126 ); //episodeResult.PosterUrl.Replace(",126,224_AL", "," + pwidth + "," + pheight + "_AL").Replace("UY126", "UY" + pheight).Replace("UX224", "UX" + pwidth);
+            episodeResult.PosterUrl = CloudStreamCore.ConvertIMDbImagesToHD(episodeResult.PosterUrl, 224, 126); //episodeResult.PosterUrl.Replace(",126,224_AL", "," + pwidth + "," + pheight + "_AL").Replace("UY126", "UY" + pheight).Replace("UX224", "UX" + pwidth);
             print(episodeResult.PosterUrl);
             //print(episodeResult.PosterUrl);
             print("OGTITLE:" + episodeResult.OgTitle);
@@ -823,7 +829,8 @@ namespace CloudStreamForms
                 if (rYear == null || rYear == "") {
                     rYear = e.title.year;
                 }
-                RatingLabel.Text = ((rYear + " | " + e.title.runtime + " | " + extra + "★ " + e.title.rating).Replace("|  |", "|")).Replace("|", "  ");
+                RatingLabel.Text = ((rYear + " | " + e.title.runtime).Replace("|  |", "|")).Replace("|", "  "); //+ " | " + extra + "★ " + e.title.rating).Replace("|  |", "|")).Replace("|", "  ");
+                RatingLabelRating.Text = "Rated: " + e.title.rating;
                 DescriptionLabel.Text = Settings.MovieDecEnabled ? e.title.description.Replace("\\u0027", "\'") : "";
                 if (e.title.description == "") {
                     DescriptionLabel.HeightRequest = 0;
@@ -843,7 +850,7 @@ namespace CloudStreamForms
                     //SeasonPicker.ItemsSource.Clear();
                     for (int i = 1; i <= e.title.seasons; i++) {
                         season.Add("Season " + i);
-                      //  SeasonPicker.ItemsSource.Add("Season " + i);
+                        //  SeasonPicker.ItemsSource.Add("Season " + i);
                     }
                     SeasonPicker.ItemsSource = season;
 
@@ -924,7 +931,16 @@ namespace CloudStreamForms
                         }));
                         Commands.SetTapParameter(stackLayout, i);
 
+                        /*
+                        Commands.SetLongTap(stackLayout, new Command((o) => {
+                            int z = (int)o;
+                            App.ShowToast(RecomendedPosters[z].name);
 
+
+                        }));*/
+                        Commands.SetTapParameter(stackLayout, i);
+                      //  Commands.SetLongTapParameter(stackLayout, i);
+                        
 
                         //Source = p.posterUrl
                         recBtts.Add(imageButton);
@@ -1049,8 +1065,8 @@ namespace CloudStreamForms
             GetImdbEpisodes(currentSeason);
 
 
-           // SeasonBtt.Text = SeasonPicker.ItemsSource[SeasonPicker.SelectedIndex];
-           // SeasonBtt.IsVisible = SeasonPicker.IsVisible;
+            // SeasonBtt.Text = SeasonPicker.ItemsSource[SeasonPicker.SelectedIndex];
+            // SeasonBtt.IsVisible = SeasonPicker.IsVisible;
             // myEpisodeResultCollection.Clear();
         }
 
@@ -1166,10 +1182,14 @@ namespace CloudStreamForms
 
 
                 bool enabled = CurrentMalLink != "";
-                MALBtt.IsVisible = enabled;
-                MALBtt.IsEnabled = enabled;
-                MALTxt.IsVisible = enabled;
-                MALTxt.IsEnabled = enabled;
+
+                MALB.IsVisible = enabled;
+                MALB.IsEnabled = enabled;
+                MALA.IsVisible = enabled;
+                MALA.IsEnabled = enabled;
+
+                Grid.SetColumn(MALB, enabled ? 5 : 0);
+                Grid.SetColumn(MALA, enabled ? 5 : 0);
 
                 SetRows();
 
@@ -1253,20 +1273,23 @@ namespace CloudStreamForms
                 TRAILERSTAB.IsEnabled = true;
                 trailerView.Children.Clear();
                 trailerView.HeightRequest = e.Count * 240 + 200;
-                PlayBttGradient.Source = GetImageSource("nexflixPlayBtt.png");
+                if (PlayBttGradient.Source == null) {
+                    PlayBttGradient.Source = GetImageSource("nexflixPlayBtt.png");
+                }
 
                 for (int i = 0; i < e.Count; i++) {
                     string p = e[i].PosterUrl;
                     if (CheckIfURLIsValid(p)) {
 
                         Grid stackLayout = new Grid();
-                        Button imageButton = new Button() { BackgroundColor = Color.Transparent, VerticalOptions = LayoutOptions.Fill, HorizontalOptions = LayoutOptions.Fill };
+                        //Button imageButton = new Button() { BackgroundColor = Color.Transparent, VerticalOptions = LayoutOptions.Fill, HorizontalOptions = LayoutOptions.Fill };
                         Label textLb = new Label() { Text = e[i].Name, TextColor = Color.FromHex("#e7e7e7"), FontAttributes = FontAttributes.Bold, FontSize = 15, TranslationX = 10 };
                         Image playBtt = new Image() { Source = GetImageSource("nexflixPlayBtt.png"), VerticalOptions = LayoutOptions.Center, HorizontalOptions = LayoutOptions.Center, Scale = 0.5, InputTransparent = true };
                         var ff = new FFImageLoading.Forms.CachedImage {
                             Source = p,
                             BackgroundColor = Color.Transparent,
                             VerticalOptions = LayoutOptions.Fill,
+                            Aspect = Aspect.AspectFill,
                             HorizontalOptions = LayoutOptions.Fill,
                             Transformations = {
                             //  new FFImageLoading.Transformations.RoundedTransformation(10,1,1.5,10,"#303F9F")
@@ -1279,22 +1302,22 @@ namespace CloudStreamForms
                         //Source = p.posterUrl
                         //recBtts.Add(imageButton);
                         int _sel = int.Parse(i.ToString());
-                       /* imageButton.Clicked += (o, _e) => {
-                            try {
-                                var _t = epView.CurrentTrailers[_sel];
-                                PlayVLCWithSingleUrl(_t.Url, _t.Name);
-                            }
-                            catch (Exception) {
+                        /* imageButton.Clicked += (o, _e) => {
+                             try {
+                                 var _t = epView.CurrentTrailers[_sel];
+                                 PlayVLCWithSingleUrl(_t.Url, _t.Name);
+                             }
+                             catch (Exception) {
 
-                            }
-                        };*/
+                             }
+                         };*/
                         stackLayout.Children.Add(ff);
-                        stackLayout.Children.Add(imageButton);
+                        //stackLayout.Children.Add(imageButton);
                         stackLayout.Children.Add(playBtt);
                         trailerView.Children.Add(stackLayout);
                         trailerView.Children.Add(textLb);
 
-                        stackLayout.SetValue(XamEffects.TouchEffect.ColorProperty, new Color(1,1,1,0.3) );
+                        stackLayout.SetValue(XamEffects.TouchEffect.ColorProperty, new Color(1, 1, 1, 0.3));
                         Commands.SetTap(stackLayout, new Command((o) => {
                             int z = (int)o;
                             var _t = epView.CurrentTrailers[z];
@@ -1311,9 +1334,16 @@ namespace CloudStreamForms
                             }*/
                             //do something
                         }));
+                        /*
+                        Commands.SetLongTap(stackLayout, new Command((o) => {
+                            int z = (int)o;
+                            var _t = epView.CurrentTrailers[z];
+                            PlayVLCWithSingleUrl(_t.Url, _t.Name);
+                           
+                        }));*/
                         Commands.SetTapParameter(stackLayout, _sel);
+                        // Commands.SetLongTapParameter(stackLayout, _sel);
 
-                       
                         Grid.SetRow(stackLayout, (i + 1) * 2 - 2);
                         Grid.SetRow(textLb, (i + 1) * 2 - 1);
                         //         Device.BeginInvokeOnMainThread(() => { /*Grid.SetRow(stackLayout, (int)Math.Round(i / 3.0));*/ Grid.SetColumn(stackLayout,i); });
@@ -1338,12 +1368,12 @@ namespace CloudStreamForms
 
         private void IMDb_Clicked(object sender, EventArgs e)
         {
-            if (!SameAsActiveMovie()) return;
+           // if (!SameAsActiveMovie()) return;
             App.OpenBrowser("https://www.imdb.com/title/" + mainPoster.url);
         }
         private void MAL_Clicked(object sender, EventArgs e)
         {
-            if (!SameAsActiveMovie()) return;
+         //   if (!SameAsActiveMovie()) return;
             App.OpenBrowser(CurrentMalLink);
         }
 
@@ -1859,8 +1889,8 @@ namespace CloudStreamForms
 
         void ChangeViewToggle()
         {
-            ViewToggle.Source = GetImageSource((toggleViewState ? "viewOffIcon.png" : "viewOnIcon.png"));
-            ViewToggle.Transformations = new List<FFImageLoading.Work.ITransformation>() { (new FFImageLoading.Transformations.TintTransformation(toggleViewState ? DARK_BLUE_COLOR : LIGHT_BLACK_COLOR)) };
+            ViewToggle.Source = GetImageSource((toggleViewState ? "outline_visibility_off_white_48dp.png" : "outline_visibility_white_48dp.png"));// GetImageSource((toggleViewState ? "viewOffIcon.png" : "viewOnIcon.png"));
+            ViewToggle.Transformations = new List<FFImageLoading.Work.ITransformation>() { (new FFImageLoading.Transformations.TintTransformation(toggleViewState ? DARK_BLUE_COLOR : LIGHT_LIGHT_BLACK_COLOR)) };
         }
 
         /// <summary>
@@ -1918,6 +1948,9 @@ namespace CloudStreamForms
                         return null;
                 }
             }
+            GetBar(prevState).ScaleXTo(0, 70, Easing.Linear);
+            GetBar(state).ScaleXTo(1, 70, Easing.Linear);//.ScaleX = stateScale;
+            /*
             timer.Elapsed += (sender, args) => {
                 stateScale += 0.5;
                 if (stateScale > 1) {
@@ -1929,7 +1962,7 @@ namespace CloudStreamForms
                 GetBar(prevState).ScaleX = 1 - stateScale;
                 GetBar(state).ScaleX = stateScale;
 
-            };
+            };*/
 
             timer.Start();
 

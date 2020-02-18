@@ -31,6 +31,7 @@ namespace CloudStreamForms
         public const string DARK_BLUE_COLOR = "#303F9F";
         public const string LIGHT_BLUE_COLOR = "#829eff";
         public const string LIGHT_BLACK_COLOR = "#595959";
+        public const string LIGHT_LIGHT_BLACK_COLOR = "#e6e6e6";
         public const string BLACK_COLOR = "#111111";
         public const string ITEM_COLOR = "#617eff";
         public const string LIGHT_DARK_BLUE_COLOR = "#1976D2";
@@ -103,8 +104,8 @@ namespace CloudStreamForms
 
             LateCheck();
 
-            Page p = new VideoPage(new VideoPage.PlayVideo() { descript = "", name = "Black Bunny", episode = -1, season = -1, MirrorNames = new List<string>() { "Googlevid" }, MirrorUrls = new List<string>() { "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" }, Subtitles = new List<string>(), SubtitlesNames = new List<string>() });//new List<string>() { "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" }, new List<string>() { "Black" }, new List<string>() { });// { mainPoster = mainPoster };
-              Navigation.PushModalAsync(p, false);
+          //  Page p = new VideoPage(new VideoPage.PlayVideo() { descript = "", name = "Black Bunny", episode = -1, season = -1, MirrorNames = new List<string>() { "Googlevid" }, MirrorUrls = new List<string>() { "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" }, Subtitles = new List<string>(), SubtitlesNames = new List<string>() });//new List<string>() { "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" }, new List<string>() { "Black" }, new List<string>() { });// { mainPoster = mainPoster };
+            //  Navigation.PushModalAsync(p, false);
 
             On<Xamarin.Forms.PlatformConfiguration.Android>().SetToolbarPlacement(ToolbarPlacement.Bottom);
 
@@ -112,7 +113,7 @@ namespace CloudStreamForms
             // Navigation.PushModalAsync(p, false);
             // PushPageFromUrlAndName("tt4869896", "Overlord");
             // PushPageFromUrlAndName("tt9054364", "That Time I Got Reincarnated as a Slime");
-            // PushPageFromUrlAndName("tt0371746", "Iron Man");
+             //PushPageFromUrlAndName("tt0371746", "Iron Man");
         }
 
 

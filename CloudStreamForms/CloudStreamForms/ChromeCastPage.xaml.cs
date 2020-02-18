@@ -97,6 +97,8 @@ namespace CloudStreamForms
             PosterUrl = chromeMovieResult.title.hdPosterUrl;
             EpisodePosterUrl = episodeResult.PosterUrl;
             EpisodeDescription = episodeResult.Description;
+            BackgroundColor = Settings.BlackRBGColor;
+
 
             try {
                 DescriptName = episodeResult.Mirros[currentSelected];
