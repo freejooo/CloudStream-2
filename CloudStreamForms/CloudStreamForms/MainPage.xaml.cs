@@ -104,8 +104,8 @@ namespace CloudStreamForms
 
             LateCheck();
 
-          //  Page p = new VideoPage(new VideoPage.PlayVideo() { descript = "", name = "Black Bunny", episode = -1, season = -1, MirrorNames = new List<string>() { "Googlevid" }, MirrorUrls = new List<string>() { "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" }, Subtitles = new List<string>(), SubtitlesNames = new List<string>() });//new List<string>() { "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" }, new List<string>() { "Black" }, new List<string>() { });// { mainPoster = mainPoster };
-            //  Navigation.PushModalAsync(p, false);
+             Page p = new VideoPage(new VideoPage.PlayVideo() { descript = "", name = "Black Bunny", episode = -1, season = -1, MirrorNames = new List<string>() { "Googlevid" }, MirrorUrls = new List<string>() { "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" }, Subtitles = new List<string>(), SubtitlesNames = new List<string>() });//new List<string>() { "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" }, new List<string>() { "Black" }, new List<string>() { });// { mainPoster = mainPoster };
+             Navigation.PushModalAsync(p, false);
 
             On<Xamarin.Forms.PlatformConfiguration.Android>().SetToolbarPlacement(ToolbarPlacement.Bottom);
 
@@ -113,7 +113,7 @@ namespace CloudStreamForms
             // Navigation.PushModalAsync(p, false);
             // PushPageFromUrlAndName("tt4869896", "Overlord");
             // PushPageFromUrlAndName("tt9054364", "That Time I Got Reincarnated as a Slime");
-             //PushPageFromUrlAndName("tt0371746", "Iron Man");
+            //PushPageFromUrlAndName("tt0371746", "Iron Man");
         }
 
 
@@ -525,7 +525,7 @@ namespace CloudStreamForms
         public const int MIRROR_COUNT = 10; // SUB HD MIRRORS
 
 
-        public const string loadingImage = "https://i.giphy.com/media/u2Prjtt7QYD0A/200.webp"; // from https://media0.giphy.com/media/u2Prjtt7QYD0A/200.webp?cid=790b7611ff76f40aaeea5e73fddeb8408c4b018b6307d9e3&rid=200.webp
+        public const string VIDEO_IMDB_IMAGE_NOT_FOUND = "emtyPoster.png";// "https://i.giphy.com/media/u2Prjtt7QYD0A/200.webp"; // from https://media0.giphy.com/media/u2Prjtt7QYD0A/200.webp?cid=790b7611ff76f40aaeea5e73fddeb8408c4b018b6307d9e3&rid=200.webp
 
         public const bool REPLACE_IMDBNAME_WITH_POSTERNAME = true;
         public static double posterRezMulti = 1.0;
@@ -1593,10 +1593,10 @@ namespace CloudStreamForms
                                     //  print("SYNO: " + ms.synonyms[s]);
                                 }
 
-                                //  print(animeTitle.ToLower() + "|" + ms.name.ToLower() + "|" + ms.engName.ToLower() + "|" + ___year + "___" + ___year2 + "|" + containsSyno);
+                                print(ur + "|" + animeTitle.ToLower() + "|" + ms.name.ToLower() + "|" + ms.engName.ToLower() + "|" + ___year + "___" + ___year2 + "|" + containsSyno);
 
                                 if (ToLowerAndReplace(ms.name) == ToLowerAndReplace(animeTitle) || ToLowerAndReplace(ms.engName) == ToLowerAndReplace(animeTitle) || containsSyno) {
-                                    print(ur);
+                                    print("ADDED:::" + ur);
                                     var baseData = activeMovie.title.MALData.seasonData[i].seasons[q];
                                     if (animeTitle == title) {
                                         baseData.gogoData.subExists = true;
@@ -1638,9 +1638,14 @@ namespace CloudStreamForms
             }
         }
 
-        public static string ToLowerAndReplace(string inp)
+        public static string ToLowerAndReplace(string inp, bool seasonReplace = true)
         {
-            return inp.ToLower().Replace("-", " ").Replace("`", "\'");
+            string _inp = inp.ToLower();
+            if(seasonReplace) {
+                _inp = _inp.Replace("2nd season", "season 2").Replace("3th season", "season 3").Replace("4th season", "season 4"); 
+            }
+            _inp = inp.Replace("-", " ").Replace("`", "\'");
+            return _inp;
         }
 
         public static void GetImdbTitle(Poster imdb, bool purgeCurrentTitleThread = true, bool autoSearchTrailer = true, bool cacheData = true)
@@ -2481,7 +2486,7 @@ namespace CloudStreamForms
                                 string posterUrl = FindHTML(d, "src=\"", "\"");
 
                                 if (posterUrl == "https://m.media-amazon.com/images/G/01/IMDb/spinning-progress.gif" || posterUrl.Replace(" ", "") == "") {
-                                    posterUrl = loadingImage; // DEAFULT LOADING
+                                    posterUrl = VIDEO_IMDB_IMAGE_NOT_FOUND; // DEAFULT LOADING
                                 }
 
                                 if (descript == "Know what this is about?") {
@@ -4015,41 +4020,49 @@ namespace CloudStreamForms
 
         public static bool AddPotentialLink(int normalEpisode, string _url, string _name, int _priority)
         {
+            if (activeMovie.episodes == null) return false;
             if (_url == "http://error.com") return false; // ERROR
             if (_url.Replace(" ", "") == "") return false;
 
             _name = _name.Replace("  ", " ");
             _url = _url.Replace(" ", "%20");
-            if (!LinkListContainsString(activeMovie.episodes[normalEpisode].links, _url)) {
-                if (CheckIfURLIsValid(_url)) {
-                    // if (GetFileSize(_url) > 0) {
-                    print("ADD LINK:" + normalEpisode + "|" + _name + "|" + _priority + "|" + _url);
-                    Episode ep = activeMovie.episodes[normalEpisode];
-                    if (ep.links == null) {
-                        activeMovie.episodes[normalEpisode] = new Episode() { links = new List<Link>(), date = ep.date, description = ep.description, name = ep.name, posterUrl = ep.posterUrl, rating = ep.rating, id = ep.id };
-                    }
+            try {
+                if (!LinkListContainsString(activeMovie.episodes[normalEpisode].links, _url)) {
+                    if (CheckIfURLIsValid(_url)) {
+                        // if (GetFileSize(_url) > 0) {
+                        print("ADD LINK:" + normalEpisode + "|" + _name + "|" + _priority + "|" + _url);
+                        Episode ep = activeMovie.episodes[normalEpisode];
+                        if (ep.links == null) {
+                            activeMovie.episodes[normalEpisode] = new Episode() { links = new List<Link>(), date = ep.date, description = ep.description, name = ep.name, posterUrl = ep.posterUrl, rating = ep.rating, id = ep.id };
+                            ep = activeMovie.episodes[normalEpisode];
+                        }
 
-                    bool done = false;
-                    int count = 1;
-                    string realName = _name;
-                    while (!done && !realName.Contains("[MIRRORCOUNTER]")) {
-                        count++;
-                        done = true;
-                        for (int i = 0; i < ep.links.Count; i++) {
-                            if (ep.links[i].name == realName) {
-                                realName = _name + " (Mirror " + count + ")";
-                                done = false;
-                                break;
+                        bool done = false;
+                        int count = 1;
+                        string realName = _name;
+                        while (!done && !realName.Contains("[MIRRORCOUNTER]")) {
+                            count++;
+                            done = true;
+                            for (int i = 0; i < ep.links.Count; i++) {
+                                if (ep.links[i].name == realName) {
+                                    realName = _name + " (Mirror " + count + ")";
+                                    done = false;
+                                    break;
+                                }
                             }
                         }
+                        realName = realName.Replace("  ", " ");
+                        var link = new Link() { priority = _priority, url = _url, name = realName };
+                        activeMovie.episodes[normalEpisode].links.Add(link); // [MIRRORCOUNTER] IS LATER REPLACED WITH A NUMBER TO MAKE IT EASIER TO SEPERATE THEM, CAN'T DO IT HERE BECAUSE IT MUST BE ABLE TO RUN SEPARETE THREADS AT THE SAME TIME
+                        linkAdded?.Invoke(null, link);
+                        return true;
+                        //}
                     }
-                    realName = realName.Replace("  ", " ");
-                    var link = new Link() { priority = _priority, url = _url, name = realName };
-                    activeMovie.episodes[normalEpisode].links.Add(link); // [MIRRORCOUNTER] IS LATER REPLACED WITH A NUMBER TO MAKE IT EASIER TO SEPERATE THEM, CAN'T DO IT HERE BECAUSE IT MUST BE ABLE TO RUN SEPARETE THREADS AT THE SAME TIME
-                    linkAdded?.Invoke(null, link);
-                    return true;
-                    //}
                 }
+
+            }
+            catch (Exception) {
+                return false;
             }
             return false;
         }

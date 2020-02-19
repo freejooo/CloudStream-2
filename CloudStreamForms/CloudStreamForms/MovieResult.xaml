@@ -343,8 +343,8 @@ xmlns:ffTransformations="clr-namespace:FFImageLoading.Transformations;assembly=F
                                                 <Grid Grid.Row="0"  Grid.Column="0"  WidthRequest="127" TranslationY="{Binding TranslateYOffset}" >
 
                                                     <!--  <ImageButton  Clicked="ImageButton_Clicked" BackgroundColor="Transparent" WidthRequest="127"></ImageButton> -->
-
-                                                    <ff:CachedImage WidthRequest="127" HeightRequest="72" Source="{Binding PosterUrl}" InputTransparent="True" >
+                                                    <!--PosterUrl-->
+                                                    <ff:CachedImage WidthRequest="127" HeightRequest="72" Source="{Binding ImageSource}" InputTransparent="True" >
 
                                                         <ff:CachedImage.Transformations >
                                                             <ffTransformations:RoundedTransformation Radius="1" BorderSize="0" BorderHexColor="#303F9F" CropWidthRatio="1.7"  >

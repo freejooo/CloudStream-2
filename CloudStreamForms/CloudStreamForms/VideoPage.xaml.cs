@@ -121,9 +121,14 @@ namespace CloudStreamForms
             MirrosImg.Source = App.GetImageSource("baseline_playlist_play_white_48dp.png");
             EpisodesImg.Source = App.GetImageSource("netflixEpisodesCut.png");
             NextImg.Source = App.GetImageSource("baseline_skip_next_white_48dp.png");
+
             //  GradientBottom.Source = App.GetImageSource("gradient.png");
             // DownloadImg.Source = App.GetImageSource("netflixEpisodesCut.png");//App.GetImageSource("round_more_vert_white_48dp.png");
+
             LockImg.Source = App.GetImageSource("wlockUnLocked.png");
+            SubtitleImg.Source = App.GetImageSource("outline_subtitles_white_48dp.png");
+
+
             Commands.SetTap(EpisodesTap, new Command(() => {
                 //do something
                 print("Hello");

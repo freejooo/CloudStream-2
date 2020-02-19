@@ -11,6 +11,8 @@ namespace CloudStreamForms.Models
         public string RatingStar { get { return (Rating.Replace(" ", "") == "" ? "Rating Unavailable" : "★ " + Rating); } } // ★
 
         public string PosterUrl { set; get; }
+        public bool IsPosterFromStorage { get { return PosterUrl == CloudStreamCore.VIDEO_IMDB_IMAGE_NOT_FOUND; } }
+        public ImageSource ImageSource { get { CloudStreamCore.print( PosterUrl); return IsPosterFromStorage ? App.GetImageSource(PosterUrl) : PosterUrl; } }
 
         public string extraInfo { set; get; }
 

@@ -116,9 +116,9 @@
                                             </Grid.ColumnDefinitions>
                                             <Grid Grid.Row="0"  Grid.Column="0"  WidthRequest="126" TranslationY="{Binding TranslateYOffset}" BindingContextChanged="Grid_BindingContextChanged">
 
-                                            <ImageButton Clicked="ImageButton_Clicked" BackgroundColor="Transparent" WidthRequest="126"></ImageButton> 
-
-                                                <ff:CachedImage WidthRequest="126" HeightRequest="80" Source="{Binding PosterUrl}" InputTransparent="True"   >
+                                            <ImageButton Clicked="ImageButton_Clicked" BackgroundColor="Transparent" WidthRequest="126"></ImageButton>
+                                                <!--PosterUrl-->
+                                                <ff:CachedImage WidthRequest="126" HeightRequest="80" Source="{Binding ImageSource}" InputTransparent="True"   >
 
                                                     <ff:CachedImage.Transformations>
                                                         <ffTransformations:RoundedTransformation BorderSize="0" Radius="1" BorderHexColor="#303F9F" CropWidthRatio="1.77"  >

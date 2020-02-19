@@ -253,7 +253,7 @@ namespace CloudStreamForms
             if (enabled) {
                 ImgChromeCastBtt.Source = GetImageSource(MainChrome.CurrentImageSource);
             }
-            NameLabel.Margin = new Thickness((enabled ? 50 : 10), 10, 10, 10);
+            NameLabel.Margin = new Thickness((enabled ? 50 : 15), 10, 10, 10);
         }
 
         protected override void OnAppearing()
@@ -567,9 +567,15 @@ namespace CloudStreamForms
             int pheight = 126;
             pheight = (int)Math.Round(pheight * mMulti * posterRezMulti);
             pwidth = (int)Math.Round(pwidth * mMulti * posterRezMulti);*/
+            if (episodeResult.PosterUrl == "") {
+                episodeResult.PosterUrl = CloudStreamCore.VIDEO_IMDB_IMAGE_NOT_FOUND;
+            }
+
             print(episodeResult.PosterUrl);
             //224; 126
-            episodeResult.PosterUrl = CloudStreamCore.ConvertIMDbImagesToHD(episodeResult.PosterUrl, 224, 126); //episodeResult.PosterUrl.Replace(",126,224_AL", "," + pwidth + "," + pheight + "_AL").Replace("UY126", "UY" + pheight).Replace("UX224", "UX" + pwidth);
+            if (episodeResult.PosterUrl != CloudStreamCore.VIDEO_IMDB_IMAGE_NOT_FOUND) {
+                episodeResult.PosterUrl = CloudStreamCore.ConvertIMDbImagesToHD(episodeResult.PosterUrl, 224, 126); //episodeResult.PosterUrl.Replace(",126,224_AL", "," + pwidth + "," + pheight + "_AL").Replace("UY126", "UY" + pheight).Replace("UX224", "UX" + pwidth);
+            }
             print(episodeResult.PosterUrl);
             //print(episodeResult.PosterUrl);
             print("OGTITLE:" + episodeResult.OgTitle);
@@ -939,8 +945,8 @@ namespace CloudStreamForms
 
                         }));*/
                         Commands.SetTapParameter(stackLayout, i);
-                      //  Commands.SetLongTapParameter(stackLayout, i);
-                        
+                        //  Commands.SetLongTapParameter(stackLayout, i);
+
 
                         //Source = p.posterUrl
                         recBtts.Add(imageButton);
@@ -1046,12 +1052,13 @@ namespace CloudStreamForms
 
         private void DubPicker_SelectedIndexChanged(object sender, int e)
         {
+            print("DUBCHANGED::");
             try {
                 isDub = "Dub" == DubPicker.ItemsSource[DubPicker.SelectedIndex];
                 SetDubExist();
             }
-            catch (Exception) {
-
+            catch (Exception _ex) {
+                print("EXPECTION:" + _ex);
             }
 
         }
@@ -1198,43 +1205,48 @@ namespace CloudStreamForms
 
         void SetDubExist()
         {
+            print("SETDUB:::");
             if (!SameAsActiveMovie()) return;
+            print("SETDUB:::SET");
 
             // string dstring = "";
-            List<string> baseUrls = GetAllGogoLinksFromAnime(currentMovie, currentSeason, isDub);
+            //List<string> baseUrls = GetAllGogoLinksFromAnime(currentMovie, currentSeason, isDub);
+            //  print("BASEURLS:::" + baseUrls.Count);
 
-            if (baseUrls.Count > 0) {
+          //  if (max > 0) {
 
                 TempThred tempThred = new TempThred();
                 tempThred.typeId = 6; // MAKE SURE THIS IS BEFORE YOU CREATE THE THRED
                 tempThred.Thread = new System.Threading.Thread(() => {
                     try {
                         int max = GetMaxEpisodesInAnimeSeason(currentMovie, currentSeason, isDub, tempThred);
-
-                        print("CLEAR AND ADD");
-                        MainThread.BeginInvokeOnMainThread(() => {
-                            try {
-                                DubBtt.Text = DubPicker.ItemsSource[DubPicker.SelectedIndex];
-                            }
-                            catch (Exception) {
-
-                            }
-
-                            DubBtt.IsVisible = DubPicker.IsVisible;
-                            ClearEpisodes();
-                            for (int i = 0; i < max; i++) {
+                        if(max > 0) {
+                            print("CLEAR AND ADD");
+                            MainThread.BeginInvokeOnMainThread(() => {
                                 try {
-                                    AddEpisode(new EpisodeResult() { Title = (i + 1) + ". " + currentEpisodes[i].name, Id = i, Description = currentEpisodes[i].description.Replace("\n", "").Replace("  ", ""), PosterUrl = currentEpisodes[i].posterUrl, Rating = currentEpisodes[i].rating, Progress = 0, epVis = false, subtitles = new List<string>() { "None" }, Mirros = new List<string>() });
-
+                                    DubBtt.Text = DubPicker.ItemsSource[DubPicker.SelectedIndex];
                                 }
                                 catch (Exception) {
-                                    AddEpisode(new EpisodeResult() { Title = (i + 1) + ". " + "Episode #" + (i + 1), Id = i, Description = "", PosterUrl = "", Rating = "", Progress = 0, epVis = false, subtitles = new List<string>() { "None" }, Mirros = new List<string>() });
 
                                 }
-                            }
-                            //episodeView.HeightRequest = myEpisodeResultCollection.Count * heightRequestPerEpisode + heightRequestAddEpisode;
-                            SetRows();
-                        });
+
+                                DubBtt.IsVisible = DubPicker.IsVisible;
+                                ClearEpisodes();
+                                for (int i = 0; i < max; i++) {
+                                    try {
+                                        AddEpisode(new EpisodeResult() { Title = (i + 1) + ". " + currentEpisodes[i].name, Id = i, Description = currentEpisodes[i].description.Replace("\n", "").Replace("  ", ""), PosterUrl = currentEpisodes[i].posterUrl, Rating = currentEpisodes[i].rating, Progress = 0, epVis = false, subtitles = new List<string>() { "None" }, Mirros = new List<string>() });
+
+                                    }
+                                    catch (Exception) {
+                                        // AddEpisode(new EpisodeResult() { Title = (i + 1) + ". " + "Episode #" + (i + 1), Id = i, Description = "", PosterUrl = "", Rating = "", Progress = 0, epVis = false, subtitles = new List<string>() { "None" }, Mirros = new List<string>() });
+
+                                    }
+                                }
+                                //episodeView.HeightRequest = myEpisodeResultCollection.Count * heightRequestPerEpisode + heightRequestAddEpisode;
+                                SetRows();
+                            });
+                        }
+                      
 
 
                     }
@@ -1246,7 +1258,7 @@ namespace CloudStreamForms
                 tempThred.Thread.Start();
 
 
-            }
+          //  }
         }
 
 
@@ -1368,12 +1380,12 @@ namespace CloudStreamForms
 
         private void IMDb_Clicked(object sender, EventArgs e)
         {
-           // if (!SameAsActiveMovie()) return;
+            // if (!SameAsActiveMovie()) return;
             App.OpenBrowser("https://www.imdb.com/title/" + mainPoster.url);
         }
         private void MAL_Clicked(object sender, EventArgs e)
         {
-         //   if (!SameAsActiveMovie()) return;
+            //   if (!SameAsActiveMovie()) return;
             App.OpenBrowser(CurrentMalLink);
         }
 
