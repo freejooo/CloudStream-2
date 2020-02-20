@@ -3,15 +3,254 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:d="http://xamarin.com/schemas/2014/forms/design"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                         xmlns:ff="clr-namespace:FFImageLoading.Forms;assembly=FFImageLoading.Forms"  
+             xmlns:ffTransformations="clr-namespace:FFImageLoading.Transformations;assembly=FFImageLoading.Transformations"
+
              mc:Ignorable="d"
              x:Class="CloudStreamForms.Settings"
              >
     <ContentPage.Content >
-
+        <ScrollView>
+            
         <StackLayout >
-            <Label Margin="3,13,3,4.5" Text="Settings" HorizontalOptions="Center"  FontSize="Large" FontAttributes="Bold"  ></Label>
+            <Label Margin="3,8,3,6.5" Text="Settings" HorizontalOptions="Center"  FontSize="25"   TextColor="#ffffff" ></Label>
 
-            <Grid >
+
+            <Grid RowSpacing="2">
+                <Grid.RowDefinitions >
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <Label Grid.Row="0" Text="General" FontSize="Body" FontAttributes="Bold" TranslationX="10" Margin="10" TextColor="#ffffff"></Label>
+                <!-- INSTANT SEARCH -->
+                <Grid  Grid.Row="1"  BackgroundColor="#212121" ColumnSpacing="10" HeightRequest="50">
+                    <Grid.ColumnDefinitions >
+                        <ColumnDefinition Width="Auto"></ColumnDefinition> </Grid.ColumnDefinitions>
+                    <ff:CachedImage Grid.Column="0" x:Name="InstantSearchImg" HorizontalOptions="Start" WidthRequest="25" HeightRequest="25" Margin="5" TranslationX="5" VerticalOptions="Center" BackgroundColor="Transparent">
+                        <ff:CachedImage.Transformations >
+                            <ffTransformations:TintTransformation HexColor="#707070" ></ffTransformations:TintTransformation>
+                        </ff:CachedImage.Transformations>
+                    </ff:CachedImage>
+                    <Label Grid.Column="1" Text="Instant search" HorizontalOptions="Start" VerticalOptions="Center"  FontSize="Body"  TextColor="{Binding MainTxtColor}"></Label>
+                    <Switch Grid.Column="2" x:Name="InstantSearchToggle"></Switch>
+                </Grid>
+                
+                <!-- SUBTITLES -->
+                <Grid  Grid.Row="2"  BackgroundColor="#212121" ColumnSpacing="10" HeightRequest="50">
+                    <Grid.ColumnDefinitions >
+                        <ColumnDefinition Width="Auto"></ColumnDefinition>
+                    </Grid.ColumnDefinitions>
+                    <ff:CachedImage Grid.Column="0" x:Name="SubtitlesImg" HorizontalOptions="Start" WidthRequest="25" HeightRequest="25" Margin="5" TranslationX="5"  VerticalOptions="Center" BackgroundColor="Transparent" >
+                        <ff:CachedImage.Transformations >
+                            <ffTransformations:TintTransformation HexColor="#707070" ></ffTransformations:TintTransformation> 
+                        </ff:CachedImage.Transformations></ff:CachedImage>
+                    <Label Grid.Column="1" Text="Subtitles" HorizontalOptions="Start" VerticalOptions="Center"  FontSize="Body" TextColor="{Binding MainTxtColor}"></Label>
+                    <Switch Grid.Column="2" x:Name="SubtitlesToggle"></Switch>
+                </Grid>
+
+                <!-- Cache DATA -->
+                <Grid  Grid.Row="3"  BackgroundColor="#212121" ColumnSpacing="10" HeightRequest="50">
+                    <Grid.ColumnDefinitions >
+                        <ColumnDefinition Width="Auto"></ColumnDefinition>
+                    </Grid.ColumnDefinitions>
+                    <ff:CachedImage Grid.Column="0" x:Name="CacheImg" HorizontalOptions="Start" WidthRequest="25" HeightRequest="25" Margin="5" TranslationX="5"  VerticalOptions="Center" BackgroundColor="Transparent" >
+                        <ff:CachedImage.Transformations >
+                            <ffTransformations:TintTransformation HexColor="#707070" ></ffTransformations:TintTransformation>
+                        </ff:CachedImage.Transformations>
+                    </ff:CachedImage>
+                    <Label Grid.Column="1" Text="Cache data" HorizontalOptions="Start" VerticalOptions="Center"  FontSize="Body" TextColor="{Binding MainTxtColor}"></Label>
+                    <Switch Grid.Column="2" x:Name="CacheDataToggle"></Switch>
+                </Grid>
+
+                <!-- Dubbed -->
+                <Grid  Grid.Row="4"  BackgroundColor="#212121" ColumnSpacing="10" HeightRequest="50">
+                    <Grid.ColumnDefinitions >
+                        <ColumnDefinition Width="Auto"></ColumnDefinition>
+                    </Grid.ColumnDefinitions>
+                    <ff:CachedImage Grid.Column="0" x:Name="DubbedImg" HorizontalOptions="Start" WidthRequest="25" HeightRequest="25" Margin="5" TranslationX="5"  VerticalOptions="Center" BackgroundColor="Transparent" >
+                        <ff:CachedImage.Transformations >
+                            <ffTransformations:TintTransformation HexColor="#707070" ></ffTransformations:TintTransformation>
+                        </ff:CachedImage.Transformations>
+                    </ff:CachedImage>
+                    <Label Grid.Column="1" Text="Default dub" HorizontalOptions="Start" VerticalOptions="Center"  FontSize="Body" TextColor="{Binding MainTxtColor}"></Label>
+                    <Switch Grid.Column="2" x:Name="DubbedToggle"></Switch>
+                </Grid>
+
+                <!-- Pause History -->
+                <Grid  Grid.Row="5"  BackgroundColor="#212121" ColumnSpacing="10" HeightRequest="50">
+                    <Grid.ColumnDefinitions >
+                        <ColumnDefinition Width="Auto"></ColumnDefinition>
+                    </Grid.ColumnDefinitions>
+                    <ff:CachedImage Grid.Column="0" x:Name="HistoryImg" HorizontalOptions="Start" WidthRequest="25" HeightRequest="25" Margin="5" TranslationX="5"  VerticalOptions="Center" BackgroundColor="Transparent" >
+                        <ff:CachedImage.Transformations >
+                            <ffTransformations:TintTransformation HexColor="#707070" ></ffTransformations:TintTransformation>
+                        </ff:CachedImage.Transformations>
+                    </ff:CachedImage>
+                    <Label Grid.Column="1" Text="Pause history" HorizontalOptions="Start" VerticalOptions="Center"  FontSize="Body" TextColor="{Binding MainTxtColor}"></Label>
+                    <Switch Grid.Column="2" x:Name="HistoryToggle"></Switch>
+                </Grid>
+
+                
+                
+                <Label Grid.Row="6" Text="UI" FontSize="Body" FontAttributes="Bold" TranslationX="10" Margin="10" TextColor="#ffffff"></Label>
+                
+                
+                <!-- Statusbar -->
+
+                <Grid  Grid.Row="7"  BackgroundColor="#212121" ColumnSpacing="10" HeightRequest="50">
+                    <Grid.ColumnDefinitions >
+                        <ColumnDefinition Width="Auto"></ColumnDefinition>
+                    </Grid.ColumnDefinitions>
+                    <ff:CachedImage Grid.Column="0" x:Name="StatusbarImg" HorizontalOptions="Start" WidthRequest="25" HeightRequest="25" Margin="5" TranslationX="5"  VerticalOptions="Center" BackgroundColor="Transparent" >
+                        <ff:CachedImage.Transformations >
+                            <ffTransformations:TintTransformation HexColor="#707070" ></ffTransformations:TintTransformation>
+                        </ff:CachedImage.Transformations>
+                    </ff:CachedImage>
+                    <Label Grid.Column="1" Text="Show statusbar" HorizontalOptions="Start" VerticalOptions="Center"  FontSize="Body" TextColor="{Binding MainTxtColor}"></Label>
+                    <Switch Grid.Column="2" x:Name="StatusbarToggle"></Switch>
+                </Grid>
+                <!-- Top 100 -->
+
+                <Grid  Grid.Row="8"  BackgroundColor="#212121" ColumnSpacing="10" HeightRequest="50">
+                    <Grid.ColumnDefinitions >
+                        <ColumnDefinition Width="Auto"></ColumnDefinition>
+                    </Grid.ColumnDefinitions>
+                    <ff:CachedImage Grid.Column="0" x:Name="TopImg" HorizontalOptions="Start" WidthRequest="25" HeightRequest="25" Margin="5" TranslationX="5"  VerticalOptions="Center" BackgroundColor="Transparent" >
+                        <ff:CachedImage.Transformations >
+                            <ffTransformations:TintTransformation HexColor="#707070" ></ffTransformations:TintTransformation>
+                        </ff:CachedImage.Transformations>
+                    </ff:CachedImage>
+                    <Label Grid.Column="1" Text="Top 100" HorizontalOptions="Start" VerticalOptions="Center"  FontSize="Body" TextColor="{Binding MainTxtColor}"></Label>
+                    <Switch Grid.Column="2" x:Name="TopToggle"></Switch>
+                </Grid>
+                <!-- Descript -->
+
+                <Grid  Grid.Row="9"  BackgroundColor="#212121" ColumnSpacing="10" HeightRequest="50">
+                    <Grid.ColumnDefinitions >
+                        <ColumnDefinition Width="Auto"></ColumnDefinition>
+                    </Grid.ColumnDefinitions>
+                    <ff:CachedImage Grid.Column="0" x:Name="DescriptImg" HorizontalOptions="Start" WidthRequest="25" HeightRequest="25" Margin="5" TranslationX="5"  VerticalOptions="Center" BackgroundColor="Transparent" >
+                        <ff:CachedImage.Transformations >
+                            <ffTransformations:TintTransformation HexColor="#707070" ></ffTransformations:TintTransformation>
+                        </ff:CachedImage.Transformations>
+                    </ff:CachedImage>
+                    <Label Grid.Column="1" Text="Episode description" HorizontalOptions="Start" VerticalOptions="Center"  FontSize="Body" TextColor="{Binding MainTxtColor}"></Label>
+                    <Switch Grid.Column="2" x:Name="DescriptToggle"></Switch>
+                </Grid>
+
+                
+                
+                <Label Grid.Row="10" Text="Clear Data" FontSize="Body" FontAttributes="Bold" TranslationX="10" Margin="10" TextColor="#ffffff"></Label>
+
+
+                <!-- Clear history -->
+
+                <Grid  Grid.Row="11"  BackgroundColor="#212121" ColumnSpacing="10" HeightRequest="50" >
+                        <Grid.ColumnDefinitions >
+                            <ColumnDefinition Width="Auto"></ColumnDefinition>
+                        </Grid.ColumnDefinitions>
+                        <ff:CachedImage Grid.Column="0" x:Name="ClearImg1" HorizontalOptions="Start" WidthRequest="25" HeightRequest="25" Margin="5" TranslationX="5"  VerticalOptions="Center" BackgroundColor="Transparent" >
+                            <ff:CachedImage.Transformations >
+                                <ffTransformations:TintTransformation HexColor="#707070" ></ffTransformations:TintTransformation>
+                            </ff:CachedImage.Transformations>
+                        </ff:CachedImage>
+                        <Label Grid.Column="1" Text="Clear history" HorizontalOptions="Start" VerticalOptions="Center"  FontSize="Body" TextColor="{Binding MainTxtColor}"></Label>
+                </Grid>
+                <!-- Clear bookmarks -->
+
+                <Grid  Grid.Row="12"  BackgroundColor="#212121" ColumnSpacing="10" HeightRequest="50">
+                        <Grid.ColumnDefinitions >
+                            <ColumnDefinition Width="Auto"></ColumnDefinition>
+                        </Grid.ColumnDefinitions>
+                        <ff:CachedImage Grid.Column="0" x:Name="ClearImg2" HorizontalOptions="Start" WidthRequest="25" HeightRequest="25" Margin="5" TranslationX="5"  VerticalOptions="Center" BackgroundColor="Transparent" >
+                            <ff:CachedImage.Transformations >
+                                <ffTransformations:TintTransformation HexColor="#707070" ></ffTransformations:TintTransformation>
+                            </ff:CachedImage.Transformations>
+                        </ff:CachedImage>
+                        <Label Grid.Column="1" Text="Clear bookmarks" HorizontalOptions="Start" VerticalOptions="Center"  FontSize="Body" TextColor="{Binding MainTxtColor}"></Label>
+
+                </Grid>
+                    <!-- Clear cached  -->
+
+                <Grid  Grid.Row="13"  BackgroundColor="#212121" ColumnSpacing="10" HeightRequest="50">
+                        <Grid.ColumnDefinitions >
+                            <ColumnDefinition Width="Auto"></ColumnDefinition>
+                        </Grid.ColumnDefinitions>
+                        <ff:CachedImage Grid.Column="0" x:Name="ClearImg3" HorizontalOptions="Start" WidthRequest="25" HeightRequest="25" Margin="5" TranslationX="5"  VerticalOptions="Center" BackgroundColor="Transparent" >
+                            <ff:CachedImage.Transformations >
+                                <ffTransformations:TintTransformation HexColor="#707070" ></ffTransformations:TintTransformation>
+                            </ff:CachedImage.Transformations>
+                        </ff:CachedImage>
+                        <Label Grid.Column="1" Text="Clear cached data" HorizontalOptions="Start" VerticalOptions="Center"  FontSize="Body" TextColor="{Binding MainTxtColor}"></Label>
+                </Grid>
+                <Grid  Grid.Row="14"  BackgroundColor="#212121" ColumnSpacing="10" HeightRequest="50">
+                        <Grid.ColumnDefinitions >
+                            <ColumnDefinition Width="Auto"></ColumnDefinition>
+                        </Grid.ColumnDefinitions>
+                        <ff:CachedImage Grid.Column="0" x:Name="ResetImg" HorizontalOptions="Start" WidthRequest="25" HeightRequest="25" Margin="5" TranslationX="5"  VerticalOptions="Center" BackgroundColor="Transparent" >
+                            <ff:CachedImage.Transformations >
+                                <ffTransformations:TintTransformation HexColor="#707070" ></ffTransformations:TintTransformation>
+                            </ff:CachedImage.Transformations>
+                        </ff:CachedImage>
+                        <Label Grid.Column="1" Text="Reset settings" HorizontalOptions="Start" VerticalOptions="Center"  FontSize="Body" TextColor="{Binding MainTxtColor}"></Label>
+                </Grid>
+                
+                    <Label Grid.Row="15" Text="Time" FontSize="Body" FontAttributes="Bold" TranslationX="10" Margin="10" TextColor="#ffffff"></Label>
+                
+                
+                    <Grid  Grid.Row="16"  BackgroundColor="#212121" ColumnSpacing="10" HeightRequest="50">
+                        <Grid.ColumnDefinitions >
+                            <ColumnDefinition Width="Auto"></ColumnDefinition>
+                        </Grid.ColumnDefinitions>
+
+                        <Label x:Name="CastTime" Margin="10,0,0,0" Grid.Column="0" Text="Skip time" HorizontalOptions="Start" VerticalOptions="Center"  FontSize="Body" TextColor="{Binding MainTxtColor}"></Label>
+                        <Slider  Grid.Column="1" ValueChanged="Slider_DragCompleted2" BackgroundColor="Transparent" x:Name="CastSlider" MinimumTrackColor="#303F9F" ThumbColor="#303F9F"></Slider>
+
+                    </Grid>
+                    <Grid  Grid.Row="17"  BackgroundColor="#212121" ColumnSpacing="10" HeightRequest="50">
+                        <Grid.ColumnDefinitions >
+                            <ColumnDefinition Width="Auto"></ColumnDefinition>
+                        </Grid.ColumnDefinitions>
+
+                        <Label x:Name="LoadingTime" Margin="10,0,0,0" Grid.Column="0" Text="Skip time" HorizontalOptions="Start" VerticalOptions="Center"  FontSize="Body" TextColor="{Binding MainTxtColor}"></Label>
+                        <Slider  Grid.Column="1" ValueChanged="Slider_DragCompleted" BackgroundColor="Transparent" x:Name="LoadingSlider" MinimumTrackColor="#303F9F" ThumbColor="#303F9F"></Slider>
+
+                    </Grid>
+
+                    <Label Grid.Row="18" Text="Build" FontSize="Body" FontAttributes="Bold" TranslationX="10" Margin="10" TextColor="#ffffff"></Label>
+
+                    <Label Text="Build Version: " Grid.Row="19" x:Name="BuildNumber" TranslationX="10"  ></Label>
+                    <Label Text="Github: https://github.com/LagradOst/CloudStream-2"  Grid.Row="20" TranslationX="10"    ></Label>
+                    <Button  x:Name="StarMe" Grid.Row="21" Text="Open Github" BackgroundColor="#212121"  HeightRequest="50"></Button>
+                    <Button x:Name="SetTheme" Grid.Row="22" Text="Theme" BackgroundColor="#212121"  HeightRequest="50"></Button>
+                    <Button Text="Update To..." Grid.Row="23" x:Name="UpdateBtt" IsEnabled="False" IsVisible="False" BackgroundColor="#212121" HeightRequest="50"></Button>
+                    <Image x:Name="OffBar" InputTransparent="True" VerticalOptions="Start"></Image>
+
+                    <!-- <Button Grid.Row="1"  Text="Instant search" CornerRadius="0"  InputTransparent="True"  BackgroundColor="#212121"></Button>-->
+            </Grid>
+            <!--
+            <Grid IsEnabled="False" IsVisible="False" >
                 <Grid.RowDefinitions >
                     <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
@@ -41,14 +280,14 @@
                             <TableSection>
                                 <TextCell  Detail="|FONTSIZE:17: BOLD:: BLACK:: POSY:30:|" DetailColor="Transparent" Text="UI" TextColor="#FFFFFF" ></TextCell>
                             </TableSection>
-                        <!--    <TableSection >
+                          <TableSection >
                                 
                                 <SwitchCell Text="Force black background (Restart recommended)" x:Name="BlackBgToggle" OnColor="{Binding MainColor}"></SwitchCell>
-                            </TableSection>-->
+                            </TableSection>
                             <TableSection >
                                 <SwitchCell Text="Show status bar" x:Name="StaturBarToggle" OnColor="{Binding MainColor}"></SwitchCell>
                             </TableSection>
-                            <TableSection>
+                           <TableSection>
                                 <SwitchCell Text="Top 100 enabled" x:Name="TopToggle" OnColor="{Binding MainColor}"></SwitchCell>
                             </TableSection>
                             <TableSection>
@@ -84,26 +323,16 @@
                 </Grid>
             </Grid>
            
+-->
+           <!-- <Label Text="Chrome skip time" x:Name="CastTime" TranslationX="5"></Label>-->
 
-            <Label Text="Chrome skip time" x:Name="CastTime" TranslationX="5"></Label>
-            <Slider ValueChanged="Slider_DragCompleted2" BackgroundColor="Transparent" x:Name="CastSlider" MinimumTrackColor="#303F9F" ThumbColor="#303F9F"></Slider>
-            <Label Text="Loading Time" x:Name="LoadingTime" TranslationX="5"></Label>
-            <Slider ValueChanged="Slider_DragCompleted" BackgroundColor="Transparent" x:Name="LoadingSlider" MinimumTrackColor="#303F9F" ThumbColor="#303F9F"></Slider>
-            <Label Text="Build Version: " x:Name="BuildNumber" TranslationX="5"></Label>
-            <Label Text="Github: https://github.com/LagradOst/CloudStream-2" TranslationX="5" ></Label>
 
             <!--  =================== BUTTONS =================== -->
 
-            <Grid HeightRequest="74">
-                <Button   Text="Set Theme - Restart Recommended" InputTransparent="True" HeightRequest="74" BackgroundColor="#2593ff"></Button>
-                <Picker  x:Name="ColorPicker" TextColor="Transparent"></Picker>
-            </Grid>
 
-            <Button Text="Update To..." x:Name="UpdateBtt" IsEnabled="False" IsVisible="False" BackgroundColor="#1976D2" HeightRequest="37"></Button>
-            <Button Text="Star me on Github" x:Name="StarMe" BackgroundColor="#303F9F" HeightRequest="37">
-                <!--★-->
-            </Button>
+            
         </StackLayout>
+        </ScrollView>
 
     </ContentPage.Content>
 </ContentPage>

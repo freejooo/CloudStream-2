@@ -93,7 +93,8 @@ namespace CloudStreamForms
 
 
             List<string> names = new List<string>() { "Home", "Search", "Downloads", "Settings" };
-            List<string> icons = new List<string>() { "homeIcon.png", "searchIcon.png", "downloadIcon.png", "baseline_settings_applications_white_48dp_inverted_big.png" };
+            //List<string> icons = new List<string>() { "homeIcon.png", "searchIcon.png", "downloadIcon.png", "baseline_settings_applications_white_48dp_inverted_big.png" };
+            List<string> icons = new List<string>() { "outline_home_white_48dp.png", "searchIcon.png", "outline_get_app_white_48dp.png", "outline_settings_white_48dp.png" };
             List<Page> pages = new List<Page>() { new Home(), new Search(), new Download(), new Settings(), };
 
             for (int i = 0; i < names.Count; i++) {
@@ -104,8 +105,8 @@ namespace CloudStreamForms
 
             LateCheck();
 
-             Page p = new VideoPage(new VideoPage.PlayVideo() { descript = "", name = "Black Bunny", episode = -1, season = -1, MirrorNames = new List<string>() { "Googlevid" }, MirrorUrls = new List<string>() { "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" }, Subtitles = new List<string>(), SubtitlesNames = new List<string>() });//new List<string>() { "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" }, new List<string>() { "Black" }, new List<string>() { });// { mainPoster = mainPoster };
-             Navigation.PushModalAsync(p, false);
+           //  Page p = new VideoPage(new VideoPage.PlayVideo() { descript = "", name = "Black Bunny", episode = -1, season = -1, MirrorNames = new List<string>() { "Googlevid" }, MirrorUrls = new List<string>() { "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" }, Subtitles = new List<string>(), SubtitlesNames = new List<string>() });//new List<string>() { "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" }, new List<string>() { "Black" }, new List<string>() { });// { mainPoster = mainPoster };
+           //  Navigation.PushModalAsync(p, false);
 
             On<Xamarin.Forms.PlatformConfiguration.Android>().SetToolbarPlacement(ToolbarPlacement.Bottom);
 
@@ -3702,7 +3703,7 @@ namespace CloudStreamForms
                 var webRequest = HttpWebRequest.Create(new System.Uri(url));
                 webRequest.Method = "HEAD";
                 print("RESPONSEGET:");
-
+                webRequest.Timeout = 10000;
                 using (var webResponse = webRequest.GetResponse()) {
                     print("RESPONSE:");
                     var fileSize = webResponse.Headers.Get("Content-Length");
@@ -5216,3 +5217,37 @@ namespace CloudStreamForms
         }
     }
 }
+
+
+/*
+            string url = "https://watch.animeonline360.com/?s=overlord";
+
+            string d = DownloadString(url);
+            string lookFor = " class=\"title\"> <a href=\"";
+            while (d.Contains(lookFor)) {
+                string uri = FindHTML(d, lookFor, "\"");
+                d = RemoveOne(d, lookFor);
+                string name = FindHTML(d, "/\">", "<",decodeToNonHtml:true);
+                print(name + "|" + uri);
+            }
+            */
+/*
+string url = "https://watch.animeonline360.com/tvshows/overlord-dubbed/";
+string d = DownloadString(url);
+List<string> episodes = new List<string>();
+string lookFor = "div class=\'numerando\'>";
+while (d.Contains(lookFor)) {
+    string uri = FindHTML(d, "<a href=\'", "\'");
+    d = RemoveOne(d, lookFor);
+    episodes.Add(uri);
+}*/
+
+/*
+string url = "https://watch.animeonline360.com/episodes/air-episode-1-english-dubbed/";
+string d = DownloadString(url);
+string id = FindHTML(d, "data-post=\'", "\'");
+string _d = PostRequest("https://watch.animeonline360.com/wp-admin/admin-ajax.php", url, "action=doo_player_ajax&post=" + id + "&nume=1&type=tv");
+string source = FindHTML(_d, "src=\'", "\'");
+ d = DownloadString(source);
+string videoUrl = FindHTML(d, "source src=\"", "\"");
+print(videoUrl);*/

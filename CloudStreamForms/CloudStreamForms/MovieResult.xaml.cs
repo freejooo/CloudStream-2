@@ -69,6 +69,8 @@ namespace CloudStreamForms
 
         protected override bool OnBackButtonPressed()
         {
+            print("STARTONBACK");
+
             Search.mainPoster = new Poster();
 
             print("STARTBACK");
@@ -1213,52 +1215,52 @@ namespace CloudStreamForms
             //List<string> baseUrls = GetAllGogoLinksFromAnime(currentMovie, currentSeason, isDub);
             //  print("BASEURLS:::" + baseUrls.Count);
 
-          //  if (max > 0) {
+            //  if (max > 0) {
 
-                TempThred tempThred = new TempThred();
-                tempThred.typeId = 6; // MAKE SURE THIS IS BEFORE YOU CREATE THE THRED
-                tempThred.Thread = new System.Threading.Thread(() => {
-                    try {
-                        int max = GetMaxEpisodesInAnimeSeason(currentMovie, currentSeason, isDub, tempThred);
-                        if(max > 0) {
-                            print("CLEAR AND ADD");
-                            MainThread.BeginInvokeOnMainThread(() => {
+            TempThred tempThred = new TempThred();
+            tempThred.typeId = 6; // MAKE SURE THIS IS BEFORE YOU CREATE THE THRED
+            tempThred.Thread = new System.Threading.Thread(() => {
+                try {
+                    int max = GetMaxEpisodesInAnimeSeason(currentMovie, currentSeason, isDub, tempThred);
+                    if (max > 0) {
+                        print("CLEAR AND ADD");
+                        MainThread.BeginInvokeOnMainThread(() => {
+                            try {
+                                DubBtt.Text = DubPicker.ItemsSource[DubPicker.SelectedIndex];
+                            }
+                            catch (Exception) {
+
+                            }
+
+                            DubBtt.IsVisible = DubPicker.IsVisible;
+                            ClearEpisodes();
+                            for (int i = 0; i < max; i++) {
                                 try {
-                                    DubBtt.Text = DubPicker.ItemsSource[DubPicker.SelectedIndex];
+                                    AddEpisode(new EpisodeResult() { Title = (i + 1) + ". " + currentEpisodes[i].name, Id = i, Description = currentEpisodes[i].description.Replace("\n", "").Replace("  ", ""), PosterUrl = currentEpisodes[i].posterUrl, Rating = currentEpisodes[i].rating, Progress = 0, epVis = false, subtitles = new List<string>() { "None" }, Mirros = new List<string>() });
+
                                 }
                                 catch (Exception) {
+                                    // AddEpisode(new EpisodeResult() { Title = (i + 1) + ". " + "Episode #" + (i + 1), Id = i, Description = "", PosterUrl = "", Rating = "", Progress = 0, epVis = false, subtitles = new List<string>() { "None" }, Mirros = new List<string>() });
 
                                 }
-
-                                DubBtt.IsVisible = DubPicker.IsVisible;
-                                ClearEpisodes();
-                                for (int i = 0; i < max; i++) {
-                                    try {
-                                        AddEpisode(new EpisodeResult() { Title = (i + 1) + ". " + currentEpisodes[i].name, Id = i, Description = currentEpisodes[i].description.Replace("\n", "").Replace("  ", ""), PosterUrl = currentEpisodes[i].posterUrl, Rating = currentEpisodes[i].rating, Progress = 0, epVis = false, subtitles = new List<string>() { "None" }, Mirros = new List<string>() });
-
-                                    }
-                                    catch (Exception) {
-                                        // AddEpisode(new EpisodeResult() { Title = (i + 1) + ". " + "Episode #" + (i + 1), Id = i, Description = "", PosterUrl = "", Rating = "", Progress = 0, epVis = false, subtitles = new List<string>() { "None" }, Mirros = new List<string>() });
-
-                                    }
-                                }
-                                //episodeView.HeightRequest = myEpisodeResultCollection.Count * heightRequestPerEpisode + heightRequestAddEpisode;
-                                SetRows();
-                            });
-                        }
-                      
-
-
+                            }
+                            //episodeView.HeightRequest = myEpisodeResultCollection.Count * heightRequestPerEpisode + heightRequestAddEpisode;
+                            SetRows();
+                        });
                     }
-                    finally {
-                        JoinThred(tempThred);
-                    }
-                });
-                tempThred.Thread.Name = "Gogoanime Download";
-                tempThred.Thread.Start();
 
 
-          //  }
+
+                }
+                finally {
+                    JoinThred(tempThred);
+                }
+            });
+            tempThred.Thread.Name = "Gogoanime Download";
+            tempThred.Thread.Start();
+
+
+            //  }
         }
 
 
@@ -1763,33 +1765,48 @@ namespace CloudStreamForms
                 for (int i = 0; i < episodeResult.Mirros.Count; i++) {
                     if (episodeResult.Mirros[i] == download) {
                         string s = episodeResult.mirrosUrls[i];
-                        Thread t = new Thread(() => {
-                            UserDialogs.Instance.ShowLoading("Checking link...", MaskType.Gradient);
-                            //UserDialogs.Instance.load
-                            double fileSize = CloudStreamCore.GetFileSize(s);
-                            UserDialogs.Instance.HideLoading();
-                            if (fileSize > 1) {
-                                string dpath = App.DownloadUrl(s, episodeResult.Title + ".mp4", true, "/" + GetPathFromType(), "Download complete!", true, episodeResult.Title);
-                                //  string ppath = App.DownloadUrl(episodeResult.PosterUrl, "epP" + episodeResult.Title + ".jpg", false, "/Posters");
-                                // string mppath = App.DownloadUrl(currentMovie.title.hdPosterUrl, "hdP" + episodeResult.Title + ".jpg", false, "/TitlePosters");
-                                string mppath = currentMovie.title.hdPosterUrl;
-                                string ppath = episodeResult.PosterUrl;
-                                string key = "_dpath=" + dpath + "|||_ppath=" + ppath + "|||_mppath=" + mppath + "|||_descript=" + episodeResult.Description + "|||_maindescript=" + currentMovie.title.description + "|||_epCounter=" + episodeResult.Id + "|||_epId=" + GetId(episodeResult) + "|||_movieId=" + currentMovie.title.id + "|||_title=" + episodeResult.Title + "|||_movieTitle=" + currentMovie.title.name + "|||=EndAll";
-                                print("DKEY: " + key);
-                                App.SetKey("Download", GetId(episodeResult), key);
-                                App.ShowToast("Download Started - " + fileSize + "MB");
-                                App.SetKey("DownloadSize", GetId(episodeResult), fileSize);
-                                SetColor(episodeResult);
-                                ForceUpdate();
-                            }
-                            else {
-                                EpisodeSettings(episodeResult);
-                                App.ShowToast("Download Failed");
-                                ForceUpdate();
-                            }
 
-                        }) { Name = "DownloadThread" };
-                        t.Start();
+                        TempThred tempThred = new TempThred();
+                        tempThred.typeId = 4; // MAKE SURE THIS IS BEFORE YOU CREATE THE THRED
+                        tempThred.Thread = new System.Threading.Thread(() =>
+                        {
+                            try {
+
+                                UserDialogs.Instance.ShowLoading("Checking link...", MaskType.Gradient);
+                                //UserDialogs.Instance.load
+                                double fileSize = CloudStreamCore.GetFileSize(s);
+                                UserDialogs.Instance.HideLoading();
+                                if (fileSize > 1) {
+                                    string dpath = App.DownloadUrl(s, episodeResult.Title + ".mp4", true, "/" + GetPathFromType(), "Download complete!", true, episodeResult.Title);
+                                    //  string ppath = App.DownloadUrl(episodeResult.PosterUrl, "epP" + episodeResult.Title + ".jpg", false, "/Posters");
+                                    // string mppath = App.DownloadUrl(currentMovie.title.hdPosterUrl, "hdP" + episodeResult.Title + ".jpg", false, "/TitlePosters");
+                                    string mppath = currentMovie.title.hdPosterUrl;
+                                    string ppath = episodeResult.PosterUrl;
+                                    string key = "_dpath=" + dpath + "|||_ppath=" + ppath + "|||_mppath=" + mppath + "|||_descript=" + episodeResult.Description + "|||_maindescript=" + currentMovie.title.description + "|||_epCounter=" + episodeResult.Id + "|||_epId=" + GetId(episodeResult) + "|||_movieId=" + currentMovie.title.id + "|||_title=" + episodeResult.Title + "|||_movieTitle=" + currentMovie.title.name + "|||=EndAll";
+                                    print("DKEY: " + key);
+                                    App.SetKey("Download", GetId(episodeResult), key);
+                                    App.ShowToast("Download Started - " + fileSize + "MB");
+                                    App.SetKey("DownloadSize", GetId(episodeResult), fileSize);
+                                    SetColor(episodeResult);
+                                    ForceUpdate();
+                                }
+                                else {
+                                    EpisodeSettings(episodeResult);
+                                    App.ShowToast("Download Failed");
+                                    ForceUpdate();
+                                }
+                               // if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
+
+                            }
+                            finally {
+                                UserDialogs.Instance.HideLoading();
+                                JoinThred(tempThred);
+                            }
+                        });
+                        tempThred.Thread.Name = "DownloadThread";
+                        tempThred.Thread.Start();
+
+ 
                     }
                 }
             }

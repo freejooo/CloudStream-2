@@ -9,6 +9,11 @@ namespace CloudStreamForms
     [XamlCompilation(XamlCompilationOptions.Compile)]
     public partial class Settings : ContentPage
     {
+
+        LabelList ColorPicker;
+        public string MainTxtColor { set; get; } = "#e1e1e1";
+
+
         public const string errorEpisodeToast = "No Links Found";
         public static int LoadingMiliSec
         {
@@ -116,7 +121,8 @@ namespace CloudStreamForms
                 App.SetKey("Settings", nameof(MovieDecEnabled), value);
             }
             get {
-                return App.GetKey("Settings", nameof(MovieDecEnabled), true);
+                return true;
+                //return App.GetKey("Settings", nameof(MovieDecEnabled), true);
             }
         }
         public static bool SearchEveryCharEnabled
@@ -184,6 +190,28 @@ namespace CloudStreamForms
         public Settings()
         {
             InitializeComponent();
+            InstantSearchImg.Source = App.GetImageSource("searchIcon.png");
+            SubtitlesImg.Source = App.GetImageSource("outline_subtitles_white_48dp.png");
+            CacheImg.Source = App.GetImageSource("outline_cached_white_48dp.png");
+            DubbedImg.Source = App.GetImageSource("outline_record_voice_over_white_48dp.png");
+            HistoryImg.Source = App.GetImageSource("outline_history_white_48dp.png");
+            
+            StatusbarImg.Source = App.GetImageSource("outline_aspect_ratio_white_48dp.png");
+            TopImg.Source = App.GetImageSource("outline_reorder_white_48dp.png");
+            DescriptImg.Source = App.GetImageSource("outline_description_white_48dp.png");
+
+            var ClearSource = App.GetImageSource("outline_delete_white_48dp.png");
+            ClearImg1.Source = ClearSource;
+            ClearImg2.Source = ClearSource;
+            ClearImg3.Source = ClearSource;
+
+            ResetImg.Source = App.GetImageSource("baseline_refresh_white_48dp.png");
+
+
+            ColorPicker = new LabelList(SetTheme, new List<string> { "Black", "Dark", "Netflix", "YouTube" });
+            //outline_reorder_white_48dp.png
+
+
             BackgroundColor = Settings.BlackRBGColor;
 
 
@@ -205,34 +233,35 @@ namespace CloudStreamForms
             BuildNumber.Text = "Build Version: " + App.GetBuildNumber();
             Apper();
 
-            ViewHistoryToggle.OnChanged += (o, e) => {
+            HistoryToggle.Toggled += (o, e) => {
                 ViewHistory = !e.Value;
             };
-            DubToggle.OnChanged += (o, e) => {
+            DubbedToggle.Toggled += (o, e) => {
                 DefaultDub = e.Value;
             };
             //  BlackBgToggle.OnChanged += (o, e) => {
             //     BlackBg = e.Value;
             //  };
-            SubtitesToggle.OnChanged += (o, e) => {
+            SubtitlesToggle.Toggled += (o, e) => {
                 SubtitlesEnabled = e.Value;
             };
+            /*
             EpsDecToggle.OnChanged += (o, e) => {
                 EpDecEnabled = e.Value;
-            };
-            DecToggle.OnChanged += (o, e) => {
+            };*/
+            DescriptToggle.Toggled += (o, e) => {
                 MovieDecEnabled = e.Value;
             };
-            SearchToggle.OnChanged += (o, e) => {
+            InstantSearchToggle.Toggled += (o, e) => {
                 SearchEveryCharEnabled = e.Value;
             };
-            CacheToggle.OnChanged += (o, e) => {
+            CacheDataToggle.Toggled += (o, e) => {
                 CacheData = e.Value;
             };
-            TopToggle.OnChanged += (o, e) => {
+            TopToggle.Toggled += (o, e) => {
                 Top100Enabled = e.Value;
             };
-            StaturBarToggle.OnChanged += (o, e) => {
+            StatusbarToggle.Toggled += (o, e) => {
                 HasStatusBar = e.Value;
                 App.UpdateStatusBar();
             };
@@ -240,6 +269,7 @@ namespace CloudStreamForms
             ColorPicker.SelectedIndexChanged += (o, e) => {
                 if (ColorPicker.SelectedIndex != -1) {
                     BlackBgType = ColorPicker.SelectedIndex;
+                    ColorPicker.button.Text = "Current Theme: " + ColorPicker.button.Text;
                     App.UpdateBackground();
                 }
             };
@@ -250,6 +280,7 @@ namespace CloudStreamForms
                 }
             };
 
+            /*
             if (Device.RuntimePlatform != Device.Android) {
                 for (int i = 0; i < SettingsTable.Count; i++) {
                     if (i >= SettingsTable.Count) break;
@@ -260,7 +291,7 @@ namespace CloudStreamForms
                         }
                     }
                 }
-            }
+            }*/
         }
 
         const double MAX_LOADING_TIME = 30000;
@@ -277,6 +308,14 @@ namespace CloudStreamForms
                 SetSliderChromeTime();
                 LoadingSlider.Value = ((LoadingMiliSec - MIN_LOADING_TIME) / (MAX_LOADING_TIME - MIN_LOADING_TIME));
                 CastSlider.Value = ((LoadingChromeSec - MIN_LOADING_CHROME) / (MAX_LOADING_CHROME - MIN_LOADING_CHROME));
+                SubtitlesToggle.IsToggled = SubtitlesEnabled;
+                DubbedToggle.IsToggled = DefaultDub;
+                HistoryToggle.IsToggled = !ViewHistory;
+                DescriptToggle.IsToggled = MovieDecEnabled;
+                InstantSearchToggle.IsToggled = SearchEveryCharEnabled;
+                CacheDataToggle.IsToggled = CacheData;
+                StatusbarToggle.IsToggled = HasStatusBar;
+                /*
                 SubtitesToggle.On = SubtitlesEnabled;
                 DubToggle.On = DefaultDub;
                 ViewHistoryToggle.On = !ViewHistory;
@@ -284,10 +323,11 @@ namespace CloudStreamForms
                 EpsDecToggle.On = EpDecEnabled;
                 SearchToggle.On = SearchEveryCharEnabled;
                 CacheToggle.On = CacheData;
-                TopToggle.On = Top100Enabled;
-                StaturBarToggle.On = HasStatusBar;
+                StaturBarToggle.On = HasStatusBar;*/
 
-                ColorPicker.ItemsSource = new List<string> { "Black", "Dark", "Netflix", "YouTube" };
+                TopToggle.IsToggled = Top100Enabled;
+
+             //   ColorPicker.ItemsSource = 
                 ColorPicker.SelectedIndex = BlackBgType;
 
                 /* if (Device.RuntimePlatform == Device.UWP) {
@@ -349,7 +389,7 @@ namespace CloudStreamForms
 
         void SetSliderChromeTime()
         {
-            CastTime.Text = "Chromecast skip time: " + LoadingChromeSec + "s";
+            CastTime.Text = "Skip time: " + LoadingChromeSec + "s";
         }
 
         private void TextCell_Tapped(object sender, EventArgs e)
