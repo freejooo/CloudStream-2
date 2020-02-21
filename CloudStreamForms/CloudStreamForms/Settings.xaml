@@ -5,6 +5,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
                          xmlns:ff="clr-namespace:FFImageLoading.Forms;assembly=FFImageLoading.Forms"  
              xmlns:ffTransformations="clr-namespace:FFImageLoading.Transformations;assembly=FFImageLoading.Transformations"
+                         xmlns:xe="clr-namespace:XamEffects;assembly=XamEffects"
 
              mc:Ignorable="d"
              x:Class="CloudStreamForms.Settings"
@@ -13,7 +14,7 @@
         <ScrollView>
             
         <StackLayout >
-            <Label Margin="3,8,3,6.5" Text="Settings" HorizontalOptions="Center"  FontSize="25"   TextColor="#ffffff" ></Label>
+            <Label Margin="3,5.1" Text="Settings" HorizontalOptions="Center"  FontSize="25"   TextColor="#ffffff" ></Label>
 
 
             <Grid RowSpacing="2">
@@ -42,7 +43,7 @@
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
-                <Label Grid.Row="0" Text="General" FontSize="Body" FontAttributes="Bold" TranslationX="10" Margin="10" TextColor="#ffffff"></Label>
+                <Label Grid.Row="0" Text="General" FontSize="Body" FontAttributes="Bold" TranslationX="10" Margin="10,20,10,10" TextColor="#ffffff"></Label>
                 <!-- INSTANT SEARCH -->
                 <Grid  Grid.Row="1"  BackgroundColor="#212121" ColumnSpacing="10" HeightRequest="50">
                     <Grid.ColumnDefinitions >
@@ -166,7 +167,7 @@
 
                 <!-- Clear history -->
 
-                <Grid  Grid.Row="11"  BackgroundColor="#212121" ColumnSpacing="10" HeightRequest="50" >
+                    <Grid  Grid.Row="11"  BackgroundColor="#212121" ColumnSpacing="10" HeightRequest="50" xe:TouchEffect.Color="#000000"  x:Name="ClearHistoryTap" >
                         <Grid.ColumnDefinitions >
                             <ColumnDefinition Width="Auto"></ColumnDefinition>
                         </Grid.ColumnDefinitions>
@@ -179,7 +180,7 @@
                 </Grid>
                 <!-- Clear bookmarks -->
 
-                <Grid  Grid.Row="12"  BackgroundColor="#212121" ColumnSpacing="10" HeightRequest="50">
+                    <Grid  Grid.Row="12"  BackgroundColor="#212121" ColumnSpacing="10" HeightRequest="50" xe:TouchEffect.Color="#000000"  x:Name="ClearBookmarksTap">
                         <Grid.ColumnDefinitions >
                             <ColumnDefinition Width="Auto"></ColumnDefinition>
                         </Grid.ColumnDefinitions>
@@ -193,7 +194,7 @@
                 </Grid>
                     <!-- Clear cached  -->
 
-                <Grid  Grid.Row="13"  BackgroundColor="#212121" ColumnSpacing="10" HeightRequest="50">
+                    <Grid  Grid.Row="13"  BackgroundColor="#212121" ColumnSpacing="10" HeightRequest="50" xe:TouchEffect.Color="#000000"  x:Name="ClearCachedTap">
                         <Grid.ColumnDefinitions >
                             <ColumnDefinition Width="Auto"></ColumnDefinition>
                         </Grid.ColumnDefinitions>
@@ -204,7 +205,7 @@
                         </ff:CachedImage>
                         <Label Grid.Column="1" Text="Clear cached data" HorizontalOptions="Start" VerticalOptions="Center"  FontSize="Body" TextColor="{Binding MainTxtColor}"></Label>
                 </Grid>
-                <Grid  Grid.Row="14"  BackgroundColor="#212121" ColumnSpacing="10" HeightRequest="50">
+                    <Grid  Grid.Row="14"  BackgroundColor="#212121" ColumnSpacing="10" HeightRequest="50" xe:TouchEffect.Color="#000000"  x:Name="ResetallTap">
                         <Grid.ColumnDefinitions >
                             <ColumnDefinition Width="Auto"></ColumnDefinition>
                         </Grid.ColumnDefinitions>

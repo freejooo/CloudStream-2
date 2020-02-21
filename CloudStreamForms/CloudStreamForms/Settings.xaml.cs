@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
+using XamEffects;
 using static CloudStreamForms.MainPage;
 
 namespace CloudStreamForms
@@ -265,6 +266,23 @@ namespace CloudStreamForms
                 HasStatusBar = e.Value;
                 App.UpdateStatusBar();
             };
+
+
+            Commands.SetTap(ClearHistoryTap, new Command((o) => {
+                ClearHistory();
+            }));
+
+            Commands.SetTap(ClearCachedTap, new Command((o) => {
+                ClearCache();
+            }));
+            Commands.SetTap(ClearBookmarksTap, new Command((o) => {
+                ClearBookmarks();
+            }));
+            Commands.SetTap(ResetallTap, new Command((o) => {
+                ResetToDef();
+            }));
+
+
 
             ColorPicker.SelectedIndexChanged += (o, e) => {
                 if (ColorPicker.SelectedIndex != -1) {

@@ -105,8 +105,8 @@ namespace CloudStreamForms
 
             LateCheck();
 
-           //  Page p = new VideoPage(new VideoPage.PlayVideo() { descript = "", name = "Black Bunny", episode = -1, season = -1, MirrorNames = new List<string>() { "Googlevid" }, MirrorUrls = new List<string>() { "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" }, Subtitles = new List<string>(), SubtitlesNames = new List<string>() });//new List<string>() { "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" }, new List<string>() { "Black" }, new List<string>() { });// { mainPoster = mainPoster };
-           //  Navigation.PushModalAsync(p, false);
+            //  Page p = new VideoPage(new VideoPage.PlayVideo() { descript = "", name = "Black Bunny", episode = -1, season = -1, MirrorNames = new List<string>() { "Googlevid" }, MirrorUrls = new List<string>() { "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" }, Subtitles = new List<string>(), SubtitlesNames = new List<string>() });//new List<string>() { "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" }, new List<string>() { "Black" }, new List<string>() { });// { mainPoster = mainPoster };
+            //  Navigation.PushModalAsync(p, false);
 
             On<Xamarin.Forms.PlatformConfiguration.Android>().SetToolbarPlacement(ToolbarPlacement.Bottom);
 
@@ -643,7 +643,6 @@ namespace CloudStreamForms
 
         #region Data
         [Serializable]
-
         public enum MovieType { Movie, TVSeries, Anime, AnimeMovie }
         [Serializable]
         public enum PosterType { Imdb, Raw }
@@ -732,6 +731,7 @@ namespace CloudStreamForms
         [Serializable]
         public struct MALSeason
         {
+            public string malUrl;
             public string name;
             public string japName;
             public string engName;
@@ -920,6 +920,69 @@ namespace CloudStreamForms
             public Title title;
             public List<Subtitle> subtitles;
             public List<Episode> episodes;
+            public List<MoeEpisode> moeEpisodes;
+        }
+
+      //  public struct NotificationData
+
+        [Serializable]
+        public struct MoeEpisode
+        {
+            public DateTime timeOfRelease;
+            public DateTime timeOfMesure;
+            public TimeSpan DiffTime { get { return timeOfRelease.Subtract(timeOfMesure); } }
+        }
+
+
+        [Serializable]
+        struct MoeService
+        {
+            public string service;
+            public string serviceId;
+        }
+        [Serializable]
+        struct MoeLink
+        {
+            public string Title;
+            public string URL;
+        }
+
+        [Serializable]
+        struct MoeMediaTitle
+        {
+            public string Canonical;
+            public string Romaji;
+            public string English;
+            public string Japanese;
+            public string Hiragana;
+            public string[] Synonyms;
+        }
+
+        [Serializable]
+        struct MoeApi
+        {
+            public string id;
+            public string type;
+            public MoeMediaTitle title;
+            public string summary;
+            public string status;
+            public string[] genres;
+            public string startDate;
+            public string endDate;
+            public int episodeCount;
+            public int episodeLength;
+            public string source;
+            public MoeService[] mappings;
+            //  Image image;
+            public string firstChannel;
+            //   AnimeRating rating;
+            //  AnimePopularity popularity;
+            //  ExternalMedia[] trailers;
+            public string[] episodes;
+            public string[] studios;
+            public string[] producers;
+            public string[] licensors;
+            public MoeLink[] links;
         }
         #endregion
 
@@ -944,6 +1007,7 @@ namespace CloudStreamForms
         public static event EventHandler<Movie> watchSeriesFishingDone;
         public static event EventHandler<Movie> fmoviesFishingDone;
         public static event EventHandler<Movie> fishingDone;
+        public static event EventHandler<List<MoeEpisode>> moeDone;
         //public static event EventHandler<Movie> yesmovieFishingDone;
 
         private static Random rng = new Random();
@@ -1278,6 +1342,9 @@ namespace CloudStreamForms
                             sqlLink = FindHTML(sequel, "<a href=\"", "\"");
                             string _jap = FindHTML(d, "Japanese:</span> ", "<", decodeToNonHtml: true).Replace("  ", "").Replace("\n", "");
                             string _eng = FindHTML(d, "English:</span> ", "<", decodeToNonHtml: true).Replace("  ", "").Replace("\n", "");
+                            if (_eng == "") {
+                                _eng = FindHTML(d, "og:title\" content=\"", "\"", decodeToNonHtml: true);
+                            }
                             string _syno = FindHTML(d, "Synonyms:</span> ", "<", decodeToNonHtml: true).Replace("  ", "").Replace("\n", "") + ",";
                             List<string> _synos = new List<string>();
                             while (_syno.Contains(",")) {
@@ -1292,11 +1359,11 @@ namespace CloudStreamForms
 
                             if (currentName.Contains("Part ") && !currentName.Contains("Part 1")) // WILL ONLY WORK UNTIL PART 10, BUT JUST HOPE THAT THAT DOSENT HAPPEND :)
                             {
-                                data[data.Count - 1].seasons.Add(new MALSeason() { name = currentName, engName = _eng, japName = _jap, synonyms = _synos });
+                                data[data.Count - 1].seasons.Add(new MALSeason() { name = currentName, engName = _eng, japName = _jap, synonyms = _synos, malUrl = _malLink });
                             }
                             else {
                                 data.Add(new MALSeasonData() {
-                                    seasons = new List<MALSeason>() { new MALSeason() { name = currentName, engName = _eng, japName = _jap, synonyms = _synos } },
+                                    seasons = new List<MALSeason>() { new MALSeason() { name = currentName, engName = _eng, japName = _jap, synonyms = _synos, malUrl = _malLink } },
                                     malUrl = "https://myanimelist.net" + _malLink
                                 });
                             }
@@ -1335,9 +1402,15 @@ namespace CloudStreamForms
                         currentSelectedYear = activeMovie.title.MALData.currentSelectedYear;
                     }
                     print("FISHING DATA");
+                    if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
                     FishGogoAnime(currentSelectedYear, tempThred);
+                    if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
                     FishDubbedAnime();
+                    if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
                     FishKickassAnime(activeMovie.title.MALData.firstName);
+                    if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
+                    FishMALNotification();
+                    if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
                     print("DONE FISHING DATA");
                     MALData md = activeMovie.title.MALData;
 
@@ -1360,6 +1433,86 @@ namespace CloudStreamForms
             });
             tempThred.Thread.Name = "MAL Search";
             tempThred.Thread.Start();
+        }
+
+        static void FishMALNotification()
+        {
+            TempThred tempThred = new TempThred();
+            tempThred.typeId = 2; // MAKE SURE THIS IS BEFORE YOU CREATE THE THRED
+            tempThred.Thread = new System.Threading.Thread(() => {
+                try {
+                    var malSeason = activeMovie.title.MALData.seasonData;
+                    var season = malSeason[malSeason.Count - 1].seasons;
+                    string downloadString = "https://notify.moe/search/" + season[season.Count - 1].engName;
+                    //   print("DOWNLOADING::" + downloadString);
+                    string d = DownloadString(downloadString);
+                    if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
+
+                    string lookFor = "<a href=\'/anime/";
+                    while (d.Contains(lookFor)) {
+                        string uri = FindHTML(d, lookFor, "\'");
+                        string _d = DownloadString("https://notify.moe/api/anime/" + uri);
+                        if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
+                        MoeApi api = Newtonsoft.Json.JsonConvert.DeserializeObject<MoeApi>(_d);
+                        bool doIt = false;
+                        string serviceId = "-1";
+                        if (api.mappings != null) {
+                            for (int i = 0; i < api.mappings.Length; i++) {
+                                if (api.mappings[i].service == "myanimelist/anime") {
+                                    serviceId = api.mappings[i].serviceId;
+                                }
+                                // print(api.mappings[i].service);
+                            }
+
+                        }
+
+                        // print("DA:::" + season[season.Count - 1].engName + "==||==" + api.title.English + "||" + serviceId + "|" + season[season.Count - 1].malUrl);
+                        if (FindHTML(season[season.Count - 1].malUrl, "/anime/", "/") == serviceId && serviceId != "-1") {
+                            doIt = true;
+                        }
+                        // if(Fi season[season.Count - 1].malUrl)
+
+                        if (doIt) {
+                            activeMovie.moeEpisodes = new List<MoeEpisode>();
+                            // if (ToLowerAndReplace(api.title.English) == ToLowerAndReplace(season[season.Count - 1].engName)) {
+                            if (api.episodes != null) {
+                                for (int i = 0; i < api.episodes.Length; i++) {
+                                    //https://notify.moe/api/episode/
+                                    //https://notify.moe/api/episode/r0Zy9WEZRV
+                                    //https://notify.moe/api/episode/xGNheCEZgM
+                                    // print(api.title.English + "|NO." + (i + 1) + " - " + api.episodes[i]);
+
+
+                                    string __d = DownloadString("https://notify.moe/api/episode/" + api.episodes[i]);
+                                    string end = FindHTML(__d, "\"end\":\"", "\"");
+
+                                    //https://twist.moe/api/anime/angel-beats/sources
+
+
+                                    var time = DateTime.Parse(end);
+                                    var _t = time.Subtract(DateTime.Now);
+
+                                    activeMovie.moeEpisodes.Add(new MoeEpisode() { timeOfRelease = time, timeOfMesure = DateTime.Now });
+                                    //print("TotalDays:" + _t.Days + "|" + _t.Hours + "|" + _t.Minutes);
+                                }
+                            }
+                            moeDone?.Invoke(null, activeMovie.moeEpisodes);
+                            return;
+                            //   print(uri);
+                            //}
+                        }
+                        d = RemoveOne(d, lookFor);
+                    }
+
+                }
+                finally {
+                    JoinThred(tempThred);
+                }
+            });
+            tempThred.Thread.Name = "FishMALNotification";
+            tempThred.Thread.Start();
+
+
         }
 
         static void FishKickassAnime(string query)
@@ -1642,8 +1795,8 @@ namespace CloudStreamForms
         public static string ToLowerAndReplace(string inp, bool seasonReplace = true)
         {
             string _inp = inp.ToLower();
-            if(seasonReplace) {
-                _inp = _inp.Replace("2nd season", "season 2").Replace("3th season", "season 3").Replace("4th season", "season 4"); 
+            if (seasonReplace) {
+                _inp = _inp.Replace("2nd season", "season 2").Replace("3th season", "season 3").Replace("4th season", "season 4");
             }
             _inp = inp.Replace("-", " ").Replace("`", "\'");
             return _inp;
@@ -2535,7 +2688,9 @@ namespace CloudStreamForms
                 if (d.Contains("<div class=\"msg warn\"><b>No results</b> found, try")) {
                     return "";
                 }
-                string _url = "https://www.opensubtitles.org/" + lang + "/subtitles/" + FindHTML(d, "en/subtitles/", "\'");
+                string _found = FindHTML(d, "en/subtitles/", "\'");
+                if (_found == "") return "";
+                string _url = "https://www.opensubtitles.org/" + lang + "/subtitles/" + _found;
 
                 d = DownloadString(_url);
                 const string subAdd = "https://dl.opensubtitles.org/en/download/file/";

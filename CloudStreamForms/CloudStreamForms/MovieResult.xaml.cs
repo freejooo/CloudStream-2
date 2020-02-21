@@ -447,6 +447,8 @@ namespace CloudStreamForms
             linksProbablyDone += MovieResult_linksProbablyDone;
 
             fishingDone += MovieFishingDone;
+
+            moeDone += MovieResult_moeDone;
             /*
             movie123FishingDone += MovieFishingDone;
             yesmovieFishingDone += MovieFishingDone;
@@ -505,7 +507,33 @@ namespace CloudStreamForms
             ChangedRecState(0, true);
         }
 
+        private void MovieResult_moeDone(object sender, List<MoeEpisode> e)
+        {
+            if (e == null) return;
+            if (e.Count <= 0) return;
 
+            if (!SameAsActiveMovie()) return;
+            Device.BeginInvokeOnMainThread(() => {
+                try {
+                    NotificationTime.Text = "";
+                    for (int i = 0; i < e.Count; i++) {
+                        var diff = e[i].DiffTime;
+                        print("DIFFTIME:::::" + e[i].DiffTime);
+                        if (diff.TotalSeconds > 0) {
+                            NotificationTime.Text = "Next Epiode: " + (diff.Days == 0 ? "" : (diff.Days + "d ")) + (diff.Hours == 0 ? "" : (diff.Hours + "h ")) + diff.Minutes + "m";
+                            return;
+                        }
+                    }
+                    NotificationTime.Text = "Completed";
+                }
+                catch (Exception _ex) {
+                    print("EXKKK::" + _ex);
+                }
+             
+            });
+
+
+        }
 
         private void MainPage_SizeChanged(object sender, EventArgs e)
         {
@@ -1768,8 +1796,7 @@ namespace CloudStreamForms
 
                         TempThred tempThred = new TempThred();
                         tempThred.typeId = 4; // MAKE SURE THIS IS BEFORE YOU CREATE THE THRED
-                        tempThred.Thread = new System.Threading.Thread(() =>
-                        {
+                        tempThred.Thread = new System.Threading.Thread(() => {
                             try {
 
                                 UserDialogs.Instance.ShowLoading("Checking link...", MaskType.Gradient);
@@ -1795,7 +1822,7 @@ namespace CloudStreamForms
                                     App.ShowToast("Download Failed");
                                     ForceUpdate();
                                 }
-                               // if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
+                                // if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
 
                             }
                             finally {
@@ -1806,7 +1833,7 @@ namespace CloudStreamForms
                         tempThred.Thread.Name = "DownloadThread";
                         tempThred.Thread.Start();
 
- 
+
                     }
                 }
             }

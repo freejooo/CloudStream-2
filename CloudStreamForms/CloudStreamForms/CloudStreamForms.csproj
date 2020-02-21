@@ -33,6 +33,8 @@
   <ItemGroup>
     <None Remove="Resource\baseline_get_app_white_48dp.png" />
     <None Remove="Resource\baseline_keyboard_arrow_down_white_48dp.png" />
+    <None Remove="Resource\baseline_notifications_active_white_48dp.png" />
+    <None Remove="Resource\baseline_notifications_none_white_48dp.png" />
     <None Remove="Resource\baseline_pause_white_48dp.png" />
     <None Remove="Resource\baseline_playlist_play_white_48dp.png" />
     <None Remove="Resource\baseline_play_arrow_white_48dp.png" />
@@ -144,6 +146,8 @@
   <ItemGroup>
     <EmbeddedResource Include="Resource\baseline_get_app_white_48dp.png" />
     <EmbeddedResource Include="Resource\baseline_keyboard_arrow_down_white_48dp.png" />
+    <EmbeddedResource Include="Resource\baseline_notifications_active_white_48dp.png" />
+    <EmbeddedResource Include="Resource\baseline_notifications_none_white_48dp.png" />
     <EmbeddedResource Include="Resource\baseline_pause_white_48dp.png" />
     <EmbeddedResource Include="Resource\baseline_playlist_play_white_48dp.png" />
     <EmbeddedResource Include="Resource\baseline_play_arrow_white_48dp.png" />

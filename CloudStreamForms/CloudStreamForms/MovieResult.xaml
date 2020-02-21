@@ -229,15 +229,21 @@ xmlns:ffTransformations="clr-namespace:FFImageLoading.Transformations;assembly=F
                         <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
 
-                    <Grid x:Name="EpPickers" Grid.Row="1"  Grid.Column="0" Margin="0,10,0,0">
-
-                        <StackLayout Orientation="Horizontal" TranslationX="10" >
-                                <Button x:Name="SeasonBtt"  InputTransparent="False" BackgroundColor="#333333" Text="Season 1" TextColor="#e7e7e7" FontAttributes="Bold" FontSize="Body" CornerRadius="5" HeightRequest="37" ></Button>
+                    <Grid x:Name="EpPickers" Grid.Row="1"  Grid.Column="0" Margin="10,10,0,0">
+                        <Grid.ColumnDefinitions >
+                            <ColumnDefinition Width="Auto"></ColumnDefinition>
+                            <ColumnDefinition Width="Auto"></ColumnDefinition>
+                            <ColumnDefinition Width="*"></ColumnDefinition>
+                        </Grid.ColumnDefinitions>
+                        <!--   <StackLayout Orientation="Horizontal" TranslationX="10" >-->
+                                <Button x:Name="SeasonBtt" Grid.Column="0" InputTransparent="False" BackgroundColor="#333333" Text="Season 1" TextColor="#e7e7e7" FontAttributes="Bold" FontSize="Body" CornerRadius="5" HeightRequest="37" ></Button>
                              <!--   <Picker x:Name="SeasonPicker"  TranslationX="13" TextColor="Transparent" IsVisible="False" VerticalOptions="Center" HorizontalOptions="Start"  FontAttributes="Bold" FontSize="Body" ></Picker> -->
 
-                                <Button x:Name="DubBtt" InputTransparent="False" BackgroundColor="#333333" Text="Dub" TextColor="#e7e7e7" FontAttributes="Bold" FontSize="Body" CornerRadius="5" HeightRequest="37" WidthRequest="60" ></Button>
-                             <!--   <Picker x:Name="DubPicker" IsVisible="False" VerticalOptions="Center" HorizontalOptions="Start"  FontAttributes="Bold" FontSize="Body" TextColor="Transparent" TranslationX="13"></Picker> -->
-                        </StackLayout>
+                        <Button x:Name="DubBtt" Grid.Column="1" InputTransparent="False" BackgroundColor="#333333" Text="Dub" TextColor="#e7e7e7" FontAttributes="Bold" FontSize="Body" CornerRadius="5" HeightRequest="37" WidthRequest="60" ></Button>
+                        <Label x:Name="NotificationTime" Grid.Column="2" VerticalOptions="Center" HorizontalOptions="End" Margin="10,0"></Label>    
+                        
+                        <!--   <Picker x:Name="DubPicker" IsVisible="False" VerticalOptions="Center" HorizontalOptions="Start"  FontAttributes="Bold" FontSize="Body" TextColor="Transparent" TranslationX="13"></Picker> -->
+                       <!-- </StackLayout>-->
 
                     </Grid>
 
