@@ -350,19 +350,21 @@ xmlns:ffTransformations="clr-namespace:FFImageLoading.Transformations;assembly=F
 
                                                     <!--  <ImageButton  Clicked="ImageButton_Clicked" BackgroundColor="Transparent" WidthRequest="127"></ImageButton> -->
                                                     <!--PosterUrl-->
-                                                    <ff:CachedImage WidthRequest="127" HeightRequest="72" Source="{Binding ImageSource}" InputTransparent="True" >
+                                                  
+           
+                                                    <Grid  xe:TouchEffect.Color="White" Opacity="1" WidthRequest="127" HeightRequest="72"  BackgroundColor="Transparent" xe:EffectsConfig.ChildrenInputTransparent="False" BindingContextChanged="Grid_BindingContextChanged" >
+                                                        <ff:CachedImage WidthRequest="127" HeightRequest="72" Source="{Binding ImageSource}" InputTransparent="True" >
 
-                                                        <ff:CachedImage.Transformations >
-                                                            <ffTransformations:RoundedTransformation Radius="1" BorderSize="0" BorderHexColor="#303F9F" CropWidthRatio="1.7"  >
+                                                            <ff:CachedImage.Transformations >
+                                                                <ffTransformations:RoundedTransformation Radius="1" BorderSize="0" BorderHexColor="#303F9F" CropWidthRatio="1.7"  >
 
-                                                            </ffTransformations:RoundedTransformation>
-                                                        </ff:CachedImage.Transformations>
+                                                                </ffTransformations:RoundedTransformation>
+                                                            </ff:CachedImage.Transformations>
 
-                                                    </ff:CachedImage>
-                                                    <ff:CachedImage PropertyChanging="Image_PropertyChanging" InputTransparent="True"  BackgroundColor="Transparent">
+                                                        </ff:CachedImage>
+                                                        <ff:CachedImage PropertyChanging="Image_PropertyChanging" InputTransparent="True"  BackgroundColor="Transparent">
 
-                                                    </ff:CachedImage>
-                                                    <Grid  xe:TouchEffect.Color="White" Opacity="0.5" WidthRequest="127" HeightRequest="72" Margin="0,10" BackgroundColor="Transparent" xe:EffectsConfig.ChildrenInputTransparent="False" BindingContextChanged="Grid_BindingContextChanged" >
+                                                        </ff:CachedImage>
                                                     </Grid>
                                                     <!-- Source="{Binding PosterUrl}"-->
                                                 </Grid>

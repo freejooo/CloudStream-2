@@ -1491,7 +1491,8 @@ namespace CloudStreamForms
 
                                     var time = DateTime.Parse(end);
                                     var _t = time.Subtract(DateTime.Now);
-
+                                    if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
+                                    if (activeMovie.moeEpisodes == null) return;
                                     activeMovie.moeEpisodes.Add(new MoeEpisode() { timeOfRelease = time, timeOfMesure = DateTime.Now });
                                     //print("TotalDays:" + _t.Days + "|" + _t.Hours + "|" + _t.Minutes);
                                 }

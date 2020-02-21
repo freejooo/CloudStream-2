@@ -251,7 +251,7 @@ namespace CloudStreamForms
                 EpDecEnabled = e.Value;
             };*/
             DescriptToggle.Toggled += (o, e) => {
-                MovieDecEnabled = e.Value;
+                EpDecEnabled = e.Value;
             };
             InstantSearchToggle.Toggled += (o, e) => {
                 SearchEveryCharEnabled = e.Value;
@@ -329,7 +329,7 @@ namespace CloudStreamForms
                 SubtitlesToggle.IsToggled = SubtitlesEnabled;
                 DubbedToggle.IsToggled = DefaultDub;
                 HistoryToggle.IsToggled = !ViewHistory;
-                DescriptToggle.IsToggled = MovieDecEnabled;
+                DescriptToggle.IsToggled = EpDecEnabled;
                 InstantSearchToggle.IsToggled = SearchEveryCharEnabled;
                 CacheDataToggle.IsToggled = CacheData;
                 StatusbarToggle.IsToggled = HasStatusBar;
