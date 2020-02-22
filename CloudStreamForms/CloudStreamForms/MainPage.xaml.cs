@@ -5374,6 +5374,11 @@ namespace CloudStreamForms
     }
 }
 
+// =============================================================== NOT IMPLEMENTED PROVIDERS (COMING SOON) ===============================================================
+
+
+
+// =============================================================== watch.animeonline360 ===============================================================
 
 /*
             string url = "https://watch.animeonline360.com/?s=overlord";
@@ -5407,3 +5412,125 @@ string source = FindHTML(_d, "src=\'", "\'");
  d = DownloadString(source);
 string videoUrl = FindHTML(d, "source src=\"", "\"");
 print(videoUrl);*/
+
+
+
+// =============================================================== twist.moe ===============================================================
+
+/*
+        // =============== GET COOKIE SITE ===============
+        string d = GetHTML("https://twist.moe/a/angel-beats/1");
+        string code = FindHTML(d, "<script>", "</script>").Replace("e(r);", "alert(r);");
+        string token = "";
+        string token2 = "";
+        string tokenCook = "";
+        var engine = new Engine().SetValue("alert", new Action<string>((a) => { token = a; }));//.SetValue("log", new Action<string>((a) => { token2 = a; })); ;
+        engine.Execute(code);
+        token = token.Replace("location.reload();", "alert(e); alertCook(doccookie);");
+        string find = "+ \';path=";
+        token = token.Replace(find + "" + FindHTML(token, find, "\'") + "\'", "").Replace("document.cookie=", "var doccookie=");
+
+        var engine2 = new Engine()
+                 .SetValue("alert", new Action<string>((a) => { token2 = a; })).SetValue("alertCook", new Action<string>((a) => { tokenCook = a; }));
+        engine2.Execute(token);
+
+        //string _d = HTMLGet("https://twist.moe/api/anime/angel-beats/sources", "https://twist.moe/a/angel-beats/1", cookies: new List<Cookie>() { new Cookie() { Name = FindHTML("|" + tokenCook, "|", "="), Value = FindHTML(tokenCook + "|", "=", "|"), Expires = DateTime.Now.AddSeconds(1000) } }, keys: new List<string>() { "x-access-token" }, values: new List<string>() { token2 }) ;
+
+        // =============== GET REAL SITE ===============
+
+        string _d = HTMLGet("https://twist.moe/a/angel-beats/1", "https://twist.moe/a/angel-beats/1", cookies: new List<Cookie>() { new Cookie() { Name = FindHTML("|" + tokenCook, "|", "="), Value = FindHTML(tokenCook + "|", "=", "|"), Expires = DateTime.Now.AddSeconds(1000) } });
+        string openToken = "";
+        string lookFor = "<link href=\"/_nuxt/";
+        while (_d.Contains(lookFor)) {
+            if (openToken == "") {
+                string ___d = FindHTML(_d, lookFor, "\"");
+                if (___d.EndsWith(".js")) {
+                    string dKey = DownloadString("https://twist.moe/_nuxt/" + ___d);
+                    openToken = FindHTML(dKey, "x-access-token\":\"", "\"");
+                    //x-access-token":"
+                }
+            }
+            _d = RemoveOne(_d, lookFor);
+        }
+        // =============== GET SOURCES ===============
+        string seriesD = HTMLGet("https://twist.moe/api/anime/angel-beats/sources", "https://twist.moe/a/angel-beats/1", cookies: new List<Cookie>() { new Cookie() { Name = FindHTML("|" + tokenCook, "|", "="), Value = FindHTML(tokenCook + "|", "=", "|"), Expires = DateTime.Now.AddSeconds(1000) } }, keys: new List<string>() { "x-access-token" }, values: new List<string>() { openToken }) ;
+        print(seriesD);
+        string fetch = FetchMoeUrlFromSalted("U2FsdGVkX19keEYdmWm5SfhOhvOubne48rkyrP/vvFp/9yurDNMI20rUCXnlkf8DFLW9bSJfKLFkKsN6P7Hhy+zYjYdqjOB/EyNH9+gdhdAjUJVKBbdui/Kk3Avx84/e");
+        print(fetch);*/
+
+// =============================================================== twist.moe LINK FETCH ===============================================================
+
+
+/*        static string FetchMoeUrlFromSalted(string _salted)
+    {
+        byte[] CreateMD5Byte(byte[] input)
+        {
+            using (System.Security.Cryptography.MD5 md5 = System.Security.Cryptography.MD5.Create()) {
+                byte[] hashBytes = md5.ComputeHash(input);
+                return hashBytes;
+            }
+        }
+        string DecryptStringFromBytes_Aes(byte[] cipherText, byte[] Key, byte[] IV)
+        {
+            if (cipherText == null || cipherText.Length <= 0)
+                throw new ArgumentNullException("cipherText");
+            if (Key == null || Key.Length <= 0)
+                throw new ArgumentNullException("Key");
+            if (IV == null || IV.Length <= 0)
+                throw new ArgumentNullException("IV");
+            string plaintext = null;
+            using (Aes aesAlg = Aes.Create()) {
+                aesAlg.Key = Key;
+                aesAlg.IV = IV;
+                aesAlg.Mode = CipherMode.CBC;
+                aesAlg.Padding = PaddingMode.PKCS7;
+                ICryptoTransform decryptor = aesAlg.CreateDecryptor(aesAlg.Key, aesAlg.IV);
+                using (MemoryStream msDecrypt = new MemoryStream(cipherText)) {
+                    using (CryptoStream csDecrypt = new CryptoStream(msDecrypt, decryptor, CryptoStreamMode.Read)) {
+                        using (StreamReader srDecrypt = new StreamReader(csDecrypt, Encoding.UTF8)) {
+                            plaintext = srDecrypt.ReadToEnd();
+                        }
+                    }
+                }
+            }
+            return plaintext;
+        }
+        byte[] SubArray(byte[] data, int index, int length)
+        {
+            byte[] result = new byte[length];
+            Array.Copy(data, index, result, 0, length);
+            return result;
+        }
+        byte[] Combine(params byte[][] arrays)
+        {
+            byte[] rv = new byte[arrays.Sum(a => a.Length)];
+            int offset = 0;
+            foreach (byte[] array in arrays) {
+                System.Buffer.BlockCopy(array, 0, rv, offset, array.Length);
+                offset += array.Length;
+            }
+            return rv;
+        }
+        byte[] bytes_to_key(byte[] data, byte[] _salt, int output = 48)
+        {
+            data = Combine(data, _salt);
+            byte[] _key = CreateMD5Byte(data);
+            List<byte> final_key = _key.ToList();
+            while (final_key.Count < output) {
+                _key = CreateMD5Byte(Combine(_key, data));
+                final_key.AddRange(_key);
+            }
+            return SubArray(final_key.ToArray(), 0, output);
+        }
+
+        const string KEY = "LXgIVP&PorO68Rq7dTx8N^lP!Fa5sGJ^*XK";
+        var f = System.Convert.FromBase64String(_salted);
+        var salt = SubArray(f, 8, 8);
+        var bytes = System.Text.Encoding.ASCII.GetBytes(KEY);
+        byte[] key_iv = bytes_to_key(bytes, salt, 32 + 16);
+        byte[] key = SubArray(key_iv, 0, 32);
+
+        byte[] iv = SubArray(key_iv, 32, 16);
+        return FindHTML(DecryptStringFromBytes_Aes(SubArray(f, 16, f.Length - 16), key, iv) + "|", "/", "|").Replace(" ", "%20");
+    }
+*/
