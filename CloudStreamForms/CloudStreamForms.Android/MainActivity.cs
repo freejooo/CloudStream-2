@@ -60,7 +60,9 @@ namespace CloudStreamForms.Droid
             global::Xamarin.Forms.Forms.Init(this, savedInstanceState);
 
 
+
             LocalNotificationsImplementation.NotificationIconId = Resource.Drawable.bicon;
+           
 
             LoadApplication(new App());
             activity = this;
@@ -118,8 +120,10 @@ namespace CloudStreamForms.Droid
         static bool hidden = false;
         static int baseShow = 0;
 
-        public void UpdateBackground()
+        public void UpdateBackground(int color)
         {
+            Window window = MainActivity.activity.Window;
+            window.SetNavigationBarColor(Android.Graphics.Color.Rgb(color, color, color));
             /*
             Window window = MainActivity.activity.Window;
             int color = Settings.BlackColor - 5;

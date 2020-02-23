@@ -149,6 +149,7 @@ namespace CloudStreamForms
             Settings.SubtitlesEnabled = !Settings.SubtitlesEnabled;
             ChangeSubtitle(SubtitlesEnabled);
         }
+
         private void ShareBttClicked(object sender, EventArgs e)
         {
             if (currentMovie.title.id != "" && currentMovie.title.name != "") {

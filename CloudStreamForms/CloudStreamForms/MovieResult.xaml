@@ -206,7 +206,7 @@ xmlns:ffTransformations="clr-namespace:FFImageLoading.Transformations;assembly=F
                                 </Grid>
                                 
                                 <Grid Grid.Row="0"  Grid.Column="5" x:Name="MALB">
-                                    <ff:CachedImage x:Name="MALBtt" HeightRequest="30"  BackgroundColor="Transparent" TranslationY="2" TranslationX="7" Scale="0.8" WidthRequest="50">
+                                    <ff:CachedImage x:Name="MALBtt" HeightRequest="30"  BackgroundColor="Transparent" TranslationY="0" TranslationX="7" Scale="0.8" WidthRequest="50">
                                         <ff:CachedImage.Transformations>
                                             <ffTransformations:TintTransformation HexColor="#e6e6e6" ></ffTransformations:TintTransformation>
 

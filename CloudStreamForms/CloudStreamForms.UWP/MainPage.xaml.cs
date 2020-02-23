@@ -39,7 +39,7 @@ namespace CloudStreamForms.UWP
 
     public class MainUWP : _App.IPlatformDep
     {
-        public void UpdateBackground()
+        public void UpdateBackground(int color)
         {
             // DO NOTHING
         }

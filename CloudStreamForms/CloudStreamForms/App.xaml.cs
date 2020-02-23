@@ -37,7 +37,7 @@ namespace CloudStreamForms
             void HideStatusBar();
             void ShowStatusBar();
             void UpdateStatusBar();
-            void UpdateBackground();
+            void UpdateBackground(int color);
         }
 
         public class StorageInfo
@@ -65,9 +65,13 @@ namespace CloudStreamForms
             platformDep.UpdateStatusBar();
         }
 
-        public static void UpdateBackground()
+        public static void UpdateBackground(int color = -1)
         {
-            platformDep.UpdateBackground();
+            if (color == -1) {
+                color = Math.Max(0, Settings.BlackColor - 10);
+            }
+            CloudStreamForms.MainPage.mainPage.BarBackgroundColor = new Color(color / 255.0, color / 255.0, color / 255.0, 1);
+            platformDep.UpdateBackground(color);
         }
 
         public static void HideStatusBar()
@@ -190,8 +194,8 @@ namespace CloudStreamForms
         {
             try {
                 if (myApp.Properties.ContainsKey(path)) {
-                   // CloudStreamCore.print("GETKEY::" + myApp.Properties[path]);
-                   // CloudStreamCore.print("GETKEY::" + typeof(T).ToString() + "||" + ConvertToObject<T>(myApp.Properties[path] as string, defVal));
+                    // CloudStreamCore.print("GETKEY::" + myApp.Properties[path]);
+                    // CloudStreamCore.print("GETKEY::" + typeof(T).ToString() + "||" + ConvertToObject<T>(myApp.Properties[path] as string, defVal));
                     return (T)ConvertToObject<T>(myApp.Properties[path] as string, defVal);
                 }
                 else {
@@ -322,7 +326,7 @@ namespace CloudStreamForms
             if (isSubtitleEnabled) {
                 _s += "\n";
                 _s += "\n";
-              //  _s += "#EXT-X-MEDIA:TYPE=SUBTITLES,GROUP-ID=\"subs\",NAME=\"English\",DEFAULT=YES,AUTOSELECT=YES,FORCED=NO,LANGUAGE=\"en\",CHARACTERISTICS=\"public.accessibility.transcribes-spoken-dialog, public.accessibility.describes-music-and-sound\",URI=" + beforePath + baseSubtitleName + "\"";
+                //  _s += "#EXT-X-MEDIA:TYPE=SUBTITLES,GROUP-ID=\"subs\",NAME=\"English\",DEFAULT=YES,AUTOSELECT=YES,FORCED=NO,LANGUAGE=\"en\",CHARACTERISTICS=\"public.accessibility.transcribes-spoken-dialog, public.accessibility.describes-music-and-sound\",URI=" + beforePath + baseSubtitleName + "\"";
                 _s += "#EXTVLCOPT:sub-file=" + beforePath + baseSubtitleName;
                 _s += "\n";
             }

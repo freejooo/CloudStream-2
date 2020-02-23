@@ -72,7 +72,9 @@ namespace CloudStreamForms
 
         void OnStop()
         {
-            Navigation.PopModalAsync();
+            if (isActive) {
+                Navigation.PopModalAsync();
+            }
             isActive = false;
         }
 
@@ -224,16 +226,16 @@ namespace CloudStreamForms
 
         void SetPause(bool paused)
         {
-            Pause.Source = paused ? GetImageSource(RoundedPrefix+ "_play_arrow_white_48dp.png") : GetImageSource(RoundedPrefix+"_pause_white_48dp.png");
+            Pause.Source = paused ? GetImageSource(RoundedPrefix + "_play_arrow_white_48dp.png") : GetImageSource(RoundedPrefix + "_pause_white_48dp.png");
         }
 
         protected override void OnAppearing()
         {
             base.OnAppearing();
-            PlayList.Source = GetImageSource(RoundedPrefix+"_playlist_play_white_48dp.png");
+            PlayList.Source = GetImageSource(RoundedPrefix + "_playlist_play_white_48dp.png");
             StopAll.Source = GetImageSource(RoundedPrefix + "_stop_white_48dp.png");
             BackForward.Source = GetImageSource(RoundedPrefix + "_replay_white_48dp.png");
-            FastForward.Source = GetImageSource(RoundedPrefix + "_replay_white_48dp_mirror.png"); 
+            FastForward.Source = GetImageSource(RoundedPrefix + "_replay_white_48dp_mirror.png");
             SkipBack.Source = GetImageSource(RoundedPrefix + "_skip_previous_white_48dp.png");
             SkipForward.Source = GetImageSource(RoundedPrefix + "_skip_next_white_48dp.png");
             Audio.Source = GetImageSource(RoundedPrefix + "_volume_up_white_48dp.png");

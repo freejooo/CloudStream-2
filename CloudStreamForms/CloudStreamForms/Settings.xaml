@@ -12,160 +12,162 @@
              >
     <ContentPage.Content >
         <ScrollView>
-            
-        <StackLayout >
-            <Label Margin="3,5.1" Text="Settings" HorizontalOptions="Center"  FontSize="25"   TextColor="#ffffff" ></Label>
+
+            <StackLayout >
+                <Label Margin="3,5.1" Text="Settings" HorizontalOptions="Center"  FontSize="25"   TextColor="#ffffff" ></Label>
 
 
-            <Grid RowSpacing="2">
-                <Grid.RowDefinitions >
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                </Grid.RowDefinitions>
-                <Label Grid.Row="0" Text="General" FontSize="Body" FontAttributes="Bold" TranslationX="10" Margin="10,20,10,10" TextColor="#ffffff"></Label>
-                <!-- INSTANT SEARCH -->
-                <Grid  Grid.Row="1"  BackgroundColor="#212121" ColumnSpacing="10" HeightRequest="50">
-                    <Grid.ColumnDefinitions >
-                        <ColumnDefinition Width="Auto"></ColumnDefinition> </Grid.ColumnDefinitions>
-                    <ff:CachedImage Grid.Column="0" x:Name="InstantSearchImg" HorizontalOptions="Start" WidthRequest="25" HeightRequest="25" Margin="5" TranslationX="5" VerticalOptions="Center" BackgroundColor="Transparent">
-                        <ff:CachedImage.Transformations >
-                            <ffTransformations:TintTransformation HexColor="#707070" ></ffTransformations:TintTransformation>
-                        </ff:CachedImage.Transformations>
-                    </ff:CachedImage>
-                    <Label Grid.Column="1" Text="Instant search" HorizontalOptions="Start" VerticalOptions="Center"  FontSize="Body"  TextColor="{Binding MainTxtColor}"></Label>
-                    <Switch Grid.Column="2" x:Name="InstantSearchToggle"></Switch>
-                </Grid>
-                
-                <!-- SUBTITLES -->
-                <Grid  Grid.Row="2"  BackgroundColor="#212121" ColumnSpacing="10" HeightRequest="50">
-                    <Grid.ColumnDefinitions >
-                        <ColumnDefinition Width="Auto"></ColumnDefinition>
-                    </Grid.ColumnDefinitions>
-                    <ff:CachedImage Grid.Column="0" x:Name="SubtitlesImg" HorizontalOptions="Start" WidthRequest="25" HeightRequest="25" Margin="5" TranslationX="5"  VerticalOptions="Center" BackgroundColor="Transparent" >
-                        <ff:CachedImage.Transformations >
-                            <ffTransformations:TintTransformation HexColor="#707070" ></ffTransformations:TintTransformation> 
-                        </ff:CachedImage.Transformations></ff:CachedImage>
-                    <Label Grid.Column="1" Text="Subtitles" HorizontalOptions="Start" VerticalOptions="Center"  FontSize="Body" TextColor="{Binding MainTxtColor}"></Label>
-                    <Switch Grid.Column="2" x:Name="SubtitlesToggle"></Switch>
-                </Grid>
+                <Grid RowSpacing="2">
+                    <Grid.RowDefinitions >
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <Label Grid.Row="0" Text="General" FontSize="Body" FontAttributes="Bold" TranslationX="10" Margin="10,20,10,10" TextColor="#ffffff"></Label>
+                    <!-- INSTANT SEARCH -->
+                    <Grid  Grid.Row="1"  BackgroundColor="#212121" ColumnSpacing="10" HeightRequest="50">
+                        <Grid.ColumnDefinitions >
+                            <ColumnDefinition Width="Auto"></ColumnDefinition>
+                        </Grid.ColumnDefinitions>
+                        <ff:CachedImage Grid.Column="0" x:Name="InstantSearchImg" HorizontalOptions="Start" WidthRequest="25" HeightRequest="25" Margin="5" TranslationX="5" VerticalOptions="Center" BackgroundColor="Transparent">
+                            <ff:CachedImage.Transformations >
+                                <ffTransformations:TintTransformation HexColor="#707070" ></ffTransformations:TintTransformation>
+                            </ff:CachedImage.Transformations>
+                        </ff:CachedImage>
+                        <Label Grid.Column="1" Text="Instant search" HorizontalOptions="Start" VerticalOptions="Center"  FontSize="Body"  TextColor="{Binding MainTxtColor}"></Label>
+                        <Switch Grid.Column="2" x:Name="InstantSearchToggle" HorizontalOptions="End" VerticalOptions="Center"></Switch>
+                    </Grid>
 
-                <!-- Cache DATA -->
-                <Grid  Grid.Row="3"  BackgroundColor="#212121" ColumnSpacing="10" HeightRequest="50">
-                    <Grid.ColumnDefinitions >
-                        <ColumnDefinition Width="Auto"></ColumnDefinition>
-                    </Grid.ColumnDefinitions>
-                    <ff:CachedImage Grid.Column="0" x:Name="CacheImg" HorizontalOptions="Start" WidthRequest="25" HeightRequest="25" Margin="5" TranslationX="5"  VerticalOptions="Center" BackgroundColor="Transparent" >
-                        <ff:CachedImage.Transformations >
-                            <ffTransformations:TintTransformation HexColor="#707070" ></ffTransformations:TintTransformation>
-                        </ff:CachedImage.Transformations>
-                    </ff:CachedImage>
-                    <Label Grid.Column="1" Text="Cache data" HorizontalOptions="Start" VerticalOptions="Center"  FontSize="Body" TextColor="{Binding MainTxtColor}"></Label>
-                    <Switch Grid.Column="2" x:Name="CacheDataToggle"></Switch>
-                </Grid>
+                    <!-- SUBTITLES -->
+                    <Grid  Grid.Row="2"  BackgroundColor="#212121" ColumnSpacing="10" HeightRequest="50">
+                        <Grid.ColumnDefinitions >
+                            <ColumnDefinition Width="Auto"></ColumnDefinition>
+                        </Grid.ColumnDefinitions>
+                        <ff:CachedImage Grid.Column="0" x:Name="SubtitlesImg" HorizontalOptions="Start" WidthRequest="25" HeightRequest="25" Margin="5" TranslationX="5"  VerticalOptions="Center" BackgroundColor="Transparent" >
+                            <ff:CachedImage.Transformations >
+                                <ffTransformations:TintTransformation HexColor="#707070" ></ffTransformations:TintTransformation>
+                            </ff:CachedImage.Transformations>
+                        </ff:CachedImage>
+                        <Label Grid.Column="1" Text="Subtitles" HorizontalOptions="Start" VerticalOptions="Center"  FontSize="Body" TextColor="{Binding MainTxtColor}"></Label>
+                        <Switch Grid.Column="2" x:Name="SubtitlesToggle" HorizontalOptions="End" VerticalOptions="Center"></Switch>
+                    </Grid>
 
-                <!-- Dubbed -->
-                <Grid  Grid.Row="4"  BackgroundColor="#212121" ColumnSpacing="10" HeightRequest="50">
-                    <Grid.ColumnDefinitions >
-                        <ColumnDefinition Width="Auto"></ColumnDefinition>
-                    </Grid.ColumnDefinitions>
-                    <ff:CachedImage Grid.Column="0" x:Name="DubbedImg" HorizontalOptions="Start" WidthRequest="25" HeightRequest="25" Margin="5" TranslationX="5"  VerticalOptions="Center" BackgroundColor="Transparent" >
-                        <ff:CachedImage.Transformations >
-                            <ffTransformations:TintTransformation HexColor="#707070" ></ffTransformations:TintTransformation>
-                        </ff:CachedImage.Transformations>
-                    </ff:CachedImage>
-                    <Label Grid.Column="1" Text="Default dub" HorizontalOptions="Start" VerticalOptions="Center"  FontSize="Body" TextColor="{Binding MainTxtColor}"></Label>
-                    <Switch Grid.Column="2" x:Name="DubbedToggle"></Switch>
-                </Grid>
+                    <!-- Cache DATA -->
+                    <Grid  Grid.Row="3"  BackgroundColor="#212121" ColumnSpacing="10" HeightRequest="50">
+                        <Grid.ColumnDefinitions >
+                            <ColumnDefinition Width="Auto"></ColumnDefinition>
+                        </Grid.ColumnDefinitions>
+                        <ff:CachedImage Grid.Column="0" x:Name="CacheImg" HorizontalOptions="Start" WidthRequest="25" HeightRequest="25" Margin="5" TranslationX="5"  VerticalOptions="Center" BackgroundColor="Transparent" >
+                            <ff:CachedImage.Transformations >
+                                <ffTransformations:TintTransformation HexColor="#707070" ></ffTransformations:TintTransformation>
+                            </ff:CachedImage.Transformations>
+                        </ff:CachedImage>
+                        <Label Grid.Column="1" Text="Cache data" HorizontalOptions="Start" VerticalOptions="Center"  FontSize="Body" TextColor="{Binding MainTxtColor}"></Label>
+                        <Switch Grid.Column="2" x:Name="CacheDataToggle" HorizontalOptions="End" VerticalOptions="Center"></Switch>
+                    </Grid>
 
-                <!-- Pause History -->
-                <Grid  Grid.Row="5"  BackgroundColor="#212121" ColumnSpacing="10" HeightRequest="50">
-                    <Grid.ColumnDefinitions >
-                        <ColumnDefinition Width="Auto"></ColumnDefinition>
-                    </Grid.ColumnDefinitions>
-                    <ff:CachedImage Grid.Column="0" x:Name="HistoryImg" HorizontalOptions="Start" WidthRequest="25" HeightRequest="25" Margin="5" TranslationX="5"  VerticalOptions="Center" BackgroundColor="Transparent" >
-                        <ff:CachedImage.Transformations >
-                            <ffTransformations:TintTransformation HexColor="#707070" ></ffTransformations:TintTransformation>
-                        </ff:CachedImage.Transformations>
-                    </ff:CachedImage>
-                    <Label Grid.Column="1" Text="Pause history" HorizontalOptions="Start" VerticalOptions="Center"  FontSize="Body" TextColor="{Binding MainTxtColor}"></Label>
-                    <Switch Grid.Column="2" x:Name="HistoryToggle"></Switch>
-                </Grid>
+                    <!-- Dubbed -->
+                    <Grid  Grid.Row="4"  BackgroundColor="#212121" ColumnSpacing="10" HeightRequest="50">
+                        <Grid.ColumnDefinitions >
+                            <ColumnDefinition Width="Auto"></ColumnDefinition>
+                        </Grid.ColumnDefinitions>
+                        <ff:CachedImage Grid.Column="0" x:Name="DubbedImg" HorizontalOptions="Start" WidthRequest="25" HeightRequest="25" Margin="5" TranslationX="5"  VerticalOptions="Center" BackgroundColor="Transparent" >
+                            <ff:CachedImage.Transformations >
+                                <ffTransformations:TintTransformation HexColor="#707070" ></ffTransformations:TintTransformation>
+                            </ff:CachedImage.Transformations>
+                        </ff:CachedImage>
+                        <Label Grid.Column="1" Text="Default dub" HorizontalOptions="Start" VerticalOptions="Center"  FontSize="Body" TextColor="{Binding MainTxtColor}"></Label>
+                        <Switch Grid.Column="2" x:Name="DubbedToggle" HorizontalOptions="End" VerticalOptions="Center"></Switch>
+                    </Grid>
 
-                
-                
-                <Label Grid.Row="6" Text="UI" FontSize="Body" FontAttributes="Bold" TranslationX="10" Margin="10" TextColor="#ffffff"></Label>
-                
-                
-                <!-- Statusbar -->
-
-                <Grid  Grid.Row="7"  BackgroundColor="#212121" ColumnSpacing="10" HeightRequest="50">
-                    <Grid.ColumnDefinitions >
-                        <ColumnDefinition Width="Auto"></ColumnDefinition>
-                    </Grid.ColumnDefinitions>
-                    <ff:CachedImage Grid.Column="0" x:Name="StatusbarImg" HorizontalOptions="Start" WidthRequest="25" HeightRequest="25" Margin="5" TranslationX="5"  VerticalOptions="Center" BackgroundColor="Transparent" >
-                        <ff:CachedImage.Transformations >
-                            <ffTransformations:TintTransformation HexColor="#707070" ></ffTransformations:TintTransformation>
-                        </ff:CachedImage.Transformations>
-                    </ff:CachedImage>
-                    <Label Grid.Column="1" Text="Show statusbar" HorizontalOptions="Start" VerticalOptions="Center"  FontSize="Body" TextColor="{Binding MainTxtColor}"></Label>
-                    <Switch Grid.Column="2" x:Name="StatusbarToggle"></Switch>
-                </Grid>
-                <!-- Top 100 -->
-
-                <Grid  Grid.Row="8"  BackgroundColor="#212121" ColumnSpacing="10" HeightRequest="50">
-                    <Grid.ColumnDefinitions >
-                        <ColumnDefinition Width="Auto"></ColumnDefinition>
-                    </Grid.ColumnDefinitions>
-                    <ff:CachedImage Grid.Column="0" x:Name="TopImg" HorizontalOptions="Start" WidthRequest="25" HeightRequest="25" Margin="5" TranslationX="5"  VerticalOptions="Center" BackgroundColor="Transparent" >
-                        <ff:CachedImage.Transformations >
-                            <ffTransformations:TintTransformation HexColor="#707070" ></ffTransformations:TintTransformation>
-                        </ff:CachedImage.Transformations>
-                    </ff:CachedImage>
-                    <Label Grid.Column="1" Text="Top 100" HorizontalOptions="Start" VerticalOptions="Center"  FontSize="Body" TextColor="{Binding MainTxtColor}"></Label>
-                    <Switch Grid.Column="2" x:Name="TopToggle"></Switch>
-                </Grid>
-                <!-- Descript -->
-
-                <Grid  Grid.Row="9"  BackgroundColor="#212121" ColumnSpacing="10" HeightRequest="50">
-                    <Grid.ColumnDefinitions >
-                        <ColumnDefinition Width="Auto"></ColumnDefinition>
-                    </Grid.ColumnDefinitions>
-                    <ff:CachedImage Grid.Column="0" x:Name="DescriptImg" HorizontalOptions="Start" WidthRequest="25" HeightRequest="25" Margin="5" TranslationX="5"  VerticalOptions="Center" BackgroundColor="Transparent" >
-                        <ff:CachedImage.Transformations >
-                            <ffTransformations:TintTransformation HexColor="#707070" ></ffTransformations:TintTransformation>
-                        </ff:CachedImage.Transformations>
-                    </ff:CachedImage>
-                    <Label Grid.Column="1" Text="Episode description" HorizontalOptions="Start" VerticalOptions="Center"  FontSize="Body" TextColor="{Binding MainTxtColor}"></Label>
-                    <Switch Grid.Column="2" x:Name="DescriptToggle"></Switch>
-                </Grid>
-
-                
-                
-                <Label Grid.Row="10" Text="Clear Data" FontSize="Body" FontAttributes="Bold" TranslationX="10" Margin="10" TextColor="#ffffff"></Label>
+                    <!-- Pause History -->
+                    <Grid  Grid.Row="5"  BackgroundColor="#212121" ColumnSpacing="10" HeightRequest="50">
+                        <Grid.ColumnDefinitions >
+                            <ColumnDefinition Width="Auto"></ColumnDefinition>
+                        </Grid.ColumnDefinitions>
+                        <ff:CachedImage Grid.Column="0" x:Name="HistoryImg" HorizontalOptions="Start" WidthRequest="25" HeightRequest="25" Margin="5" TranslationX="5"  VerticalOptions="Center" BackgroundColor="Transparent" >
+                            <ff:CachedImage.Transformations >
+                                <ffTransformations:TintTransformation HexColor="#707070" ></ffTransformations:TintTransformation>
+                            </ff:CachedImage.Transformations>
+                        </ff:CachedImage>
+                        <Label Grid.Column="1" Text="Pause history" HorizontalOptions="Start" VerticalOptions="Center"  FontSize="Body" TextColor="{Binding MainTxtColor}"></Label>
+                        <Switch Grid.Column="2" x:Name="HistoryToggle" HorizontalOptions="End" VerticalOptions="Center"></Switch>
+                    </Grid>
 
 
-                <!-- Clear history -->
+
+                    <Label Grid.Row="6" Text="UI" FontSize="Body" FontAttributes="Bold" TranslationX="10" Margin="10" TextColor="#ffffff"></Label>
+
+
+                    <!-- Statusbar -->
+
+                    <Grid  Grid.Row="7"  BackgroundColor="#212121" ColumnSpacing="10" HeightRequest="50">
+                        <Grid.ColumnDefinitions >
+                            <ColumnDefinition Width="Auto"></ColumnDefinition>
+                        </Grid.ColumnDefinitions>
+                        <ff:CachedImage Grid.Column="0" x:Name="StatusbarImg" HorizontalOptions="Start" WidthRequest="25" HeightRequest="25" Margin="5" TranslationX="5"  VerticalOptions="Center" BackgroundColor="Transparent" >
+                            <ff:CachedImage.Transformations >
+                                <ffTransformations:TintTransformation HexColor="#707070" ></ffTransformations:TintTransformation>
+                            </ff:CachedImage.Transformations>
+                        </ff:CachedImage>
+                        <Label Grid.Column="1" Text="Show statusbar" HorizontalOptions="Start" VerticalOptions="Center"  FontSize="Body" TextColor="{Binding MainTxtColor}"></Label>
+                        <Switch Grid.Column="2" x:Name="StatusbarToggle" HorizontalOptions="End" VerticalOptions="Center"></Switch>
+                    </Grid>
+                    <!-- Top 100 -->
+
+                    <Grid  Grid.Row="8"  BackgroundColor="#212121" ColumnSpacing="10" HeightRequest="50">
+                        <Grid.ColumnDefinitions >
+                            <ColumnDefinition Width="Auto"></ColumnDefinition>
+                        </Grid.ColumnDefinitions>
+                        <ff:CachedImage Grid.Column="0" x:Name="TopImg" HorizontalOptions="Start" WidthRequest="25" HeightRequest="25" Margin="5" TranslationX="5"  VerticalOptions="Center" BackgroundColor="Transparent" >
+                            <ff:CachedImage.Transformations >
+                                <ffTransformations:TintTransformation HexColor="#707070" ></ffTransformations:TintTransformation>
+                            </ff:CachedImage.Transformations>
+                        </ff:CachedImage>
+                        <Label Grid.Column="1" Text="Top 100" HorizontalOptions="Start" VerticalOptions="Center"  FontSize="Body" TextColor="{Binding MainTxtColor}"></Label>
+                        <Switch Grid.Column="2" x:Name="TopToggle" HorizontalOptions="End" VerticalOptions="Center"></Switch>
+                    </Grid>
+                    <!-- Descript -->
+
+                    <Grid  Grid.Row="9"  BackgroundColor="#212121" ColumnSpacing="10" HeightRequest="50">
+                        <Grid.ColumnDefinitions >
+                            <ColumnDefinition Width="Auto"></ColumnDefinition>
+                        </Grid.ColumnDefinitions>
+                        <ff:CachedImage Grid.Column="0" x:Name="DescriptImg" HorizontalOptions="Start" WidthRequest="25" HeightRequest="25" Margin="5" TranslationX="5"  VerticalOptions="Center" BackgroundColor="Transparent" >
+                            <ff:CachedImage.Transformations >
+                                <ffTransformations:TintTransformation HexColor="#707070" ></ffTransformations:TintTransformation>
+                            </ff:CachedImage.Transformations>
+                        </ff:CachedImage>
+                        <Label Grid.Column="1" Text="Episode description" HorizontalOptions="Start" VerticalOptions="Center"  FontSize="Body" TextColor="{Binding MainTxtColor}"></Label>
+                        <Switch Grid.Column="2" x:Name="DescriptToggle" HorizontalOptions="End" VerticalOptions="Center"></Switch>
+                    </Grid>
+
+
+
+                    <Label Grid.Row="10" Text="Clear Data" FontSize="Body" FontAttributes="Bold" TranslationX="10" Margin="10" TextColor="#ffffff"></Label>
+
+
+                    <!-- Clear history -->
 
                     <Grid  Grid.Row="11"  BackgroundColor="#212121" ColumnSpacing="10" HeightRequest="50" xe:TouchEffect.Color="#000000"  x:Name="ClearHistoryTap" >
                         <Grid.ColumnDefinitions >
@@ -177,8 +179,8 @@
                             </ff:CachedImage.Transformations>
                         </ff:CachedImage>
                         <Label Grid.Column="1" Text="Clear history" HorizontalOptions="Start" VerticalOptions="Center"  FontSize="Body" TextColor="{Binding MainTxtColor}"></Label>
-                </Grid>
-                <!-- Clear bookmarks -->
+                    </Grid>
+                    <!-- Clear bookmarks -->
 
                     <Grid  Grid.Row="12"  BackgroundColor="#212121" ColumnSpacing="10" HeightRequest="50" xe:TouchEffect.Color="#000000"  x:Name="ClearBookmarksTap">
                         <Grid.ColumnDefinitions >
@@ -191,7 +193,7 @@
                         </ff:CachedImage>
                         <Label Grid.Column="1" Text="Clear bookmarks" HorizontalOptions="Start" VerticalOptions="Center"  FontSize="Body" TextColor="{Binding MainTxtColor}"></Label>
 
-                </Grid>
+                    </Grid>
                     <!-- Clear cached  -->
 
                     <Grid  Grid.Row="13"  BackgroundColor="#212121" ColumnSpacing="10" HeightRequest="50" xe:TouchEffect.Color="#000000"  x:Name="ClearCachedTap">
@@ -204,8 +206,8 @@
                             </ff:CachedImage.Transformations>
                         </ff:CachedImage>
                         <Label Grid.Column="1" Text="Clear cached data" HorizontalOptions="Start" VerticalOptions="Center"  FontSize="Body" TextColor="{Binding MainTxtColor}"></Label>
-                </Grid>
-                    <Grid  Grid.Row="14"  BackgroundColor="#212121" ColumnSpacing="10" HeightRequest="50" xe:TouchEffect.Color="#000000"  x:Name="ResetallTap">
+                    </Grid>
+                    <Grid  Grid.Row="14"  BackgroundColor="#212121" ColumnSpacing="10" HeightRequest="50" xe:TouchEffect.Color="#000000"  x:Name="ResetallTap" >
                         <Grid.ColumnDefinitions >
                             <ColumnDefinition Width="Auto"></ColumnDefinition>
                         </Grid.ColumnDefinitions>
@@ -215,11 +217,11 @@
                             </ff:CachedImage.Transformations>
                         </ff:CachedImage>
                         <Label Grid.Column="1" Text="Reset settings" HorizontalOptions="Start" VerticalOptions="Center"  FontSize="Body" TextColor="{Binding MainTxtColor}"></Label>
-                </Grid>
-                
+                    </Grid>
+
                     <Label Grid.Row="15" Text="Time" FontSize="Body" FontAttributes="Bold" TranslationX="10" Margin="10" TextColor="#ffffff"></Label>
-                
-                
+
+
                     <Grid  Grid.Row="16"  BackgroundColor="#212121" ColumnSpacing="10" HeightRequest="50">
                         <Grid.ColumnDefinitions >
                             <ColumnDefinition Width="Auto"></ColumnDefinition>
@@ -249,8 +251,8 @@
                     <Image x:Name="OffBar" InputTransparent="True" VerticalOptions="Start"></Image>
 
                     <!-- <Button Grid.Row="1"  Text="Instant search" CornerRadius="0"  InputTransparent="True"  BackgroundColor="#212121"></Button>-->
-            </Grid>
-            <!--
+                </Grid>
+                <!--
             <Grid IsEnabled="False" IsVisible="False" >
                 <Grid.RowDefinitions >
                     <RowDefinition Height="Auto" />
@@ -325,14 +327,14 @@
             </Grid>
            
 -->
-           <!-- <Label Text="Chrome skip time" x:Name="CastTime" TranslationX="5"></Label>-->
+                <!-- <Label Text="Chrome skip time" x:Name="CastTime" TranslationX="5"></Label>-->
 
 
-            <!--  =================== BUTTONS =================== -->
+                <!--  =================== BUTTONS =================== -->
 
 
-            
-        </StackLayout>
+
+            </StackLayout>
         </ScrollView>
 
     </ContentPage.Content>

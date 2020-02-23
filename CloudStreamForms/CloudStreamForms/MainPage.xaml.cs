@@ -18,6 +18,7 @@ using System.Threading.Tasks;
 using Xamarin.Forms;
 using Xamarin.Forms.PlatformConfiguration.AndroidSpecific;
 using static CloudStreamForms.CloudStreamCore;
+using Application = Xamarin.Forms.Application;
 using Button = Xamarin.Forms.Button;
 
 namespace CloudStreamForms
@@ -110,7 +111,8 @@ namespace CloudStreamForms
             //  Navigation.PushModalAsync(p, false);
 
             On<Xamarin.Forms.PlatformConfiguration.Android>().SetToolbarPlacement(ToolbarPlacement.Bottom);
-
+           // BarBackgroundColor = Color.Black;
+         //   BarTextColor = Color.OrangeRed;
             // Page p = new ChromeCastPage();// { mainPoster = mainPoster };
             // Navigation.PushModalAsync(p, false);
             // PushPageFromUrlAndName("tt4869896", "Overlord");

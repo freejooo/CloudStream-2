@@ -132,7 +132,7 @@
                                                     <ff:CachedImage PropertyChanging="Image_PropertyChanging" InputTransparent="True" BackgroundColor="Transparent">
 
                                                     </ff:CachedImage>
-                                                    <Grid  xe:TouchEffect.Color="White" Opacity="0.5" BackgroundColor="Transparent" xe:EffectsConfig.ChildrenInputTransparent="False" BindingContextChanged="Grid_BindingContextChanged" >
+                                                    <Grid  xe:TouchEffect.Color="White" Opacity="0.5" BackgroundColor="Transparent" xe:EffectsConfig.ChildrenInputTransparent="False" BindingContextChanged="Grid_BindingContextChanged" IsVisible="False" IsEnabled="False">
                                                         <!-- xe:Commands.Tap="{Binding TapCommand}"-->
                                                      <!--   <ImageButton Clicked="ImageButton_Clicked" BackgroundColor="Transparent" InputTransparent="False" ></ImageButton  > -->
 
