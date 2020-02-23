@@ -190,8 +190,8 @@ namespace CloudStreamForms
         {
             try {
                 if (myApp.Properties.ContainsKey(path)) {
-                    CloudStreamCore.print("GETKEY::" + myApp.Properties[path]);
-                    CloudStreamCore.print("GETKEY::" + typeof(T).ToString() + "||" + ConvertToObject<T>(myApp.Properties[path] as string, defVal));
+                   // CloudStreamCore.print("GETKEY::" + myApp.Properties[path]);
+                   // CloudStreamCore.print("GETKEY::" + typeof(T).ToString() + "||" + ConvertToObject<T>(myApp.Properties[path] as string, defVal));
                     return (T)ConvertToObject<T>(myApp.Properties[path] as string, defVal);
                 }
                 else {

@@ -2,6 +2,7 @@
 using GoogleCast.Channels;
 using GoogleCast.Models.Media;
 using Jint;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -790,22 +791,7 @@ namespace CloudStreamForms
             public string currentSelectedYear;
         }
 
-        [System.Serializable]
-        public struct DubbedAnimeEpisode
-        {
-            public int rowid;
-            public string title;
-            public string desc;
-            public string status;
-            public int totalEp;
-            public int ep;
-            public string slug;
-            public int year;
-            public int showid;
-            public int Epviews;
-            public int TotalViews;
-            public string serversHTML;
-        }
+     
 
         [Serializable]
         public struct Title
@@ -883,6 +869,167 @@ namespace CloudStreamForms
             public PosterType posterType; // HOW DID YOU GET THE POSTER, IMDB SEARCH OR SOMETHING ELSE
         }
 
+        #region QuickSearch
+        [System.Serializable]
+        public struct DubbedAnimeEpisode
+        {
+            public string rowid;
+            public string title;
+            public string desc;
+            public string status;
+            public object skips;
+            public int totalEp;
+            public string ep;
+            public int NextEp;
+            public string slug;
+            public string wideImg;
+            public string year;
+            public string showid;
+            public string Epviews;
+            public string TotalViews;
+            public string serversHTML;
+            public string preview_img;
+            public string tags;
+        }
+        [System.Serializable]
+        public struct DubbedAnimeSearchResult
+        {
+            public List<DubbedAnimeEpisode> anime;
+            public bool error;
+            public object errorMSG;
+        }
+        [System.Serializable]
+        public struct DubbedAnimeSearchRootObject
+        {
+            public DubbedAnimeSearchResult result;
+        }
+        [System.Serializable]
+        struct MALSearchPayload
+        {
+            public string media_type;
+            public int start_year;
+            public string aired;
+            public string score;
+            public string status;
+        }
+
+        [System.Serializable]
+        struct MALSearchItem
+        {
+            public int id;
+            public string type;
+            public string name;
+            public string url;
+            public string image_url;
+            public string thumbnail_url;
+            public MALSearchPayload payload;
+            public string es_score;
+        }
+
+        [System.Serializable]
+        struct MALSearchCategories
+        {
+            public string type;
+            public MALSearchItem[] items;
+        }
+
+        [System.Serializable]
+        struct MALQuickSearch
+        {
+            public MALSearchCategories[] categories;
+        }
+        [System.Serializable]
+        struct IMDbSearchImage
+        {
+            public int height;
+            /// <summary>
+            /// Image
+            /// </summary>
+            public string imageUrl;
+            public int width;
+        }
+
+        [System.Serializable]
+        struct IMDbSearchTrailer
+        {
+            /// <summary>
+            /// Image
+            /// </summary>
+            public IMDbSearchImage i;
+            /// <summary>
+            /// Video ID
+            /// </summary>
+            public string id;
+            /// <summary>
+            /// Trailer Name
+            /// </summary>
+            public string l;
+            /// <summary>
+            /// Duration
+            /// </summary>
+            public string s;
+        }
+
+        [System.Serializable]
+        struct IMDbSearchItem
+        {
+            /// <summary>
+            /// Poster
+            /// </summary>
+            public IMDbSearchImage i;
+            /// <summary>
+            /// Id
+            /// </summary>
+            public string id;
+            /// <summary>
+            /// Title Name
+            /// </summary>
+            public string l;
+            /// <summary>
+            /// feature, TV series, video
+            /// </summary>
+            public string q;
+            /// <summary>
+            /// Rank
+            /// </summary>
+            public int rank;
+            /// <summary>
+            /// Actors
+            /// </summary>
+            public string s;
+            /// <summary>
+            /// Trailers
+            /// </summary>
+            public IMDbSearchTrailer[] v;
+            /// <summary>
+            /// IDK
+            /// </summary>
+            public int vt;
+            /// <summary>
+            /// Year
+            /// </summary>
+            public int y;
+            /// <summary>
+            /// YearString
+            /// </summary>
+            public string yr;
+        }
+
+        [System.Serializable]
+        struct IMDbQuickSearch
+        {
+            /// <summary>
+            /// Search Items
+            /// </summary>
+            public IMDbSearchItem[] d;
+            /// <summary>
+            /// Search Term
+            /// </summary>
+            public string q;
+            public int v;
+        }
+        #endregion
+
         [Serializable]
         public struct Link
         {
@@ -923,7 +1070,7 @@ namespace CloudStreamForms
             public List<MoeEpisode> moeEpisodes;
         }
 
-      //  public struct NotificationData
+        //  public struct NotificationData
 
         [Serializable]
         public struct MoeEpisode
@@ -1193,12 +1340,13 @@ namespace CloudStreamForms
                     string qSearchLink = "https://v2.sg.media-imdb.com/suggestion/" + text.Substring(0, 1) + "/" + text.Replace(" ", "_") + ".json";
                     string result = DownloadString(qSearchLink, tempThred);
                     //print(qSearchLink+ "|" +result);
-                    string lookFor = "{\"i\":{\"";
+                    //  string lookFor = "{\"i\":{\"";
 
                     if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
                     activeSearchResults = new List<Poster>();
 
-                    int counter = 0;
+                    //int counter = 0;
+                    /*
                     while (result.Contains(lookFor) && counter < 100) {
                         counter++;
                         string name = ReadJson(result, "\"l");
@@ -1215,6 +1363,27 @@ namespace CloudStreamForms
                             AddToActiveSearchResults(new Poster() { name = name, posterUrl = posterUrl, extra = extra, year = year, rank = rank, url = id, posterType = PosterType.Imdb });
                         }
                         result = RemoveOne(result, "y\":" + oyear);
+                    }*/
+                    try {
+                        var f = JsonConvert.DeserializeObject<IMDbQuickSearch>(result);
+
+                        if (f.d != null) {
+                            for (int i = 0; i < f.d.Length; i++) {
+                                var poster = f.d[i];
+                                string year = poster.yr ?? poster.y.ToString();
+                                if (poster.id.StartsWith("tt") && year != "0") {
+                                    print("ID::" + poster.id + "|" + year);
+                                    string extra = poster.q ?? "";
+                                    if (extra == "feature") extra = "";
+
+                                    AddToActiveSearchResults(new Poster() { extra = extra, name = poster.l ?? "", posterType = PosterType.Imdb, posterUrl = poster.i.imageUrl ?? "", year = year, url = poster.id, rank = poster.rank.ToString() ?? "" });
+                                }
+
+                            }
+                        }
+                    }
+                    catch (Exception _ex) {
+                        print("EERROOR:" + _ex);
                     }
 
                     if (onlySearch) {
@@ -1283,8 +1452,28 @@ namespace CloudStreamForms
                         string url = "";
                         if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
 
-                        string lookFor = "\"name\":\"";
-                        bool done = false;
+                        //string lookFor = "\"name\":\"";
+                        //bool done = false;
+                        var f = JsonConvert.DeserializeObject<MALQuickSearch>(_d);
+
+                        try {
+                            var items = f.categories[0].items;
+                            for (int i = 0; i < items.Length; i++) {
+                                var item = items[i];
+                                string _year = item.payload.start_year.ToString();
+                                if (!item.name.Contains(" Season") && !item.name.EndsWith("Specials") && _year == year && item.payload.score != "N/A") {
+                                    url = item.url;
+                                    currentSelectedYear = _year;
+                                    break;
+                                }
+                            }
+                        }
+                        catch (Exception _ex) {
+                            print("EROROOROROROOR::" + _ex);
+                        }
+
+
+                        /*
                         while (_d.Contains(lookFor) && !done) { // TO FIX MY HERO ACADIMEA CHOOSING THE SECOND SEASON BECAUSE IT WAS FIRST SEARCHRESULT
                             string name = FindHTML(_d, lookFor, "\"");
                             print("NAME FOUND: " + name);
@@ -1306,7 +1495,7 @@ namespace CloudStreamForms
                             }
                             _d = RemoveOne(_d, lookFor);
                             _d = RemoveOne(_d, "\"id\":");
-                        }
+                        }*/
 
                         /*
 
@@ -3478,9 +3667,10 @@ namespace CloudStreamForms
                                         DubbedAnimeEpisode dubbedEp = GetDubbedAnimeEpisode(fwordLink, _episode - subtract);
 
                                         string serverUrls = dubbedEp.serversHTML;
-                                        string sLookFor = "hl=\\\"";
+                                        print("SERVERURLLRL:" + serverUrls);
+                                        string sLookFor = "hl=\"";
                                         while (serverUrls.Contains(sLookFor)) {
-                                            string baseUrl = FindHTML(dubbedEp.serversHTML, "hl=\\\"", "\"");
+                                            string baseUrl = FindHTML(dubbedEp.serversHTML, "hl=\"", "\"");
                                             print("BASE::" + baseUrl);
                                             string burl = "https://bestdubbedanime.com/xz/api/playeri.php?url=" + baseUrl + "&_=" + UnixTime;
                                             print(burl);
@@ -4224,55 +4414,71 @@ namespace CloudStreamForms
             return false;
         }
 
+
         public static DubbedAnimeEpisode GetDubbedAnimeEpisode(string slug, int eps)
         {
             string url = "https://bestdubbedanime.com/xz/v3/jsonEpi.php?slug=" + slug + "/" + eps + "&_=" + UnixTime;
             string d = DownloadString(url);
-            print(d);
-
-            const string smallAdd = "\": \"";
-            string FastFind(string name)
-            {
-                if (d.Contains(name + smallAdd + "\": null,")) {
-                    return "";
-                }
-                string _f = FindHTML(d, name + smallAdd, "\",");
-                if (_f == "") {
-                    _f = FindHTML(d, name + "\":", ",");
-                }
-                return _f;
+            print("GOTEP" + d);
+            var f = JsonConvert.DeserializeObject<DubbedAnimeSearchRootObject>(d);
+            if (f.result.error) {
+                print("RETURNOS:ERROR");
+                return new DubbedAnimeEpisode();
             }
-            int FastId(string name)
-            {
+            else {
                 try {
-                    return int.Parse(FastFind(name));
+                    return f.result.anime[0];
                 }
                 catch (Exception) {
-                    return -1;
+                    print("RETURNOS:ERROR");
+                    return new DubbedAnimeEpisode();
                 }
             }
+            /* print(d);
 
-            DubbedAnimeEpisode e = new DubbedAnimeEpisode();
-            try {
-                e.serversHTML = FastFind(nameof(e.serversHTML));
+             const string smallAdd = "\": \"";
+             string FastFind(string name)
+             {
+                 if (d.Contains(name + smallAdd + "\": null,")) {
+                     return "";
+                 }
+                 string _f = FindHTML(d, name + smallAdd, "\",");
+                 if (_f == "") {
+                     _f = FindHTML(d, name + "\":", ",");
+                 }
+                 return _f;
+             }
+             int FastId(string name)
+             {
+                 try {
+                     return int.Parse(FastFind(name));
+                 }
+                 catch (Exception) {
+                     return -1;
+                 }
+             }
 
-                e.ep = FastId(nameof(e.ep));
-                e.Epviews = FastId(nameof(e.Epviews));
-                e.rowid = FastId(nameof(e.ep));
-                e.totalEp = FastId(nameof(e.totalEp));
-                e.year = FastId(nameof(e.year));
-                e.showid = FastId(nameof(e.showid));
-                e.TotalViews = FastId(nameof(e.TotalViews));
+             DubbedAnimeEpisode e = new DubbedAnimeEpisode();
+             try {
+                 e.serversHTML = FastFind(nameof(e.serversHTML));
 
-                e.desc = FastFind(nameof(e.desc));
-                e.title = FastFind(nameof(e.title));
-                e.slug = FastFind(nameof(e.slug));
-                e.status = FastFind(nameof(e.status));
-            }
-            catch (Exception) {
-                print("!!!!!!DubbedAnimeEpisodeERROR");
-            }
-            return e;
+                 e.ep = FastId(nameof(e.ep));
+                 e.Epviews = FastId(nameof(e.Epviews));
+                 e.rowid = FastId(nameof(e.ep));
+                 e.totalEp = FastId(nameof(e.totalEp));
+                 e.year = FastId(nameof(e.year));
+                 e.showid = FastId(nameof(e.showid));
+                 e.TotalViews = FastId(nameof(e.TotalViews));
+
+                 e.desc = FastFind(nameof(e.desc));
+                 e.title = FastFind(nameof(e.title));
+                 e.slug = FastFind(nameof(e.slug));
+                 e.status = FastFind(nameof(e.status));
+             }
+             catch (Exception) {
+                 print("!!!!!!DubbedAnimeEpisodeERROR");
+             }
+             return e;*/
         }
 
         public static int UnixTime { get { return (int)(DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1))).TotalSeconds; } }
