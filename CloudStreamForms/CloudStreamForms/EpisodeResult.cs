@@ -12,7 +12,8 @@ namespace CloudStreamForms.Models
 
         public string PosterUrl { set; get; }
         public bool IsPosterFromStorage { get { return PosterUrl == CloudStreamCore.VIDEO_IMDB_IMAGE_NOT_FOUND; } }
-        public ImageSource ImageSource { get { CloudStreamCore.print( PosterUrl); return IsPosterFromStorage ? App.GetImageSource(PosterUrl) : PosterUrl; } }
+        public ImageSource ImageSource { get {  return IsPosterFromStorage ? App.GetImageSource(PosterUrl) : PosterUrl; } }
+        public ImageSource VideoSource { get { return App.GetImageSource("nexflixPlayBtt.png");  } }
 
         public string extraInfo { set; get; }
 

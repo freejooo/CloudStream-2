@@ -6,6 +6,7 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -94,13 +95,13 @@ namespace CloudStreamForms
         {
             base.OnAppearing();
 
-           // Apper();
+            // Apper();
         }
         async void Apper()
         {
             await Task.Delay(1000);
             Page p = new VideoPage(new VideoPage.PlayVideo() { descript = "", name = "Black Bunny", episode = -1, season = -1, MirrorNames = new List<string>() { "Googlevid" }, MirrorUrls = new List<string>() { "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" }, Subtitles = new List<string>(), SubtitlesNames = new List<string>() });//new List<string>() { "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" }, new List<string>() { "Black" }, new List<string>() { });// { mainPoster = mainPoster };
-           await Navigation.PushModalAsync(p, false);
+            await Navigation.PushModalAsync(p, false);
         }
 
         public MainPage()
@@ -120,8 +121,8 @@ namespace CloudStreamForms
             }
 
             LateCheck();
-            Page p = new VideoPage(new VideoPage.PlayVideo() { descript = "", name = "Black Bunny", episode = -1, season = -1, MirrorNames = new List<string>() { "Googlevid" }, MirrorUrls = new List<string>() { "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" }, Subtitles = new List<string>(), SubtitlesNames = new List<string>() });//new List<string>() { "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" }, new List<string>() { "Black" }, new List<string>() { });// { mainPoster = mainPoster };
-             Navigation.PushModalAsync(p, false);
+            //   Page p = new VideoPage(new VideoPage.PlayVideo() { descript = "", name = "Black Bunny", episode = -1, season = -1, MirrorNames = new List<string>() { "Googlevid" }, MirrorUrls = new List<string>() { "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" }, Subtitles = new List<string>(), SubtitlesNames = new List<string>() });//new List<string>() { "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" }, new List<string>() { "Black" }, new List<string>() { });// { mainPoster = mainPoster };
+            //   Navigation.PushModalAsync(p, false);
 
 
             On<Xamarin.Forms.PlatformConfiguration.Android>().SetToolbarPlacement(ToolbarPlacement.Bottom);
@@ -129,7 +130,8 @@ namespace CloudStreamForms
             //   BarTextColor = Color.OrangeRed;
             // Page p = new ChromeCastPage();// { mainPoster = mainPoster };
             // Navigation.PushModalAsync(p, false);
-            // PushPageFromUrlAndName("tt4869896", "Overlord");
+             //PushPageFromUrlAndName("tt4869896", "Overlord");
+           //  PushPageFromUrlAndName("tt10885406", "Ascendance of a Bookworm");
             // PushPageFromUrlAndName("tt9054364", "That Time I Got Reincarnated as a Slime");
             //PushPageFromUrlAndName("tt0371746", "Iron Man");
         }
@@ -773,8 +775,8 @@ namespace CloudStreamForms
             public bool subExists;
             public string subUrl;
             public string dubUrl;
-            public List<string> dubEpisodesUrls;
-            public List<string> subEpisodesUrls;
+            public string[] dubEpisodesUrls;
+            public string[] subEpisodesUrls;
         }
 
         [Serializable]
@@ -1687,7 +1689,7 @@ namespace CloudStreamForms
                                     //https://notify.moe/api/episode/xGNheCEZgM
                                     // print(api.title.English + "|NO." + (i + 1) + " - " + api.episodes[i]);
 
-
+                                    print("MOE API::" + i);
                                     string __d = DownloadString("https://notify.moe/api/episode/" + api.episodes[i]);
                                     string end = FindHTML(__d, "\"end\":\"", "\"");
 
@@ -1696,6 +1698,7 @@ namespace CloudStreamForms
 
                                     var time = DateTime.Parse(end);
                                     var _t = time.Subtract(DateTime.Now);
+                                    if (_t.TotalSeconds < 0) return;
                                     if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
                                     if (activeMovie.moeEpisodes == null) return;
                                     activeMovie.moeEpisodes.Add(new MoeEpisode() { timeOfRelease = time, timeOfMesure = DateTime.Now });
@@ -1779,31 +1782,41 @@ namespace CloudStreamForms
                             string _d = DownloadString(slug);
                             // print(d);
                             string _lookfor = "\"epnum\":\"";
-                            List<string> episodes = new List<string>();
+
+
+                            int slugCount = Regex.Matches(_d, _lookfor).Count;
+                            string[] episodes = new string[slugCount];
+                            print("SLIGCOUNT:::DA" + slugCount);
+                            //  Stopwatch s = new Stopwatch();
+                            //  s.Start();
+
+
+
                             while (_d.Contains(_lookfor)) {
-                                //epnum":"Preview","name":null,"slug":"\/anime\/dr-stone-901389\/preview-170620","createddate":"2019-05-30 00:27:49"
-                                string epNum = FindHTML(_d, _lookfor, "\"");
-                                _d = RemoveOne(_d, _lookfor);
+                                try {
+                                    //epnum":"Preview","name":null,"slug":"\/anime\/dr-stone-901389\/preview-170620","createddate":"2019-05-30 00:27:49"
+                                    string epNum = FindHTML(_d, _lookfor, "\"");
+                                    _d = RemoveOne(_d, _lookfor);
 
-                                string _slug = "https://www.kickassanime.rs" + FindHTML(_d, "\"slug\":\"", "\"").Replace("\\/", "/");
-                                print("SLUGOS:" + _slug + "|" + epNum);
-                                string createDate = FindHTML(_d, "\"createddate\":\"", "\"");
-                                // string name = FindHTML(d, lookfor, "\"");
-                                //string slug = FindHTML(d, "\"slug\":\"", "\"").Replace("\\/", "/");
-                                if (epNum.StartsWith("Episode")) {
-                                    int cEP = int.Parse(epNum.Replace("Episode ", ""));
-                                    int change = Math.Max(cEP - episodes.Count, 0);
-                                    for (int z = 0; z < change; z++) {
-                                        episodes.Add("");
+                                    string _slug = "https://www.kickassanime.rs" + FindHTML(_d, "\"slug\":\"", "\"").Replace("\\/", "/");
+                                    //print("SLUGOS:" + _slug + "|" + epNum);
+                                    string createDate = FindHTML(_d, "\"createddate\":\"", "\"");
+                                    // string name = FindHTML(d, lookfor, "\"");
+                                    //string slug = FindHTML(d, "\"slug\":\"", "\"").Replace("\\/", "/");
+                                    if (epNum.StartsWith("Episode")) {
+                                        int cEP = int.Parse(epNum.Replace("Episode ", ""));
+                                        //   int change = Math.Max(cEP - episodes.Length, 0);
+                                        episodes[cEP - 1] = _slug;
                                     }
-
-                                    episodes[cEP - 1] = _slug;
-
-
+                                   // print("SSLIUGPSPSOSO::" + epNum + "|" + slug + "|" + createDate);
                                 }
-                                print(epNum + "|" + slug + "|" + createDate);
+                                catch (Exception) {
+                                    print("SOMETHING LIKE 25.5");
+                                }
+                        
                             }
-                            print("EPISODES::::" + episodes.Count);
+                            //    s.Stop();
+                            print("EPISODES::::" + episodes.Length );
                             var baseData = activeMovie.title.MALData.seasonData[i].seasons[q];
                             if (!isDub) {
                                 baseData.kickassAnimeData.subExists = true;
@@ -1953,10 +1966,10 @@ namespace CloudStreamForms
                                     //  print("SYNO: " + ms.synonyms[s]);
                                 }
 
-                                print(ur + "|" + animeTitle.ToLower() + "|" + ms.name.ToLower() + "|" + ms.engName.ToLower() + "|" + ___year + "___" + ___year2 + "|" + containsSyno);
+                              //  print(ur + "|" + animeTitle.ToLower() + "|" + ms.name.ToLower() + "|" + ms.engName.ToLower() + "|" + ___year + "___" + ___year2 + "|" + containsSyno);
 
                                 if (ToLowerAndReplace(ms.name) == ToLowerAndReplace(animeTitle) || ToLowerAndReplace(ms.engName) == ToLowerAndReplace(animeTitle) || containsSyno) {
-                                    print("ADDED:::" + ur);
+                                   // print("ADDED:::" + ur);
                                     var baseData = activeMovie.title.MALData.seasonData[i].seasons[q];
                                     if (animeTitle == title) {
                                         baseData.gogoData.subExists = true;
@@ -2814,19 +2827,26 @@ namespace CloudStreamForms
                 tempThred.Thread = new System.Threading.Thread(() => {
                     try {
                         string url = "https://www.imdb.com/title/" + activeMovie.title.id + "/episodes?season=" + season;
+                        print("URLLLLL::::" + url);
                         string d = DownloadString(url, tempThred);
+                        print(d);
                         if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
 
                         int eps = 0;
 
-                        for (int q = 0; q < 1000; q++) {
+                        for (int q = 1; q < 1000; q++) {
                             if (d.Contains("?ref_=ttep_ep" + q)) {
                                 eps = q;
                             }
+                            else {
+                                break;
+                            }
                         }
+                        print("EPPSPPS:" + eps);
                         if (activeMovie.title.movieType == MovieType.Anime) {
                             while (!activeMovie.title.MALData.done) {
                                 Thread.Sleep(100);
+                                print("WAITING:");
                                 if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
                             }
                             //string _d = DownloadString("");
@@ -2845,6 +2865,8 @@ namespace CloudStreamForms
                                 string date = FindHTML(d, "<div class=\"airdate\">", "<").Replace("\n", "").Replace("  ", "");
                                 string posterUrl = FindHTML(d, "src=\"", "\"");
 
+                                //print("ADDED EP::::" + name + "|" + q);
+
                                 if (posterUrl == "https://m.media-amazon.com/images/G/01/IMDb/spinning-progress.gif" || posterUrl.Replace(" ", "") == "") {
                                     posterUrl = VIDEO_IMDB_IMAGE_NOT_FOUND; // DEAFULT LOADING
                                 }
@@ -2861,7 +2883,7 @@ namespace CloudStreamForms
                         }
                         //print(activeMovie.title.MALData.japName + "<<<<<<<<<<<<<<<<<<<<<<<<");
                         //     https://www9.gogoanime.io/category/mix-meisei-story
-
+                        print("EPLOADED::::::");
                         episodeLoaded?.Invoke(null, activeMovie.episodes);
                     }
                     finally {
@@ -3051,6 +3073,12 @@ namespace CloudStreamForms
             }
             catch (Exception) {
             }
+            /*
+            Stopwatch s = new Stopwatch();
+            s.Start();
+            var array = baseUrls.ToArray();
+            s.Stop();
+            print("MSMMSMSMSMMSMS:" + (s.ElapsedMilliseconds / 1000.0));*/
             return baseUrls;
         }
 
@@ -4154,9 +4182,9 @@ namespace CloudStreamForms
             pheight = App.ConvertDPtoPx((int)pheight);
             pwidth = App.ConvertDPtoPx((int)pwidth);
             if (pwidth == 0 && pheight == 0) return nonHDImg;
-            print("IMDBASE:" + nonHDImg);
+           // print("IMDBASE:" + nonHDImg);
             img += "." + (pheight > 0 ? "_UY" + pheight : "") + (pwidth > 0 ? "UX" + pwidth : "") + "_.jpg";
-            print(img);
+            //print(img);
             /*
             string x1 = pwidth.ToString();
             string y1 = pheight.ToString();

@@ -3,7 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:d="http://xamarin.com/schemas/2014/forms/design"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:local="clr-namespace:CloudStreamForms"
+             xmlns:local="clr-namespace:CloudStreamForms;assembly=CloudStreamForms"
             xmlns:ff="clr-namespace:FFImageLoading.Forms;assembly=FFImageLoading.Forms"  
 xmlns:ffSvg="clr-namespace:FFImageLoading.Svg.Forms;assembly=FFImageLoading.Svg.Forms"  
                          xmlns:xe="clr-namespace:XamEffects;assembly=XamEffects"
@@ -12,6 +12,7 @@ xmlns:ffTransformations="clr-namespace:FFImageLoading.Transformations;assembly=F
              mc:Ignorable="d"
              
              x:Class="CloudStreamForms.MovieResult">
+    <!-- xmlns:local="clr-namespace:CloudStreamForms"-->
 
     <ScrollView  VerticalScrollBarVisibility="Never">
         <StackLayout>
@@ -352,7 +353,7 @@ xmlns:ffTransformations="clr-namespace:FFImageLoading.Transformations;assembly=F
                                                     <!--PosterUrl-->
                                                   
            
-                                                    <Grid  xe:TouchEffect.Color="White" Opacity="1" WidthRequest="127" HeightRequest="72"  BackgroundColor="Transparent" xe:EffectsConfig.ChildrenInputTransparent="False" BindingContextChanged="Grid_BindingContextChanged" >
+                                                    <Grid  xe:TouchEffect.Color="White" Opacity="1" WidthRequest="127" HeightRequest="72"  BackgroundColor="Transparent" xe:EffectsConfig.ChildrenInputTransparent="False" LayoutChanged="Grid_LayoutChanged"  >
                                                         <ff:CachedImage WidthRequest="127" HeightRequest="72" Source="{Binding ImageSource}" InputTransparent="True" >
 
                                                             <ff:CachedImage.Transformations >
@@ -362,9 +363,12 @@ xmlns:ffTransformations="clr-namespace:FFImageLoading.Transformations;assembly=F
                                                             </ff:CachedImage.Transformations>
 
                                                         </ff:CachedImage>
-                                                        <ff:CachedImage PropertyChanging="Image_PropertyChanging" InputTransparent="True"  BackgroundColor="Transparent">
-
+                                                        <ff:CachedImage   Source="{Binding VideoSource}" Scale="0.4" InputTransparent="True"  BackgroundColor="Transparent">
+                                                            
                                                         </ff:CachedImage>
+                                                        <!--<ff:CachedImage  Source="nexflixPlayBtt.png" Scale="0.4" InputTransparent="True"  BackgroundColor="Transparent">
+
+                                                        </ff:CachedImage>-->
                                                     </Grid>
                                                     <!-- Source="{Binding PosterUrl}"-->
                                                 </Grid>
