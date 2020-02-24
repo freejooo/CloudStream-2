@@ -1,4 +1,4 @@
-﻿/*
+﻿
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -19,6 +19,8 @@ using Xamarin.Forms;
 using Xamarin.Forms.Platform.Android;
 using static Java.Util.ResourceBundle;
 using static CloudStreamForms.CloudStreamCore;
+using Android.Graphics.Drawables;
+using Android.Graphics.Drawables.Shapes;
 
 [assembly: ExportRenderer(typeof(Slider), typeof(CustomSliderRenderer))]
 public class CustomSliderRenderer : SliderRenderer
@@ -34,9 +36,13 @@ public class CustomSliderRenderer : SliderRenderer
         if (Control == null)
             return;
         var seek = Control as global::Android.Widget.SeekBar;
-        seek.Thumb.SetBounds(100, 100, 100, 100);
+        //seek.Thumb.SetBounds(100, 100, 100, 100);
+        ShapeDrawable th = new ShapeDrawable(new OvalShape());
+        th.SetIntrinsicWidth(40);
+        th.SetIntrinsicHeight(40);
+        th.SetColorFilter(e.NewElement.ThumbColor.ToAndroid(), Android.Graphics.PorterDuff.Mode.SrcOver);
+        seek.SetThumb(th);
         print("SEEK;::::::" + seek);
     }
 }
 
-*/

@@ -326,6 +326,14 @@ namespace CloudStreamForms.UWP
         public void ShowStatusBar()
         {
         }
+
+        public void LandscapeOrientation()
+        {
+        }
+
+        public void NormalOrientation()
+        {
+        }
     }
 
     public static class Message

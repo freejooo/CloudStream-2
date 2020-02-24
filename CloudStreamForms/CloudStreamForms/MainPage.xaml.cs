@@ -89,6 +89,20 @@ namespace CloudStreamForms
 
             }
         }
+
+        protected override void OnAppearing()
+        {
+            base.OnAppearing();
+
+           // Apper();
+        }
+        async void Apper()
+        {
+            await Task.Delay(1000);
+            Page p = new VideoPage(new VideoPage.PlayVideo() { descript = "", name = "Black Bunny", episode = -1, season = -1, MirrorNames = new List<string>() { "Googlevid" }, MirrorUrls = new List<string>() { "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" }, Subtitles = new List<string>(), SubtitlesNames = new List<string>() });//new List<string>() { "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" }, new List<string>() { "Black" }, new List<string>() { });// { mainPoster = mainPoster };
+           await Navigation.PushModalAsync(p, false);
+        }
+
         public MainPage()
         {
             InitializeComponent(); mainPage = this;
@@ -106,13 +120,13 @@ namespace CloudStreamForms
             }
 
             LateCheck();
+            Page p = new VideoPage(new VideoPage.PlayVideo() { descript = "", name = "Black Bunny", episode = -1, season = -1, MirrorNames = new List<string>() { "Googlevid" }, MirrorUrls = new List<string>() { "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" }, Subtitles = new List<string>(), SubtitlesNames = new List<string>() });//new List<string>() { "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" }, new List<string>() { "Black" }, new List<string>() { });// { mainPoster = mainPoster };
+             Navigation.PushModalAsync(p, false);
 
-            //  Page p = new VideoPage(new VideoPage.PlayVideo() { descript = "", name = "Black Bunny", episode = -1, season = -1, MirrorNames = new List<string>() { "Googlevid" }, MirrorUrls = new List<string>() { "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" }, Subtitles = new List<string>(), SubtitlesNames = new List<string>() });//new List<string>() { "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" }, new List<string>() { "Black" }, new List<string>() { });// { mainPoster = mainPoster };
-            //  Navigation.PushModalAsync(p, false);
 
             On<Xamarin.Forms.PlatformConfiguration.Android>().SetToolbarPlacement(ToolbarPlacement.Bottom);
-           // BarBackgroundColor = Color.Black;
-         //   BarTextColor = Color.OrangeRed;
+            // BarBackgroundColor = Color.Black;
+            //   BarTextColor = Color.OrangeRed;
             // Page p = new ChromeCastPage();// { mainPoster = mainPoster };
             // Navigation.PushModalAsync(p, false);
             // PushPageFromUrlAndName("tt4869896", "Overlord");
@@ -793,7 +807,7 @@ namespace CloudStreamForms
             public string currentSelectedYear;
         }
 
-     
+
 
         [Serializable]
         public struct Title
@@ -4348,7 +4362,7 @@ namespace CloudStreamForms
                 return "";
             }
         }
-
+        /*
         static string ReadJson(string all, string inp)
         {
             try {
@@ -4366,7 +4380,7 @@ namespace CloudStreamForms
                 return "";
             }
         }
-
+        */
         public static bool AddPotentialLink(int normalEpisode, string _url, string _name, int _priority)
         {
             if (activeMovie.episodes == null) return false;

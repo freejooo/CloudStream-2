@@ -38,6 +38,8 @@ namespace CloudStreamForms
             void ShowStatusBar();
             void UpdateStatusBar();
             void UpdateBackground(int color);
+            void LandscapeOrientation(); 
+            void NormalOrientation();
         }
 
         public class StorageInfo
@@ -81,6 +83,16 @@ namespace CloudStreamForms
         public static void ShowStatusBar()
         {
             platformDep.ShowStatusBar();
+        }
+
+        public static void LandscapeOrientation()
+        {
+            platformDep.LandscapeOrientation();
+        }
+
+        public static void NormalOrientation()
+        {
+            platformDep.NormalOrientation();
         }
 
         public App()

@@ -62,7 +62,7 @@ namespace CloudStreamForms.Droid
 
 
             LocalNotificationsImplementation.NotificationIconId = Resource.Drawable.bicon;
-           
+
 
             LoadApplication(new App());
             activity = this;
@@ -76,8 +76,16 @@ namespace CloudStreamForms.Droid
                 }
             }
             RequestPermission(this);
-
-           // Window.DecorView.SetBackgroundResource(Resource.Drawable.splash_background_remove);//Resources.GetDrawable(Resource.Drawable.splash_background_remove);
+            /*
+            MessagingCenter.Subscribe<VideoPage>(this, "allowLandScapePortrait", sender =>
+            {
+                RequestedOrientation = ScreenOrientation.Unspecified;
+            });
+            MessagingCenter.Subscribe<VideoPage>(this, "preventLandScape", sender =>
+            {
+                RequestedOrientation = ScreenOrientation.Portrait;
+            });*/
+            // Window.DecorView.SetBackgroundResource(Resource.Drawable.splash_background_remove);//Resources.GetDrawable(Resource.Drawable.splash_background_remove);
 
         }
 
@@ -145,6 +153,17 @@ namespace CloudStreamForms.Droid
             }
         }
 
+        public void LandscapeOrientation()
+        {
+            MainActivity.activity.RequestedOrientation = ScreenOrientation.Landscape;
+
+        }
+        public void NormalOrientation()
+        {
+            MainActivity.activity.RequestedOrientation = ScreenOrientation.Unspecified;
+        }
+
+
         public void ShowStatusBar()
         {
             if (!hidden) return;
@@ -161,6 +180,7 @@ namespace CloudStreamForms.Droid
 
         public void HideStatusBar()
         {
+
             if (hidden) return;
             hidden = true;
 

@@ -2,6 +2,8 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 
 using Xamarin.Forms;
@@ -106,6 +108,9 @@ namespace CloudStreamForms
             InitializeComponent();
             Core.Initialize();
 
+            SkipForward.TranslationX = TRANSLATE_START_X;
+            SkipForwardImg.Source = App.GetImageSource("netflixSkipForward.png");
+
             // ======================= SETUP =======================
 
             _libVLC = new LibVLC();
@@ -117,7 +122,7 @@ namespace CloudStreamForms
 
 
             // ========== IMGS ==========
-           // SubtitlesImg.Source = App.GetImageSource("netflixSubtitlesCut.png"); //App.GetImageSource("baseline_subtitles_white_48dp.png");
+            // SubtitlesImg.Source = App.GetImageSource("netflixSubtitlesCut.png"); //App.GetImageSource("baseline_subtitles_white_48dp.png");
             MirrosImg.Source = App.GetImageSource("baseline_playlist_play_white_48dp.png");
             EpisodesImg.Source = App.GetImageSource("netflixEpisodesCut.png");
             NextImg.Source = App.GetImageSource("baseline_skip_next_white_48dp.png");
@@ -136,6 +141,12 @@ namespace CloudStreamForms
             //Commands.SetTapParameter(view, someObject);
             // ================================================================================ UI ================================================================================
             PausePlayBtt.Source = App.GetImageSource(PAUSE_IMAGE);
+            //PausePlayClickBtt.set
+            Commands.SetTap(PausePlayClickBtt, new Command(() => {
+                //do something
+                PausePlayBtt_Clicked(null, EventArgs.Empty);
+                print("Hello");
+            }));
 
             void SetIsPaused(bool paused)
             {
@@ -177,7 +188,7 @@ namespace CloudStreamForms
                         SetIsPaused(!Player.IsPlaying);
                     }
                     else {
-                        BufferBar.Progress = e.Cache / 100;
+                        BufferBar.ProgressTo(e.Cache / 100.0, 50, Easing.Linear);
                         BufferBar.IsVisible = true;
                         PausePlayBtt.IsVisible = false;
                         LoadingCir.IsVisible = true;
@@ -196,24 +207,62 @@ namespace CloudStreamForms
         {
             base.OnAppearing();
             Hide();
+            App.LandscapeOrientation();
+            /*
+            TapRec. += (o, e) => {
+                print("CHANGED:::<<<<<<<<<<<<:");
+                if (visible) {
+                    VideoSettings.FadeTo(0);
+                }
+                else {
+                    VideoSettings.FadeTo(1);
+                }
+                visible = !visible;*/
+            /*
+            StringBuilder sb = new StringBuilder("");
 
-        }
+            //print($" { e.NumberOfTaps} times with {e.NumberOfTouches} fingers.");
+            print($" ViewPosition: {e.ViewPosition.X}/{ e.ViewPosition.Y}/{e.ViewPosition.Width}/{ e.ViewPosition.Height}, Touches: ");
+            if (e.Touches != null && e.Touches.Length > 0)
+                print(String.Join(", ", e.Touches.Select(t => t.X + "/" + t.Y)));
 
-        async void Hide()
-        {
-            await Task.Delay(100);
-            App.HideStatusBar();
+            print("DADAAAAAAAAAAAAAAAAAAAAAAAAADDDGGGGGGGGGGG" + (e.ViewPosition.X < e.ViewPosition.Width / 2.0));
+            print(e.Touches.Length);*/
+            /*};
+            TapRec.DoubleTapped += (o, e) => {
+                var d = e;
+                throw new Exception();
+            };*/
+            /*
+            print("CHADHSHAHDSANN:" + e.GestureId);
+            if (e.GestureId == (int)GestureStatus.Started) {
+                print("CHANGED:::<<<<<<<<<<<<:");
+                if (visible) {
+                    VideoSettings.FadeTo(0);
+                }
+                else {
+                    VideoSettings.FadeTo(1);
+                }
+                visible = !visible;
+            }*/
         }
 
 
         protected override void OnDisappearing()
         {
             App.ShowStatusBar();
+            App.NormalOrientation();
             Player.Stop();
             Player.Dispose();
             base.OnDisappearing();
         }
 
+
+        async void Hide()
+        {
+            await Task.Delay(100);
+            App.HideStatusBar();
+        }
 
         public void PausePlayBtt_Clicked(object sender, EventArgs e)
         {
@@ -267,11 +316,15 @@ namespace CloudStreamForms
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
+
+        bool visible = false;
+
         private void PanGestureRecognizer_PanUpdated(object sender, PanUpdatedEventArgs e)
         {
             //  float brighness = vvideo.MediaPlayer.AdjustFloat(VideoAdjustOption.Brightness);
             // print("BRIGHNESS::" + brighness);
             //vvideo.MediaPlayer.SetAdjustFloat(VideoAdjustOption.Brightness, 0);
+
             switch (e.StatusType) {
                 case GestureStatus.Running:
                     if (e.TotalX < 0 && Math.Abs(e.TotalX) > Math.Abs(e.TotalY)) {
@@ -352,6 +405,56 @@ namespace CloudStreamForms
         private void VideoSlider_ValueChanged(object sender, ValueChangedEventArgs e)
         {
             ChangeTime(e.NewValue);
+        }
+
+        const int TRANSLATE_SKIP_X = 100;
+        const int TRANSLATE_START_X = 170;
+
+        async void SkipForAni()
+        {
+            SkipForwardImg.AbortAnimation("RotateTo");
+            SkipForwardImg.Rotation = 0;
+            await SkipForwardImg.RotateTo(90, 100, Easing.SinInOut);
+            await SkipForwardImg.RotateTo(0, 100, Easing.SinInOut);
+        }
+
+        async void SkipFor()
+        {
+            SkipForward.AbortAnimation("TranslateTo");
+            SkipForAni();
+
+            SkipForward.IsVisible = true;
+            SkipForwardSmall.IsVisible = false;
+            SkipForward.TranslationX = TRANSLATE_START_X;
+
+            await SkipForward.TranslateTo(TRANSLATE_START_X + TRANSLATE_SKIP_X, SkipForward.TranslationY, 200, Easing.SinInOut);
+
+            SkipForward.TranslationX = TRANSLATE_START_X;
+            SkipForward.IsVisible = false;
+            SkipForwardSmall.IsVisible = true;
+        }
+
+        DateTime lastClick = DateTime.MinValue;
+        private void TouchEffect_TouchAction(object sender, TouchTracking.TouchActionEventArgs args)
+        {
+            if (args.Type == TouchTracking.TouchActionType.Pressed) {
+                if (DateTime.Now.Subtract(lastClick).TotalSeconds < 0.25) { // Doubble click
+                    bool forward = (TapRec.Width / 2.0 < args.Location.X);
+                    SeekMedia(10000 * (forward ? 1 : -1));
+                    if (forward) {
+                        SkipFor();
+                    }
+                }
+                lastClick = DateTime.Now;
+            }
+            print("LEFT TIGHT " + (TapRec.Width / 2.0 < args.Location.X) + TapRec.Width + "|" + TapRec.X);
+            print("TOUCHED::D:A::A" + args.Location.X + "|" + args.Type.ToString());
+        }
+
+
+        void SeekMedia(long ms)
+        {
+            Player.Time = Player.Time + ms;
         }
     }
 }

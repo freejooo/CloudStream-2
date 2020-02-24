@@ -16,7 +16,7 @@
             
            
             <!--<BoxView HeightRequest="1" Color="#303F9F"></BoxView>-->
-            <ScrollView Orientation="Horizontal" x:Name="MScroll" VerticalOptions="Start" HeightRequest="130" HorizontalScrollBarVisibility="Never">
+            <ScrollView Orientation="Horizontal" x:Name="MScroll" VerticalOptions="Start" HeightRequest="130" HorizontalScrollBarVisibility="Never" Margin="10,10,10,0">
                 <StackLayout>
                     <Grid x:Name="Bookmarks" VerticalOptions="Start" HorizontalOptions="Start" HeightRequest="130">
 
@@ -27,7 +27,7 @@
             <!--   <BoxView HeightRequest="1" Color="#303F9F"></BoxView>-->
            
         </FlexLayout>
-        <BoxView  HeightRequest="3" Color="#303F9F" TranslationY="10"></BoxView>
+        <!--<BoxView  HeightRequest="3" Color="#303F9F" TranslationY="10"></BoxView>-->
 
         <StackLayout x:Name="Top100Stack">
 
@@ -118,8 +118,8 @@
                                                     <ColumnDefinition Width="Auto" />
                                                     <ColumnDefinition Width="Auto" />
                                                 </Grid.ColumnDefinitions>
-                                                
-                                                <Grid Grid.Row="0"  Grid.Column="1"  WidthRequest="67" TranslationY="{Binding TranslateYOffsetVertical}">
+
+                                                <Grid Grid.Row="0"  Grid.Column="1"  WidthRequest="67" TranslationY="{Binding TranslateYOffsetVertical}" >
                                                     
                                                     <ff:CachedImage WidthRequest="67" HeightRequest="98" Source="{Binding PosterUrl}" InputTransparent="True" >
 
@@ -129,15 +129,15 @@
                                                             </ffTransformations:RoundedTransformation>
                                                         </ff:CachedImage.Transformations>
                                                     </ff:CachedImage>
+<!--
                                                     <ff:CachedImage PropertyChanging="Image_PropertyChanging" InputTransparent="True" BackgroundColor="Transparent">
 
-                                                    </ff:CachedImage>
-                                                    <Grid  xe:TouchEffect.Color="White" Opacity="0.5" BackgroundColor="Transparent" xe:EffectsConfig.ChildrenInputTransparent="False" BindingContextChanged="Grid_BindingContextChanged" IsVisible="False" IsEnabled="False">
+                                                    </ff:CachedImage>-->
+                                                    <Grid  xe:TouchEffect.Color="White" Opacity="0.5" BackgroundColor="Transparent" xe:EffectsConfig.ChildrenInputTransparent="False" BindingContextChanged="Grid_BindingContextChanged" >
                                                         <!-- xe:Commands.Tap="{Binding TapCommand}"-->
-                                                     <!--   <ImageButton Clicked="ImageButton_Clicked" BackgroundColor="Transparent" InputTransparent="False" ></ImageButton  > -->
+                                                        <!--   <ImageButton Clicked="ImageButton_Clicked" BackgroundColor="Transparent" InputTransparent="False" ></ImageButton  > -->
 
                                                     </Grid>
-
 
                                                 </Grid>
                                                 <Grid  Grid.Row="0"  Grid.Column="0">
