@@ -26,6 +26,7 @@ namespace CloudStreamForms
 
         LabelList SeasonPicker;
         LabelList DubPicker;
+        LabelList FromToPicker;
 
 
         public Poster mainPoster;
@@ -386,6 +387,7 @@ namespace CloudStreamForms
 
             SeasonPicker = new LabelList(SeasonBtt, new List<string>());
             DubPicker = new LabelList(DubBtt, new List<string>());
+            // FromToPicker = new LabelList(FromToBtt, new List<string>());
 
             // -------------- CHROMECASTING THINGS --------------
 
@@ -542,9 +544,6 @@ namespace CloudStreamForms
         {
             // WaitScale();
         }
-        List<Grid> grids = new List<Grid>();
-        List<ProgressBar> progressBars = new List<ProgressBar>();
-
 
         public void SetColor(EpisodeResult episodeResult)
         {
@@ -639,14 +638,12 @@ namespace CloudStreamForms
 
         public void ClearEpisodes()
         {
+            return;
+
             episodeView.ItemsSource = null;
             epView.MyEpisodeResultCollection.Clear();
             episodeView.ItemsSource = epView.MyEpisodeResultCollection;
-            // episodeView.HeightRequest = 0;
-
-            play_btts = new List<FFImageLoading.Forms.CachedImage>();
-            grids = new List<Grid>();
-            progressBars = new List<ProgressBar>();
+            // episodeView.HeightRequest = 0; 
             //  grids.Clear();
             // gridsSize.Clear();
             SetHeight();
@@ -1117,6 +1114,10 @@ namespace CloudStreamForms
             }
 
         }
+        private void FromToPicker_SelectedIndexChanged(object sender, int e)
+        {
+            SetEpisodeFromTo(e, -1);
+        }
 
         private void SeasonPicker_SelectedIndexChanged(object sender, int e)
         {
@@ -1130,6 +1131,37 @@ namespace CloudStreamForms
             // SeasonBtt.Text = SeasonPicker.ItemsSource[SeasonPicker.SelectedIndex];
             // SeasonBtt.IsVisible = SeasonPicker.IsVisible;
             // myEpisodeResultCollection.Clear();
+        }
+
+        void SetChangeTo(int maxEp = -1)
+        {
+            //   Device.BeginInvokeOnMainThread(() => {
+            if (maxEp == -1) {
+                maxEp = maxEpisodes;
+            }
+            print("MAXTOODOA:" + maxEp + "<||" + epView.AllEpisodes.Count);
+
+            var source = new List<string>();
+            //FromToPicker.ItemsSource.Clear();
+            for (int i = 0; i < epView.AllEpisodes.Count; i++) {
+                int fromTo = maxEp - i * MovieResultMainEpisodeView.MAX_EPS_PER;
+                string f = (i * MovieResultMainEpisodeView.MAX_EPS_PER + 1) + "-" + ((i) * MovieResultMainEpisodeView.MAX_EPS_PER + Math.Min(fromTo, MovieResultMainEpisodeView.MAX_EPS_PER));
+                print("TOODOAODOA:::" + f);
+                source.Add(f);
+                //    FromToPicker.ItemsSource.Add(f);
+            }
+            FromToPicker = new LabelList(FromToBtt, source);//.IsVisible = FromToPicker.ItemsSource.Count > 1;                
+            FromToPicker.SelectedIndex = 0;//.IsVisible = FromToPicker.ItemsSource.Count > 1;           
+            FromToPicker.IsVisible = FromToPicker.ItemsSource.Count > 1;
+            FromToPicker.button.IsEnabled = FromToPicker.ItemsSource.Count > 1;
+            FromToPicker.SelectedIndexChanged += (o, e) => {
+                SetEpisodeFromTo(e, Math.Min(maxEp - (e * MovieResultMainEpisodeView.MAX_EPS_PER), MovieResultMainEpisodeView.MAX_EPS_PER));
+            };//FromToPicker_SelectedIndexChanged;
+              //  SetChangeTo(max);
+
+            // });
+
+            //  FromToPicker.ItemsSource = source;
         }
 
         private void MovieResult_epsiodesLoaded(object sender, List<Episode> e)
@@ -1154,7 +1186,8 @@ namespace CloudStreamForms
                     //  if (currentMovie.title.movieType != MovieType.Anime) {
                     maxEpisodes = currentEpisodes.Count;
                     for (int i = 0; i < (int)Math.Ceiling((double)maxEpisodes / (double)MovieResultMainEpisodeView.MAX_EPS_PER); i++) {
-                        epView.AllEpisodes.Add(new EpisodeResult[MovieResultMainEpisodeView.MAX_EPS_PER]);
+                        int fromMax = maxEpisodes - MovieResultMainEpisodeView.MAX_EPS_PER * i;
+                        epView.AllEpisodes.Add(new EpisodeResult[Math.Min(MovieResultMainEpisodeView.MAX_EPS_PER, fromMax)]);
                     }
 
                     for (int i = 0; i < currentEpisodes.Count; i++) {
@@ -1164,6 +1197,7 @@ namespace CloudStreamForms
                     }
                     if (!isAnime) {
                         SetEpisodeFromTo(0);
+                        SetChangeTo();
                     }
                     // }
                 }
@@ -1175,6 +1209,7 @@ namespace CloudStreamForms
                     //isLocalMovie = true;
                     SetEpisodeFromTo(0);
                 }
+
 
 
 
@@ -1331,6 +1366,7 @@ namespace CloudStreamForms
 
                             int select = 0;
                             SetEpisodeFromTo(select, max - select * MovieResultMainEpisodeView.MAX_EPS_PER);
+                            SetChangeTo(max);
                             //episodeView.HeightRequest = myEpisodeResultCollection.Count * heightRequestPerEpisode + heightRequestAddEpisode;
                             //SetRows();
                         });
@@ -1476,22 +1512,6 @@ namespace CloudStreamForms
         {
             //   if (!SameAsActiveMovie()) return;
             App.OpenBrowser(CurrentMalLink);
-        }
-
-
-        List<FFImageLoading.Forms.CachedImage> play_btts = new List<FFImageLoading.Forms.CachedImage>();
-        List<FFImageLoading.Forms.CachedImage> gray_images = new List<FFImageLoading.Forms.CachedImage>();
-        private void Image_PropertyChanging(object sender, PropertyChangingEventArgs e)
-        {
-
-        }
-        private void ImageGetGradient(object sender, PropertyChangingEventArgs e)
-        {
-            FFImageLoading.Forms.CachedImage image = ((FFImageLoading.Forms.CachedImage)sender);
-            if (play_btts.Where(t => t.Id == image.Id).Count() == 0) {
-                play_btts.Add(image);
-                image.Source = GetGradient();
-            }
         }
 
 
@@ -2087,21 +2107,7 @@ namespace CloudStreamForms
             // print(((EpisodeResult)((Grid)sender).BindingContext).Title + "|TITLELL");
         }
 
-        private void CachedImage_BindingContextChanged(object sender, EventArgs e)
-        {
-            print("DAAAAAAAAAAAAAAAAAAAAAAAAAAFFFFFFFFFGH");
-            FFImageLoading.Forms.CachedImage image = ((FFImageLoading.Forms.CachedImage)sender);
-            if (play_btts.Where(t => t.Id == image.Id).Count() == 0) {
-                play_btts.Add(image);
-                image.Source = App.GetImageSource("nexflixPlayBtt.png");//ImageSource.FromResource("CloudStreamForms.Resource.playBtt.png", Assembly.GetExecutingAssembly());
-                if (Device.RuntimePlatform == Device.Android) {
-                    image.Scale = 0.4f;
-                }
-                else {
-                    image.Scale = 0.3f;
-                }
-            }
-        }
+         
     }
 
 }

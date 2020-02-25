@@ -130,8 +130,9 @@ namespace CloudStreamForms
             //   BarTextColor = Color.OrangeRed;
             // Page p = new ChromeCastPage();// { mainPoster = mainPoster };
             // Navigation.PushModalAsync(p, false);
-             //PushPageFromUrlAndName("tt4869896", "Overlord");
-           //  PushPageFromUrlAndName("tt10885406", "Ascendance of a Bookworm");
+            //PushPageFromUrlAndName("tt4869896", "Overlord");
+            PushPageFromUrlAndName("tt0409591", "Naruto");
+            //  PushPageFromUrlAndName("tt10885406", "Ascendance of a Bookworm");
             // PushPageFromUrlAndName("tt9054364", "That Time I Got Reincarnated as a Slime");
             //PushPageFromUrlAndName("tt0371746", "Iron Man");
         }
