@@ -18,6 +18,5 @@ public class CustomLabelRenderer : LabelRenderer
             return;
         var tv = Control as global::Android.Widget.TextView;
         tv.VerticalScrollBarEnabled = false;
-        CloudStreamForms.CloudStreamCore.print("HHAHDHADHAHD");
     }
 }

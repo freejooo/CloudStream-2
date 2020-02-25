@@ -550,7 +550,7 @@ namespace CloudStreamForms
             string id = GetId(episodeResult);
             if (id != "") {
                 List<string> hexColors = new List<string>() { "#ffffff", LIGHT_BLUE_COLOR, "#e5e598" };
-                List<string> darkHexColors = new List<string>() { "#808080", DARK_BLUE_COLOR, "#d3c450" };
+                List<string> darkHexColors = new List<string>() { "#959595", DARK_BLUE_COLOR, "#d3c450" };
                 int color = 0;
                 if (App.KeyExists("ViewHistory", id)) {
                     color = 1;
@@ -2116,13 +2116,13 @@ public class MovieResultMainEpisodeView
 {
     public ObservableCollection<Trailer> CurrentTrailers { get; set; }
 
-    private ObservableCollection<EpisodeResult> _MyEpisodeResultCollection;
-    public ObservableCollection<EpisodeResult> MyEpisodeResultCollection { set { Added?.Invoke(null, null); _MyEpisodeResultCollection = value; } get { return _MyEpisodeResultCollection; } }
+    public ObservableCollection<EpisodeResult> MyEpisodeResultCollection { set; get; }
+    //public ObservableCollection<EpisodeResult> MyEpisodeResultCollection { set { Added?.Invoke(null, null); _MyEpisodeResultCollection = value; } get { return _MyEpisodeResultCollection; } }
 
     public const int MAX_EPS_PER = 50;
     public List<EpisodeResult[]> AllEpisodes = new List<EpisodeResult[]>();
 
-    public event EventHandler Added;
+   // public event EventHandler Added;
 
     public MovieResultMainEpisodeView()
     {
