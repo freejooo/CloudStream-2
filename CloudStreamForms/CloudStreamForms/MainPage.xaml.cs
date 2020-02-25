@@ -131,7 +131,7 @@ namespace CloudStreamForms
             // Page p = new ChromeCastPage();// { mainPoster = mainPoster };
             // Navigation.PushModalAsync(p, false);
             //PushPageFromUrlAndName("tt4869896", "Overlord");
-            PushPageFromUrlAndName("tt0409591", "Naruto");
+            //  PushPageFromUrlAndName("tt0409591", "Naruto");
             //  PushPageFromUrlAndName("tt10885406", "Ascendance of a Bookworm");
             // PushPageFromUrlAndName("tt9054364", "That Time I Got Reincarnated as a Slime");
             //PushPageFromUrlAndName("tt0371746", "Iron Man");
@@ -1809,15 +1809,15 @@ namespace CloudStreamForms
                                         //   int change = Math.Max(cEP - episodes.Length, 0);
                                         episodes[cEP - 1] = _slug;
                                     }
-                                   // print("SSLIUGPSPSOSO::" + epNum + "|" + slug + "|" + createDate);
+                                    // print("SSLIUGPSPSOSO::" + epNum + "|" + slug + "|" + createDate);
                                 }
                                 catch (Exception) {
                                     print("SOMETHING LIKE 25.5");
                                 }
-                        
+
                             }
                             //    s.Stop();
-                            print("EPISODES::::" + episodes.Length );
+                            print("EPISODES::::" + episodes.Length);
                             var baseData = activeMovie.title.MALData.seasonData[i].seasons[q];
                             if (!isDub) {
                                 baseData.kickassAnimeData.subExists = true;
@@ -1967,10 +1967,10 @@ namespace CloudStreamForms
                                     //  print("SYNO: " + ms.synonyms[s]);
                                 }
 
-                              //  print(ur + "|" + animeTitle.ToLower() + "|" + ms.name.ToLower() + "|" + ms.engName.ToLower() + "|" + ___year + "___" + ___year2 + "|" + containsSyno);
+                                //  print(ur + "|" + animeTitle.ToLower() + "|" + ms.name.ToLower() + "|" + ms.engName.ToLower() + "|" + ___year + "___" + ___year2 + "|" + containsSyno);
 
                                 if (ToLowerAndReplace(ms.name) == ToLowerAndReplace(animeTitle) || ToLowerAndReplace(ms.engName) == ToLowerAndReplace(animeTitle) || containsSyno) {
-                                   // print("ADDED:::" + ur);
+                                    // print("ADDED:::" + ur);
                                     var baseData = activeMovie.title.MALData.seasonData[i].seasons[q];
                                     if (animeTitle == title) {
                                         baseData.gogoData.subExists = true;
@@ -4175,27 +4175,15 @@ namespace CloudStreamForms
 
             */
 
-        public static string ConvertIMDbImagesToHD(string nonHDImg, int? pwidth = null, int? pheight = null)
+        public static string ConvertIMDbImagesToHD(string nonHDImg, int? pwidth = null, int? pheight = null, double multi = 1)
         {
             string img = FindHTML("|" + nonHDImg, "|", "._");
-            pheight = (int)Math.Round((pheight ?? 0) * posterRezMulti);
-            pwidth = (int)Math.Round((pwidth ?? 0) * posterRezMulti);
+            pheight = (int)Math.Round((pheight ?? 0) * posterRezMulti * multi);
+            pwidth = (int)Math.Round((pwidth ?? 0) * posterRezMulti * multi);
             pheight = App.ConvertDPtoPx((int)pheight);
             pwidth = App.ConvertDPtoPx((int)pwidth);
             if (pwidth == 0 && pheight == 0) return nonHDImg;
-           // print("IMDBASE:" + nonHDImg);
             img += "." + (pheight > 0 ? "_UY" + pheight : "") + (pwidth > 0 ? "UX" + pwidth : "") + "_.jpg";
-            //print(img);
-            /*
-            string x1 = pwidth.ToString();
-            string y1 = pheight.ToString();
-            pheight = (int)Math.Round(pheight * mMulti * posterRezMulti);
-            pwidth = (int)Math.Round(pwidth * mMulti * posterRezMulti);
-            int zpwidth = (int)Math.Round(pwidth *zoom);
-            int zpheight = (int)Math.Round(pheight *zoom);
-            print("IMG::" + nonHDImg);
-            string img = nonHDImg.Replace("," + x1 + "," + y1 + "_AL", "," + pwidth + "," + pheight + "_AL").Replace("," + y1 + "," + x1 + "_AL", "," + pwidth + "," + pheight + "_AL").Replace("UY" + y1, "UY" + zpheight).Replace("UX" + x1, "UX" + zpwidth).Replace("UX" + y1, "UX" + zpheight).Replace("UY" + x1, "UY" + zpwidth);
-            print("IMG>>" + img);*/
             return img;
         }
 

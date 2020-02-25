@@ -282,7 +282,7 @@ xmlns:ffTransformations="clr-namespace:FFImageLoading.Transformations;assembly=F
 
                     <ListView ItemsSource="{Binding MyEpisodeResultCollection}"
                                  CachingStrategy="RecycleElement" 
-                    ItemTapped="ListView_ItemTapped" RowHeight="200" HasUnevenRows="false"
+                  RowHeight="200" HasUnevenRows="false"
                         x:Name="episodeView" SeparatorColor="Transparent" VerticalScrollBarVisibility="Never"> 
                         <ListView.ItemTemplate>
                             <DataTemplate >

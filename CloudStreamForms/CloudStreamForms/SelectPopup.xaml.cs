@@ -40,7 +40,7 @@ namespace CloudStreamForms
 
             SelectedIndexChanged += (o, e) => {
                 if (this == o) {
-                    if (e >= 0) {
+                    if (e >= 0 && ItemsSource.Count > 0) {
                         button.Text = ItemsSource[e];
                     }
                 }
