@@ -1254,7 +1254,7 @@ namespace CloudStreamForms
 
                 //string d =;
                 string _d = GetHTML(url);
-                string lookFor = "<div class=\"rec_item\"";
+                const string lookFor = "<div class=\"rec_item\"";
                 while (_d.Contains(lookFor)) {
                     _d = RemoveOne(_d, lookFor);
                     string tt = FindHTML(_d, " data-tconst=\"", "\"");
@@ -1317,7 +1317,7 @@ namespace CloudStreamForms
             string d = GetHTML(trueUrl, true);
             print("FALSEURL:" + trueUrl);
 
-            string lookFor = "class=\"loadlate\"";
+            const string lookFor = "class=\"loadlate\"";
             int place = start - 1;
             int counter = 0;
             while (d.Contains(lookFor)) {
@@ -1652,11 +1652,11 @@ namespace CloudStreamForms
                     var malSeason = activeMovie.title.MALData.seasonData;
                     var season = malSeason[malSeason.Count - 1].seasons;
                     string downloadString = "https://notify.moe/search/" + season[season.Count - 1].engName;
-                    //   print("DOWNLOADING::" + downloadString);
+                   print("DOWNLOADINGMOE::" + downloadString);
                     string d = DownloadString(downloadString);
                     if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
 
-                    string lookFor = "<a href=\'/anime/";
+                    const string lookFor = "<a href=\'/anime/";
                     while (d.Contains(lookFor)) {
                         string uri = FindHTML(d, lookFor, "\'");
                         string _d = DownloadString("https://notify.moe/api/anime/" + uri);
@@ -1690,7 +1690,7 @@ namespace CloudStreamForms
                                     //https://notify.moe/api/episode/xGNheCEZgM
                                     // print(api.title.English + "|NO." + (i + 1) + " - " + api.episodes[i]);
 
-                                    print("MOE API::" + i);
+                                    print("MOE API::" + i + "|" + uri);
                                     string __d = DownloadString("https://notify.moe/api/episode/" + api.episodes[i]);
                                     string end = FindHTML(__d, "\"end\":\"", "\"");
 
@@ -1699,10 +1699,13 @@ namespace CloudStreamForms
 
                                     var time = DateTime.Parse(end);
                                     var _t = time.Subtract(DateTime.Now);
-                                    if (_t.TotalSeconds < 0) return;
+                                    print("TOTALLSLDLSA::" + _t.TotalSeconds);
                                     if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
                                     if (activeMovie.moeEpisodes == null) return;
+                                    print("DADAAA::::::");
                                     activeMovie.moeEpisodes.Add(new MoeEpisode() { timeOfRelease = time, timeOfMesure = DateTime.Now });
+                                    if (_t.TotalSeconds > 0) break;
+
                                     //print("TotalDays:" + _t.Days + "|" + _t.Hours + "|" + _t.Minutes);
                                 }
                             }
@@ -1749,7 +1752,7 @@ namespace CloudStreamForms
             print("COMPAREURL:" + url);
             string d = DownloadString(url);
             print("DOWNLOADEDDDD::" + d);
-            string lookfor = "\"name\":\"";
+            const string lookfor = "\"name\":\"";
             while (d.Contains(lookfor)) {
                 string animeTitle = FindHTML(d, lookfor, "\"");
                 const string dubTxt = "(Dub)";
@@ -1782,7 +1785,7 @@ namespace CloudStreamForms
 
                             string _d = DownloadString(slug);
                             // print(d);
-                            string _lookfor = "\"epnum\":\"";
+                            const string _lookfor = "\"epnum\":\"";
 
 
                             int slugCount = Regex.Matches(_d, _lookfor).Count;
@@ -1859,7 +1862,7 @@ namespace CloudStreamForms
             string _imdb = activeMovie.title.name; //"Attack On Titan";
             string imdb = _imdb.Replace(".", "").Replace("/", "");
             string d = DownloadString("https://bestdubbedanime.com/search/" + imdb);
-            string lookFor = "class=\"resulta\" href=\"";
+            const string lookFor = "class=\"resulta\" href=\"";
             string nameLookFor = "<div class=\"titleresults\">";
             print(d);
 
@@ -2064,7 +2067,7 @@ namespace CloudStreamForms
 
                         string _d = DownloadString(url + "keywords", tempThred);
                         if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
-                        string _lookFor = "data-item-keyword=\"";
+                        const string _lookFor = "data-item-keyword=\"";
                         while (_d.Contains(_lookFor)) {
                             keyWords.Add(FindHTML(_d, _lookFor, "\""));
                             _d = RemoveOne(_d, _lookFor);
@@ -2174,7 +2177,7 @@ namespace CloudStreamForms
 
                         if (fetchData) {
                             activeMovie.title.recomended = new List<Poster>();
-                            string lookFor = "<div class=\"rec_item\" data-info=\"\" data-spec=\"";
+                            const string lookFor = "<div class=\"rec_item\" data-info=\"\" data-spec=\"";
                             for (int i = 0; i < 12; i++) {
                                 try {
                                     string result = FindHTML(d, lookFor, "/> <br/>");
@@ -2352,7 +2355,7 @@ namespace CloudStreamForms
                                 if (activeMovie.title.movieType == MovieType.TVSeries) {
                                     //<a data-ep-id="
                                     string _d = DownloadString(fwordLink, tempThred);
-                                    string _lookFor = "<a data-ep-id=\"";
+                                    const string _lookFor = "<a data-ep-id=\"";
                                     //print(_d);
                                     List<string> sData = new List<string>();
                                     while (_d.Contains(_lookFor)) {
@@ -2515,7 +2518,7 @@ namespace CloudStreamForms
                     string d = DownloadString(url);
                     if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
 
-                    string lookFor = " <div class=\"vid_info\">";
+                    const string lookFor = " <div class=\"vid_info\">";
                     List<FishWatch> fishWatches = new List<FishWatch>();
 
                     while (d.Contains(lookFor)) {
@@ -2672,7 +2675,7 @@ namespace CloudStreamForms
                     string d = DownloadString(yesmovies, tempThred);
                     if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
                     int counter = 0;
-                    string lookfor = "data-url=\"";
+                    const string lookfor = "data-url=\"";
                     while ((d.Contains(lookfor)) && counter < 100) {
                         counter++;
                         string url = FindHTML(d, lookfor, "\"");
@@ -2758,7 +2761,7 @@ namespace CloudStreamForms
                     string d = DownloadString("https://www.imdb.com/title/" + activeMovie.title.id + "/trailers/");
                     if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
                     print(d);
-                    string lookfor = "viconst=\"";
+                    const string lookfor = "viconst=\"";
                     int index = 0;
                     while (d.Contains(lookfor)) {
                         string viUrl = FindHTML(d, lookfor, "\"");
@@ -2827,15 +2830,36 @@ namespace CloudStreamForms
                 tempThred.typeId = 6; // MAKE SURE THIS IS BEFORE YOU CREATE THE THRED
                 tempThred.Thread = new System.Threading.Thread(() => {
                     try {
-                        string url = "https://www.imdb.com/title/" + activeMovie.title.id + "/episodes?season=" + season;
+                        string url = "https://www.imdb.com/title/" + activeMovie.title.id + "/episodes/_ajax?season=" + season;
                         print("URLLLLL::::" + url);
                         string d = DownloadString(url, tempThred);
+
+                        // SEE https://www.imdb.com/title/tt0388629/episodes
+                        if (d == "") {
+                            print("FAILED TO GET EPISODES:::");
+                            string _d = DownloadString("https://www.imdb.com/title/" + activeMovie.title.id + "/episodes");
+                            string fromTo = FindHTML(_d, "<select id=\"byYear\"", "</select>");
+                            List<string> years = new List<string>();
+                            const string lookFor = "<option  value=\"";
+                            while (fromTo.Contains(lookFor)) {
+                                years.Add(FindHTML(fromTo, lookFor, "\""));
+                                fromTo = RemoveOne(fromTo, lookFor);
+                            }
+                            for (int i = 0; i < years.Count; i++) {
+                                //https://www.imdb.com/title/tt0388629/episodes/?year=2020
+                                string partURL = "https://www.imdb.com/title/" + activeMovie.title.id + "/episodes/_ajax?year=" + years[i];
+                                print("PARTURLL:::" + partURL);
+                                d += DownloadString(partURL);
+                            }
+                            //<label for="byYear">Year:</label>
+                        }
                         print(d);
                         if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
 
                         int eps = 0;
+                        //https://www.imdb.com/title/tt4508902/episodes/_ajax?season=2
 
-                        for (int q = 1; q < 1000; q++) {
+                        for (int q = 1; q < 2000; q++) { 
                             if (d.Contains("?ref_=ttep_ep" + q)) {
                                 eps = q;
                             }
@@ -3007,7 +3031,7 @@ namespace CloudStreamForms
                 activeMovie.title.MALData.currentActiveDubbedMaxEpsPerSeason = dubbedSum;
             }
 
-            print("MAX:" + maxDubbed + "|" + maxGogo);
+            print("MAXUDUOASHDJKAS:" + maxDubbed + "|" + maxGogo + "|" + maxKickass);
             max = Math.Max(maxDubbed, Math.Max(maxGogo, maxKickass));
             return max;
         }
@@ -3059,7 +3083,7 @@ namespace CloudStreamForms
         public static List<string> GetAllKickassLinksFromAnime(Movie currentMovie, int currentSeason, bool isDub)
         {
             List<string> baseUrls = new List<string>();
-
+            print("CURRENSTSEASON:::" + currentSeason + "|" + isDub + "|" + currentMovie.title.MALData.seasonData.Count);
             try {
                 for (int q = 0; q < currentMovie.title.MALData.seasonData[currentSeason].seasons.Count; q++) {
                     var ms = currentMovie.title.MALData.seasonData[currentSeason].seasons[q].kickassAnimeData;
@@ -3068,7 +3092,7 @@ namespace CloudStreamForms
                         //  dstring = ms.baseUrl;
                         baseUrls.AddRange(isDub ? ms.dubEpisodesUrls : ms.subEpisodesUrls);
 
-                        //print("BASEURL " + ms.baseUrl);
+                        print("BASEURL dada.:::" + (isDub ? ms.dubEpisodesUrls : ms.subEpisodesUrls));
                     }
                 }
             }
@@ -3140,7 +3164,7 @@ namespace CloudStreamForms
             if (fembed != "") {
                 GetFembed(fembed, tempThred, normalEpisode, source, _ref);
             }
-            string lookFor = "file: \'";
+            const string lookFor = "file: \'";
             int prio = 5;
             while (d.Contains(lookFor)) {
                 string ur = FindHTML(d, lookFor, "\'");
@@ -3322,7 +3346,7 @@ namespace CloudStreamForms
                 }
             }
             string __d = d.ToString();
-            string lookFor = "https://redirector.googlevideo.com/";
+            const string lookFor = "https://redirector.googlevideo.com/";
             int prio = 11;
             while (__d.Contains(lookFor)) {
                 prio++;
@@ -3518,7 +3542,7 @@ namespace CloudStreamForms
 
                         if (_s.Contains("sources: [{file:\"")) {
                             string s = _s.ToString();
-                            string lookFor = "file:\"";
+                            const string lookFor = "file:\"";
 
                             while (s.Contains(lookFor)) {
                                 string uri = FindHTML(s, lookFor, "\"");
@@ -3713,7 +3737,7 @@ namespace CloudStreamForms
 
                                         string serverUrls = dubbedEp.serversHTML;
                                         print("SERVERURLLRL:" + serverUrls);
-                                        string sLookFor = "hl=\"";
+                                        const string sLookFor = "hl=\"";
                                         while (serverUrls.Contains(sLookFor)) {
                                             string baseUrl = FindHTML(dubbedEp.serversHTML, "hl=\"", "\"");
                                             print("BASE::" + baseUrl);
@@ -3935,7 +3959,7 @@ namespace CloudStreamForms
         static void GetVidNode(string _d, int normalEpisode, string urlName = "Vidstreaming")
         {
             string linkContext = FindHTML(_d, "<h6>Link download</h6>", " </div>");
-            string lookFor = "href=\"";
+            const string lookFor = "href=\"";
             string rem = "<div class=<\"dowload\"><a";
             linkContext = RemoveOne(linkContext, rem);
             int prio = 0;
@@ -3969,7 +3993,7 @@ namespace CloudStreamForms
                 int prio = 10;
                 string _d = PostRequest(urlType + "/api/source/" + fembed, urlType + "/v/" + fembed, "r=&d=" + referer, tempThred);
                 if (_d != "") {
-                    string lookFor = "\"file\":\"";
+                    const string lookFor = "\"file\":\"";
                     string _labelFind = "\"label\":\"";
                     while (_d.Contains(_labelFind)) {
                         string link = FindHTML(_d, lookFor, "\",\"");
@@ -4026,7 +4050,7 @@ namespace CloudStreamForms
                     string _d = PostRequest("https://myvidis.top/api/source/" + find, "https://myvidis.top/v/" + find, "", tempThred);
                     if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
                     if (_d != "") {
-                        string lookFor = "\"file\":\"";
+                        const string lookFor = "\"file\":\"";
                         string _labelFind = "\"label\":\"";
                         while (_d.Contains(_labelFind)) {
                             string link = FindHTML(_d, lookFor, "\",\"");
@@ -4867,7 +4891,7 @@ namespace CloudStreamForms
                                                 if (upstream != "") {
                                                     string _d = DownloadString("https://upstream.to/embed-" + upstream);
                                                     if (!GetThredActive(tempThred)) { return; };
-                                                    string lookFor = "file:\"";
+                                                    const string lookFor = "file:\"";
                                                     int prio = 16;
                                                     while (_d.Contains(lookFor)) {
                                                         prio--;
@@ -4941,7 +4965,7 @@ namespace CloudStreamForms
                                                 }
                                                 //   activeMovie.episodes[episode] = SetEpisodeProgress(activeMovie.episodes[episode]);
 
-                                                string __lookFor = "https:\\/\\/gomo.to\\/vid\\/";
+                                                const string __lookFor = "https:\\/\\/gomo.to\\/vid\\/";
                                                 while (result.Contains(__lookFor)) {
                                                     string gogoStream = FindHTML(result, __lookFor, "\"");
                                                     result = RemoveOne(result, __lookFor);

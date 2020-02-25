@@ -545,8 +545,8 @@ namespace CloudStreamForms
                                 //  if (links.Count != 0) {
                                 // print("LINK ADDED" + links.Count + "|" + links[links.Count - 1].name);
                                 //  }
-
-                                epView.MyEpisodeResultCollection[i].epVis = true;
+                                int realFrom = i % MovieResultMainEpisodeView.MAX_EPS_PER;
+                                epView.MyEpisodeResultCollection[realFrom].epVis = true;
                                 List<string> mirrors = new List<string>();
                                 List<string> mirrorsUrls = new List<string>();
                                 int mirrorCounter = 0;
@@ -567,11 +567,11 @@ namespace CloudStreamForms
                                     catch (Exception) { }
                                 }
 
-                                if (mirrors.Count > epView.MyEpisodeResultCollection[i].Mirros.Count) {
+                                if (mirrors.Count > epView.MyEpisodeResultCollection[realFrom].Mirros.Count) {
                                     //EpisodeResult epRes = epView.MyEpisodeResultCollection[i];
-                                    epView.MyEpisodeResultCollection[i].mirrosUrls = mirrorsUrls;
-                                    epView.MyEpisodeResultCollection[i].epVis = mirrors.Count > 0;
-                                    epView.MyEpisodeResultCollection[i].Mirros = mirrors;// = new EpisodeResult() { mirros = mirrors, Description = epRes.Description, epVis = mirrors.Count > 0, Id = epRes.Id, mirrosUrls = mirrorsUrls, PosterUrl = epRes.PosterUrl, progress = epRes.progress, Rating = epRes.Rating, subtitles = epRes.subtitles, Title = epRes.Title };
+                                    epView.MyEpisodeResultCollection[realFrom].mirrosUrls = mirrorsUrls;
+                                    epView.MyEpisodeResultCollection[realFrom].epVis = mirrors.Count > 0;
+                                    epView.MyEpisodeResultCollection[realFrom].Mirros = mirrors;// = new EpisodeResult() { mirros = mirrors, Description = epRes.Description, epVis = mirrors.Count > 0, Id = epRes.Id, mirrosUrls = mirrorsUrls, PosterUrl = epRes.PosterUrl, progress = epRes.progress, Rating = epRes.Rating, subtitles = epRes.subtitles, Title = epRes.Title };
                                 }
                             }
                         }

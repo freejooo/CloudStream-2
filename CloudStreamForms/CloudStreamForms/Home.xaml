@@ -9,7 +9,7 @@
              mc:Ignorable="d"
              x:Class="CloudStreamForms.Home">
         <StackLayout>
-        <Label Margin="3" Text="Home" HorizontalOptions="Center"  FontSize="Large" FontAttributes="Bold" ></Label>
+        <Label Margin="3" Text="Home" HorizontalOptions="Center"  FontSize="25"   TextColor="#ffffff" ></Label>
         <!--TextColor="#303F9F"-->
         <!--   <Label Text="Bookmarks" FontAttributes="Italic" TranslationX="10" VerticalOptions="Start" HorizontalOptions="FillAndExpand" FontSize="Small"  x:Name="BTxt"></Label>-->
         <FlexLayout Margin="0,0,0,0">
