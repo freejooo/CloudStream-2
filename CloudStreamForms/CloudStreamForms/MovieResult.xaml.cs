@@ -711,7 +711,7 @@ namespace CloudStreamForms
 
                 for (int i = 0; i < RecomendedPosters.Count; i++) {
                     Poster p = e.title.recomended[i];
-                    string posterURL = ConvertIMDbImagesToHD(p.posterUrl, 76, 113, 4); //.Replace(",76,113_AL", "," + pwidth + "," + pheight + "_AL").Replace("UY113", "UY" + pheight).Replace("UX76", "UX" + pwidth);
+                    string posterURL = ConvertIMDbImagesToHD(p.posterUrl, 76, 113, 1.75); //.Replace(",76,113_AL", "," + pwidth + "," + pheight + "_AL").Replace("UY113", "UY" + pheight).Replace("UX76", "UX" + pwidth);
                     if (CheckIfURLIsValid(posterURL)) {
                         Grid stackLayout = new Grid();
                         Button imageButton = new Button() { HeightRequest = RecPosterHeight, WidthRequest = RecPosterWith, BackgroundColor = Color.Transparent, VerticalOptions = LayoutOptions.Center };
@@ -1009,6 +1009,8 @@ namespace CloudStreamForms
                 trailerView.HeightRequest = e.Count * 240 + 200;
                 if (PlayBttGradient.Source == null) {
                     PlayBttGradient.Source = GetImageSource("nexflixPlayBtt.png");
+                    PlayBttGradient.Opacity = 0;
+                    PlayBttGradient.FadeTo(1, FATE_TIME_MS);
                 }
 
                 for (int i = 0; i < e.Count; i++) {
