@@ -1821,6 +1821,7 @@ namespace CloudStreamForms
                             }
                             //    s.Stop();
                             print("EPISODES::::" + episodes.Length);
+                            
                             var baseData = activeMovie.title.MALData.seasonData[i].seasons[q];
                             if (!isDub) {
                                 baseData.kickassAnimeData.subExists = true;
@@ -4477,7 +4478,7 @@ namespace CloudStreamForms
             string url = "https://bestdubbedanime.com/xz/v3/jsonEpi.php?slug=" + slug + "/" + eps + "&_=" + UnixTime;
             string d = DownloadString(url);
             print("GOTEP" + d);
-            var f = JsonConvert.DeserializeObject<DubbedAnimeSearchRootObject>(d);
+            var f = JsonConvert.DeserializeObject<DubbedAnimeSearchRootObject>(d,new JsonSerializerSettings() { NullValueHandling = NullValueHandling.Ignore});
             if (f.result.error) {
                 print("RETURNOS:ERROR");
                 return new DubbedAnimeEpisode();

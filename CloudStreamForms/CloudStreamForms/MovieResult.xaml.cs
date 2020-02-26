@@ -21,6 +21,8 @@ namespace CloudStreamForms
     [XamlCompilation(XamlCompilationOptions.Compile)]
     public partial class MovieResult : ContentPage
     {
+        const uint FATE_TIME_MS = 500;
+
         public int SmallFontSize { get; set; } = 11;
         public int WithSize { get; set; } = 50;
         List<Episode> CurrentEpisodes { set { currentMovie.episodes = value; } get { return currentMovie.episodes; } }
@@ -401,7 +403,9 @@ namespace CloudStreamForms
                         var diff = e[i].DiffTime;
                         print("DIFFTIME:::::" + e[i].DiffTime);
                         if (diff.TotalSeconds > 0) {
+                            NotificationTime.Opacity = 0;
                             NotificationTime.Text = "Next Epiode: " + (diff.Days == 0 ? "" : (diff.Days + "d ")) + (diff.Hours == 0 ? "" : (diff.Hours + "h ")) + diff.Minutes + "m";
+                            NotificationTime.FadeTo(1, FATE_TIME_MS);
                             return;
                         }
                     }
@@ -434,12 +438,19 @@ namespace CloudStreamForms
         }
 
 
-        void SetEpisodeFromTo(int segment)
+        void SetEpisodeFromTo(int segment, int max = -1)
         {
             epView.MyEpisodeResultCollection.Clear();
 
             int start = MovieResultMainEpisodeView.MAX_EPS_PER * segment;
-            int end = Math.Min(MovieResultMainEpisodeView.MAX_EPS_PER * (segment + 1), epView.AllEpisodes.Length);
+            if (max == -1) {
+                max = epView.AllEpisodes.Length;
+            }
+            else {
+                max = Math.Min(max, epView.AllEpisodes.Length);
+            }
+
+            int end = Math.Min(MovieResultMainEpisodeView.MAX_EPS_PER * (segment + 1), max);
             for (int i = start; i < end; i++) {
                 epView.MyEpisodeResultCollection.Add(epView.AllEpisodes[i]);
             }
@@ -492,15 +503,10 @@ namespace CloudStreamForms
 
 
         public void ClearEpisodes()
-        {
-            return;
-
+        { 
             episodeView.ItemsSource = null;
             epView.MyEpisodeResultCollection.Clear();
             episodeView.ItemsSource = epView.MyEpisodeResultCollection;
-            // episodeView.HeightRequest = 0; 
-            //  grids.Clear();
-            // gridsSize.Clear();
             SetHeight();
         }
 
@@ -592,6 +598,24 @@ namespace CloudStreamForms
         }
 
 
+     
+        async void FadeTitles(bool fadeSeason)
+        {
+            print("FAFSAFAFAFA:::");
+            DescriptionLabel.Opacity = 0;
+            RatingLabel.Opacity = 0;
+            RatingLabelRating.Opacity = 0;
+            SeasonBtt.Opacity = 0;
+            await RatingLabelRating.FadeTo(1, FATE_TIME_MS);
+            await RatingLabel.FadeTo(1, FATE_TIME_MS);
+            await DescriptionLabel.FadeTo(1, FATE_TIME_MS);
+            if(fadeSeason) {
+                await SeasonBtt.FadeTo(1, FATE_TIME_MS);
+            }
+
+
+        }
+
         private void MovieResult_titleLoaded(object sender, Movie e)
         {
             if (loadedTitle) return;
@@ -641,10 +665,14 @@ namespace CloudStreamForms
                     DescriptionLabel.HeightRequest = 0;
                 }
 
+
+
                 // ---------------------------- SEASONS ----------------------------
 
 
                 SeasonPicker.IsVisible = haveSeasons;
+                FadeTitles(haveSeasons);
+
                 DubPicker.SelectedIndexChanged += DubPicker_SelectedIndexChanged;
                 if (haveSeasons) {
                     List<string> season = new List<string>();
@@ -662,6 +690,8 @@ namespace CloudStreamForms
                     }
 
                     currentSeason = SeasonPicker.SelectedIndex + 1;
+
+
                     print("GetImdbEpisodes>>>>>>>>>>>>>>><<");
                     GetImdbEpisodes(currentSeason);
                 }
@@ -767,6 +797,9 @@ namespace CloudStreamForms
         private void SeasonPicker_SelectedIndexChanged(object sender, int e)
         {
             ClearEpisodes();
+          //  epView.MyEpisodeResultCollection.Clear();
+
+            DubPicker.button.FadeTo(0, FATE_TIME_MS);
             currentSeason = SeasonPicker.SelectedIndex + 1;
             App.SetKey("SeasonIndex", activeMovie.title.id, SeasonPicker.SelectedIndex);
 
@@ -775,7 +808,7 @@ namespace CloudStreamForms
 
         void SetChangeTo(int maxEp = -1)
         {
-            Device.BeginInvokeOnMainThread(() => { 
+            Device.BeginInvokeOnMainThread(() => {
                 if (maxEp == -1) {
                     maxEp = maxEpisodes;
                 }
@@ -794,7 +827,7 @@ namespace CloudStreamForms
                 FromToPicker.IsVisible = FromToPicker.ItemsSource.Count > 1;
                 FromToPicker.button.IsEnabled = FromToPicker.ItemsSource.Count > 1;
                 FromToPicker.SelectedIndexChanged += (o, e) => {
-                    SetEpisodeFromTo(e);
+                    SetEpisodeFromTo(e, maxEpisodes);
                 };
             });
 
@@ -818,6 +851,7 @@ namespace CloudStreamForms
                 if (currentMovie.title.movieType != MovieType.Movie && currentMovie.title.movieType != MovieType.AnimeMovie) { // SEASON ECT
                     print("MAXEPS:::" + CurrentEpisodes.Count);
                     epView.AllEpisodes = new EpisodeResult[CurrentEpisodes.Count];
+                    maxEpisodes = epView.AllEpisodes.Length;
                     for (int i = 0; i < CurrentEpisodes.Count; i++) {
                         AddEpisode(new EpisodeResult() { Title = (i + 1) + ". " + CurrentEpisodes[i].name, Id = i, Description = CurrentEpisodes[i].description.Replace("\n", "").Replace("  ", ""), PosterUrl = CurrentEpisodes[i].posterUrl, Rating = CurrentEpisodes[i].rating, Progress = 0, epVis = false, subtitles = new List<string>() { "None" }, Mirros = new List<string>() }, i);
                     }
@@ -892,7 +926,7 @@ namespace CloudStreamForms
                     SetDubExist();
                 }
 
-                DubPicker.IsVisible = DubPicker.ItemsSource.Count > 0;
+
 
                 bool enabled = CurrentMalLink != "";
 
@@ -903,8 +937,13 @@ namespace CloudStreamForms
 
                 Grid.SetColumn(MALB, enabled ? 5 : 0);
                 Grid.SetColumn(MALA, enabled ? 5 : 0);
+
+                DubPicker.button.Opacity = 0;
+                DubPicker.IsVisible = DubPicker.ItemsSource.Count > 0;
+                DubPicker.button.FadeTo(DubPicker.IsVisible ? 1 : 0, FATE_TIME_MS);
             });
         }
+
 
         void SetDubExist()
         {
@@ -930,9 +969,10 @@ namespace CloudStreamForms
 
                             //  DubBtt.IsVisible = DubPicker.IsVisible;
 
+                            maxEpisodes = max;
                             print("MAXUSsssss" + maxEpisodes + "|" + max + "|" + (int)Math.Ceiling((double)max / (double)MovieResultMainEpisodeView.MAX_EPS_PER));
 
-                            SetEpisodeFromTo(0);
+                            SetEpisodeFromTo(0, max);
                             SetChangeTo(max);
                         });
                     }
