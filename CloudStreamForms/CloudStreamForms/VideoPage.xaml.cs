@@ -94,6 +94,17 @@ namespace CloudStreamForms
             currentSubtitlesId = subtitles;
         }
 
+
+        public void PlayerTimeChanged(long time)
+        {
+            Device.BeginInvokeOnMainThread(() => {
+                double val = ((double)(time / 1000) / (double)(Player.Length / 1000));
+                ChangeTime(val);
+                VideoSlider.Value = val;
+            });
+        }
+
+
         /// <summary>
         /// Subtitles are in full
         /// </summary>
@@ -118,7 +129,7 @@ namespace CloudStreamForms
 
             SkipBack.TranslationX = -TRANSLATE_START_X;
             SkipBackImg.Source = App.GetImageSource("netflixSkipBack.png");
-             SkipBackBtt.TranslationX = -TRANSLATE_START_X;
+            SkipBackBtt.TranslationX = -TRANSLATE_START_X;
             Commands.SetTap(SkipBackBtt, new Command(() => {
                 SeekMedia(-SKIPTIME);
                 SkipBac();
@@ -168,7 +179,7 @@ namespace CloudStreamForms
                 PausePlayBtt.Source = App.GetImageSource(paused ? PLAY_IMAGE : PAUSE_IMAGE);
                 PausePlayBtt.IsVisible = true;
                 LoadingCir.IsVisible = false;
-                BufferBar.IsVisible = false;
+                BufferLabel.IsVisible = false;
 
             }
 
@@ -188,12 +199,7 @@ namespace CloudStreamForms
                 //   LoadingCir.IsEnabled = false;
             };
             Player.TimeChanged += (o, e) => {
-                Device.BeginInvokeOnMainThread(() => {
-
-                    double val = ((double)(Player.Time / 1000) / (double)(Player.Length / 1000));
-                    ChangeTime(val);
-                    VideoSlider.Value = val;
-                });
+                PlayerTimeChanged(Player.Time);
             };
 
 
@@ -203,8 +209,9 @@ namespace CloudStreamForms
                         SetIsPaused(!Player.IsPlaying);
                     }
                     else {
-                        BufferBar.ProgressTo(e.Cache / 100.0, 50, Easing.Linear);
-                        BufferBar.IsVisible = true;
+                        //BufferBar.ProgressTo(e.Cache / 100.0, 50, Easing.Linear);
+                        BufferLabel.Text = "" + (int)e.Cache + "%";
+                        BufferLabel.IsVisible = true;
                         PausePlayBtt.IsVisible = false;
                         LoadingCir.IsVisible = true;
                     }
@@ -407,19 +414,33 @@ namespace CloudStreamForms
         {
             Player.SetPause(true);
             dragingVideo = true;
+            SlideChangedLabel.IsVisible = true;
+            SlideChangedLabel.Text = "";
         }
 
         private void VideoSlider_DragCompleted(object sender, EventArgs e)
         {
-            long len = (long)((VideoSlider.Value * (double)(Player.Length / 1000)) * 1000);
+            long len = (long)(VideoSlider.Value * Player.Length);
             Player.Time = len;
             Player.SetPause(false);
             dragingVideo = false;
+            SlideChangedLabel.IsVisible = false;
+            SlideChangedLabel.Text = "";
         }
 
         private void VideoSlider_ValueChanged(object sender, ValueChangedEventArgs e)
         {
             ChangeTime(e.NewValue);
+            long timeChange = (long)(VideoSlider.Value * Player.Length) - Player.Time;
+            if (dragingVideo) {
+                SlideChangedLabel.TranslationX = ((e.NewValue - 0.5)) * (VideoSlider.Width - 30);
+
+            //    var time = TimeSpan.FromMilliseconds(timeChange);
+
+                string before = (timeChange > 0 ? "+" : "-") + ConvertTimeToString(Math.Abs(timeChange / 1000)); //+ (int)time.Seconds + "s";
+
+                SlideChangedLabel.Text = before;//CloudStreamCore.ConvertTimeToString((timeChange / 1000.0));
+            }
         }
 
         const int TRANSLATE_SKIP_X = 100;
@@ -504,6 +525,7 @@ namespace CloudStreamForms
         void SeekMedia(long ms)
         {
             Player.Time = Player.Time + ms;
+            PlayerTimeChanged(Player.Time);
         }
     }
 }

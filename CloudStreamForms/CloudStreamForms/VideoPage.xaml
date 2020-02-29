@@ -39,7 +39,7 @@
 
             </ff:CachedImage>
 
-            <ActivityIndicator x:Name="LoadingCir"  IsVisible="False"  InputTransparent="True" IsRunning="True"  Opacity="0.5" VerticalOptions="Center" HorizontalOptions="Center" Color="White"></ActivityIndicator>
+            <ActivityIndicator x:Name="LoadingCir"  IsVisible="False"  InputTransparent="True" IsRunning="True"  Opacity="1" VerticalOptions="Center" HorizontalOptions="Center" Color="#617EFF"></ActivityIndicator>
 
             <Label x:Name="SkipForward" Text="+10" IsVisible="False" VerticalOptions="Center" HorizontalOptions="Center" TranslationX="170" AbsoluteLayout.LayoutFlags="All" FontSize="24" TextColor="White" />
             <Label x:Name="SkipForwardSmall" Text="10" VerticalOptions="Center" HorizontalOptions="Center" TranslationX="170" AbsoluteLayout.LayoutFlags="All" FontSize="20" TextColor="White" />
@@ -54,7 +54,7 @@
             <xe:BorderView  x:Name="SkipBackBtt" xe:TouchEffect.Color="White"  TranslationX="-100" Opacity="0.6" VerticalOptions="Center" WidthRequest="34" HeightRequest="34" CornerRadius="17" HorizontalOptions="Center" BackgroundColor="Transparent">
             </xe:BorderView>
 
-
+            <Label x:Name="BufferLabel" Text="50%" TextColor="White" FontSize="14" VerticalOptions="Center" HorizontalOptions="Center"></Label>
             <Label x:Name="EpisodeLabel"  Text="S12:E3 Iron Man" VerticalOptions="Start" HorizontalOptions="Center" FontSize="14" TextColor="#e7e7e7" TranslationY="20"></Label>
             <!--  <Grid x:Name="VideoSettings" VerticalOptions="Start" HorizontalOptions="End" TranslationY="20" ColumnSpacing="20" Scale="0.7">
                 <Grid.ColumnDefinitions >
@@ -118,7 +118,9 @@
                 </Grid.RowDefinitions>
                 <!--  <Image x:Name="GradientBottom" Grid.Row="1" HorizontalOptions="Fill" HeightRequest="80" TranslationY="0" VerticalOptions="End" Rotation="180" InputTransparent="True" ScaleX="100" Opacity="1" ScaleY="3"></Image>
 -->
-                <Grid HorizontalOptions="Fill" ColumnSpacing="0" Padding="10,0" Margin="0,0,0,-20" VerticalOptions="End" Grid.Row="0" >
+                <Label Grid.Row="0" x:Name="SlideChangedLabel" Text="+120s" VerticalOptions="Center" HorizontalOptions="Center" TextColor="White"></Label>
+
+                <Grid HorizontalOptions="Fill" ColumnSpacing="0" Padding="10,0" Margin="0,0,0,-20" VerticalOptions="End" Grid.Row="1" >
                     <Grid.ColumnDefinitions >
                         <ColumnDefinition Width="Auto" />
                         <ColumnDefinition Width="*" />
@@ -128,7 +130,7 @@
                     <Slider x:Name="VideoSlider" Grid.Column="1"  MinimumTrackColor="#617EFF" ThumbColor="#617EFF" HorizontalOptions="Fill" Margin="0,0,0,10" Maximum="1" DragStarted="VideoSlider_DragStarted" DragCompleted="VideoSlider_DragCompleted" ValueChanged="VideoSlider_ValueChanged" ></Slider>
                     <Label Grid.Row="0" Grid.Column="2" x:Name="EndTxt" Text="54:27" HorizontalOptions="End" TextColor="White"></Label>
                 </Grid>
-                <Grid x:Name="VideoSettings" VerticalOptions="End" HorizontalOptions="Center" Grid.Row="1" TranslationY="20" ColumnSpacing="20" TranslationX="20">
+                <Grid x:Name="VideoSettings" VerticalOptions="End" HorizontalOptions="Center" Grid.Row="2" TranslationY="20" ColumnSpacing="20" TranslationX="20">
                     <Grid.ColumnDefinitions >
                         <ColumnDefinition Width="Auto" />
                         <ColumnDefinition Width="Auto" />
@@ -367,7 +369,7 @@
                 </Grid>
 
             </Grid>
-            <ProgressBar x:Name="BufferBar" Progress="0" ProgressColor="#303F9F" IsVisible="False" VerticalOptions="End"></ProgressBar>
+         <!--   <ProgressBar x:Name="BufferBar" Progress="0" ProgressColor="#303F9F" IsVisible="False" VerticalOptions="End"></ProgressBar> -->
             <!--     <Button BackgroundColor="Blue" HorizontalOptions="FillAndExpand" VerticalOptions="FillAndExpand"></Button>-->
             <!--
             <xe:BorderView x:Name="LockTap" Grid.Column="0"  TranslationX="20" Margin="20"
