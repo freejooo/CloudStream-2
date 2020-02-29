@@ -32,17 +32,28 @@
 
 
             <xe:BorderView  x:Name="PausePlayClickBtt" xe:TouchEffect.Color="White"  Opacity="0.6" VerticalOptions="Center" WidthRequest="80" HeightRequest="80" CornerRadius="40" HorizontalOptions="Center" BackgroundColor="Transparent">
-                
+
             </xe:BorderView>
-          <!--  <Button Clicked="PausePlayBtt_Clicked" VerticalOptions="Center" WidthRequest="100" HeightRequest="100" CornerRadius="50" HorizontalOptions="Center" BackgroundColor="White" Opacity="0"></Button>-->
+            <!--  <Button Clicked="PausePlayBtt_Clicked" VerticalOptions="Center" WidthRequest="100" HeightRequest="100" CornerRadius="50" HorizontalOptions="Center" BackgroundColor="White" Opacity="0"></Button>-->
             <ff:CachedImage x:Name="PausePlayBtt" VerticalOptions="Center" WidthRequest="60" HeightRequest="60" HorizontalOptions="Center" BackgroundColor="Transparent" InputTransparent="True">
 
             </ff:CachedImage>
+
             <ActivityIndicator x:Name="LoadingCir"  IsVisible="False"  InputTransparent="True" IsRunning="True"  Opacity="0.5" VerticalOptions="Center" HorizontalOptions="Center" Color="White"></ActivityIndicator>
 
             <Label x:Name="SkipForward" Text="+10" IsVisible="False" VerticalOptions="Center" HorizontalOptions="Center" TranslationX="170" AbsoluteLayout.LayoutFlags="All" FontSize="24" TextColor="White" />
             <Label x:Name="SkipForwardSmall" Text="10" VerticalOptions="Center" HorizontalOptions="Center" TranslationX="170" AbsoluteLayout.LayoutFlags="All" FontSize="20" TextColor="White" />
             <Image x:Name="SkipForwardImg"   VerticalOptions="Center" HorizontalOptions="Center" TranslationX="170" AbsoluteLayout.LayoutFlags="All" WidthRequest="50" HeightRequest="50" />
+            <xe:BorderView  x:Name="SkipForwardBtt" xe:TouchEffect.Color="White"  TranslationX="100" Opacity="0.6" VerticalOptions="Center" WidthRequest="34" HeightRequest="34" CornerRadius="17" HorizontalOptions="Center" BackgroundColor="Transparent">
+            </xe:BorderView>
+
+
+            <Label x:Name="SkipBack" Text="-10" IsVisible="False" VerticalOptions="Center" HorizontalOptions="Center" TranslationX="-170" AbsoluteLayout.LayoutFlags="All" FontSize="24" TextColor="White" />
+            <Label x:Name="SkipBackSmall" Text="10" VerticalOptions="Center" HorizontalOptions="Center" TranslationX="-170" AbsoluteLayout.LayoutFlags="All" FontSize="20" TextColor="White" />
+            <Image x:Name="SkipBackImg"   VerticalOptions="Center" HorizontalOptions="Center" TranslationX="-170" AbsoluteLayout.LayoutFlags="All" WidthRequest="50" HeightRequest="50" />
+            <xe:BorderView  x:Name="SkipBackBtt" xe:TouchEffect.Color="White"  TranslationX="-100" Opacity="0.6" VerticalOptions="Center" WidthRequest="34" HeightRequest="34" CornerRadius="17" HorizontalOptions="Center" BackgroundColor="Transparent">
+            </xe:BorderView>
+
 
             <Label x:Name="EpisodeLabel"  Text="S12:E3 Iron Man" VerticalOptions="Start" HorizontalOptions="Center" FontSize="14" TextColor="#e7e7e7" TranslationY="20"></Label>
             <!--  <Grid x:Name="VideoSettings" VerticalOptions="Start" HorizontalOptions="End" TranslationY="20" ColumnSpacing="20" Scale="0.7">
@@ -172,7 +183,7 @@
                     </BoxView>
                     -->
 
-                  <!--  <xe:BorderView x:Name="LockTap" Grid.Column="0" Padding="40,0"
+                    <!--  <xe:BorderView x:Name="LockTap" Grid.Column="0" Padding="40,0"
           HeightRequest="35"
           WidthRequest="35"
                                     xe:TouchEffect.Color="White" 
@@ -250,7 +261,7 @@
 
                         </Grid>
                     </xe:BorderView>
-                    
+
                     <xe:BorderView x:Name="SubTap" Grid.Column="3"  Margin="-10,0"
           HeightRequest="35"
           WidthRequest="120"
@@ -294,7 +305,7 @@
 
                         </Grid>
                     </xe:BorderView>
-<!--
+                    <!--
                     <xe:BorderView x:Name="SubTap" Margin="40,0" Grid.Column="4"
           HeightRequest="35"
           WidthRequest="35"

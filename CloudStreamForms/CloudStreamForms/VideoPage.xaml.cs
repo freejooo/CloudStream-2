@@ -110,6 +110,21 @@ namespace CloudStreamForms
 
             SkipForward.TranslationX = TRANSLATE_START_X;
             SkipForwardImg.Source = App.GetImageSource("netflixSkipForward.png");
+            SkipForwardBtt.TranslationX = TRANSLATE_START_X;
+            Commands.SetTap(SkipForwardBtt, new Command(() => {
+                SeekMedia(SKIPTIME);
+                SkipFor();
+            }));
+
+            SkipBack.TranslationX = -TRANSLATE_START_X;
+            SkipBackImg.Source = App.GetImageSource("netflixSkipBack.png");
+             SkipBackBtt.TranslationX = -TRANSLATE_START_X;
+            Commands.SetTap(SkipBackBtt, new Command(() => {
+                SeekMedia(-SKIPTIME);
+                SkipBac();
+            }));
+
+
 
             // ======================= SETUP =======================
 
@@ -418,6 +433,14 @@ namespace CloudStreamForms
             await SkipForwardImg.RotateTo(0, 100, Easing.SinInOut);
         }
 
+        async void SkipBacAni()
+        {
+            SkipBackImg.AbortAnimation("RotateTo");
+            SkipBackImg.Rotation = 0;
+            await SkipBackImg.RotateTo(-90, 100, Easing.SinInOut);
+            await SkipBackImg.RotateTo(0, 100, Easing.SinInOut);
+        }
+
         async void SkipFor()
         {
             SkipForward.AbortAnimation("TranslateTo");
@@ -434,15 +457,39 @@ namespace CloudStreamForms
             SkipForwardSmall.IsVisible = true;
         }
 
+
+        async void SkipBac()
+        {
+            SkipBack.AbortAnimation("TranslateTo");
+            SkipBacAni();
+
+            SkipBack.IsVisible = true;
+            SkipBackSmall.IsVisible = false;
+            SkipBack.TranslationX = -TRANSLATE_START_X;
+
+            await SkipBack.TranslateTo(-TRANSLATE_START_X - TRANSLATE_SKIP_X, SkipBack.TranslationY, 200, Easing.SinInOut);
+
+            SkipBack.TranslationX = -TRANSLATE_START_X;
+            SkipBack.IsVisible = false;
+            SkipBackSmall.IsVisible = true;
+        }
+
+
         DateTime lastClick = DateTime.MinValue;
+
+        public const int SKIPTIME = 10000;
+
         private void TouchEffect_TouchAction(object sender, TouchTracking.TouchActionEventArgs args)
         {
             if (args.Type == TouchTracking.TouchActionType.Pressed) {
                 if (DateTime.Now.Subtract(lastClick).TotalSeconds < 0.25) { // Doubble click
                     bool forward = (TapRec.Width / 2.0 < args.Location.X);
-                    SeekMedia(10000 * (forward ? 1 : -1));
+                    SeekMedia(SKIPTIME * (forward ? 1 : -1));
                     if (forward) {
                         SkipFor();
+                    }
+                    else {
+                        SkipBac();
                     }
                 }
                 lastClick = DateTime.Now;
@@ -450,6 +497,8 @@ namespace CloudStreamForms
             print("LEFT TIGHT " + (TapRec.Width / 2.0 < args.Location.X) + TapRec.Width + "|" + TapRec.X);
             print("TOUCHED::D:A::A" + args.Location.X + "|" + args.Type.ToString());
         }
+
+
 
 
         void SeekMedia(long ms)

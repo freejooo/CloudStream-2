@@ -71,6 +71,7 @@
     <None Remove="Resource\MALWhite.png" />
     <None Remove="Resource\netflixCancel.png" />
     <None Remove="Resource\netflixEpisodesCut.png" />
+    <None Remove="Resource\netflixSkipBack.png" />
     <None Remove="Resource\netflixSkipForward.png" />
     <None Remove="Resource\nexflixPlayBtt.png" />
     <None Remove="Resource\notBookmarkedBtt.png" />
@@ -186,6 +187,7 @@
     <EmbeddedResource Include="Resource\MALWhite.png" />
     <EmbeddedResource Include="Resource\netflixCancel.png" />
     <EmbeddedResource Include="Resource\netflixEpisodesCut.png" />
+    <EmbeddedResource Include="Resource\netflixSkipBack.png" />
     <EmbeddedResource Include="Resource\netflixSkipForward.png" />
     <EmbeddedResource Include="Resource\nexflixPlayBtt.png" />
     <EmbeddedResource Include="Resource\notBookmarkedBtt.png" />

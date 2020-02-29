@@ -94,14 +94,6 @@ namespace CloudStreamForms
         protected override void OnAppearing()
         {
             base.OnAppearing();
-
-            // Apper();
-        }
-        async void Apper()
-        {
-            await Task.Delay(1000);
-            Page p = new VideoPage(new VideoPage.PlayVideo() { descript = "", name = "Black Bunny", episode = -1, season = -1, MirrorNames = new List<string>() { "Googlevid" }, MirrorUrls = new List<string>() { "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" }, Subtitles = new List<string>(), SubtitlesNames = new List<string>() });//new List<string>() { "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" }, new List<string>() { "Black" }, new List<string>() { });// { mainPoster = mainPoster };
-            await Navigation.PushModalAsync(p, false);
         }
 
         public MainPage()
@@ -114,15 +106,16 @@ namespace CloudStreamForms
             List<string> icons = new List<string>() { "outline_home_white_48dp.png", "searchIcon.png", "outline_get_app_white_48dp.png", "outline_settings_white_48dp.png" };
             List<Page> pages = new List<Page>() { new Home(), new Search(), new Download(), new Settings(), };
 
+            /*
             for (int i = 0; i < names.Count; i++) {
                 Children.Add(pages[i]);
                 Children[i].Title = names[i];
                 Children[i].IconImageSource = icons[i];
-            }
+            }*/
 
-            LateCheck();
-            //   Page p = new VideoPage(new VideoPage.PlayVideo() { descript = "", name = "Black Bunny", episode = -1, season = -1, MirrorNames = new List<string>() { "Googlevid" }, MirrorUrls = new List<string>() { "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" }, Subtitles = new List<string>(), SubtitlesNames = new List<string>() });//new List<string>() { "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" }, new List<string>() { "Black" }, new List<string>() { });// { mainPoster = mainPoster };
-            //   Navigation.PushModalAsync(p, false);
+            // LateCheck();
+            Page p = new VideoPage(new VideoPage.PlayVideo() { descript = "", name = "Black Bunny", episode = -1, season = -1, MirrorNames = new List<string>() { "Googlevid" }, MirrorUrls = new List<string>() { "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" }, Subtitles = new List<string>(), SubtitlesNames = new List<string>() });//new List<string>() { "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" }, new List<string>() { "Black" }, new List<string>() { });// { mainPoster = mainPoster };
+            Navigation.PushModalAsync(p, false);
 
 
             On<Xamarin.Forms.PlatformConfiguration.Android>().SetToolbarPlacement(ToolbarPlacement.Bottom);
@@ -1652,7 +1645,7 @@ namespace CloudStreamForms
                     var malSeason = activeMovie.title.MALData.seasonData;
                     var season = malSeason[malSeason.Count - 1].seasons;
                     string downloadString = "https://notify.moe/search/" + season[season.Count - 1].engName;
-                   print("DOWNLOADINGMOE::" + downloadString);
+                    print("DOWNLOADINGMOE::" + downloadString);
                     string d = DownloadString(downloadString);
                     if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
 
@@ -1821,7 +1814,7 @@ namespace CloudStreamForms
                             }
                             //    s.Stop();
                             print("EPISODES::::" + episodes.Length);
-                            
+
                             var baseData = activeMovie.title.MALData.seasonData[i].seasons[q];
                             if (!isDub) {
                                 baseData.kickassAnimeData.subExists = true;
@@ -2860,7 +2853,7 @@ namespace CloudStreamForms
                         int eps = 0;
                         //https://www.imdb.com/title/tt4508902/episodes/_ajax?season=2
 
-                        for (int q = 1; q < 2000; q++) { 
+                        for (int q = 1; q < 2000; q++) {
                             if (d.Contains("?ref_=ttep_ep" + q)) {
                                 eps = q;
                             }
@@ -4478,7 +4471,7 @@ namespace CloudStreamForms
             string url = "https://bestdubbedanime.com/xz/v3/jsonEpi.php?slug=" + slug + "/" + eps + "&_=" + UnixTime;
             string d = DownloadString(url);
             print("GOTEP" + d);
-            var f = JsonConvert.DeserializeObject<DubbedAnimeSearchRootObject>(d,new JsonSerializerSettings() { NullValueHandling = NullValueHandling.Ignore});
+            var f = JsonConvert.DeserializeObject<DubbedAnimeSearchRootObject>(d, new JsonSerializerSettings() { NullValueHandling = NullValueHandling.Ignore });
             if (f.result.error) {
                 print("RETURNOS:ERROR");
                 return new DubbedAnimeEpisode();

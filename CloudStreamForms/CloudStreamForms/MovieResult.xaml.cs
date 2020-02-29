@@ -1226,7 +1226,7 @@ namespace CloudStreamForms
             bool hasDownloadedFile = App.KeyExists("Download", GetId(episodeResult));
             string downloadKeyData = "";
 
-            List<string> actions = new List<string>() { "Play", "Download", "Download Subtitles", "Copy Link", "Reload" };
+            List<string> actions = new List<string>() { "Play", "Play in Browser", "Download", "Download Subtitles", "Copy Link", "Reload" };
 
             if (hasDownloadedFile) {
                 downloadKeyData = App.GetKey("Download", GetId(episodeResult), "");
@@ -1237,6 +1237,16 @@ namespace CloudStreamForms
             }
 
             action = await DisplayActionSheet(episodeResult.Title, "Cancel", null, actions.ToArray());
+
+
+            if(action == "Play in Browser") {
+                string copy = await DisplayActionSheet("Open Link", "Cancel", null, episodeResult.Mirros.ToArray());
+                for (int i = 0; i < episodeResult.Mirros.Count; i++) {
+                    if (episodeResult.Mirros[i] == copy) {
+                        App.OpenBrowser(episodeResult.mirrosUrls[i]);
+                    }
+                }
+            }
 
             if (action == "Chromecast") { // ============================== CHROMECAST ==============================
                 chromeResult = episodeResult;
