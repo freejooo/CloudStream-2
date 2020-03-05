@@ -40,6 +40,8 @@ namespace CloudStreamForms
             void UpdateBackground(int color);
             void LandscapeOrientation(); 
             void NormalOrientation();
+
+            void Test();
         }
 
         public class StorageInfo
@@ -57,6 +59,11 @@ namespace CloudStreamForms
         public static void OnDownloadProgressChanged(string path, DownloadProgressChangedEventArgs progress)
         {
             // Main.print("PATH: " + path + " | Progress:" + progress.ProgressPercentage);
+        }
+
+        public static void Test()
+        {
+            platformDep.Test();
         }
 
 

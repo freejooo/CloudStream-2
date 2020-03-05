@@ -39,6 +39,8 @@ namespace CloudStreamForms
         public const string ITEM_COLOR = "#617eff";
         public const string LIGHT_DARK_BLUE_COLOR = "#1976D2";
 
+        public const bool IS_EMTY_BUILD = false;
+
         public static string intentData = "";
         public static MainPage mainPage;
 
@@ -94,31 +96,36 @@ namespace CloudStreamForms
         protected override void OnAppearing()
         {
             base.OnAppearing();
+            App.Test();
         }
 
         public MainPage()
         {
             InitializeComponent(); mainPage = this;
 
+            if (IS_EMTY_BUILD) return;
 
+            
             List<string> names = new List<string>() { "Home", "Search", "Downloads", "Settings" };
             //List<string> icons = new List<string>() { "homeIcon.png", "searchIcon.png", "downloadIcon.png", "baseline_settings_applications_white_48dp_inverted_big.png" };
             List<string> icons = new List<string>() { "outline_home_white_48dp.png", "searchIcon.png", "outline_get_app_white_48dp.png", "outline_settings_white_48dp.png" };
             List<Page> pages = new List<Page>() { new Home(), new Search(), new Download(), new Settings(), };
 
-            /*
+
             for (int i = 0; i < names.Count; i++) {
                 Children.Add(pages[i]);
                 Children[i].Title = names[i];
                 Children[i].IconImageSource = icons[i];
-            }*/
+            }
 
-            // LateCheck();
-            Page p = new VideoPage(new VideoPage.PlayVideo() { descript = "", name = "Black Bunny", episode = -1, season = -1, MirrorNames = new List<string>() { "Googlevid" }, MirrorUrls = new List<string>() { "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" }, Subtitles = new List<string>(), SubtitlesNames = new List<string>() });//new List<string>() { "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" }, new List<string>() { "Black" }, new List<string>() { });// { mainPoster = mainPoster };
-            Navigation.PushModalAsync(p, false);
+            LateCheck();
+            //  Page p = new VideoPage(new VideoPage.PlayVideo() { descript = "", name = "Black Bunny", episode = -1, season = -1, MirrorNames = new List<string>() { "Googlevid" }, MirrorUrls = new List<string>() { "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" }, Subtitles = new List<string>(), SubtitlesNames = new List<string>() });//new List<string>() { "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" }, new List<string>() { "Black" }, new List<string>() { });// { mainPoster = mainPoster };
+            // Navigation.PushModalAsync(p, false);
 
 
             On<Xamarin.Forms.PlatformConfiguration.Android>().SetToolbarPlacement(ToolbarPlacement.Bottom);
+
+            
             // BarBackgroundColor = Color.Black;
             //   BarTextColor = Color.OrangeRed;
             // Page p = new ChromeCastPage();// { mainPoster = mainPoster };

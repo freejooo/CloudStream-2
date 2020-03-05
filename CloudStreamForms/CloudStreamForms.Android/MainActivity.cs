@@ -21,10 +21,11 @@ using System.Threading.Tasks;
 using Xamarin.Forms;
 using static CloudStreamForms.App;
 using static CloudStreamForms.CloudStreamCore;
+using Application = Android.App.Application;
 
 namespace CloudStreamForms.Droid
 {
-    [Activity(Label = "CloudStream 2", Icon = "@drawable/bicon", Theme = "@style/MainTheme.Splash", MainLauncher = true, ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation), IntentFilter(new[] { Intent.ActionView }, DataScheme = "cloudstreamforms", Categories = new[] { Intent.CategoryDefault, Intent.CategoryBrowsable })]
+    [Activity(Label = "CloudStream 2", Icon = "@drawable/bicon", Theme = "@style/MainTheme.Splash", MainLauncher = true, LaunchMode = LaunchMode.SingleTop, ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation), IntentFilter(new[] { Intent.ActionView }, DataScheme = "cloudstreamforms", Categories = new[] { Intent.CategoryDefault, Intent.CategoryBrowsable })]
     public class MainActivity : global::Xamarin.Forms.Platform.Android.FormsAppCompatActivity
     {
         MainDroid mainDroid;
@@ -62,6 +63,7 @@ namespace CloudStreamForms.Droid
 
 
             LocalNotificationsImplementation.NotificationIconId = Resource.Drawable.bicon;
+            MainDroid.NotificationIconId = Resource.Drawable.bicon;
 
 
             LoadApplication(new App());
@@ -76,6 +78,8 @@ namespace CloudStreamForms.Droid
                 }
             }
             RequestPermission(this);
+
+            mainDroid.Test();
             /*
             MessagingCenter.Subscribe<VideoPage>(this, "allowLandScapePortrait", sender =>
             {
@@ -123,8 +127,96 @@ namespace CloudStreamForms.Droid
         }
     }
 
+
+
+
     public class MainDroid : App.IPlatformDep
     {
+
+        // FROM https://github.com/edsnider/localnotificationsplugin/blob/master/src/Plugin.LocalNotifications.Android/LocalNotificationsImplementation.cs
+
+
+        /// <summary>
+        /// Get or Set Resource Icon to display
+        /// </summary>
+        public static int NotificationIconId { get; set; }
+        static string _packageName => Application.Context.PackageName;
+        static NotificationManager _manager => (NotificationManager)Application.Context.GetSystemService(Context.NotificationService);
+
+        /// <summary>
+        /// Show a local notification
+        /// </summary>
+        /// <param name="title">Title of the notification</param>
+        /// <param name="body">Body or description of the notification</param>
+        /// <param name="id">Id of the notification</param>
+        public void Show(string title, string body, int id = 0)
+        {
+            var builder = new Notification.Builder(Application.Context);
+            builder.SetContentTitle(title);
+            builder.SetContentText(body);
+            builder.SetAutoCancel(true);
+
+            if (NotificationIconId != 0) {
+                builder.SetSmallIcon(NotificationIconId);
+            }
+            else {
+                builder.SetSmallIcon(Resource.Drawable.plugin_lc_smallicon);
+            }
+
+            if (Build.VERSION.SdkInt >= BuildVersionCodes.O) {
+                var channelId = $"{_packageName}.general";
+                var channel = new NotificationChannel(channelId, "General", NotificationImportance.Default);
+
+                _manager.CreateNotificationChannel(channel);
+
+                builder.SetChannelId(channelId);
+
+                var context = MainActivity.activity.ApplicationContext;
+                var _resultIntent = new Intent(context, typeof(MainActivity));
+                //_resultIntent.SetFlags(ActivityFlags.NewTask | ActivityFlags.ClearTask);
+
+                var pending = PendingIntent.GetActivity(context, 0,
+                    _resultIntent,
+                   // PendingIntentFlags.CancelCurrent
+                   PendingIntentFlags.UpdateCurrent
+                    );
+
+                // SET AFTER THO 
+                RemoteViews remoteViews = new RemoteViews(Application.Context.PackageName, Resource.Xml.PausePlay);
+                // remoteViews.SetImageViewResource(R.id.notifAddDriverIcon, R.drawable.my_trips_new);
+                builder.SetCustomContentView(remoteViews);
+
+                builder.SetShowWhen(false);
+
+                //  builder.SetProgress(100, 51, false); // PROGRESSBAR
+                //  builder.SetLargeIcon(Android.Graphics.Drawables.Icon.CreateWithResource(context, Resource.Drawable.bicon)); // POSTER
+                builder.SetActions(new Notification.Action(Resource.Drawable.design_bottom_navigation_item_background, "Hello", pending)); // IDK TEXT PRESS
+            }
+
+            var resultIntent = GetLauncherActivity();
+            resultIntent.SetFlags(ActivityFlags.NewTask | ActivityFlags.ClearTask);
+            var stackBuilder = Android.Support.V4.App.TaskStackBuilder.Create(Application.Context);
+            stackBuilder.AddNextIntent(resultIntent);
+            var resultPendingIntent =
+                stackBuilder.GetPendingIntent(0, (int)PendingIntentFlags.UpdateCurrent);
+            builder.SetContentIntent(resultPendingIntent);
+
+            _manager.Notify(id, builder.Build());
+        }
+        public static Intent GetLauncherActivity()
+        {
+            var packageName = Application.Context.PackageName;
+            return Application.Context.PackageManager.GetLaunchIntentForPackage(packageName);
+        }
+
+
+
+
+
+
+
+
+
         static bool hidden = false;
         static int baseShow = 0;
 
@@ -301,6 +393,16 @@ namespace CloudStreamForms.Droid
             }*/
         }
 
+        static readonly int NOTIFICATION_ID = 1000;
+        static readonly string CHANNEL_ID = "location_notification";
+        internal static readonly string COUNT_KEY = "count";
+        public void Test()
+        {
+
+            Show("Test", "test");
+            print("HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH");
+
+        }
 
         static Java.Lang.Thread downloadThread;
         public static void DownloadFromLink(string url, string title, string toast = "", string ending = "", bool openFile = false, string descripts = "")
@@ -324,6 +426,7 @@ namespace CloudStreamForms.Droid
             manager = (DownloadManager)MainActivity.activity.GetSystemService(Context.DownloadService);
 
             long downloadId = manager.Enqueue(request);
+
 
 
 

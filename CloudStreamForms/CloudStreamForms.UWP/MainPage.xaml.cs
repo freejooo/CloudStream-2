@@ -334,6 +334,10 @@ namespace CloudStreamForms.UWP
         public void NormalOrientation()
         {
         }
+
+        public void Test()
+        { 
+        }
     }
 
     public static class Message

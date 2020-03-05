@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+xmlns:app="http://schemas.android.com/apk/res-auto"
+android:layout_width="match_parent"
+android:layout_height="140dp">
+  <!--
+  <ImageView
+      android:id="@+id/notifAddDriverIcon"
+      android:layout_width="40dp"
+      android:layout_height="40dp"
+      android:layout_alignParentStart="true"
+      android:layout_alignParentTop="true"
+      android:layout_marginStart="12dp"
+      android:layout_marginTop="12dp"
+      app:srcCompat="@drawable/my_trips_new" />-->
+
+  <TextView
+      android:id="@+id/notifAddDriverTitle"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_alignTop="@+id/notifAddDriverIcon"
+      android:layout_marginStart="21dp"
+      android:layout_toEndOf="@+id/notifAddDriverIcon"
+      android:text="Need to update driver details"
+      android:textSize="18sp" />
+
+  <TextView
+      android:id="@+id/notifAddDriverSubtitle"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_alignStart="@+id/notifAddDriverTitle"
+      android:layout_below="@+id/notifAddDriverTitle"
+      android:layout_marginTop="6dp"
+      android:text="From one place to another\n in sunday 05.02.2017 at 09:00" />
+
+  <!--<View-->
+  <!--android:id="@+id/separator"-->
+  <!--android:layout_width="match_parent"-->
+  <!--android:layout_height="2dp"-->
+  <!--android:layout_alignStart="@+id/notifAddDriverSubtitle"-->
+  <!--android:layout_below="@+id/notifAddDriverSubtitle"-->
+  <!--android:layout_marginStart="12dp"-->
+  <!--android:layout_marginTop="19dp"-->
+  <!--android:background="@color/chat_view_call_stroke" />-->
+
+  <RelativeLayout
+      android:id="@+id/notifAddDriverButton"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+
+      android:orientation="horizontal"
+      android:layout_below="@+id/notifAddDriverSubtitle"
+      android:layout_centerHorizontal="true">
+
+    <TextView
+        android:id="@+id/notifAddDriverText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_marginStart="17dp"
+        android:layout_toEndOf="@+id/imageView4"
+        android:layout_weight="1"
+        android:text="update details"
+        android:textSize="18sp" />
+    <!--
+    <ImageView
+        android:id="@+id/imageView4"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_centerVertical="true"
+        android:layout_weight="1"
+        app:srcCompat="@drawable/ic_reply" />
+        -->
+  </RelativeLayout>
+</RelativeLayout>
