@@ -38,8 +38,11 @@ namespace CloudStreamForms
             void ShowStatusBar();
             void UpdateStatusBar();
             void UpdateBackground(int color);
-            void LandscapeOrientation(); 
+            void LandscapeOrientation();
             void NormalOrientation();
+             
+            void SetBrightness(double opacity); 
+            double GetBrightness();
 
             void Test();
         }
@@ -72,6 +75,16 @@ namespace CloudStreamForms
         public static void UpdateStatusBar()
         {
             platformDep.UpdateStatusBar();
+        }
+
+        public static double GetBrightness()
+        {
+            return platformDep.GetBrightness();
+        }
+
+        public static void SetBrightness(double brightness)
+        {
+            platformDep.SetBrightness(brightness);
         }
 
         public static void UpdateBackground(int color = -1)

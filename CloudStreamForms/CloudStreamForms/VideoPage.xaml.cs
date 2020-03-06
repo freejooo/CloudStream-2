@@ -228,8 +228,19 @@ namespace CloudStreamForms
         protected override void OnAppearing()
         {
             base.OnAppearing();
+
+            try { // SETTINGS NOW ALLOWED 
+                BrightnessProcentage = App.GetBrightness() * 100;
+                print("BRIGHTNESS:::" + BrightnessProcentage + "]]]");
+            }
+            catch (Exception) {
+                canChangeBrightness = false;
+            }
+
+            Volyme = 100;
             Hide();
             App.LandscapeOrientation();
+
             /*
             TapRec. += (o, e) => {
                 print("CHANGED:::<<<<<<<<<<<<:");
@@ -298,116 +309,7 @@ namespace CloudStreamForms
         // =========================================================================== LOGIC ====================================================================================================
 
 
-        string _message = string.Empty;
 
-        long _finalTime;
-        bool _timeChanged;
-
-        int _finalVolume;
-        bool _volumeChanged;
-        bool WillOverflow => _finalTime > TimeSpan.MaxValue.TotalMilliseconds || _finalTime < TimeSpan.MinValue.TotalMilliseconds;
-        string FormatSeekingMessage(long timeDiff, long finalTime, Direction direction)
-        {
-            var timeDiffTimeSpan = TimeSpan.FromMilliseconds((double)new decimal(timeDiff));
-            var finalTimeSpan = TimeSpan.FromMilliseconds((double)new decimal(finalTime));
-            var diffSign = direction == Direction.Right ? "+" : "-";
-            return $"Seeking ({direction} swipe): {diffSign}{timeDiffTimeSpan.Minutes}:{Math.Abs(timeDiffTimeSpan.Seconds)} ({finalTimeSpan.Minutes}:{Math.Abs(finalTimeSpan.Seconds)})";
-        }
-
-        string FormatVolumeMessage(int volume, Direction direction) => $"Volume ({direction} swipe): {volume}%";
-
-        int VolumeRangeCheck(int volume)
-        {
-            if (volume < 0)
-                volume = 0;
-            else if (volume > 200)
-                volume = 200;
-            return volume;
-        }
-        public string Message
-        {
-            get => _message;
-            set { Set(nameof(Message), ref _message, value); SeekTxt.Text = value; }
-        }
-        private void Set<T>(string propertyName, ref T field, T value)
-        {
-            if (field == null && value != null || field != null && !field.Equals(value)) {
-                field = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-            }
-        }
-
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        bool visible = false;
-
-        private void PanGestureRecognizer_PanUpdated(object sender, PanUpdatedEventArgs e)
-        {
-            //  float brighness = vvideo.MediaPlayer.AdjustFloat(VideoAdjustOption.Brightness);
-            // print("BRIGHNESS::" + brighness);
-            //vvideo.MediaPlayer.SetAdjustFloat(VideoAdjustOption.Brightness, 0);
-
-            switch (e.StatusType) {
-                case GestureStatus.Running:
-                    if (e.TotalX < 0 && Math.Abs(e.TotalX) > Math.Abs(e.TotalY)) {
-                        var timeDiff = Convert.ToInt64(e.TotalX * 1000);
-                        _finalTime = Player.Time + timeDiff;
-
-                        if (WillOverflow)
-                            break;
-
-                        Message = FormatSeekingMessage(timeDiff, _finalTime, Direction.Left);
-                        _timeChanged = true;
-                    }
-                    else if (e.TotalX > 0 && Math.Abs(e.TotalX) > Math.Abs(e.TotalY)) {
-                        var timeDiff = Convert.ToInt64(e.TotalX * 1000);
-                        _finalTime = Player.Time + timeDiff;
-
-                        if (WillOverflow)
-                            break;
-
-                        Message = FormatSeekingMessage(timeDiff, _finalTime, Direction.Right);
-                        _timeChanged = true;
-                    }
-                    else if (e.TotalY < 0 && Math.Abs(e.TotalY) > Math.Abs(e.TotalX)) {
-                        var volume = (int)(Player.Volume + e.TotalY * -1);
-                        _finalVolume = VolumeRangeCheck(volume);
-
-                        Message = FormatVolumeMessage(_finalVolume, Direction.Top);
-                        _volumeChanged = true;
-                    }
-                    else if (e.TotalY > 0 && e.TotalY > Math.Abs(e.TotalX)) {
-                        var volume = (int)(Player.Volume + e.TotalY * -1);
-                        _finalVolume = VolumeRangeCheck(volume);
-
-                        Message = FormatVolumeMessage(_finalVolume, Direction.Bottom);
-                        _volumeChanged = true;
-                    }
-                    break;
-                case GestureStatus.Started:
-                case GestureStatus.Canceled:
-                    Message = string.Empty;
-                    break;
-                case GestureStatus.Completed:
-                    if (_timeChanged)
-                        Player.Time = _finalTime;
-                    if (_volumeChanged && Player.Volume != _finalVolume)
-                        Player.Volume = _finalVolume;
-
-                    Message = string.Empty;
-                    _timeChanged = false;
-                    _volumeChanged = false;
-                    break;
-            }
-
-        }
-        enum Direction
-        {
-            Left,
-            Right,
-            Top,
-            Bottom
-        }
 
         static bool dragingVideo = false;
         private void VideoSlider_DragStarted(object sender, EventArgs e)
@@ -435,7 +337,7 @@ namespace CloudStreamForms
             if (dragingVideo) {
                 SlideChangedLabel.TranslationX = ((e.NewValue - 0.5)) * (VideoSlider.Width - 30);
 
-            //    var time = TimeSpan.FromMilliseconds(timeChange);
+                //    var time = TimeSpan.FromMilliseconds(timeChange);
 
                 string before = (timeChange > 0 ? "+" : "-") + ConvertTimeToString(Math.Abs(timeChange / 1000)); //+ (int)time.Seconds + "s";
 
@@ -499,9 +401,43 @@ namespace CloudStreamForms
         DateTime lastClick = DateTime.MinValue;
 
         public const int SKIPTIME = 10000;
+        const float minimumDistance = 1;
+        bool isMovingCursor = false;
+        bool isMovingHorozontal = false;
+        bool isMovingFromLeftSide = false;
+        long isMovingStartTime = 0;
+        long isMovingSkipTime = 0;
+
+
+        double _Volyme = 100;
+        double Volyme
+        {
+            set {
+                _Volyme = value; Player.Volume = (int)value;
+            }
+            get { return _Volyme; }
+        }
+
+        int maxVol = 100;
+        bool canChangeBrightness = true;
+        double _BrightnessProcentage = 100;
+        double BrightnessProcentage
+        {
+            set {
+                _BrightnessProcentage = value; /*OverlayBlack.Opacity = 1 - (value / 100.0);*/ App.SetBrightness(value / 100);
+            }
+            get { return _BrightnessProcentage; }
+        }
+        TouchTracking.TouchTrackingPoint cursorPosition;
+        TouchTracking.TouchTrackingPoint startCursorPosition;
+
+
+
 
         private void TouchEffect_TouchAction(object sender, TouchTracking.TouchActionEventArgs args)
         {
+            if (Player.Length == -1) return;
+
             if (args.Type == TouchTracking.TouchActionType.Pressed) {
                 if (DateTime.Now.Subtract(lastClick).TotalSeconds < 0.25) { // Doubble click
                     bool forward = (TapRec.Width / 2.0 < args.Location.X);
@@ -515,6 +451,67 @@ namespace CloudStreamForms
                 }
                 lastClick = DateTime.Now;
             }
+
+            if (args.Type == TouchTracking.TouchActionType.Released) {
+                if (isMovingCursor && isMovingHorozontal && Math.Abs(isMovingSkipTime) > 1000) { // SKIP TIME
+                    SeekMedia(isMovingSkipTime - Player.Time + isMovingStartTime);
+                }
+                SkiptimeLabel.Text = "";
+                isMovingCursor = false;
+            }
+
+            if (args.Type == TouchTracking.TouchActionType.Pressed) {
+                startCursorPosition = args.Location;
+                isMovingFromLeftSide = (TapRec.Width / 2.0 > args.Location.X);
+                isMovingStartTime = Player.Time;
+                isMovingSkipTime = 0;
+                isMovingCursor = false;
+                cursorPosition = args.Location;
+
+                maxVol = Volyme >= 100 ? 200 : 100;
+
+            }
+
+            if (args.Type == TouchTracking.TouchActionType.Moved) {
+                print(startCursorPosition.X - args.Location.X);
+                if ((minimumDistance < Math.Abs(startCursorPosition.X - args.Location.X) || minimumDistance < Math.Abs(startCursorPosition.X - args.Location.X)) && !isMovingCursor) {
+                    // STARTED FIRST TIME
+                    isMovingHorozontal = Math.Abs(startCursorPosition.X - args.Location.X) > Math.Abs(startCursorPosition.Y - args.Location.Y);
+                    isMovingCursor = true;
+                }
+                else if (isMovingCursor) { // DRAGINS SKIPING TIME
+                    if (isMovingHorozontal) {
+                        double diffX = (args.Location.X - startCursorPosition.X) * 2.0 / TapRec.Width;
+                        isMovingSkipTime = (long)((Player.Length * (diffX * diffX) / 10) * (diffX < 0 ? -1 : 1)); // EXPONENTIAL SKIP LIKE VLC
+
+                        if (isMovingSkipTime + isMovingStartTime > Player.Length) { // SKIP TO END
+                            isMovingSkipTime = Player.Length - isMovingStartTime;
+                        }
+                        else if (isMovingSkipTime + isMovingStartTime < 0) { // SKIP TO FRONT
+                            isMovingSkipTime = -isMovingStartTime;
+                        }
+                        SkiptimeLabel.Text = $"{CloudStreamCore.ConvertTimeToString((isMovingStartTime + isMovingSkipTime) / 1000)} [{(isMovingSkipTime > 0 ? "+" : "-")}{CloudStreamCore.ConvertTimeToString(Math.Abs(isMovingSkipTime / 1000))}]";
+                    }
+                    else {
+                        if (isMovingFromLeftSide) {
+                            if (canChangeBrightness) {
+                                BrightnessProcentage -= args.Location.Y - cursorPosition.Y;
+                                BrightnessProcentage = Math.Max(Math.Min(BrightnessProcentage, 100), 0); // CLAM
+                                SkiptimeLabel.Text = $"Brightness {(int)BrightnessProcentage}%";
+                            }
+                        }
+                        else {
+                            Volyme -= args.Location.Y - cursorPosition.Y;
+                            Volyme = Math.Max(Math.Min(Volyme, maxVol), 0); // CLAM
+                            SkiptimeLabel.Text = $"Volyme {(int)Volyme}%";
+                        }
+                    }
+
+                    cursorPosition = args.Location;
+
+                }
+            }
+
             print("LEFT TIGHT " + (TapRec.Width / 2.0 < args.Location.X) + TapRec.Width + "|" + TapRec.X);
             print("TOUCHED::D:A::A" + args.Location.X + "|" + args.Type.ToString());
         }

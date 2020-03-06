@@ -78,8 +78,7 @@ namespace CloudStreamForms.Droid
                 }
             }
             RequestPermission(this);
-
-            mainDroid.Test();
+            //mainDroid.Test();
             /*
             MessagingCenter.Subscribe<VideoPage>(this, "allowLandScapePortrait", sender =>
             {
@@ -101,29 +100,26 @@ namespace CloudStreamForms.Droid
             base.OnRequestPermissionsResult(requestCode, permissions, grantResults);
         }
 
-        public static int REQUEST_WRITE_STORAGE = 112;
+        public static int REQUEST_START = 112;
         public static int REQUEST_INSTALL = 113;
         public static int REQUEST_INSTALL2 = 113;
+        public static int REQUEST_INSTALL3 = 114;
         private static void RequestPermission(Activity context)
         {
-            bool hasPermission = (ContextCompat.CheckSelfPermission(context, Manifest.Permission.WriteExternalStorage) == Permission.Granted);
-            if (!hasPermission) {
-                ActivityCompat.RequestPermissions(context,
-                   new string[] { Manifest.Permission.WriteExternalStorage },
-                 REQUEST_WRITE_STORAGE);
+
+            List<string> requests = new List<string>() {
+                Manifest.Permission.WriteExternalStorage, Manifest.Permission.RequestInstallPackages,Manifest.Permission.InstallPackages,Manifest.Permission.WriteSettings
+            };
+
+            for (int i = 0; i < requests.Count; i++) {
+                bool hasPermission = (ContextCompat.CheckSelfPermission(context, requests[i]) == Permission.Granted);
+                if (!hasPermission) {
+                    ActivityCompat.RequestPermissions(context,
+                       new string[] { requests[i] },
+                     REQUEST_START + i);
+                }
             }
-            bool hasPermission2 = (ContextCompat.CheckSelfPermission(context, Manifest.Permission.RequestInstallPackages) == Permission.Granted);
-            if (!hasPermission2) {
-                ActivityCompat.RequestPermissions(context,
-                   new string[] { Manifest.Permission.RequestInstallPackages },
-                 REQUEST_INSTALL);
-            }
-            bool hasPermission3 = (ContextCompat.CheckSelfPermission(context, Manifest.Permission.InstallPackages) == Permission.Granted);
-            if (!hasPermission3) {
-                ActivityCompat.RequestPermissions(context,
-                   new string[] { Manifest.Permission.InstallPackages },
-                 REQUEST_INSTALL2);
-            }
+
         }
     }
 
@@ -132,6 +128,16 @@ namespace CloudStreamForms.Droid
 
     public class MainDroid : App.IPlatformDep
     {
+        public void SetBrightness(double opacity)
+        {
+            Android.Provider.Settings.System.PutInt(MainActivity.activity.ContentResolver, Android.Provider.Settings.System.ScreenBrightness, (int)(opacity * 255));
+        }
+
+        public double GetBrightness()
+        {
+            return Android.Provider.Settings.System.GetInt(MainActivity.activity.ContentResolver, Android.Provider.Settings.System.ScreenBrightness) / 255.0;
+        }
+
 
         // FROM https://github.com/edsnider/localnotificationsplugin/blob/master/src/Plugin.LocalNotifications.Android/LocalNotificationsImplementation.cs
 

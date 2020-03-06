@@ -336,7 +336,16 @@ namespace CloudStreamForms.UWP
         }
 
         public void Test()
-        { 
+        {
+        }
+
+        public void SetBrightness(double opacity)
+        {
+        }
+
+        public double GetBrightness()
+        {
+            return 1;
         }
     }
 
