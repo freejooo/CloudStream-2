@@ -240,14 +240,26 @@ namespace CloudStreamForms.Droid
 
         public void UpdateStatusBar()
         {
-            Window window = MainActivity.activity.Window;
-
+            // Window window = MainActivity.activity.Window;
+            ToggleFullscreen(!Settings.HasStatusBar);
+            /*
             if (!Settings.HasStatusBar) {
                 print("REMOVE STATUS BAR::::");
                 window.AddFlags(WindowManagerFlags.Fullscreen); // REMOVES STATUS BAR
             }
             else {
                 window.ClearFlags(WindowManagerFlags.Fullscreen); // ADD STATUS BAR
+            }*/
+        }
+
+        public void ToggleFullscreen(bool fullscreen)
+        {
+            Window window = MainActivity.activity.Window;
+            if (fullscreen) {
+                window.AddFlags(WindowManagerFlags.Fullscreen); // REMOVES STATUS BAR
+            }
+            else {
+                window.ClearFlags(WindowManagerFlags.Fullscreen);
             }
         }
 
@@ -269,6 +281,8 @@ namespace CloudStreamForms.Droid
             Window window = MainActivity.activity.Window;
             window.ClearFlags(WindowManagerFlags.TurnScreenOn);
             window.ClearFlags(WindowManagerFlags.KeepScreenOn);
+            //ToggleFullscreen(!Settings.HasStatusBar);
+            
             if (Settings.HasStatusBar) {
                 window.ClearFlags(WindowManagerFlags.Fullscreen);
             }
@@ -285,6 +299,7 @@ namespace CloudStreamForms.Droid
             Window window = MainActivity.activity.Window;
             window.AddFlags(WindowManagerFlags.TurnScreenOn);
             window.AddFlags(WindowManagerFlags.KeepScreenOn);
+            
             if (Settings.HasStatusBar) {
                 window.AddFlags(WindowManagerFlags.Fullscreen);
             }

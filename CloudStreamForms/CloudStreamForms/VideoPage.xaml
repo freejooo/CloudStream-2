@@ -38,7 +38,7 @@
 
                     </xe:BorderView>
                     <!--  <Button Clicked="PausePlayBtt_Clicked" VerticalOptions="Center" WidthRequest="100" HeightRequest="100" CornerRadius="50" HorizontalOptions="Center" BackgroundColor="White" Opacity="0"></Button>-->
-                    <ff:CachedImage x:Name="PausePlayBtt" VerticalOptions="Center" WidthRequest="60" HeightRequest="60" HorizontalOptions="Center" BackgroundColor="Transparent" InputTransparent="True">
+                    <ff:CachedImage x:Name="PausePlayBtt" VerticalOptions="Center" WidthRequest="70" HeightRequest="70" HorizontalOptions="Center" BackgroundColor="Transparent" InputTransparent="True">
 
                     </ff:CachedImage>
 
@@ -49,8 +49,11 @@
                     <Image x:Name="SkipForwardImg"   VerticalOptions="Center" HorizontalOptions="Center" TranslationX="170" AbsoluteLayout.LayoutFlags="All" WidthRequest="50" HeightRequest="50" />
                     <xe:BorderView  x:Name="SkipForwardBtt" xe:TouchEffect.Color="White"  TranslationX="100" Opacity="0.6" VerticalOptions="Center" WidthRequest="34" HeightRequest="34" CornerRadius="17" HorizontalOptions="Center" BackgroundColor="Transparent">
                     </xe:BorderView>
-
-
+                    <ff:CachedImage x:Name="BacktoMain" HorizontalOptions="Start" VerticalOptions="Start" TranslationX="8" TranslationY="8" InputTransparent="True"></ff:CachedImage>
+                    <xe:BorderView  x:Name="GoBackBtt" xe:TouchEffect.Color="White"  VerticalOptions="Start" TranslationX="8" TranslationY="7" Opacity="0.6" WidthRequest="34" HeightRequest="34" CornerRadius="17" Scale="1.5" HorizontalOptions="Start" BackgroundColor="Transparent">
+                    </xe:BorderView>
+                    
+                    
                     <Label x:Name="SkipBack" Text="-10" IsVisible="False" VerticalOptions="Center" HorizontalOptions="Center" TranslationX="-170" AbsoluteLayout.LayoutFlags="All" FontSize="24" TextColor="White" />
                     <Label x:Name="SkipBackSmall" Text="10" VerticalOptions="Center" HorizontalOptions="Center" TranslationX="-170" AbsoluteLayout.LayoutFlags="All" FontSize="20" TextColor="White" />
                     <Image x:Name="SkipBackImg"   VerticalOptions="Center" HorizontalOptions="Center" TranslationX="-170" AbsoluteLayout.LayoutFlags="All" WidthRequest="50" HeightRequest="50" />
@@ -58,7 +61,7 @@
                     </xe:BorderView>
 
                     <Label x:Name="BufferLabel" Text="50%" TextColor="White" FontSize="14" VerticalOptions="Center" HorizontalOptions="Center"></Label>
-                    <Label x:Name="SkiptimeLabel" Text="" TextColor="White" FontSize="25" VerticalOptions="Center" HorizontalOptions="Center" TranslationY="-40"></Label>
+                    <Label x:Name="SkiptimeLabel" Text="" TextColor="White" FontSize="25" VerticalOptions="Center" HorizontalOptions="Center" TranslationY="-60"></Label>
                     <Label x:Name="EpisodeLabel"  Text="S12:E3 Iron Man" VerticalOptions="Start" HorizontalOptions="Center" FontSize="14" TextColor="#e7e7e7" TranslationY="20"></Label>
                     <!--  <Grid x:Name="VideoSettings" VerticalOptions="Start" HorizontalOptions="End" TranslationY="20" ColumnSpacing="20" Scale="0.7">
                 <Grid.ColumnDefinitions >

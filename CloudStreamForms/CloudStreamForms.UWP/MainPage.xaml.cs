@@ -347,6 +347,11 @@ namespace CloudStreamForms.UWP
         {
             return 1;
         }
+
+        public void ToggleFullscreen(bool fullscreen)
+        {
+
+        }
     }
 
     public static class Message

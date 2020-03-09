@@ -40,7 +40,9 @@ namespace CloudStreamForms
             void UpdateBackground(int color);
             void LandscapeOrientation();
             void NormalOrientation();
-             
+
+            void ToggleFullscreen(bool fullscreen);
+
             void SetBrightness(double opacity); 
             double GetBrightness();
 
@@ -75,6 +77,11 @@ namespace CloudStreamForms
         public static void UpdateStatusBar()
         {
             platformDep.UpdateStatusBar();
+        }
+
+        public static void ToggleFullscreen(bool fullscreen)
+        {
+            platformDep.ToggleFullscreen(fullscreen);
         }
 
         public static double GetBrightness()

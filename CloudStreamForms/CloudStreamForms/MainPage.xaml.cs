@@ -40,8 +40,8 @@ namespace CloudStreamForms
         public const string LIGHT_DARK_BLUE_COLOR = "#1976D2";
 
         public const bool IS_EMTY_BUILD = false;
-        public const bool IS_TEST_VIDEO = false;
-
+        public const bool IS_TEST_VIDEO = true;
+         
         public static string intentData = "";
         public static MainPage mainPage;
 

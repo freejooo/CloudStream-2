@@ -17,8 +17,8 @@ namespace CloudStreamForms
     public partial class VideoPage : ContentPage
     {
 
-        const string PLAY_IMAGE = "baseline_play_arrow_white_48dp.png";
-        const string PAUSE_IMAGE = "baseline_pause_white_48dp.png";
+        const string PLAY_IMAGE = "netflixPlay.png";//"baseline_play_arrow_white_48dp.png";
+        const string PAUSE_IMAGE = "pausePlay.png";//"baseline_pause_white_48dp.png";
 
         MediaPlayer Player { get { return vvideo.MediaPlayer; } set { vvideo.MediaPlayer = value; } }
 
@@ -152,6 +152,7 @@ namespace CloudStreamForms
             MirrosImg.Source = App.GetImageSource("baseline_playlist_play_white_48dp.png");
             EpisodesImg.Source = App.GetImageSource("netflixEpisodesCut.png");
             NextImg.Source = App.GetImageSource("baseline_skip_next_white_48dp.png");
+            BacktoMain.Source = App.GetImageSource("baseline_keyboard_arrow_left_white_48dp.png");
 
             //  GradientBottom.Source = App.GetImageSource("gradient.png");
             // DownloadImg.Source = App.GetImageSource("netflixEpisodesCut.png");//App.GetImageSource("round_more_vert_white_48dp.png");
@@ -173,6 +174,13 @@ namespace CloudStreamForms
                 PausePlayBtt_Clicked(null, EventArgs.Empty);
                 print("Hello");
             }));
+            Commands.SetTap(GoBackBtt, new Command(() => {
+                print("DAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAdddddddddddAAAAAAAA");
+                Navigation.PopModalAsync();
+            }));
+
+
+
 
             void SetIsPaused(bool paused)
             {
@@ -240,7 +248,7 @@ namespace CloudStreamForms
             Volyme = 100;
             Hide();
             App.LandscapeOrientation();
-
+            App.ToggleFullscreen(true);
             /*
             TapRec. += (o, e) => {
                 print("CHANGED:::<<<<<<<<<<<<:");
@@ -285,6 +293,8 @@ namespace CloudStreamForms
         {
             App.ShowStatusBar();
             App.NormalOrientation();
+            App.ToggleFullscreen(!Settings.HasStatusBar);
+
             Player.Stop();
             Player.Dispose();
             base.OnDisappearing();
@@ -328,6 +338,7 @@ namespace CloudStreamForms
             dragingVideo = false;
             SlideChangedLabel.IsVisible = false;
             SlideChangedLabel.Text = "";
+            SkiptimeLabel.Text = "";
         }
 
         private void VideoSlider_ValueChanged(object sender, ValueChangedEventArgs e)
@@ -341,6 +352,7 @@ namespace CloudStreamForms
 
                 string before = (timeChange > 0 ? "+" : "-") + ConvertTimeToString(Math.Abs(timeChange / 1000)); //+ (int)time.Seconds + "s";
 
+                SkiptimeLabel.Text = $"[{ConvertTimeToString(VideoSlider.Value * Player.Length / 1000)}]";
                 SlideChangedLabel.Text = before;//CloudStreamCore.ConvertTimeToString((timeChange / 1000.0));
             }
         }
