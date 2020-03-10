@@ -4,10 +4,12 @@ using Android.App;
 using Android.Content;
 using Android.Content.PM;
 using Android.Graphics;
+using Android.Media.Session;
 using Android.OS;
 using Android.Runtime;
 using Android.Support.V4.App;
 using Android.Support.V4.Content;
+using Android.Support.V7.App;
 using Android.Views;
 using Android.Widget;
 using Java.IO;
@@ -24,10 +26,25 @@ using System.Threading.Tasks;
 using Xamarin.Forms;
 using static CloudStreamForms.App;
 using static CloudStreamForms.CloudStreamCore;
+using static CloudStreamForms.Droid.MainActivity;
 using Application = Android.App.Application;
 
 namespace CloudStreamForms.Droid
 {
+    [Service]
+    public class DemoIntentService : IntentService
+    {
+        public DemoIntentService() : base("DemoIntentService")
+        {
+        }
+
+        protected override void OnHandleIntent(Android.Content.Intent intent)
+        {
+            print("perform some long running work");
+            System.Console.WriteLine("work complete");
+        }
+    }
+
     [Activity(Label = "CloudStream 2", Icon = "@drawable/bicon", Theme = "@style/MainTheme.Splash", MainLauncher = true, LaunchMode = LaunchMode.SingleTop, ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation), IntentFilter(new[] { Intent.ActionView }, DataScheme = "cloudstreamforms", Categories = new[] { Intent.CategoryDefault, Intent.CategoryBrowsable })]
     public class MainActivity : global::Xamarin.Forms.Platform.Android.FormsAppCompatActivity
     {
@@ -56,11 +73,11 @@ namespace CloudStreamForms.Droid
             base.OnNewIntent(intent);
         }
 
-
         protected override void OnCreate(Bundle savedInstanceState)
         {
 
             print("ON CREATED:::::!!!!!!!!!");
+
 
 
             TabLayoutResource = Resource.Layout.Tabbar;
@@ -124,7 +141,6 @@ namespace CloudStreamForms.Droid
                 RequestedOrientation = ScreenOrientation.Portrait;
             });*/
             // Window.DecorView.SetBackgroundResource(Resource.Drawable.splash_background_remove);//Resources.GetDrawable(Resource.Drawable.splash_background_remove);
-
         }
 
 
@@ -198,25 +214,29 @@ namespace CloudStreamForms.Droid
             }
         }
 
-        private Bitmap GetImageBitmapFromUrl(string url)
+        private async Task<Bitmap> GetImageBitmapFromUrl(string url)
         {
-            Bitmap imageBitmap = null;
+            try {
+                Bitmap imageBitmap = null;
 
-            using (var webClient = new WebClient()) {
-                var imageBytes = webClient.DownloadData(url);
-                if (imageBytes != null && imageBytes.Length > 0) {
-                    imageBitmap = BitmapFactory.DecodeByteArray(imageBytes, 0, imageBytes.Length);
+                using (var webClient = new WebClient()) {
+                    var imageBytes = await webClient.DownloadDataTaskAsync(url);
+                    if (imageBytes != null && imageBytes.Length > 0) {
+                        imageBitmap = BitmapFactory.DecodeByteArray(imageBytes, 0, imageBytes.Length);
+                    }
                 }
+
+                return imageBitmap;
+            }
+            catch (Exception) {
+                return null;
             }
 
-            return imageBitmap;
         }
 
 
-
-        public void ShowNotIntent(string title, string body, int id, string titleId, string titleName, DateTime? time = null, string bigIconUrl = "")
+        private async void ShowNotIntentAsync(string title, string body, int id, string titleId, string titleName, DateTime? time = null, string bigIconUrl = "")
         {
-            print("BIGICON:::" + bigIconUrl);
             var builder = new Notification.Builder(Application.Context);
             builder.SetContentTitle(title);
             builder.SetContentText(body);
@@ -236,7 +256,7 @@ namespace CloudStreamForms.Droid
                 var context = MainActivity.activity.ApplicationContext;
                 if (bigIconUrl != "") {
                     print("BIGBIG::" + bigIconUrl);
-                    var bitmap = GetImageBitmapFromUrl(bigIconUrl);
+                    var bitmap = await GetImageBitmapFromUrl(bigIconUrl);
                     if (bitmap != null) {
                         builder.SetLargeIcon(bitmap);
                         builder.SetStyle(new Notification.MediaStyle()); // NICER IMAGE
@@ -269,6 +289,12 @@ namespace CloudStreamForms.Droid
         }
 
 
+        public void ShowNotIntent(string title, string body, int id, string titleId, string titleName, DateTime? time = null, string bigIconUrl = "")
+        {
+            ShowNotIntentAsync(title, body, id, titleId, titleName, time, bigIconUrl);
+        }
+
+
 
         /// <summary>
         /// Show a local notification
@@ -276,7 +302,7 @@ namespace CloudStreamForms.Droid
         /// <param name="title">Title of the notification</param>
         /// <param name="body">Body or description of the notification</param>
         /// <param name="id">Id of the notification</param>
-        public void Show(string title, string body, int id = 0)
+        public async void Show(string title, string body, int id = 0)
         {
             var builder = new Notification.Builder(Application.Context);
             builder.SetContentTitle(title);
@@ -295,7 +321,42 @@ namespace CloudStreamForms.Droid
                 _manager.CreateNotificationChannel(channel);
 
                 builder.SetChannelId(channelId);
+                //https://m.media-amazon.com/images/M/MV5BMTczNTI2ODUwOF5BMl5BanBnXkFtZTcwMTU0NTIzMw@@._V1_UX182_CR0,0,182,268_AL_.jpg
+                var bitmap = await GetImageBitmapFromUrl("https://m.media-amazon.com/images/M/MV5BMTczNTI2ODUwOF5BMl5BanBnXkFtZTcwMTU0NTIzMw@@._V1_UX182_CR0,0,182,268_AL_.jpg");
+                if (bitmap != null) {
+                    builder.SetLargeIcon(bitmap);
+                }
+                var context = MainActivity.activity.ApplicationContext;
 
+
+                MediaSession mediaSession = new MediaSession(context, "tag");
+
+                builder.SetStyle(new Notification.MediaStyle().SetMediaSession(mediaSession.SessionToken).SetShowActionsInCompactView(0)); // NICER IMAGE
+
+
+                // mediaSession.SetPlaybackState(PlaybackState.)
+
+
+
+                var _resultIntent = new Intent(context, typeof(DemoIntentService));
+                // _resultIntent.SetAction("com.CloudStreamForms.CloudStreamForms.pause");
+                // _resultIntent.AddFlags(ActivityFlags.IncludeStoppedPackages);
+                //    _resultIntent.PutExtra("data", "yeet");
+                // _resultIntent.AddFlags(ActivityFlags.ReceiverForeground);
+
+                //PendingIntent.GetActivity
+                //GetBroadcast
+                //GetService
+                var pending = PendingIntent.GetService(context, 0,
+                 _resultIntent,
+                //PendingIntentFlags.CancelCurrent
+                PendingIntentFlags.UpdateCurrent
+                 );
+
+
+                builder.SetActions(new Notification.Action(Resource.Drawable.round_close_white_48, "Hello1", pending));
+                //builder.SetColorized(true);
+                //  builder.SetColor(Resource.Color.colorPrimary);
                 /*
                 var context = MainActivity.activity.ApplicationContext;
                 var _resultIntent = new Intent(context, typeof(MainActivity));
