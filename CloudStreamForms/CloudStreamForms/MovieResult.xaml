@@ -243,8 +243,9 @@ xmlns:ffTransformations="clr-namespace:FFImageLoading.Transformations;assembly=F
 
                         <Button x:Name="DubBtt" Grid.Column="1" InputTransparent="False" BackgroundColor="#333333" Text="Dub" TextColor="#e7e7e7" FontAttributes="Bold" FontSize="Body" CornerRadius="5" HeightRequest="37" WidthRequest="60" ></Button>
                         <Button x:Name="FromToBtt" Grid.Column="2" InputTransparent="False" IsVisible="False" IsEnabled="False" BackgroundColor="#333333" Text="Test" TextColor="#e7e7e7" FontAttributes="Bold" FontSize="Body" CornerRadius="5" HeightRequest="37" WidthRequest="80" ></Button>
-                        <Label x:Name="NotificationTime" Grid.Column="3" VerticalOptions="Center" HorizontalOptions="End" Margin="10,0"></Label>
-
+                        <ff:CachedImage x:Name="NotificationImg" Grid.Column="3" VerticalOptions="Center" HorizontalOptions="End" ></ff:CachedImage>
+                        <xe:BorderView x:Name="NotificationBtt" IsEnabled="False" xe:TouchEffect.Color="White"  Opacity="0.4" Grid.Column="3" TranslationX="2.5" WidthRequest="36" HeightRequest="36" CornerRadius="18"  VerticalOptions="Center" HorizontalOptions="End"></xe:BorderView>
+                        <Label x:Name="NotificationTime" Grid.Column="4" VerticalOptions="Center" HorizontalOptions="End" Margin="10,0"></Label>
                         <!--   <Picker x:Name="DubPicker" IsVisible="False" VerticalOptions="Center" HorizontalOptions="Start"  FontAttributes="Bold" FontSize="Body" TextColor="Transparent" TranslationX="13"></Picker> -->
                         <!-- </StackLayout>-->
 

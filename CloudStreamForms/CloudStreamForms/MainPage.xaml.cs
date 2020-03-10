@@ -40,8 +40,8 @@ namespace CloudStreamForms
         public const string LIGHT_DARK_BLUE_COLOR = "#1976D2";
 
         public const bool IS_EMTY_BUILD = false;
-        public const bool IS_TEST_VIDEO = true;
-         
+        public const bool IS_TEST_VIDEO = false;
+
         public static string intentData = "";
         public static MainPage mainPage;
 
@@ -97,7 +97,7 @@ namespace CloudStreamForms
         protected override void OnAppearing()
         {
             base.OnAppearing();
-            //App.Test();
+            App.Test();
         }
 
         public MainPage()
@@ -141,6 +141,7 @@ namespace CloudStreamForms
             //  PushPageFromUrlAndName("tt10885406", "Ascendance of a Bookworm");
             // PushPageFromUrlAndName("tt9054364", "That Time I Got Reincarnated as a Slime");
             //PushPageFromUrlAndName("tt0371746", "Iron Man");
+            PushPageFromUrlAndName("tt10954274", "ID: Invaded");
         }
 
 
@@ -1121,6 +1122,9 @@ namespace CloudStreamForms
             public DateTime timeOfRelease;
             public DateTime timeOfMesure;
             public TimeSpan DiffTime { get { return timeOfRelease.Subtract(timeOfMesure); } }
+
+            public string episodeName;
+            public int number;
         }
 
 
@@ -2090,8 +2094,9 @@ namespace CloudStreamForms
         {
             public void FishMainLink(string year, TempThred tempThred, MALData malData)
             {
-                string result = DownloadString("https://animeflix.io/api/search?q=" + malData.firstName);//activeMovie.title.name);
+                string result = DownloadString("https://animeflix.io/api/search?q=" + malData.firstName, waitTime: 400, repeats: 1);//activeMovie.title.name);
                 print("FLIX::::" + result);
+                if (result == "") return;
                 if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
                 var res = JsonConvert.DeserializeObject<AnimeFlixQuickSearch>(result);
                 var data = res.data;
@@ -2145,7 +2150,7 @@ namespace CloudStreamForms
                                             hasDub = true;
                                         }
                                         print("ADDED EP::: " + _data.id + "|" + subEx + "|" + dubEx + "|");
-                                        animeFlixEpisodes[int.Parse(_data.episode_num)-1] = new AnimeFlixEpisode() { id = _data.id, dubExists = dubEx, subExists = subEx };
+                                        animeFlixEpisodes[int.Parse(_data.episode_num) - 1] = new AnimeFlixEpisode() { id = _data.id, dubExists = dubEx, subExists = subEx };
                                     }
 
                                     AnimeFlixData flixData = new AnimeFlixData() {
@@ -4107,6 +4112,30 @@ namespace CloudStreamForms
             tempThred.Thread.Start();
         }
 
+        public struct AnimeNotTitle
+        {
+            public string romaji { get; set; }
+            public string english { get; set; }
+            public string japanese { get; set; }
+        }
+
+        public struct AiringDate
+        {
+            public DateTime start { get; set; }
+            public DateTime end { get; set; }
+        }
+
+
+        public struct AnimeNotEpisode
+        {
+            public string animeId { get; set; }
+            public int number { get; set; }
+            public AnimeNotTitle title { get; set; }
+            public AiringDate airingDate { get; set; }
+            public string id { get; set; }
+        }
+
+
         static void FishMALNotification()
         {
             TempThred tempThred = new TempThred();
@@ -4148,18 +4177,36 @@ namespace CloudStreamForms
                             activeMovie.moeEpisodes = new List<MoeEpisode>();
                             // if (ToLowerAndReplace(api.title.English) == ToLowerAndReplace(season[season.Count - 1].engName)) {
                             if (api.episodes != null) {
-                                for (int i = 0; i < api.episodes.Length; i++) {
+                                for (int i = api.episodes.Length - 1; i > 0; i--) {
                                     //https://notify.moe/api/episode/
                                     //https://notify.moe/api/episode/r0Zy9WEZRV
                                     //https://notify.moe/api/episode/xGNheCEZgM
                                     // print(api.title.English + "|NO." + (i + 1) + " - " + api.episodes[i]);
 
+
+
+
                                     print("MOE API::" + i + "|" + uri);
                                     string __d = DownloadString("https://notify.moe/api/episode/" + api.episodes[i]);
+
+
+
+                                    var _seasonData = JsonConvert.DeserializeObject<AnimeNotEpisode>(__d);
                                     string end = FindHTML(__d, "\"end\":\"", "\"");
 
                                     //https://twist.moe/api/anime/angel-beats/sources
-
+                                    /*
+                                    string name = _seasonData.title.english ?? "";
+                                    if (name == "") {
+                                        name = _seasonData.title.japanese ?? "";
+                                    }
+                                    if (name == "") {
+                                        name = _seasonData.title.romaji ?? "";
+                                    }
+                                    if (name == "") {
+                                        name = "Episode " + _seasonData.number;
+                                    }*/
+                                    string name = "Episode " + _seasonData.number;
 
                                     var time = DateTime.Parse(end);
                                     var _t = time.Subtract(DateTime.Now);
@@ -4167,8 +4214,8 @@ namespace CloudStreamForms
                                     if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
                                     if (activeMovie.moeEpisodes == null) return;
                                     print("DADAAA::::::");
-                                    activeMovie.moeEpisodes.Add(new MoeEpisode() { timeOfRelease = time, timeOfMesure = DateTime.Now });
-                                    if (_t.TotalSeconds > 0) break;
+                                    if (_t.TotalSeconds < 0) break;
+                                    activeMovie.moeEpisodes.Add(new MoeEpisode() { timeOfRelease = time, timeOfMesure = DateTime.Now, number = _seasonData.number, episodeName = name });
 
                                     //print("TotalDays:" + _t.Days + "|" + _t.Hours + "|" + _t.Minutes);
                                 }
@@ -5530,25 +5577,8 @@ namespace CloudStreamForms
                 return "";
             }
         }
-        /*
-        static string ReadJson(string all, string inp)
-        {
-            try {
-                int indexInp = all.IndexOf(inp);
-                if (indexInp == -1) {
-                    return "";
-                }
-                string newS = all.Substring(indexInp + (inp.Length + 3), all.Length - indexInp - (inp.Length + 3));
 
-                string ns = newS.Substring(0, newS.IndexOf("\""));
 
-                return ns;
-            }
-            catch (Exception) {
-                return "";
-            }
-        }
-        */
         public static bool AddPotentialLink(int normalEpisode, string _url, string _name, int _priority)
         {
             if (activeMovie.episodes == null) return false;

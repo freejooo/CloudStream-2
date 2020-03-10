@@ -352,6 +352,16 @@ namespace CloudStreamForms.UWP
         {
 
         }
+
+        public void ShowNotIntent(string title, string body, int id, string titleId, string titleName, DateTime? time = null, string bigIconUrl = "")
+        {
+            if (time == null) {
+                _App.ShowNotification(title, body);
+            }
+            else {
+                _App.ShowNotification(title, body, id, (DateTime)time);
+            }
+        }
     }
 
     public static class Message

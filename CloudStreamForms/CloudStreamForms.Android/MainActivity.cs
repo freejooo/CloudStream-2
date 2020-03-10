@@ -3,12 +3,15 @@ using Android;
 using Android.App;
 using Android.Content;
 using Android.Content.PM;
+using Android.Graphics;
 using Android.OS;
 using Android.Runtime;
 using Android.Support.V4.App;
 using Android.Support.V4.Content;
 using Android.Views;
 using Android.Widget;
+using Java.IO;
+using Java.Net;
 using LibVLCSharp.Forms.Shared;
 using Plugin.LocalNotifications;
 using System;
@@ -31,8 +34,35 @@ namespace CloudStreamForms.Droid
         MainDroid mainDroid;
         public static Activity activity;
 
+        protected override void OnNewIntent(Intent intent)
+        {
+            //App.ShowToast("ON NEW INTENT");
+            //print("DA:::.2132131");
+            if (intent.DataString != null) {
+
+                print("INTENTNADADA:::" + intent.DataString);
+            }
+            Bundle extras = intent.Extras;
+            if (extras != null) {
+                print("DADADA:D:A:D:AD:A:D:A:D:A222");
+                if (extras.ContainsKey("data")) {
+                    print("DADADA:D:A:D:AD:A:D:A:D:A2233332");
+                    // extract the extra-data in the Notification
+                    string msg = extras.GetString("data");
+                    print("DADADA:D:A:D:AD:A:D:A:D:A" + msg);
+                }
+            }
+
+            base.OnNewIntent(intent);
+        }
+
+
         protected override void OnCreate(Bundle savedInstanceState)
         {
+
+            print("ON CREATED:::::!!!!!!!!!");
+
+
             TabLayoutResource = Resource.Layout.Tabbar;
             ToolbarResource = Resource.Layout.Toolbar;
 
@@ -73,11 +103,16 @@ namespace CloudStreamForms.Droid
             mainDroid.Awake();
 
             if (Intent.DataString != null) {
+                print("GOT NON NULL DATA");
                 if (Intent.DataString != "") {
+                    print("INTENTDATA::::" + Intent.DataString);
                     MainPage.PushPageFromUrlAndName(Intent.DataString);
                 }
             }
             RequestPermission(this);
+
+            //App.ShowToast("ON CREATE");
+
             //mainDroid.Test();
             /*
             MessagingCenter.Subscribe<VideoPage>(this, "allowLandScapePortrait", sender =>
@@ -149,6 +184,92 @@ namespace CloudStreamForms.Droid
         static string _packageName => Application.Context.PackageName;
         static NotificationManager _manager => (NotificationManager)Application.Context.GetSystemService(Context.NotificationService);
 
+
+
+        int LocalNotificationIconId
+        {
+            get {
+                if (NotificationIconId != 0) {
+                    return NotificationIconId;
+                }
+                else {
+                    return Resource.Drawable.plugin_lc_smallicon;
+                }
+            }
+        }
+
+        private Bitmap GetImageBitmapFromUrl(string url)
+        {
+            Bitmap imageBitmap = null;
+
+            using (var webClient = new WebClient()) {
+                var imageBytes = webClient.DownloadData(url);
+                if (imageBytes != null && imageBytes.Length > 0) {
+                    imageBitmap = BitmapFactory.DecodeByteArray(imageBytes, 0, imageBytes.Length);
+                }
+            }
+
+            return imageBitmap;
+        }
+
+
+
+        public void ShowNotIntent(string title, string body, int id, string titleId, string titleName, DateTime? time = null, string bigIconUrl = "")
+        {
+            print("BIGICON:::" + bigIconUrl);
+            var builder = new Notification.Builder(Application.Context);
+            builder.SetContentTitle(title);
+            builder.SetContentText(body);
+            builder.SetAutoCancel(true);
+            builder.SetShowWhen(true);
+            builder.SetSmallIcon(LocalNotificationIconId);
+
+
+            if (Build.VERSION.SdkInt >= BuildVersionCodes.O) {
+                var channelId = $"{_packageName}.general";
+                var channel = new NotificationChannel(channelId, "General", NotificationImportance.Default);
+
+                _manager.CreateNotificationChannel(channel);
+
+                builder.SetChannelId(channelId);
+
+                var context = MainActivity.activity.ApplicationContext;
+                if (bigIconUrl != "") {
+                    print("BIGBIG::" + bigIconUrl);
+                    var bitmap = GetImageBitmapFromUrl(bigIconUrl);
+                    if (bitmap != null) {
+                        builder.SetLargeIcon(bitmap);
+                        builder.SetStyle(new Notification.MediaStyle()); // NICER IMAGE
+                    }
+                }
+            }
+
+
+            var resultIntent = GetLauncherActivity();
+            resultIntent.SetFlags(ActivityFlags.NewTask | ActivityFlags.ClearTask);
+            //"cloudstreamforms:tt0371746Name=Iron man=EndAll"
+            string data = $"cloudstreamforms:{titleId}Name={titleName}=EndAll";
+
+            var _data = Android.Net.Uri.Parse(data);
+            resultIntent.SetData(_data);
+
+            var stackBuilder = Android.Support.V4.App.TaskStackBuilder.Create(Application.Context);
+            stackBuilder.AddNextIntent(resultIntent);
+            var resultPendingIntent =
+                stackBuilder.GetPendingIntent(0, (int)PendingIntentFlags.UpdateCurrent);
+
+
+            builder.SetContentIntent(resultPendingIntent);
+
+            if (time != null) {
+                builder.SetWhen(((DateTime)time).Millisecond);
+            }
+
+            _manager.Notify(id, builder.Build());
+        }
+
+
+
         /// <summary>
         /// Show a local notification
         /// </summary>
@@ -162,12 +283,10 @@ namespace CloudStreamForms.Droid
             builder.SetContentText(body);
             builder.SetAutoCancel(true);
 
-            if (NotificationIconId != 0) {
-                builder.SetSmallIcon(NotificationIconId);
-            }
-            else {
-                builder.SetSmallIcon(Resource.Drawable.plugin_lc_smallicon);
-            }
+
+            builder.SetSmallIcon(LocalNotificationIconId);
+
+
 
             if (Build.VERSION.SdkInt >= BuildVersionCodes.O) {
                 var channelId = $"{_packageName}.general";
@@ -177,34 +296,57 @@ namespace CloudStreamForms.Droid
 
                 builder.SetChannelId(channelId);
 
+                /*
                 var context = MainActivity.activity.ApplicationContext;
                 var _resultIntent = new Intent(context, typeof(MainActivity));
                 //_resultIntent.SetFlags(ActivityFlags.NewTask | ActivityFlags.ClearTask);
 
+                var da = Android.Net.Uri.Parse("cloudstreamforms:tt0371746Name=Iron man=EndAll");
+                _resultIntent.SetData(da);
+                _resultIntent.PutExtra("data", da);
+                _resultIntent.AddFlags(ActivityFlags.SingleTop | ActivityFlags.ClearTop);
+
+                print("PDATA::::" + _resultIntent.DataString);
                 var pending = PendingIntent.GetActivity(context, 0,
                     _resultIntent,
-                   // PendingIntentFlags.CancelCurrent
+                   //PendingIntentFlags.CancelCurrent
                    PendingIntentFlags.UpdateCurrent
                     );
 
                 // SET AFTER THO 
-                RemoteViews remoteViews = new RemoteViews(Application.Context.PackageName, Resource.Xml.PausePlay);
+                //RemoteViews remoteViews = new RemoteViews(Application.Context.PackageName, Resource.Xml.PausePlay);
                 // remoteViews.SetImageViewResource(R.id.notifAddDriverIcon, R.drawable.my_trips_new);
-                builder.SetCustomContentView(remoteViews);
+                // builder.SetCustomContentView(remoteViews);
 
                 builder.SetShowWhen(false);
+                builder.SetContentIntent(pending);
+                builder.SetFullScreenIntent(pending, true);
+                */
 
+                /*
+                Intent notificationIntent = new Intent(context, typeof(MainActivity));
+                notificationIntent.PutExtra("NotificationMessage", "YEET");
+                notificationIntent.AddFlags(ActivityFlags.SingleTop | ActivityFlags.ClearTop);
+                PendingIntent pendingNotificationIntent = PendingIntent.GetActivity(context, 1337, notificationIntent,PendingIntentFlags.UpdateCurrent);
+                
+                notification.setLatestEventInfo(getApplicationContext(), notificationTitle, notificationMessage, pendingNotificationIntent);*/
                 //  builder.SetProgress(100, 51, false); // PROGRESSBAR
                 //  builder.SetLargeIcon(Android.Graphics.Drawables.Icon.CreateWithResource(context, Resource.Drawable.bicon)); // POSTER
-                builder.SetActions(new Notification.Action(Resource.Drawable.design_bottom_navigation_item_background, "Hello", pending)); // IDK TEXT PRESS
+                // builder.SetActions(new Notification.Action(Resource.Drawable.design_bottom_navigation_item_background, "Hello", pending)); // IDK TEXT PRESS
             }
 
             var resultIntent = GetLauncherActivity();
             resultIntent.SetFlags(ActivityFlags.NewTask | ActivityFlags.ClearTask);
+
+            var _da = Android.Net.Uri.Parse("cloudstreamforms:tt0371746Name=Iron man=EndAll");
+            resultIntent.SetData(_da);
+
             var stackBuilder = Android.Support.V4.App.TaskStackBuilder.Create(Application.Context);
             stackBuilder.AddNextIntent(resultIntent);
             var resultPendingIntent =
                 stackBuilder.GetPendingIntent(0, (int)PendingIntentFlags.UpdateCurrent);
+
+
             builder.SetContentIntent(resultPendingIntent);
 
             _manager.Notify(id, builder.Build());
@@ -282,7 +424,7 @@ namespace CloudStreamForms.Droid
             window.ClearFlags(WindowManagerFlags.TurnScreenOn);
             window.ClearFlags(WindowManagerFlags.KeepScreenOn);
             //ToggleFullscreen(!Settings.HasStatusBar);
-            
+
             if (Settings.HasStatusBar) {
                 window.ClearFlags(WindowManagerFlags.Fullscreen);
             }
@@ -299,7 +441,7 @@ namespace CloudStreamForms.Droid
             Window window = MainActivity.activity.Window;
             window.AddFlags(WindowManagerFlags.TurnScreenOn);
             window.AddFlags(WindowManagerFlags.KeepScreenOn);
-            
+
             if (Settings.HasStatusBar) {
                 window.AddFlags(WindowManagerFlags.Fullscreen);
             }
@@ -518,7 +660,7 @@ namespace CloudStreamForms.Droid
         public static Java.IO.File WriteFile(string name, string basePath, string write)
         {
             try {
-                File.Delete(basePath + "/" + name);
+                System.IO.File.Delete(basePath + "/" + name);
             }
             catch (System.Exception) {
 

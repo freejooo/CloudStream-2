@@ -45,7 +45,7 @@ namespace CloudStreamForms
 
             void SetBrightness(double opacity); 
             double GetBrightness();
-
+            void ShowNotIntent(string title, string body, int id, string titleId, string titleName, DateTime? time = null, string bigIconUrl = "");
             void Test();
         }
 
@@ -92,6 +92,11 @@ namespace CloudStreamForms
         public static void SetBrightness(double brightness)
         {
             platformDep.SetBrightness(brightness);
+        }
+
+        public static void ShowNotIntent(string title, string body, int id, string titleId, string titleName, DateTime? time = null, string bigIconUrl = "")
+        {
+            platformDep.ShowNotIntent(title, body, id, titleId, titleName, time, bigIconUrl);
         }
 
         public static void UpdateBackground(int color = -1)
@@ -338,6 +343,12 @@ namespace CloudStreamForms
         {
             CrossLocalNotifications.Current.Show(title, body, id, DateTime.Now.AddSeconds(sec));
         }
+
+        public static void ShowNotification(string title, string body, int id, DateTime time)
+        {
+            CrossLocalNotifications.Current.Show(title, body, id, time);
+        }
+
         public static void CancelNotifaction(int id)
         {
             CrossLocalNotifications.Current.Cancel(id);

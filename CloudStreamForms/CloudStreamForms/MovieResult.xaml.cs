@@ -291,6 +291,7 @@ namespace CloudStreamForms
             SubtitleBtt.Source = GetImageSource("outline_subtitles_white_48dp.png"); //GetImageSource("round_subtitles_white_48dp.png");
                                                                                      //  IMDbBlue.Source = GetImageSource("IMDbBlue.png"); //GetImageSource("round_subtitles_white_48dp.png");
 
+
             SeasonPicker = new LabelList(SeasonBtt, new List<string>());
             DubPicker = new LabelList(DubBtt, new List<string>());
             // FromToPicker = new LabelList(FromToBtt, new List<string>());
@@ -388,28 +389,85 @@ namespace CloudStreamForms
             ChangeStar();
 
             ChangedRecState(0, true);
+
+
+            Commands.SetTap(NotificationBtt, new Command(() => {
+                ToggleNotify();
+            }));
+
         }
+
+
+        void ToggleNotify()
+        {
+            bool hasNot = App.GetKey<bool>("Notifications", currentMovie.title.id, false);
+            App.SetKey("Notifications", currentMovie.title.id, !hasNot);
+            UpdateNotification(!hasNot);
+
+            if (!hasNot) {
+                List<int> keys = new List<int>();
+
+                for (int i = 0; i < setNotificationsTimes.Count; i++) {
+                    int _id = int.Parse(setNotificationsTimes[i].number + currentMovie.title.id.Replace("tt", ""));
+                    keys.Add(_id);
+                    print("BIGICON:::" + currentMovie.title.hdPosterUrl + "|" + currentMovie.title.posterUrl);
+                    App.ShowNotIntent("NEW EPISODE - " + currentMovie.title.name, setNotificationsTimes[i].episodeName, _id, currentMovie.title.id, currentMovie.title.name,bigIconUrl:currentMovie.title.hdPosterUrl);//ShowNotification("NEW EPISODE - " + currentMovie.title.name, setNotificationsTimes[i].episodeName, _id, i * 10);
+                }
+                App.SetKey("NotificationsIds", currentMovie.title.id, keys);
+            }
+            else {
+                var keys = App.GetKey<List<int>>("NotificationsIds", currentMovie.title.id, new List<int>());
+                for (int i = 0; i < keys.Count; i++) {
+                    App.CancelNotifaction(keys[i]);
+                }
+            }
+        }
+
+        void UpdateNotification(bool? overrideNot = null)
+        {
+            bool hasNot = overrideNot ?? App.GetKey<bool>("Notifications", currentMovie.title.id, false);
+            NotificationImg.Source = App.GetImageSource(hasNot ? "baseline_notifications_active_white_48dp.png" : "baseline_notifications_none_white_48dp.png");
+            NotificationImg.Transformations = new List<FFImageLoading.Work.ITransformation>() { (new FFImageLoading.Transformations.TintTransformation(hasNot ? DARK_BLUE_COLOR : LIGHT_LIGHT_BLACK_COLOR)) };
+        }
+
+        List<MoeEpisode> setNotificationsTimes = new List<MoeEpisode>();
+
 
         private void MovieResult_moeDone(object sender, List<MoeEpisode> e)
         {
             if (e == null) return;
-            if (e.Count <= 0) return;
+            void FadeIn()
+            {
+                NotificationTime.Opacity = 0;
+                NotificationTime.FadeTo(1, FATE_TIME_MS);
+            }
+
+            if (e.Count <= 0) {
+                Device.BeginInvokeOnMainThread(() => {
+                    NotificationTime.Text = "Completed";
+                    FadeIn();
+                });
+                return;
+            };
+
+            setNotificationsTimes = e;
+
 
             if (!SameAsActiveMovie()) return;
             Device.BeginInvokeOnMainThread(() => {
                 try {
-                    NotificationTime.Text = "";
-                    for (int i = 0; i < e.Count; i++) {
+                    NotificationTime.Text = "Completed";
+                    FadeIn();
+                    for (int i = e.Count - 1; i > 0; i++) {
                         var diff = e[i].DiffTime;
                         print("DIFFTIME:::::" + e[i].DiffTime);
                         if (diff.TotalSeconds > 0) {
-                            NotificationTime.Opacity = 0;
                             NotificationTime.Text = "Next Epiode: " + (diff.Days == 0 ? "" : (diff.Days + "d ")) + (diff.Hours == 0 ? "" : (diff.Hours + "h ")) + diff.Minutes + "m";
-                            NotificationTime.FadeTo(1, FATE_TIME_MS);
+                            UpdateNotification();
+                            NotificationBtt.IsEnabled = true;
                             return;
                         }
                     }
-                    NotificationTime.Text = "Completed";
                 }
                 catch (Exception _ex) {
                     print("EXKKK::" + _ex);
@@ -503,7 +561,7 @@ namespace CloudStreamForms
 
 
         public void ClearEpisodes()
-        { 
+        {
             episodeView.ItemsSource = null;
             epView.MyEpisodeResultCollection.Clear();
             episodeView.ItemsSource = epView.MyEpisodeResultCollection;
@@ -598,7 +656,7 @@ namespace CloudStreamForms
         }
 
 
-     
+
         async void FadeTitles(bool fadeSeason)
         {
             print("FAFSAFAFAFA:::");
@@ -609,7 +667,7 @@ namespace CloudStreamForms
             await RatingLabelRating.FadeTo(1, FATE_TIME_MS);
             await RatingLabel.FadeTo(1, FATE_TIME_MS);
             await DescriptionLabel.FadeTo(1, FATE_TIME_MS);
-            if(fadeSeason) {
+            if (fadeSeason) {
                 await SeasonBtt.FadeTo(1, FATE_TIME_MS);
             }
 
@@ -797,7 +855,7 @@ namespace CloudStreamForms
         private void SeasonPicker_SelectedIndexChanged(object sender, int e)
         {
             ClearEpisodes();
-          //  epView.MyEpisodeResultCollection.Clear();
+            //  epView.MyEpisodeResultCollection.Clear();
 
             DubPicker.button.FadeTo(0, FATE_TIME_MS);
             currentSeason = SeasonPicker.SelectedIndex + 1;
@@ -1239,7 +1297,7 @@ namespace CloudStreamForms
             action = await DisplayActionSheet(episodeResult.Title, "Cancel", null, actions.ToArray());
 
 
-            if(action == "Play in Browser") {
+            if (action == "Play in Browser") {
                 string copy = await DisplayActionSheet("Open Link", "Cancel", null, episodeResult.Mirros.ToArray());
                 for (int i = 0; i < episodeResult.Mirros.Count; i++) {
                     if (episodeResult.Mirros[i] == copy) {
