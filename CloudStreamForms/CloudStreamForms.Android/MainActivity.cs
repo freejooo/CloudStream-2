@@ -23,11 +23,13 @@ using System.Linq;
 using System.Net;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Xml.Serialization;
 using Xamarin.Forms;
 using static CloudStreamForms.App;
 using static CloudStreamForms.CloudStreamCore;
 using static CloudStreamForms.Droid.MainActivity;
 using Application = Android.App.Application;
+using static CloudStreamForms.Droid.LocalNot;
 
 namespace CloudStreamForms.Droid
 {
@@ -44,6 +46,159 @@ namespace CloudStreamForms.Droid
             System.Console.WriteLine("work complete");
         }
     }
+    [System.Serializable]
+    public class LocalNot
+    {
+        public string title;
+        public string body;
+        public bool autoCancel;
+        public bool showWhen;
+        public int smallIcon;
+        public string bigIcon;
+        public bool mediaStyle = true;
+        public string data;
+        public int id;
+        public DateTime? when = null;
+        public int notificationImportance = (int)NotificationImportance.Default;
+
+
+        public static NotificationManager _manager => (NotificationManager)Application.Context.GetSystemService(Context.NotificationService);
+
+        public static async Task<Bitmap> GetImageBitmapFromUrl(string url)
+        {
+            try {
+                Bitmap imageBitmap = null;
+
+                using (var webClient = new WebClient()) {
+                    var imageBytes = await webClient.DownloadDataTaskAsync(url);
+                    if (imageBytes != null && imageBytes.Length > 0) {
+                        imageBitmap = BitmapFactory.DecodeByteArray(imageBytes, 0, imageBytes.Length);
+                    }
+                }
+
+                return imageBitmap;
+            }
+            catch (Exception) {
+                return null;
+            }
+
+        }
+
+        public static long CurrentTimeMillis(DateTime time)
+        {
+            return (long)(time - Jan1st1970).TotalMilliseconds;
+        }
+
+        private static readonly DateTime Jan1st1970 = new DateTime
+    (1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+        public static async void ShowLocalNot(LocalNot not)
+        {
+            var builder = new Notification.Builder(Application.Context);
+            builder.SetContentTitle(not.title);
+            builder.SetContentText(not.body);
+            builder.SetSmallIcon(not.smallIcon);
+            builder.SetAutoCancel(not.autoCancel);
+            if (Build.VERSION.SdkInt >= BuildVersionCodes.O) {
+                var channelId = $"{Application.Context.PackageName}.general";
+                var channel = new NotificationChannel(channelId, "General", (NotificationImportance)not.notificationImportance);
+                _manager.CreateNotificationChannel(channel);
+
+                builder.SetChannelId(channelId);
+
+                if (not.bigIcon != "") {
+                    var bitmap = await GetImageBitmapFromUrl(not.bigIcon);
+                    if (bitmap != null) {
+                        builder.SetLargeIcon(bitmap);
+                        if (not.mediaStyle) {
+                            builder.SetStyle(new Notification.MediaStyle()); // NICER IMAGE
+                        }
+                    }
+                }
+            }
+
+            builder.SetShowWhen(not.showWhen);
+            if (not.when != null) {
+                builder.SetWhen(CurrentTimeMillis((DateTime)not.when));
+            }
+
+            var resultIntent = GetLauncherActivity();
+            resultIntent.SetFlags(ActivityFlags.NewTask | ActivityFlags.ClearTask); 
+            var _da = Android.Net.Uri.Parse(not.data);//"cloudstreamforms:tt0371746Name=Iron man=EndAll");
+            resultIntent.SetData(_da);
+
+            var stackBuilder = Android.Support.V4.App.TaskStackBuilder.Create(Application.Context);
+            stackBuilder.AddNextIntent(resultIntent);
+            var resultPendingIntent =
+                stackBuilder.GetPendingIntent(not.id, (int)PendingIntentFlags.UpdateCurrent);
+            builder.SetContentIntent(resultPendingIntent); 
+            _manager.Notify(not.id, builder.Build());
+        }
+        public static Intent GetLauncherActivity()
+        {
+            var packageName = Application.Context.PackageName;
+            return Application.Context.PackageManager.GetLaunchIntentForPackage(packageName);
+        }
+    }
+
+    [Service]
+    public class NotifyAtTime : IntentService
+    {
+        public NotifyAtTime() : base("NotifyAtTime")
+        {
+        }
+
+        protected override void OnHandleIntent(Android.Content.Intent intent)
+        {
+            ToastLength toastLength = ToastLength.Short;
+
+            Toast.MakeText(Android.App.Application.Context, "Hello world", toastLength).Show();
+
+        }
+    }
+
+    [BroadcastReceiver]
+    public class AlertReceiver : BroadcastReceiver
+    {
+        public override void OnReceive(Context context, Intent intent)
+        {
+            ToastLength toastLength = ToastLength.Short;
+            LocalNot localNot = new LocalNot();
+            foreach (var prop in typeof(LocalNot).GetFields()) {
+                if (prop.FieldType == typeof(string)) {
+                    prop.SetValue(localNot, intent.Extras.GetString(prop.Name));
+                }
+                if (prop.FieldType == typeof(int)) {
+                    prop.SetValue(localNot, intent.Extras.GetInt(prop.Name));
+                }
+                if (prop.FieldType == typeof(float)) {
+                    prop.SetValue(localNot, intent.Extras.GetFloat(prop.Name));
+                }
+                if (prop.FieldType == typeof(DateTime)) {
+                    prop.SetValue(localNot, DateTime.Parse(intent.Extras.GetString(prop.Name)));
+                }
+                if (prop.FieldType == typeof(bool)) {
+                    prop.SetValue(localNot, intent.Extras.GetBoolean(prop.Name));
+                }
+            }
+
+          //  Toast.MakeText(Android.App.Application.Context, "da:" + localNot.title, toastLength).Show();
+            ShowLocalNot(localNot);
+
+            /*
+            try {
+              //  print("GOT DATATATA::::::::::::::::::::::::::::::::::::.!!");
+                string data = intent.GetStringExtra("data");
+                var not = App.ConvertToObject<LocalNot>(data, null);
+                if (not != null) {
+                    MainDroid.ShowLocalNot(not);
+                }
+            }
+            catch (Exception) {
+
+            }*/
+        }
+    }
+
 
     [Activity(Label = "CloudStream 2", Icon = "@drawable/bicon", Theme = "@style/MainTheme.Splash", MainLauncher = true, LaunchMode = LaunchMode.SingleTop, ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation), IntentFilter(new[] { Intent.ActionView }, DataScheme = "cloudstreamforms", Categories = new[] { Intent.CategoryDefault, Intent.CategoryBrowsable })]
     public class MainActivity : global::Xamarin.Forms.Platform.Android.FormsAppCompatActivity
@@ -141,6 +296,16 @@ namespace CloudStreamForms.Droid
                 RequestedOrientation = ScreenOrientation.Portrait;
             });*/
             // Window.DecorView.SetBackgroundResource(Resource.Drawable.splash_background_remove);//Resources.GetDrawable(Resource.Drawable.splash_background_remove);
+
+
+            /*
+            var alarm = Application.Context.GetSystemService(Context.AlarmService) as AlarmManager;
+            var context = ApplicationContext;
+            var _testIntent = new Intent(context, typeof(AlertReceiver));
+
+            var pending = PendingIntent.GetBroadcast(context, 1337, _testIntent, 0);
+
+            alarm.SetExactAndAllowWhileIdle(AlarmType.RtcWakeup, MainDroid.CurrentTimeMillis(DateTime.UtcNow.AddSeconds(5)), pending);*/
         }
 
 
@@ -198,7 +363,6 @@ namespace CloudStreamForms.Droid
         /// </summary>
         public static int NotificationIconId { get; set; }
         static string _packageName => Application.Context.PackageName;
-        static NotificationManager _manager => (NotificationManager)Application.Context.GetSystemService(Context.NotificationService);
 
 
 
@@ -214,30 +378,78 @@ namespace CloudStreamForms.Droid
             }
         }
 
-        private async Task<Bitmap> GetImageBitmapFromUrl(string url)
-        {
-            try {
-                Bitmap imageBitmap = null;
 
-                using (var webClient = new WebClient()) {
-                    var imageBytes = await webClient.DownloadDataTaskAsync(url);
-                    if (imageBytes != null && imageBytes.Length > 0) {
-                        imageBitmap = BitmapFactory.DecodeByteArray(imageBytes, 0, imageBytes.Length);
-                    }
-                }
 
-                return imageBitmap;
-            }
-            catch (Exception) {
-                return null;
-            }
 
-        }
+
+
+
+
 
 
         private async void ShowNotIntentAsync(string title, string body, int id, string titleId, string titleName, DateTime? time = null, string bigIconUrl = "")
         {
-            var builder = new Notification.Builder(Application.Context);
+
+            var localNot = new LocalNot() { title = title, body = body, id = id, data = "cloudstreamforms:" + titleId + "Name=" + titleName + "=EndAll", bigIcon = bigIconUrl, autoCancel = true, mediaStyle = true, notificationImportance = (int)NotificationImportance.Default, showWhen = true, when = time, smallIcon = LocalNotificationIconId };
+
+
+            if (time == null) {
+                ShowLocalNot(localNot);
+            }
+            else {
+                print("SHOWS NOTIFICATION== " + body + " in " + ((DateTime)time).Subtract(DateTime.UtcNow).TotalSeconds);
+                var context = MainActivity.activity.ApplicationContext;
+
+                var _resultIntent = new Intent(context, typeof(AlertReceiver));
+                //  _resultIntent.PutExtra("data", App.ConvertToString(localNot));
+
+
+                // IF NOT BITSERALIZER IS AVALIBLE
+                foreach (var prop in typeof(LocalNot).GetFields()) {
+                    if (prop.FieldType == typeof(int)) {
+                        _resultIntent.PutExtra(prop.Name, (int)prop.GetValue(localNot));//(int)prop.GetValue(localNot));
+                    }
+                    if (prop.FieldType == typeof(float)) {
+                        _resultIntent.PutExtra(prop.Name, (float)prop.GetValue(localNot));//(int)prop.GetValue(localNot));
+                    }
+                    if (prop.FieldType == typeof(bool)) {
+                        _resultIntent.PutExtra(prop.Name, (bool)prop.GetValue(localNot));//(int)prop.GetValue(localNot));
+                    }
+                    if (prop.FieldType == typeof(string)) {
+                        _resultIntent.PutExtra(prop.Name, (string)prop.GetValue(localNot));//(int)prop.GetValue(localNot));
+                    }
+                    if (prop.FieldType == typeof(DateTime)) {
+                        _resultIntent.PutExtra(prop.Name, ((DateTime)prop.GetValue(localNot)).ToLongDateString());//(int)prop.GetValue(localNot));
+                    }
+                    if (prop.FieldType.IsEnum) {
+                        _resultIntent.PutExtra(prop.Name, (int)prop.GetValue(localNot));//(int)prop.GetValue(localNot));
+                    }
+                }
+
+
+                _resultIntent.PutExtra("title", localNot.title);
+
+                var pending = PendingIntent.GetBroadcast(context, id,
+                     _resultIntent,
+                    PendingIntentFlags.CancelCurrent
+                     );
+
+                var triggerTime = CurrentTimeMillis((DateTime)time);// NotifyTimeInMilliseconds((DateTime)time);
+                var alarmManager = GetAlarmManager();
+
+                alarmManager.SetExactAndAllowWhileIdle(AlarmType.RtcWakeup, triggerTime, pending);
+
+                /*
+                var alarm = Application.Context.GetSystemService(Context.AlarmService) as AlarmManager;
+                var _testIntent = new Intent(context, typeof(AlertReceiver));
+
+                var pending = PendingIntent.GetBroadcast(context, 1337, _testIntent, 0);
+
+                alarm.SetExactAndAllowWhileIdle(AlarmType.RtcWakeup, MainDroid.CurrentTimeMillis(DateTime.UtcNow.AddSeconds(5)), pending);*/
+
+            }
+
+            /*var builder = new Notification.Builder(Application.Context);
             builder.SetContentTitle(title);
             builder.SetContentText(body);
             builder.SetAutoCancel(true);
@@ -281,11 +493,43 @@ namespace CloudStreamForms.Droid
 
             builder.SetContentIntent(resultPendingIntent);
 
-            if (time != null) {
-                builder.SetWhen(((DateTime)time).Millisecond);
-            }
 
-            _manager.Notify(id, builder.Build());
+
+
+            if (time != null) {
+
+
+                //var serializedNotification = SerializeNotification(localNotification);
+                //intent.PutExtra(ScheduledAlarmHandler.LocalNotificationKey, serializedNotification);
+                var context = MainActivity.activity.ApplicationContext;
+
+                var _resultIntent = new Intent(context, typeof(NotifyAtTime));
+                _resultIntent.PutExtra("title", builder.)
+
+                var pending = PendingIntent.GetService(context, 0,
+                 _resultIntent,
+                //PendingIntentFlags.CancelCurrent
+                PendingIntentFlags.UpdateCurrent
+                 );
+
+
+
+
+                // var pendingIntent = PendingIntent.GetService()//GetBroadcast(Application.Context, 0, intent, PendingIntentFlags.CancelCurrent);
+                var triggerTime = NotifyTimeInMilliseconds((DateTime)time);
+                var alarmManager = GetAlarmManager();
+
+                alarmManager.Set(AlarmType.RtcWakeup, triggerTime, pending);
+
+                // builder.SetWhen(CurrentTimeMillis((DateTime)time));
+            }
+            else {
+
+                _manager.Notify(id, builder.Build());
+            }*/
+
+
+
         }
 
 
@@ -389,7 +633,7 @@ namespace CloudStreamForms.Droid
                 notificationIntent.PutExtra("NotificationMessage", "YEET");
                 notificationIntent.AddFlags(ActivityFlags.SingleTop | ActivityFlags.ClearTop);
                 PendingIntent pendingNotificationIntent = PendingIntent.GetActivity(context, 1337, notificationIntent,PendingIntentFlags.UpdateCurrent);
-                
+
                 notification.setLatestEventInfo(getApplicationContext(), notificationTitle, notificationMessage, pendingNotificationIntent);*/
                 //  builder.SetProgress(100, 51, false); // PROGRESSBAR
                 //  builder.SetLargeIcon(Android.Graphics.Drawables.Icon.CreateWithResource(context, Resource.Drawable.bicon)); // POSTER
@@ -420,7 +664,21 @@ namespace CloudStreamForms.Droid
 
 
 
+        private AlarmManager GetAlarmManager()
+        {
+            var alarmManager = Application.Context.GetSystemService(Context.AlarmService) as AlarmManager;
+            return alarmManager;
+        }
 
+
+        private long NotifyTimeInMilliseconds(DateTime notifyTime)
+        {
+            var utcTime = TimeZoneInfo.ConvertTimeToUtc(notifyTime);
+            var epochDifference = (new DateTime(1970, 1, 1) - DateTime.MinValue).TotalSeconds;
+
+            var utcAlarmTimeInMillis = utcTime.AddSeconds(-epochDifference).Ticks / 10000;
+            return utcAlarmTimeInMillis;
+        }
 
 
 
@@ -709,7 +967,7 @@ namespace CloudStreamForms.Droid
             promptInstall.AddFlags(ActivityFlags.GrantWriteUriPermission);
             promptInstall.AddFlags(ActivityFlags.GrantPrefixUriPermission);
             promptInstall.AddFlags(ActivityFlags.GrantPersistableUriPermission);
-            
+
             promptInstall.AddFlags(ActivityFlags.NewTask);*/
 
 

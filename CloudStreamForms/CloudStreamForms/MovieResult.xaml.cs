@@ -395,6 +395,8 @@ namespace CloudStreamForms
                 ToggleNotify();
             }));
 
+
+
         }
 
 
@@ -408,10 +410,11 @@ namespace CloudStreamForms
                 List<int> keys = new List<int>();
 
                 for (int i = 0; i < setNotificationsTimes.Count; i++) {
-                    int _id = int.Parse(setNotificationsTimes[i].number + currentMovie.title.id.Replace("tt", ""));
+
+                    int _id = 1337 + setNotificationsTimes[i].number* 100000000 + int.Parse(currentMovie.title.id.Replace("tt", ""));// int.Parse(setNotificationsTimes[i].number + currentMovie.title.id.Replace("tt", ""));
                     keys.Add(_id);
                     print("BIGICON:::" + currentMovie.title.hdPosterUrl + "|" + currentMovie.title.posterUrl);
-                    App.ShowNotIntent("NEW EPISODE - " + currentMovie.title.name, setNotificationsTimes[i].episodeName, _id, currentMovie.title.id, currentMovie.title.name,bigIconUrl:currentMovie.title.hdPosterUrl);//ShowNotification("NEW EPISODE - " + currentMovie.title.name, setNotificationsTimes[i].episodeName, _id, i * 10);
+                    App.ShowNotIntent("NEW EPISODE - " + currentMovie.title.name, setNotificationsTimes[i].episodeName, _id, currentMovie.title.id, currentMovie.title.name,bigIconUrl:currentMovie.title.hdPosterUrl,time:DateTime.UtcNow.AddSeconds(1));//ShowNotification("NEW EPISODE - " + currentMovie.title.name, setNotificationsTimes[i].episodeName, _id, i * 10);
                 }
                 App.SetKey("NotificationsIds", currentMovie.title.id, keys);
             }
@@ -688,6 +691,8 @@ namespace CloudStreamForms
                 SetKey();
             }
             MainThread.BeginInvokeOnMainThread(() => {
+                //App.ShowNotIntent("NEW EPISODE - " + currentMovie.title.name, currentMovie.title.name, 1337, currentMovie.title.id, currentMovie.title.name, bigIconUrl: currentMovie.title.hdPosterUrl, time: DateTime.UtcNow.AddSeconds(1));//ShowNotification("NEW EPISODE - " + currentMovie.title.name, setNotificationsTimes[i].episodeName, _id, i * 10);
+
                 EPISODES.Text = isMovie ? "MOVIE" : "EPISODES";
 
                 try {

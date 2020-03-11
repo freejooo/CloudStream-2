@@ -2202,6 +2202,10 @@ namespace CloudStreamForms
                     try {
                         int max = 0;
                         for (int q = 0; q < activeMovie.title.MALData.seasonData[season].seasons.Count; q++) {
+                            var urls = activeMovie.title.MALData.seasonData[season].seasons[q].animeFlixData.EpisodesUrls;
+                            if (urls == null) {
+                                return;
+                            }
                             max += activeMovie.title.MALData.seasonData[season].seasons[q].animeFlixData.EpisodesUrls.Length;
                             print("MAX::: " + max);
 

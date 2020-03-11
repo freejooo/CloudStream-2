@@ -298,7 +298,7 @@ namespace CloudStreamForms
         }
         static Application myApp { get { return Application.Current; } }
 
-        static public T ConvertToObject<T>(string str, T defValue)
+        public static T ConvertToObject<T>(string str, T defValue)
         {
             try {
                 return FromByteArray<T>(Convert.FromBase64String(str));
@@ -309,7 +309,7 @@ namespace CloudStreamForms
             }
         }
 
-        static public T FromByteArray<T>(byte[] rawValue)
+        public static T FromByteArray<T>(byte[] rawValue)
         {
             BinaryFormatter bf = new BinaryFormatter();
             using (MemoryStream ms = new MemoryStream(rawValue)) {
@@ -317,12 +317,12 @@ namespace CloudStreamForms
             }
         }
 
-        static string ConvertToString(object o)
+        public static string ConvertToString(object o)
         {
             return Convert.ToBase64String(ToByteArray(o));
         }
 
-        static byte[] ToByteArray(object obj)
+        public static byte[] ToByteArray(object obj)
         {
             if (obj == null)
                 return null;
