@@ -341,5 +341,8 @@
   <ItemGroup>
     <AndroidResource Include="Resources\drawable-xxxhdpi\netflixPlay128v2.png" />
   </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\drawable-xxxhdpi\biconWhite.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\Android\Xamarin.Android.CSharp.targets" />
 </Project>

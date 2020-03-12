@@ -1325,7 +1325,7 @@ namespace CloudStreamForms
                         succ = true;
                     }
                     else {
-                        succ = await MainChrome.CastVideo(episodeResult.mirrosUrls[count], episodeResult.Mirros[count]);
+                        succ = await MainChrome.CastVideo(episodeResult.mirrosUrls[count], episodeResult.Mirros[count],posterUrl:currentMovie.title.hdPosterUrl,movieTitle:currentMovie.title.name);
                     }
                 }
                 ChromeCastPage.currentSelected = count;

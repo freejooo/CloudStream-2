@@ -48,6 +48,42 @@ namespace CloudStreamForms.Droid
             print("HANDLE" + intent.Extras.GetString("data"));
         }
     }
+
+    [Service]
+    public class ChromeCastIntentService : IntentService
+    {
+        public ChromeCastIntentService() : base("ChromeCastIntentService")
+        {
+        }
+
+        protected override void OnHandleIntent(Android.Content.Intent intent)
+        {
+            string data = intent.Extras.GetString("data");
+            //play" : "pause", "goforward", "stop
+            print("HANDLE [" + data + "]");
+
+            switch (data) {
+                case "play":
+                    MainChrome.PauseAndPlay(false);
+                    break;
+                case "pause":
+                    MainChrome.PauseAndPlay(true);
+                    break;
+                case "goforward":
+                    MainChrome.SeekMedia(30);
+                    break;
+                case "goback":
+                    MainChrome.SeekMedia(-30);
+                    break;
+                case "stop":
+                    MainChrome.StopCast();
+                    break;
+                default:
+                    break;
+            }
+
+        }
+    }
     [System.Serializable]
     public class LocalNot
     {
@@ -65,9 +101,14 @@ namespace CloudStreamForms.Droid
 
 
         public static NotificationManager _manager => (NotificationManager)Application.Context.GetSystemService(Context.NotificationService);
+        public static Dictionary<string, Bitmap> cachedBitmaps = new Dictionary<string, Bitmap>(); // TO ADD PREFORMACE WHEN ADDING NOTIFICATION W SAME IMAGE
 
         public static async Task<Bitmap> GetImageBitmapFromUrl(string url)
         {
+            if (cachedBitmaps.ContainsKey(url)) {
+                return cachedBitmaps[url];
+            }
+
             try {
                 Bitmap imageBitmap = null;
 
@@ -77,7 +118,7 @@ namespace CloudStreamForms.Droid
                         imageBitmap = BitmapFactory.DecodeByteArray(imageBytes, 0, imageBytes.Length);
                     }
                 }
-
+                cachedBitmaps.Add(url, imageBitmap);
                 return imageBitmap;
             }
             catch (Exception) {
@@ -311,6 +352,21 @@ namespace CloudStreamForms.Droid
             var pending = PendingIntent.GetBroadcast(context, 1337, _testIntent, 0);
 
             alarm.SetExactAndAllowWhileIdle(AlarmType.RtcWakeup, MainDroid.CurrentTimeMillis(DateTime.UtcNow.AddSeconds(5)), pending);*/
+
+            MainChrome.OnDisconnected += (o, e) => {
+                MainDroid.CancelChromecast();
+            };
+
+            MainChrome.OnNotificationChanged += (o, e) => {
+                print("CHROMECAST CHANGED::: ");
+                print("ID=====================" + e.isCasting + "|" + e.isPlaying + "|" + e.isPaused);
+                if (!e.isCasting) {// || !e.isPlaying) {
+                    MainDroid.CancelChromecast();
+                }
+                else {
+                    MainDroid.UpdateChromecastNotification(e.title, e.body, e.isPaused, e.posterUrl);
+                }
+            };
         }
 
 
@@ -532,9 +588,6 @@ namespace CloudStreamForms.Droid
 
                 _manager.Notify(id, builder.Build());
             }*/
-
-
-
         }
 
 
@@ -543,6 +596,77 @@ namespace CloudStreamForms.Droid
             ShowNotIntentAsync(title, body, id, titleId, titleName, time, bigIconUrl);
         }
 
+        public const int CHROME_CAST_NOTIFICATION_ID = 1337;
+
+        public static void CancelChromecast()
+        {
+            _manager.Cancel(CHROME_CAST_NOTIFICATION_ID);
+        }
+
+        static MediaSession mediaSession = new MediaSession(Application.Context, "Chromecast");
+
+        public static async void UpdateChromecastNotification(string title, string body, bool isPaused, string poster)
+        {
+            var builder = new Notification.Builder(Application.Context);
+            builder.SetContentTitle(title);
+            builder.SetContentText(body);
+            builder.SetAutoCancel(true);
+
+            builder.SetSmallIcon(Resource.Drawable.biconWhite);//LocalNotificationIconId);
+            builder.SetOngoing(true);
+
+
+            if (Build.VERSION.SdkInt >= BuildVersionCodes.O) {
+                var channelId = $"{_packageName}.general";
+                var channel = new NotificationChannel(channelId, "General", NotificationImportance.Default);
+
+                _manager.CreateNotificationChannel(channel);
+
+                builder.SetChannelId(channelId);
+                //https://m.media-amazon.com/images/M/MV5BMTczNTI2ODUwOF5BMl5BanBnXkFtZTcwMTU0NTIzMw@@._V1_UX182_CR0,0,182,268_AL_.jpg
+                var bitmap = await GetImageBitmapFromUrl(poster);//"https://m.media-amazon.com/images/M/MV5BMTczNTI2ODUwOF5BMl5BanBnXkFtZTcwMTU0NTIzMw@@._V1_UX182_CR0,0,182,268_AL_.jpg");
+                if (bitmap != null) {
+                    builder.SetLargeIcon(bitmap);
+                }
+                var context = MainActivity.activity.ApplicationContext;
+
+                builder.SetStyle(new Notification.MediaStyle().SetMediaSession(mediaSession.SessionToken).SetShowActionsInCompactView(0, 1, 2)); // NICER IMAGE
+
+                List<string> actionNames = new List<string>() { "-30s", isPaused ? "Play" : "Pause", "+30s", "Stop" };
+                List<int> sprites = new List<int>() { Resource.Drawable.netflixGoBack128, isPaused ? Resource.Drawable.netflixPlay128v2 : Resource.Drawable.netflixPause128v2, Resource.Drawable.netflixGoForward128, Resource.Drawable.netflixStop128v2 };
+                List<string> actionIntent = new List<string>() { "goback", isPaused ? "play" : "pause", "goforward", "stop" }; // next
+
+                List<Notification.Action> actions = new List<Notification.Action>();
+
+                for (int i = 0; i < sprites.Count; i++) {
+                    var _resultIntent = new Intent(context, typeof(ChromeCastIntentService));
+                    _resultIntent.PutExtra("data", actionIntent[i]);
+                    var pending = PendingIntent.GetService(context, 2337 + i,
+                     _resultIntent,
+                    PendingIntentFlags.UpdateCurrent
+                     );
+
+                    actions.Add(new Notification.Action(sprites[i], actionNames[i], pending));
+                }
+                builder.SetActions(actions.ToArray());
+            }
+
+            var resultIntent = GetLauncherActivity();
+            resultIntent.SetFlags(ActivityFlags.NewTask | ActivityFlags.ClearTask);
+
+            //var _da = Android.Net.Uri.Parse("cloudstreamforms:tt0371746Name=Iron man=EndAll");
+            // resultIntent.SetData(_da);
+
+            var stackBuilder = Android.Support.V4.App.TaskStackBuilder.Create(Application.Context);
+            stackBuilder.AddNextIntent(resultIntent);
+            var resultPendingIntent =
+                stackBuilder.GetPendingIntent(0, (int)PendingIntentFlags.UpdateCurrent);
+
+
+            builder.SetContentIntent(resultPendingIntent);
+
+            _manager.Notify(CHROME_CAST_NOTIFICATION_ID, builder.Build());
+        }
 
 
         /// <summary>
@@ -553,6 +677,7 @@ namespace CloudStreamForms.Droid
         /// <param name="id">Id of the notification</param>
         public async void Show(string title, string body, int id = 0)
         {
+            return;
             var builder = new Notification.Builder(Application.Context);
             builder.SetContentTitle(title);
             builder.SetContentText(body);
@@ -580,12 +705,12 @@ namespace CloudStreamForms.Droid
 
                 MediaSession mediaSession = new MediaSession(context, "tag");
 
-                builder.SetStyle(new Notification.MediaStyle().SetMediaSession(mediaSession.SessionToken).SetShowActionsInCompactView(0,1,2)); // NICER IMAGE
+                builder.SetStyle(new Notification.MediaStyle().SetMediaSession(mediaSession.SessionToken).SetShowActionsInCompactView(0, 1, 2)); // NICER IMAGE
 
 
                 // mediaSession.SetPlaybackState(PlaybackState.)
 
-                bool isPaused = true;§
+                bool isPaused = true;
 
                 List<string> actionNames = new List<string>() { "-30s", isPaused ? "Play" : "Pause", "+30s", "Stop" };
                 List<int> sprites = new List<int>() { Resource.Drawable.netflixGoBack128, isPaused ? Resource.Drawable.netflixPlay128v2 : Resource.Drawable.netflixPause128v2, Resource.Drawable.netflixGoForward128, Resource.Drawable.netflixStop128v2 };

@@ -56,7 +56,7 @@ namespace CloudStreamForms
 
                     }
 
-                    succ = await MainChrome.CastVideo(episodeResult.mirrosUrls[currentSelected], episodeResult.Mirros[currentSelected]);
+                    succ = await MainChrome.CastVideo(episodeResult.mirrosUrls[currentSelected], episodeResult.Mirros[currentSelected], posterUrl: chromeMovieResult.title.hdPosterUrl, movieTitle: chromeMovieResult.title.name);
 
                 }
             }

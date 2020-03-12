@@ -141,7 +141,7 @@ namespace CloudStreamForms
             //  PushPageFromUrlAndName("tt10885406", "Ascendance of a Bookworm");
             // PushPageFromUrlAndName("tt9054364", "That Time I Got Reincarnated as a Slime");
             //PushPageFromUrlAndName("tt0371746", "Iron Man");
-          //  PushPageFromUrlAndName("tt10954274", "ID: Invaded");
+            //  PushPageFromUrlAndName("tt10954274", "ID: Invaded");
         }
 
 
@@ -214,6 +214,22 @@ namespace CloudStreamForms
         public static event EventHandler<string> OnChromeImageChanged;
         public static event EventHandler<bool> OnPauseChanged;
 
+        private static ChromeNotification _notification = new ChromeNotification() { isCasting = false, title = "", body = "", isPaused = false, posterUrl = "" };
+        public static ChromeNotification Notification { set { _notification = value; OnNotificationChanged?.Invoke(null, value); } get { return _notification; } }
+
+        public class ChromeNotification
+        {
+            public string title;
+            public string body; // MIRRORNAME
+            public string posterUrl;
+            public bool isCasting;
+            public bool isPlaying;
+            public bool isPaused;
+        }
+
+        public static event EventHandler<ChromeNotification> OnNotificationChanged;
+
+
         public static bool IsChromeDevicesOnNetwork
         {
             get {
@@ -227,11 +243,24 @@ namespace CloudStreamForms
 
         public static bool IsConnectedToChromeDevice { set; get; }
         public static bool IsPendingConnection { set; get; }
-        public static bool IsCastingVideo { set { _isCastingVideo = value; OnVideoCastingChanged?.Invoke(null, value); } get { return _isCastingVideo; } }
+        public static bool IsCastingVideo { set { _isCastingVideo = value; Notification.isCasting = value; OnVideoCastingChanged?.Invoke(null, value); OnNotificationChanged?.Invoke(null, Notification);
+            }
+            get { return _isCastingVideo; } }
         private static bool _isCastingVideo;
         static bool _IsPaused = false;
-        public static bool IsPaused { set; get; }
-        public static bool IsPlaying { set; get; }
+
+
+
+        //            Notification.isPaused = IsPaused;
+
+        private static bool isPaused;
+        private static bool isPlaying;
+        public static bool IsPaused { set { isPaused = value; Notification.isPaused = value; OnNotificationChanged?.Invoke(null, Notification);
+            }
+            get { return isPaused; } }
+        public static bool IsPlaying { set { isPlaying = value; Notification.isPlaying = value; OnNotificationChanged?.Invoke(null, Notification);
+             }
+            get { return isPlaying; } }
         public static double CurrentCastingDuration { get; set; }
 
         public static IEnumerable<IReceiver> allChromeDevices;
@@ -369,12 +398,13 @@ namespace CloudStreamForms
 
             print(mm.PlayerState);
 
+
             castUpdatedNow = DateTime.Now;
             castLastUpdate = mm.CurrentTime;
         }
 
         // Subtitle Url https://static.movies123.pro/files/tracks/JhUzWRukqeuUdRrPCe0R3lUJ1SmknAVSv670Ep0cXipm1JfMgNWa379VKKAz8nvFMq2ksu7bN5tCY5tXXKS4Lrr1tLkkipdLJNArNzVSu2g.srt
-        public static async Task<bool> CastVideo(string url, string title, double setTime = -1, string subtitleUrl = "", string subtitleName = "")
+        public static async Task<bool> CastVideo(string url, string mirrorName, double setTime = -1, string subtitleUrl = "", string subtitleName = "", string posterUrl = "", string movieTitle = "")
         {
             try {
                 if (setTime == -2) {
@@ -399,7 +429,7 @@ namespace CloudStreamForms
                         EdgeType = TextTrackEdgeType.DropShadow
                     };
                 }
-                mediaMetadata.Title = title;
+                mediaMetadata.Title = mirrorName;
 
                 if (validSubtitle) {
                     CurrentChromeMedia = await CurrentChannel.LoadAsync(mediaInfo, true, 1);
@@ -420,6 +450,10 @@ namespace CloudStreamForms
                 castUpdatedNow = DateTime.Now;
                 castLastUpdate = 0;
                 IsCastingVideo = true;
+                Notification.body = mirrorName;
+                Notification.title = movieTitle;
+                Notification.posterUrl = posterUrl;
+                OnNotificationChanged?.Invoke(null, Notification);
                 print("!4");
                 return true;
             }
