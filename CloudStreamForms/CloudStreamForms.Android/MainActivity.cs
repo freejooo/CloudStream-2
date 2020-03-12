@@ -44,6 +44,8 @@ namespace CloudStreamForms.Droid
         {
             print("perform some long running work");
             System.Console.WriteLine("work complete");
+
+            print("HANDLE" + intent.Extras.GetString("data"));
         }
     }
     [System.Serializable]
@@ -98,6 +100,9 @@ namespace CloudStreamForms.Droid
             builder.SetContentText(not.body);
             builder.SetSmallIcon(not.smallIcon);
             builder.SetAutoCancel(not.autoCancel);
+
+            builder.SetVisibility(NotificationVisibility.Public);
+
             if (Build.VERSION.SdkInt >= BuildVersionCodes.O) {
                 var channelId = $"{Application.Context.PackageName}.general";
                 var channel = new NotificationChannel(channelId, "General", (NotificationImportance)not.notificationImportance);
@@ -122,7 +127,7 @@ namespace CloudStreamForms.Droid
             }
 
             var resultIntent = GetLauncherActivity();
-            resultIntent.SetFlags(ActivityFlags.NewTask | ActivityFlags.ClearTask); 
+            resultIntent.SetFlags(ActivityFlags.NewTask | ActivityFlags.ClearTask);
             var _da = Android.Net.Uri.Parse(not.data);//"cloudstreamforms:tt0371746Name=Iron man=EndAll");
             resultIntent.SetData(_da);
 
@@ -130,7 +135,7 @@ namespace CloudStreamForms.Droid
             stackBuilder.AddNextIntent(resultIntent);
             var resultPendingIntent =
                 stackBuilder.GetPendingIntent(not.id, (int)PendingIntentFlags.UpdateCurrent);
-            builder.SetContentIntent(resultPendingIntent); 
+            builder.SetContentIntent(resultPendingIntent);
             _manager.Notify(not.id, builder.Build());
         }
         public static Intent GetLauncherActivity()
@@ -181,7 +186,7 @@ namespace CloudStreamForms.Droid
                 }
             }
 
-          //  Toast.MakeText(Android.App.Application.Context, "da:" + localNot.title, toastLength).Show();
+            //  Toast.MakeText(Android.App.Application.Context, "da:" + localNot.title, toastLength).Show();
             ShowLocalNot(localNot);
 
             /*
@@ -575,30 +580,39 @@ namespace CloudStreamForms.Droid
 
                 MediaSession mediaSession = new MediaSession(context, "tag");
 
-                builder.SetStyle(new Notification.MediaStyle().SetMediaSession(mediaSession.SessionToken).SetShowActionsInCompactView(0)); // NICER IMAGE
+                builder.SetStyle(new Notification.MediaStyle().SetMediaSession(mediaSession.SessionToken).SetShowActionsInCompactView(0,1,2)); // NICER IMAGE
 
 
                 // mediaSession.SetPlaybackState(PlaybackState.)
 
+                bool isPaused = true;§
 
+                List<string> actionNames = new List<string>() { "-30s", isPaused ? "Play" : "Pause", "+30s", "Stop" };
+                List<int> sprites = new List<int>() { Resource.Drawable.netflixGoBack128, isPaused ? Resource.Drawable.netflixPlay128v2 : Resource.Drawable.netflixPause128v2, Resource.Drawable.netflixGoForward128, Resource.Drawable.netflixStop128v2 };
+                List<string> actionIntent = new List<string>() { "goback", isPaused ? "play" : "pause", "goforward", "stop" }; // next
 
-                var _resultIntent = new Intent(context, typeof(DemoIntentService));
-                // _resultIntent.SetAction("com.CloudStreamForms.CloudStreamForms.pause");
-                // _resultIntent.AddFlags(ActivityFlags.IncludeStoppedPackages);
-                //    _resultIntent.PutExtra("data", "yeet");
-                // _resultIntent.AddFlags(ActivityFlags.ReceiverForeground);
+                List<Notification.Action> actions = new List<Notification.Action>();
 
-                //PendingIntent.GetActivity
-                //GetBroadcast
-                //GetService
-                var pending = PendingIntent.GetService(context, 0,
-                 _resultIntent,
-                //PendingIntentFlags.CancelCurrent
-                PendingIntentFlags.UpdateCurrent
-                 );
+                for (int i = 0; i < sprites.Count; i++) {
+                    var _resultIntent = new Intent(context, typeof(DemoIntentService));
+                    // _resultIntent.SetAction("com.CloudStreamForms.CloudStreamForms.pause");
+                    // _resultIntent.AddFlags(ActivityFlags.IncludeStoppedPackages);
+                    _resultIntent.PutExtra("data", actionIntent[i]);
+                    // _resultIntent.AddFlags(ActivityFlags.ReceiverForeground);
 
+                    //PendingIntent.GetActivity
+                    //GetBroadcast
+                    //GetService
+                    var pending = PendingIntent.GetService(context, 1337 + i,
+                     _resultIntent,
+                    //PendingIntentFlags.CancelCurrent
+                    PendingIntentFlags.UpdateCurrent
+                     );
 
-                builder.SetActions(new Notification.Action(Resource.Drawable.round_close_white_48, "Hello1", pending));
+                    actions.Add(new Notification.Action(sprites[i], actionNames[i], pending));
+                }
+                builder.SetActions(actions.ToArray());
+
                 //builder.SetColorized(true);
                 //  builder.SetColor(Resource.Color.colorPrimary);
                 /*
