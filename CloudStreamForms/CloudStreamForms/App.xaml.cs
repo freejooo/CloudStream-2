@@ -47,6 +47,8 @@ namespace CloudStreamForms
             double GetBrightness();
             void ShowNotIntent(string title, string body, int id, string titleId, string titleName, DateTime? time = null, string bigIconUrl = "");
             void Test();
+
+            void CancelNot(int id);
         }
 
         public class StorageInfo
@@ -352,6 +354,7 @@ namespace CloudStreamForms
         public static void CancelNotifaction(int id)
         {
             CrossLocalNotifications.Current.Cancel(id);
+            platformDep.CancelNot(id);
         }
 
         private static ISettings AppSettings =>

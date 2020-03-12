@@ -369,6 +369,12 @@ namespace CloudStreamForms.Droid
             };
         }
 
+        protected override void OnDestroy()
+        {
+            MainDroid.CancelChromecast(); // TO REMOVE IT, CANT INTERACT WITHOUT THE CORE
+            base.OnDestroy();
+        }
+
 
         public override void OnRequestPermissionsResult(int requestCode, string[] permissions, [GeneratedEnum] Android.Content.PM.Permission[] grantResults)
         {
@@ -444,7 +450,18 @@ namespace CloudStreamForms.Droid
 
 
 
+        public static void CancelFutureNotification(int id)
+        {
+            var context = MainActivity.activity.ApplicationContext;
 
+            var alarmManager = GetAlarmManager();
+            var _resultIntent = new Intent(context, typeof(AlertReceiver));
+            var pending = PendingIntent.GetBroadcast(context, id,
+                    _resultIntent,
+                   PendingIntentFlags.CancelCurrent
+                    );
+            alarmManager.Cancel(pending);
+        }
 
 
 
@@ -803,7 +820,7 @@ namespace CloudStreamForms.Droid
 
 
 
-        private AlarmManager GetAlarmManager()
+        private static AlarmManager GetAlarmManager()
         {
             var alarmManager = Application.Context.GetSystemService(Context.AlarmService) as AlarmManager;
             return alarmManager;
@@ -1332,6 +1349,11 @@ namespace CloudStreamForms.Droid
         public int ConvertDPtoPx(int dp)
         {
             return (int)(dp * MainActivity.activity.ApplicationContext.Resources.DisplayMetrics.Density);
+        }
+
+        public void CancelNot(int id)
+        {
+            CancelFutureNotification(id);
         }
     }
 }

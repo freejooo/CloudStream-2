@@ -362,6 +362,11 @@ namespace CloudStreamForms.UWP
                 _App.ShowNotification(title, body, id, (DateTime)time);
             }
         }
+
+        public void CancelNot(int id)
+        {
+
+        }
     }
 
     public static class Message
