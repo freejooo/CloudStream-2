@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android" android:versionCode="10" android:versionName="1.4.6" package="com.CloudStreamForms.CloudStreamForms" android:installLocation="auto">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" android:versionCode="10" android:versionName="1.4.6" package="com.CloudStreamFormsTest.CloudStreamFormsTest" android:installLocation="auto">
 	<uses-sdk android:minSdkVersion="21" android:targetSdkVersion="28" />
 	<application android:label="CloudStream 2" android:icon="@drawable/bicon"></application>
 	<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
@@ -13,7 +13,6 @@
 		<provider android:name="android.support.v4.content.FileProvider" android:authorities="${applicationId}.provider" android:exported="false" android:grantUriPermissions="true">
 			<meta-data android:name="android.support.FILE_PROVIDER_PATHS" android:resource="@xml/provider_paths" />
 		</provider>
-    <receiver android:process=":remote" android:name=".AlertReceiver" />
+		<receiver android:process=":remote" android:name=".AlertReceiver" />
 	</application>
-  
 </manifest>

@@ -395,7 +395,30 @@ namespace CloudStreamForms
                 ToggleNotify();
             }));
 
+            fishProgressLoaded += (o, e) => {
+                Device.InvokeOnMainThreadAsync(async () => {
+                    if (e.progress >= 1 && (!FishProgress.IsVisible || FishProgress.Progress >= 1)) return;
+                    FishProgress.IsVisible = true;
+                    FishProgress.IsEnabled = true;
+                    FishProgressTxt.IsVisible = true;
+                    FishProgressTxt.IsEnabled = true;
+                    if (FishProgress.Opacity == 0) {
+                        FishProgress.FadeTo(1);
+                    }
 
+                    // FishProgressTxt.Text = e.name;
+                    await FishProgress.ProgressTo(e.progress, 250, Easing.SinIn);
+                    if (e.progress >= 1) {
+
+                        FishProgressTxt.IsVisible = false;
+                        FishProgressTxt.IsEnabled = false;
+
+                        await FishProgress.FadeTo(0);
+                        FishProgress.IsVisible = false;
+                        FishProgress.IsEnabled = false;
+                    }
+                });
+            };
 
         }
 
