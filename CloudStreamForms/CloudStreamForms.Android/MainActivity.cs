@@ -48,12 +48,14 @@ namespace CloudStreamForms.Droid
             print("HANDLE" + intent.Extras.GetString("data"));
         }
     }
+     
 
     [Service]
     public class ChromeCastIntentService : IntentService
     {
         public ChromeCastIntentService() : base("ChromeCastIntentService")
         {
+
         }
 
         protected override void OnHandleIntent(Android.Content.Intent intent)

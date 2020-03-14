@@ -140,7 +140,7 @@ namespace CloudStreamForms
             //  PushPageFromUrlAndName("tt0409591", "Naruto");
             //  PushPageFromUrlAndName("tt10885406", "Ascendance of a Bookworm");
             // PushPageFromUrlAndName("tt9054364", "That Time I Got Reincarnated as a Slime");
-            //PushPageFromUrlAndName("tt0371746", "Iron Man");
+            PushPageFromUrlAndName("tt0371746", "Iron Man");
             // PushPageFromUrlAndName("tt10954274", "ID: Invaded");
         }
 
@@ -427,13 +427,22 @@ namespace CloudStreamForms
 
                 bool validSubtitle = false;
                 var mediaInfo = new MediaInformation() { ContentId = url, Metadata = mediaMetadata };
+                //subtitleUrl = "https://commondatastorage.googleapis.com/gtv-videos-bucket/CastVideos/tracks/DesigningForGoogleCast-en.vtt";
+                
+                /*
+                print("SUBTITLEURL:::: " + subtitleUrl);
+                if(subtitleUrl != "") {
+                    subtitleUrl = GetUrlFromUploadSubtitles(subtitleUrl,".txt");
+                    print("SUBURL:::" + subtitleUrl);
+                }*/
+
 
                 // SUBTITLES
                 if (subtitleUrl != "") {
                     validSubtitle = true;
                     mediaInfo.Tracks = new Track[]
                                 {
-                                 new Track() {  TrackId = 1, Language = "en-US" , Name = subtitleName, TrackContentId = subtitleUrl }
+                                 new Track() {  TrackId = 1, Language = "en-US" , Name = subtitleName, TrackContentId = subtitleUrl,SubType=TextTrackType.Subtitles,Type=TrackType.Text}
                                 };
                     mediaInfo.TextTrackStyle = new TextTrackStyle() {
                         BackgroundColor = System.Drawing.Color.Transparent,//.Color.Transparent,
@@ -567,6 +576,50 @@ namespace CloudStreamForms
             if (action != null) {
                 await action.Invoke(chromeSender.GetChannel<TChannel>());
             }
+        }
+
+
+        static string GetUrlFromUploadSubtitles(string fullData, string ending = ".srt")
+        {
+            string boundary = Guid.NewGuid().ToString();
+
+            WebRequest request = WebRequest.Create("https://uguu.se/api.php?d=upload-tool");
+            request.Method = "POST";
+            request.ContentType = string.Format("multipart/form-data; boundary={0}", boundary);
+            //request.Headers.Add(HttpRequestHeader.Cookie, header);
+            string ff = string.Format("--{0}", boundary) + "\n";
+
+            string _1 = $"{ff}Content-Disposition: form-data; name=\"MAX_FILE_SIZE\"\n\n150000000\n";
+            string _2 = $"{ff}Content-Disposition: form-data; name=\"file\"; filename=\"subtitles{ending}\"\nContent-Type: text/plain\n\n{fullData}\n\n";
+            string _3 = $"{ff}Content-Disposition: form-data; name=\"name\"\n\n\n";
+            string _4 = $"--{boundary}--";
+
+            byte[] _data = Encoding.UTF8.GetBytes(_1 + _2 + _3 + _4);
+
+            if (_data != null) {
+                request.ContentLength = _data.Length;
+            }
+
+            Stream dataStream = request.GetRequestStream();
+
+            if (_data != null && _data.Length > 0) {
+                dataStream.Write(_data, 0, _data.Length);
+            }
+
+            dataStream.Close();
+
+            WebResponse response = request.GetResponse();
+
+            dataStream = response.GetResponseStream();
+
+            StreamReader reader = new StreamReader(dataStream);
+
+            string responseReader = reader.ReadToEnd();
+            reader.Close();
+            dataStream.Close();
+            response.Close();
+
+            return responseReader;
         }
     }
     // -------------------------------- END CHROMECAST --------------------------------
@@ -4734,6 +4787,8 @@ https://prettyfast.to/e/66vvrk\/fe1541bb8d2aeaec6bb7e500d070b2ec?sub=https%253A%
             }
         }
 
+   
+
         /// <summary>
         /// RETURN SUBTITLE STRING
         /// </summary>
@@ -4765,6 +4820,9 @@ https://prettyfast.to/e/66vvrk\/fe1541bb8d2aeaec6bb7e500d070b2ec?sub=https%253A%
                         }
                     }
                     s = s.Replace("\n\n", "");
+                    if(!s.StartsWith("WEBVTT")) {
+                        s = "WEBVTT\n\n" + s; // s.Insert(0, "WEBVTT\n");
+                    }
                     if (showToast) {
                         App.ShowToast("Subtitles Downloaded");
                     }
@@ -4888,6 +4946,7 @@ https://prettyfast.to/e/66vvrk\/fe1541bb8d2aeaec6bb7e500d070b2ec?sub=https%253A%
                         }
                     }
                     if (!contains) {
+                        print("CURRENT SUBFILE:" + _subtitleLoc);
                         activeMovie.subtitles.Add(new Subtitle() { name = lang, data = _subtitleLoc });
                     }
                 }

@@ -64,6 +64,7 @@ namespace CloudStreamForms
         const string NONE_SUBTITLES = "None";
         const string ADD_BEFORE_EPISODE = "\"";
         const string ADD_AFTER_EPISODE = "\"";
+
         public static bool IsSeries { get { return !(currentVideo.season == -1 || currentVideo.episode == -1); } }
         public static string BeforeAddToName { get { return IsSeries ? ("S" + currentVideo.season + ":E" + currentVideo.episode + " ") : ""; } }
         public static string CurrentDisplayName { get { return BeforeAddToName + (IsSeries ? ADD_BEFORE_EPISODE : "") + currentVideo.name + (IsSeries ? ADD_AFTER_EPISODE : ""); } }

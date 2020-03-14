@@ -373,14 +373,14 @@ namespace CloudStreamForms
             return platformDep.DownloadFile(file, fileName, mainPath, extraPath);
         }
 
-        public static string ConvertPathAndNameToM3U8(List<string> path, List<string> name, bool isSubtitleEnabled = false, string beforePath = "")
+        public static string ConvertPathAndNameToM3U8(List<string> path, List<string> name, bool isSubtitleEnabled = false, string beforePath = "", string overrideSubtitles = null)
         {
             string _s = "#EXTM3U";
             if (isSubtitleEnabled) {
                 _s += "\n";
                 _s += "\n";
                 //  _s += "#EXT-X-MEDIA:TYPE=SUBTITLES,GROUP-ID=\"subs\",NAME=\"English\",DEFAULT=YES,AUTOSELECT=YES,FORCED=NO,LANGUAGE=\"en\",CHARACTERISTICS=\"public.accessibility.transcribes-spoken-dialog, public.accessibility.describes-music-and-sound\",URI=" + beforePath + baseSubtitleName + "\"";
-                _s += "#EXTVLCOPT:sub-file=" + beforePath + baseSubtitleName;
+                _s += "#EXTVLCOPT:sub-file=" + (overrideSubtitles ?? (beforePath + baseSubtitleName));
                 _s += "\n";
             }
             for (int i = 0; i < path.Count; i++) {
@@ -391,7 +391,7 @@ namespace CloudStreamForms
 
         public static byte[] ConvertPathAndNameToM3U8Bytes(List<string> path, List<string> name, bool isSubtitleEnabled = false, string beforePath = "")
         {
-            return Encoding.ASCII.GetBytes(ConvertPathAndNameToM3U8(path, name, isSubtitleEnabled, beforePath));
+            return Encoding.UTF8.GetBytes(ConvertPathAndNameToM3U8(path, name, isSubtitleEnabled, beforePath));
         }
 
         public static void OpenBrowser(string url)
