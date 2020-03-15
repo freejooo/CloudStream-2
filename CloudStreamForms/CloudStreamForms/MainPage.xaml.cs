@@ -140,7 +140,7 @@ namespace CloudStreamForms
             //  PushPageFromUrlAndName("tt0409591", "Naruto");
             //  PushPageFromUrlAndName("tt10885406", "Ascendance of a Bookworm");
             // PushPageFromUrlAndName("tt9054364", "That Time I Got Reincarnated as a Slime");
-            PushPageFromUrlAndName("tt0371746", "Iron Man");
+            // PushPageFromUrlAndName("tt0371746", "Iron Man");
             // PushPageFromUrlAndName("tt10954274", "ID: Invaded");
         }
 
@@ -428,7 +428,7 @@ namespace CloudStreamForms
                 bool validSubtitle = false;
                 var mediaInfo = new MediaInformation() { ContentId = url, Metadata = mediaMetadata };
                 //subtitleUrl = "https://commondatastorage.googleapis.com/gtv-videos-bucket/CastVideos/tracks/DesigningForGoogleCast-en.vtt";
-                
+
                 /*
                 print("SUBTITLEURL:::: " + subtitleUrl);
                 if(subtitleUrl != "") {
@@ -1801,7 +1801,7 @@ namespace CloudStreamForms
                             s = RemoveOne(s, lookFor);
                             string label = FindHTML(s, "label:\"", "\"");
                             if (label.Replace(" ", "") != "") {
-                                AddPotentialLink(normalEpisode, uri, "KickassSource " + label.Replace("720P","720p"), 1);
+                                AddPotentialLink(normalEpisode, uri, "KickassSource " + label.Replace("720P", "720p"), 1);
                             }
                             print("UR: " + label + "|" + uri);
                         }
@@ -2211,6 +2211,9 @@ namespace CloudStreamForms
 
             public void FishMainLink(string year, TempThred tempThred, MALData malData)
             {
+                try {
+
+              
                 string result = DownloadString("https://animeflix.io/api/search?q=" + malData.firstName, waitTime: 400, repeats: 1);//activeMovie.title.name);
                 print("FLIX::::" + result);
                 if (result == "") return;
@@ -2238,14 +2241,14 @@ namespace CloudStreamForms
                                     var ms = activeMovie.title.MALData.seasonData[season].seasons[part - 1];
                                     string url = "https://animeflix.io/api/episodes?anime_id=" + d.id + "&limit=50&sort=DESC";
                                     print("DURL:::==" + url);
-                                    string dres = DownloadString(url);
+                                    string dres = DownloadString(url,repeats:1,waitTime:50);
                                     print("DRES:::" + dres);
                                     if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
                                     var seasonData = JsonConvert.DeserializeObject<AnimeFlixAnimeSeason>(dres);
                                     for (int z = 0; z < seasonData.meta.last_page - 1; z++) {
                                         string _url = "https://animeflix.io/api/episodes?anime_id=" + d.id + "&limit=50" + "&page=" + (i + 2) + "&sort=DESC";
                                         print("DURL:::==" + url);
-                                        string _dres = DownloadString(url);
+                                        string _dres = DownloadString(url, repeats: 1, waitTime: 50);
                                         var _seasonData = JsonConvert.DeserializeObject<AnimeFlixAnimeSeason>(dres);
 
                                         seasonData.data.AddRange(_seasonData.data);
@@ -2287,6 +2290,10 @@ namespace CloudStreamForms
                             }
                         }
                     }
+                    }
+                }
+                catch (Exception _ex) {
+                    print("Error====" + _ex);
                 }
             }
 
@@ -4198,19 +4205,16 @@ https://prettyfast.to/e/66vvrk\/fe1541bb8d2aeaec6bb7e500d070b2ec?sub=https%253A%
                         currentSelectedYear = activeMovie.title.MALData.currentSelectedYear;
                     }
                     print("FISHING DATA");
+
+                    for (int i = 0; i < animeProviders.Length; i++) {
+                        if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
+                        animeProviders[i].FishMainLink(currentSelectedYear, tempThred, activeMovie.title.MALData);
+                        if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
+                    }
+
+
+                    // FASTER, BUT.. VERY WEIRD BUG BECAUSE THEY ARE ALL WRITING TO SAME CLASS
                     /*
-                    if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
-                    FishGogoAnime(currentSelectedYear, tempThred);
-                    if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
-                    FishDubbedAnime();
-                    if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
-                    FishKickassAnime(activeMovie.title.MALData.firstName);
-                    if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS*/
-
-                    if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
-
-
-
                     int count = 0;
                     Parallel.For(0, animeProviders.Length, (int i) => {
                         print("STARTEDANIME: " + animeProviders[i].ToString() + "|" + i);
@@ -4221,12 +4225,13 @@ https://prettyfast.to/e/66vvrk\/fe1541bb8d2aeaec6bb7e500d070b2ec?sub=https%253A%
                         //if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
                     });
                     if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
+                    */
+
+
 
                     /*
                     for (int i = 0; i < animeProviders.Length; i++) {
-                        print("STARTEDANIME: " + animeProviders[i].ToString() + "|" + i);
-                      
-
+                        print("STARTEDANIME: " + animeProviders[i].ToString() + "|" + i); 
                         animeProviders[i].FishMainLink(currentSelectedYear, tempThred, activeMovie.title.MALData);
                         fishProgressLoaded?.Invoke(null, new FishLoaded() { name = animeProviders[i].Name, progress = (i + 1.0) / animeProviders.Length });
                         if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
@@ -4787,7 +4792,7 @@ https://prettyfast.to/e/66vvrk\/fe1541bb8d2aeaec6bb7e500d070b2ec?sub=https%253A%
             }
         }
 
-   
+
 
         /// <summary>
         /// RETURN SUBTITLE STRING
@@ -4820,7 +4825,7 @@ https://prettyfast.to/e/66vvrk\/fe1541bb8d2aeaec6bb7e500d070b2ec?sub=https%253A%
                         }
                     }
                     s = s.Replace("\n\n", "");
-                    if(!s.StartsWith("WEBVTT")) {
+                    if (!s.StartsWith("WEBVTT")) {
                         s = "WEBVTT\n\n" + s; // s.Insert(0, "WEBVTT\n");
                     }
                     if (showToast) {

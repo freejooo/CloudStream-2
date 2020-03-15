@@ -396,6 +396,8 @@ namespace CloudStreamForms
             }));
 
             fishProgressLoaded += (o, e) => {
+                if (!SameAsActiveMovie()) return;
+
                 Device.InvokeOnMainThreadAsync(async () => {
                     if (e.progress >= 1 && (!FishProgress.IsVisible || FishProgress.Progress >= 1)) return;
                     FishProgress.IsVisible = true;
@@ -1014,7 +1016,9 @@ namespace CloudStreamForms
 
 
 
-                bool enabled = CurrentMalLink != "";
+
+                bool enabled = currentMovie.title.movieType == MovieType.Anime; //CurrentMalLink != "";
+                print("SETACTIVE::: " + enabled);
 
                 MALB.IsVisible = enabled;
                 MALB.IsEnabled = enabled;

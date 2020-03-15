@@ -514,7 +514,10 @@ namespace CloudStreamForms.Droid
                     PendingIntentFlags.CancelCurrent
                      );
 
-                var triggerTime = CurrentTimeMillis((DateTime)time);// NotifyTimeInMilliseconds((DateTime)time);
+
+               
+
+                var triggerTime = CurrentTimeMillis(((DateTime)time).Add(DateTime.UtcNow.Subtract(DateTime.Now)));// NotifyTimeInMilliseconds((DateTime)time);
                 var alarmManager = GetAlarmManager();
 
                 alarmManager.SetExactAndAllowWhileIdle(AlarmType.RtcWakeup, triggerTime, pending);

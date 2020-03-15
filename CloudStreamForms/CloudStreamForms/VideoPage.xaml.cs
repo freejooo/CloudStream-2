@@ -17,6 +17,8 @@ namespace CloudStreamForms
     public partial class VideoPage : ContentPage
     {
 
+
+
         const string PLAY_IMAGE = "netflixPlay.png";//"baseline_play_arrow_white_48dp.png";
         const string PAUSE_IMAGE = "pausePlay.png";//"baseline_pause_white_48dp.png";
 
@@ -445,11 +447,26 @@ namespace CloudStreamForms
         TouchTracking.TouchTrackingPoint startCursorPosition;
 
 
+        const uint fadeTime = 250;
+        const int timeUntilFade = 2000;
+
+
+
+        async void FadeEverything(bool disable)
+        {
+            print("FADETO: " + disable);
+            VideoSliderAndSettings.AbortAnimation("FadeTo");
+            await VideoSliderAndSettings.FadeTo(disable ? 0 : 1, fadeTime, Easing.Linear);
+        }
+
+        double TotalOpasity { get { return VideoSliderAndSettings.Opacity; } }
 
 
         private void TouchEffect_TouchAction(object sender, TouchTracking.TouchActionEventArgs args)
         {
             if (Player.Length == -1) return;
+
+
 
             if (args.Type == TouchTracking.TouchActionType.Pressed) {
                 if (DateTime.Now.Subtract(lastClick).TotalSeconds < 0.25) { // Doubble click
@@ -463,17 +480,9 @@ namespace CloudStreamForms
                     }
                 }
                 lastClick = DateTime.Now;
-            }
+                FadeEverything(false);
 
-            if (args.Type == TouchTracking.TouchActionType.Released) {
-                if (isMovingCursor && isMovingHorozontal && Math.Abs(isMovingSkipTime) > 1000) { // SKIP TIME
-                    SeekMedia(isMovingSkipTime - Player.Time + isMovingStartTime);
-                }
-                SkiptimeLabel.Text = "";
-                isMovingCursor = false;
-            }
 
-            if (args.Type == TouchTracking.TouchActionType.Pressed) {
                 startCursorPosition = args.Location;
                 isMovingFromLeftSide = (TapRec.Width / 2.0 > args.Location.X);
                 isMovingStartTime = Player.Time;
@@ -482,10 +491,20 @@ namespace CloudStreamForms
                 cursorPosition = args.Location;
 
                 maxVol = Volyme >= 100 ? 200 : 100;
-
+            }
+            else if (args.Type == TouchTracking.TouchActionType.Released) {
+                if (isMovingCursor && isMovingHorozontal && Math.Abs(isMovingSkipTime) > 1000) { // SKIP TIME
+                    SeekMedia(isMovingSkipTime - Player.Time + isMovingStartTime);
+                }
+                SkiptimeLabel.Text = "";
+                isMovingCursor = false;
+                if ((DateTime.Now.Subtract(lastClick).TotalSeconds < 0.25) && TotalOpasity == 1) {
+                    FadeEverything(true);
+                }
             }
 
-            if (args.Type == TouchTracking.TouchActionType.Moved) {
+
+            else if (args.Type == TouchTracking.TouchActionType.Moved) {
                 print(startCursorPosition.X - args.Location.X);
                 if ((minimumDistance < Math.Abs(startCursorPosition.X - args.Location.X) || minimumDistance < Math.Abs(startCursorPosition.X - args.Location.X)) && !isMovingCursor) {
                     // STARTED FIRST TIME
