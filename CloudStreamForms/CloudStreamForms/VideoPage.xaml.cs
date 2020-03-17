@@ -22,6 +22,11 @@ namespace CloudStreamForms
         const string PLAY_IMAGE = "netflixPlay.png";//"baseline_play_arrow_white_48dp.png";
         const string PAUSE_IMAGE = "pausePlay.png";//"baseline_pause_white_48dp.png";
 
+        const string LOCKED_IMAGE = "wlockLocked.png";
+        const string UN_LOCKED_IMAGE = "wlockUnLocked.png";
+
+        bool isPaused = false;
+
         MediaPlayer Player { get { return vvideo.MediaPlayer; } set { vvideo.MediaPlayer = value; } }
 
         LibVLC _libVLC;
@@ -122,6 +127,16 @@ namespace CloudStreamForms
             InitializeComponent();
             Core.Initialize();
 
+
+            void SetIsLocked()
+            {
+                LockImg.Source = App.GetImageSource(isLocked ? LOCKED_IMAGE : UN_LOCKED_IMAGE);
+                LockTxt.TextColor = Color.FromHex(isLocked ? "#617EFF" : "#FFFFFF");
+                // LockTap.SetValue(XamEffects.TouchEffect.ColorProperty, Color.FromHex(isLocked ? "#617EFF" : "#FFFFFF"));
+                LockTap.SetValue(XamEffects.TouchEffect.ColorProperty, Color.FromHex(isLocked ? "#99acff" : "#FFFFFF"));
+                LockImg.Transformations = new List<FFImageLoading.Work.ITransformation>() { (new FFImageLoading.Transformations.TintTransformation(isLocked ? MainPage.DARK_BLUE_COLOR : "#FFFFFF")) };
+            }
+
             SkipForward.TranslationX = TRANSLATE_START_X;
             SkipForwardImg.Source = App.GetImageSource("netflixSkipForward.png");
             SkipForwardBtt.TranslationX = TRANSLATE_START_X;
@@ -137,7 +152,10 @@ namespace CloudStreamForms
                 SeekMedia(-SKIPTIME);
                 SkipBac();
             }));
-
+            Commands.SetTap(LockTap, new Command(() => {
+                isLocked = !isLocked;
+                SetIsLocked();
+            }));
 
 
             // ======================= SETUP =======================
@@ -160,7 +178,8 @@ namespace CloudStreamForms
             //  GradientBottom.Source = App.GetImageSource("gradient.png");
             // DownloadImg.Source = App.GetImageSource("netflixEpisodesCut.png");//App.GetImageSource("round_more_vert_white_48dp.png");
 
-            LockImg.Source = App.GetImageSource("wlockUnLocked.png");
+            SetIsLocked();
+            // LockImg.Source = App.GetImageSource("wlockUnLocked.png");
             SubtitleImg.Source = App.GetImageSource("outline_subtitles_white_48dp.png");
 
 
@@ -191,7 +210,7 @@ namespace CloudStreamForms
                 PausePlayBtt.IsVisible = true;
                 LoadingCir.IsVisible = false;
                 BufferLabel.IsVisible = false;
-
+                isPaused = paused;
             }
 
             Player.Paused += (o, e) => {
@@ -312,10 +331,15 @@ namespace CloudStreamForms
 
         public void PausePlayBtt_Clicked(object sender, EventArgs e)
         {
+            if (isPaused) { // UNPAUSE
+                StartFade();
+            }
+
             //Player.SetPause(true);
             if (!dragingVideo) {
                 Player.Pause();
             }
+
         }
 
 
@@ -327,6 +351,8 @@ namespace CloudStreamForms
         static bool dragingVideo = false;
         private void VideoSlider_DragStarted(object sender, EventArgs e)
         {
+            CurrentTap++;
+
             Player.SetPause(true);
             dragingVideo = true;
             SlideChangedLabel.IsVisible = true;
@@ -335,6 +361,8 @@ namespace CloudStreamForms
 
         private void VideoSlider_DragCompleted(object sender, EventArgs e)
         {
+            CurrentTap++;
+
             long len = (long)(VideoSlider.Value * Player.Length);
             Player.Time = len;
             Player.SetPause(false);
@@ -342,13 +370,15 @@ namespace CloudStreamForms
             SlideChangedLabel.IsVisible = false;
             SlideChangedLabel.Text = "";
             SkiptimeLabel.Text = "";
+            StartFade();
         }
 
         private void VideoSlider_ValueChanged(object sender, ValueChangedEventArgs e)
         {
             ChangeTime(e.NewValue);
-            long timeChange = (long)(VideoSlider.Value * Player.Length) - Player.Time;
             if (dragingVideo) {
+                long timeChange = (long)(VideoSlider.Value * Player.Length) - Player.Time;
+                CurrentTap++;
                 SlideChangedLabel.TranslationX = ((e.NewValue - 0.5)) * (VideoSlider.Width - 30);
 
                 //    var time = TimeSpan.FromMilliseconds(timeChange);
@@ -447,29 +477,62 @@ namespace CloudStreamForms
         TouchTracking.TouchTrackingPoint startCursorPosition;
 
 
-        const uint fadeTime = 250;
-        const int timeUntilFade = 2000;
-
-
-
-        async void FadeEverything(bool disable)
+        const uint fadeTime = 100;
+        const int timeUntilFade = 2500;
+        const bool CAN_FADE_WHEN_PAUSED = false;
+        const bool WILL_AUTO_FADE_WHEN_PAUSED = false;
+        async void FadeEverything(bool disable, bool overridePaused = false)
         {
+            if (isPaused && !overridePaused && CAN_FADE_WHEN_PAUSED) { // CANT FADE WHEN PAUSED
+                return;
+            }
+            await Task.Delay(10);
+
             print("FADETO: " + disable);
-            VideoSliderAndSettings.AbortAnimation("FadeTo");
-            await VideoSliderAndSettings.FadeTo(disable ? 0 : 1, fadeTime, Easing.Linear);
+            VideoSliderAndSettings.AbortAnimation("TranslateTo");
+            VideoSliderAndSettings.TranslateTo(VideoSliderAndSettings.TranslationX, disable ? 80 : 0, fadeTime, Easing.Linear);
+            EpisodeLabel.AbortAnimation("TranslateTo");
+            EpisodeLabel.TranslateTo(EpisodeLabel.TranslationX, disable ? -60 : 20, fadeTime, Easing.Linear);
+
+            AllButtons.AbortAnimation("FadeTo");
+            AllButtons.IsEnabled = !disable;
+            await AllButtons.FadeTo(disable ? 0 : 1, fadeTime, Easing.Linear);
         }
 
-        double TotalOpasity { get { return VideoSliderAndSettings.Opacity; } }
+        async void StartFade(bool overridePause = false)
+        {
+            string _currentTap = CurrentTap.ToString();
+            await Task.Delay(timeUntilFade);
+            if (_currentTap == CurrentTap.ToString()) {
+                if (!isPaused || WILL_AUTO_FADE_WHEN_PAUSED) {
+                    FadeEverything(true, overridePause);
+                }
+            }
+        }
 
+        int CurrentTap = 0;
+
+        bool isLocked = false;
+
+        double TotalOpasity { get { return AllButtons.Opacity; } }
+
+        DateTime lastRelease = DateTime.MinValue;
 
         private void TouchEffect_TouchAction(object sender, TouchTracking.TouchActionEventArgs args)
         {
             if (Player.Length == -1) return;
 
-
+            if (args.Type == TouchTracking.TouchActionType.Pressed || args.Type == TouchTracking.TouchActionType.Moved || args.Type == TouchTracking.TouchActionType.Entered) {
+                CurrentTap++;
+            }
+            else if (args.Type == TouchTracking.TouchActionType.Cancelled || args.Type == TouchTracking.TouchActionType.Exited || args.Type == TouchTracking.TouchActionType.Released) {
+                StartFade();
+            }
 
             if (args.Type == TouchTracking.TouchActionType.Pressed) {
                 if (DateTime.Now.Subtract(lastClick).TotalSeconds < 0.25) { // Doubble click
+                    lastRelease = DateTime.Now;
+
                     bool forward = (TapRec.Width / 2.0 < args.Location.X);
                     SeekMedia(SKIPTIME * (forward ? 1 : -1));
                     if (forward) {
@@ -482,7 +545,6 @@ namespace CloudStreamForms
                 lastClick = DateTime.Now;
                 FadeEverything(false);
 
-
                 startCursorPosition = args.Location;
                 isMovingFromLeftSide = (TapRec.Width / 2.0 > args.Location.X);
                 isMovingStartTime = Player.Time;
@@ -492,16 +554,8 @@ namespace CloudStreamForms
 
                 maxVol = Volyme >= 100 ? 200 : 100;
             }
-            else if (args.Type == TouchTracking.TouchActionType.Released) {
-                if (isMovingCursor && isMovingHorozontal && Math.Abs(isMovingSkipTime) > 1000) { // SKIP TIME
-                    SeekMedia(isMovingSkipTime - Player.Time + isMovingStartTime);
-                }
-                SkiptimeLabel.Text = "";
-                isMovingCursor = false;
-                if ((DateTime.Now.Subtract(lastClick).TotalSeconds < 0.25) && TotalOpasity == 1) {
-                    FadeEverything(true);
-                }
-            }
+
+
 
 
             else if (args.Type == TouchTracking.TouchActionType.Moved) {
@@ -527,13 +581,13 @@ namespace CloudStreamForms
                     else {
                         if (isMovingFromLeftSide) {
                             if (canChangeBrightness) {
-                                BrightnessProcentage -= args.Location.Y - cursorPosition.Y;
+                                BrightnessProcentage -= (args.Location.Y - cursorPosition.Y) / 2.0;
                                 BrightnessProcentage = Math.Max(Math.Min(BrightnessProcentage, 100), 0); // CLAM
                                 SkiptimeLabel.Text = $"Brightness {(int)BrightnessProcentage}%";
                             }
                         }
                         else {
-                            Volyme -= args.Location.Y - cursorPosition.Y;
+                            Volyme -= (args.Location.Y - cursorPosition.Y) / 2.0;
                             Volyme = Math.Max(Math.Min(Volyme, maxVol), 0); // CLAM
                             SkiptimeLabel.Text = $"Volyme {(int)Volyme}%";
                         }
@@ -543,7 +597,19 @@ namespace CloudStreamForms
 
                 }
             }
-
+            else if (args.Type == TouchTracking.TouchActionType.Released) {
+                if (isMovingCursor && isMovingHorozontal && Math.Abs(isMovingSkipTime) > 1000) { // SKIP TIME
+                    FadeEverything(true);
+                    SeekMedia(isMovingSkipTime - Player.Time + isMovingStartTime);
+                }
+                else {
+                    SkiptimeLabel.Text = "";
+                    isMovingCursor = false;
+                    if ((DateTime.Now.Subtract(lastClick).TotalSeconds < 0.25) && TotalOpasity == 1 && DateTime.Now.Subtract(lastRelease).TotalSeconds > 0.25) { // FADE WHEN REALEASED
+                        FadeEverything(true);
+                    }
+                }
+            }
             print("LEFT TIGHT " + (TapRec.Width / 2.0 < args.Location.X) + TapRec.Width + "|" + TapRec.X);
             print("TOUCHED::D:A::A" + args.Location.X + "|" + args.Type.ToString());
         }

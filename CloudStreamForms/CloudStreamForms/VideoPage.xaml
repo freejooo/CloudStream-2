@@ -30,7 +30,10 @@
                         <!-- <vlc:MediaPlayerElement MediaPlayer="{Binding Player}" LibVLC="{Binding VLC}" EnableRendererDiscovery="True" />-->
                         <!--  <Label x:Name="SeekTxt" Text="Hello" AbsoluteLayout.LayoutBounds=".5,1,1,.1" AbsoluteLayout.LayoutFlags="All" FontSize="20" LineBreakMode="WordWrap" TextColor="White" />-->
                     </AbsoluteLayout>
-
+                   
+                    <Grid x:Name="AllButtons">
+                        
+                    
                     <Button BackgroundColor="Black" Opacity="0.3" InputTransparent="True" HorizontalOptions="FillAndExpand" VerticalOptions="FillAndExpand"></Button>
 
 
@@ -41,10 +44,8 @@
                     <ff:CachedImage x:Name="PausePlayBtt" VerticalOptions="Center" WidthRequest="70" HeightRequest="70" HorizontalOptions="Center" BackgroundColor="Transparent" InputTransparent="True">
 
                     </ff:CachedImage>
-
-                    <ActivityIndicator x:Name="LoadingCir"  IsVisible="False"  InputTransparent="True" IsRunning="True"  Opacity="1" VerticalOptions="Center" HorizontalOptions="Center" Color="#617EFF"></ActivityIndicator>
-
-                    <Label x:Name="SkipForward" Text="+10" IsVisible="False" VerticalOptions="Center" HorizontalOptions="Center" TranslationX="170" AbsoluteLayout.LayoutFlags="All" FontSize="24" TextColor="White" />
+ 
+                        <Label x:Name="SkipForward" Text="+10" IsVisible="False" VerticalOptions="Center" HorizontalOptions="Center" TranslationX="170" AbsoluteLayout.LayoutFlags="All" FontSize="24" TextColor="White" />
                     <Label x:Name="SkipForwardSmall" Text="10" VerticalOptions="Center" HorizontalOptions="Center" TranslationX="170" AbsoluteLayout.LayoutFlags="All" FontSize="20" TextColor="White" />
                     <Image x:Name="SkipForwardImg"   VerticalOptions="Center" HorizontalOptions="Center" TranslationX="170" AbsoluteLayout.LayoutFlags="All" WidthRequest="50" HeightRequest="50" />
                     <xe:BorderView  x:Name="SkipForwardBtt" xe:TouchEffect.Color="White"  TranslationX="100" Opacity="0.6" VerticalOptions="Center" WidthRequest="34" HeightRequest="34" CornerRadius="17" HorizontalOptions="Center" BackgroundColor="Transparent">
@@ -60,57 +61,8 @@
                     <xe:BorderView  x:Name="SkipBackBtt" xe:TouchEffect.Color="White"  TranslationX="-100" Opacity="0.6" VerticalOptions="Center" WidthRequest="34" HeightRequest="34" CornerRadius="17" HorizontalOptions="Center" BackgroundColor="Transparent">
                     </xe:BorderView>
 
-                    <Label x:Name="BufferLabel" Text="50%" TextColor="White" FontSize="14" VerticalOptions="Center" HorizontalOptions="Center"></Label>
                     <Label x:Name="SkiptimeLabel" Text="" TextColor="White" FontSize="25" VerticalOptions="Center" HorizontalOptions="Center" TranslationY="-60"></Label>
                     <Label x:Name="EpisodeLabel"  Text="S12:E3 Iron Man" VerticalOptions="Start" HorizontalOptions="Center" FontSize="14" TextColor="#e7e7e7" TranslationY="20"></Label>
-                    <!--  <Grid x:Name="VideoSettings" VerticalOptions="Start" HorizontalOptions="End" TranslationY="20" ColumnSpacing="20" Scale="0.7">
-                <Grid.ColumnDefinitions >
-                    <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition Width="Auto" />
-                </Grid.ColumnDefinitions>
-                <ff:CachedImage x:Name="LockImg" Grid.Column="0" VerticalOptions="Center" TranslationY="-2" InputTransparent="True" BackgroundColor="Transparent" WidthRequest="27" HeightRequest="27" ></ff:CachedImage>
-                <Image x:Name="SubtitlesImg" Grid.Column="1" TranslationX="10" InputTransparent="True" ></Image>
-                <Image x:Name="MirrosImg" Grid.Column="2"  TranslationX="10" InputTransparent="True" Scale="1.2"></Image>
-                <Image x:Name="DownloadImg" Grid.Column="3" TranslationX="10" InputTransparent="True" Scale="1"></Image>
-
-            </Grid>-->
-                    <!--
-            <Grid VerticalOptions="End" HorizontalOptions="Start">
-            
-                    <xe:BorderView x:Name="LockTap" Grid.Column="0"
-          HeightRequest="35"
-          WidthRequest="35"
-                                    xe:TouchEffect.Color="White" 
-          HorizontalOptions="Center"
-          VerticalOptions="Center"
-          BackgroundColor="Transparent"
-          CornerRadius="2"
-          BorderColor="Transparent"
-          BorderWidth="0">
-
-                        <ff:CachedImage x:Name="LockImg" Grid.Column="0" VerticalOptions="Center"  TranslationX="0"  InputTransparent="True" BackgroundColor="Transparent" WidthRequest="23" HeightRequest="23"  ></ff:CachedImage>
-
-                    </xe:BorderView>
-
-                    <xe:BorderView x:Name="SubTap" Grid.Column="1"
-          HeightRequest="35"
-          WidthRequest="35"
-                                    xe:TouchEffect.Color="White" 
-          HorizontalOptions="Center"
-          VerticalOptions="Center"
-          BackgroundColor="Transparent"
-          CornerRadius="2"
-          BorderColor="Transparent"
-          BorderWidth="0">
-
-                        <ff:CachedImage x:Name="SubtitleImg" Grid.Column="0" VerticalOptions="Center"  TranslationX="0"  InputTransparent="True" BackgroundColor="Transparent" WidthRequest="30" HeightRequest="30"  ></ff:CachedImage>
-
-                    </xe:BorderView> 
-            </Grid>-->
                     <Grid x:Name="VideoSliderAndSettings"  VerticalOptions="End" >
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto" />
@@ -133,9 +85,10 @@
                                 <ColumnDefinition Width="*" />
                                 <ColumnDefinition Width="Auto" />
                             </Grid.ColumnDefinitions>
-                            <Label Grid.Row="0" Grid.Column="0" x:Name="StartTxt" Text="11:13" HorizontalOptions="Start" TextColor="White"></Label>
-                            <Slider x:Name="VideoSlider" Grid.Column="1"  MinimumTrackColor="#617EFF" ThumbColor="#617EFF" HorizontalOptions="Fill" Margin="0,0,0,10" Maximum="1" DragStarted="VideoSlider_DragStarted" DragCompleted="VideoSlider_DragCompleted" ValueChanged="VideoSlider_ValueChanged" ></Slider>
-                            <Label Grid.Row="0" Grid.Column="2" x:Name="EndTxt" Text="54:27" HorizontalOptions="End" TextColor="White"></Label>
+                            <Label Grid.Row="0" Grid.Column="0" x:Name="StartTxt" Text="11:13" HorizontalOptions="Start" TextColor="White" VerticalOptions="Center"></Label>
+                            
+                            <Slider VerticalOptions="Center" x:Name="VideoSlider" BackgroundColor="Transparent" Grid.Column="1"  MinimumTrackColor="#617EFF" ThumbColor="#617EFF" HorizontalOptions="Fill" Margin="0,0,0,0" Maximum="1" DragStarted="VideoSlider_DragStarted" DragCompleted="VideoSlider_DragCompleted" ValueChanged="VideoSlider_ValueChanged" HeightRequest="40"></Slider>
+                            <Label VerticalOptions="Center" Grid.Row="0" Grid.Column="2" x:Name="EndTxt" Text="54:27" HorizontalOptions="End" TextColor="White"></Label>
                         </Grid>
                         <Grid x:Name="VideoSettings" VerticalOptions="End" HorizontalOptions="Center" Grid.Row="2" TranslationY="20" ColumnSpacing="20" TranslationX="20">
                             <Grid.ColumnDefinitions >
@@ -224,7 +177,7 @@
                                     </Grid.ColumnDefinitions>
                                     <ff:CachedImage x:Name="LockImg" Grid.Column="0" VerticalOptions="Center"  TranslationX="-7"  InputTransparent="True" BackgroundColor="Transparent" WidthRequest="23" HeightRequest="23" Aspect="AspectFill"></ff:CachedImage>
                                     <!--<Button Text="Episodes"  Grid.Column="1" BackgroundColor="Transparent"></Button>-->
-                                    <Label Text="Lock" Grid.Column="1" VerticalOptions="Center" TextColor="White"></Label>
+                                    <Label Text="Lock" x:Name="LockTxt" Grid.Column="1" VerticalOptions="Center" TextColor="White"></Label>
                                 </Grid>
                             </xe:BorderView>
                             <xe:BorderView x:Name="EpisodesTap" Grid.Column="1" Margin="-10,0"
@@ -376,24 +329,9 @@
                         </Grid>
 
                     </Grid>
-                    <!--   <ProgressBar x:Name="BufferBar" Progress="0" ProgressColor="#303F9F" IsVisible="False" VerticalOptions="End"></ProgressBar> -->
-                    <!--     <Button BackgroundColor="Blue" HorizontalOptions="FillAndExpand" VerticalOptions="FillAndExpand"></Button>-->
-                    <!--
-            <xe:BorderView x:Name="LockTap" Grid.Column="0"  TranslationX="20" Margin="20"
-          HeightRequest="35"
-          WidthRequest="35"
-                                    xe:TouchEffect.Color="White" 
-          HorizontalOptions="Start"
-          VerticalOptions="End"
-          BackgroundColor="Transparent"
-          CornerRadius="2"
-          BorderColor="Transparent"
-          BorderWidth="0">
-
-                <ff:CachedImage x:Name="LockImg" Grid.Column="0" VerticalOptions="Center"  TranslationX="0"  InputTransparent="True" BackgroundColor="Transparent" WidthRequest="23" HeightRequest="23"  ></ff:CachedImage>
-
-            </xe:BorderView>-->
-
+                    </Grid>
+                    <ActivityIndicator x:Name="LoadingCir"  IsVisible="False"  InputTransparent="True" IsRunning="True"  Opacity="1" VerticalOptions="Center" HorizontalOptions="Center" Color="#617EFF"></ActivityIndicator>
+                    <Label x:Name="BufferLabel" Text="50%"  FontSize="14" VerticalOptions="Center" HorizontalOptions="Center" TextColor="#617EFF"></Label>
                 </Grid>
 
             </StackLayout>
