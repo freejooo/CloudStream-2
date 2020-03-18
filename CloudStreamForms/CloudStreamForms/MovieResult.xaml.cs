@@ -425,6 +425,29 @@ namespace CloudStreamForms
         }
 
 
+
+        void CancelNotifications()
+        {
+            var keys = App.GetKey<List<int>>("NotificationsIds", currentMovie.title.id, new List<int>());
+            for (int i = 0; i < keys.Count; i++) {
+                App.CancelNotifaction(keys[i]);
+            }
+        }
+
+        void AddNotifications()
+        {
+            List<int> keys = new List<int>();
+
+            for (int i = 0; i < setNotificationsTimes.Count; i++) {
+                // GENERATE UNIQUE ID
+                int _id = 1337 + setNotificationsTimes[i].number * 100000000 + int.Parse(currentMovie.title.id.Replace("tt", ""));// int.Parse(setNotificationsTimes[i].number + currentMovie.title.id.Replace("tt", ""));
+                keys.Add(_id);
+                print("BIGICON:::" + currentMovie.title.hdPosterUrl + "|" + currentMovie.title.posterUrl);
+                App.ShowNotIntent("NEW EPISODE - " + currentMovie.title.name, setNotificationsTimes[i].episodeName, _id, currentMovie.title.id, currentMovie.title.name, bigIconUrl: currentMovie.title.hdPosterUrl, time: setNotificationsTimes[i].timeOfRelease);//DateTime.UtcNow.AddSeconds(10));//ShowNotification("NEW EPISODE - " + currentMovie.title.name, setNotificationsTimes[i].episodeName, _id, i * 10);
+            }
+            App.SetKey("NotificationsIds", currentMovie.title.id, keys);
+        }
+
         void ToggleNotify()
         {
             bool hasNot = App.GetKey<bool>("Notifications", currentMovie.title.id, false);
@@ -432,22 +455,10 @@ namespace CloudStreamForms
             UpdateNotification(!hasNot);
 
             if (!hasNot) {
-                List<int> keys = new List<int>();
-
-                for (int i = 0; i < setNotificationsTimes.Count; i++) {
-                    // GENERATE UNIQUE ID
-                    int _id = 1337 + setNotificationsTimes[i].number * 100000000 + int.Parse(currentMovie.title.id.Replace("tt", ""));// int.Parse(setNotificationsTimes[i].number + currentMovie.title.id.Replace("tt", ""));
-                    keys.Add(_id);
-                    print("BIGICON:::" + currentMovie.title.hdPosterUrl + "|" + currentMovie.title.posterUrl);
-                    App.ShowNotIntent("NEW EPISODE - " + currentMovie.title.name, setNotificationsTimes[i].episodeName, _id, currentMovie.title.id, currentMovie.title.name, bigIconUrl: currentMovie.title.hdPosterUrl, time: setNotificationsTimes[i].timeOfRelease);//DateTime.UtcNow.AddSeconds(10));//ShowNotification("NEW EPISODE - " + currentMovie.title.name, setNotificationsTimes[i].episodeName, _id, i * 10);
-                }
-                App.SetKey("NotificationsIds", currentMovie.title.id, keys);
+                AddNotifications();
             }
             else {
-                var keys = App.GetKey<List<int>>("NotificationsIds", currentMovie.title.id, new List<int>());
-                for (int i = 0; i < keys.Count; i++) {
-                    App.CancelNotifaction(keys[i]);
-                }
+                CancelNotifications();
             }
         }
 
@@ -460,10 +471,13 @@ namespace CloudStreamForms
 
         List<MoeEpisode> setNotificationsTimes = new List<MoeEpisode>();
 
-
         private void MovieResult_moeDone(object sender, List<MoeEpisode> e)
         {
             if (e == null) return;
+            print("MOE DONE:::: + " + e.Count);
+            for (int i = 0; i < e.Count; i++) {
+                print("MOE______ " + e[i].episodeName);
+            }
             void FadeIn()
             {
                 NotificationTime.Opacity = 0;
@@ -484,9 +498,15 @@ namespace CloudStreamForms
             if (!SameAsActiveMovie()) return;
             Device.BeginInvokeOnMainThread(() => {
                 try {
+                    AddNotifications(); // UPDATE NOTIFICATIONS
+                }
+                catch (Exception _ex) {
+                    print("NOTIFICATIONS ADD ERROR: " + _ex);
+                }
+                try {
                     NotificationTime.Text = "Completed";
                     FadeIn();
-                    for (int i = e.Count - 1; i > 0; i++) {
+                    for (int i = e.Count - 1; i >= 0; i--) {
                         var diff = e[i].DiffTime;
                         print("DIFFTIME:::::" + e[i].DiffTime);
                         if (diff.TotalSeconds > 0) {
