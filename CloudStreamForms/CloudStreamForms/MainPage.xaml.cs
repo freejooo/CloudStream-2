@@ -39,8 +39,8 @@ namespace CloudStreamForms
         public const string ITEM_COLOR = "#617eff";
         public const string LIGHT_DARK_BLUE_COLOR = "#1976D2";
 
-        public const bool IS_EMTY_BUILD = true;
-        public const bool IS_TEST_VIDEO = true;
+        public const bool IS_EMTY_BUILD = false;
+        public const bool IS_TEST_VIDEO = false;
 
         public static string intentData = "";
         public static MainPage mainPage;
@@ -867,6 +867,23 @@ namespace CloudStreamForms
             public DubbedAnimeData dubbedAnimeData;
             public KickassAnimeData kickassAnimeData;
             public AnimeFlixData animeFlixData;
+            public DubbedAnimeNetData dubbedAnimeNetData;
+        }
+
+        [System.Serializable]
+        public struct DubbedAnimeNetData
+        {
+            public bool dubExists;
+            public bool subExists;
+            public DubbedAnimeNetEpisode[] EpisodesUrls;
+        }
+
+        [Serializable]
+        public struct DubbedAnimeNetEpisode
+        {
+            public string href;
+            public bool dubExists;
+            public bool subExists;
         }
 
         [Serializable]
@@ -1318,7 +1335,7 @@ namespace CloudStreamForms
 
         public static IMovieProvider[] movieProviders = new IMovieProvider[] { new FullMoviesProvider(), new TMDBProvider(), new WatchTVProvider(), new FMoviesProvider(), new LiveMovies123Provider(), new TheMovies123Provider(), new YesMoviesProvider(), new WatchSeriesProvider(), new GomoStreamProvider(), new Movies123Provider() };
 
-        public static IAnimeProvider[] animeProviders = new IAnimeProvider[] { new GogoAnimeProvider(), new KickassAnimeProvider(), new DubbedAnimeProvider(), new AnimeFlixProvider() };
+        public static IAnimeProvider[] animeProviders = new IAnimeProvider[] { new GogoAnimeProvider(), new KickassAnimeProvider(), new DubbedAnimeProvider(), new AnimeFlixProvider(), new DubbedAnimeNetProvider() };
 
         public interface IMovieProvider // FOR MOVIES AND SHOWS
         {
@@ -1489,6 +1506,28 @@ namespace CloudStreamForms
                 else {
                     return 0;
                 }
+            }
+            public static List<string> GetAllGogoLinksFromAnime(Movie currentMovie, int currentSeason, bool isDub)
+            {
+                List<string> baseUrls = new List<string>();
+
+                try {
+                    for (int q = 0; q < currentMovie.title.MALData.seasonData[currentSeason].seasons.Count; q++) {
+                        var ms = currentMovie.title.MALData.seasonData[currentSeason].seasons[q].gogoData;
+
+                        if ((ms.dubExists && isDub) || (ms.subExists && !isDub)) {
+                            //  dstring = ms.baseUrl;
+                            string burl = isDub ? ms.dubUrl : ms.subUrl;
+                            if (!baseUrls.Contains(burl)) {
+                                baseUrls.Add(burl);
+                            }
+                            //print("BASEURL " + ms.baseUrl);
+                        }
+                    }
+                }
+                catch (Exception) {
+                }
+                return baseUrls;
             }
 
             public void LoadLinksTSync(int episode, int season, int normalEpisode, bool isDub, TempThred tempThred)
@@ -1903,6 +1942,291 @@ namespace CloudStreamForms
             }
         }
 
+        class DubbedAnimeNetProvider : IAnimeProvider
+        {
+            #region structs
+            public struct DubbedAnimeNetRelated
+            {
+                public string Alternative_version { get; set; }
+                public string Parent_story { get; set; }
+                public string Other { get; set; }
+                public string Prequel { get; set; }
+                public string Side_story { get; set; }
+                public string Sequel { get; set; }
+                public string Character { get; set; }
+            }
+
+            public struct DubbedAnimeNetSearchResult
+            {
+                public string id { get; set; }
+                public string slug { get; set; }
+                public string title { get; set; }
+                public string image { get; set; }
+                public string synopsis { get; set; }
+                public string english { get; set; }
+                public string japanese { get; set; }
+                public string synonyms { get; set; }
+                public string type { get; set; }
+                public string total { get; set; }
+                public string status { get; set; }
+                public string date { get; set; }
+                public string aired { get; set; }
+                public object year { get; set; }
+                public object season { get; set; }
+                public string premiered { get; set; }
+                public string duration { get; set; }
+                public string rating { get; set; }
+                public string genres { get; set; }
+                public List<DubbedAnimeNetRelated> related { get; set; }
+                public string score { get; set; }
+                public string rank { get; set; }
+                public string popularity { get; set; }
+                public string mal_id { get; set; }
+                public string url { get; set; }
+            }
+
+            public struct DubbedAnimeNetQuickSearch
+            {
+                public List<DubbedAnimeNetSearchResult> results { get; set; }
+                public int pages { get; set; }
+                public string query { get; set; }
+                public int total { get; set; }
+            }
+
+            public struct DubbedAnimeNetName
+            {
+                public string @default { get; set; }
+                public string english { get; set; }
+            }
+
+            public struct DubbedAnimeNetVideo
+            {
+                public string host { get; set; }
+                public string id { get; set; }
+                public string type { get; set; }
+                public string date { get; set; }
+            }
+
+            public struct DubbedAnimeNetAPIEpisode
+            {
+                public string id { get; set; }
+                public string anime_id { get; set; }
+                public string slug { get; set; }
+                public string number { get; set; }
+                public DubbedAnimeNetName name { get; set; }
+                public string title { get; set; }
+                public string description { get; set; }
+                public string date { get; set; }
+                public List<DubbedAnimeNetVideo> videos { get; set; }
+                public string image { get; set; }
+                public string next_id { get; set; }
+                public object previous_id { get; set; }
+                public string url { get; set; }
+                public string lang { get; set; }
+            }
+            public struct DubbedAnimeNetEpisodeExternalAPI
+            {
+                public string host { get; set; }
+                public string id { get; set; }
+                public string type { get; set; }
+            }
+            #endregion
+            public string Name => "DubbedAnimeNet";
+
+            public void FishMainLink(string year, TempThred tempThred, MALData malData)
+            {
+                print("GET MAIN LINK FROM " + Name);
+                string search = malData.engName;//"neverland";
+                string postReq = PostRequest("https://ww5.dubbedanime.net/ajax/paginate", "https://ww5.dubbedanime.net/browse-anime?search=" + search, $"query%5Bsearch%5D={search}&what=query&model=Anime&size=30&letter=all");
+                print("DUBBEDANIMEPOST: " + postReq);
+                
+                if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
+                try {
+                    var _d = JsonConvert.DeserializeObject<DubbedAnimeNetQuickSearch>(postReq);
+
+                    for (int i = 0; i < _d.results.Count; i++) {
+                        for (int q = 0; q < activeMovie.title.MALData.seasonData.Count; q++) {
+                            for (int z = 0; z < activeMovie.title.MALData.seasonData[q].seasons.Count; z++) {
+                                var md = activeMovie.title.MALData.seasonData[q].seasons[z];
+                                string id = FindHTML(md.malUrl, "/anime/", "/");
+                                print("DUBBEDANIMEID:::???" + id + "--||--" + _d.results[i].mal_id);
+                                if (id == _d.results[i].mal_id) {
+
+                                    print("SLIGID:: " + _d.results[i].slug);
+
+                                    string d = DownloadString("https://ww5.dubbedanime.net/anime/" + _d.results[i].slug);//anime/the-promised-neverland");
+
+                                    var data = new DubbedAnimeNetData();
+                                    int maxEp = 0;
+                                    string lookFor = "<li class=\"jt-di dropdown-item\"";
+
+                                    Dictionary<int, DubbedAnimeNetEpisode> dubbedKeys = new Dictionary<int, DubbedAnimeNetEpisode>();
+
+                                    while (d.Contains(lookFor)) {
+                                        d = RemoveOne(d, lookFor);
+                                        bool isDubbed = FindHTML(d, "data-dubbed=\"", "\"") == "true";
+                                        bool isSubbed = FindHTML(d, "data-subbed=\"", "\"") == "true";
+                                        string href = FindHTML(d, "<a href=\'", "\'");
+                                        int episode = int.Parse(FindHTML(d, ">Episode ", "<"));
+                                        if (maxEp < episode) {
+                                            maxEp = episode;
+                                        }
+                                        dubbedKeys.Add(episode, new DubbedAnimeNetEpisode() { dubExists = isDubbed, subExists = isSubbed, href = href });
+
+                                        print(Name + "LOADED:::::::::: " + href + "|" + episode + "|" + isDubbed + "|" + isSubbed);
+                                    }
+
+                                    data.EpisodesUrls = new CloudStreamCore.DubbedAnimeNetEpisode[maxEp];
+                                    for (int f = 0; f < maxEp; f++) {
+                                        data.EpisodesUrls[f] = dubbedKeys[f + 1];
+                                    }
+
+                                    var _data = activeMovie.title.MALData.seasonData[q].seasons[z];
+                                    _data.dubbedAnimeNetData = data;
+                                    activeMovie.title.MALData.seasonData[q].seasons[z] = _data;
+                                }
+                                //print(md.malUrl)
+                            }
+                        }
+                        // print(_d.results[i].slug + "|" + _d.results[i].mal_id);
+                    }
+                }
+                catch (Exception _ex) {
+                    print(Name + " ERROROROOROROOR!! " + _ex);
+                }
+
+            }
+
+            public int GetLinkCount(Movie currentMovie, int currentSeason, bool isDub, TempThred? tempThred)
+            {
+                int len = 0;
+                try {
+                    for (int q = 0; q < currentMovie.title.MALData.seasonData[currentSeason].seasons.Count; q++) {
+                        var ms = currentMovie.title.MALData.seasonData[currentSeason].seasons[q].dubbedAnimeNetData;
+                        if ((ms.dubExists && isDub) || (ms.subExists && !isDub)) {
+                            //  dstring = ms.baseUrl;
+                            foreach (var ep in ms.EpisodesUrls) {
+                                if (ep.dubExists && isDub || ep.subExists && !isDub) {
+                                    len++;
+                                }
+                            }
+                        }
+                    }
+                }
+                catch (Exception) {
+                }
+                return len;
+            }
+
+            static string GetSlug(int season, int normalEpisode)
+            {
+                int max = 0;
+
+                for (int q = 0; q < activeMovie.title.MALData.seasonData[season].seasons.Count; q++) {
+                    var urls = activeMovie.title.MALData.seasonData[season].seasons[q].dubbedAnimeNetData.EpisodesUrls;
+                    if (urls == null) {
+                        return "";
+                    }
+                    max += activeMovie.title.MALData.seasonData[season].seasons[q].dubbedAnimeNetData.EpisodesUrls.Length;
+                    print("MAX::: " + max);
+
+                    if (max > normalEpisode) {
+                        var ms = activeMovie.title.MALData.seasonData[season].seasons[q];
+                        if (ms.dubbedAnimeNetData.EpisodesUrls.Length > normalEpisode) {
+                            return "https://ww5.dubbedanime.net" + ms.dubbedAnimeNetData.EpisodesUrls[normalEpisode].href; 
+                        }
+                        //var ms = activeMovie.title.MALData.seasonData[season].seasons[q].animeFlixData;
+
+                    }
+                }
+                return "";
+            }
+
+            public void LoadLinksTSync(int episode, int season, int normalEpisode, bool isDub, TempThred tempThred)
+            {
+                try {
+                    string slug = GetSlug(season, normalEpisode);
+
+                    if (slug == "") return;
+
+                    string d = DownloadString(slug);
+                    if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
+
+                    string xtoken = FindHTML(d, "var xuath = \'", "\'");
+
+                    string cepisode = FindHTML(d, "var episode = ", ";");
+                    print("CEPISODE ==== " + cepisode);
+                    var epi = JsonConvert.DeserializeObject<DubbedAnimeNetAPIEpisode>(cepisode);
+                    for (int i = 0; i < epi.videos.Count; i++) {
+                        var vid = epi.videos[i];
+                        if ((vid.type == "dubbed" && !isDub) || (vid.type == "subbed" && isDub)) continue;
+
+                        //type == dubbed/subbed
+                        //host == mp4upload/trollvid
+                        //id = i9w80jgcwbu7
+                        // Getmp4UploadByFile()
+
+
+                        void AddMp4(string id)
+                        {
+                            string mp4 = ("https://www.mp4upload.com/embed-" + id);
+                            string __d = DownloadString(mp4, tempThred);
+                            if (!GetThredActive(tempThred)) { return; };
+                            string mxLink = Getmp4UploadByFile(__d);
+                            AddPotentialLink(normalEpisode, mxLink, "Mp4Upload", 9);
+                        }
+
+                        if (vid.host == "trollvid") {
+                            string dUrl = "https://mp4.sh/embed/" + vid.id + xtoken;
+                            string p = HTMLGet(dUrl, slug);
+
+                            string src = FindHTML(p, "<source src=\"", "\"");
+                            AddPotentialLink(normalEpisode, src, "Trollvid", 10);
+
+                            string fetch = FindHTML(p, "fetch(\'", "\'");
+                            if (fetch != "") {
+                                print("FETCH: " + fetch);
+                                string _d = DownloadString(fetch);
+                                if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
+                                try {
+                                    var res = JsonConvert.DeserializeObject<List<DubbedAnimeNetEpisodeExternalAPI>>(_d);
+                                    for (int q = 0; q < res.Count; q++) {
+                                        if (res[q].host == "mp4upload") {
+                                            AddMp4(res[q].id);
+                                        }
+                                        else if (res[q].host == "vidstreaming") {
+                                            string __d = "https://vidstreaming.io/streaming.php?id=" + res[q].id;
+                                            AddEpisodesFromMirrors(tempThred, __d, normalEpisode);
+                                        }
+                                        // print(res[q].host + "|" + res[q].id + "|" + res[q].type);
+                                        /*vidstreaming|MTE3NDg5|dubbed
+            server hyrax||dubbed
+            xstreamcdn||dubbed
+            vidcdn|MTE3NDg5|dubbed
+            mp4upload|nnh0ejaypnie|dubbed*/
+                                    }
+                                }
+                                catch (Exception _ex) {
+                                    print("EX:::: " + _ex);
+                                }
+
+                            }
+                            print(p);
+                        }
+                        else if (vid.host == "mp4upload") {
+                            AddMp4(vid.id);
+                        }
+
+                        print(vid.host + "|" + vid.id + "|" + vid.type);
+                    }
+
+                }
+                catch (Exception _ex) {
+                    print("ERROR IN LOADING DUBBEDANIMENET: " + _ex);
+                }
+            }
+        }
+
         class DubbedAnimeProvider : IAnimeProvider
         {
             public string Name { get => "DubbedAnime"; }
@@ -2213,83 +2537,83 @@ namespace CloudStreamForms
             {
                 try {
 
-              
-                string result = DownloadString("https://animeflix.io/api/search?q=" + malData.firstName, waitTime: 400, repeats: 1);//activeMovie.title.name);
-                print("FLIX::::" + result);
-                if (result == "") return;
-                if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
-                var res = JsonConvert.DeserializeObject<AnimeFlixQuickSearch>(result);
-                var data = res.data;
-                List<int> alreadyAdded = new List<int>();
 
-                for (int i = 0; i < data.Count; i++) {
-                    var d = data[i];
-                    List<string> names = new List<string>() { d.english_title, d.title };
-                    if (d.alternate_titles != null) {
-                        names.AddRange(d.alternate_titles);
-                    }
-                    GetSeasonAndPartFromName(d.title, out int season, out int part);
-                    print("ID::::SEASON:" + season + "|" + part + "|" + names[0]);
+                    string result = DownloadString("https://animeflix.io/api/search?q=" + malData.firstName, waitTime: 400, repeats: 1);//activeMovie.title.name);
+                    print("FLIX::::" + result);
+                    if (result == "") return;
+                    if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
+                    var res = JsonConvert.DeserializeObject<AnimeFlixQuickSearch>(result);
+                    var data = res.data;
+                    List<int> alreadyAdded = new List<int>();
 
-                    int id = season + part * 1000;
-                    if (!alreadyAdded.Contains(id)) {
-                        for (int q = 0; q < names.Count; q++) {
-                            if (names[q].ToLower().Contains(malData.firstName.ToLower()) || names[q].ToLower().Contains(activeMovie.title.name.ToLower())) {
-                                print("NAMES:::da" + d.title);
-                                alreadyAdded.Add(id);
-                                try {
-                                    var ms = activeMovie.title.MALData.seasonData[season].seasons[part - 1];
-                                    string url = "https://animeflix.io/api/episodes?anime_id=" + d.id + "&limit=50&sort=DESC";
-                                    print("DURL:::==" + url);
-                                    string dres = DownloadString(url,repeats:1,waitTime:50);
-                                    print("DRES:::" + dres);
-                                    if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
-                                    var seasonData = JsonConvert.DeserializeObject<AnimeFlixAnimeSeason>(dres);
-                                    for (int z = 0; z < seasonData.meta.last_page - 1; z++) {
-                                        string _url = "https://animeflix.io/api/episodes?anime_id=" + d.id + "&limit=50" + "&page=" + (i + 2) + "&sort=DESC";
+                    for (int i = 0; i < data.Count; i++) {
+                        var d = data[i];
+                        List<string> names = new List<string>() { d.english_title, d.title };
+                        if (d.alternate_titles != null) {
+                            names.AddRange(d.alternate_titles);
+                        }
+                        GetSeasonAndPartFromName(d.title, out int season, out int part);
+                        print("ID::::SEASON:" + season + "|" + part + "|" + names[0]);
+
+                        int id = season + part * 1000;
+                        if (!alreadyAdded.Contains(id)) {
+                            for (int q = 0; q < names.Count; q++) {
+                                if (names[q].ToLower().Contains(malData.firstName.ToLower()) || names[q].ToLower().Contains(activeMovie.title.name.ToLower())) {
+                                    print("NAMES:::da" + d.title);
+                                    alreadyAdded.Add(id);
+                                    try {
+                                        var ms = activeMovie.title.MALData.seasonData[season].seasons[part - 1];
+                                        string url = "https://animeflix.io/api/episodes?anime_id=" + d.id + "&limit=50&sort=DESC";
                                         print("DURL:::==" + url);
-                                        string _dres = DownloadString(url, repeats: 1, waitTime: 50);
-                                        var _seasonData = JsonConvert.DeserializeObject<AnimeFlixAnimeSeason>(dres);
+                                        string dres = DownloadString(url, repeats: 1, waitTime: 50);
+                                        print("DRES:::" + dres);
+                                        if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
+                                        var seasonData = JsonConvert.DeserializeObject<AnimeFlixAnimeSeason>(dres);
+                                        for (int z = 0; z < seasonData.meta.last_page - 1; z++) {
+                                            string _url = "https://animeflix.io/api/episodes?anime_id=" + d.id + "&limit=50" + "&page=" + (i + 2) + "&sort=DESC";
+                                            print("DURL:::==" + url);
+                                            string _dres = DownloadString(url, repeats: 1, waitTime: 50);
+                                            var _seasonData = JsonConvert.DeserializeObject<AnimeFlixAnimeSeason>(dres);
 
-                                        seasonData.data.AddRange(_seasonData.data);
-                                    }
-
-
-                                    bool hasDub = false, hasSub = false;
-
-                                    AnimeFlixEpisode[] animeFlixEpisodes = new AnimeFlixEpisode[seasonData.data.Count];
-                                    for (int s = 0; s < seasonData.data.Count; s++) {
-                                        var _data = seasonData.data[s];
-                                        bool dubEx = _data.dub == 1;
-                                        bool subEx = _data.sub == 1;
-
-                                        if (subEx) {
-                                            hasSub = true;
+                                            seasonData.data.AddRange(_seasonData.data);
                                         }
-                                        if (dubEx) {
-                                            hasDub = true;
+
+
+                                        bool hasDub = false, hasSub = false;
+
+                                        AnimeFlixEpisode[] animeFlixEpisodes = new AnimeFlixEpisode[seasonData.data.Count];
+                                        for (int s = 0; s < seasonData.data.Count; s++) {
+                                            var _data = seasonData.data[s];
+                                            bool dubEx = _data.dub == 1;
+                                            bool subEx = _data.sub == 1;
+
+                                            if (subEx) {
+                                                hasSub = true;
+                                            }
+                                            if (dubEx) {
+                                                hasDub = true;
+                                            }
+                                            print("ADDED EP::: " + _data.id + "|" + subEx + "|" + dubEx + "|");
+                                            animeFlixEpisodes[int.Parse(_data.episode_num) - 1] = new AnimeFlixEpisode() { id = _data.id, dubExists = dubEx, subExists = subEx };
                                         }
-                                        print("ADDED EP::: " + _data.id + "|" + subEx + "|" + dubEx + "|");
-                                        animeFlixEpisodes[int.Parse(_data.episode_num) - 1] = new AnimeFlixEpisode() { id = _data.id, dubExists = dubEx, subExists = subEx };
+
+                                        AnimeFlixData flixData = new AnimeFlixData() {
+                                            dubExists = hasDub,
+                                            subExists = hasSub,
+                                            EpisodesUrls = animeFlixEpisodes,
+                                        };
+
+                                        ms.animeFlixData = flixData;
+                                        activeMovie.title.MALData.seasonData[season].seasons[part - 1] = ms;
                                     }
+                                    catch (Exception) {
 
-                                    AnimeFlixData flixData = new AnimeFlixData() {
-                                        dubExists = hasDub,
-                                        subExists = hasSub,
-                                        EpisodesUrls = animeFlixEpisodes,
-                                    };
-
-                                    ms.animeFlixData = flixData;
-                                    activeMovie.title.MALData.seasonData[season].seasons[part - 1] = ms;
-                                }
-                                catch (Exception) {
+                                    }
+                                    break;
 
                                 }
-                                break;
-
                             }
                         }
-                    }
                     }
                 }
                 catch (Exception _ex) {
@@ -4854,76 +5178,7 @@ https://prettyfast.to/e/66vvrk\/fe1541bb8d2aeaec6bb7e500d070b2ec?sub=https%253A%
             return currentMax;
         }
 
-        public static List<string> GetAllDubbedAnimeLinks(Movie currentMovie, int currentSeason)
-        {
-            List<string> baseUrls = new List<string>();
 
-            try {
-                for (int q = 0; q < currentMovie.title.MALData.seasonData[currentSeason].seasons.Count; q++) {
-                    var ms = currentMovie.title.MALData.seasonData[currentSeason].seasons[q].dubbedAnimeData;
-
-                    if (ms.dubExists) {
-                        if (!baseUrls.Contains(ms.slug)) {
-                            baseUrls.Add(ms.slug);
-                        }
-                        //print("BASEURL " + ms.baseUrl);
-                    }
-                }
-            }
-            catch (Exception) {
-                //  throw;
-            }
-            return baseUrls;
-        }
-
-        public static List<string> GetAllGogoLinksFromAnime(Movie currentMovie, int currentSeason, bool isDub)
-        {
-            List<string> baseUrls = new List<string>();
-
-            try {
-                for (int q = 0; q < currentMovie.title.MALData.seasonData[currentSeason].seasons.Count; q++) {
-                    var ms = currentMovie.title.MALData.seasonData[currentSeason].seasons[q].gogoData;
-
-                    if ((ms.dubExists && isDub) || (ms.subExists && !isDub)) {
-                        //  dstring = ms.baseUrl;
-                        string burl = isDub ? ms.dubUrl : ms.subUrl;
-                        if (!baseUrls.Contains(burl)) {
-                            baseUrls.Add(burl);
-                        }
-                        //print("BASEURL " + ms.baseUrl);
-                    }
-                }
-            }
-            catch (Exception) {
-            }
-            return baseUrls;
-        }
-        public static List<string> GetAllKickassLinksFromAnime(Movie currentMovie, int currentSeason, bool isDub)
-        {
-            List<string> baseUrls = new List<string>();
-            print("CURRENSTSEASON:::" + currentSeason + "|" + isDub + "|" + currentMovie.title.MALData.seasonData.Count);
-            try {
-                for (int q = 0; q < currentMovie.title.MALData.seasonData[currentSeason].seasons.Count; q++) {
-                    var ms = currentMovie.title.MALData.seasonData[currentSeason].seasons[q].kickassAnimeData;
-
-                    if ((ms.dubExists && isDub) || (ms.subExists && !isDub)) {
-                        //  dstring = ms.baseUrl;
-                        baseUrls.AddRange(isDub ? ms.dubEpisodesUrls : ms.subEpisodesUrls);
-
-                        print("BASEURL dada.:::" + (isDub ? ms.dubEpisodesUrls : ms.subEpisodesUrls));
-                    }
-                }
-            }
-            catch (Exception) {
-            }
-            /*
-            Stopwatch s = new Stopwatch();
-            s.Start();
-            var array = baseUrls.ToArray();
-            s.Stop();
-            print("MSMMSMSMSMMSMS:" + (s.ElapsedMilliseconds / 1000.0));*/
-            return baseUrls;
-        }
 
         public static void DownloadSubtitlesAndAdd(string lang = "eng", bool isEpisode = false, int episodeCounter = 0)
         {
