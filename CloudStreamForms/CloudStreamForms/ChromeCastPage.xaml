@@ -9,21 +9,27 @@
              x:Class="CloudStreamForms.ChromeCastPage">
     <ContentPage.Content>
         <ScrollView>
+            <Grid>
+                <StackLayout >
+                    <Image x:Name="BackFaded" Scale="1.2" Opacity="0.2" TranslationY="200" Aspect="AspectFill" VerticalOptions="Fill" HorizontalOptions="Fill" InputTransparent="True"></Image>
+                </StackLayout>
             <StackLayout  >
                 <Label x:Name="NameLabel" FontSize="Title"  FontAttributes="Bold" HorizontalOptions="Center" Margin="0,10,0,-5" TextColor="White" ></Label>
                 <Label x:Name="EpsodeName"  HorizontalOptions="Center" TextColor="Gray" Margin="0"></Label>
 
-                <ff:CachedImage x:Name="Poster" HeightRequest="225" WidthRequest="150"  InputTransparent="True" Margin="20">
+                <ff:CachedImage x:Name="Poster" HeightRequest="225" WidthRequest="150"  InputTransparent="True" Margin="20" TranslationY="20">
 
                     <ff:CachedImage.Transformations>
-                        <ffTransformations:RoundedTransformation BorderSize="0" BorderHexColor="#303F9F" CropWidthRatio="0.67" Radius="1">
+                        <ffTransformations:RoundedTransformation BorderSize="0" BorderHexColor="#303F9F" CropWidthRatio="0.67" Radius="5">
 
                         </ffTransformations:RoundedTransformation>
+                         
                     </ff:CachedImage.Transformations>
+                    
                 </ff:CachedImage>
 
-                <Label x:Name="EpTitleLabel" FontSize="Large" FontAttributes="Bold" HorizontalOptions="Center" Margin="0,10,0,-5" TextColor="White" ></Label>
-                <Label x:Name="EpTitleDescript" FontSize="Default" TextColor="Gray" FontAttributes="Italic" HorizontalOptions="Center" Margin="20,10"  ></Label>
+                <Label x:Name="EpTitleLabel" FontSize="Large" FontAttributes="Bold" HorizontalOptions="Center" Margin="0,10,0,-5" TextColor="White" Opacity="0"></Label>
+                <Label x:Name="EpTitleDescript" FontSize="Default" TextColor="Gray" FontAttributes="Italic" HorizontalOptions="Center" Margin="20,10"  Opacity="0"></Label>
                 <!--
                 <ff:CachedImage  x:Name="EpisodePoster" HorizontalOptions="Start" WidthRequest="100" InputTransparent="True" Margin="20">
 
@@ -46,7 +52,7 @@
                 </Grid>-->
              
                 <BoxView VerticalOptions="FillAndExpand" ></BoxView>
-                <StackLayout TranslationY="-40" >
+                <StackLayout TranslationY="-20" >
                     <Grid HorizontalOptions="Center" ColumnSpacing="30" Margin="10" TranslationY="-10">
                         <Grid.ColumnDefinitions >
                             <ColumnDefinition Width="Auto" />
@@ -67,16 +73,14 @@
                         </Grid.ColumnDefinitions>
 
                         <ImageButton x:Name="SkipBack" Grid.Column="0" BackgroundColor="Transparent" Scale="{Binding ScaleAll}" ></ImageButton>
-                        <ImageButton x:Name="BackForward" Grid.Column="1" BackgroundColor="Transparent"  Scale="{Binding ScaleAll}" ></ImageButton>
-                        <Label Text="{Binding BackForwardTime}" Grid.Column="1" VerticalOptions="Center" HorizontalOptions="Center" TranslationY="2" TextColor="White" InputTransparent="True" FontSize="12"></Label>
-                        <ff:CachedImage   x:Name="Pause" Grid.Column="2" BackgroundColor="Transparent" Scale="2" Margin="10" WidthRequest="30" HeightRequest="30" InputTransparent="True" >
-
-                        
+                        <ImageButton x:Name="BackForward" Grid.Column="1" BackgroundColor="Transparent"  Scale="1" HeightRequest="{Binding IconSize}" WidthRequest="{Binding IconSize}" ></ImageButton>
+                        <Label Text="{Binding BackForwardTime}" Grid.Column="1" VerticalOptions="Center" HorizontalOptions="Center" TranslationY="0" TextColor="White" InputTransparent="True" FontSize="17"></Label>
+                        <ff:CachedImage   x:Name="Pause" Grid.Column="2" BackgroundColor="Transparent" Scale="2.5" Margin="15" WidthRequest="30" HeightRequest="30" InputTransparent="True" > 
                         </ff:CachedImage>
-                        <Button  Clicked="Pause_Clicked" BackgroundColor="Transparent"  Grid.Column="2" WidthRequest="30" ></Button>
+                        <Button  Clicked="Pause_Clicked" BackgroundColor="Transparent"  Grid.Column="2" WidthRequest="45" ></Button>
                        <!-- <ImageButton x:Name="Pause" Grid.Column="2" BackgroundColor="Transparent" Clicked="Pause_Clicked" Scale="{Binding ScaleAllBig}" Margin="10" WidthRequest="30" HeightRequest="30" ></ImageButton>-->
-                        <ImageButton x:Name="FastForward" Grid.Column="3" BackgroundColor="Transparent" Scale="{Binding ScaleAll}"  ></ImageButton>
-                        <Label Text="{Binding FastForwardTime}" Grid.Column="3" VerticalOptions="Center" HorizontalOptions="Center" TranslationY="2" TextColor="White" InputTransparent="True" FontSize="12"  ></Label>
+                        <ImageButton x:Name="FastForward" Grid.Column="3" BackgroundColor="Transparent" Scale="1"  HeightRequest="{Binding IconSize}" WidthRequest="{Binding IconSize}" ></ImageButton>
+                        <Label Text="{Binding FastForwardTime}" Grid.Column="3" VerticalOptions="Center" HorizontalOptions="Center" TranslationY="0" TextColor="White" InputTransparent="True" FontSize="17"  ></Label>
                         <ImageButton x:Name="SkipForward" Grid.Column="4" BackgroundColor="Transparent" Scale="{Binding ScaleAll}" ></ImageButton>
                     </Grid>
 
@@ -90,13 +94,22 @@
                         <Label Grid.Row="0" Grid.Column="2" x:Name="EndTxt" Text="54:27" HorizontalOptions="End"></Label>
                     </Grid>
                     <Slider x:Name="VideoSlider" Grid.Column="1" MinimumTrackColor="#303F9F" ThumbColor="#303F9F" HorizontalOptions="Fill" Margin="0,0,0,10"></Slider>
-
+                        <Grid HorizontalOptions="Center">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"></ColumnDefinition>
+                                <ColumnDefinition Width="Auto"></ColumnDefinition>
+                                <ColumnDefinition Width="Auto"></ColumnDefinition>
+                            </Grid.ColumnDefinitions>
+                            <Image x:Name="ChromeImg" Grid.Column="0" Source="round_cast_white_48dp2_4.png" HeightRequest="23" WidthRequest="23" VerticalOptions="Center" Margin="10,0"></Image>
+                            <Label x:Name="ChromeLabel" Grid.Column="1" Text="Yeetos" VerticalOptions="Center"></Label>
+                        </Grid>
 
                 </StackLayout>
                
                 
                
             </StackLayout>
+            </Grid>
         </ScrollView>
     </ContentPage.Content>
 </ContentPage>

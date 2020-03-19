@@ -37,6 +37,7 @@ namespace CloudStreamForms
         public float ScaleAllBig { set; get; } = 2f;
 
         public static int currentSelected = 0;
+        public static double changeTime = -1;
 
         async void SelectMirror()
         {
@@ -62,7 +63,13 @@ namespace CloudStreamForms
                             _sub = chromeMovieResult.subtitles[0].data;
                         }
                     }
-                    succ = await MainChrome.CastVideo(episodeResult.mirrosUrls[currentSelected], episodeResult.Mirros[currentSelected],subtitleUrl:_sub, posterUrl: chromeMovieResult.title.hdPosterUrl, movieTitle: chromeMovieResult.title.name);
+
+                    if(MainChrome.CurrentTime > 120) {
+                        changeTime = MainChrome.CurrentTime;
+                        print("CHANGE TIME TO " + changeTime);
+                    }
+
+                    succ = await MainChrome.CastVideo(episodeResult.mirrosUrls[currentSelected], episodeResult.Mirros[currentSelected], subtitleUrl: _sub, posterUrl: chromeMovieResult.title.hdPosterUrl, movieTitle: chromeMovieResult.title.name,setTime: changeTime);
 
                 }
             }
@@ -102,17 +109,18 @@ namespace CloudStreamForms
             BindingContext = this;
             TitleName = chromeMovieResult.title.name;
             EpisodeTitleName = episodeResult.Title;
-            PosterUrl = chromeMovieResult.title.hdPosterUrl;
+            PosterUrl = CloudStreamCore.ConvertIMDbImagesToHD(chromeMovieResult.title.hdPosterUrl, 150, 225);
             EpisodePosterUrl = episodeResult.PosterUrl;
             EpisodeDescription = episodeResult.Description;
             BackgroundColor = Settings.BlackRBGColor;
-
+            //  CloudStreamForms.MainPage.mainPage.BarBackgroundColor = Color.Transparent;
+            ChromeLabel.Text = "Connected to " + MainChrome.chromeRecivever.FriendlyName;
 
             try {
                 DescriptName = episodeResult.Mirros[currentSelected];
             }
-            catch (Exception) {
-
+            catch (Exception _ex) {
+                print("ERROR LOADING MIRROR " + _ex);
             }
 
             MainChrome.OnDisconnected += (o, e) => {
@@ -133,8 +141,8 @@ namespace CloudStreamForms
                 draging = false;
                 UpdateTxt();
             };
-            const bool rotateAllWay = true;
-            const int rotate = 45;
+            const bool rotateAllWay = false;
+            const int rotate = 90;
             FastForward.Clicked += async (o, e) => {
                 SeekMedia(FastForwardTime);
                 FastForward.Rotation = 0;
@@ -232,16 +240,17 @@ namespace CloudStreamForms
 
         void SetPause(bool paused)
         {
-            Pause.Source = paused ? GetImageSource(RoundedPrefix + "_play_arrow_white_48dp.png") : GetImageSource(RoundedPrefix + "_pause_white_48dp.png");
+            Pause.Source = GetImageSource(paused ? "netflixPlay.png" : "netflixPause.png");//GetImageSource(RoundedPrefix + "_play_arrow_white_48dp.png") : GetImageSource(RoundedPrefix + "_pause_white_48dp.png");
         }
 
         protected override void OnAppearing()
         {
             base.OnAppearing();
+            BackFaded.Source = GetImageSource("faded.png");
             PlayList.Source = GetImageSource(RoundedPrefix + "_playlist_play_white_48dp.png");
             StopAll.Source = GetImageSource(RoundedPrefix + "_stop_white_48dp.png");
-            BackForward.Source = GetImageSource(RoundedPrefix + "_replay_white_48dp.png");
-            FastForward.Source = GetImageSource(RoundedPrefix + "_replay_white_48dp_mirror.png");
+            BackForward.Source = GetImageSource("netflixSkipBack.png");//GetImageSource(RoundedPrefix + "_replay_white_48dp.png");
+            FastForward.Source = GetImageSource("netflixSkipForward.png"); // GetImageSource(RoundedPrefix + "_replay_white_48dp_mirror.png");
             SkipBack.Source = GetImageSource(RoundedPrefix + "_skip_previous_white_48dp.png");
             SkipForward.Source = GetImageSource(RoundedPrefix + "_skip_next_white_48dp.png");
             Audio.Source = GetImageSource(RoundedPrefix + "_volume_up_white_48dp.png");
@@ -262,9 +271,9 @@ namespace CloudStreamForms
 
         async void PauseScale()
         {
-            Pause.Scale = 2.0;
-            await Pause.ScaleTo(2.4, 50, Easing.SinOut);
-            await Pause.ScaleTo(2, 50, Easing.SinOut);
+            Pause.Scale = 2.5;
+            await Pause.ScaleTo(2.3, 50, Easing.SinOut);
+            await Pause.ScaleTo(2.5, 50, Easing.SinOut);
         }
 
         async void ListScale()

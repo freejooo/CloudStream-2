@@ -56,6 +56,7 @@
     <None Remove="Resource\bookmarkedBtt.png" />
     <None Remove="Resource\dropdown.png" />
     <None Remove="Resource\emtyPoster.png" />
+    <None Remove="Resource\faded.png" />
     <None Remove="Resource\gradient.png" />
     <None Remove="Resource\gradient0.png" />
     <None Remove="Resource\gradient17.png" />
@@ -176,6 +177,7 @@
     <EmbeddedResource Include="Resource\bookmarkedBtt.png" />
     <EmbeddedResource Include="Resource\dropdown.png" />
     <EmbeddedResource Include="Resource\emtyPoster.png" />
+    <EmbeddedResource Include="Resource\faded.png" />
     <EmbeddedResource Include="Resource\gradient.png" />
     <EmbeddedResource Include="Resource\gradient0.png" />
     <EmbeddedResource Include="Resource\gradient17.png" />

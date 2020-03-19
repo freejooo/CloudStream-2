@@ -108,7 +108,8 @@ namespace CloudStreamForms
                 Page p = new VideoPage(new VideoPage.PlayVideo() { descript = "", name = "Black Bunny", episode = -1, season = -1, MirrorNames = new List<string>() { "Googlevid" }, MirrorUrls = new List<string>() { "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" }, Subtitles = new List<string>(), SubtitlesNames = new List<string>() });//new List<string>() { "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" }, new List<string>() { "Black" }, new List<string>() { });// { mainPoster = mainPoster };
                 Navigation.PushModalAsync(p, false);
             }
-
+           // Page _p = new ChromeCastPage();// { mainPoster = mainPoster };
+           // Navigation.PushModalAsync(_p, false);
 
             if (IS_EMTY_BUILD) return;
 
@@ -134,13 +135,12 @@ namespace CloudStreamForms
 
             // BarBackgroundColor = Color.Black;
             //   BarTextColor = Color.OrangeRed;
-            // Page p = new ChromeCastPage();// { mainPoster = mainPoster };
-            // Navigation.PushModalAsync(p, false);
+           
             //PushPageFromUrlAndName("tt4869896", "Overlord");
             //  PushPageFromUrlAndName("tt0409591", "Naruto");
             //  PushPageFromUrlAndName("tt10885406", "Ascendance of a Bookworm");
             // PushPageFromUrlAndName("tt9054364", "That Time I Got Reincarnated as a Slime");
-            // PushPageFromUrlAndName("tt0371746", "Iron Man");
+            PushPageFromUrlAndName("tt0371746", "Iron Man");
             // PushPageFromUrlAndName("tt10954274", "ID: Invaded");
         }
 
@@ -2039,7 +2039,7 @@ namespace CloudStreamForms
                 string search = malData.engName;//"neverland";
                 string postReq = PostRequest("https://ww5.dubbedanime.net/ajax/paginate", "https://ww5.dubbedanime.net/browse-anime?search=" + search, $"query%5Bsearch%5D={search}&what=query&model=Anime&size=30&letter=all");
                 print("DUBBEDANIMEPOST: " + postReq);
-                
+
                 if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
                 try {
                     var _d = JsonConvert.DeserializeObject<DubbedAnimeNetQuickSearch>(postReq);
@@ -2133,7 +2133,7 @@ namespace CloudStreamForms
                     if (max > normalEpisode) {
                         var ms = activeMovie.title.MALData.seasonData[season].seasons[q];
                         if (ms.dubbedAnimeNetData.EpisodesUrls.Length > normalEpisode) {
-                            return "https://ww5.dubbedanime.net" + ms.dubbedAnimeNetData.EpisodesUrls[normalEpisode].href; 
+                            return "https://ww5.dubbedanime.net" + ms.dubbedAnimeNetData.EpisodesUrls[normalEpisode].href;
                         }
                         //var ms = activeMovie.title.MALData.seasonData[season].seasons[q].animeFlixData;
 
