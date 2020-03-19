@@ -672,21 +672,21 @@ namespace CloudStreamForms.Droid
                 }
                 builder.SetActions(actions.ToArray());
             }
-
+            /*
             var resultIntent = GetLauncherActivity();
-            resultIntent.SetFlags(ActivityFlags.NewTask | ActivityFlags.ClearTask);
+           // resultIntent.SetFlags(ActivityFlags.NewTask | ActivityFlags.ClearTask);
 
             //var _da = Android.Net.Uri.Parse("cloudstreamforms:tt0371746Name=Iron man=EndAll");
             // resultIntent.SetData(_da);
 
             var stackBuilder = Android.Support.V4.App.TaskStackBuilder.Create(Application.Context);
-            stackBuilder.AddNextIntent(resultIntent);
+           stackBuilder.AddNextIntent(resultIntent);
             var resultPendingIntent =
                 stackBuilder.GetPendingIntent(0, (int)PendingIntentFlags.UpdateCurrent);
 
 
             builder.SetContentIntent(resultPendingIntent);
-
+            */
             _manager.Notify(CHROME_CAST_NOTIFICATION_ID, builder.Build());
         }
 

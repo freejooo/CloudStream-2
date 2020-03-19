@@ -42,7 +42,7 @@ public class CustomSliderRenderer : SliderRenderer
         th.SetIntrinsicHeight(40);
         th.SetColorFilter(e.NewElement.ThumbColor.ToAndroid(), Android.Graphics.PorterDuff.Mode.SrcOver);
         seek.SetThumb(th);
-        print("SEEK;::::::" + seek);
+        //print("SEEK;::::::" + seek);
     }
 }
 
