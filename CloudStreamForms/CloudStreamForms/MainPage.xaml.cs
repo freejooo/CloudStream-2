@@ -108,8 +108,8 @@ namespace CloudStreamForms
                 Page p = new VideoPage(new VideoPage.PlayVideo() { descript = "", name = "Black Bunny", episode = -1, season = -1, MirrorNames = new List<string>() { "Googlevid" }, MirrorUrls = new List<string>() { "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" }, Subtitles = new List<string>(), SubtitlesNames = new List<string>() });//new List<string>() { "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" }, new List<string>() { "Black" }, new List<string>() { });// { mainPoster = mainPoster };
                 Navigation.PushModalAsync(p, false);
             }
-           // Page _p = new ChromeCastPage();// { mainPoster = mainPoster };
-           // Navigation.PushModalAsync(_p, false);
+            // Page _p = new ChromeCastPage();// { mainPoster = mainPoster };
+            // Navigation.PushModalAsync(_p, false);
 
             if (IS_EMTY_BUILD) return;
 
@@ -135,7 +135,7 @@ namespace CloudStreamForms
 
             // BarBackgroundColor = Color.Black;
             //   BarTextColor = Color.OrangeRed;
-           
+
             //PushPageFromUrlAndName("tt4869896", "Overlord");
             //  PushPageFromUrlAndName("tt0409591", "Naruto");
             //  PushPageFromUrlAndName("tt10885406", "Ascendance of a Bookworm");
@@ -1356,6 +1356,17 @@ namespace CloudStreamForms
 
         #region =================================================== ANIME PROVIDERS ===================================================
 
+
+        static class AnimeProviderHelper
+        {
+            public static object _lock = new object();
+
+            public static void ConvertEpisodeToSeasonPart(int episode, int season)
+            {
+
+            }
+        }
+
         class GogoAnimeProvider : IAnimeProvider
         {
             public string Name { get => "Gogoanime"; }
@@ -1394,7 +1405,10 @@ namespace CloudStreamForms
                             // LOADS TITLES
                             for (int i = 0; i < activeMovie.title.MALData.seasonData.Count; i++) {
                                 for (int q = 0; q < activeMovie.title.MALData.seasonData[i].seasons.Count; q++) {
-                                    MALSeason ms = activeMovie.title.MALData.seasonData[i].seasons[q];
+                                    MALSeason ms;
+                                    lock (AnimeProviderHelper._lock) {
+                                        ms = activeMovie.title.MALData.seasonData[i].seasons[q];
+                                    }
 
                                     bool containsSyno = false;
                                     for (int s = 0; s < ms.synonyms.Count; s++) {
@@ -1408,25 +1422,29 @@ namespace CloudStreamForms
 
                                     if (ToLowerAndReplace(ms.name) == ToLowerAndReplace(animeTitle) || ToLowerAndReplace(ms.engName) == ToLowerAndReplace(animeTitle) || containsSyno) {
                                         // print("ADDED:::" + ur);
-                                        var baseData = activeMovie.title.MALData.seasonData[i].seasons[q];
-                                        if (animeTitle == title) {
-                                            baseData.gogoData.subExists = true;
-                                            baseData.gogoData.subUrl = ur;
 
-                                        }
-                                        else {
-                                            baseData.gogoData.dubExists = true;
-                                            baseData.gogoData.dubUrl = ur.Replace("-dub", "") + "-dub";
-                                        }
+                                        lock (AnimeProviderHelper._lock) {
 
-                                        /*
-                                        if (animeTitle == title) {
-                                             //= new MALSeason() { name = ms.name, subUrl = ur, dubUrl = ms.dubUrl, subExists = true, dubExists = ms.dubExists, japName = ms.japName, engName = ms.engName, synonyms = ms.synonyms };
+                                            var baseData = activeMovie.title.MALData.seasonData[i].seasons[q];
+                                            if (animeTitle == title) {
+                                                baseData.gogoData.subExists = true;
+                                                baseData.gogoData.subUrl = ur;
+
+                                            }
+                                            else {
+                                                baseData.gogoData.dubExists = true;
+                                                baseData.gogoData.dubUrl = ur.Replace("-dub", "") + "-dub";
+                                            }
+
+                                            /*
+                                            if (animeTitle == title) {
+                                                 //= new MALSeason() { name = ms.name, subUrl = ur, dubUrl = ms.dubUrl, subExists = true, dubExists = ms.dubExists, japName = ms.japName, engName = ms.engName, synonyms = ms.synonyms };
+                                            }
+                                            else {
+                                                activeMovie.title.MALData.seasonData[i].seasons[q] //= new MALSeason() { name = ms.name, dubUrl = ur.Replace("-dub", "") + "-dub", subUrl = ms.subUrl, dubExists = true, subExists = ms.subExists, japName = ms.japName, engName = ms.engName, synonyms = ms.synonyms };
+                                            }*/
+                                            activeMovie.title.MALData.seasonData[i].seasons[q] = baseData;
                                         }
-                                        else {
-                                            activeMovie.title.MALData.seasonData[i].seasons[q] //= new MALSeason() { name = ms.name, dubUrl = ur.Replace("-dub", "") + "-dub", subUrl = ms.subUrl, dubExists = true, subExists = ms.subExists, japName = ms.japName, engName = ms.engName, synonyms = ms.synonyms };
-                                        }*/
-                                        activeMovie.title.MALData.seasonData[i].seasons[q] = baseData;
 
                                     }
                                 }
@@ -1559,7 +1577,6 @@ namespace CloudStreamForms
                                 if (episode > floor && episode <= seling) {
                                     sel = i;
                                     subtract = floor;
-
                                 }
                                 //print(activeMovie.title.MALData.currentActiveMaxEpsPerSeason[i] + "<<");
                                 floor += activeMovie.title.MALData.currentActiveGoGoMaxEpsPerSeason[i];
@@ -1628,7 +1645,11 @@ namespace CloudStreamForms
 
                     for (int i = 0; i < activeMovie.title.MALData.seasonData.Count; i++) {
                         for (int q = 0; q < activeMovie.title.MALData.seasonData[i].seasons.Count; q++) {
-                            MALSeason ms = activeMovie.title.MALData.seasonData[i].seasons[q];
+                            MALSeason ms;
+
+                            lock (AnimeProviderHelper._lock) {
+                                ms = activeMovie.title.MALData.seasonData[i].seasons[q];
+                            }
 
                             string compareName = ms.name.Replace(" ", "");
                             bool containsSyno = false;
@@ -1683,26 +1704,28 @@ namespace CloudStreamForms
                                 //    s.Stop();
                                 print("EPISODES::::" + episodes.Length);
 
-                                var baseData = activeMovie.title.MALData.seasonData[i].seasons[q];
-                                if (!isDub) {
-                                    baseData.kickassAnimeData.subExists = true;
-                                    baseData.kickassAnimeData.subUrl = slug;
-                                    baseData.kickassAnimeData.subEpisodesUrls = episodes;
+                                lock (AnimeProviderHelper._lock) {
+                                    var baseData = activeMovie.title.MALData.seasonData[i].seasons[q];
+                                    if (!isDub) {
+                                        baseData.kickassAnimeData.subExists = true;
+                                        baseData.kickassAnimeData.subUrl = slug;
+                                        baseData.kickassAnimeData.subEpisodesUrls = episodes;
 
+                                    }
+                                    else {
+                                        baseData.kickassAnimeData.dubExists = true;
+                                        baseData.kickassAnimeData.dubUrl = slug;
+                                        baseData.kickassAnimeData.dubEpisodesUrls = episodes;
+                                    }
+
+                                    activeMovie.title.MALData.seasonData[i].seasons[q] = baseData;
                                 }
-                                else {
-                                    baseData.kickassAnimeData.dubExists = true;
-                                    baseData.kickassAnimeData.dubUrl = slug;
-                                    baseData.kickassAnimeData.dubEpisodesUrls = episodes;
-                                }
-
-                                activeMovie.title.MALData.seasonData[i].seasons[q] = baseData;
-
                             }
                         }
                     }
                     print(slug + "|" + animeTitle);
                 }
+                /*
                 for (int i = 0; i < activeMovie.title.MALData.seasonData.Count; i++) {
                     for (int q = 0; q < activeMovie.title.MALData.seasonData[i].seasons.Count; q++) {
                         var ms = activeMovie.title.MALData.seasonData[i].seasons[q];
@@ -1714,7 +1737,7 @@ namespace CloudStreamForms
                             print(i + ". " + ms.name + " | Sub E" + ms.kickassAnimeData.subUrl);
                         }
                     }
-                }
+                }*/
             }
 
             public List<string> GetAllLinks(Movie currentMovie, int currentSeason, bool isDub)
@@ -2047,8 +2070,13 @@ namespace CloudStreamForms
                     for (int i = 0; i < _d.results.Count; i++) {
                         for (int q = 0; q < activeMovie.title.MALData.seasonData.Count; q++) {
                             for (int z = 0; z < activeMovie.title.MALData.seasonData[q].seasons.Count; z++) {
-                                var md = activeMovie.title.MALData.seasonData[q].seasons[z];
-                                string id = FindHTML(md.malUrl, "/anime/", "/");
+
+                                MALSeason ms;
+                                lock (AnimeProviderHelper._lock) {
+                                    ms = activeMovie.title.MALData.seasonData[q].seasons[z];
+                                }
+
+                                string id = FindHTML(ms.malUrl, "/anime/", "/");
                                 print("DUBBEDANIMEID:::???" + id + "--||--" + _d.results[i].mal_id);
                                 if (id == _d.results[i].mal_id) {
 
@@ -2081,9 +2109,11 @@ namespace CloudStreamForms
                                         data.EpisodesUrls[f] = dubbedKeys[f + 1];
                                     }
 
-                                    var _data = activeMovie.title.MALData.seasonData[q].seasons[z];
-                                    _data.dubbedAnimeNetData = data;
-                                    activeMovie.title.MALData.seasonData[q].seasons[z] = _data;
+                                    lock (AnimeProviderHelper._lock) {
+                                        var _data = activeMovie.title.MALData.seasonData[q].seasons[z];
+                                        _data.dubbedAnimeNetData = data;
+                                        activeMovie.title.MALData.seasonData[q].seasons[z] = _data;
+                                    }
                                 }
                                 //print(md.malUrl)
                             }
@@ -2236,6 +2266,8 @@ namespace CloudStreamForms
                 string _imdb = activeMovie.title.name; //"Attack On Titan";
                 string imdb = _imdb.Replace(".", "").Replace("/", "");
                 string d = DownloadString("https://bestdubbedanime.com/search/" + imdb);
+                if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
+
                 const string lookFor = "class=\"resulta\" href=\"";
                 string nameLookFor = "<div class=\"titleresults\">";
                 print(d);
@@ -2278,12 +2310,15 @@ namespace CloudStreamForms
                             alreadyAdded.Add(id);
                             try {
                                 print("SEASON::" + season + "PART" + part);
-                                var ms = activeMovie.title.MALData.seasonData[season].seasons[part - 1];
-                                ms.dubbedAnimeData.dubExists = true;
-                                ms.dubbedAnimeData.slug = slug;
-                                activeMovie.title.MALData.seasonData[season].seasons[part - 1] = ms;
-                                print("ÖÖ>>");
-                                print(activeMovie.title.MALData.seasonData[season].seasons[part - 1].dubbedAnimeData.dubExists);
+                                lock (AnimeProviderHelper._lock) {
+                                    var ms = activeMovie.title.MALData.seasonData[season].seasons[part - 1];
+                                    ms.dubbedAnimeData.dubExists = true;
+                                    ms.dubbedAnimeData.slug = slug;
+                                    activeMovie.title.MALData.seasonData[season].seasons[part - 1] = ms;
+
+                                    print("ÖÖ>>");
+                                    print(activeMovie.title.MALData.seasonData[season].seasons[part - 1].dubbedAnimeData.dubExists);
+                                }
                             }
                             catch (Exception) {
                                 print("ERROR IN " + "SEASON::" + season + "PART" + part);
@@ -2562,7 +2597,12 @@ namespace CloudStreamForms
                                     print("NAMES:::da" + d.title);
                                     alreadyAdded.Add(id);
                                     try {
-                                        var ms = activeMovie.title.MALData.seasonData[season].seasons[part - 1];
+
+                                        MALSeason ms;
+                                        lock (AnimeProviderHelper._lock) {
+                                             ms = activeMovie.title.MALData.seasonData[season].seasons[part - 1];
+                                        }
+
                                         string url = "https://animeflix.io/api/episodes?anime_id=" + d.id + "&limit=50&sort=DESC";
                                         print("DURL:::==" + url);
                                         string dres = DownloadString(url, repeats: 1, waitTime: 50);
@@ -2604,7 +2644,10 @@ namespace CloudStreamForms
                                         };
 
                                         ms.animeFlixData = flixData;
-                                        activeMovie.title.MALData.seasonData[season].seasons[part - 1] = ms;
+
+                                        lock (AnimeProviderHelper._lock) {
+                                            activeMovie.title.MALData.seasonData[season].seasons[part - 1] = ms;
+                                        }
                                     }
                                     catch (Exception) {
 
@@ -4530,26 +4573,29 @@ https://prettyfast.to/e/66vvrk\/fe1541bb8d2aeaec6bb7e500d070b2ec?sub=https%253A%
                     }
                     print("FISHING DATA");
 
+                    /*
                     for (int i = 0; i < animeProviders.Length; i++) {
                         if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
                         animeProviders[i].FishMainLink(currentSelectedYear, tempThred, activeMovie.title.MALData);
                         if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
-                    }
+                    }*/
 
 
                     // FASTER, BUT.. VERY WEIRD BUG BECAUSE THEY ARE ALL WRITING TO SAME CLASS
-                    /*
+
                     int count = 0;
                     Parallel.For(0, animeProviders.Length, (int i) => {
                         print("STARTEDANIME: " + animeProviders[i].ToString() + "|" + i);
+                        fishProgressLoaded?.Invoke(null, new FishLoaded() { name = animeProviders[i].Name, progress = ((double)count) / animeProviders.Length });
                         animeProviders[i].FishMainLink(currentSelectedYear, tempThred, activeMovie.title.MALData);
                         count++;
                         print("COUNT INCRESED < -------------------------------- " + count);
-                        fishProgressLoaded?.Invoke(null, new FishLoaded() { name = animeProviders[i].Name, progress = ((double)count) / animeProviders.Length });
                         //if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
                     });
+                    fishProgressLoaded?.Invoke(null, new FishLoaded() { name = "", progress = 1 });
+
                     if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
-                    */
+
 
 
 
