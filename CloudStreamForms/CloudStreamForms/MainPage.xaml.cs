@@ -39,8 +39,8 @@ namespace CloudStreamForms
         public const string ITEM_COLOR = "#617eff";
         public const string LIGHT_DARK_BLUE_COLOR = "#1976D2";
 
-        public const bool IS_EMTY_BUILD = false;
-        public const bool IS_TEST_VIDEO = false;
+        public const bool IS_EMTY_BUILD = true;
+        public const bool IS_TEST_VIDEO = true;
 
         public static string intentData = "";
         public static MainPage mainPage;
@@ -4685,7 +4685,6 @@ https://prettyfast.to/e/66vvrk\/fe1541bb8d2aeaec6bb7e500d070b2ec?sub=https%253A%
                                 }
                                 // print(api.mappings[i].service);
                             }
-
                         }
 
                         // print("DA:::" + season[season.Count - 1].engName + "==||==" + api.title.English + "||" + serviceId + "|" + season[season.Count - 1].malUrl);

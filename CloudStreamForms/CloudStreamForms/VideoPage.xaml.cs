@@ -112,6 +112,8 @@ namespace CloudStreamForms
             });
         }
 
+        VisualElement[] lockElements;
+        VisualElement[] settingsElements;
 
         /// <summary>
         /// Subtitles are in full
@@ -126,15 +128,27 @@ namespace CloudStreamForms
 
             InitializeComponent();
             Core.Initialize();
-
+            lockElements = new VisualElement[] { BacktoMain, GoBackBtt, EpisodeLabel, PausePlayClickBtt, PausePlayBtt, SkipForward, SkipForwardBtt, SkipForwardImg, SkipForwardSmall, SkipBack, SkipBackBtt, SkipBackImg, SkipBackSmall };
+            settingsElements = new VisualElement[] { EpisodesTap, MirrorsTap, SubTap, NextEpisodeTap, };
 
             void SetIsLocked()
-            {
+            { 
                 LockImg.Source = App.GetImageSource(isLocked ? LOCKED_IMAGE : UN_LOCKED_IMAGE);
                 LockTxt.TextColor = Color.FromHex(isLocked ? "#617EFF" : "#FFFFFF");
                 // LockTap.SetValue(XamEffects.TouchEffect.ColorProperty, Color.FromHex(isLocked ? "#617EFF" : "#FFFFFF"));
                 LockTap.SetValue(XamEffects.TouchEffect.ColorProperty, Color.FromHex(isLocked ? "#99acff" : "#FFFFFF"));
                 LockImg.Transformations = new List<FFImageLoading.Work.ITransformation>() { (new FFImageLoading.Transformations.TintTransformation(isLocked ? MainPage.DARK_BLUE_COLOR : "#FFFFFF")) };
+                VideoSlider.InputTransparent = isLocked;
+                foreach (var visual in lockElements) {
+                    visual.IsEnabled = !isLocked;
+                    visual.IsVisible = !isLocked;
+                }
+
+                foreach (var visual in settingsElements) {
+                    visual.Opacity = isLocked ? 0 : 1;
+                    visual.IsEnabled = !isLocked;
+                }
+
             }
 
             SkipForward.TranslationX = TRANSLATE_START_X;
@@ -154,6 +168,8 @@ namespace CloudStreamForms
             }));
             Commands.SetTap(LockTap, new Command(() => {
                 isLocked = !isLocked;
+                CurrentTap++;
+                FadeEverything(false);
                 SetIsLocked();
             }));
 
@@ -207,7 +223,7 @@ namespace CloudStreamForms
             void SetIsPaused(bool paused)
             {
                 PausePlayBtt.Source = App.GetImageSource(paused ? PLAY_IMAGE : PAUSE_IMAGE);
-                PausePlayBtt.IsVisible = true;
+                PausePlayBtt.Opacity = 1;
                 LoadingCir.IsVisible = false;
                 BufferLabel.IsVisible = false;
                 isPaused = paused;
@@ -242,7 +258,7 @@ namespace CloudStreamForms
                         //BufferBar.ProgressTo(e.Cache / 100.0, 50, Easing.Linear);
                         BufferLabel.Text = "" + (int)e.Cache + "%";
                         BufferLabel.IsVisible = true;
-                        PausePlayBtt.IsVisible = false;
+                        PausePlayBtt.Opacity = 0;
                         LoadingCir.IsVisible = true;
                     }
                 });
@@ -414,15 +430,15 @@ namespace CloudStreamForms
             SkipForward.AbortAnimation("TranslateTo");
             SkipForAni();
 
-            SkipForward.IsVisible = true;
-            SkipForwardSmall.IsVisible = false;
+            SkipForward.Opacity = 1;
+            SkipForwardSmall.Opacity = 0;
             SkipForward.TranslationX = TRANSLATE_START_X;
 
             await SkipForward.TranslateTo(TRANSLATE_START_X + TRANSLATE_SKIP_X, SkipForward.TranslationY, 200, Easing.SinInOut);
 
             SkipForward.TranslationX = TRANSLATE_START_X;
-            SkipForward.IsVisible = false;
-            SkipForwardSmall.IsVisible = true;
+            SkipForward.Opacity = 0;
+            SkipForwardSmall.Opacity = 1;
         }
 
 
@@ -431,15 +447,15 @@ namespace CloudStreamForms
             SkipBack.AbortAnimation("TranslateTo");
             SkipBacAni();
 
-            SkipBack.IsVisible = true;
-            SkipBackSmall.IsVisible = false;
+            SkipBack.Opacity = 1;
+            SkipBackSmall.Opacity = 0;
             SkipBack.TranslationX = -TRANSLATE_START_X;
 
             await SkipBack.TranslateTo(-TRANSLATE_START_X - TRANSLATE_SKIP_X, SkipBack.TranslationY, 200, Easing.SinInOut);
 
             SkipBack.TranslationX = -TRANSLATE_START_X;
-            SkipBack.IsVisible = false;
-            SkipBackSmall.IsVisible = true;
+            SkipBack.Opacity = 0;
+            SkipBackSmall.Opacity = 1;
         }
 
 
@@ -486,7 +502,7 @@ namespace CloudStreamForms
             if (isPaused && !overridePaused && CAN_FADE_WHEN_PAUSED) { // CANT FADE WHEN PAUSED
                 return;
             }
-            await Task.Delay(10);
+            await Task.Delay(100);
 
             print("FADETO: " + disable);
             VideoSliderAndSettings.AbortAnimation("TranslateTo");
@@ -517,10 +533,12 @@ namespace CloudStreamForms
         double TotalOpasity { get { return AllButtons.Opacity; } }
 
         DateTime lastRelease = DateTime.MinValue;
+        DateTime startPressTime = DateTime.MinValue;
 
         private void TouchEffect_TouchAction(object sender, TouchTracking.TouchActionEventArgs args)
         {
             if (Player.Length == -1) return;
+
 
             if (args.Type == TouchTracking.TouchActionType.Pressed || args.Type == TouchTracking.TouchActionType.Moved || args.Type == TouchTracking.TouchActionType.Entered) {
                 CurrentTap++;
@@ -529,6 +547,27 @@ namespace CloudStreamForms
                 StartFade();
             }
 
+
+            // ========================================== LOCKED LOGIC ==========================================
+            if (isLocked) {
+
+                if(args.Type == TouchTracking.TouchActionType.Pressed) {
+                    startPressTime = System.DateTime.Now;
+                }
+
+                if (args.Type == TouchTracking.TouchActionType.Released && System.DateTime.Now.Subtract(startPressTime).TotalSeconds < 0.4) {
+
+                    if (TotalOpasity == 1) {
+                        FadeEverything(true);
+                    }
+                    else {
+                        FadeEverything(false);
+                    }
+                }
+                return;
+            };
+
+            // ========================================== NORMAL LOGIC ==========================================
             if (args.Type == TouchTracking.TouchActionType.Pressed) {
                 if (DateTime.Now.Subtract(lastClick).TotalSeconds < 0.25) { // Doubble click
                     lastRelease = DateTime.Now;

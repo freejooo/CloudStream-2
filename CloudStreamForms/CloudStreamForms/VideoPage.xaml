@@ -45,7 +45,7 @@
 
                     </ff:CachedImage>
  
-                        <Label x:Name="SkipForward" Text="+10" IsVisible="False" VerticalOptions="Center" HorizontalOptions="Center" TranslationX="170" AbsoluteLayout.LayoutFlags="All" FontSize="24" TextColor="White" />
+                        <Label x:Name="SkipForward" Text="+10" IsVisible="False" Opacity="0" VerticalOptions="Center" HorizontalOptions="Center" TranslationX="170" AbsoluteLayout.LayoutFlags="All" FontSize="24" TextColor="White" />
                     <Label x:Name="SkipForwardSmall" Text="10" VerticalOptions="Center" HorizontalOptions="Center" TranslationX="170" AbsoluteLayout.LayoutFlags="All" FontSize="20" TextColor="White" />
                     <Image x:Name="SkipForwardImg"   VerticalOptions="Center" HorizontalOptions="Center" TranslationX="170" AbsoluteLayout.LayoutFlags="All" WidthRequest="50" HeightRequest="50" />
                     <xe:BorderView  x:Name="SkipForwardBtt" xe:TouchEffect.Color="White"  TranslationX="100" Opacity="0.6" VerticalOptions="Center" WidthRequest="34" HeightRequest="34" CornerRadius="17" HorizontalOptions="Center" BackgroundColor="Transparent">
@@ -55,7 +55,7 @@
                     </xe:BorderView>
                     
                     
-                    <Label x:Name="SkipBack" Text="-10" IsVisible="False" VerticalOptions="Center" HorizontalOptions="Center" TranslationX="-170" AbsoluteLayout.LayoutFlags="All" FontSize="24" TextColor="White" />
+                    <Label x:Name="SkipBack" Text="-10" IsVisible="False" Opacity="0" VerticalOptions="Center" HorizontalOptions="Center" TranslationX="-170" AbsoluteLayout.LayoutFlags="All" FontSize="24" TextColor="White" />
                     <Label x:Name="SkipBackSmall" Text="10" VerticalOptions="Center" HorizontalOptions="Center" TranslationX="-170" AbsoluteLayout.LayoutFlags="All" FontSize="20" TextColor="White" />
                     <Image x:Name="SkipBackImg"   VerticalOptions="Center" HorizontalOptions="Center" TranslationX="-170" AbsoluteLayout.LayoutFlags="All" WidthRequest="50" HeightRequest="50" />
                     <xe:BorderView  x:Name="SkipBackBtt" xe:TouchEffect.Color="White"  TranslationX="-100" Opacity="0.6" VerticalOptions="Center" WidthRequest="34" HeightRequest="34" CornerRadius="17" HorizontalOptions="Center" BackgroundColor="Transparent">
