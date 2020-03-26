@@ -8,17 +8,20 @@
 xmlns:ffSvg="clr-namespace:FFImageLoading.Svg.Forms;assembly=FFImageLoading.Svg.Forms"  
                          xmlns:xe="clr-namespace:XamEffects;assembly=XamEffects"
 
-xmlns:ffTransformations="clr-namespace:FFImageLoading.Transformations;assembly=FFImageLoading.Transformations"  
+xmlns:ffTransformations="clr-namespace:FFImageLoading.Transformations;assembly=FFImageLoading.Transformations"
+             xmlns:cloudstreamforms="clr-namespace:CloudStreamForms"
              mc:Ignorable="d"
              
              x:Class="CloudStreamForms.MovieResult">
     <!-- xmlns:local="clr-namespace:CloudStreamForms"-->
 
     <ScrollView  VerticalScrollBarVisibility="Never">
-        <StackLayout>
-            <StackLayout x:Name="NormalStack">
+        <AbsoluteLayout HorizontalOptions="Fill">
 
-                <!--
+            <StackLayout  >
+                <StackLayout x:Name="NormalStack">
+
+                    <!--
         <Grid
 
             RowSpacing="0"
@@ -39,66 +42,69 @@ xmlns:ffTransformations="clr-namespace:FFImageLoading.Transformations;assembly=F
 
         </Grid>
 -->
-                <Grid x:Name="XGRID" HorizontalOptions="Center" 
-            RowSpacing="10" Margin="0,-10,0,0" MinimumHeightRequest="0" 
+                    <Grid x:Name="XGRID" HorizontalOptions="Center" 
+            RowSpacing="10" Margin="0,-8,0,0" MinimumHeightRequest="0" 
 				    VerticalOptions="Start">
 
 
-                    <Grid.RowDefinitions >
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                    </Grid.RowDefinitions>
+                        <Grid.RowDefinitions >
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
 
-                    <Grid Grid.Row="0"  Grid.Column="0">
 
-                        <ff:CachedImage x:Name="TrailerBtt" BackgroundColor="Transparent"   Aspect="AspectFill" ></ff:CachedImage>
-                        <ImageButton x:Name="Gradient" HorizontalOptions="Fill" Aspect="AspectFill" Rotation="180" Opacity="1" Source="gradient.png" BackgroundColor="Transparent"></ImageButton>
-                        <ff:CachedImage x:Name="PlayBttGradient" HorizontalOptions="Center" VerticalOptions="Center"  Scale="1.8" WidthRequest="40" HeightRequest="40" Opacity="1"  BackgroundColor="Transparent" InputTransparent="True"></ff:CachedImage>
-                        <ImageButton x:Name="ReloadAllBtt" BackgroundColor="Transparent" HorizontalOptions="End" HeightRequest="30" WidthRequest="30" VerticalOptions="Start" TranslationX="-10" TranslationY="10"></ImageButton>
 
-                        <!--  <Image x:Name="FakePlayBtt"  WidthRequest="100" VerticalOptions="Start"  TranslationY="75"></Image> -->
-                    </Grid>
-                    <Grid Grid.Row="1"  Grid.Column="0" TranslationX="-5">
-                        <ff:CachedImage x:Name="ImgChromeCastBtt" BackgroundColor="Transparent" WidthRequest="40" HeightRequest="40" TranslationY="-6" VerticalOptions="Start" HorizontalOptions="Start" Scale="0.7" TranslationX="10" >
+                        <Grid Grid.Row="0"  Grid.Column="0">
 
-                        </ff:CachedImage>
-                        <ImageButton x:Name="ChromeCastBtt" BackgroundColor="Transparent" Clicked="ChromeCastBtt_Clicked"  WidthRequest="40" HeightRequest="40" TranslationY="-6" VerticalOptions="Start" HorizontalOptions="Start"></ImageButton>
-                        <Label x:Name="NameLabel" FontSize="Title" Text="Iron Man" FontAttributes="Bold" HorizontalOptions="Start" Margin="10,10,10,10" TranslationY="-10" TextColor="#e7e7e7" ></Label>
-                    </Grid>
+                            <ff:CachedImage x:Name="TrailerBtt" BackgroundColor="Transparent"   Aspect="AspectFill" ></ff:CachedImage>
+                            <ImageButton x:Name="Gradient" HorizontalOptions="Fill" Aspect="AspectFill" Rotation="180" Opacity="1" Source="gradient.png" BackgroundColor="Transparent"></ImageButton>
+                            <ff:CachedImage x:Name="PlayBttGradient" HorizontalOptions="Center" VerticalOptions="Center"  Scale="1.8" WidthRequest="40" HeightRequest="40" Opacity="1"  BackgroundColor="Transparent" InputTransparent="True"></ff:CachedImage>
+                            <ImageButton x:Name="ReloadAllBtt" BackgroundColor="Transparent" HorizontalOptions="End" HeightRequest="30" WidthRequest="30" VerticalOptions="Start" TranslationX="-10" TranslationY="10"></ImageButton>
 
-                    <Grid Grid.Row="2"  Grid.Column="0">
-                        <Grid ColumnSpacing="10">
-                            <!--★-->
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto"></ColumnDefinition>
-                                <ColumnDefinition Width="Auto"></ColumnDefinition>
-                                <ColumnDefinition Width="Auto"></ColumnDefinition>
-                                <ColumnDefinition Width="Auto"></ColumnDefinition>
-                                <ColumnDefinition Width="Auto"></ColumnDefinition>
-                                <ColumnDefinition Width="Auto"></ColumnDefinition>
-                            </Grid.ColumnDefinitions>
-                            <!--<Button Grid.Column="0" Text="IMDb" BackgroundColor="Transparent" BorderColor="#303F9F" BorderWidth="2" WidthRequest="60" HeightRequest="40"></Button>
+                            <!--  <Image x:Name="FakePlayBtt"  WidthRequest="100" VerticalOptions="Start"  TranslationY="75"></Image> -->
+                        </Grid>
+
+                        <Grid Grid.Row="1"  Grid.Column="0" TranslationX="-5">
+                            <ff:CachedImage x:Name="ImgChromeCastBtt" BackgroundColor="Transparent" WidthRequest="40" HeightRequest="40" TranslationY="-6" VerticalOptions="Start" HorizontalOptions="Start" Scale="0.7" TranslationX="10" >
+
+                            </ff:CachedImage>
+                            <ImageButton x:Name="ChromeCastBtt" BackgroundColor="Transparent" Clicked="ChromeCastBtt_Clicked"  WidthRequest="40" HeightRequest="40" TranslationY="-6" VerticalOptions="Start" HorizontalOptions="Start"></ImageButton>
+                            <Label x:Name="NameLabel" FontSize="Title" Text="Iron Man" FontAttributes="Bold" HorizontalOptions="Start" Margin="10,10,10,10" TranslationY="-10" TextColor="#e7e7e7" ></Label>
+                        </Grid>
+
+                        <Grid Grid.Row="2"  Grid.Column="0">
+                            <Grid ColumnSpacing="10">
+                                <!--★-->
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"></ColumnDefinition>
+                                    <ColumnDefinition Width="Auto"></ColumnDefinition>
+                                    <ColumnDefinition Width="Auto"></ColumnDefinition>
+                                    <ColumnDefinition Width="Auto"></ColumnDefinition>
+                                    <ColumnDefinition Width="Auto"></ColumnDefinition>
+                                    <ColumnDefinition Width="Auto"></ColumnDefinition>
+                                </Grid.ColumnDefinitions>
+                                <!--<Button Grid.Column="0" Text="IMDb" BackgroundColor="Transparent" BorderColor="#303F9F" BorderWidth="2" WidthRequest="60" HeightRequest="40"></Button>
                             <Button Grid.Column="1" Text="MAL" BackgroundColor="Transparent" BorderColor="#303F9F" BorderWidth="2" WidthRequest="60" HeightRequest="40"></Button>-->
 
 
 
-                            <Label Grid.Column="0"  x:Name="RatingLabelRating" Text="" FontAttributes="Bold" HorizontalOptions="Start" VerticalOptions="Center" TranslationX="10" FontSize="18" TranslationY="-20" TextColor="#4257d8"></Label>
+                                <Label Grid.Column="0"  x:Name="RatingLabelRating" Text="" FontAttributes="Bold" HorizontalOptions="Start" VerticalOptions="Center" TranslationX="10" FontSize="18" TranslationY="-20" TextColor="#4257d8"></Label>
 
-                            <Label Grid.Column="1" x:Name="RatingLabel"   Text=""  HorizontalOptions="Start" TranslationX="10" VerticalOptions="Center" TranslationY="-20" TextColor="#646464"></Label>
+                                <Label Grid.Column="1" x:Name="RatingLabel"   Text=""  HorizontalOptions="Start" TranslationX="10" VerticalOptions="Center" TranslationY="-20" TextColor="#646464"></Label>
+
+                            </Grid>
+                        </Grid>
+
+
+                        <Grid Grid.Row="3"  Grid.Column="0">
+                            <Label x:Name="DescriptionLabel" Text="" HorizontalOptions="Fill" VerticalOptions="Start" Margin="10,0,10,0" MinimumHeightRequest="0" TranslationY="-20" TextColor="#dadada"></Label>
 
                         </Grid>
-                    </Grid>
 
-
-                    <Grid Grid.Row="3"  Grid.Column="0">
-                        <Label x:Name="DescriptionLabel" Text="" HorizontalOptions="Fill" VerticalOptions="Start" Margin="10,0,10,0" MinimumHeightRequest="0" TranslationY="-20" TextColor="#dadada"></Label>
-
-                    </Grid>
-
-                    <!-- <Grid Grid.Row="4"  Grid.Column="0" x:Name="ChromeRow" Margin="10,10,0,0">
+                        <!-- <Grid Grid.Row="4"  Grid.Column="0" x:Name="ChromeRow" Margin="10,10,0,0">
                         <Grid  Grid.Column="0" VerticalOptions="Start" HorizontalOptions="Start" WidthRequest="100">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto"></ColumnDefinition>
@@ -108,26 +114,26 @@ xmlns:ffTransformations="clr-namespace:FFImageLoading.Transformations;assembly=F
                                 <ColumnDefinition Width="Auto"></ColumnDefinition>
                                 <ColumnDefinition Width="Auto"></ColumnDefinition>
                             </Grid.ColumnDefinitions>-->
-                    <!--
+                        <!--
                                 <Button xe:TouchEffect.Color="#303F9F" Text="IMDb" BorderColor="#303F9F" BorderWidth="2" WidthRequest="50" HeightRequest="30"  CornerRadius="2" Grid.Column="0"  HorizontalOptions="Start" VerticalOptions="Center">
 
                                 </Button>-->
-                    <!-- <xe:BorderView xe:TouchEffect.Color="#303F9F" BorderColor="#303F9F" BorderWidth="2" WidthRequest="50" HeightRequest="30"  CornerRadius="2" Grid.Column="0"  HorizontalOptions="Start" VerticalOptions="Center">
+                        <!-- <xe:BorderView xe:TouchEffect.Color="#303F9F" BorderColor="#303F9F" BorderWidth="2" WidthRequest="50" HeightRequest="30"  CornerRadius="2" Grid.Column="0"  HorizontalOptions="Start" VerticalOptions="Center">
 
                                     <Label TextColor="White" Text="IMDb" VerticalOptions="Center" HorizontalOptions="Center"></Label>
                                 </xe:BorderView>-->
-                    <!-- <xe:BorderView xe:TouchEffect.Color="#303F9F" BorderColor="#303F9F" BorderWidth="2" WidthRequest="45" HeightRequest="30"   CornerRadius="2" Grid.Column="1"  HorizontalOptions="Start" VerticalOptions="Center">
+                        <!-- <xe:BorderView xe:TouchEffect.Color="#303F9F" BorderColor="#303F9F" BorderWidth="2" WidthRequest="45" HeightRequest="30"   CornerRadius="2" Grid.Column="1"  HorizontalOptions="Start" VerticalOptions="Center">
 
                                     <Label TextColor="White" Text="MAL" VerticalOptions="Center" HorizontalOptions="Center"></Label>
                                 </xe:BorderView>-->
-                    <!--
+                        <!--
                             <ff:CachedImage x:Name="IMDbBlue" BackgroundColor="Transparent" HeightRequest="25" VerticalOptions="Start" >
 
                             </ff:CachedImage>
 
                         </Grid>
                     </Grid>-->
-                    <!--
+                        <!--
                     <Grid Grid.Row="4"  Grid.Column="0" x:Name="ChromeRow" Margin="0,-16,0,0">
                         <StackLayout Orientation="Horizontal" HorizontalOptions="Center" VerticalOptions="Start" >
                             <Image HeightRequest="30" x:Name="ChromeCastQQ" BackgroundColor="Transparent" InputTransparent="True"></Image>
@@ -136,274 +142,276 @@ xmlns:ffTransformations="clr-namespace:FFImageLoading.Transformations;assembly=F
                     </Grid>-->
 
 
-                    <Grid Grid.Row="5"  Grid.Column="0" x:Name="SecChromeRow" Margin="4,-20,5,0">
-                        <Grid HorizontalOptions="FillAndExpand" HeightRequest="60" TranslationX="0"  x:Name="QuickMenu" Margin="5">
-                            <Grid>
-                                <Grid Grid.Row="0"  Grid.Column="0">
-                                    <!--595959-->
-                                    <ff:CachedImage x:Name="StarBtt" HeightRequest="50"  BackgroundColor="Transparent"  WidthRequest="50">
-                                        <ff:CachedImage.Transformations>
-                                            <ffTransformations:TintTransformation HexColor="#201E20" ></ffTransformations:TintTransformation>
+                        <Grid Grid.Row="5"  Grid.Column="0" x:Name="SecChromeRow" Margin="4,-20,5,0">
+                            <Grid HorizontalOptions="FillAndExpand" HeightRequest="60" TranslationX="0"  x:Name="QuickMenu" Margin="5">
+                                <Grid>
+                                    <Grid Grid.Row="0"  Grid.Column="0">
+                                        <!--595959-->
+                                        <ff:CachedImage x:Name="StarBtt" HeightRequest="50"  BackgroundColor="Transparent"  WidthRequest="50">
+                                            <ff:CachedImage.Transformations>
+                                                <ffTransformations:TintTransformation HexColor="#201E20" ></ffTransformations:TintTransformation>
 
-                                        </ff:CachedImage.Transformations>
-                                    </ff:CachedImage>
-                                    <ImageButton BackgroundColor="Transparent" Clicked="StarBttClicked"></ImageButton>
+                                            </ff:CachedImage.Transformations>
+                                        </ff:CachedImage>
+                                        <ImageButton BackgroundColor="Transparent" Clicked="StarBttClicked"></ImageButton>
+                                    </Grid>
+                                    <Grid Grid.Row="1"  Grid.Column="0">
+                                        <Label Text="Bookmark" HorizontalOptions="Center" TextColor="Gray" FontSize="11"  ></Label>
+                                    </Grid>
+
+                                    <Grid Grid.Row="0"  Grid.Column="1">
+                                        <ff:CachedImage x:Name="SubtitleBtt" HeightRequest="40"  BackgroundColor="Transparent"  WidthRequest="50">
+                                            <ff:CachedImage.Transformations>
+                                                <ffTransformations:TintTransformation HexColor="#e6e6e6" ></ffTransformations:TintTransformation>
+
+                                            </ff:CachedImage.Transformations>
+                                        </ff:CachedImage>
+                                        <ImageButton BackgroundColor="Transparent" Clicked="SubtitleBttClicked" HeightRequest="40" ></ImageButton>
+                                    </Grid>
+                                    <Grid Grid.Row="1"  Grid.Column="1">
+                                        <Label Text="Subtitles"  HorizontalOptions="Center" TextColor="Gray" FontSize="11" ></Label>
+                                    </Grid>
+
+                                    <Grid Grid.Row="0"  Grid.Column="2">
+
+                                        <ff:CachedImage x:Name="ViewToggle" InputTransparent="True" BackgroundColor="Transparent"  WidthRequest="50">
+                                            <ff:CachedImage.Transformations>
+                                                <ffTransformations:TintTransformation HexColor="#e6e6e6" ></ffTransformations:TintTransformation>
+
+                                            </ff:CachedImage.Transformations>
+                                        </ff:CachedImage>
+                                        <ImageButton BackgroundColor="Transparent" Clicked="ViewToggle_Clicked" HeightRequest="40" ></ImageButton>
+                                    </Grid>
+                                    <Grid Grid.Row="1"  Grid.Column="2">
+                                        <Label Text="Viewstate" HorizontalOptions="Center" TextColor="Gray" FontSize="11" ></Label>
+                                    </Grid>
+                                    <Grid Grid.Row="0"  Grid.Column="3">
+
+                                        <ff:CachedImage x:Name="ShareBtt"  HeightRequest="40"  BackgroundColor="Transparent" Scale="1.2"  WidthRequest="50">
+                                            <!--Scale="0.8"-->
+                                            <ff:CachedImage.Transformations>
+                                                <ffTransformations:TintTransformation HexColor="#e6e6e6" ></ffTransformations:TintTransformation>
+
+                                            </ff:CachedImage.Transformations>
+                                        </ff:CachedImage>
+                                        <ImageButton BackgroundColor="Transparent" Clicked="ShareBttClicked" HeightRequest="40" ></ImageButton>
+                                    </Grid>
+                                    <Grid Grid.Row="1"  Grid.Column="3">
+                                        <Label Text="Share" HorizontalOptions="Center" TextColor="Gray" FontSize="11"  ></Label>
+                                    </Grid>
+
+                                    <Grid Grid.Row="0"  Grid.Column="4">
+                                        <ff:CachedImage x:Name="IMDbBtt" HeightRequest="40"  BackgroundColor="Transparent" Scale="0.8" WidthRequest="50" >
+                                            <ff:CachedImage.Transformations>
+                                                <ffTransformations:TintTransformation HexColor="#e6e6e6" ></ffTransformations:TintTransformation>
+
+                                            </ff:CachedImage.Transformations>
+                                        </ff:CachedImage>
+                                        <ImageButton  Clicked="IMDb_Clicked" BackgroundColor="Transparent" HeightRequest="30" ></ImageButton>
+                                    </Grid>
+                                    <Grid Grid.Row="1"  Grid.Column="4">
+                                        <Label Text="IMDb" HorizontalOptions="Center" TextColor="Gray" FontSize="11"  ></Label>
+                                    </Grid>
+
+                                    <Grid Grid.Row="0"  Grid.Column="5" x:Name="MALB">
+                                        <ff:CachedImage x:Name="MALBtt" HeightRequest="30"  BackgroundColor="Transparent" TranslationY="0" TranslationX="7" Scale="0.8" WidthRequest="50">
+                                            <ff:CachedImage.Transformations>
+                                                <ffTransformations:TintTransformation HexColor="#e6e6e6" ></ffTransformations:TintTransformation>
+
+                                            </ff:CachedImage.Transformations>
+                                        </ff:CachedImage>
+                                        <ImageButton Clicked="MAL_Clicked"   BackgroundColor="Transparent" HeightRequest="30" ></ImageButton>
+                                    </Grid>
+                                    <Grid Grid.Row="1"  Grid.Column="5" x:Name="MALA">
+                                        <Label Text="MAL" HorizontalOptions="Center"  x:Name="MALTxt"  TextColor="Gray" TranslationX="7" FontSize="11"  ></Label>
+                                    </Grid>
+
                                 </Grid>
-                                <Grid Grid.Row="1"  Grid.Column="0">
-                                    <Label Text="Bookmark" HorizontalOptions="Center" TextColor="Gray" FontSize="11"  ></Label>
-                                </Grid>
-
-                                <Grid Grid.Row="0"  Grid.Column="1">
-                                    <ff:CachedImage x:Name="SubtitleBtt" HeightRequest="40"  BackgroundColor="Transparent"  WidthRequest="50">
-                                        <ff:CachedImage.Transformations>
-                                            <ffTransformations:TintTransformation HexColor="#e6e6e6" ></ffTransformations:TintTransformation>
-
-                                        </ff:CachedImage.Transformations>
-                                    </ff:CachedImage>
-                                    <ImageButton BackgroundColor="Transparent" Clicked="SubtitleBttClicked" HeightRequest="40" ></ImageButton>
-                                </Grid>
-                                <Grid Grid.Row="1"  Grid.Column="1">
-                                    <Label Text="Subtitles"  HorizontalOptions="Center" TextColor="Gray" FontSize="11" ></Label>
-                                </Grid>
-
-                                <Grid Grid.Row="0"  Grid.Column="2">
-
-                                    <ff:CachedImage x:Name="ViewToggle" InputTransparent="True" BackgroundColor="Transparent"  WidthRequest="50">
-                                        <ff:CachedImage.Transformations>
-                                            <ffTransformations:TintTransformation HexColor="#e6e6e6" ></ffTransformations:TintTransformation>
-
-                                        </ff:CachedImage.Transformations>
-                                    </ff:CachedImage>
-                                    <ImageButton BackgroundColor="Transparent" Clicked="ViewToggle_Clicked" HeightRequest="40" ></ImageButton>
-                                </Grid>
-                                <Grid Grid.Row="1"  Grid.Column="2">
-                                    <Label Text="Viewstate" HorizontalOptions="Center" TextColor="Gray" FontSize="11" ></Label>
-                                </Grid>
-                                <Grid Grid.Row="0"  Grid.Column="3">
-
-                                    <ff:CachedImage x:Name="ShareBtt"  HeightRequest="40"  BackgroundColor="Transparent" Scale="1.2"  WidthRequest="50">
-                                        <!--Scale="0.8"-->
-                                        <ff:CachedImage.Transformations>
-                                            <ffTransformations:TintTransformation HexColor="#e6e6e6" ></ffTransformations:TintTransformation>
-
-                                        </ff:CachedImage.Transformations>
-                                    </ff:CachedImage>
-                                    <ImageButton BackgroundColor="Transparent" Clicked="ShareBttClicked" HeightRequest="40" ></ImageButton>
-                                </Grid>
-                                <Grid Grid.Row="1"  Grid.Column="3">
-                                    <Label Text="Share" HorizontalOptions="Center" TextColor="Gray" FontSize="11"  ></Label>
-                                </Grid>
-
-                                <Grid Grid.Row="0"  Grid.Column="4">
-                                    <ff:CachedImage x:Name="IMDbBtt" HeightRequest="40"  BackgroundColor="Transparent" Scale="0.8" WidthRequest="50" >
-                                        <ff:CachedImage.Transformations>
-                                            <ffTransformations:TintTransformation HexColor="#e6e6e6" ></ffTransformations:TintTransformation>
-
-                                        </ff:CachedImage.Transformations>
-                                    </ff:CachedImage>
-                                    <ImageButton  Clicked="IMDb_Clicked" BackgroundColor="Transparent" HeightRequest="30" ></ImageButton>
-                                </Grid>
-                                <Grid Grid.Row="1"  Grid.Column="4">
-                                    <Label Text="IMDb" HorizontalOptions="Center" TextColor="Gray" FontSize="11"  ></Label>
-                                </Grid>
-
-                                <Grid Grid.Row="0"  Grid.Column="5" x:Name="MALB">
-                                    <ff:CachedImage x:Name="MALBtt" HeightRequest="30"  BackgroundColor="Transparent" TranslationY="0" TranslationX="7" Scale="0.8" WidthRequest="50">
-                                        <ff:CachedImage.Transformations>
-                                            <ffTransformations:TintTransformation HexColor="#e6e6e6" ></ffTransformations:TintTransformation>
-
-                                        </ff:CachedImage.Transformations>
-                                    </ff:CachedImage>
-                                    <ImageButton Clicked="MAL_Clicked"   BackgroundColor="Transparent" HeightRequest="30" ></ImageButton>
-                                </Grid>
-                                <Grid Grid.Row="1"  Grid.Column="5" x:Name="MALA">
-                                    <Label Text="MAL" HorizontalOptions="Center"  x:Name="MALTxt"  TextColor="Gray" TranslationX="7" FontSize="11"  ></Label>
-                                </Grid>
-
                             </Grid>
+
+
                         </Grid>
 
-
                     </Grid>
 
-                </Grid>
+                    <Grid Margin="0,-13,0,-5">
+                        <Grid.RowDefinitions >
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
 
-                <Grid Margin="0,-13,0,-5">
-                    <Grid.RowDefinitions >
-                        <RowDefinition Height="Auto" />
-                    </Grid.RowDefinitions>
+                        <Grid x:Name="EpPickers" Grid.Row="1"  Grid.Column="0" Margin="10,10,0,0">
+                            <Grid.ColumnDefinitions >
+                                <ColumnDefinition Width="Auto"></ColumnDefinition>
+                                <ColumnDefinition Width="Auto"></ColumnDefinition>
+                                <ColumnDefinition Width="Auto"></ColumnDefinition>
+                                <ColumnDefinition Width="Auto"></ColumnDefinition>
+                            </Grid.ColumnDefinitions>
+                            <!--   <StackLayout Orientation="Horizontal" TranslationX="10" >-->
+                            <Button x:Name="SeasonBtt" Grid.Column="0" InputTransparent="False" Opacity="0" BackgroundColor="#333333" Text="Season 1" TextColor="#e7e7e7" FontAttributes="Bold" FontSize="Body" CornerRadius="5" HeightRequest="37" ></Button>
+                            <!--   <Picker x:Name="SeasonPicker"  TranslationX="13" TextColor="Transparent" IsVisible="False" VerticalOptions="Center" HorizontalOptions="Start"  FontAttributes="Bold" FontSize="Body" ></Picker> -->
 
-                    <Grid x:Name="EpPickers" Grid.Row="1"  Grid.Column="0" Margin="10,10,0,0">
-                        <Grid.ColumnDefinitions >
-                            <ColumnDefinition Width="Auto"></ColumnDefinition>
-                            <ColumnDefinition Width="Auto"></ColumnDefinition>
-                            <ColumnDefinition Width="Auto"></ColumnDefinition>
-                            <ColumnDefinition Width="Auto"></ColumnDefinition>
-                        </Grid.ColumnDefinitions>
-                        <!--   <StackLayout Orientation="Horizontal" TranslationX="10" >-->
-                        <Button x:Name="SeasonBtt" Grid.Column="0" InputTransparent="False" Opacity="0" BackgroundColor="#333333" Text="Season 1" TextColor="#e7e7e7" FontAttributes="Bold" FontSize="Body" CornerRadius="5" HeightRequest="37" ></Button>
-                        <!--   <Picker x:Name="SeasonPicker"  TranslationX="13" TextColor="Transparent" IsVisible="False" VerticalOptions="Center" HorizontalOptions="Start"  FontAttributes="Bold" FontSize="Body" ></Picker> -->
+                            <Button x:Name="DubBtt" Grid.Column="1" InputTransparent="False" BackgroundColor="#333333" Text="Dub" TextColor="#e7e7e7" FontAttributes="Bold" FontSize="Body" CornerRadius="5" HeightRequest="37" WidthRequest="60" ></Button>
+                            <Button x:Name="FromToBtt" Grid.Column="2" InputTransparent="False" IsVisible="False" IsEnabled="False" BackgroundColor="#333333" Text="Test" TextColor="#e7e7e7" FontAttributes="Bold" FontSize="Body" CornerRadius="5" HeightRequest="37" WidthRequest="80" ></Button>
+                            <ff:CachedImage x:Name="NotificationImg" Grid.Column="3" VerticalOptions="Center" HorizontalOptions="End" ></ff:CachedImage>
+                            <xe:BorderView x:Name="NotificationBtt" IsEnabled="False" xe:TouchEffect.Color="White"  Opacity="0.4" Grid.Column="3" TranslationX="2.5" WidthRequest="36" HeightRequest="36" CornerRadius="18"  VerticalOptions="Center" HorizontalOptions="End"></xe:BorderView>
+                            <Label x:Name="NotificationTime" Grid.Column="4" VerticalOptions="Center" HorizontalOptions="End" Margin="10,0"></Label>
+                            <!--   <Picker x:Name="DubPicker" IsVisible="False" VerticalOptions="Center" HorizontalOptions="Start"  FontAttributes="Bold" FontSize="Body" TextColor="Transparent" TranslationX="13"></Picker> -->
+                            <!-- </StackLayout>-->
 
-                        <Button x:Name="DubBtt" Grid.Column="1" InputTransparent="False" BackgroundColor="#333333" Text="Dub" TextColor="#e7e7e7" FontAttributes="Bold" FontSize="Body" CornerRadius="5" HeightRequest="37" WidthRequest="60" ></Button>
-                        <Button x:Name="FromToBtt" Grid.Column="2" InputTransparent="False" IsVisible="False" IsEnabled="False" BackgroundColor="#333333" Text="Test" TextColor="#e7e7e7" FontAttributes="Bold" FontSize="Body" CornerRadius="5" HeightRequest="37" WidthRequest="80" ></Button>
-                        <ff:CachedImage x:Name="NotificationImg" Grid.Column="3" VerticalOptions="Center" HorizontalOptions="End" ></ff:CachedImage>
-                        <xe:BorderView x:Name="NotificationBtt" IsEnabled="False" xe:TouchEffect.Color="White"  Opacity="0.4" Grid.Column="3" TranslationX="2.5" WidthRequest="36" HeightRequest="36" CornerRadius="18"  VerticalOptions="Center" HorizontalOptions="End"></xe:BorderView>
-                        <Label x:Name="NotificationTime" Grid.Column="4" VerticalOptions="Center" HorizontalOptions="End" Margin="10,0"></Label>
-                        <!--   <Picker x:Name="DubPicker" IsVisible="False" VerticalOptions="Center" HorizontalOptions="Start"  FontAttributes="Bold" FontSize="Body" TextColor="Transparent" TranslationX="13"></Picker> -->
-                        <!-- </StackLayout>-->
+                        </Grid>
 
-                    </Grid>
-
-                    <Grid Grid.Row="0"  Grid.Column="0">
-                        <!--
+                        <Grid Grid.Row="0"  Grid.Column="0">
+                            <!--
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"></RowDefinition>
                             <RowDefinition Height="Auto"></RowDefinition>
                             <RowDefinition Height="Auto"></RowDefinition>
                         </Grid.RowDefinitions>-->
 
-                        <Image x:Name="OffBar" InputTransparent="True" VerticalOptions="Start"></Image>
+                            <Image x:Name="OffBar" InputTransparent="True" VerticalOptions="Start"></Image>
 
 
-                        <StackLayout Orientation="Horizontal" HorizontalOptions="Start" VerticalOptions="Start" TranslationY="-8" Margin="0,5">
-                            <Grid >
+                            <StackLayout Orientation="Horizontal" HorizontalOptions="Start" VerticalOptions="Start" TranslationY="-8" Margin="0,5">
+                                <Grid >
 
-                                <ProgressBar x:Name="EPISODESBar" ScaleX="0" Progress="1.0" ProgressColor="#303F9F" BackgroundColor="Transparent" InputTransparent="True" TranslationY="-8"></ProgressBar>
-                                <Button x:Name="EPISODES" Margin="5"  TranslationY="10" BackgroundColor="Transparent" Text="LOADING" TextColor="#e7e7e7" FontAttributes="Bold" FontSize="14" CornerRadius="5" HeightRequest="37" Clicked="Episodes_Clicked" ></Button>
+                                    <ProgressBar x:Name="EPISODESBar" ScaleX="0" Progress="1.0" ProgressColor="#303F9F" BackgroundColor="Transparent" InputTransparent="True" TranslationY="-8"></ProgressBar>
+                                    <Button x:Name="EPISODES" Margin="5"  TranslationY="10" BackgroundColor="Transparent" Text="LOADING" TextColor="#e7e7e7" FontAttributes="Bold" FontSize="14" CornerRadius="5" HeightRequest="37" Clicked="Episodes_Clicked" ></Button>
 
-                            </Grid>
-                            <Grid >
-                                <ProgressBar x:Name="RECOMMENDATIONSBar" ScaleX="0" Progress="1.0" ProgressColor="#303F9F"  BackgroundColor="Transparent" InputTransparent="True" TranslationY="-8"></ProgressBar>
-                                <Button x:Name="RECOMMENDATIONS" Margin="5"  TranslationY="10" BackgroundColor="Transparent" Text="RECOMMENDATIONS" TextColor="#e7e7e7" FontAttributes="Bold" FontSize="14" CornerRadius="5" HeightRequest="37" Clicked="Recommendations_Clicked" ></Button>
-                            </Grid>
-                            <Grid x:Name="TRAILERSTAB" IsEnabled="False" IsVisible="False">
-                                <ProgressBar x:Name="TRAILERSBar" ScaleX="0" Progress="1.0" ProgressColor="#303F9F"  BackgroundColor="Transparent" InputTransparent="True" TranslationY="-8"></ProgressBar>
-                                <Button x:Name="TRAILERS" Margin="5"  TranslationY="10" BackgroundColor="Transparent" Text="TRAILERS" TextColor="#e7e7e7" FontAttributes="Bold" FontSize="14" CornerRadius="5" HeightRequest="37" Clicked="Trailers_Clicked" ></Button>
-                            </Grid>
-                        </StackLayout>
+                                </Grid>
+                                <Grid >
+                                    <ProgressBar x:Name="RECOMMENDATIONSBar" ScaleX="0" Progress="1.0" ProgressColor="#303F9F"  BackgroundColor="Transparent" InputTransparent="True" TranslationY="-8"></ProgressBar>
+                                    <Button x:Name="RECOMMENDATIONS" Margin="5"  TranslationY="10" BackgroundColor="Transparent" Text="RECOMMENDATIONS" TextColor="#e7e7e7" FontAttributes="Bold" FontSize="14" CornerRadius="5" HeightRequest="37" Clicked="Recommendations_Clicked" ></Button>
+                                </Grid>
+                                <Grid x:Name="TRAILERSTAB" IsEnabled="False" IsVisible="False">
+                                    <ProgressBar x:Name="TRAILERSBar" ScaleX="0" Progress="1.0" ProgressColor="#303F9F"  BackgroundColor="Transparent" InputTransparent="True" TranslationY="-8"></ProgressBar>
+                                    <Button x:Name="TRAILERS" Margin="5"  TranslationY="10" BackgroundColor="Transparent" Text="TRAILERS" TextColor="#e7e7e7" FontAttributes="Bold" FontSize="14" CornerRadius="5" HeightRequest="37" Clicked="Trailers_Clicked" ></Button>
+                                </Grid>
+                            </StackLayout>
+                        </Grid>
                     </Grid>
-                </Grid>
 
-                <!--
+                    <!--
 
             <StackLayout  x:Name="absLayout" VerticalOptions="FillAndExpand" SizeChanged="absLayout_SizeChanged"
                    
                    > -->
-                <ProgressBar x:Name="FishProgress" IsVisible="False" IsEnabled="False" ProgressColor="#303F9F" Opacity="0" InputTransparent="True" VerticalOptions="Start" Margin="10,0"></ProgressBar>
-                <Label x:Name="FishProgressTxt"   Text="" HorizontalOptions="Center" TextColor="#e6e6e6"></Label>
-                
-                <Grid>
+                 <!--   <ProgressBar x:Name="FishProgress" IsVisible="False" IsEnabled="False" ProgressColor="#303F9F" Opacity="0" InputTransparent="True" VerticalOptions="Start" Margin="10,0"></ProgressBar>-->
+                    <Label x:Name="FishProgressTxt"   Text="" HorizontalOptions="Center" TextColor="#e6e6e6"></Label>
 
-                    <ListView ItemsSource="{Binding MyEpisodeResultCollection}"
+                    <Grid >
+                        <StackLayout x:Name="FadeEpisodes">
+
+                            <ListView ItemsSource="{Binding MyEpisodeResultCollection}" VerticalOptions="Fill" 
                                  CachingStrategy="RecycleElement" 
                   RowHeight="200" HasUnevenRows="false"
-                        x:Name="episodeView" SeparatorColor="Transparent" VerticalScrollBarVisibility="Never">
-                        <ListView.ItemTemplate>
-                            <DataTemplate >
-                                <ViewCell Tapped="ViewCell_Tapped" >
-                                    <Grid RowSpacing="0"  Padding="0"  HorizontalOptions="Fill" VerticalOptions="FillAndExpand">
-                                        <!--SizeChanged="ViewCell_SizeChanged"-->
-                                        <Grid.RowDefinitions >
-                                            <RowDefinition Height="Auto" />
-                                            <RowDefinition Height="Auto" />
-                                        </Grid.RowDefinitions>
+                        x:Name="episodeView" SeparatorColor="Transparent" VerticalScrollBarVisibility="Never" ItemAppearing="episodeView_ItemAppearing">
+                                <ListView.ItemTemplate>
+                                    <DataTemplate>
+                                        <ViewCell Tapped="ViewCell_Tapped"  >
+                                            <Grid RowSpacing="0"  Padding="0"  HorizontalOptions="Fill" VerticalOptions="FillAndExpand">
+                                                <!--SizeChanged="ViewCell_SizeChanged"-->
+                                                <Grid.RowDefinitions >
+                                                    <RowDefinition Height="Auto" />
+                                                    <RowDefinition Height="Auto" />
+                                                </Grid.RowDefinitions>
 
-                                        <Grid Grid.Row="0" Grid.Column="0" HorizontalOptions="Fill" Margin="10,10,10,0">
-                                            <Grid.RowDefinitions >
-                                                <RowDefinition Height="Auto" />
-                                                <RowDefinition Height="Auto" />
-                                                <RowDefinition Height="Auto" />
-                                            </Grid.RowDefinitions>
-
-                                            <Grid.ColumnDefinitions >
-                                                <ColumnDefinition Width="Auto" />
-                                                <ColumnDefinition Width="Auto" />
-                                                <ColumnDefinition Width="Auto" />
-                                            </Grid.ColumnDefinitions>
-
-                                            <Grid  Grid.Row="0"  Grid.Column="1" Margin="10,0,0,0">
-
-                                                <Grid RowSpacing="0" Padding="0" VerticalOptions="Center">
+                                                <Grid Grid.Row="0" Grid.Column="0" HorizontalOptions="Fill" Margin="10,10,10,0">
                                                     <Grid.RowDefinitions >
                                                         <RowDefinition Height="Auto" />
                                                         <RowDefinition Height="Auto" />
                                                         <RowDefinition Height="Auto" />
                                                     </Grid.RowDefinitions>
+
                                                     <Grid.ColumnDefinitions >
                                                         <ColumnDefinition Width="Auto" />
                                                         <ColumnDefinition Width="Auto" />
                                                         <ColumnDefinition Width="Auto" />
                                                     </Grid.ColumnDefinitions>
-                                                    <Grid Grid.Row="0"  Grid.Column="0" >
-                                                        <Label Text="{Binding OgTitle}" TextColor="{Binding MainTextColor}" FontAttributes="Bold" FontSize="15"/>
+
+                                                    <Grid  Grid.Row="0"  Grid.Column="1" Margin="10,0,0,0">
+
+                                                        <Grid RowSpacing="0" Padding="0" VerticalOptions="Center">
+                                                            <Grid.RowDefinitions >
+                                                                <RowDefinition Height="Auto" />
+                                                                <RowDefinition Height="Auto" />
+                                                                <RowDefinition Height="Auto" />
+                                                            </Grid.RowDefinitions>
+                                                            <Grid.ColumnDefinitions >
+                                                                <ColumnDefinition Width="Auto" />
+                                                                <ColumnDefinition Width="Auto" />
+                                                                <ColumnDefinition Width="Auto" />
+                                                            </Grid.ColumnDefinitions>
+                                                            <Grid Grid.Row="0"  Grid.Column="0" >
+                                                                <Label Text="{Binding OgTitle}" TextColor="{Binding MainTextColor}" FontAttributes="Bold" FontSize="15"/>
+                                                            </Grid>
+                                                            <Grid Grid.Row="1"  Grid.Column="0" >
+                                                                <Label Text="{Binding RatingStar}" TextColor="{Binding MainDarkTextColor}" FontAttributes="None" FontSize="14"/>
+                                                            </Grid>
+                                                        </Grid>
                                                     </Grid>
-                                                    <Grid Grid.Row="1"  Grid.Column="0" >
-                                                        <Label Text="{Binding RatingStar}" TextColor="{Binding MainDarkTextColor}" FontAttributes="None" FontSize="14"/>
+
+
+
+
+                                                    <Grid TranslationY="{Binding TranslateYOffset}"  xe:TouchEffect.Color="White" Grid.Row="0"  Grid.Column="0" WidthRequest="127" HeightRequest="72"  BackgroundColor="Transparent" xe:EffectsConfig.ChildrenInputTransparent="False" LayoutChanged="Grid_LayoutChanged"  >
+                                                        <ff:CachedImage WidthRequest="127" HeightRequest="72" Source="{Binding ImageSource}" InputTransparent="True" >
+
+                                                            <ff:CachedImage.Transformations >
+                                                                <ffTransformations:RoundedTransformation Radius="1" CropWidthRatio="1.8"  >
+
+                                                                </ffTransformations:RoundedTransformation>
+                                                            </ff:CachedImage.Transformations>
+
+                                                        </ff:CachedImage>
+                                                        <ff:CachedImage   Source="{Binding VideoSource}" Scale="0.5" InputTransparent="True"  BackgroundColor="Transparent">
+
+                                                        </ff:CachedImage>
+
                                                     </Grid>
                                                 </Grid>
+
+
+
+                                                <Label Text="{Binding Description}"  TextColor="{Binding MainDarkTextColor}" LineHeight="1"  TranslationY="-5"  MaxLines="4" Grid.Row="1" Grid.Column="0" HorizontalOptions="Fill" VerticalOptions="Fill"  Padding="0,0,0,0" Margin="10,0" />
                                             </Grid>
 
 
-
-
-                                            <Grid TranslationY="{Binding TranslateYOffset}"  xe:TouchEffect.Color="White" Grid.Row="0"  Grid.Column="0" WidthRequest="127" HeightRequest="72"  BackgroundColor="Transparent" xe:EffectsConfig.ChildrenInputTransparent="False" LayoutChanged="Grid_LayoutChanged"  >
-                                                <ff:CachedImage WidthRequest="127" HeightRequest="72" Source="{Binding ImageSource}" InputTransparent="True" >
-
-                                                    <ff:CachedImage.Transformations >
-                                                        <ffTransformations:RoundedTransformation Radius="1" CropWidthRatio="1.8"  >
-
-                                                        </ffTransformations:RoundedTransformation>
-                                                    </ff:CachedImage.Transformations>
-
-                                                </ff:CachedImage>
-                                                <ff:CachedImage   Source="{Binding VideoSource}" Scale="0.5" InputTransparent="True"  BackgroundColor="Transparent">
-
-                                                </ff:CachedImage>
-
-                                            </Grid>
-                                        </Grid>
-
-
-
-                                        <Label Text="{Binding Description}"  TextColor="{Binding MainDarkTextColor}" LineHeight="1"  TranslationY="-5"  MaxLines="4" Grid.Row="1" Grid.Column="0" HorizontalOptions="Fill" VerticalOptions="Fill"  Padding="0,0,0,0" Margin="10,0" />
-                                    </Grid>
-
-
-                                    <!--
+                                            <!--
                                             <ff:CachedImage PropertyChanging="ImageGetGradient" InputTransparent="True" ScaleX="300" TranslationY="2" HeightRequest="10" Rotation="180" VerticalOptions="End" BackgroundColor="Transparent">
 
                                             </ff:CachedImage>-->
 
-                                    <!--  <ImageButton  Clicked="ImageButton_Clicked" BackgroundColor="Transparent" WidthRequest="127"></ImageButton> -->
-                                    <!--PosterUrl-->
-                                    <!-- Source="{Binding PosterUrl}"-->
+                                            <!--  <ImageButton  Clicked="ImageButton_Clicked" BackgroundColor="Transparent" WidthRequest="127"></ImageButton> -->
+                                            <!--PosterUrl-->
+                                            <!-- Source="{Binding PosterUrl}"-->
 
-                                    <!--Margin="10,-5"-->
-                                    <!-- >-->
-                                    <!--
+                                            <!--Margin="10,-5"-->
+                                            <!-- >-->
+                                            <!--
                                     <Grid Grid.Row="1" x:Name="PBar"  Grid.Column="0" VerticalOptions="Center">
                                         <ContentView VerticalOptions="Center">
                                             <ProgressBar Progress="{Binding Progress}" VerticalOptions="Center" PropertyChanged="ProgressBar_BindingContextChanged" IsVisible="False" IsEnabled="False"></ProgressBar>
                                         </ContentView>
                                     </Grid>
 -->
-                                    <!--  Progress="{Binding Progress}"  IsVisible="False" WidthRequest="126"-->
+                                            <!--  Progress="{Binding Progress}"  IsVisible="False" WidthRequest="126"-->
 
-                                    <!--    <Label Text="{Binding Description}" /> -->
+                                            <!--    <Label Text="{Binding Description}" /> -->
 
-                                    <!--  d:Text="{Binding .}"   LineBreakMode="NoWrap" 
+                                            <!--  d:Text="{Binding .}"   LineBreakMode="NoWrap" 
                                 FontSize="16" />-->
-                                    <!--   Style="{DynamicResource ListItemDetailTextStyle}"        LineBreakMode="NoWrap"
+                                            <!--   Style="{DynamicResource ListItemDetailTextStyle}"        LineBreakMode="NoWrap"
                                 FontSize="13"                           d:Text="Item descripton"
 -->
-                                    <!--<Label Text="{Binding Description}"  TextColor="{Binding MainDarkTextColor}" MaxLines="4"  />-->
+                                            <!--<Label Text="{Binding Description}"  TextColor="{Binding MainDarkTextColor}" MaxLines="4"  />-->
 
-                                </ViewCell>
-                            </DataTemplate>
-                        </ListView.ItemTemplate>
+                                        </ViewCell>
+                                    </DataTemplate>
+                                </ListView.ItemTemplate>
 
-                    </ListView>
-                    <!--
+                            </ListView>
+                        </StackLayout>
+                        <!--
                     <ListView ItemsSource="{Binding CurrentTrailers}"
                                  CachingStrategy="RecycleElement" 
                     ItemTapped="ListView_ItemTapped" RowHeight="5000" HasUnevenRows="False" 
@@ -441,47 +449,47 @@ xmlns:ffTransformations="clr-namespace:FFImageLoading.Transformations;assembly=F
                         </ListView.ItemTemplate>
                     </ListView>
 -->
-                    <StackLayout  x:Name="trailerStack" >
-                        <Grid x:Name="trailerView" VerticalOptions="Start" HorizontalOptions="CenterAndExpand" Margin="10" RowSpacing="10" >
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                            </Grid.RowDefinitions>
-                        </Grid>
-                    </StackLayout>
+                        <StackLayout  x:Name="trailerStack" >
+                            <Grid x:Name="trailerView" VerticalOptions="Start" HorizontalOptions="CenterAndExpand" Margin="10" RowSpacing="10" >
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+                            </Grid>
+                        </StackLayout>
 
-                    <StackLayout Margin="0,0,0,0" x:Name="RecStack">
-                        <!--  <Label x:Name="RText" Text="Recommendations" FontAttributes="Bold" TranslationX="10" VerticalOptions="Start" FontSize="Medium" TextColor="White"></Label>-->
-                        <ScrollView Orientation="Vertical" x:Name="MScroll" VerticalOptions="Start" HorizontalScrollBarVisibility="Never">
-                            <StackLayout>
-                                <Grid x:Name="Recommendations" VerticalOptions="Start" HorizontalOptions="Fill" HeightRequest="130" RowSpacing="10" >
+                        <StackLayout Margin="0,0,0,40" x:Name="RecStack">
+                            <!--  <Label x:Name="RText" Text="Recommendations" FontAttributes="Bold" TranslationX="10" VerticalOptions="Start" FontSize="Medium" TextColor="White"></Label>-->
+                            <ScrollView Orientation="Vertical" x:Name="MScroll" VerticalOptions="Start" HorizontalScrollBarVisibility="Never">
+                                <StackLayout>
+                                    <Grid x:Name="Recommendations" VerticalOptions="Start" HorizontalOptions="Fill" HeightRequest="130" RowSpacing="10" >
 
-                                </Grid>
-                            </StackLayout>
-                        </ScrollView>
-                        <ActivityIndicator x:Name="RecomendationLoaded" IsRunning="True" IsVisible="True" IsEnabled="True" ></ActivityIndicator>
-                    </StackLayout>
-                </Grid>
+                                    </Grid>
+                                </StackLayout>
+                            </ScrollView>
+                            <!--   <ActivityIndicator x:Name="RecomendationLoaded" IsRunning="True" IsVisible="True" IsEnabled="True" ></ActivityIndicator>-->
+                        </StackLayout>
+                    </Grid>
 
-                <!--
+                    <!--
                 <StackLayout Margin="0,-10,0,0">
                     <Label x:Name="RText" Text="Recommendations" FontAttributes="Bold" TranslationX="10" VerticalOptions="Start" FontSize="Medium" TextColor="White"></Label>
                     <ScrollView Orientation="Horizontal" x:Name="MScroll" VerticalOptions="Start" HorizontalScrollBarVisibility="Never">
@@ -493,9 +501,15 @@ xmlns:ffTransformations="clr-namespace:FFImageLoading.Transformations;assembly=F
                     </ScrollView>
                     <ActivityIndicator x:Name="RecomendationLoaded" IsRunning="True" IsVisible="True" IsEnabled="True" ></ActivityIndicator>
                 </StackLayout>-->
-            </StackLayout>
+                </StackLayout>
 
-        </StackLayout>
+            </StackLayout>
+            <StackLayout AbsoluteLayout.LayoutBounds="0, 0, 1, 1" AbsoluteLayout.LayoutFlags="All" InputTransparent="True">
+                <ProgressBar HorizontalOptions="Fill"  x:Name="RecomendationLoaded" InputTransparent="True"  IsVisible="True" IsEnabled="True" ClassId="id" TranslationY="-7" ></ProgressBar>
+                
+            </StackLayout>
+        </AbsoluteLayout>
+ 
 
 
     </ScrollView>

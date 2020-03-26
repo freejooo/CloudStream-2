@@ -6,6 +6,7 @@
              xmlns:ff="clr-namespace:FFImageLoading.Forms;assembly=FFImageLoading.Forms"             
              xmlns:xe="clr-namespace:XamEffects;assembly=XamEffects"
              xmlns:ffTransformations="clr-namespace:FFImageLoading.Transformations;assembly=FFImageLoading.Transformations"
+             xmlns:cloudstreamforms="clr-namespace:CloudStreamForms"
              mc:Ignorable="d"
              x:Class="CloudStreamForms.Home">
         <StackLayout>
@@ -83,7 +84,8 @@
                 <Grid.RowDefinitions >
                     <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
-                <ActivityIndicator x:Name="LoadingIndicator" TranslationY="30"></ActivityIndicator>
+                <ProgressBar  x:Name="LoadingIndicator"  HorizontalOptions="Fill" ClassId="id" ></ProgressBar>
+                <!--<ActivityIndicator x:Name="LoadingIndicator" TranslationY="30"></ActivityIndicator>-->
 
                 <Grid Grid.Row="1"  Grid.Column="0">
                     <ListView ItemsSource="{Binding MyEpisodeResultCollection}" 
@@ -95,7 +97,7 @@
 
                         <ListView.ItemTemplate>
                             <DataTemplate     >
-                                <ViewCell Tapped="ViewCell_Tapped"   >
+                                <cloudstreamforms:CustomCell Tapped="ViewCell_Tapped"   >
                                     <Grid RowSpacing="0"  Padding="0"  HorizontalOptions="Fill"  HeightRequest="98" >
 
 
@@ -181,7 +183,7 @@
 
                                     </Grid>
 
-                                </ViewCell>
+                                </cloudstreamforms:CustomCell>
                             </DataTemplate>
                         </ListView.ItemTemplate>
 

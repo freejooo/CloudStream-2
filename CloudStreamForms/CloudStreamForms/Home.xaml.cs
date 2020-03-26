@@ -110,7 +110,7 @@ namespace CloudStreamForms
         {
             set {
                 if ((value && epView.MyEpisodeResultCollection.Count == 0) || !value) {
-                    Device.BeginInvokeOnMainThread(() => { LoadingIndicator.IsVisible = value; LoadingIndicator.IsEnabled = value; LoadingIndicator.IsRunning = value; });
+                    Device.BeginInvokeOnMainThread(() => { LoadingIndicator.IsVisible = value; LoadingIndicator.IsEnabled = value; /*LoadingIndicator.IsRunning = value;*/ });
                 }
                 _fething = value;
             }
@@ -395,7 +395,7 @@ namespace CloudStreamForms
         {
             SaveData();
             base.OnAppearing();
-            if (!hasAppered) {
+             if (!hasAppered) {
                 App.UpdateStatusBar();
                 App.UpdateBackground();
 
