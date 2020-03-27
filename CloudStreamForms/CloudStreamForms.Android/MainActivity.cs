@@ -902,7 +902,7 @@ namespace CloudStreamForms.Droid
             // uiOptions |= (int)SystemUiFlags.Fullscreen;
 
 
-            var attrs = window.Attributes;
+            //var attrs = window.Attributes;
 
             if (fullscreen) {
                 uiOptions |= (int)SystemUiFlags.HideNavigation;

@@ -116,10 +116,13 @@ namespace CloudStreamForms
         {
             currentMirrorId = mirror;
             var media = new Media(_libVLC, CurrentMirrorUrl, FromType.FromLocation);
-            vvideo.MediaPlayer.Play(media);
+            bool succ = vvideo.MediaPlayer.Play(media);
             App.ToggleRealFullScreen(true);
 
             EpisodeLabel.Text = CurrentDisplayName;
+            if (!succ) {
+                ErrorWhenLoading();
+            }
         }
 
         /// <summary>
@@ -135,9 +138,19 @@ namespace CloudStreamForms
         public void PlayerTimeChanged(long time)
         {
             Device.BeginInvokeOnMainThread(() => {
-                double val = ((double)(time / 1000) / (double)(Player.Length / 1000));
-                ChangeTime(val);
-                VideoSlider.Value = val;
+                try {
+                    double val = ((double)(time / 1000) / (double)(Player.Length / 1000));
+                    ChangeTime(val);
+                    VideoSlider.Value = val;
+
+                    if(Player.Length !=  -1 && Player.Length > 10000 && Player.Length <= Player.Time + 1000) {
+                        //TODO: NEXT EPISODE
+                        Navigation.PopModalAsync();
+                    }
+                }
+                catch (Exception _ex) {
+                    print("EROROR WHEN TIME" + _ex);
+                } 
             });
         }
 
@@ -189,6 +202,7 @@ namespace CloudStreamForms
             SkipForwardBtt.TranslationX = TRANSLATE_START_X;
             Commands.SetTap(SkipForwardBtt, new Command(() => {
                 SeekMedia(SKIPTIME);
+                lastClick = DateTime.Now;
                 SkipFor();
             }));
 
@@ -197,6 +211,7 @@ namespace CloudStreamForms
             SkipBackBtt.TranslationX = -TRANSLATE_START_X;
             Commands.SetTap(SkipBackBtt, new Command(() => {
                 SeekMedia(-SKIPTIME);
+                lastClick = DateTime.Now;
                 SkipBac();
             }));
             Commands.SetTap(LockTap, new Command(() => {
@@ -214,6 +229,7 @@ namespace CloudStreamForms
 
             Commands.SetTap(MirrorsTap, new Command(async () => {
                 string action = await DisplayActionSheet("Mirrors", "Cancel", null, AllMirrorsNames.ToArray());
+                App.ToggleRealFullScreen(true);
                 if (action != "Cancel") {
                     for (int i = 0; i < AllMirrorsNames.Count; i++) {
                         if (AllMirrorsNames[i] == action) {
@@ -264,6 +280,7 @@ namespace CloudStreamForms
             Commands.SetTap(GoBackBtt, new Command(() => {
                 print("DAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAdddddddddddAAAAAAAA");
                 Navigation.PopModalAsync();
+                //Navigation.PopModalAsync();
             }));
 
 
@@ -315,18 +332,25 @@ namespace CloudStreamForms
             };
             Player.EncounteredError += (o, e) => {
                 // TODO: SKIP TO NEXT
+                ErrorWhenLoading();
 
-                currentMirrorId++;
-                if(currentMirrorId >= CurrentMirrorUrl.Length) {
-                    currentMirrorId = 0;
-                }
-                SelectMirror(currentMirrorId);
 
-                App.ShowToast("Error loading media");
             };
             SelectMirror(0);
 
             //  Player.AddSlave(MediaSlaveType.Subtitle,"") // ADD SUBTITLEs
+        }
+
+        void ErrorWhenLoading()
+        {
+            print("ERROR UCCURED");
+            currentMirrorId++;
+            if (currentMirrorId >= CurrentMirrorUrl.Length) {
+                currentMirrorId = 0;
+            }
+            SelectMirror(currentMirrorId);
+
+            App.ShowToast("Error loading media");
         }
 
         protected override void OnAppearing()
@@ -387,13 +411,15 @@ namespace CloudStreamForms
 
         protected override void OnDisappearing()
         {
-            App.ShowStatusBar();
+
+            // App.ShowStatusBar();
             App.NormalOrientation();
             App.ToggleRealFullScreen(false);
             //App.ToggleFullscreen(!Settings.HasStatusBar);
 
             Player.Stop();
-            Player.Dispose();
+
+            // Player.Dispose();
             base.OnDisappearing();
         }
 
@@ -437,15 +463,24 @@ namespace CloudStreamForms
         private void VideoSlider_DragCompleted(object sender, EventArgs e)
         {
             CurrentTap++;
+            try {
+                if (Player == null) return;
+                if (!Player.IsSeekable) return;
+                if (Player.Length == -1) return;
 
-            long len = (long)(VideoSlider.Value * Player.Length);
-            Player.Time = len;
-            Player.SetPause(false);
-            dragingVideo = false;
-            SlideChangedLabel.IsVisible = false;
-            SlideChangedLabel.Text = "";
-            SkiptimeLabel.Text = "";
-            StartFade();
+                long len = (long)(VideoSlider.Value * Player.Length);
+                Player.Time = len;
+                Player.SetPause(false);
+                dragingVideo = false;
+                SlideChangedLabel.IsVisible = false;
+                SlideChangedLabel.Text = "";
+                SkiptimeLabel.Text = "";
+                StartFade();
+            }
+            catch (Exception _ex) {
+                print("ERROR DTAG: " + _ex);
+            }
+           
         }
 
         private void VideoSlider_ValueChanged(object sender, ValueChangedEventArgs e)
@@ -717,8 +752,20 @@ namespace CloudStreamForms
 
         void SeekMedia(long ms)
         {
-            Player.Time = Player.Time + ms;
-            PlayerTimeChanged(Player.Time);
+            try {
+                if (Player == null) return;
+                if (!Player.IsSeekable) return;
+                if (Player.Length == -1) return;
+
+                print("SEEK MEDIA to " + ms);
+                Player.Time = Player.Time + ms;
+                PlayerTimeChanged(Player.Time);
+            }
+            catch (Exception _ex) {
+                print("ERROR SEEKINGING " + _ex);
+            }
+           
+            
         }
     }
 }
