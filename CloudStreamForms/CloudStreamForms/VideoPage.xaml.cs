@@ -117,7 +117,7 @@ namespace CloudStreamForms
             currentMirrorId = mirror;
             var media = new Media(_libVLC, CurrentMirrorUrl, FromType.FromLocation);
             vvideo.MediaPlayer.Play(media);
-            App.ToggleFullscreen(true);
+            App.ToggleRealFullScreen(true);
 
             EpisodeLabel.Text = CurrentDisplayName;
         }
@@ -344,7 +344,7 @@ namespace CloudStreamForms
             Volyme = 100;
             Hide();
             App.LandscapeOrientation();
-            App.ToggleFullscreen(true);
+            App.ToggleRealFullScreen(true);
             /*
             TapRec. += (o, e) => {
                 print("CHANGED:::<<<<<<<<<<<<:");
@@ -389,7 +389,8 @@ namespace CloudStreamForms
         {
             App.ShowStatusBar();
             App.NormalOrientation();
-            App.ToggleFullscreen(!Settings.HasStatusBar);
+            App.ToggleRealFullScreen(false);
+            //App.ToggleFullscreen(!Settings.HasStatusBar);
 
             Player.Stop();
             Player.Dispose();

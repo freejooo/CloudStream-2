@@ -22,7 +22,8 @@ namespace CloudStreamForms
         public const string baseSubtitleName = @"subtitles.srt";
 
         public interface IPlatformDep
-        {
+        { 
+            void ToggleRealFullScreen(bool fullscreen);
             void PlayVlc(string url, string name, string subtitleLoc);
             void PlayVlc(List<string> url, List<string> name, string subtitleLoc);
             void ShowToast(string message, double duration);
@@ -82,6 +83,11 @@ namespace CloudStreamForms
         public static void ToggleFullscreen(bool fullscreen)
         {
             platformDep.ToggleFullscreen(fullscreen);
+        }
+
+        public static void ToggleRealFullScreen(bool fullscreen)
+        {
+            platformDep.ToggleRealFullScreen(fullscreen);
         }
 
         public static double GetBrightness()

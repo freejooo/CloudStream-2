@@ -48,7 +48,7 @@ namespace CloudStreamForms.Droid
             print("HANDLE" + intent.Extras.GetString("data"));
         }
     }
-     
+
 
     [Service]
     public class ChromeCastIntentService : IntentService
@@ -515,7 +515,7 @@ namespace CloudStreamForms.Droid
                      );
 
 
-               
+
 
                 var triggerTime = CurrentTimeMillis(((DateTime)time).Add(DateTime.UtcNow.Subtract(DateTime.Now)));// NotifyTimeInMilliseconds((DateTime)time);
                 var alarmManager = GetAlarmManager();
@@ -846,7 +846,7 @@ namespace CloudStreamForms.Droid
 
 
         static bool hidden = false;
-        static int baseShow = 0;
+        // static int baseShow = 0;
 
         public void UpdateBackground(int color)
         {
@@ -864,6 +864,12 @@ namespace CloudStreamForms.Droid
         {
             // Window window = MainActivity.activity.Window;
             ToggleFullscreen(!Settings.HasStatusBar);
+            if (Settings.HasStatusBar) {
+                ShowStatusBar();
+            }
+            else {
+                HideStatusBar();
+            }
             /*
             if (!Settings.HasStatusBar) {
                 print("REMOVE STATUS BAR::::");
@@ -877,7 +883,7 @@ namespace CloudStreamForms.Droid
         public void ToggleFullscreen(bool fullscreen)
         {
             Window window = MainActivity.activity.Window;
-            print("TOGGLE" + fullscreen);
+
             if (fullscreen) {
                 window.AddFlags(WindowManagerFlags.Fullscreen); // REMOVES STATUS BAR
             }
@@ -886,53 +892,119 @@ namespace CloudStreamForms.Droid
             }
         }
 
+        public void ToggleRealFullScreen(bool fullscreen)
+        {
+            Window window = MainActivity.activity.Window;
+            print("TOGGLE" + fullscreen);
+
+            var uiOptions = (int)window.DecorView.SystemUiVisibility;
+            // uiOptions |= (int)SystemUiFlags.LowProfile;
+            // uiOptions |= (int)SystemUiFlags.Fullscreen;
+
+
+            var attrs = window.Attributes;
+
+            if (fullscreen) {
+                uiOptions |= (int)SystemUiFlags.HideNavigation;
+                //uiOptions |= (int)SystemUiFlags.ImmersiveSticky;
+                uiOptions |= (int)SystemUiFlags.Fullscreen;
+                //uiOptions |= (int)SystemUiFlags.LayoutStable;
+                //uiOptions |= (int)SystemUiFlags.LayoutHideNavigation;
+                //uiOptions |= (int)SystemUiFlags.LayoutFullscreen;
+                //    uiOptions |= (int)SystemUiFlags.LowProfile;
+
+                window.AddFlags(WindowManagerFlags.TurnScreenOn);
+                window.AddFlags(WindowManagerFlags.KeepScreenOn);
+                window.AddFlags(WindowManagerFlags.Fullscreen); // REMOVES STATUS BAR
+
+                //   attrs.Flags |= Android.Views.WindowManagerFlags.Fullscreen;
+
+                //   window.AddFlags(WindowManagerFlags.Fullscreen);
+                // window.ClearFlags(WindowManagerFlags.ForceNotFullscreen);
+            }
+            else {
+                uiOptions &= ~(int)SystemUiFlags.HideNavigation;
+                //     uiOptions &= ~(int)SystemUiFlags.ImmersiveSticky;
+                uiOptions &= ~(int)SystemUiFlags.Fullscreen;
+                //   uiOptions &= ~(int)SystemUiFlags.LayoutStable;
+                //   uiOptions &= ~(int)SystemUiFlags.LayoutHideNavigation;
+                //  uiOptions &= ~(int)SystemUiFlags.LayoutFullscreen;
+                //   uiOptions &= ~(int)SystemUiFlags.LowProfile;
+
+                window.ClearFlags(WindowManagerFlags.TurnScreenOn);
+                window.ClearFlags(WindowManagerFlags.KeepScreenOn);
+                window.ClearFlags(WindowManagerFlags.Fullscreen);
+
+                // window.AddFlags(WindowManagerFlags.ForceNotFullscreen);
+                // window.ClearFlags(WindowManagerFlags.Fullscreen);
+
+                //  attrs.Flags &= ~Android.Views.WindowManagerFlags.Fullscreen;
+            }
+
+            //   window.Attributes = attrs;
+
+            window.DecorView.SystemUiVisibility = (StatusBarVisibility)uiOptions;
+
+            if (!fullscreen) {
+                UpdateStatusBar();
+            }
+
+        }
+
         public void LandscapeOrientation()
         {
             MainActivity.activity.RequestedOrientation = ScreenOrientation.Landscape;
-
         }
+
         public void NormalOrientation()
         {
             MainActivity.activity.RequestedOrientation = ScreenOrientation.Unspecified;
         }
 
-
         public void ShowStatusBar()
         {
-            if (!hidden) return;
+            //  if (!hidden) return;
 
             Window window = MainActivity.activity.Window;
-            window.ClearFlags(WindowManagerFlags.TurnScreenOn);
-            window.ClearFlags(WindowManagerFlags.KeepScreenOn);
+            // window.ClearFlags(WindowManagerFlags.TurnScreenOn);
+            //window.ClearFlags(WindowManagerFlags.KeepScreenOn);
             //ToggleFullscreen(!Settings.HasStatusBar);
 
-            if (Settings.HasStatusBar) {
-                window.ClearFlags(WindowManagerFlags.Fullscreen);
-            }
+            //if (Settings.HasStatusBar) {
+            window.ClearFlags(WindowManagerFlags.Fullscreen);
+            //}
 
-            window.DecorView.SystemUiVisibility = (StatusBarVisibility)baseShow;
+            int uiOptions = (int)window.DecorView.SystemUiVisibility;
+            //  baseShow = uiOptions;
+
+            //  uiOptions &= ~(int)SystemUiFlags.LowProfile;
+            uiOptions &= ~(int)SystemUiFlags.Fullscreen;
+            //   uiOptions &= ~(int)SystemUiFlags.HideNavigation;
+            uiOptions &= ~(int)SystemUiFlags.ImmersiveSticky;
+
+            window.DecorView.SystemUiVisibility = (StatusBarVisibility)uiOptions;
         }
 
         public void HideStatusBar()
         {
 
-            if (hidden) return;
+            //if (hidden) return;
             hidden = true;
 
             Window window = MainActivity.activity.Window;
-            window.AddFlags(WindowManagerFlags.TurnScreenOn);
-            window.AddFlags(WindowManagerFlags.KeepScreenOn);
+            //  window.AddFlags(WindowManagerFlags.TurnScreenOn);
+            // window.AddFlags(WindowManagerFlags.KeepScreenOn);
 
             if (Settings.HasStatusBar) {
                 window.AddFlags(WindowManagerFlags.Fullscreen);
             }
 
             int uiOptions = (int)window.DecorView.SystemUiVisibility;
-            baseShow = uiOptions;
+            //  baseShow = uiOptions;
 
-            uiOptions |= (int)SystemUiFlags.LowProfile;
-            // uiOptions |= (int)SystemUiFlags.Fullscreen;
-            uiOptions |= (int)SystemUiFlags.HideNavigation;
+            // uiOptions |= (int)SystemUiFlags.LowProfile;
+            uiOptions |= (int)SystemUiFlags.Fullscreen;
+            // uiOptions |= (int)SystemUiFlags.HideNavigation;
             uiOptions |= (int)SystemUiFlags.ImmersiveSticky;
 
             window.DecorView.SystemUiVisibility = (StatusBarVisibility)uiOptions;

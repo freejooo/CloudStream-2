@@ -353,6 +353,11 @@ namespace CloudStreamForms.UWP
 
         }
 
+        public void ToggleRealFullScreen(bool fullscreen)
+        {
+
+        }
+
         public void ShowNotIntent(string title, string body, int id, string titleId, string titleName, DateTime? time = null, string bigIconUrl = "")
         {
             if (time == null) {
