@@ -6,6 +6,8 @@ namespace CloudStreamForms.Models
     public class EpisodeResult
     {
         public int Id { set; get; }
+
+        public int episode { set; get; } = -1;
         public string Title { set; get; }
         public string Rating { set; get; }
         public string RatingStar { get { return (Rating.Replace(" ", "") == "" ? "Rating Unavailable" : "★ " + Rating); } } // ★

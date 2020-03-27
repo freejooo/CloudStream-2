@@ -102,7 +102,7 @@ namespace CloudStreamForms
 
         public MainPage()
         {
-            InitializeComponent(); mainPage = this;
+            InitializeComponent(); mainPage = this; CloudStreamCore.mainPage = mainPage;
 
             if (IS_TEST_VIDEO) {
                 Page p = new VideoPage(new VideoPage.PlayVideo() { descript = "", name = "Black Bunny", episode = -1, season = -1, MirrorNames = new List<string>() { "Googlevid" }, MirrorUrls = new List<string>() { "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" }, Subtitles = new List<string>(), SubtitlesNames = new List<string>() });//new List<string>() { "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" }, new List<string>() { "Black" }, new List<string>() { });// { mainPoster = mainPoster };
@@ -625,6 +625,8 @@ namespace CloudStreamForms
     [Serializable]
     public static class CloudStreamCore
     {
+        public static object mainPage;
+
 
         // ========================================================= CONSTS =========================================================
         #region CONSTS

@@ -877,6 +877,7 @@ namespace CloudStreamForms.Droid
         public void ToggleFullscreen(bool fullscreen)
         {
             Window window = MainActivity.activity.Window;
+            print("TOGGLE" + fullscreen);
             if (fullscreen) {
                 window.AddFlags(WindowManagerFlags.Fullscreen); // REMOVES STATUS BAR
             }

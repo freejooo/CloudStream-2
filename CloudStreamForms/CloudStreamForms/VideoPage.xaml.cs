@@ -32,6 +32,33 @@ namespace CloudStreamForms
         LibVLC _libVLC;
         MediaPlayer _mediaPlayer;
 
+
+        /// <summary>
+        /// Multiplyes a string
+        /// </summary>
+        /// <param name="s">String of what you want to multiply</param>
+        /// <param name="times">How many times you want to multiply it</param>
+        /// <returns></returns>
+        public static string MultiplyString(string s, int times)
+        {
+            return String.Concat(Enumerable.Repeat(s, times));
+        }
+
+
+        /// <summary>
+        /// Turn a int to classic score like pacman or spaceinvader, 123 -> 00000123
+        /// </summary>
+        /// <param name="inp">Input, can be string or int</param>
+        /// <param name="maxLetters">How many letters at max</param>
+        /// <param name="multiString">What character that will be used before score</param>
+        /// <returns></returns>
+        public static string ConvertScoreToArcadeScore(object inp, int maxLetters = 8, string multiString = "0")
+        {
+            string inpS = inp.ToString();
+            inpS = MultiplyString(multiString, maxLetters - inpS.Length) + inpS;
+            return inpS;
+        }
+
         /// <summary>
         /// 0-1
         /// </summary>
@@ -58,6 +85,7 @@ namespace CloudStreamForms
             public string descript;
             public int episode; //-1 = null, movie  
             public int season; //-1 = null, movie  
+            public bool isSingleMirror;
         }
 
         /// <summary>
@@ -73,8 +101,8 @@ namespace CloudStreamForms
         const string ADD_AFTER_EPISODE = "\"";
 
         public static bool IsSeries { get { return !(currentVideo.season == -1 || currentVideo.episode == -1); } }
-        public static string BeforeAddToName { get { return IsSeries ? ("S" + currentVideo.season + ":E" + currentVideo.episode + " ") : ""; } }
-        public static string CurrentDisplayName { get { return BeforeAddToName + (IsSeries ? ADD_BEFORE_EPISODE : "") + currentVideo.name + (IsSeries ? ADD_AFTER_EPISODE : ""); } }
+        public static string BeforeAddToName { get { return IsSingleMirror ? AllMirrorsNames[0] : (IsSeries ? ("S" + currentVideo.season + ":E" + currentVideo.episode + " ") : ""); } }
+        public static string CurrentDisplayName { get { return BeforeAddToName + (IsSeries ? ADD_BEFORE_EPISODE : "") + currentVideo.name + (IsSeries ? ADD_AFTER_EPISODE : "") + (IsSingleMirror ? "" : (" · " + CurrentMirrorName)); } }
         public static string CurrentMirrorName { get { return currentVideo.MirrorNames[currentMirrorId]; } }
         public static string CurrentMirrorUrl { get { return currentVideo.MirrorUrls[currentMirrorId]; } }
         public static string CurrentSubtitles { get { if (currentSubtitlesId == -1) { return ""; } else { return currentVideo.Subtitles[currentMirrorId]; } } }
@@ -89,6 +117,7 @@ namespace CloudStreamForms
             currentMirrorId = mirror;
             var media = new Media(_libVLC, CurrentMirrorUrl, FromType.FromLocation);
             vvideo.MediaPlayer.Play(media);
+            App.ToggleFullscreen(true);
 
             EpisodeLabel.Text = CurrentDisplayName;
         }
@@ -115,6 +144,8 @@ namespace CloudStreamForms
         VisualElement[] lockElements;
         VisualElement[] settingsElements;
 
+        public static bool IsSingleMirror = false;
+
         /// <summary>
         /// Subtitles are in full
         /// </summary>
@@ -125,6 +156,7 @@ namespace CloudStreamForms
         {
             currentVideo = video;
             maxEpisodes = _maxEpisodes;
+            IsSingleMirror = video.isSingleMirror;
 
             InitializeComponent();
             Core.Initialize();
@@ -132,7 +164,7 @@ namespace CloudStreamForms
             settingsElements = new VisualElement[] { EpisodesTap, MirrorsTap, SubTap, NextEpisodeTap, };
 
             void SetIsLocked()
-            { 
+            {
                 LockImg.Source = App.GetImageSource(isLocked ? LOCKED_IMAGE : UN_LOCKED_IMAGE);
                 LockTxt.TextColor = Color.FromHex(isLocked ? "#617EFF" : "#FFFFFF");
                 // LockTap.SetValue(XamEffects.TouchEffect.ColorProperty, Color.FromHex(isLocked ? "#617EFF" : "#FFFFFF"));
@@ -150,6 +182,7 @@ namespace CloudStreamForms
                 }
 
             }
+
 
             SkipForward.TranslationX = TRANSLATE_START_X;
             SkipForwardImg.Source = App.GetImageSource("netflixSkipForward.png");
@@ -173,6 +206,23 @@ namespace CloudStreamForms
                 SetIsLocked();
             }));
 
+            MirrorsTap.IsVisible = AllMirrorsUrls.Count > 1;
+            SubTap.IsVisible = false; // TODO: ADD SUBTITLES
+            EpisodesTap.IsVisible = false; // TODO: ADD EPISODES SWITCH
+            NextEpisodeTap.IsVisible = false; // TODO: ADD NEXT EPISODE
+
+
+            Commands.SetTap(MirrorsTap, new Command(async () => {
+                string action = await DisplayActionSheet("Mirrors", "Cancel", null, AllMirrorsNames.ToArray());
+                if (action != "Cancel") {
+                    for (int i = 0; i < AllMirrorsNames.Count; i++) {
+                        if (AllMirrorsNames[i] == action) {
+                            SelectMirror(i);
+                        }
+                    }
+                }
+            }));
+
 
             // ======================= SETUP =======================
 
@@ -181,7 +231,6 @@ namespace CloudStreamForms
 
             vvideo.MediaPlayer = _mediaPlayer; // = new VideoView() { MediaPlayer = _mediaPlayer };
 
-            SelectMirror(0);
 
 
             // ========== IMGS ==========
@@ -265,9 +314,18 @@ namespace CloudStreamForms
 
             };
             Player.EncounteredError += (o, e) => {
-                // SKIP TO NEXT
-                App.ShowToast("Error when loading media");
+                // TODO: SKIP TO NEXT
+
+                currentMirrorId++;
+                if(currentMirrorId >= CurrentMirrorUrl.Length) {
+                    currentMirrorId = 0;
+                }
+                SelectMirror(currentMirrorId);
+
+                App.ShowToast("Error loading media");
             };
+            SelectMirror(0);
+
             //  Player.AddSlave(MediaSlaveType.Subtitle,"") // ADD SUBTITLEs
         }
 
@@ -399,7 +457,7 @@ namespace CloudStreamForms
 
                 //    var time = TimeSpan.FromMilliseconds(timeChange);
 
-                string before = (timeChange > 0 ? "+" : "-") + ConvertTimeToString(Math.Abs(timeChange / 1000)); //+ (int)time.Seconds + "s";
+                string before = ((Math.Abs(timeChange) < 1000) ? "" : timeChange > 0 ? "+" : "-") + ConvertTimeToString(Math.Abs(timeChange / 1000)); //+ (int)time.Seconds + "s";
 
                 SkiptimeLabel.Text = $"[{ConvertTimeToString(VideoSlider.Value * Player.Length / 1000)}]";
                 SlideChangedLabel.Text = before;//CloudStreamCore.ConvertTimeToString((timeChange / 1000.0));
@@ -551,7 +609,7 @@ namespace CloudStreamForms
             // ========================================== LOCKED LOGIC ==========================================
             if (isLocked) {
 
-                if(args.Type == TouchTracking.TouchActionType.Pressed) {
+                if (args.Type == TouchTracking.TouchActionType.Pressed) {
                     startPressTime = System.DateTime.Now;
                 }
 
@@ -615,7 +673,7 @@ namespace CloudStreamForms
                         else if (isMovingSkipTime + isMovingStartTime < 0) { // SKIP TO FRONT
                             isMovingSkipTime = -isMovingStartTime;
                         }
-                        SkiptimeLabel.Text = $"{CloudStreamCore.ConvertTimeToString((isMovingStartTime + isMovingSkipTime) / 1000)} [{(isMovingSkipTime > 0 ? "+" : "-")}{CloudStreamCore.ConvertTimeToString(Math.Abs(isMovingSkipTime / 1000))}]";
+                        SkiptimeLabel.Text = $"{CloudStreamCore.ConvertTimeToString((isMovingStartTime + isMovingSkipTime) / 1000)} [{ (Math.Abs(isMovingSkipTime) < 1000 ? "" : (isMovingSkipTime > 0 ? "+" : "-"))}{CloudStreamCore.ConvertTimeToString(Math.Abs(isMovingSkipTime / 1000))}]";
                     }
                     else {
                         if (isMovingFromLeftSide) {

@@ -988,7 +988,7 @@ namespace CloudStreamForms
                     epView.AllEpisodes = new EpisodeResult[CurrentEpisodes.Count];
                     maxEpisodes = epView.AllEpisodes.Length;
                     for (int i = 0; i < CurrentEpisodes.Count; i++) {
-                        AddEpisode(new EpisodeResult() { Title = (i + 1) + ". " + CurrentEpisodes[i].name, Id = i, Description = CurrentEpisodes[i].description.Replace("\n", "").Replace("  ", ""), PosterUrl = CurrentEpisodes[i].posterUrl, Rating = CurrentEpisodes[i].rating, Progress = 0, epVis = false, subtitles = new List<string>() { "None" }, Mirros = new List<string>() }, i);
+                        AddEpisode(new EpisodeResult() { episode = i + 1, Title = (i + 1) + ". " + CurrentEpisodes[i].name, Id = i, Description = CurrentEpisodes[i].description.Replace("\n", "").Replace("  ", ""), PosterUrl = CurrentEpisodes[i].posterUrl, Rating = CurrentEpisodes[i].rating, Progress = 0, epVis = false, subtitles = new List<string>() { "None" }, Mirros = new List<string>() }, i);
                     }
                     if (!isAnime) {
                         SetEpisodeFromTo(0);
@@ -1323,7 +1323,7 @@ namespace CloudStreamForms
                     _sub = currentMovie.subtitles[0].data;
                 }
             }
-            App.PlayVLCWithSingleUrl(episodeResult.mirrosUrls, episodeResult.Mirros, _sub);
+            App.PlayVLCWithSingleUrl(episodeResult.mirrosUrls, episodeResult.Mirros, _sub, currentMovie.title.name, episodeResult.episode, currentSeason);
         }
 
         // ============================== FORCE UPDATE ==============================
