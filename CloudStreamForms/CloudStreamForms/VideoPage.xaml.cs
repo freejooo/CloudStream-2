@@ -112,17 +112,61 @@ namespace CloudStreamForms
         public static List<string> AllMirrorsNames { get { return currentVideo.MirrorNames; } }
         public static List<string> AllMirrorsUrls { get { return currentVideo.MirrorUrls; } }
 
+        string lastUrl = "";
+        public static bool ExecuteWithTimeLimit(TimeSpan timeSpan, Action codeBlock)
+        {
+            try {
+                Task task = Task.Factory.StartNew(() => codeBlock());
+                task.Wait(timeSpan);
+                return task.IsCompleted;
+            }
+            catch (AggregateException ae) {
+                return false;
+                // throw ae.InnerExceptions[0];
+            }
+            finally {
+                print("FINISHED EXICUTE");
+            }
+        }
         public void SelectMirror(int mirror)
         {
+            if (lastUrl == AllMirrorsUrls[mirror]) return;
             currentMirrorId = mirror;
-            var media = new Media(_libVLC, CurrentMirrorUrl, FromType.FromLocation);
-            bool succ = vvideo.MediaPlayer.Play(media);
-            App.ToggleRealFullScreen(true);
 
-            EpisodeLabel.Text = CurrentDisplayName;
-            if (!succ) {
+            print("MIRROR SELECTED : " + CurrentMirrorUrl);
+            if (CurrentMirrorUrl == "" || CurrentMirrorUrl == null) {
+                print("ERRPR IN SELECT MIRROR");
                 ErrorWhenLoading();
             }
+            else {
+                Device.BeginInvokeOnMainThread(() => {
+                    EpisodeLabel.Text = CurrentDisplayName;
+                    App.ToggleRealFullScreen(true);
+                });
+
+                bool Completed = ExecuteWithTimeLimit(TimeSpan.FromMilliseconds(1000), () => {
+                    try {
+                        print("PLAY MEDIA " + CurrentMirrorUrl);
+                        var media = new Media(_libVLC, CurrentMirrorUrl, FromType.FromLocation);
+                        lastUrl = CurrentMirrorUrl;
+                        bool succ = vvideo.MediaPlayer.Play(media);
+                        print("SUCC:::: " + succ);
+
+
+                        if (!succ) {
+                            ErrorWhenLoading();
+                        }
+                    }
+                    catch (Exception _ex) {
+                        print("EXEPTIOM: " + _ex);
+                    }
+                    //
+                    // Write your time bounded code here
+                    // 
+                });
+                print("COMPLEATED::: " + Completed);
+            }
+
         }
 
         /// <summary>
@@ -143,14 +187,14 @@ namespace CloudStreamForms
                     ChangeTime(val);
                     VideoSlider.Value = val;
 
-                    if(Player.Length !=  -1 && Player.Length > 10000 && Player.Length <= Player.Time + 1000) {
+                    if (Player.Length != -1 && Player.Length > 10000 && Player.Length <= Player.Time + 1000) {
                         //TODO: NEXT EPISODE
                         Navigation.PopModalAsync();
                     }
                 }
                 catch (Exception _ex) {
                     print("EROROR WHEN TIME" + _ex);
-                } 
+                }
             });
         }
 
@@ -230,9 +274,11 @@ namespace CloudStreamForms
             Commands.SetTap(MirrorsTap, new Command(async () => {
                 string action = await DisplayActionSheet("Mirrors", "Cancel", null, AllMirrorsNames.ToArray());
                 App.ToggleRealFullScreen(true);
+                print("ACTION = " + action);
                 if (action != "Cancel") {
                     for (int i = 0; i < AllMirrorsNames.Count; i++) {
                         if (AllMirrorsNames[i] == action) {
+                            print("SELECT MIRR" + action);
                             SelectMirror(i);
                         }
                     }
@@ -344,13 +390,13 @@ namespace CloudStreamForms
         void ErrorWhenLoading()
         {
             print("ERROR UCCURED");
-            currentMirrorId++;
-            if (currentMirrorId >= CurrentMirrorUrl.Length) {
-                currentMirrorId = 0;
+            int _currentMirrorId = currentMirrorId + 1;
+            if (_currentMirrorId >= AllMirrorsUrls.Count) {
+                _currentMirrorId = 0;
             }
-            SelectMirror(currentMirrorId);
-
             App.ShowToast("Error loading media");
+            SelectMirror(_currentMirrorId);
+
         }
 
         protected override void OnAppearing()
@@ -432,6 +478,11 @@ namespace CloudStreamForms
 
         public void PausePlayBtt_Clicked(object sender, EventArgs e)
         {
+            if (Player == null) return;
+            if (Player.State == VLCState.Error || Player.State == VLCState.Opening) return;
+            if (Player.Length == -1) return;
+            if (!Player.CanPause && !isPaused) return;
+
             if (isPaused) { // UNPAUSE
                 StartFade();
             }
@@ -453,6 +504,10 @@ namespace CloudStreamForms
         private void VideoSlider_DragStarted(object sender, EventArgs e)
         {
             CurrentTap++;
+            if (Player == null) return;
+            if (Player.State == VLCState.Error || Player.State == VLCState.Opening) return;
+            if (Player.Length == -1) return;
+            if (!Player.CanPause) return;
 
             Player.SetPause(true);
             dragingVideo = true;
@@ -465,6 +520,7 @@ namespace CloudStreamForms
             CurrentTap++;
             try {
                 if (Player == null) return;
+                if (Player.State == VLCState.Error || Player.State == VLCState.Opening) return;
                 if (!Player.IsSeekable) return;
                 if (Player.Length == -1) return;
 
@@ -480,11 +536,16 @@ namespace CloudStreamForms
             catch (Exception _ex) {
                 print("ERROR DTAG: " + _ex);
             }
-           
+
         }
 
         private void VideoSlider_ValueChanged(object sender, ValueChangedEventArgs e)
         {
+            if (Player == null) return;
+            if (Player.State == VLCState.Error || Player.State == VLCState.Opening) return;
+            if (!Player.IsSeekable) return;
+            if (Player.Length == -1) return;
+
             ChangeTime(e.NewValue);
             if (dragingVideo) {
                 long timeChange = (long)(VideoSlider.Value * Player.Length) - Player.Time;
@@ -631,7 +692,37 @@ namespace CloudStreamForms
 
         private void TouchEffect_TouchAction(object sender, TouchTracking.TouchActionEventArgs args)
         {
-            if (Player.Length == -1) return;
+            print("TOUCH ACCTION0");
+
+            bool lockActionOnly = false;
+
+            void CheckLock()
+            {
+                if (Player == null) {
+                    lockActionOnly = true; return;
+                }
+                else if (Player.State == VLCState.Error) {
+                    lockActionOnly = true; return;
+                }
+                else if (Player.State == VLCState.Opening) {
+                    lockActionOnly = true; return;
+                }
+                else if (Player.Length == -1) {
+                    lockActionOnly = true; return;
+                }
+                else if (!Player.IsSeekable) {
+                    lockActionOnly = true; return;
+                }
+            }
+
+            try {
+                CheckLock();
+            }
+            catch (Exception _ex) {
+                print("ERRORIN TOUCH: " + _ex);
+                lockActionOnly = true;
+            }
+
 
 
             if (args.Type == TouchTracking.TouchActionType.Pressed || args.Type == TouchTracking.TouchActionType.Moved || args.Type == TouchTracking.TouchActionType.Entered) {
@@ -643,7 +734,7 @@ namespace CloudStreamForms
 
 
             // ========================================== LOCKED LOGIC ==========================================
-            if (isLocked) {
+            if (isLocked || lockActionOnly) {
 
                 if (args.Type == TouchTracking.TouchActionType.Pressed) {
                     startPressTime = System.DateTime.Now;
@@ -660,6 +751,8 @@ namespace CloudStreamForms
                 }
                 return;
             };
+
+            if (lockActionOnly) return;
 
             // ========================================== NORMAL LOGIC ==========================================
             if (args.Type == TouchTracking.TouchActionType.Pressed) {
@@ -754,18 +847,23 @@ namespace CloudStreamForms
         {
             try {
                 if (Player == null) return;
-                if (!Player.IsSeekable) return;
+                if (Player.State == VLCState.Error) return;
+                if (Player.State == VLCState.Opening) return;
                 if (Player.Length == -1) return;
-
-                print("SEEK MEDIA to " + ms);
-                Player.Time = Player.Time + ms;
-                PlayerTimeChanged(Player.Time);
+                if (!Player.IsSeekable) return;
             }
             catch (Exception _ex) {
-                print("ERROR SEEKINGING " + _ex);
+                print("ERRORIN TOUCH: " + _ex);
+                return;
             }
-           
-            
+
+            print("SEEK MEDIA to " + ms);
+            Player.Time = Player.Time + ms;
+
+            PlayerTimeChanged(Player.Time);
+
+
+
         }
     }
 }
