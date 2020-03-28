@@ -146,6 +146,16 @@ namespace CloudStreamForms
             }
         }
 
+        public static bool UseVideoPlayer
+        {
+            set {
+                App.SetKey("Settings", nameof(UseVideoPlayer), value);
+            }
+            get {
+                return App.GetKey("Settings", nameof(UseVideoPlayer), false);
+            }
+        }
+
         public static bool Top100Enabled
         {
             set {
@@ -188,18 +198,55 @@ namespace CloudStreamForms
         public static bool CacheImdb { get { return CacheData; } }
         public static bool CacheMAL { get { return CacheData; } }
 
+
+        VisualElement[] displayElements;
         public Settings()
         {
             InitializeComponent();
+
+            displayElements = new VisualElement[] {
+                G_GeneralTxt,
+                G_InstatSearch,
+                G_Subtitles,
+                G_CacheData,
+                G_Dubbed,
+                G_PauseHistory,
+                G_UITxt,
+                G_Statusbar,
+                G_Top100,
+                G_VideoPlayer,
+                G_Descript,
+                G_ClearData,
+                ClearHistoryTap,
+                ClearBookmarksTap,
+                ClearCachedTap,
+                ResetallTap,
+                G_TimeTxt,
+                G_CastTime,
+                G_SkipTime,
+                G_BuildTxt,
+                BuildNumber,
+                G_GithubTxt,
+                StarMe,
+                SetTheme,
+               // UpdateBtt,
+            };
+
+            for (int i = 0; i < displayElements.Length; i++) {
+                Grid.SetRow(displayElements[i], i);
+            }
+
             InstantSearchImg.Source = App.GetImageSource("searchIcon.png");
             SubtitlesImg.Source = App.GetImageSource("outline_subtitles_white_48dp.png");
             CacheImg.Source = App.GetImageSource("outline_cached_white_48dp.png");
             DubbedImg.Source = App.GetImageSource("outline_record_voice_over_white_48dp.png");
             HistoryImg.Source = App.GetImageSource("outline_history_white_48dp.png");
-            
+
             StatusbarImg.Source = App.GetImageSource("outline_aspect_ratio_white_48dp.png");
             TopImg.Source = App.GetImageSource("outline_reorder_white_48dp.png");
             DescriptImg.Source = App.GetImageSource("outline_description_white_48dp.png");
+
+            VideoImg.Source = App.GetImageSource("baseline_ondemand_video_white_48dp.png");
 
             var ClearSource = App.GetImageSource("outline_delete_white_48dp.png");
             ClearImg1.Source = ClearSource;
@@ -237,8 +284,13 @@ namespace CloudStreamForms
             HistoryToggle.Toggled += (o, e) => {
                 ViewHistory = !e.Value;
             };
+
             DubbedToggle.Toggled += (o, e) => {
                 DefaultDub = e.Value;
+            };
+
+            VideoToggle.Toggled += (o, e) => {
+                UseVideoPlayer = e.Value;
             };
             //  BlackBgToggle.OnChanged += (o, e) => {
             //     BlackBg = e.Value;
@@ -328,6 +380,7 @@ namespace CloudStreamForms
                 CastSlider.Value = ((LoadingChromeSec - MIN_LOADING_CHROME) / (MAX_LOADING_CHROME - MIN_LOADING_CHROME));
                 SubtitlesToggle.IsToggled = SubtitlesEnabled;
                 DubbedToggle.IsToggled = DefaultDub;
+                VideoToggle.IsToggled = UseVideoPlayer;
                 HistoryToggle.IsToggled = !ViewHistory;
                 DescriptToggle.IsToggled = EpDecEnabled;
                 InstantSearchToggle.IsToggled = SearchEveryCharEnabled;
@@ -345,7 +398,7 @@ namespace CloudStreamForms
 
                 TopToggle.IsToggled = Top100Enabled;
 
-             //   ColorPicker.ItemsSource = 
+                //   ColorPicker.ItemsSource = 
                 ColorPicker.SelectedIndex = BlackBgType;
 
                 /* if (Device.RuntimePlatform == Device.UWP) {
@@ -374,14 +427,15 @@ namespace CloudStreamForms
             base.OnAppearing();
             Apper();
 
-
             if (Device.RuntimePlatform == Device.Android) {
+                if (NewGithubUpdate) {
+                    Grid.SetRow(UpdateBtt, displayElements.Length);
+                }
                 UpdateBtt.IsEnabled = NewGithubUpdate;
                 UpdateBtt.IsVisible = NewGithubUpdate;
                 UpdateBtt.Text = "Update " + App.GetBuildNumber() + " to " + githubUpdateTag.Replace("v", "") + " · " + githubUpdateText;
                 BackgroundColor = Settings.BlackRBGColor;
             }
-
         }
 
 
@@ -390,6 +444,7 @@ namespace CloudStreamForms
             LoadingMiliSec = (int)(Math.Round((Math.Round(((Slider)sender).Value * (MAX_LOADING_TIME - MIN_LOADING_TIME)) + MIN_LOADING_TIME) / Math.Pow(10, ROUND_LOADING_DECIMALES)) * Math.Pow(10, ROUND_LOADING_DECIMALES));
             SetSliderTime();
         }
+
         private void Slider_DragCompleted2(object sender, EventArgs e)
         {
             LoadingChromeSec = (int)(Math.Round((Math.Round(((Slider)sender).Value * (MAX_LOADING_CHROME - MIN_LOADING_CHROME)) + MIN_LOADING_CHROME) / Math.Pow(10, ROUND_LOADING_CHROME_DECIMALES)) * Math.Pow(10, ROUND_LOADING_CHROME_DECIMALES));

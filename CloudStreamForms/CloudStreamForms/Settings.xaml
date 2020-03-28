@@ -43,9 +43,9 @@
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
-                    <Label Grid.Row="0" Text="General" FontSize="Body" FontAttributes="Bold" TranslationX="10" Margin="10,20,10,10" TextColor="#ffffff"></Label>
+                    <Label Grid.Row="0" Text="General" x:Name="G_GeneralTxt"  FontSize="Body" FontAttributes="Bold" TranslationX="10" Margin="10,20,10,10" TextColor="#ffffff"></Label>
                     <!-- INSTANT SEARCH -->
-                    <Grid  Grid.Row="1"  BackgroundColor="#212121" ColumnSpacing="10" HeightRequest="50">
+                    <Grid  x:Name="G_InstatSearch"  BackgroundColor="#212121" ColumnSpacing="10" HeightRequest="50">
                         <Grid.ColumnDefinitions >
                             <ColumnDefinition Width="Auto"></ColumnDefinition>
                         </Grid.ColumnDefinitions>
@@ -59,7 +59,7 @@
                     </Grid>
 
                     <!-- SUBTITLES -->
-                    <Grid  Grid.Row="2"  BackgroundColor="#212121" ColumnSpacing="10" HeightRequest="50">
+                    <Grid  x:Name="G_Subtitles"  BackgroundColor="#212121" ColumnSpacing="10" HeightRequest="50">
                         <Grid.ColumnDefinitions >
                             <ColumnDefinition Width="Auto"></ColumnDefinition>
                         </Grid.ColumnDefinitions>
@@ -73,7 +73,7 @@
                     </Grid>
 
                     <!-- Cache DATA -->
-                    <Grid  Grid.Row="3"  BackgroundColor="#212121" ColumnSpacing="10" HeightRequest="50">
+                    <Grid x:Name="G_CacheData"  BackgroundColor="#212121" ColumnSpacing="10" HeightRequest="50">
                         <Grid.ColumnDefinitions >
                             <ColumnDefinition Width="Auto"></ColumnDefinition>
                         </Grid.ColumnDefinitions>
@@ -87,7 +87,7 @@
                     </Grid>
 
                     <!-- Dubbed -->
-                    <Grid  Grid.Row="4"  BackgroundColor="#212121" ColumnSpacing="10" HeightRequest="50">
+                    <Grid  x:Name="G_Dubbed"  BackgroundColor="#212121" ColumnSpacing="10" HeightRequest="50">
                         <Grid.ColumnDefinitions >
                             <ColumnDefinition Width="Auto"></ColumnDefinition>
                         </Grid.ColumnDefinitions>
@@ -101,7 +101,7 @@
                     </Grid>
 
                     <!-- Pause History -->
-                    <Grid  Grid.Row="5"  BackgroundColor="#212121" ColumnSpacing="10" HeightRequest="50">
+                    <Grid  x:Name="G_PauseHistory"  BackgroundColor="#212121" ColumnSpacing="10" HeightRequest="50">
                         <Grid.ColumnDefinitions >
                             <ColumnDefinition Width="Auto"></ColumnDefinition>
                         </Grid.ColumnDefinitions>
@@ -115,13 +115,12 @@
                     </Grid>
 
 
-
-                    <Label Grid.Row="6" Text="UI" FontSize="Body" FontAttributes="Bold" TranslationX="10" Margin="10" TextColor="#ffffff"></Label>
+                    <Label x:Name="G_UITxt" Text="UI" FontSize="Body" FontAttributes="Bold" TranslationX="10" Margin="10" TextColor="#ffffff"></Label>
 
 
                     <!-- Statusbar -->
 
-                    <Grid  Grid.Row="7"  BackgroundColor="#212121" ColumnSpacing="10" HeightRequest="50">
+                    <Grid  x:Name="G_Statusbar"  BackgroundColor="#212121" ColumnSpacing="10" HeightRequest="50">
                         <Grid.ColumnDefinitions >
                             <ColumnDefinition Width="Auto"></ColumnDefinition>
                         </Grid.ColumnDefinitions>
@@ -135,7 +134,7 @@
                     </Grid>
                     <!-- Top 100 -->
 
-                    <Grid  Grid.Row="8"  BackgroundColor="#212121" ColumnSpacing="10" HeightRequest="50">
+                    <Grid x:Name="G_Top100" BackgroundColor="#212121" ColumnSpacing="10" HeightRequest="50">
                         <Grid.ColumnDefinitions >
                             <ColumnDefinition Width="Auto"></ColumnDefinition>
                         </Grid.ColumnDefinitions>
@@ -147,9 +146,23 @@
                         <Label Grid.Column="1" Text="Top 100" HorizontalOptions="Start" VerticalOptions="Center"  FontSize="Body" TextColor="{Binding MainTxtColor}"></Label>
                         <Switch Grid.Column="2" x:Name="TopToggle" HorizontalOptions="End" VerticalOptions="Center"></Switch>
                     </Grid>
+
+                    <Grid  x:Name="G_VideoPlayer" BackgroundColor="#212121" ColumnSpacing="10" HeightRequest="50">
+                        <Grid.ColumnDefinitions >
+                            <ColumnDefinition Width="Auto"></ColumnDefinition>
+                        </Grid.ColumnDefinitions>
+                        <ff:CachedImage Grid.Column="0" x:Name="VideoImg" HorizontalOptions="Start" WidthRequest="25" HeightRequest="25" Margin="5" TranslationX="5"  VerticalOptions="Center" BackgroundColor="Transparent" >
+                            <ff:CachedImage.Transformations >
+                                <ffTransformations:TintTransformation HexColor="#707070" ></ffTransformations:TintTransformation>
+                            </ff:CachedImage.Transformations>
+                        </ff:CachedImage>
+                        <Label Grid.Column="1" Text="Use experimental videoplayer" HorizontalOptions="Start" VerticalOptions="Center"  FontSize="Body" TextColor="{Binding MainTxtColor}"></Label>
+                        <Switch Grid.Column="2" x:Name="VideoToggle" HorizontalOptions="End" VerticalOptions="Center"></Switch>
+                    </Grid>
+
                     <!-- Descript -->
 
-                    <Grid  Grid.Row="9"  BackgroundColor="#212121" ColumnSpacing="10" HeightRequest="50">
+                    <Grid x:Name="G_Descript"  BackgroundColor="#212121" ColumnSpacing="10" HeightRequest="50">
                         <Grid.ColumnDefinitions >
                             <ColumnDefinition Width="Auto"></ColumnDefinition>
                         </Grid.ColumnDefinitions>
@@ -163,9 +176,7 @@
                     </Grid>
 
 
-
-                    <Label Grid.Row="10" Text="Clear Data" FontSize="Body" FontAttributes="Bold" TranslationX="10" Margin="10" TextColor="#ffffff"></Label>
-
+                    <Label x:Name="G_ClearData" Text="Clear Data" FontSize="Body" FontAttributes="Bold" TranslationX="10" Margin="10" TextColor="#ffffff"></Label>
 
                     <!-- Clear history -->
 
@@ -219,10 +230,9 @@
                         <Label Grid.Column="1" Text="Reset settings" HorizontalOptions="Start" VerticalOptions="Center"  FontSize="Body" TextColor="{Binding MainTxtColor}"></Label>
                     </Grid>
 
-                    <Label Grid.Row="15" Text="Time" FontSize="Body" FontAttributes="Bold" TranslationX="10" Margin="10" TextColor="#ffffff"></Label>
+                    <Label x:Name="G_TimeTxt"  Text="Time" FontSize="Body" FontAttributes="Bold" TranslationX="10" Margin="10" TextColor="#ffffff"></Label>
 
-
-                    <Grid  Grid.Row="16"  BackgroundColor="#212121" ColumnSpacing="10" HeightRequest="50">
+                    <Grid  Grid.Row="16"  BackgroundColor="#212121" ColumnSpacing="10" HeightRequest="50" x:Name="G_CastTime">
                         <Grid.ColumnDefinitions >
                             <ColumnDefinition Width="Auto"></ColumnDefinition>
                         </Grid.ColumnDefinitions>
@@ -231,7 +241,8 @@
                         <Slider  Grid.Column="1" ValueChanged="Slider_DragCompleted2" BackgroundColor="Transparent" x:Name="CastSlider" MinimumTrackColor="#303F9F" ThumbColor="#303F9F"></Slider>
 
                     </Grid>
-                    <Grid  Grid.Row="17"  BackgroundColor="#212121" ColumnSpacing="10" HeightRequest="50">
+
+                    <Grid  x:Name="G_SkipTime"  BackgroundColor="#212121" ColumnSpacing="10" HeightRequest="50">
                         <Grid.ColumnDefinitions >
                             <ColumnDefinition Width="Auto"></ColumnDefinition>
                         </Grid.ColumnDefinitions>
@@ -241,13 +252,13 @@
 
                     </Grid>
 
-                    <Label Grid.Row="18" Text="Build" FontSize="Body" FontAttributes="Bold" TranslationX="10" Margin="10" TextColor="#ffffff"></Label>
+                    <Label x:Name="G_BuildTxt"  Text="Build" FontSize="Body" FontAttributes="Bold" TranslationX="10" Margin="10" TextColor="#ffffff"></Label>
 
-                    <Label Text="Build Version: " Grid.Row="19" x:Name="BuildNumber" TranslationX="10"  ></Label>
-                    <Label Text="Github: https://github.com/LagradOst/CloudStream-2"  Grid.Row="20" TranslationX="10"    ></Label>
-                    <Button  x:Name="StarMe" Grid.Row="21" Text="Open Github" BackgroundColor="#212121"  HeightRequest="50"></Button>
-                    <Button x:Name="SetTheme" Grid.Row="22" Text="Theme" BackgroundColor="#212121"  HeightRequest="50"></Button>
-                    <Button Text="Update To..." Grid.Row="23" x:Name="UpdateBtt" IsEnabled="False" IsVisible="False" BackgroundColor="#212121" HeightRequest="50"></Button>
+                    <Label Text="Build Version: "  x:Name="BuildNumber" TranslationX="10"  ></Label>
+                    <Label Text="Github: https://github.com/LagradOst/CloudStream-2"  x:Name="G_GithubTxt" TranslationX="10"    ></Label>
+                    <Button  x:Name="StarMe" Text="Open Github" BackgroundColor="#212121"  HeightRequest="50"></Button>
+                    <Button x:Name="SetTheme" Text="Theme" BackgroundColor="#212121"  HeightRequest="50"></Button>
+                    <Button Text="Update To..."  x:Name="UpdateBtt" IsEnabled="False" IsVisible="False" BackgroundColor="#212121" HeightRequest="50"></Button>
                     <Image x:Name="OffBar" InputTransparent="True" VerticalOptions="Start"></Image>
 
                     <!-- <Button Grid.Row="1"  Text="Instant search" CornerRadius="0"  InputTransparent="True"  BackgroundColor="#212121"></Button>-->

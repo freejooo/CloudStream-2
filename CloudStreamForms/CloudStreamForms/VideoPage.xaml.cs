@@ -217,7 +217,7 @@ namespace CloudStreamForms
 
             InitializeComponent();
             Core.Initialize();
-            lockElements = new VisualElement[] { BacktoMain, GoBackBtt, EpisodeLabel, PausePlayClickBtt, PausePlayBtt, SkipForward, SkipForwardBtt, SkipForwardImg, SkipForwardSmall, SkipBack, SkipBackBtt, SkipBackImg, SkipBackSmall };
+            lockElements = new VisualElement[] { NextMirror, NextMirrorBtt, BacktoMain, GoBackBtt, EpisodeLabel, PausePlayClickBtt, PausePlayBtt, SkipForward, SkipForwardBtt, SkipForwardImg, SkipForwardSmall, SkipBack, SkipBackBtt, SkipBackImg, SkipBackSmall };
             settingsElements = new VisualElement[] { EpisodesTap, MirrorsTap, SubTap, NextEpisodeTap, };
 
             void SetIsLocked()
@@ -236,6 +236,10 @@ namespace CloudStreamForms
                 foreach (var visual in settingsElements) {
                     visual.Opacity = isLocked ? 0 : 1;
                     visual.IsEnabled = !isLocked;
+                }
+
+                if(!isLocked) {
+                    ShowNextMirror();
                 }
 
             }
@@ -301,6 +305,7 @@ namespace CloudStreamForms
             EpisodesImg.Source = App.GetImageSource("netflixEpisodesCut.png");
             NextImg.Source = App.GetImageSource("baseline_skip_next_white_48dp.png");
             BacktoMain.Source = App.GetImageSource("baseline_keyboard_arrow_left_white_48dp.png");
+            NextMirror.Source = App.GetImageSource("baseline_skip_next_white_48dp.png");
 
             //  GradientBottom.Source = App.GetImageSource("gradient.png");
             // DownloadImg.Source = App.GetImageSource("netflixEpisodesCut.png");//App.GetImageSource("round_more_vert_white_48dp.png");
@@ -314,6 +319,11 @@ namespace CloudStreamForms
                 //do something
                 print("Hello");
             }));
+            Commands.SetTap(NextMirrorBtt, new Command(() => {
+                SelectNextMirror();
+            }));
+
+
             //Commands.SetTapParameter(view, someObject);
             // ================================================================================ UI ================================================================================
             PausePlayBtt.Source = App.GetImageSource(PAUSE_IMAGE);
@@ -383,20 +393,34 @@ namespace CloudStreamForms
 
             };
             SelectMirror(0);
+            ShowNextMirror();
 
             //  Player.AddSlave(MediaSlaveType.Subtitle,"") // ADD SUBTITLEs
+        }
+
+        void ShowNextMirror()
+        { 
+            NextMirror.IsVisible = !IsSingleMirror;
+            NextMirror.IsEnabled = !IsSingleMirror;
+            NextMirrorBtt.IsVisible = !IsSingleMirror;
+            NextMirrorBtt.IsEnabled = !IsSingleMirror;
         }
 
         void ErrorWhenLoading()
         {
             print("ERROR UCCURED");
+            App.ShowToast("Error loading media");
+            SelectNextMirror();
+
+        }
+
+        void SelectNextMirror()
+        {
             int _currentMirrorId = currentMirrorId + 1;
             if (_currentMirrorId >= AllMirrorsUrls.Count) {
                 _currentMirrorId = 0;
             }
-            App.ShowToast("Error loading media");
             SelectMirror(_currentMirrorId);
-
         }
 
         protected override void OnAppearing()

@@ -173,7 +173,7 @@ namespace CloudStreamForms
         public static void PlayVLCWithSingleUrl(string url, string name = "", string subtitleLoc = "")
         {
             //PlayVlc?.Invoke(null, url);
-            if (playerWithVideoPlayer) {
+            if (Settings.UseVideoPlayer) {
                 Page p = new VideoPage(new VideoPage.PlayVideo() { descript = "", name = "",isSingleMirror=true, episode = -1, season = -1, MirrorNames = new List<string>() { name }, MirrorUrls = new List<string>() { url }, Subtitles = new List<string>(), SubtitlesNames = new List<string>() });//new List<string>() { "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" }, new List<string>() { "Black" }, new List<string>() { });// { mainPoster = mainPoster };
                 ((MainPage)CloudStreamCore.mainPage).Navigation.PushModalAsync(p, false);
             }
@@ -205,11 +205,10 @@ namespace CloudStreamForms
             return platformDep.GetDownloadPath(path, extraFolder);
         }
 
-        static bool playerWithVideoPlayer = true;
-
+ 
         public static void PlayVLCWithSingleUrl(List<string> url, List<string> name, string subtitleLoc = "", string publicName = "", int episode = -1, int season = -1)
         {
-            if (playerWithVideoPlayer) {
+            if (Settings.UseVideoPlayer) {
                 Page p = new VideoPage(new VideoPage.PlayVideo() { descript = "", name = publicName,isSingleMirror=false, episode = episode, season = season, MirrorNames = name, MirrorUrls = url, Subtitles = new List<string>(), SubtitlesNames = new List<string>() });//new List<string>() { "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" }, new List<string>() { "Black" }, new List<string>() { });// { mainPoster = mainPoster };
                 ((MainPage)CloudStreamCore.mainPage).Navigation.PushModalAsync(p, false);
             }
