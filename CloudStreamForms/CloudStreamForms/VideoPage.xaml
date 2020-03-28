@@ -41,10 +41,16 @@
 
                     </xe:BorderView>
                     <!--  <Button Clicked="PausePlayBtt_Clicked" VerticalOptions="Center" WidthRequest="100" HeightRequest="100" CornerRadius="50" HorizontalOptions="Center" BackgroundColor="White" Opacity="0"></Button>-->
+
+                        <Image x:Name="PausePlayBtt" VerticalOptions="Center" WidthRequest="70" HeightRequest="70" HorizontalOptions="Center" BackgroundColor="Transparent" InputTransparent="True">
+                            
+                        </Image>
+                        <!--
                     <ff:CachedImage x:Name="PausePlayBtt" VerticalOptions="Center" WidthRequest="70" HeightRequest="70" HorizontalOptions="Center" BackgroundColor="Transparent" InputTransparent="True">
 
                     </ff:CachedImage>
- 
+ -->
+                        
                         <Label x:Name="SkipForward" Text="+10" IsVisible="False" Opacity="0" VerticalOptions="Center" HorizontalOptions="Center" TranslationX="170" AbsoluteLayout.LayoutFlags="All" FontSize="24" TextColor="White" />
                     <Label x:Name="SkipForwardSmall" Text="10" VerticalOptions="Center" HorizontalOptions="Center" TranslationX="170" AbsoluteLayout.LayoutFlags="All" FontSize="20" TextColor="White" />
                     <Image x:Name="SkipForwardImg"   VerticalOptions="Center" HorizontalOptions="Center" TranslationX="170" AbsoluteLayout.LayoutFlags="All" WidthRequest="50" HeightRequest="50" />
@@ -54,9 +60,9 @@
                     <xe:BorderView  x:Name="GoBackBtt" xe:TouchEffect.Color="White"  VerticalOptions="Start" TranslationX="-3" TranslationY="-3" Opacity="0.6" WidthRequest="54" HeightRequest="54" CornerRadius="27" Scale="1" HorizontalOptions="Start" BackgroundColor="Transparent">
                     </xe:BorderView>
 
-                        <ff:CachedImage x:Name="NextMirror" HorizontalOptions="End" VerticalOptions="Start" TranslationX="-8" TranslationY="8" InputTransparent="True"></ff:CachedImage>
-                        <xe:BorderView  x:Name="NextMirrorBtt" xe:TouchEffect.Color="White"  VerticalOptions="Start" TranslationX="3" TranslationY="-3" Opacity="0.6" WidthRequest="54" HeightRequest="54" CornerRadius="27" Scale="1" HorizontalOptions="End" BackgroundColor="Transparent">
-                        </xe:BorderView>
+                    <ff:CachedImage x:Name="NextMirror" HorizontalOptions="End" VerticalOptions="Start" TranslationX="-8" TranslationY="8" InputTransparent="True"></ff:CachedImage>
+                    <xe:BorderView  x:Name="NextMirrorBtt" xe:TouchEffect.Color="White"  VerticalOptions="Start" TranslationX="3" TranslationY="-3" Opacity="0.6" WidthRequest="54" HeightRequest="54" CornerRadius="27" Scale="1" HorizontalOptions="End" BackgroundColor="Transparent">
+                    </xe:BorderView>
                         
 
                         <Label x:Name="SkipBack" Text="-10" IsVisible="False" Opacity="0" VerticalOptions="Center" HorizontalOptions="Center" TranslationX="-170" AbsoluteLayout.LayoutFlags="All" FontSize="24" TextColor="White" />

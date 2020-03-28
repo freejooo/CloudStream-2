@@ -351,5 +351,8 @@
   <ItemGroup>
     <AndroidResource Include="Resources\drawable\round_cast_white_48dp2_4.png" />
   </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\drawable\pausePlay.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\Android\Xamarin.Android.CSharp.targets" />
 </Project>

@@ -1305,7 +1305,7 @@ namespace CloudStreamForms
 
 
         // ============================== PLAY VIDEO ==============================
-        void PlayEpisode(EpisodeResult episodeResult)
+        void PlayEpisode(EpisodeResult episodeResult, bool? overrideSelectVideo = null)
         {
             string id = GetId(episodeResult);
             if (id != "") {
@@ -1323,7 +1323,7 @@ namespace CloudStreamForms
                     _sub = currentMovie.subtitles[0].data;
                 }
             }
-            App.PlayVLCWithSingleUrl(episodeResult.mirrosUrls, episodeResult.Mirros, _sub, currentMovie.title.name, episodeResult.episode, currentSeason);
+            App.PlayVLCWithSingleUrl(episodeResult.mirrosUrls, episodeResult.Mirros, _sub, currentMovie.title.name, episodeResult.episode, currentSeason, overrideSelectVideo);
         }
 
         // ============================== FORCE UPDATE ==============================
@@ -1379,7 +1379,7 @@ namespace CloudStreamForms
             bool hasDownloadedFile = App.KeyExists("Download", GetId(episodeResult));
             string downloadKeyData = "";
 
-            List<string> actions = new List<string>() { "Play", "Play in Browser", "Download", "Download Subtitles", "Copy Link", "Reload" };
+            List<string> actions = new List<string>() { "Play in App", "Play External App", "Download", "Download Subtitles", "Copy Link", "Reload" }; // Play in Browser
 
             if (hasDownloadedFile) {
                 downloadKeyData = App.GetKey("Download", GetId(episodeResult), "");
@@ -1439,6 +1439,12 @@ namespace CloudStreamForms
 
             if (action == "Play") { // ============================== PLAY ==============================
                 PlayEpisode(episodeResult);
+            }
+            else if (action == "Play External App") {
+                PlayEpisode(episodeResult, false);
+            }
+            else if (action == "Play in App") {
+                PlayEpisode(episodeResult, true);
             }
             else if (action == "Copy Link") { // ============================== COPY LINK ==============================
                 string copy = await DisplayActionSheet("Copy Link", "Cancel", null, episodeResult.Mirros.ToArray());

@@ -326,7 +326,7 @@ namespace CloudStreamForms
 
             //Commands.SetTapParameter(view, someObject);
             // ================================================================================ UI ================================================================================
-            PausePlayBtt.Source = App.GetImageSource(PAUSE_IMAGE);
+            PausePlayBtt.Source = PAUSE_IMAGE;//App.GetImageSource(PAUSE_IMAGE);
             //PausePlayClickBtt.set
             Commands.SetTap(PausePlayClickBtt, new Command(() => {
                 //do something
@@ -344,7 +344,7 @@ namespace CloudStreamForms
 
             void SetIsPaused(bool paused)
             {
-                PausePlayBtt.Source = App.GetImageSource(paused ? PLAY_IMAGE : PAUSE_IMAGE);
+                PausePlayBtt.Source = paused ? PLAY_IMAGE : PAUSE_IMAGE;//App.GetImageSource(paused ? PLAY_IMAGE : PAUSE_IMAGE);
                 PausePlayBtt.Opacity = 1;
                 LoadingCir.IsVisible = false;
                 BufferLabel.IsVisible = false;

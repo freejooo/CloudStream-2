@@ -13488,64 +13488,67 @@ namespace CloudStreamForms.Droid
 			public const int outline_settings_white_48dp = 2131165527;
 			
 			// aapt resource value: 0x7F070158
-			public const int plugin_lc_smallicon = 2131165528;
-			
-			// aapt resource value: 0x7F070164
-			public const int roundedbg = 2131165540;
-			
-			// aapt resource value: 0x7F070165
-			public const int roundedbgdark = 2131165541;
+			public const int pausePlay = 2131165528;
 			
 			// aapt resource value: 0x7F070159
-			public const int round_cast_white_48dp2_0 = 2131165529;
+			public const int plugin_lc_smallicon = 2131165529;
 			
-			// aapt resource value: 0x7F07015A
-			public const int round_cast_white_48dp2_4 = 2131165530;
-			
-			// aapt resource value: 0x7F07015B
-			public const int round_close_white_18 = 2131165531;
-			
-			// aapt resource value: 0x7F07015C
-			public const int round_close_white_24 = 2131165532;
-			
-			// aapt resource value: 0x7F07015D
-			public const int round_close_white_36 = 2131165533;
-			
-			// aapt resource value: 0x7F07015E
-			public const int round_close_white_48 = 2131165534;
-			
-			// aapt resource value: 0x7F07015F
-			public const int round_menu_white_48dp = 2131165535;
-			
-			// aapt resource value: 0x7F070160
-			public const int round_tv_white_18 = 2131165536;
-			
-			// aapt resource value: 0x7F070161
-			public const int round_tv_white_24 = 2131165537;
-			
-			// aapt resource value: 0x7F070162
-			public const int round_tv_white_36 = 2131165538;
-			
-			// aapt resource value: 0x7F070163
-			public const int round_tv_white_48 = 2131165539;
+			// aapt resource value: 0x7F070165
+			public const int roundedbg = 2131165541;
 			
 			// aapt resource value: 0x7F070166
-			public const int searchIcon = 2131165542;
+			public const int roundedbgdark = 2131165542;
+			
+			// aapt resource value: 0x7F07015A
+			public const int round_cast_white_48dp2_0 = 2131165530;
+			
+			// aapt resource value: 0x7F07015B
+			public const int round_cast_white_48dp2_4 = 2131165531;
+			
+			// aapt resource value: 0x7F07015C
+			public const int round_close_white_18 = 2131165532;
+			
+			// aapt resource value: 0x7F07015D
+			public const int round_close_white_24 = 2131165533;
+			
+			// aapt resource value: 0x7F07015E
+			public const int round_close_white_36 = 2131165534;
+			
+			// aapt resource value: 0x7F07015F
+			public const int round_close_white_48 = 2131165535;
+			
+			// aapt resource value: 0x7F070160
+			public const int round_menu_white_48dp = 2131165536;
+			
+			// aapt resource value: 0x7F070161
+			public const int round_tv_white_18 = 2131165537;
+			
+			// aapt resource value: 0x7F070162
+			public const int round_tv_white_24 = 2131165538;
+			
+			// aapt resource value: 0x7F070163
+			public const int round_tv_white_36 = 2131165539;
+			
+			// aapt resource value: 0x7F070164
+			public const int round_tv_white_48 = 2131165540;
 			
 			// aapt resource value: 0x7F070167
-			public const int settingsIcon = 2131165543;
+			public const int searchIcon = 2131165543;
 			
 			// aapt resource value: 0x7F070168
-			public const int splash_background = 2131165544;
+			public const int settingsIcon = 2131165544;
 			
 			// aapt resource value: 0x7F070169
-			public const int splash_background_remove = 2131165545;
+			public const int splash_background = 2131165545;
 			
 			// aapt resource value: 0x7F07016A
-			public const int tooltip_frame_dark = 2131165546;
+			public const int splash_background_remove = 2131165546;
 			
 			// aapt resource value: 0x7F07016B
-			public const int tooltip_frame_light = 2131165547;
+			public const int tooltip_frame_dark = 2131165547;
+			
+			// aapt resource value: 0x7F07016C
+			public const int tooltip_frame_light = 2131165548;
 			
 			static Drawable()
 			{
