@@ -31,6 +31,7 @@ using static CloudStreamForms.Droid.MainActivity;
 using Application = Android.App.Application;
 using static CloudStreamForms.Droid.LocalNot;
 using static CloudStreamForms.Droid.MainHelper;
+using System.Threading;
 
 namespace CloudStreamForms.Droid
 {
@@ -51,72 +52,7 @@ namespace CloudStreamForms.Droid
     }
 
 
-    [Service]
-    public class DownloadIntentService : IntentService
-    {
-        public DownloadIntentService() : base("DownloadIntentService")
-        {
 
-        }
-
-        protected override void OnHandleIntent(Android.Content.Intent intent)
-        {
-            int id = intent.Extras.GetInt("id", -1);
-            string url = intent.Extras.GetString("url", "");
-            string title = intent.Extras.GetString("title", "");
-            string path = intent.Extras.GetString("path", "");
-            bool showNotification = intent.Extras.GetBoolean("not", false);
-            bool showNotificationWhenDone = intent.Extras.GetBoolean("notdone", false);
-            bool openWhenDone = intent.Extras.GetBoolean("opendone", false);
-            string poster = intent.Extras.GetString("poster", "");
-            string fileName = intent.Extras.GetString("file", "");
-
-            int progress = 0;
-            int _progress = 0;
-
-            void UpdateDloadNot()
-            {
-                //poster != ""
-                ShowLocalNot(new LocalNot() { mediaStyle = false, bigIcon = poster, title = title, autoCancel = false, onGoing = true, id = id, smallIcon = Resource.Drawable.bicon, progress = progress, body = progress + "%" });
-            }
-
-            try {
-                Java.IO.File _file = new Java.IO.File(path);
-                _file.Mkdirs();
-                path += "/" + CensorFilename(fileName);
-
-                using (WebClient wc = new WebClient()) {
-                    wc.DownloadProgressChanged += (o, e) => {
-                        progress = e.ProgressPercentage;
-                        if (_progress != progress) {
-                            _progress = progress;
-                            if (showNotification && id != -1) {
-                                UpdateDloadNot();
-                            }
-                        }
-                    };
-                    wc.DownloadFileCompleted += (o, e) => {
-                        if (showNotificationWhenDone) {
-                            ShowLocalNot(new LocalNot() { mediaStyle = poster != "", bigIcon = poster, title = title, autoCancel = true, onGoing = false, id = id, smallIcon = Resource.Drawable.bicon, body = "Download done!" });
-                        }
-                    };
-                    wc.DownloadFileAsync(
-                         new System.Uri(url),
-                         path
-                    );
-                }
-            }
-            catch (Exception) {
-                ShowLocalNot(new LocalNot() { mediaStyle = poster != "", bigIcon = poster, title = title, autoCancel = true, onGoing = false, id = id, smallIcon = Resource.Drawable.bicon, body = "Download Failed!" });
-
-                //App.ShowToast("Download Failed");
-            }
-
-            //  return GetPath(mainPath, extraPath) + "/" + CensorFilename(fileName);
-
-
-        }
-    }
 
 
 
@@ -208,9 +144,10 @@ namespace CloudStreamForms.Droid
 
         private static readonly DateTime Jan1st1970 = new DateTime
     (1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
-        public static async void ShowLocalNot(LocalNot not)
+        public static async void ShowLocalNot(LocalNot not, Context context = null)
         {
-            var builder = new Notification.Builder(Application.Context);
+            var cc = context ?? Application.Context;
+            var builder = new Notification.Builder(cc);
             builder.SetContentTitle(not.title);
             builder.SetContentText(not.body);
             builder.SetSmallIcon(not.smallIcon);
@@ -224,7 +161,7 @@ namespace CloudStreamForms.Droid
             builder.SetVisibility(NotificationVisibility.Public);
 
             if (Build.VERSION.SdkInt >= BuildVersionCodes.O) {
-                var channelId = $"{Application.Context.PackageName}.general";
+                var channelId = $"{cc.PackageName}.general";
                 var channel = new NotificationChannel(channelId, "General", (NotificationImportance)not.notificationImportance);
                 _manager.CreateNotificationChannel(channel);
 
@@ -246,7 +183,7 @@ namespace CloudStreamForms.Droid
                 builder.SetWhen(CurrentTimeMillis((DateTime)not.when));
             }
 
-            var resultIntent = GetLauncherActivity();
+            var resultIntent = GetLauncherActivity(cc);
             resultIntent.SetFlags(ActivityFlags.NewTask | ActivityFlags.ClearTask);
 
             if (not.data != "") {
@@ -254,17 +191,18 @@ namespace CloudStreamForms.Droid
                 resultIntent.SetData(_data);
             }
 
-            var stackBuilder = Android.Support.V4.App.TaskStackBuilder.Create(Application.Context);
+            var stackBuilder = Android.Support.V4.App.TaskStackBuilder.Create(cc);
             stackBuilder.AddNextIntent(resultIntent);
             var resultPendingIntent =
                 stackBuilder.GetPendingIntent(not.id, (int)PendingIntentFlags.UpdateCurrent);
             builder.SetContentIntent(resultPendingIntent);
             _manager.Notify(not.id, builder.Build());
         }
-        public static Intent GetLauncherActivity()
+        public static Intent GetLauncherActivity(Context context = null)
         {
-            var packageName = Application.Context.PackageName;
-            return Application.Context.PackageManager.GetLaunchIntentForPackage(packageName);
+            var cc = context ?? Application.Context;
+            var packageName = cc.PackageName;
+            return cc.PackageManager.GetLaunchIntentForPackage(packageName);
         }
     }
 
@@ -283,6 +221,129 @@ namespace CloudStreamForms.Droid
 
         }
     }
+
+    [Service]
+    public class DownloadUrlService : IntentService
+    {
+        public DownloadUrlService() : base("DownloadUrlService")
+        {
+        }
+
+        public override IBinder OnBind(Intent intent)
+        {
+            return null;//base.OnBind(intent);
+        }
+        /*
+        [return: GeneratedEnum]
+        public override StartCommandResult OnStartCommand(Intent intent, [GeneratedEnum] StartCommandFlags flags, int startId)
+        {
+            return StartCommandResult.Sticky;
+           // return base.OnStartCommand(intent, flags, startId);
+        }*/
+
+        public override void OnTaskRemoved(Intent rootIntent)
+        {
+            ShowLocalNot(new LocalNot() { mediaStyle = poster != "", bigIcon = poster, title = title, autoCancel = true, onGoing = false, id = id, smallIcon = Resource.Drawable.bicon, body = "Download Failed, App killed!" });
+
+            base.OnTaskRemoved(rootIntent);
+        }
+
+        public override void OnDestroy()
+        {
+            ShowLocalNot(new LocalNot() { mediaStyle = poster != "", bigIcon = poster, title = title, autoCancel = true, onGoing = false, id = id, smallIcon = Resource.Drawable.bicon, body = "Download Failed, App killed!" });
+
+            base.OnDestroy();
+        }
+
+
+        string poster;
+        string title;
+        int id;
+        protected override void OnHandleIntent(Intent intent)
+        {
+            var context = Application.Context;
+            id = intent.Extras.GetInt("id", -1);
+            string url = intent.Extras.GetString("url", "");
+            title = intent.Extras.GetString("title", "");
+            string path = intent.Extras.GetString("path", "");
+            bool showNotification = intent.Extras.GetBoolean("not", false);
+            bool showNotificationWhenDone = intent.Extras.GetBoolean("notdone", false);
+            bool openWhenDone = intent.Extras.GetBoolean("opendone", false);
+            poster = intent.Extras.GetString("poster", "");
+            string fileName = intent.Extras.GetString("file", "");
+
+            int progress = 0;
+            int _progress = 0;
+
+            void UpdateDloadNot()
+            {
+                //poster != ""
+                ShowLocalNot(new LocalNot() { mediaStyle = false, bigIcon = poster, title = title, autoCancel = false, onGoing = true, id = id, smallIcon = Resource.Drawable.bicon, progress = progress, body = progress + "%" }, context);
+            }
+            bool isDone = false;
+
+            void ShowDone()
+            {
+                if (showNotificationWhenDone) {
+                    ShowLocalNot(new LocalNot() { mediaStyle = poster != "", bigIcon = poster, title = title, autoCancel = true, onGoing = false, id = id, smallIcon = Resource.Drawable.bicon, body = "Download done!" }, context); // ((e.Cancelled || e.Error != null) ? "Download Failed!"
+                }
+                // Toast.MakeText(context, "PG DONE!!!", ToastLength.Long).Show();
+
+            }
+
+            try {
+                Java.IO.File _file = new Java.IO.File(path);
+                _file.Mkdirs();
+                path += "/" + CensorFilename(fileName);
+
+                using (WebClient wc = new WebClient()) {
+                    wc.DownloadProgressChanged += (o, e) => {
+                        progress = e.ProgressPercentage;
+                        // Toast.MakeText(context, "PROGRESS::" + e.ProgressPercentage, ToastLength.Short).Show();
+                        if (progress < 100) {
+
+                            if (_progress != progress) {
+                                _progress = progress;
+                                if (showNotification && id != -1) {
+                                    UpdateDloadNot();
+                                }
+                            }
+                        }
+                        else {
+                            isDone = true;
+                            ShowDone();
+                        }
+                    };
+                    wc.DownloadFileCompleted += (o, e) => {
+                        if (isDone) {
+                            ShowDone();
+                        }
+                        else {
+                            ShowLocalNot(new LocalNot() { mediaStyle = poster != "", bigIcon = poster, title = title, autoCancel = true, onGoing = false, id = id, smallIcon = Resource.Drawable.bicon, body = "Download Failed!" }, context); // ((e.Cancelled || e.Error != null) ? "Download Failed!"
+                        }
+                    };
+                    wc.DownloadFileAsync(
+                         new System.Uri(url),
+                         path
+                    );
+                }
+            }
+            catch (Exception) {
+                if (showNotificationWhenDone) {
+                    ShowLocalNot(new LocalNot() { mediaStyle = poster != "", bigIcon = poster, title = title, autoCancel = true, onGoing = false, id = id, smallIcon = Resource.Drawable.bicon, body = "Download Failed!" }, context);
+                }
+
+                //App.ShowToast("Download Failed");
+            }
+
+            //  return GetPath(mainPath, extraPath) + "/" + CensorFilename(fileName);
+        }
+
+
+
+
+    }
+
 
     [BroadcastReceiver]
     public class AlertReceiver : BroadcastReceiver
@@ -450,7 +511,6 @@ namespace CloudStreamForms.Droid
                 }
             };
         }
-
         protected override void OnDestroy()
         {
             MainDroid.CancelChromecast(); // TO REMOVE IT, CANT INTERACT WITHOUT THE CORE
@@ -1434,7 +1494,7 @@ namespace CloudStreamForms.Droid
         public string DownloadAdvanced(int id, string url, string fileName, string titleName, bool mainPath, string extraPath, bool showNotification = true, bool showNotificationWhenDone = true, bool openWhenDone = false, string poster = "")
         {
             var context = MainActivity.activity.ApplicationContext;
-            Intent downloadIntent = new Intent(context, typeof(DownloadIntentService));
+            Intent downloadIntent = new Intent(context, typeof(DownloadUrlService));
 
             //string title = fileName;
             string path = GetPath(mainPath, extraPath);
@@ -1449,7 +1509,23 @@ namespace CloudStreamForms.Droid
             downloadIntent.PutExtra("opendone", openWhenDone);
             downloadIntent.PutExtra("poster", poster);
 
-            MainActivity.activity.StartService(downloadIntent);
+            //  MainActivity.activity.StartService(downloadIntent);
+            Application.Context.StartService(downloadIntent);
+            /*
+            var pending = PendingIntent.GetBroadcast(context, id,
+                  downloadIntent,
+                 PendingIntentFlags.UpdateCurrent
+                  );
+
+
+
+
+            var triggerTime = CurrentTimeMillis(DateTime.UtcNow);// NotifyTimeInMilliseconds((DateTime)time);
+            var alarmManager = GetAlarmManager();
+
+            alarmManager.SetExactAndAllowWhileIdle(AlarmType.RtcWakeup, triggerTime, pending);*/
+
+            MainActivity.activity.SendBroadcast(downloadIntent);
             return path + "/" + CensorFilename(fileName);
         }
 
