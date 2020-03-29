@@ -22,7 +22,7 @@ namespace CloudStreamForms
         public const string baseSubtitleName = @"subtitles.srt";
 
         public interface IPlatformDep
-        { 
+        {
             void ToggleRealFullScreen(bool fullscreen);
             void PlayVlc(string url, string name, string subtitleLoc);
             void PlayVlc(List<string> url, List<string> name, string subtitleLoc);
@@ -48,6 +48,9 @@ namespace CloudStreamForms
             void Test();
 
             void CancelNot(int id);
+
+            string DownloadAdvanced(int id, string url, string fileName, string titleName, bool mainPath, string extraPath, bool showNotification = true, bool showNotificationWhenDone = true, bool openWhenDone = false, string poster = "");
+
         }
 
         public class StorageInfo
@@ -93,6 +96,11 @@ namespace CloudStreamForms
         public static double GetBrightness()
         {
             return platformDep.GetBrightness();
+        }
+
+        public static string DownloadAdvanced(int id, string url, string fileName, string titleName, bool mainPath, string extraPath, bool showNotification = true, bool showNotificationWhenDone = true, bool openWhenDone = false, string poster = "")
+        {
+            return platformDep.DownloadAdvanced(id, url, fileName,titleName, mainPath, extraPath, showNotification, showNotificationWhenDone, openWhenDone, poster);
         }
 
         public static void SetBrightness(double brightness)
@@ -177,7 +185,7 @@ namespace CloudStreamForms
             bool useVideo = overrideSelectVideo ?? Settings.UseVideoPlayer;
 
             if (useVideo) {
-                Page p = new VideoPage(new VideoPage.PlayVideo() { descript = "", name = "",isSingleMirror=true, episode = -1, season = -1, MirrorNames = new List<string>() { name }, MirrorUrls = new List<string>() { url }, Subtitles = new List<string>(), SubtitlesNames = new List<string>() });//new List<string>() { "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" }, new List<string>() { "Black" }, new List<string>() { });// { mainPoster = mainPoster };
+                Page p = new VideoPage(new VideoPage.PlayVideo() { descript = "", name = "", isSingleMirror = true, episode = -1, season = -1, MirrorNames = new List<string>() { name }, MirrorUrls = new List<string>() { url }, Subtitles = new List<string>(), SubtitlesNames = new List<string>() });//new List<string>() { "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" }, new List<string>() { "Black" }, new List<string>() { });// { mainPoster = mainPoster };
                 ((MainPage)CloudStreamCore.mainPage).Navigation.PushModalAsync(p, false);
             }
             else {
@@ -208,13 +216,13 @@ namespace CloudStreamForms
             return platformDep.GetDownloadPath(path, extraFolder);
         }
 
- 
+
         public static void PlayVLCWithSingleUrl(List<string> url, List<string> name, string subtitleLoc = "", string publicName = "", int episode = -1, int season = -1, bool? overrideSelectVideo = null)
         {
             bool useVideo = overrideSelectVideo ?? Settings.UseVideoPlayer;
 
             if (useVideo) {
-                Page p = new VideoPage(new VideoPage.PlayVideo() { descript = "", name = publicName,isSingleMirror=false, episode = episode, season = season, MirrorNames = name, MirrorUrls = url, Subtitles = new List<string>(), SubtitlesNames = new List<string>() });//new List<string>() { "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" }, new List<string>() { "Black" }, new List<string>() { });// { mainPoster = mainPoster };
+                Page p = new VideoPage(new VideoPage.PlayVideo() { descript = "", name = publicName, isSingleMirror = false, episode = episode, season = season, MirrorNames = name, MirrorUrls = url, Subtitles = new List<string>(), SubtitlesNames = new List<string>() });//new List<string>() { "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" }, new List<string>() { "Black" }, new List<string>() { });// { mainPoster = mainPoster };
                 ((MainPage)CloudStreamCore.mainPage).Navigation.PushModalAsync(p, false);
             }
             else {
@@ -393,6 +401,7 @@ namespace CloudStreamForms
         {
             return platformDep.DownloadUrl(url, fileName, mainPath, extraPath, toast, isNotification, body);
         }
+
         public static string DownloadFile(string file, string fileName, bool mainPath = true, string extraPath = "")
         {
             return platformDep.DownloadFile(file, fileName, mainPath, extraPath);

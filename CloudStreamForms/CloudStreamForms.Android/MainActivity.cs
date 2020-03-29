@@ -30,6 +30,7 @@ using static CloudStreamForms.CloudStreamCore;
 using static CloudStreamForms.Droid.MainActivity;
 using Application = Android.App.Application;
 using static CloudStreamForms.Droid.LocalNot;
+using static CloudStreamForms.Droid.MainHelper;
 
 namespace CloudStreamForms.Droid
 {
@@ -48,6 +49,75 @@ namespace CloudStreamForms.Droid
             print("HANDLE" + intent.Extras.GetString("data"));
         }
     }
+
+
+    [Service]
+    public class DownloadIntentService : IntentService
+    {
+        public DownloadIntentService() : base("DownloadIntentService")
+        {
+
+        }
+
+        protected override void OnHandleIntent(Android.Content.Intent intent)
+        {
+            int id = intent.Extras.GetInt("id", -1);
+            string url = intent.Extras.GetString("url", "");
+            string title = intent.Extras.GetString("title", "");
+            string path = intent.Extras.GetString("path", "");
+            bool showNotification = intent.Extras.GetBoolean("not", false);
+            bool showNotificationWhenDone = intent.Extras.GetBoolean("notdone", false);
+            bool openWhenDone = intent.Extras.GetBoolean("opendone", false);
+            string poster = intent.Extras.GetString("poster", "");
+            string fileName = intent.Extras.GetString("file", "");
+
+            int progress = 0;
+            int _progress = 0;
+
+            void UpdateDloadNot()
+            {
+                //poster != ""
+                ShowLocalNot(new LocalNot() { mediaStyle = false, bigIcon = poster, title = title, autoCancel = false, onGoing = true, id = id, smallIcon = Resource.Drawable.bicon, progress = progress, body = progress + "%" });
+            }
+
+            try {
+                Java.IO.File _file = new Java.IO.File(path);
+                _file.Mkdirs();
+                path += "/" + CensorFilename(fileName);
+
+                using (WebClient wc = new WebClient()) {
+                    wc.DownloadProgressChanged += (o, e) => {
+                        progress = e.ProgressPercentage;
+                        if (_progress != progress) {
+                            _progress = progress;
+                            if (showNotification && id != -1) {
+                                UpdateDloadNot();
+                            }
+                        }
+                    };
+                    wc.DownloadFileCompleted += (o, e) => {
+                        if (showNotificationWhenDone) {
+                            ShowLocalNot(new LocalNot() { mediaStyle = poster != "", bigIcon = poster, title = title, autoCancel = true, onGoing = false, id = id, smallIcon = Resource.Drawable.bicon, body = "Download done!" });
+                        }
+                    };
+                    wc.DownloadFileAsync(
+                         new System.Uri(url),
+                         path
+                    );
+                }
+            }
+            catch (Exception) {
+                ShowLocalNot(new LocalNot() { mediaStyle = poster != "", bigIcon = poster, title = title, autoCancel = true, onGoing = false, id = id, smallIcon = Resource.Drawable.bicon, body = "Download Failed!" });
+
+                //App.ShowToast("Download Failed");
+            }
+
+            //  return GetPath(mainPath, extraPath) + "/" + CensorFilename(fileName);
+
+
+        }
+    }
+
 
 
     [Service]
@@ -96,8 +166,10 @@ namespace CloudStreamForms.Droid
         public int smallIcon;
         public string bigIcon;
         public bool mediaStyle = true;
-        public string data;
+        public string data = "";
         public int id;
+        public bool onGoing = false;
+        public int progress = -1;
         public DateTime? when = null;
         public int notificationImportance = (int)NotificationImportance.Default;
 
@@ -143,6 +215,11 @@ namespace CloudStreamForms.Droid
             builder.SetContentText(not.body);
             builder.SetSmallIcon(not.smallIcon);
             builder.SetAutoCancel(not.autoCancel);
+            builder.SetOngoing(not.onGoing);
+
+            if (not.progress != -1) {
+                builder.SetProgress(100, not.progress, false);
+            }
 
             builder.SetVisibility(NotificationVisibility.Public);
 
@@ -171,8 +248,11 @@ namespace CloudStreamForms.Droid
 
             var resultIntent = GetLauncherActivity();
             resultIntent.SetFlags(ActivityFlags.NewTask | ActivityFlags.ClearTask);
-            var _da = Android.Net.Uri.Parse(not.data);//"cloudstreamforms:tt0371746Name=Iron man=EndAll");
-            resultIntent.SetData(_da);
+
+            if (not.data != "") {
+                var _data = Android.Net.Uri.Parse(not.data);//"cloudstreamforms:tt0371746Name=Iron man=EndAll");
+                resultIntent.SetData(_data);
+            }
 
             var stackBuilder = Android.Support.V4.App.TaskStackBuilder.Create(Application.Context);
             stackBuilder.AddNextIntent(resultIntent);
@@ -409,6 +489,24 @@ namespace CloudStreamForms.Droid
     }
 
 
+    public static class MainHelper
+    {
+        public static string GetPath(bool mainPath, string extraPath)
+        {
+            return (mainPath ? (Android.OS.Environment.ExternalStorageDirectory + "/" + Android.OS.Environment.DirectoryDownloads) : (Android.OS.Environment.ExternalStorageDirectory + "/" + Android.OS.Environment.DirectoryDownloads + "/Extra")) + extraPath;
+        }
+        public static string CensorFilename(string name, bool toLower = true)
+        {
+            name = Regex.Replace(name, @"[^A-Za-z0-9\.]+", String.Empty);
+            name.Replace(" ", "");
+            if (toLower) {
+                name = name.ToLower();
+            }
+            return name;
+        }
+
+
+    }
 
 
     public class MainDroid : App.IPlatformDep
@@ -1324,14 +1422,35 @@ namespace CloudStreamForms.Droid
 
         }
 
-        public static string GetPath(bool mainPath, string extraPath)
-        {
-            return (mainPath ? (Android.OS.Environment.ExternalStorageDirectory + "/" + Android.OS.Environment.DirectoryDownloads) : (Android.OS.Environment.ExternalStorageDirectory + "/" + Android.OS.Environment.DirectoryDownloads + "/Extra")) + extraPath;
-        }
+
 
         public string DownloadFile(string file, string fileName, bool mainPath, string extraPath)
         {
             return WriteFile(CensorFilename(fileName), GetPath(mainPath, extraPath), file).Path;
+        }
+
+
+
+        public string DownloadAdvanced(int id, string url, string fileName, string titleName, bool mainPath, string extraPath, bool showNotification = true, bool showNotificationWhenDone = true, bool openWhenDone = false, string poster = "")
+        {
+            var context = MainActivity.activity.ApplicationContext;
+            Intent downloadIntent = new Intent(context, typeof(DownloadIntentService));
+
+            //string title = fileName;
+            string path = GetPath(mainPath, extraPath);
+
+            downloadIntent.PutExtra("id", id);
+            downloadIntent.PutExtra("url", url);
+            downloadIntent.PutExtra("title", titleName);
+            downloadIntent.PutExtra("file", fileName);
+            downloadIntent.PutExtra("path", path);
+            downloadIntent.PutExtra("not", showNotification);
+            downloadIntent.PutExtra("notdone", showNotificationWhenDone);
+            downloadIntent.PutExtra("opendone", openWhenDone);
+            downloadIntent.PutExtra("poster", poster);
+
+            MainActivity.activity.StartService(downloadIntent);
+            return path + "/" + CensorFilename(fileName);
         }
 
         public string DownloadUrl(string url, string fileName, bool mainPath, string extraPath, string toast = "", bool isNotification = false, string body = "")
@@ -1387,15 +1506,6 @@ namespace CloudStreamForms.Droid
 
 
 
-        static string CensorFilename(string name, bool toLower = true)
-        {
-            name = Regex.Replace(name, @"[^A-Za-z0-9\.]+", String.Empty);
-            name.Replace(" ", "");
-            if (toLower) {
-                name = name.ToLower();
-            }
-            return name;
-        }
 
         public string GetBuildNumber()
         {

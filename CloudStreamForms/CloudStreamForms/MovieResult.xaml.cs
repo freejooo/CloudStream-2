@@ -1470,7 +1470,9 @@ namespace CloudStreamForms
                                 double fileSize = CloudStreamCore.GetFileSize(s);
                                 UserDialogs.Instance.HideLoading();
                                 if (fileSize > 1) {
-                                    string dpath = App.DownloadUrl(s, episodeResult.Title + ".mp4", true, "/" + GetPathFromType(), "Download complete!", true, episodeResult.Title);
+
+                                    string dpath = App.DownloadAdvanced(GetCorrectId(episodeResult), s, episodeResult.Title + ".mp4", episodeResult.OgTitle, true, "/" + GetPathFromType(), true, true, false, episodeResult.PosterUrl);
+                                   // string dpath = App.DownloadUrl(s, episodeResult.Title + ".mp4", true, "/" + GetPathFromType(), "Download complete!", true, episodeResult.Title);
                                     //  string ppath = App.DownloadUrl(episodeResult.PosterUrl, "epP" + episodeResult.Title + ".jpg", false, "/Posters");
                                     // string mppath = App.DownloadUrl(currentMovie.title.hdPosterUrl, "hdP" + episodeResult.Title + ".jpg", false, "/TitlePosters");
                                     string mppath = currentMovie.title.hdPosterUrl;
@@ -1551,6 +1553,12 @@ namespace CloudStreamForms
 
         }
 
+
+        public int GetCorrectId(EpisodeResult episodeResult)
+        {
+            return int.Parse(((currentMovie.title.movieType == MovieType.TVSeries || currentMovie.title.movieType == MovieType.Anime) ? currentMovie.episodes[episodeResult.Id].id : currentMovie.title.id).Replace("tt", ""));
+
+        }
 
         // ============================== ID OF EPISODE ==============================
         public string GetId(EpisodeResult episodeResult)
