@@ -32,6 +32,9 @@ using Application = Android.App.Application;
 using static CloudStreamForms.Droid.LocalNot;
 using static CloudStreamForms.Droid.MainHelper;
 using System.Threading;
+using Android.Webkit;
+using static Android.App.ActivityManager;
+
 
 namespace CloudStreamForms.Droid
 {
@@ -222,45 +225,36 @@ namespace CloudStreamForms.Droid
         }
     }
 
+
     [Service]
     public class DownloadUrlService : IntentService
     {
         public DownloadUrlService() : base("DownloadUrlService")
         {
+            SetIntentRedelivery(true);
         }
+        string poster;
+        string title;
+        int id;
 
-        public override IBinder OnBind(Intent intent)
-        {
-            return null;//base.OnBind(intent);
-        }
-        /*
-        [return: GeneratedEnum]
-        public override StartCommandResult OnStartCommand(Intent intent, [GeneratedEnum] StartCommandFlags flags, int startId)
-        {
-            return StartCommandResult.Sticky;
-           // return base.OnStartCommand(intent, flags, startId);
-        }*/
 
-        public override void OnTaskRemoved(Intent rootIntent)
-        {
-            ShowLocalNot(new LocalNot() { mediaStyle = poster != "", bigIcon = poster, title = title, autoCancel = true, onGoing = false, id = id, smallIcon = Resource.Drawable.bicon, body = "Download Failed, App killed!" });
-
-            base.OnTaskRemoved(rootIntent);
-        }
 
         public override void OnDestroy()
         {
-            ShowLocalNot(new LocalNot() { mediaStyle = poster != "", bigIcon = poster, title = title, autoCancel = true, onGoing = false, id = id, smallIcon = Resource.Drawable.bicon, body = "Download Failed, App killed!" });
+            ShowLocalNot(new LocalNot() { mediaStyle = poster != "", bigIcon = poster, title = title, autoCancel = true, onGoing = false, id = id, smallIcon = Resource.Drawable.bicon, body = "Download ddddd" });
 
             base.OnDestroy();
         }
 
+        public override void OnCreate()
+        {
 
-        string poster;
-        string title;
-        int id;
+
+            base.OnCreate();
+        }
         protected override void OnHandleIntent(Intent intent)
         {
+            //startIntent = intent;
             var context = Application.Context;
             id = intent.Extras.GetInt("id", -1);
             string url = intent.Extras.GetString("url", "");
@@ -287,9 +281,47 @@ namespace CloudStreamForms.Droid
                 if (showNotificationWhenDone) {
                     ShowLocalNot(new LocalNot() { mediaStyle = poster != "", bigIcon = poster, title = title, autoCancel = true, onGoing = false, id = id, smallIcon = Resource.Drawable.bicon, body = "Download done!" }, context); // ((e.Cancelled || e.Error != null) ? "Download Failed!"
                 }
-                // Toast.MakeText(context, "PG DONE!!!", ToastLength.Long).Show();
-
+                // Toast.MakeText(context, "PG DONE!!!", ToastLength.Long).Show(); 
             }
+            /*
+            try { 
+                URL _url = new URL(url);
+                URLConnection connection = _url.OpenConnection();
+                connection.Connect();
+                int fileLength = connection.ContentLength;
+                String fileExtension = MimeTypeMap.GetFileExtensionFromUrl(url);
+                fileName = CensorFilename(fileName);
+                InputStream input = new BufferedInputStream(connection.InputStream);
+                Java.IO.File _file = new Java.IO.File(path);
+                _file.Mkdirs();
+                path += "/" + CensorFilename(fileName);
+
+                OutputStream output = new FileOutputStream(new Java.IO.File(path));
+                byte[] data = new byte[1024];
+                long total = 0;
+                int count;
+                int previousProgress = 0;
+                while ((count = input.Read(data)) != -1) {
+                    total += count;
+                    int cprogress = (int)(total * 100 / fileLength);
+                    output.Write(data, 0, count);
+                    if (cprogress == 100 || cprogress > previousProgress + 4) {
+                        // Only post progress event if we've made progress.
+                        previousProgress = cprogress;
+                        progress = cprogress;
+                        UpdateDloadNot();
+
+                    }
+                }
+                output.Flush();
+                output.Close();
+                input.Close();
+            }
+            catch (Exception) {
+                throw;
+            }*/
+
+            //  fileName = System.CurrentTimeMillis() + "." + fileExtension;
 
             try {
                 Java.IO.File _file = new Java.IO.File(path);
@@ -332,11 +364,78 @@ namespace CloudStreamForms.Droid
                 if (showNotificationWhenDone) {
                     ShowLocalNot(new LocalNot() { mediaStyle = poster != "", bigIcon = poster, title = title, autoCancel = true, onGoing = false, id = id, smallIcon = Resource.Drawable.bicon, body = "Download Failed!" }, context);
                 }
-
                 //App.ShowToast("Download Failed");
             }
-
+            StopSelf();
             //  return GetPath(mainPath, extraPath) + "/" + CensorFilename(fileName);
+        }
+
+
+    }
+
+
+    [BroadcastReceiver]
+    public class DownloadUrlReceiver : BroadcastReceiver
+    {
+
+        /*
+        [return: GeneratedEnum]
+        public override StartCommandResult OnStartCommand(Intent intent, [GeneratedEnum] StartCommandFlags flags, int startId)
+        {
+            return StartCommandResult.Sticky;
+           // return base.OnStartCommand(intent, flags, startId);
+        }*/
+
+        /*
+    public override void OnTaskRemoved(Intent rootIntent)
+    {
+        ShowLocalNot(new LocalNot() { mediaStyle = poster != "", bigIcon = poster, title = title, autoCancel = true, onGoing = false, id = id, smallIcon = Resource.Drawable.bicon, body = "Download Failed, App killed Task!" });
+        //  StartService(rootIntent);
+       var triggerTime = CurrentTimeMillis(DateTime.UtcNow.AddSeconds(10)); // NotifyTimeInMilliseconds((DateTime)time);
+        var alarmManager = GetAlarmManager();
+        var context = Application.Context;
+
+        var _resultIntent = new Intent(context, typeof(DownloadUrlService));
+        //  _resultIntent.PutExtra("data", App.ConvertToString(localNot)); 
+        var pending = PendingIntent.GetBroadcast(context, id,
+             _resultIntent,
+            PendingIntentFlags.CancelCurrent
+             );
+
+
+        alarmManager.SetExactAndAllowWhileIdle(AlarmType.RtcWakeup, triggerTime, pending);
+        MainActivity.mainDroid.ShowNotIntentAsync("Hello", "yeet", id, "tt4869896", "IronYeet", System.DateTime.Now.AddSeconds(10));
+        //  base.OnTaskRemoved(rootIntent);
+    }*/
+
+
+
+        string poster;
+        string title;
+        int id;
+        //Intent startIntent;
+        public override void OnReceive(Context context, Intent intent)
+        {
+            Intent downloadIntent = new Intent(context, typeof(DownloadUrlService));
+            downloadIntent.PutExtras(intent.Extras);
+            context.StartService(downloadIntent);
+            /*
+            var _resultIntent = new Intent(context, typeof(DownloadUrlReceiver));
+            //  _resultIntent.PutExtra("data", App.ConvertToString(localNot)); 
+            var pending = PendingIntent.GetBroadcast(context, id,
+                 _resultIntent,
+                PendingIntentFlags.CancelCurrent
+                 );
+            var alarmManager = MainHelper.GetAlarmManager();
+            var triggerTime = CurrentTimeMillis(DateTime.UtcNow.AddSeconds(2));
+            alarmManager.SetExactAndAllowWhileIdle(AlarmType.RtcWakeup, triggerTime, pending);*/
+            //LocalNot.ShowLocalNot(new LocalNot() { title = "da", id = 12345 });
+            //ShowLocalNot(new LocalNot() { mediaStyle = poster != "", bigIcon = poster, title = title, autoCancel = true, onGoing = false, id = 1234, smallIcon = Resource.Drawable.bicon, body = "Download Failed, App killed Task!" });
+
+            MainActivity.mainDroid.ShowNotIntentAsync("Hello", "yeet", 12345, "tt4869896", "IronYeet", System.DateTime.Now);
+            // return;
+
+
         }
 
 
@@ -388,11 +487,174 @@ namespace CloudStreamForms.Droid
         }
     }
 
+    public static class DownloadHandle
+    {
+
+        static Dictionary<int, long> progressDownloads = new Dictionary<int, long>();
+        const string DOWNLOAD_KEY = "DownloadProgress";
+        const string DOWNLOAD_KEY_INTENT = "DownloadProgressIntent";
+
+        public static void OnDestroy()
+        {
+            foreach (var key in progressDownloads.Keys) {
+                print("SAVED KEY:" + key);
+                App.SetKey(DOWNLOAD_KEY, key.ToString(), progressDownloads[key]);
+            }
+            foreach (var path in App.GetKeysPath(DOWNLOAD_KEY_INTENT)) {
+                //  App.GetKey<long>(DOWNLOAD_KEY, path, 0);
+                string data = App.GetKey<string>(path, null);
+                int id = int.Parse(FindHTML(data, $"{nameof(id)}=", "|||"));
+                App.CancelNotifaction(id);
+            }
+        }
+
+        public static void ResumeIntents()
+        {
+            foreach (var path in App.GetKeysPath(DOWNLOAD_KEY_INTENT)) {
+                //  App.GetKey<long>(DOWNLOAD_KEY, path, 0);
+                string data = App.GetKey<string>(path, null);
+                App.ShowToast(path);
+                HandleIntent(data);
+            }
+        }
+        public static void HandleIntent(string intent)
+        {
+            if (intent == null) return;
+
+            int id = int.Parse(FindHTML(intent, $"{nameof(id)}=", "|||"));
+            string url = FindHTML(intent, $"{nameof(url)}=", "|||");
+            string title = FindHTML(intent, $"{nameof(title)}=", "|||");
+            string path = FindHTML(intent, $"{nameof(path)}=", "|||");
+            bool showNotification = bool.Parse(FindHTML(intent, $"{nameof(showNotification)}=", "|||"));
+            bool showNotificationWhenDone = bool.Parse(FindHTML(intent, $"{nameof(showNotificationWhenDone)}=", "|||"));
+            bool openWhenDone = bool.Parse(FindHTML(intent, $"{nameof(openWhenDone)}=", "|||"));
+            string poster = FindHTML(intent, $"{nameof(poster)}=", "|||");
+            string fileName = FindHTML(intent, $"{nameof(fileName)}=", "|||");
+            HandleIntent(id, url, title, path, showNotification, showNotificationWhenDone, openWhenDone, poster, fileName);
+        }
+
+        public static void HandleIntent(Intent intent)
+        {
+            if (intent == null) return;
+
+            var context = Application.Context;
+            int id = intent.Extras.GetInt("id", -1);
+            string url = intent.Extras.GetString("url", "");
+            string title = intent.Extras.GetString("title", "");
+            string path = intent.Extras.GetString("path", "");
+            bool showNotification = intent.Extras.GetBoolean("not", false);
+            bool showNotificationWhenDone = intent.Extras.GetBoolean("notdone", false);
+            bool openWhenDone = intent.Extras.GetBoolean("opendone", false);
+            string poster = intent.Extras.GetString("poster", "");
+            string fileName = intent.Extras.GetString("file", "");
+            HandleIntent(id, url, title, path, showNotification, showNotificationWhenDone, openWhenDone, poster, fileName);
+        }
+
+        public static void HandleIntent(int id, string url, string title, string path, bool showNotification, bool showNotificationWhenDone, bool openWhenDone, string poster, string fileName)
+        {
+
+
+            var context = Application.Context;
+            App.SetKey(DOWNLOAD_KEY_INTENT, id.ToString(), $"{nameof(id)}={id}|||{nameof(url)}={url}|||{nameof(title)}={title}|||{nameof(path)}={path}|||{nameof(showNotification)}={showNotification}|||{nameof(showNotificationWhenDone)}={showNotificationWhenDone}|||{nameof(openWhenDone)}={openWhenDone}|||{nameof(poster)}={poster}|||{nameof(fileName)}={fileName}|||");
+
+            int progress = 0;
+            int _progress = 0;
+
+            void UpdateDloadNot()
+            {
+                //poster != ""
+                ShowLocalNot(new LocalNot() { mediaStyle = false, bigIcon = poster, title = title, autoCancel = false, onGoing = true, id = id, smallIcon = Resource.Drawable.bicon, progress = progress, body = progress + "%" }, context);
+            }
+
+            void ShowDone(bool succ)
+            {
+                if (showNotificationWhenDone) {
+                    ShowLocalNot(new LocalNot() { mediaStyle = poster != "", bigIcon = poster, title = title, autoCancel = true, onGoing = false, id = id, smallIcon = Resource.Drawable.bicon, body = succ ? "Download done!" : "Download Failed" }, context); // ((e.Cancelled || e.Error != null) ? "Download Failed!"
+                }
+                // Toast.MakeText(context, "PG DONE!!!", ToastLength.Long).Show(); 
+            }
+            Thread t = new Thread(() => {
+
+                if ((int)Android.OS.Build.VERSION.SdkInt > 9) {
+                    StrictMode.ThreadPolicy policy = new
+                    StrictMode.ThreadPolicy.Builder().PermitAll().Build();
+                    StrictMode.SetThreadPolicy(policy);
+                }
+                try {
+                    URL _url = new URL(url);
+                    URLConnection connection = _url.OpenConnection();
+                    connection.Connect();
+                    int fileLength = connection.ContentLength;
+                    String fileExtension = MimeTypeMap.GetFileExtensionFromUrl(url);
+                    InputStream input = new BufferedInputStream(connection.InputStream);
+
+                    try {
+                        Java.IO.File __file = new Java.IO.File(path);
+                        __file.Mkdirs();
+                    }
+                    catch (Exception _ex) {
+                        print("FAILED:::" + _ex);
+                    }
+
+
+                    fileName = CensorFilename(fileName);
+                    path += "/" + fileName;
+                    print("PATH=====" + path + "|" + fileName);
+
+                    var rFile = new Java.IO.File(path);
+                    if (!rFile.Exists()) {
+                        print("FILE DOSENT EXITS");
+                        rFile.CreateNewFile();
+                    }
+
+                    long skip = App.GetKey<long>(DOWNLOAD_KEY, id.ToString(), 0);
+                    input.Skip(skip);
+                    
+                    OutputStream output = new FileOutputStream(rFile, true);
+
+                    byte[] data = new byte[1024];
+                    long total = skip;
+                    int count;
+                    int previousProgress = 0;
+                    UpdateDloadNot();
+                    while ((count = input.Read(data)) != -1) {
+                        total += count;
+                        int cprogress = (int)(total * 100 / fileLength);
+                        output.Write(data, 0, count);
+                        progressDownloads[id] = total;
+
+                        if (cprogress == 100 || cprogress > previousProgress) {
+                            // Only post progress event if we've made progress.
+                            previousProgress = cprogress;
+                            progress = cprogress;
+                            UpdateDloadNot();
+                        }
+                    }
+                    ShowDone(true);
+                    output.Flush();
+                    output.Close();
+                    input.Close();
+                }
+                catch (Exception _ex) {
+                    print("DOWNLOADURL: " + url);
+                    print("DOWNLOAD FAILED BC: " + _ex);
+                    ShowDone(false);
+                }
+                finally {
+                    App.RemoveKey(DOWNLOAD_KEY, id.ToString());
+                    App.RemoveKey(DOWNLOAD_KEY_INTENT, id.ToString());
+                }
+            });
+            t.Start();
+        }
+    }
+
+
 
     [Activity(Label = "CloudStream 2", Icon = "@drawable/bicon", Theme = "@style/MainTheme.Splash", MainLauncher = true, LaunchMode = LaunchMode.SingleTop, ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation), IntentFilter(new[] { Intent.ActionView }, DataScheme = "cloudstreamforms", Categories = new[] { Intent.CategoryDefault, Intent.CategoryBrowsable })]
     public class MainActivity : global::Xamarin.Forms.Platform.Android.FormsAppCompatActivity
     {
-        MainDroid mainDroid;
+        public static MainDroid mainDroid;
         public static Activity activity;
 
         protected override void OnNewIntent(Intent intent)
@@ -510,10 +772,22 @@ namespace CloudStreamForms.Droid
                     MainDroid.UpdateChromecastNotification(e.title, e.body, e.isPaused, e.posterUrl);
                 }
             };
+            ResumeIntentData();
         }
+
+
+        async void ResumeIntentData()
+        {
+            await Task.Delay(1000);
+            print("STARTINTENT");
+            DownloadHandle.ResumeIntents();
+
+        }
+
         protected override void OnDestroy()
         {
             MainDroid.CancelChromecast(); // TO REMOVE IT, CANT INTERACT WITHOUT THE CORE
+            DownloadHandle.OnDestroy();
             base.OnDestroy();
         }
 
@@ -551,6 +825,12 @@ namespace CloudStreamForms.Droid
 
     public static class MainHelper
     {
+        public static AlarmManager GetAlarmManager()
+        {
+            var alarmManager = Application.Context.GetSystemService(Context.AlarmService) as AlarmManager;
+            return alarmManager;
+        }
+
         public static string GetPath(bool mainPath, string extraPath)
         {
             return (mainPath ? (Android.OS.Environment.ExternalStorageDirectory + "/" + Android.OS.Environment.DirectoryDownloads) : (Android.OS.Environment.ExternalStorageDirectory + "/" + Android.OS.Environment.DirectoryDownloads + "/Extra")) + extraPath;
@@ -625,7 +905,7 @@ namespace CloudStreamForms.Droid
 
 
 
-        private async void ShowNotIntentAsync(string title, string body, int id, string titleId, string titleName, DateTime? time = null, string bigIconUrl = "")
+        public async void ShowNotIntentAsync(string title, string body, int id, string titleId, string titleName, DateTime? time = null, string bigIconUrl = "")
         {
 
             var localNot = new LocalNot() { title = title, body = body, id = id, data = "cloudstreamforms:" + titleId + "Name=" + titleName + "=EndAll", bigIcon = bigIconUrl, autoCancel = true, mediaStyle = true, notificationImportance = (int)NotificationImportance.Default, showWhen = true, when = time, smallIcon = LocalNotificationIconId };
@@ -983,11 +1263,6 @@ namespace CloudStreamForms.Droid
 
 
 
-        private static AlarmManager GetAlarmManager()
-        {
-            var alarmManager = Application.Context.GetSystemService(Context.AlarmService) as AlarmManager;
-            return alarmManager;
-        }
 
 
         private long NotifyTimeInMilliseconds(DateTime notifyTime)
@@ -1365,7 +1640,7 @@ namespace CloudStreamForms.Droid
 
             // Android.App.Application.Context.ApplicationContext.start
             //Android.App.Application.Context.StartService(intent);
-            Android.App.Application.Context.StartActivity(promptInstall);
+            // Android.App.Application.Context.StartActivity(promptInstall);
         }
 
         public static Java.IO.File WriteFile(string name, string basePath, string write)
@@ -1508,9 +1783,10 @@ namespace CloudStreamForms.Droid
             downloadIntent.PutExtra("notdone", showNotificationWhenDone);
             downloadIntent.PutExtra("opendone", openWhenDone);
             downloadIntent.PutExtra("poster", poster);
-
-            //  MainActivity.activity.StartService(downloadIntent);
-            Application.Context.StartService(downloadIntent);
+            DownloadHandle.HandleIntent(downloadIntent);
+            // MainActivity.activity.StartForegroundService(downloadIntent);
+            //  activity.BindService(downloadIntent, f.Class , Bind.AutoCreate);
+            // Application.Context.SendBroadcast(downloadIntent);
             /*
             var pending = PendingIntent.GetBroadcast(context, id,
                   downloadIntent,
@@ -1525,7 +1801,7 @@ namespace CloudStreamForms.Droid
 
             alarmManager.SetExactAndAllowWhileIdle(AlarmType.RtcWakeup, triggerTime, pending);*/
 
-            MainActivity.activity.SendBroadcast(downloadIntent);
+            // MainActivity.activity.SendBroadcast(downloadIntent);
             return path + "/" + CensorFilename(fileName);
         }
 
