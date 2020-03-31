@@ -373,7 +373,7 @@ namespace CloudStreamForms.UWP
 
         }
 
-        public string DownloadAdvanced(int id, string url, string fileName, string titleName, bool mainPath, string extraPath, bool showNotification = true, bool showNotificationWhenDone = true, bool openWhenDone = false, string poster = "")
+        public string DownloadAdvanced(int id, string url, string fileName, string titleName, bool mainPath, string extraPath, bool showNotification = true, bool showNotificationWhenDone = true, bool openWhenDone = false, string poster = "", string beforeTxt = "")
         {
             return DownloadUrl(url, fileName, mainPath, extraPath, showNotificationWhenDone ? "Download Complete!" : "", true, titleName);
         }

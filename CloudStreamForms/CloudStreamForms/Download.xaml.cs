@@ -200,10 +200,10 @@ namespace CloudStreamForms
                         downloadDone = dprogress > 0.98;
                         if (!downloadDone) {
 
-                            extra = " | " + currentProgress + " Mb - " + maxProgress + " Mb";
+                            extra = " | " + currentProgress + " MB - " + maxProgress + " MB";
                         }
                         else {
-                            extra = " | " + maxProgress + " Mb";
+                            extra = " | " + maxProgress + " MB";
                         }
                     }
                     bool isYouTube = __key.Contains("isYouTube=" + true);

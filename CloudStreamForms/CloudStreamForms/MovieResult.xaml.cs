@@ -600,7 +600,9 @@ namespace CloudStreamForms
             if (episodeResult.Rating == "") {
                 episodeResult.Rating = currentMovie.title.rating;
             }
-
+            if(currentMovie.title.movieType != MovieType.Movie && currentMovie.title.movieType != MovieType.AnimeMovie) {
+                episodeResult.Title = episodeResult.episode + ". " + episodeResult.Title;
+            }
             if (episodeResult.PosterUrl == "") {
                 if (activeMovie.title.posterUrl != "") {
                     string posterUrl = "";
@@ -988,7 +990,7 @@ namespace CloudStreamForms
                     epView.AllEpisodes = new EpisodeResult[CurrentEpisodes.Count];
                     maxEpisodes = epView.AllEpisodes.Length;
                     for (int i = 0; i < CurrentEpisodes.Count; i++) {
-                        AddEpisode(new EpisodeResult() { episode = i + 1, Title = (i + 1) + ". " + CurrentEpisodes[i].name, Id = i, Description = CurrentEpisodes[i].description.Replace("\n", "").Replace("  ", ""), PosterUrl = CurrentEpisodes[i].posterUrl, Rating = CurrentEpisodes[i].rating, Progress = 0, epVis = false, subtitles = new List<string>() { "None" }, Mirros = new List<string>() }, i);
+                        AddEpisode(new EpisodeResult() { episode = i + 1, Title =  CurrentEpisodes[i].name, Id = i, Description = CurrentEpisodes[i].description.Replace("\n", "").Replace("  ", ""), PosterUrl = CurrentEpisodes[i].posterUrl, Rating = CurrentEpisodes[i].rating, Progress = 0, epVis = false, subtitles = new List<string>() { "None" }, Mirros = new List<string>() }, i);
                     }
                     if (!isAnime) {
                         SetEpisodeFromTo(0);
@@ -1459,7 +1461,8 @@ namespace CloudStreamForms
                 string download = await DisplayActionSheet("Download", "Cancel", null, episodeResult.Mirros.ToArray());
                 for (int i = 0; i < episodeResult.Mirros.Count; i++) {
                     if (episodeResult.Mirros[i] == download) {
-                        string s = episodeResult.mirrosUrls[i];
+                        string mirrorUrl = episodeResult.mirrosUrls[i];
+                        string mirrorName = episodeResult.Mirros[i];
 
                         TempThred tempThred = new TempThred();
                         tempThred.typeId = 4; // MAKE SURE THIS IS BEFORE YOU CREATE THE THRED
@@ -1467,11 +1470,11 @@ namespace CloudStreamForms
                             try {
 
                                 UserDialogs.Instance.ShowLoading("Checking link...", MaskType.Gradient);
-                                double fileSize = CloudStreamCore.GetFileSize(s);
+                                double fileSize = CloudStreamCore.GetFileSize(mirrorUrl);
                                 UserDialogs.Instance.HideLoading();
                                 if (fileSize > 1) {
 
-                                    string dpath = App.DownloadAdvanced(GetCorrectId(episodeResult), s, episodeResult.Title + ".mp4", episodeResult.OgTitle, true, "/" + GetPathFromType(), true, true, false, episodeResult.PosterUrl);
+                                    string dpath = App.DownloadAdvanced(GetCorrectId(episodeResult), mirrorUrl, episodeResult.Title + ".mp4", episodeResult.OgTitle, true, "/" + GetPathFromType(), true, true, false, episodeResult.PosterUrl, (currentMovie.title.movieType == MovieType.Movie || currentMovie.title.movieType == MovieType.AnimeMovie) ? $"{mirrorName}\n" : $"S{currentSeason}:E{episodeResult.episode} - {mirrorName}\n");
                                    // string dpath = App.DownloadUrl(s, episodeResult.Title + ".mp4", true, "/" + GetPathFromType(), "Download complete!", true, episodeResult.Title);
                                     //  string ppath = App.DownloadUrl(episodeResult.PosterUrl, "epP" + episodeResult.Title + ".jpg", false, "/Posters");
                                     // string mppath = App.DownloadUrl(currentMovie.title.hdPosterUrl, "hdP" + episodeResult.Title + ".jpg", false, "/TitlePosters");

@@ -49,7 +49,7 @@ namespace CloudStreamForms
 
             void CancelNot(int id);
 
-            string DownloadAdvanced(int id, string url, string fileName, string titleName, bool mainPath, string extraPath, bool showNotification = true, bool showNotificationWhenDone = true, bool openWhenDone = false, string poster = "");
+            string DownloadAdvanced(int id, string url, string fileName, string titleName, bool mainPath, string extraPath, bool showNotification = true, bool showNotificationWhenDone = true, bool openWhenDone = false, string poster = "", string beforeTxt = "");
 
         }
 
@@ -98,9 +98,9 @@ namespace CloudStreamForms
             return platformDep.GetBrightness();
         }
 
-        public static string DownloadAdvanced(int id, string url, string fileName, string titleName, bool mainPath, string extraPath, bool showNotification = true, bool showNotificationWhenDone = true, bool openWhenDone = false, string poster = "")
+        public static string DownloadAdvanced(int id, string url, string fileName, string titleName, bool mainPath, string extraPath, bool showNotification = true, bool showNotificationWhenDone = true, bool openWhenDone = false, string poster = "",string beforeTxt = "")
         {
-            return platformDep.DownloadAdvanced(id, url, fileName,titleName, mainPath, extraPath, showNotification, showNotificationWhenDone, openWhenDone, poster);
+            return platformDep.DownloadAdvanced(id, url, fileName,titleName, mainPath, extraPath, showNotification, showNotificationWhenDone, openWhenDone, poster, beforeTxt);
         }
 
         public static void SetBrightness(double brightness)
