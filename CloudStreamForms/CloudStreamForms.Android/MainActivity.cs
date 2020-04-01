@@ -39,6 +39,34 @@ using static Android.App.ActivityManager;
 namespace CloudStreamForms.Droid
 {
     [Service]
+
+    public class OnKilledService : Service
+    { 
+
+        public override IBinder OnBind(Intent intent)
+        {
+            return null;
+        }
+        [return: GeneratedEnum]
+        public override StartCommandResult OnStartCommand(Intent intent, [GeneratedEnum] StartCommandFlags flags, int startId)
+        {
+            return StartCommandResult.Sticky;
+        }
+
+        public override void OnDestroy()
+        {
+            base.OnDestroy();
+        }
+
+        public override void OnTaskRemoved(Intent rootIntent)
+        {
+            MainActivity.activity.Killed();
+            StopSelf();
+           // base.OnTaskRemoved(rootIntent);
+        }
+    }
+
+    [Service]
     public class DemoIntentService : IntentService
     {
         public DemoIntentService() : base("DemoIntentService")
@@ -69,9 +97,26 @@ namespace CloudStreamForms.Droid
             if (data.StartsWith("handleDownload")) {
                 int id = int.Parse(FindHTML(data, $"{nameof(id)}=", "|||")); //intent.Extras.GetInt("downloadId");
                 int dType = int.Parse(FindHTML(data, $"{nameof(dType)}=", "|||"));
+                var manager = Application.Context.GetSystemService(Context.NotificationService) as NotificationManager;
+                manager.Cancel(id);
                 DownloadHandle.isPaused[id] = dType;
                 DownloadHandle.changedPause?.Invoke(null, id);
             }
+        }
+    }
+
+    [Service]
+    public class NullIntent : IntentService
+    {
+        public override void OnCreate()
+        {
+            base.OnCreate();
+
+        }
+
+        protected override void OnHandleIntent(Intent intent)
+        {
+
         }
     }
 
@@ -211,13 +256,13 @@ namespace CloudStreamForms.Droid
                         }
                     }
                 }
+
                 if (containsMultiLine) {
                     var b = new Notification.BigTextStyle();
                     b.BigText(not.body);
                     builder.SetStyle(b); // Text
                                          // builder.SetContentText(not.body);
                 }
-
 
                 if (not.actions.Count > 0) {
                     List<Notification.Action> actions = new List<Notification.Action>();
@@ -244,28 +289,34 @@ namespace CloudStreamForms.Droid
             var stackBuilder = Android.Support.V4.App.TaskStackBuilder.Create(cc);
 
             var resultIntent = GetLauncherActivity(cc);
-
             if (not.data != "") {
+
                 resultIntent.SetFlags(ActivityFlags.NewTask | ActivityFlags.ClearTask);
                 var _data = Android.Net.Uri.Parse(not.data);//"cloudstreamforms:tt0371746Name=Iron man=EndAll");
                 resultIntent.SetData(_data);
-
+                stackBuilder.AddNextIntent(resultIntent);
+                var resultPendingIntent =
+              stackBuilder.GetPendingIntent(not.id, (int)PendingIntentFlags.UpdateCurrent);
+                builder.SetContentIntent(resultPendingIntent);
             }
             else {
+                //Intent resultIntent = new Intent(context, typeof(MainActivity));
+                stackBuilder.AddParentStack(activity.Class);
+                // resultIntent.SetFlags(ActivityFlags.NewTask | ActivityFlags.ResetTaskIfNeeded );
+                /* resultIntent.SetAction(Intent.ActionMain);
+                 resultIntent.AddCategory(Intent.CategoryLauncher);*/
+                stackBuilder.AddNextIntent(resultIntent);
                 // resultIntent.SetFlags(ActivityFlags.task);
             }
-            stackBuilder.AddNextIntent(resultIntent);
 
-            var resultPendingIntent =
-                stackBuilder.GetPendingIntent(not.id, (int)PendingIntentFlags.UpdateCurrent);
-            builder.SetContentIntent(resultPendingIntent);
+
             _manager.Notify(not.id, builder.Build());
         }
         public static Intent GetLauncherActivity(Context context = null)
         {
             var cc = context ?? Application.Context;
             var packageName = cc.PackageName;
-            return cc.PackageManager.GetLaunchIntentForPackage(packageName);
+            return cc.PackageManager.GetLaunchIntentForPackage(packageName).SetPackage(null);
         }
     }
 
@@ -555,24 +606,36 @@ namespace CloudStreamForms.Droid
         const string DOWNLOAD_KEY = "DownloadProgress";
         const string DOWNLOAD_KEY_INTENT = "DownloadProgressIntent";
 
-        public static void OnDestroy()
+        public static void OnKilled()
         {
-            foreach (var key in progressDownloads.Keys) {
-                print("SAVED KEY:" + key);
-                App.SetKey(DOWNLOAD_KEY, key.ToString(), progressDownloads[key]);
+            try {
+                /*
+                foreach (var path in App.GetKeysPath(DOWNLOAD_KEY_INTENT)) {
+                    //  App.GetKey<long>(DOWNLOAD_KEY, path, 0);
+                    string data = App.GetKey<string>(path, null);
+                    int id = int.Parse(FindHTML(data, $"{nameof(id)}=", "|||"));
+                    App.CancelNotifaction(id);
+                }*/
+
+                foreach (var id in DownloadHandle.activeIds) {
+                    var manager = Application.Context.GetSystemService(Context.NotificationService) as NotificationManager;
+                    manager.Cancel(id);
+                    //  App.CancelNotifaction(id);
+                }
+                foreach (var key in outputStreams.Keys) {
+                    var outp = outputStreams[key];
+                    var inpp = inputStreams[key];
+                    outp.Flush();
+                    outp.Close();
+                    inpp.Close();
+                }
+                foreach (var key in progressDownloads.Keys) {
+                    print("SAVED KEY:" + key);
+                    App.SetKey(DOWNLOAD_KEY, key.ToString(), progressDownloads[key]);
+                }
             }
-            foreach (var path in App.GetKeysPath(DOWNLOAD_KEY_INTENT)) {
-                //  App.GetKey<long>(DOWNLOAD_KEY, path, 0);
-                string data = App.GetKey<string>(path, null);
-                int id = int.Parse(FindHTML(data, $"{nameof(id)}=", "|||"));
-                App.CancelNotifaction(id);
-            }
-            foreach (var key in outputStreams.Keys) {
-                var outp = outputStreams[key];
-                var inpp = inputStreams[key];
-                outp.Flush();
-                outp.Close();
-                inpp.Close();
+            catch (Exception _ex) {
+                print("EXEPTION WHEN DESTROYED: " + _ex);
             }
         }
 
@@ -632,6 +695,7 @@ namespace CloudStreamForms.Droid
 
         static Dictionary<int, OutputStream> outputStreams = new Dictionary<int, OutputStream>();
         static Dictionary<int, InputStream> inputStreams = new Dictionary<int, InputStream>();
+        public static List<int> activeIds = new List<int>();
         /// <summary>
         /// 0 = download, 1 = Pause, 2 = remove
         /// </summary>
@@ -743,6 +807,7 @@ namespace CloudStreamForms.Droid
                     outputStreams[id] = output;
                     inputStreams[id] = input;
                     isPaused[id] = 0;
+                    activeIds.Add(id);
 
                     int cProgress()
                     {
@@ -795,6 +860,7 @@ namespace CloudStreamForms.Droid
                             App.RemoveKey(DOWNLOAD_KEY, id.ToString());
                             App.RemoveKey(DOWNLOAD_KEY_INTENT, id.ToString());
                             changedPause -= UpdateFromId;
+                            activeIds.Remove(id);
                             Thread.Sleep(100);
                             return;
                         }
@@ -827,6 +893,7 @@ namespace CloudStreamForms.Droid
                     input.Close();
                     outputStreams.Remove(id);
                     inputStreams.Remove(id);
+                    activeIds.Remove(id);
                 }
                 catch (Exception _ex) {
                     print("DOWNLOADURL: " + url);
@@ -933,7 +1000,7 @@ namespace CloudStreamForms.Droid
     public class MainActivity : global::Xamarin.Forms.Platform.Android.FormsAppCompatActivity
     {
         public static MainDroid mainDroid;
-        public static Activity activity;
+        public static MainActivity activity;
 
         protected override void OnNewIntent(Intent intent)
         {
@@ -1051,21 +1118,29 @@ namespace CloudStreamForms.Droid
                 }
             };
             ResumeIntentData();
+            StartService(new Intent(BaseContext, typeof(OnKilledService)));
+           // DownloadHandle.ResumeIntents();
         }
 
 
         async void ResumeIntentData()
         {
-            await Task.Delay(1000);
-            print("STARTINTENT");
+           await Task.Delay(1000);
+           print("STARTINTENT");
             DownloadHandle.ResumeIntents();
 
         }
 
+        public void Killed()
+        {
+           // ShowNotification("finish", "Yeet");
+            MainDroid.CancelChromecast(); // TO REMOVE IT, CANT INTERACT WITHOUT THE CORE
+            DownloadHandle.OnKilled();
+        }
+
         protected override void OnDestroy()
         {
-            MainDroid.CancelChromecast(); // TO REMOVE IT, CANT INTERACT WITHOUT THE CORE
-            DownloadHandle.OnDestroy();
+            Killed();
             base.OnDestroy();
         }
 
