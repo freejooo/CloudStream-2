@@ -54,9 +54,6 @@ namespace CloudStreamForms.Droid
         }
     }
 
-
-
-
     [Service]
     public class MainIntentService : IntentService
     {
@@ -654,8 +651,11 @@ namespace CloudStreamForms.Droid
             void UpdateDloadNot(string progressTxt)
             {
                 //poster != ""
-                bool canPause = isPaused[id] == 0;
-                ShowLocalNot(new LocalNot() { actions = new List<LocalAction>() { new LocalAction() { action = $"handleDownload|||id={id}|||dType={(canPause ? 1 : 0)}|||", name = canPause ? "Pause" : "Resume" }, new LocalAction() { action = $"handleDownload|||id={id}|||dType=2|||", name = "Stop" } }, mediaStyle = false, bigIcon = poster, title = title, autoCancel = false, onGoing = true, id = id, smallIcon = Resource.Drawable.bicon, progress = progress, body = progressTxt }, context);
+                int isPause = isPaused[id];
+                bool canPause = isPause == 0;
+                if (isPause != 2) {
+                    ShowLocalNot(new LocalNot() { actions = new List<LocalAction>() { new LocalAction() { action = $"handleDownload|||id={id}|||dType={(canPause ? 1 : 0)}|||", name = canPause ? "Pause" : "Resume" }, new LocalAction() { action = $"handleDownload|||id={id}|||dType=2|||", name = "Stop" } }, mediaStyle = false, bigIcon = poster, title = title, autoCancel = false, onGoing = true, id = id, smallIcon = Resource.Drawable.bicon, progress = progress, body = progressTxt }, context);
+                }
             }
 
             void ShowDone(bool succ, string? overrideText = null)
@@ -783,18 +783,19 @@ namespace CloudStreamForms.Droid
                         if (isPaused[id] == 2) { // DELETE FILE
                             print("DOWNLOAD STOPPED");
                             ShowDone(false, "Download Stopped");
-                            Thread.Sleep(100);
+                            //  Thread.Sleep(100);
                             output.Flush();
                             output.Close();
                             input.Close();
                             outputStreams.Remove(id);
                             inputStreams.Remove(id);
                             isPaused.Remove(id);
-                            Thread.Sleep(100);
+                            // Thread.Sleep(100);
                             rFile.Delete();
                             App.RemoveKey(DOWNLOAD_KEY, id.ToString());
                             App.RemoveKey(DOWNLOAD_KEY_INTENT, id.ToString());
                             changedPause -= UpdateFromId;
+                            Thread.Sleep(100);
                             return;
                         }
 

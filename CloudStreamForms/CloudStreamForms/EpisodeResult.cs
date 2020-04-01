@@ -6,12 +6,10 @@ namespace CloudStreamForms.Models
     public class EpisodeResult
     {
         public int Id { set; get; }
-
-        public int episode { set; get; } = -1;
+        public int Episode { set; get; } = -1;
         public string Title { set; get; }
         public string Rating { set; get; }
         public string RatingStar { get { return (Rating.Replace(" ", "") == "" ? "Rating Unavailable" : "★ " + Rating); } } // ★
-
         public string PosterUrl { set; get; }
         public bool IsPosterFromStorage { get { return PosterUrl == CloudStreamCore.VIDEO_IMDB_IMAGE_NOT_FOUND; } }
         public ImageSource ImageSource { get {  return IsPosterFromStorage ? App.GetImageSource(PosterUrl) : PosterUrl; } }

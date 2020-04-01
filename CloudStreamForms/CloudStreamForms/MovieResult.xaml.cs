@@ -586,23 +586,26 @@ namespace CloudStreamForms
         int episodeCounter = 0;
         public void AddEpisode(EpisodeResult episodeResult, int index)
         {
-            ChangeEpisode(ref episodeResult);
-            epView.AllEpisodes[index] = episodeResult;
+            var _episode = ChangeEpisode(episodeResult);
+            epView.AllEpisodes[index] = _episode;
         }
 
-        void ChangeEpisode(ref EpisodeResult episodeResult)
+        EpisodeResult ChangeEpisode(EpisodeResult episodeResult)
         {
             episodeResult.OgTitle = episodeResult.Title;
             SetColor(episodeResult);
-            if (episodeResult.Rating != "") {
+            /*if (episodeResult.Rating != "") {
                 episodeResult.Title += " | ★ " + episodeResult.Rating;
-            }
+            }*/
             if (episodeResult.Rating == "") {
                 episodeResult.Rating = currentMovie.title.rating;
             }
-            if(currentMovie.title.movieType != MovieType.Movie && currentMovie.title.movieType != MovieType.AnimeMovie) {
-                episodeResult.Title = episodeResult.episode + ". " + episodeResult.Title;
+
+            if (!isMovie) {
+                print("ADDMOVIE:___" + episodeResult.Episode);
+                episodeResult.Title = episodeResult.Episode + ". " + episodeResult.Title;
             }
+
             if (episodeResult.PosterUrl == "") {
                 if (activeMovie.title.posterUrl != "") {
                     string posterUrl = "";
@@ -625,6 +628,7 @@ namespace CloudStreamForms
             else {
                 episodeResult.PosterUrl = CloudStreamCore.ConvertIMDbImagesToHD(episodeResult.PosterUrl, 224, 126); //episodeResult.PosterUrl.Replace(",126,224_AL", "," + pwidth + "," + pheight + "_AL").Replace("UY126", "UY" + pheight).Replace("UX224", "UX" + pwidth);
             }
+            return episodeResult;
         }
 
 
@@ -990,7 +994,7 @@ namespace CloudStreamForms
                     epView.AllEpisodes = new EpisodeResult[CurrentEpisodes.Count];
                     maxEpisodes = epView.AllEpisodes.Length;
                     for (int i = 0; i < CurrentEpisodes.Count; i++) {
-                        AddEpisode(new EpisodeResult() { episode = i + 1, Title =  CurrentEpisodes[i].name, Id = i, Description = CurrentEpisodes[i].description.Replace("\n", "").Replace("  ", ""), PosterUrl = CurrentEpisodes[i].posterUrl, Rating = CurrentEpisodes[i].rating, Progress = 0, epVis = false, subtitles = new List<string>() { "None" }, Mirros = new List<string>() }, i);
+                        AddEpisode(new EpisodeResult() { Episode = i + 1, Title = CurrentEpisodes[i].name, Id = i, Description = CurrentEpisodes[i].description.Replace("\n", "").Replace("  ", ""), PosterUrl = CurrentEpisodes[i].posterUrl, Rating = CurrentEpisodes[i].rating, Progress = 0, epVis = false, subtitles = new List<string>() { "None" }, Mirros = new List<string>() }, i);
                     }
                     if (!isAnime) {
                         SetEpisodeFromTo(0);
@@ -1325,7 +1329,7 @@ namespace CloudStreamForms
                     _sub = currentMovie.subtitles[0].data;
                 }
             }
-            App.PlayVLCWithSingleUrl(episodeResult.mirrosUrls, episodeResult.Mirros, _sub, currentMovie.title.name, episodeResult.episode, currentSeason, overrideSelectVideo);
+            App.PlayVLCWithSingleUrl(episodeResult.mirrosUrls, episodeResult.Mirros, _sub, currentMovie.title.name, episodeResult.Episode, currentSeason, overrideSelectVideo);
         }
 
         // ============================== FORCE UPDATE ==============================
@@ -1341,7 +1345,7 @@ namespace CloudStreamForms
                 for (int i = 0; i < _e.Count; i++) {
                     // print("Main::" + _e[i].MainTextColor);
                     EpisodeResult e = _e[i];
-                    epView.MyEpisodeResultCollection.Add(new EpisodeResult() { Title = e.Title, Description = e.Description, MainTextColor = e.MainTextColor, MainDarkTextColor = e.MainDarkTextColor, Rating = e.Rating, epVis = e.epVis, Id = e.Id, LoadedLinks = e.LoadedLinks, Mirros = e.Mirros, mirrosUrls = e.mirrosUrls, OgTitle = e.OgTitle, PosterUrl = e.PosterUrl, Progress = e.Progress, subtitles = e.subtitles, subtitlesUrls = e.subtitlesUrls }); // , loadResult = e.loadResult
+                    epView.MyEpisodeResultCollection.Add(e);//new EpisodeResult() { Title = e.Title, Description = e.Description, MainTextColor = e.MainTextColor, MainDarkTextColor = e.MainDarkTextColor, Rating = e.Rating, epVis = e.epVis, Id = e.Id, LoadedLinks = e.LoadedLinks, Mirros = e.Mirros, mirrosUrls = e.mirrosUrls, OgTitle = e.OgTitle, PosterUrl = e.PosterUrl, Progress = e.Progress, subtitles = e.subtitles, subtitlesUrls = e.subtitlesUrls }); // , loadResult = e.loadResult
                 }
                 /*  }
                   else {
@@ -1359,6 +1363,7 @@ namespace CloudStreamForms
 
         async void EpisodeSettings(EpisodeResult episodeResult)
         {
+            print("EPDATA:::" + episodeResult.OgTitle + "|" + episodeResult.Episode);
             if (!episodeResult.LoadedLinks) {
                 try {
                     await LoadLinksForEpisode(episodeResult, false);
@@ -1467,13 +1472,14 @@ namespace CloudStreamForms
                         TempThred tempThred = new TempThred();
                         tempThred.typeId = 4; // MAKE SURE THIS IS BEFORE YOU CREATE THE THRED
                         tempThred.Thread = new System.Threading.Thread(() => {
-                            try { 
+                            try {
                                 UserDialogs.Instance.ShowLoading("Checking link...", MaskType.Gradient);
                                 double fileSize = CloudStreamCore.GetFileSize(mirrorUrl);
                                 UserDialogs.Instance.HideLoading();
                                 if (fileSize > 1) {
-                                    string dpath = App.DownloadAdvanced(GetCorrectId(episodeResult), mirrorUrl, episodeResult.Title + ".mp4", isMovie ? currentMovie.title.name : $"{currentMovie.title.name} · {episodeResult.OgTitle}", true, "/" + GetPathFromType(), true, true, false, episodeResult.PosterUrl, (isMovie) ? $"{mirrorName}\n" : $"S{currentSeason}:E{episodeResult.episode} - {mirrorName}\n");
-                                   // string dpath = App.DownloadUrl(s, episodeResult.Title + ".mp4", true, "/" + GetPathFromType(), "Download complete!", true, episodeResult.Title);
+                                    print("DSUZE:::::" + episodeResult.Episode);
+                                    string dpath = App.DownloadAdvanced(GetCorrectId(episodeResult), mirrorUrl, episodeResult.Title + ".mp4", isMovie ? currentMovie.title.name : $"{currentMovie.title.name} · {episodeResult.OgTitle}", true, "/" + GetPathFromType(), true, true, false, episodeResult.PosterUrl, (isMovie) ? $"{mirrorName}\n" : $"S{currentSeason}:E{episodeResult.Episode} - {mirrorName}\n");
+                                    // string dpath = App.DownloadUrl(s, episodeResult.Title + ".mp4", true, "/" + GetPathFromType(), "Download complete!", true, episodeResult.Title);
                                     //  string ppath = App.DownloadUrl(episodeResult.PosterUrl, "epP" + episodeResult.Title + ".jpg", false, "/Posters");
                                     // string mppath = App.DownloadUrl(currentMovie.title.hdPosterUrl, "hdP" + episodeResult.Title + ".jpg", false, "/TitlePosters");
                                     string mppath = currentMovie.title.hdPosterUrl;

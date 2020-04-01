@@ -342,7 +342,7 @@ xmlns:ffTransformations="clr-namespace:FFImageLoading.Transformations;assembly=F
                                                                 <ColumnDefinition Width="Auto" />
                                                             </Grid.ColumnDefinitions>
                                                             <Grid Grid.Row="0"  Grid.Column="0" >
-                                                                <Label Text="{Binding OgTitle}" TextColor="{Binding MainTextColor}" FontAttributes="Bold" FontSize="15"/>
+                                                                <Label Text="{Binding Title}" TextColor="{Binding MainTextColor}" FontAttributes="Bold" FontSize="15"/>
                                                             </Grid>
                                                             <Grid Grid.Row="1"  Grid.Column="0" >
                                                                 <Label Text="{Binding RatingStar}" TextColor="{Binding MainDarkTextColor}" FontAttributes="None" FontSize="14"/>
