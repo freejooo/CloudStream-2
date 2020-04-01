@@ -57,7 +57,26 @@ namespace CloudStreamForms.Droid
 
 
 
+    [Service]
+    public class MainIntentService : IntentService
+    {
+        public MainIntentService() : base("MainIntentService")
+        {
 
+        }
+
+        protected override void OnHandleIntent(Android.Content.Intent intent)
+        {
+            string data = intent.Extras.GetString("data");
+
+            if (data.StartsWith("handleDownload")) {
+                int id = int.Parse(FindHTML(data, $"{nameof(id)}=", "|||")); //intent.Extras.GetInt("downloadId");
+                int dType = int.Parse(FindHTML(data, $"{nameof(dType)}=", "|||"));
+                DownloadHandle.isPaused[id] = dType;
+                DownloadHandle.changedPause?.Invoke(null, id);
+            }
+        }
+    }
 
     [Service]
     public class ChromeCastIntentService : IntentService
@@ -95,6 +114,15 @@ namespace CloudStreamForms.Droid
 
         }
     }
+
+    [System.Serializable]
+    public class LocalAction
+    {
+        public string action;
+        public string name;
+        public int sprite;
+    }
+
     [System.Serializable]
     public class LocalNot
     {
@@ -110,6 +138,8 @@ namespace CloudStreamForms.Droid
         public bool onGoing = false;
         public int progress = -1;
         public DateTime? when = null;
+        public List<LocalAction> actions = new List<LocalAction>();
+
         public int notificationImportance = (int)NotificationImportance.Default;
 
 
@@ -152,7 +182,12 @@ namespace CloudStreamForms.Droid
             var cc = context ?? Application.Context;
             var builder = new Notification.Builder(cc);
             builder.SetContentTitle(not.title);
-            builder.SetContentText(not.body);
+
+            bool containsMultiLine = not.body.Contains("\n");
+
+            if (Build.VERSION.SdkInt < BuildVersionCodes.O || !containsMultiLine) {
+                builder.SetContentText(not.body);
+            }
             builder.SetSmallIcon(not.smallIcon);
             builder.SetAutoCancel(not.autoCancel);
             builder.SetOngoing(not.onGoing);
@@ -179,23 +214,51 @@ namespace CloudStreamForms.Droid
                         }
                     }
                 }
+                if (containsMultiLine) {
+                    var b = new Notification.BigTextStyle();
+                    b.BigText(not.body);
+                    builder.SetStyle(b); // Text
+                                         // builder.SetContentText(not.body);
+                }
+
+
+                if (not.actions.Count > 0) {
+                    List<Notification.Action> actions = new List<Notification.Action>();
+
+                    for (int i = 0; i < not.actions.Count; i++) {
+                        var _resultIntent = new Intent(context, typeof(MainIntentService));
+                        _resultIntent.PutExtra("data", not.actions[i].action);
+                        var pending = PendingIntent.GetService(context, 3337 + i + not.id,
+                         _resultIntent,
+                        PendingIntentFlags.UpdateCurrent
+                         );
+
+                        actions.Add(new Notification.Action(not.actions[i].sprite, not.actions[i].name, pending));
+                    }
+
+                    builder.SetActions(actions.ToArray());
+                }
             }
 
             builder.SetShowWhen(not.showWhen);
             if (not.when != null) {
                 builder.SetWhen(CurrentTimeMillis((DateTime)not.when));
             }
+            var stackBuilder = Android.Support.V4.App.TaskStackBuilder.Create(cc);
 
             var resultIntent = GetLauncherActivity(cc);
-            resultIntent.SetFlags(ActivityFlags.NewTask | ActivityFlags.ClearTask);
 
             if (not.data != "") {
+                resultIntent.SetFlags(ActivityFlags.NewTask | ActivityFlags.ClearTask);
                 var _data = Android.Net.Uri.Parse(not.data);//"cloudstreamforms:tt0371746Name=Iron man=EndAll");
                 resultIntent.SetData(_data);
-            }
 
-            var stackBuilder = Android.Support.V4.App.TaskStackBuilder.Create(cc);
+            }
+            else {
+                // resultIntent.SetFlags(ActivityFlags.task);
+            }
             stackBuilder.AddNextIntent(resultIntent);
+
             var resultPendingIntent =
                 stackBuilder.GetPendingIntent(not.id, (int)PendingIntentFlags.UpdateCurrent);
             builder.SetContentIntent(resultPendingIntent);
@@ -329,7 +392,6 @@ namespace CloudStreamForms.Droid
                 path += "/" + CensorFilename(fileName);
 
                 using (WebClient wc = new WebClient()) {
-
                     wc.DownloadProgressChanged += (o, e) => {
                         progress = e.ProgressPercentage;
                         // Toast.MakeText(context, "PROGRESS::" + e.ProgressPercentage, ToastLength.Short).Show();
@@ -524,18 +586,18 @@ namespace CloudStreamForms.Droid
                 //  App.GetKey<long>(DOWNLOAD_KEY, path, 0);
                 downloadResumes++;
                 string data = App.GetKey<string>(path, null);
-                HandleIntent(data);
+                HandleIntent(data, true);
             }
 
             if (downloadResumes == 1) {
                 App.ShowToast("Resumed Download");
             }
-            else {
+            else if (downloadResumes != 0) {
                 App.ShowToast($"Resumed {downloadResumes} downloads");
             }
 
         }
-        public static void HandleIntent(string intent)
+        public static void HandleIntent(string intent, bool resumeIntent = false)
         {
             if (intent == null) return;
 
@@ -549,7 +611,7 @@ namespace CloudStreamForms.Droid
             string poster = FindHTML(intent, $"{nameof(poster)}=", "|||");
             string fileName = FindHTML(intent, $"{nameof(fileName)}=", "|||");
             string beforeTxt = FindHTML(intent, $"{nameof(beforeTxt)}=", "|||");
-            HandleIntent(id, url, title, path, showNotification, showNotificationWhenDone, openWhenDone, poster, fileName, beforeTxt);
+            HandleIntent(id, url, title, path, showNotification, showNotificationWhenDone, openWhenDone, poster, fileName, beforeTxt, resumeIntent);
         }
 
         public static void HandleIntent(Intent intent)
@@ -573,25 +635,33 @@ namespace CloudStreamForms.Droid
 
         static Dictionary<int, OutputStream> outputStreams = new Dictionary<int, OutputStream>();
         static Dictionary<int, InputStream> inputStreams = new Dictionary<int, InputStream>();
+        /// <summary>
+        /// 0 = download, 1 = Pause, 2 = remove
+        /// </summary>
+        public static Dictionary<int, int> isPaused = new Dictionary<int, int>();
 
-        public static void HandleIntent(int id, string url, string title, string path, bool showNotification, bool showNotificationWhenDone, bool openWhenDone, string poster, string fileName, string beforeTxt)
+        public static EventHandler<int> changedPause;
+
+        public static void HandleIntent(int id, string url, string title, string path, bool showNotification, bool showNotificationWhenDone, bool openWhenDone, string poster, string fileName, string beforeTxt, bool resumeIntent = false)
         {
+            if (isPaused.ContainsKey(id)) return;
+
             var context = Application.Context;
             App.SetKey(DOWNLOAD_KEY_INTENT, id.ToString(), $"{nameof(id)}={id}|||{nameof(url)}={url}|||{nameof(title)}={title}|||{nameof(path)}={path}|||{nameof(showNotification)}={showNotification}|||{nameof(showNotificationWhenDone)}={showNotificationWhenDone}|||{nameof(openWhenDone)}={openWhenDone}|||{nameof(poster)}={poster}|||{nameof(fileName)}={fileName}|||{nameof(beforeTxt)}={beforeTxt}|||");
 
             int progress = 0;
 
-
             void UpdateDloadNot(string progressTxt)
             {
                 //poster != ""
-                ShowLocalNot(new LocalNot() { mediaStyle = false, bigIcon = poster, title = title, autoCancel = false, onGoing = true, id = id, smallIcon = Resource.Drawable.bicon, progress = progress, body = progressTxt }, context);
+                bool canPause = isPaused[id] == 0;
+                ShowLocalNot(new LocalNot() { actions = new List<LocalAction>() { new LocalAction() { action = $"handleDownload|||id={id}|||dType={(canPause ? 1 : 0)}|||", name = canPause ? "Pause" : "Resume" }, new LocalAction() { action = $"handleDownload|||id={id}|||dType=2|||", name = "Stop" } }, mediaStyle = false, bigIcon = poster, title = title, autoCancel = false, onGoing = true, id = id, smallIcon = Resource.Drawable.bicon, progress = progress, body = progressTxt }, context);
             }
 
-            void ShowDone(bool succ)
+            void ShowDone(bool succ, string? overrideText = null)
             {
                 if (showNotificationWhenDone) {
-                    ShowLocalNot(new LocalNot() { mediaStyle = poster != "", bigIcon = poster, title = title, autoCancel = true, onGoing = false, id = id, smallIcon = Resource.Drawable.bicon, body = succ ? "Download done!" : "Download Failed" }, context); // ((e.Cancelled || e.Error != null) ? "Download Failed!"
+                    ShowLocalNot(new LocalNot() { mediaStyle = poster != "", bigIcon = poster, title = title, autoCancel = true, onGoing = false, id = id, smallIcon = Resource.Drawable.bicon, body = overrideText ?? (succ ? "Download done!" : "Download Failed") }, context); // ((e.Cancelled || e.Error != null) ? "Download Failed!"
                 }
                 // Toast.MakeText(context, "PG DONE!!!", ToastLength.Long).Show(); 
             }
@@ -611,8 +681,22 @@ namespace CloudStreamForms.Droid
                     StrictMode.ThreadPolicy.Builder().PermitAll().Build();
                     StrictMode.SetThreadPolicy(policy);
                 }
+                long total = 0;
+                int fileLength = 0;
+
+                void UpdateProgress()
+                {
+                    UpdateDloadNot($"{beforeTxt}{progress} % ({ConvertBytesToAny(total, 1, 2)} MB/{ConvertBytesToAny(fileLength, 1, 2)} MB)");
+                }
+
+                void UpdateFromId(object sender, int _id)
+                {
+                    if (_id == id) {
+                        UpdateProgress();
+                    }
+                }
+
                 try {
-                    long total = 0;
                     try {
                         Java.IO.File __file = new Java.IO.File(path);
                         __file.Mkdirs();
@@ -636,13 +720,19 @@ namespace CloudStreamForms.Droid
                         rFile.CreateNewFile();
                     }
                     else {
-                        total = rFile.Length();
-                        connection.SetRequestProperty("Range", "bytes=" + rFile.Length() + "-");
+                        if (resumeIntent) {
+                            total = rFile.Length();
+                            connection.SetRequestProperty("Range", "bytes=" + rFile.Length() + "-");
+                        }
+                        else {
+                            rFile.Delete();
+                            rFile.CreateNewFile();
+                        }
                     }
-
+                    connection.SetRequestProperty("Accept-Encoding", "identity");
 
                     connection.Connect();
-                    int fileLength = connection.ContentLength + (int)total;
+                    fileLength = connection.ContentLength + (int)total;
                     String fileExtension = MimeTypeMap.GetFileExtensionFromUrl(url);
                     InputStream input = new BufferedInputStream(connection.InputStream);
 
@@ -652,6 +742,7 @@ namespace CloudStreamForms.Droid
 
                     outputStreams[id] = output;
                     inputStreams[id] = input;
+                    isPaused[id] = 0;
 
                     int cProgress()
                     {
@@ -669,6 +760,8 @@ namespace CloudStreamForms.Droid
                     long lastTotal = total;
                     const int UPDATE_TIME = 1;
 
+                    changedPause += UpdateFromId;
+
                     while ((count = input.Read(data)) != -1) {
                         total += count;
 
@@ -676,16 +769,46 @@ namespace CloudStreamForms.Droid
                         progressDownloads[id] = total;
                         progress = cProgress();
 
+
+                        if (isPaused[id] == 1) {
+                            print("PAUSEDOWNLOAD");
+                            UpdateProgress();
+                            while (isPaused[id] == 1) {
+                                Thread.Sleep(100);
+                            }
+                            if (isPaused[id] != 2) {
+                                UpdateProgress();
+                            }
+                        }
+                        if (isPaused[id] == 2) { // DELETE FILE
+                            print("DOWNLOAD STOPPED");
+                            ShowDone(false, "Download Stopped");
+                            Thread.Sleep(100);
+                            output.Flush();
+                            output.Close();
+                            input.Close();
+                            outputStreams.Remove(id);
+                            inputStreams.Remove(id);
+                            isPaused.Remove(id);
+                            Thread.Sleep(100);
+                            rFile.Delete();
+                            App.RemoveKey(DOWNLOAD_KEY, id.ToString());
+                            App.RemoveKey(DOWNLOAD_KEY_INTENT, id.ToString());
+                            changedPause -= UpdateFromId;
+                            return;
+                        }
+
                         if (DateTime.Now.Subtract(lastUpdateTime).TotalSeconds > UPDATE_TIME) {
                             lastUpdateTime = DateTime.Now;
                             long diff = total - lastTotal;
                             //  UpdateDloadNot($"{ConvertBytesToAny(diff/UPDATE_TIME, 2,2)}MB/s | {progress}%");
                             //{ConvertBytesToAny(diff / UPDATE_TIME, 2, 2)}MB/s | 
-                            UpdateDloadNot($"{beforeTxt}{progress} % ({ConvertBytesToAny(total, 1, 2)} MB/{ConvertBytesToAny(fileLength, 1, 2)} MB)");
+                            UpdateProgress();
                             lastTotal = total;
                         }
 
                         if (progress >= 100 || progress > previousProgress) {
+                            UpdateProgress();
                             // Only post progress event if we've made progress.
                             previousProgress = progress;
                             if (progress >= 100) {
@@ -696,6 +819,7 @@ namespace CloudStreamForms.Droid
                             }
                         }
                     }
+
                     ShowDone(true);
                     output.Flush();
                     output.Close();
@@ -711,6 +835,8 @@ namespace CloudStreamForms.Droid
                 finally {
                     App.RemoveKey(DOWNLOAD_KEY, id.ToString());
                     App.RemoveKey(DOWNLOAD_KEY_INTENT, id.ToString());
+                    changedPause -= UpdateFromId;
+                    isPaused.Remove(id);
                 }
                 /*
                 try {
@@ -1917,7 +2043,7 @@ namespace CloudStreamForms.Droid
 
 
 
-        public string DownloadAdvanced(int id, string url, string fileName, string titleName, bool mainPath, string extraPath, bool showNotification = true, bool showNotificationWhenDone = true, bool openWhenDone = false, string poster = "",string beforeTxt = "")
+        public string DownloadAdvanced(int id, string url, string fileName, string titleName, bool mainPath, string extraPath, bool showNotification = true, bool showNotificationWhenDone = true, bool openWhenDone = false, string poster = "", string beforeTxt = "")
         {
             var context = MainActivity.activity.ApplicationContext;
             Intent downloadIntent = new Intent(context, typeof(DownloadUrlService));

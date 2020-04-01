@@ -1467,14 +1467,12 @@ namespace CloudStreamForms
                         TempThred tempThred = new TempThred();
                         tempThred.typeId = 4; // MAKE SURE THIS IS BEFORE YOU CREATE THE THRED
                         tempThred.Thread = new System.Threading.Thread(() => {
-                            try {
-
+                            try { 
                                 UserDialogs.Instance.ShowLoading("Checking link...", MaskType.Gradient);
                                 double fileSize = CloudStreamCore.GetFileSize(mirrorUrl);
                                 UserDialogs.Instance.HideLoading();
                                 if (fileSize > 1) {
-
-                                    string dpath = App.DownloadAdvanced(GetCorrectId(episodeResult), mirrorUrl, episodeResult.Title + ".mp4", episodeResult.OgTitle, true, "/" + GetPathFromType(), true, true, false, episodeResult.PosterUrl, (currentMovie.title.movieType == MovieType.Movie || currentMovie.title.movieType == MovieType.AnimeMovie) ? $"{mirrorName}\n" : $"S{currentSeason}:E{episodeResult.episode} - {mirrorName}\n");
+                                    string dpath = App.DownloadAdvanced(GetCorrectId(episodeResult), mirrorUrl, episodeResult.Title + ".mp4", isMovie ? currentMovie.title.name : $"{currentMovie.title.name} · {episodeResult.OgTitle}", true, "/" + GetPathFromType(), true, true, false, episodeResult.PosterUrl, (isMovie) ? $"{mirrorName}\n" : $"S{currentSeason}:E{episodeResult.episode} - {mirrorName}\n");
                                    // string dpath = App.DownloadUrl(s, episodeResult.Title + ".mp4", true, "/" + GetPathFromType(), "Download complete!", true, episodeResult.Title);
                                     //  string ppath = App.DownloadUrl(episodeResult.PosterUrl, "epP" + episodeResult.Title + ".jpg", false, "/Posters");
                                     // string mppath = App.DownloadUrl(currentMovie.title.hdPosterUrl, "hdP" + episodeResult.Title + ".jpg", false, "/TitlePosters");
