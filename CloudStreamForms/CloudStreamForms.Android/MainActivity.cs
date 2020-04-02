@@ -39,9 +39,8 @@ using static Android.App.ActivityManager;
 namespace CloudStreamForms.Droid
 {
     [Service]
-
     public class OnKilledService : Service
-    { 
+    {
 
         public override IBinder OnBind(Intent intent)
         {
@@ -62,9 +61,11 @@ namespace CloudStreamForms.Droid
         {
             MainActivity.activity.Killed();
             StopSelf();
-           // base.OnTaskRemoved(rootIntent);
+            // base.OnTaskRemoved(rootIntent);
         }
     }
+
+
 
     [Service]
     public class DemoIntentService : IntentService
@@ -170,9 +171,9 @@ namespace CloudStreamForms.Droid
     {
         public string title;
         public string body;
-        public bool autoCancel;
-        public bool showWhen;
-        public int smallIcon;
+        public bool autoCancel = true;
+        public bool showWhen = true;
+        public int smallIcon = Resource.Drawable.bicon;
         public string bigIcon;
         public bool mediaStyle = true;
         public string data = "";
@@ -301,7 +302,7 @@ namespace CloudStreamForms.Droid
             }
             else {
                 //Intent resultIntent = new Intent(context, typeof(MainActivity));
-                stackBuilder.AddParentStack(activity.Class);
+                //  stackBuilder.AddParentStack(activity.Class);
                 // resultIntent.SetFlags(ActivityFlags.NewTask | ActivityFlags.ResetTaskIfNeeded );
                 /* resultIntent.SetAction(Intent.ActionMain);
                  resultIntent.AddCategory(Intent.CategoryLauncher);*/
@@ -383,7 +384,7 @@ namespace CloudStreamForms.Droid
             void UpdateDloadNot()
             {
                 //poster != ""
-                ShowLocalNot(new LocalNot() { mediaStyle = false, bigIcon = poster, title = title, autoCancel = false, onGoing = true, id = id, smallIcon = Resource.Drawable.bicon, progress = progress, body = progress + "%" }, context);
+                ShowLocalNot(new LocalNot() { mediaStyle = false, bigIcon = poster, title = title, autoCancel = false, onGoing = false, id = id, smallIcon = Resource.Drawable.bicon, progress = progress, body = progress + "%" }, context);
             }
             bool isDone = false;
 
@@ -718,7 +719,7 @@ namespace CloudStreamForms.Droid
                 int isPause = isPaused[id];
                 bool canPause = isPause == 0;
                 if (isPause != 2) {
-                    ShowLocalNot(new LocalNot() { actions = new List<LocalAction>() { new LocalAction() { action = $"handleDownload|||id={id}|||dType={(canPause ? 1 : 0)}|||", name = canPause ? "Pause" : "Resume" }, new LocalAction() { action = $"handleDownload|||id={id}|||dType=2|||", name = "Stop" } }, mediaStyle = false, bigIcon = poster, title = title, autoCancel = false, onGoing = true, id = id, smallIcon = Resource.Drawable.bicon, progress = progress, body = progressTxt }, context);
+                    ShowLocalNot(new LocalNot() { actions = new List<LocalAction>() { new LocalAction() { action = $"handleDownload|||id={id}|||dType={(canPause ? 1 : 0)}|||", name = canPause ? "Pause" : "Resume" }, new LocalAction() { action = $"handleDownload|||id={id}|||dType=2|||", name = "Stop" } }, mediaStyle = false, bigIcon = poster, title = title, autoCancel = false, onGoing = canPause, id = id, smallIcon = Resource.Drawable.bicon, progress = progress, body = progressTxt }, context);
                 }
             }
 
@@ -1119,21 +1120,21 @@ namespace CloudStreamForms.Droid
             };
             ResumeIntentData();
             StartService(new Intent(BaseContext, typeof(OnKilledService)));
-           // DownloadHandle.ResumeIntents();
+            // DownloadHandle.ResumeIntents();
         }
 
 
         async void ResumeIntentData()
         {
-           await Task.Delay(1000);
-           print("STARTINTENT");
+            await Task.Delay(1000);
+            print("STARTINTENT");
             DownloadHandle.ResumeIntents();
 
         }
 
         public void Killed()
         {
-           // ShowNotification("finish", "Yeet");
+            // ShowNotification("finish", "Yeet");
             MainDroid.CancelChromecast(); // TO REMOVE IT, CANT INTERACT WITHOUT THE CORE
             DownloadHandle.OnKilled();
         }

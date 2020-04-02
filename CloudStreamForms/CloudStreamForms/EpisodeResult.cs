@@ -1,9 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Xamarin.Forms;
 
 namespace CloudStreamForms.Models
 {
-    public class EpisodeResult
+    public class EpisodeResult : ICloneable
     {
         public int Id { set; get; }
         public int Episode { set; get; } = -1;
@@ -14,6 +15,17 @@ namespace CloudStreamForms.Models
         public bool IsPosterFromStorage { get { return PosterUrl == CloudStreamCore.VIDEO_IMDB_IMAGE_NOT_FOUND; } }
         public ImageSource ImageSource { get {  return IsPosterFromStorage ? App.GetImageSource(PosterUrl) : PosterUrl; } }
         public ImageSource VideoSource { get { return App.GetImageSource("nexflixPlayBtt.png");  } }
+        public ImageSource DownloadSource { get { return "NetflixDownload1.png"; } }
+        public Command TapCom { set; get; }
+        public bool IsDownloading { get { return downloadState == 2; } }
+        public bool IsDownloaded { get { return downloadState == 1; } } 
+        public bool IsSearchingDownloadResults { get { return downloadState == 3; } } 
+        public bool IsNotSearchingDownloadResults { get { return !IsSearchingDownloadResults; } } 
+
+        /// <summary>
+        /// 0 = Nothing, 1 = Downloaded, 1 = Downloading, 2 = Paused, 3 = Searching 
+        /// </summary>
+        public int downloadState { set; get; } = 0;
 
         public string extraInfo { set; get; }
 
@@ -56,6 +68,11 @@ namespace CloudStreamForms.Models
                     return 0;
                 }
             }
+        }
+
+        public object Clone()
+        {
+            return this.MemberwiseClone();
         }
     }
     /*

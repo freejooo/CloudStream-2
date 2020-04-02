@@ -18,5 +18,6 @@
     <!-- <receiver android:process=":remote" android:name=".DownloadReceiver" />-->
     <service android:name=".DownloadUrlService"></service>
     <service android:name=".OnKilledService" android:stopWithTask="false" ></service>
+    <service android:name=".EverService" android:stopWithTask="false" ></service>
 	</application>
 </manifest>
