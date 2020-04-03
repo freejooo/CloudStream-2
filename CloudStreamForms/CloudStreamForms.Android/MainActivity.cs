@@ -34,7 +34,10 @@ using static CloudStreamForms.Droid.MainHelper;
 using System.Threading;
 using Android.Webkit;
 using static Android.App.ActivityManager;
-
+using Android.Text;
+using Android.Media;
+using Java.Interop;
+using static Android.Media.AudioManager;
 
 namespace CloudStreamForms.Droid
 {
@@ -1120,6 +1123,7 @@ namespace CloudStreamForms.Droid
             };
             ResumeIntentData();
             StartService(new Intent(BaseContext, typeof(OnKilledService)));
+            //ShowBlackToast("Yeet", 3);
             // DownloadHandle.ResumeIntents();
         }
 
@@ -1199,12 +1203,36 @@ namespace CloudStreamForms.Droid
             return name;
         }
 
+        public static void TurnColor()
+        {
+
+        }
+
+        public static void ShowBlackToast(string msg, double duration)
+        {
+            Device.BeginInvokeOnMainThread(() => {
+                ToastLength toastLength = ToastLength.Short;
+                if (duration >= 3) {
+                    toastLength = ToastLength.Long;
+                }
+                Toast toast = Toast.MakeText(Application.Context, Html.FromHtml("<font color='#ffffff' >" + msg + "</font>"), ToastLength.Short);
+                toast.SetGravity(GravityFlags.CenterHorizontal | GravityFlags.Top, 0, 0);
+                var view = toast.View;
+                //Gets the actual oval background of the Toast then sets the colour filter
+                view.SetBackgroundColor(new Android.Graphics.Color(0, 0, 0, 10));//.SetColorFilter(Resource.dtra, PorterDuff.Mode.SRC_IN);
+                toast.Show();
+            });
+        }
+
 
     }
 
 
     public class MainDroid : App.IPlatformDep
     {
+        
+
+
         public void SetBrightness(double opacity)
         {
             Android.Provider.Settings.System.PutInt(MainActivity.activity.ContentResolver, Android.Provider.Settings.System.ScreenBrightness, (int)(opacity * 255));
@@ -1637,6 +1665,8 @@ namespace CloudStreamForms.Droid
 
         public void UpdateBackground(int color)
         {
+            print("SET NON TRANSPARENT!");
+
             Window window = MainActivity.activity.Window;
             window.SetNavigationBarColor(Android.Graphics.Color.Rgb(color, color, color));
             /*
@@ -1645,6 +1675,12 @@ namespace CloudStreamForms.Droid
             if(color > 255) { color = 255; }
             if(color < 0) { color = 0; }
             window.SetNavigationBarColor(Android.Graphics.Color.Rgb(color, color, color));*/
+        }
+        public void UpdateBackground()
+        {
+            Window window = MainActivity.activity.Window;
+            print("SET TRANSPARENT!");
+            window.SetNavigationBarColor(Android.Graphics.Color.Transparent);
         }
 
         public void UpdateStatusBar()
@@ -2094,10 +2130,91 @@ namespace CloudStreamForms.Droid
             }
 
         }
+
+        public EventHandler<bool> OnAudioFocusChanged { set; get; }
+
         public void Awake()
         {
             App.platformDep = this;
+
+            myAudioFocusListener = new MyAudioFocusListener();
+            myAudioFocusListener.FocusChanged += ((sender, b) =>
+            {
+                OnAudioFocusChanged?.Invoke(this, b);
+                if (b) {
+                    // play stuff
+                }
+                else {
+                    // stop playing stuff
+                }
+            });
+            var playbackAttributes = new AudioAttributes.Builder()
+                  .SetUsage(AudioUsageKind.Media)
+                  .SetContentType(AudioContentType.Movie)
+                  .Build();
+
+            CurrentAudioFocusRequest = new AudioFocusRequestClass.Builder(AudioFocus.Gain)
+                .SetAudioAttributes(playbackAttributes)
+                .SetAcceptsDelayedFocusGain(true)
+                .SetOnAudioFocusChangeListener(myAudioFocusListener, handler)
+                .Build();
         }
+
+        MyAudioFocusListener myAudioFocusListener;
+
+        public class MyAudioFocusListener
+    : Java.Lang.Object
+    , AudioManager.IOnAudioFocusChangeListener
+        {
+            public event EventHandler<bool> FocusChanged;
+
+            public void OnAudioFocusChange(AudioFocus focusChange)
+            {
+                print("AUDIOFOCUS CHANGED:::: " + focusChange.ToString() + "|" + (int)focusChange);
+                switch (focusChange) {
+                    case AudioFocus.GainTransient:
+                        if (FocusChanged != null)
+                            FocusChanged(this, true);
+                        break;
+                    case AudioFocus.LossTransient:
+                        if (FocusChanged != null)
+                            FocusChanged(this, false);
+                        break;
+                    case AudioFocus.Loss:
+                        if (FocusChanged != null)
+                            FocusChanged(this, false);
+                        break;
+                    case AudioFocus.GainTransientExclusive:
+                        if (FocusChanged != null)
+                            FocusChanged(this, true);
+                        break;
+                    case AudioFocus.Gain:
+                        if (FocusChanged != null)
+                            FocusChanged(this, true);
+                        break;
+                }
+            }
+        }
+        private Handler handler = new Handler();
+
+        AudioManager AudioManager => Application.Context.GetSystemService(Context.AudioService) as AudioManager;
+
+
+        AudioFocusRequestClass CurrentAudioFocusRequest;
+        public bool GainAudioFocus()
+        {
+            // AudioManager.IOnAudioFocusChangeListener afChangeListener;
+            // AudioFocusRequestClass.Builder audioBuilder = new AudioFocusRequestClass.Builder();
+            AudioFocusRequest audio = AudioManager.RequestAudioFocus(CurrentAudioFocusRequest);
+            return audio == AudioFocusRequest.Granted;
+        }
+
+
+        public void ReleaseAudioFocus()
+        {
+            AudioFocusRequest audio = AudioManager.AbandonAudioFocusRequest(CurrentAudioFocusRequest);
+        }
+
 
         public void ShowToast(string message, double duration)
         {
@@ -2108,7 +2225,6 @@ namespace CloudStreamForms.Droid
                 }
                 Toast.MakeText(Android.App.Application.Context, message, toastLength).Show();
             });
-
         }
 
 

@@ -150,8 +150,11 @@ namespace CloudStreamForms
                     await FastForward.RotateTo(360, 200, Easing.SinOut);
                 }
                 else {
+                    FastForward.ScaleTo(0.9, 50, Easing.SinOut);
                     await FastForward.RotateTo(rotate, 50, Easing.SinOut);
+                    FastForward.ScaleTo(1, 50, Easing.SinOut);
                     await FastForward.RotateTo(0, 50, Easing.SinOut);
+
                 }
             };
 
@@ -162,7 +165,9 @@ namespace CloudStreamForms
                     await BackForward.RotateTo(-360, 200, Easing.SinOut);
                 }
                 else {
+                    BackForward.ScaleTo(0.9, 50, Easing.SinOut);
                     await BackForward.RotateTo(-rotate, 50, Easing.SinOut);
+                    BackForward.ScaleTo(1, 50, Easing.SinOut);
                     await BackForward.RotateTo(0, 50, Easing.SinOut);
                 }
             };
@@ -246,6 +251,7 @@ namespace CloudStreamForms
         protected override void OnAppearing()
         {
             base.OnAppearing();
+            App.UpdateToTransparentBg();
             BackFaded.Source = GetImageSource("faded.png");
             PlayList.Source = GetImageSource(RoundedPrefix + "_playlist_play_white_48dp.png");
             StopAll.Source = GetImageSource(RoundedPrefix + "_stop_white_48dp.png");
@@ -255,6 +261,12 @@ namespace CloudStreamForms
             SkipForward.Source = GetImageSource(RoundedPrefix + "_skip_next_white_48dp.png");
             Audio.Source = GetImageSource(RoundedPrefix + "_volume_up_white_48dp.png");
             SetPause(IsPaused);
+        }
+
+        protected override void OnDisappearing()
+        {
+            App.UpdateBackground();
+            base.OnDisappearing();
         }
 
         private void AudioClicked(object sender, EventArgs e)

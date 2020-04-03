@@ -39,6 +39,12 @@ namespace CloudStreamForms.UWP
 
     public class MainUWP : _App.IPlatformDep
     {
+        public EventHandler<bool> OnAudioFocusChanged { set; get; }
+
+        public void UpdateBackground()
+        {
+            // DO NOTHING
+        }
         public void UpdateBackground(int color)
         {
             // DO NOTHING
@@ -376,6 +382,16 @@ namespace CloudStreamForms.UWP
         public string DownloadAdvanced(int id, string url, string fileName, string titleName, bool mainPath, string extraPath, bool showNotification = true, bool showNotificationWhenDone = true, bool openWhenDone = false, string poster = "", string beforeTxt = "")
         {
             return DownloadUrl(url, fileName, mainPath, extraPath, showNotificationWhenDone ? "Download Complete!" : "", true, titleName);
+        }
+
+        public bool GainAudioFocus()
+        {
+            return true;
+        }
+
+        public void ReleaseAudioFocus()
+        {
+
         }
     }
 

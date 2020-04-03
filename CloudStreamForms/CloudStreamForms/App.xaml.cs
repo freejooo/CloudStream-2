@@ -39,6 +39,7 @@ namespace CloudStreamForms
             void ShowStatusBar();
             void UpdateStatusBar();
             void UpdateBackground(int color);
+            void UpdateBackground();
             void LandscapeOrientation();
             void NormalOrientation();
             void ToggleFullscreen(bool fullscreen);
@@ -46,7 +47,9 @@ namespace CloudStreamForms
             double GetBrightness();
             void ShowNotIntent(string title, string body, int id, string titleId, string titleName, DateTime? time = null, string bigIconUrl = "");
             void Test();
-
+            EventHandler<bool> OnAudioFocusChanged { set; get; }
+            bool GainAudioFocus();
+            void ReleaseAudioFocus();
             void CancelNot(int id);
 
             string DownloadAdvanced(int id, string url, string fileName, string titleName, bool mainPath, string extraPath, bool showNotification = true, bool showNotificationWhenDone = true, bool openWhenDone = false, string poster = "", string beforeTxt = "");
@@ -75,8 +78,22 @@ namespace CloudStreamForms
             platformDep.Test();
         }
 
+        private static IPlatformDep _platformDep;
+        public static IPlatformDep platformDep { set { _platformDep = value; 
+                _platformDep.OnAudioFocusChanged += (o, e) => { OnAudioFocusChanged?.Invoke(o, e); }; 
+            } get { return _platformDep; } }
 
-        public static IPlatformDep platformDep;
+        public static EventHandler<bool> OnAudioFocusChanged;
+
+        public static bool GainAudioFocus()
+        {
+            return platformDep.GainAudioFocus();
+        }
+
+        public static void ReleaseAudioFocus()
+        {
+            platformDep.ReleaseAudioFocus();
+        }
 
         public static void UpdateStatusBar()
         {
@@ -98,9 +115,9 @@ namespace CloudStreamForms
             return platformDep.GetBrightness();
         }
 
-        public static string DownloadAdvanced(int id, string url, string fileName, string titleName, bool mainPath, string extraPath, bool showNotification = true, bool showNotificationWhenDone = true, bool openWhenDone = false, string poster = "",string beforeTxt = "")
+        public static string DownloadAdvanced(int id, string url, string fileName, string titleName, bool mainPath, string extraPath, bool showNotification = true, bool showNotificationWhenDone = true, bool openWhenDone = false, string poster = "", string beforeTxt = "")
         {
-            return platformDep.DownloadAdvanced(id, url, fileName,titleName, mainPath, extraPath, showNotification, showNotificationWhenDone, openWhenDone, poster, beforeTxt);
+            return platformDep.DownloadAdvanced(id, url, fileName, titleName, mainPath, extraPath, showNotification, showNotificationWhenDone, openWhenDone, poster, beforeTxt);
         }
 
         public static void SetBrightness(double brightness)
@@ -120,6 +137,11 @@ namespace CloudStreamForms
             }
             CloudStreamForms.MainPage.mainPage.BarBackgroundColor = new Color(color / 255.0, color / 255.0, color / 255.0, 1);
             platformDep.UpdateBackground(color);
+        }
+
+        public static void UpdateToTransparentBg()
+        {
+            platformDep.UpdateBackground();
         }
 
         public static void HideStatusBar()

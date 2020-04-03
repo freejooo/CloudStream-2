@@ -128,6 +128,23 @@ namespace CloudStreamForms
                 print("FINISHED EXICUTE");
             }
         }
+
+        public void HandleAudioFocus(object sender, bool e)
+        {
+            if (Player == null) return;
+            if (Player.State == VLCState.Error || Player.State == VLCState.Opening) return;
+            if (Player.Length == -1) return;
+            if (!Player.IsPlaying && e) { // HANDLE GAIN AUDIO FOCUS AUTO
+
+            }
+            if (Player.IsPlaying && !e) { // HANDLE LOST AUDIO FOCUS
+                if (Player.CanPause) {
+                    Player.SetPause(true);
+                }
+            }
+        }
+
+
         public void SelectMirror(int mirror)
         {
             if (lastUrl == AllMirrorsUrls[mirror]) return;
@@ -238,7 +255,7 @@ namespace CloudStreamForms
                     visual.IsEnabled = !isLocked;
                 }
 
-                if(!isLocked) {
+                if (!isLocked) {
                     ShowNextMirror();
                 }
 
@@ -354,16 +371,21 @@ namespace CloudStreamForms
             Player.Paused += (o, e) => {
                 Device.BeginInvokeOnMainThread(() => {
                     SetIsPaused(true);
+                    App.ReleaseAudioFocus();
                     //   LoadingCir.IsEnabled = false;
                 });
-
             };
             Player.Playing += (o, e) => {
                 Device.BeginInvokeOnMainThread(() => {
-                    SetIsPaused(false);
-
+                    if (App.GainAudioFocus()) {
+                        SetIsPaused(false);
+                    }
+                    else {
+                        if (Player.CanPause) {
+                            Player.SetPause(true);
+                        }
+                    }
                 });
-
                 //   LoadingCir.IsEnabled = false;
             };
             Player.TimeChanged += (o, e) => {
@@ -399,7 +421,7 @@ namespace CloudStreamForms
         }
 
         void ShowNextMirror()
-        { 
+        {
             NextMirror.IsVisible = !IsSingleMirror;
             NextMirror.IsEnabled = !IsSingleMirror;
             NextMirrorBtt.IsVisible = !IsSingleMirror;
@@ -426,6 +448,8 @@ namespace CloudStreamForms
         protected override void OnAppearing()
         {
             base.OnAppearing();
+
+            App.OnAudioFocusChanged += HandleAudioFocus;
 
             try { // SETTINGS NOW ALLOWED 
                 BrightnessProcentage = App.GetBrightness() * 100;
@@ -481,6 +505,7 @@ namespace CloudStreamForms
 
         protected override void OnDisappearing()
         {
+            App.OnAudioFocusChanged -= HandleAudioFocus;
 
             // App.ShowStatusBar();
             App.NormalOrientation();
@@ -513,7 +538,15 @@ namespace CloudStreamForms
 
             //Player.SetPause(true);
             if (!dragingVideo) {
-                Player.Pause();
+                if (Player.IsPlaying) {
+                    Player.SetPause(true);
+                }
+                else {
+                    if (App.GainAudioFocus()) {
+                        Player.SetPause(false);
+                    }
+                }
+                //Player.Pause();
             }
 
         }
@@ -550,7 +583,10 @@ namespace CloudStreamForms
 
                 long len = (long)(VideoSlider.Value * Player.Length);
                 Player.Time = len;
-                Player.SetPause(false);
+
+                if (App.GainAudioFocus()) {
+                    Player.SetPause(false);
+                }
                 dragingVideo = false;
                 SlideChangedLabel.IsVisible = false;
                 SlideChangedLabel.Text = "";
@@ -591,16 +627,22 @@ namespace CloudStreamForms
         async void SkipForAni()
         {
             SkipForwardImg.AbortAnimation("RotateTo");
+            SkipForwardImg.AbortAnimation("ScaleTo");
             SkipForwardImg.Rotation = 0;
+            SkipForwardImg.ScaleTo(0.9, 100, Easing.SinInOut);
             await SkipForwardImg.RotateTo(90, 100, Easing.SinInOut);
+            SkipForwardImg.ScaleTo(1, 100, Easing.SinInOut);
             await SkipForwardImg.RotateTo(0, 100, Easing.SinInOut);
         }
 
         async void SkipBacAni()
         {
             SkipBackImg.AbortAnimation("RotateTo");
+            SkipBackImg.AbortAnimation("ScaleTo");
             SkipBackImg.Rotation = 0;
+            SkipBackImg.ScaleTo(0.9, 100, Easing.SinInOut);
             await SkipBackImg.RotateTo(-90, 100, Easing.SinInOut);
+            SkipBackImg.ScaleTo(1, 100, Easing.SinInOut);
             await SkipBackImg.RotateTo(0, 100, Easing.SinInOut);
         }
 
