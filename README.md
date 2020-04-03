@@ -1,6 +1,9 @@
 # CloudStream 2
 
-CloudStream 2 is the successor to https://github.com/LagradOst/CloudStream, and focuses more on appearance and usability. CloudStream 2 can also be used on Windows, instead of only on android. (Can't get Windows UWP signing to work, so the Windows version has to be compiled on your own)
+**DOWNLOAD:**
+https://github.com/LagradOst/CloudStream-2/releases
+
+CloudStream 2 is the successor to https://github.com/LagradOst/CloudStream, and focuses more on appearance and usability. It is a Xamarin.Forms project, but I have no working UWP build at the moment.   
 
 **FEATURES:**
 + **AdFree**, No ads whatsoever
@@ -18,8 +21,6 @@ CloudStream 2 is the successor to https://github.com/LagradOst/CloudStream, and 
 + Chromecast
 + Top 100 movies 
 + YouTube Download
-
-**COMING SOON:**
 + InApp video player using https://github.com/videolan/libvlcsharp
 
 **REQUIREMENTS:**
@@ -32,14 +33,14 @@ CloudStream 2 is the successor to https://github.com/LagradOst/CloudStream, and 
 
 **SCREENSHOTS:**
 <p align="center">
-    <img src="https://cdn.discordapp.com/attachments/542987806285496322/660616664114790410/Screenshot_20191228_234253_com.CloudStreamForms.CloudStreamForms.jpg" width="200" title="hover text">    
-        <img src="https://cdn.discordapp.com/attachments/542987806285496322/660619120726769684/Screenshot_20191229_000243_com.CloudStreamForms.CloudStreamForms.jpg" width="200" title="hover text">    
-    <img src="https://cdn.discordapp.com/attachments/542987806285496322/660619964415344650/Screenshot_20191229_000742_com.CloudStreamForms.CloudStreamForms.jpg" width="200" title="hover text">    
-    <img src="https://cdn.discordapp.com/attachments/542987806285496322/660619121343463434/Screenshot_20191229_000203_com.CloudStreamForms.CloudStreamForms.jpg" width="200" title="hover text">    
-    <img src="https://cdn.discordapp.com/attachments/542987806285496322/660616662696853527/Screenshot_20191228_234518_com.CloudStreamForms.CloudStreamForms.jpg" width="200" title="hover text">    
-    <img src="https://cdn.discordapp.com/attachments/542987806285496322/660616663443570690/Screenshot_20191228_234354_com.CloudStreamForms.CloudStreamForms.jpg" width="200" title="hover text">    
-    <img src="https://cdn.discordapp.com/attachments/542987806285496322/660616661883420695/Screenshot_20191228_235333_com.CloudStreamForms.CloudStreamForms.jpg" width="200" title="hover text">    
-    <img src="https://cdn.discordapp.com/attachments/542987806285496322/660616662696853525/Screenshot_20191228_235201_com.CloudStreamForms.CloudStreamForms.jpg" width="200" title="hover text">
+    <img src="https://cdn.discordapp.com/attachments/542070959067103232/695591072969261056/Screenshot_20200403_131009_com.CloudStreamForms.CloudStreamForms.jpg" width="200" title="hover text">  
+        <img src="https://cdn.discordapp.com/attachments/542070959067103232/695591071870353418/Screenshot_20200403_131014_com.CloudStreamForms.CloudStreamForms.jpg" width="200" title="hover text">  
+<img src="https://cdn.discordapp.com/attachments/542070959067103232/695591073887813682/Screenshot_20200403_130959_com.CloudStreamForms.CloudStreamForms.jpg" width="200" title="hover text">   
+    <img src="https://cdn.discordapp.com/attachments/542070959067103232/695591073581629440/Screenshot_20200403_131004_com.CloudStreamForms.CloudStreamForms.jpg" width="200" title="hover text"> 
+<img src="https://cdn.discordapp.com/attachments/542070959067103232/695591075070607390/Screenshot_20200403_130854_com.CloudStreamForms.CloudStreamForms.jpg" width="200" title="hover text">
+    <img src="https://cdn.discordapp.com/attachments/542070959067103232/695591076609916998/Screenshot_20200403_130800_com.CloudStreamForms.CloudStreamForms.jpg" width="200" title="hover text">      
+    <img src="https://cdn.discordapp.com/attachments/542070959067103232/695594924912934922/Screenshot_20200403_130821_com.CloudStreamForms.CloudStreamForms.png" width="200" title="hover text">
+<img src="https://cdn.discordapp.com/attachments/542070959067103232/695598765184385056/Screenshot_20200403_130821_com.CloudStreamForms.CloudStreamForms.png" width="200" title="hover text">
 </p>
 
 ***How it works:***
@@ -69,6 +70,8 @@ https://www.freefullmovies.zone (Movie Links)
 http://watchserieshd.tv (slow Tv-Show links)
 
 https://www9.gogoanime.io/ (Anime HD links)
+
+https://animeflix.io/ (Anime HD links)
 
 https://www.opensubtitles.org (Subtitles)
 
