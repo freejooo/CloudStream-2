@@ -68,30 +68,35 @@ namespace CloudStreamForms
 
         public static void CheckGitHubUpdate()
         {
-            if (Device.RuntimePlatform == Device.Android) { // ONLY ANDROID CAN UPDATE
-                TempThred tempThred = new TempThred();
-                tempThred.typeId = 4; // MAKE SURE THIS IS BEFORE YOU CREATE THE THRED
-                tempThred.Thread = new System.Threading.Thread(() => {
-                    try {
-                        string d = DownloadString("https://github.com/LagradOst/CloudStream-2/releases", tempThred);
-                        if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
+            try {
+                if (Device.RuntimePlatform == Device.Android) { // ONLY ANDROID CAN UPDATE
+                    TempThred tempThred = new TempThred();
+                    tempThred.typeId = 4; // MAKE SURE THIS IS BEFORE YOU CREATE THE THRED
+                    tempThred.Thread = new System.Threading.Thread(() => {
+                        try {
+                            string d = DownloadString("https://github.com/LagradOst/CloudStream-2/releases", tempThred);
+                            if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
 
-                        string look = "/LagradOst/CloudStream-2/releases/tag/";
-                        //   float bigf = -1;
-                        //     string bigUpdTxt = "";
-                        // while (d.Contains(look)) {
-                        githubUpdateTag = FindHTML(d, look, "\"");
-                        githubUpdateText = FindHTML(d, look + githubUpdateTag + "\">", "<");
-                        print("UPDATE SEARCHED: " + githubUpdateTag + "|" + githubUpdateText);
-                    }
-                    finally {
-                        JoinThred(tempThred);
-                    }
-                });
-                tempThred.Thread.Name = "GitHub Update Thread";
-                tempThred.Thread.Start();
-
+                            string look = "/LagradOst/CloudStream-2/releases/tag/";
+                            //   float bigf = -1;
+                            //     string bigUpdTxt = "";
+                            // while (d.Contains(look)) {
+                            githubUpdateTag = FindHTML(d, look, "\"");
+                            githubUpdateText = FindHTML(d, look + githubUpdateTag + "\">", "<");
+                            print("UPDATE SEARCHED: " + githubUpdateTag + "|" + githubUpdateText);
+                        }
+                        finally {
+                            JoinThred(tempThred);
+                        }
+                    });
+                    tempThred.Thread.Name = "GitHub Update Thread";
+                    tempThred.Thread.Start();
+                }
             }
+            catch (Exception _ex) {
+                print("Github ex::" + _ex);
+            }
+            
         }
 
         protected override void OnAppearing()
@@ -146,10 +151,15 @@ namespace CloudStreamForms
         async void LateCheck()
         {
             await Task.Delay(5000);
-
-            CheckGitHubUpdate();
-            MainChrome.StartImageChanger();
-            MainChrome.GetAllChromeDevices();
+            try {
+                CheckGitHubUpdate();
+                MainChrome.StartImageChanger();
+                MainChrome.GetAllChromeDevices();
+            }
+            catch (Exception _ex) {
+                print("ERROR IN LATECHECK::: " + _ex);
+            }
+            
         }
 
         public static void PushPageFromUrlAndName(string url, string name)
@@ -388,15 +398,21 @@ namespace CloudStreamForms
 
         public static async void GetAllChromeDevices()
         {
-            print("SCANNING");
-            allChromeDevices = await new DeviceLocator().FindReceiversAsync();
-            print("SCANNED");
-            print("FOUND " + allChromeDevices.ToList().Count + " CHROME DEVICES");
-            if (IsChromeDevicesOnNetwork) {
-                Device.BeginInvokeOnMainThread(() => {
-                    OnChromeDevicesFound?.Invoke(null, null);
-                });
+            try {
+                print("SCANNING");
+                allChromeDevices = await new DeviceLocator().FindReceiversAsync();
+                print("SCANNED");
+                print("FOUND " + allChromeDevices.ToList().Count + " CHROME DEVICES");
+                if (IsChromeDevicesOnNetwork) {
+                    Device.BeginInvokeOnMainThread(() => {
+                        OnChromeDevicesFound?.Invoke(null, null);
+                    });
+                }
             }
+            catch (Exception _ex) {
+                print("ERROR LOADING CHROME::" + _ex);
+            }
+         
         }
 
         public static List<string> GetChromeDevicesNames()

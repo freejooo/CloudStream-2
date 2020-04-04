@@ -19,5 +19,6 @@
     <service android:name=".DownloadUrlService"></service>
     <service android:name=".OnKilledService" android:stopWithTask="false" ></service>
     <service android:name=".EverService" android:stopWithTask="false" ></service>
+    <activity android:name=".TrampolineActivity" android:taskAffinity=""></activity>
 	</application>
 </manifest>

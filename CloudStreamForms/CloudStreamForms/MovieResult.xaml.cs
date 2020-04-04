@@ -244,14 +244,23 @@ namespace CloudStreamForms
             WaitChangeChromeCast();
         }
 
+        public static void OpenChrome(bool validate = true)
+        {
+            if (!ChromeCastPage.isActive) {
+                Page p = new ChromeCastPage() { episodeResult = chromeResult, chromeMovieResult = chromeMovieResult };
+                MainPage.mainPage.Navigation.PushModalAsync(p, false);
+            }
+        }
+
         private void OpenChromecastView(object sender, EventArgs e)
         {
             if (sender != null) {
                 ChromeCastPage.isActive = false;
             }
             if (!ChromeCastPage.isActive) {
-                Page p = new ChromeCastPage() { episodeResult = chromeResult, chromeMovieResult = chromeMovieResult };
-                Navigation.PushModalAsync(p, false);
+                OpenChrome(false);
+                //      Page p = new ChromeCastPage() { episodeResult = chromeResult, chromeMovieResult = chromeMovieResult };
+                //    Navigation.PushModalAsync(p, false);
             }
         }
 
@@ -633,7 +642,7 @@ namespace CloudStreamForms
 
                 int _id = -1;
                 for (int i = 0; i < epView.MyEpisodeResultCollection.Count; i++) {
-                    if(epView.MyEpisodeResultCollection[i].Id == episodeResult.Id) {
+                    if (epView.MyEpisodeResultCollection[i].Id == episodeResult.Id) {
                         _id = i;
                         break;
                     }
@@ -641,10 +650,10 @@ namespace CloudStreamForms
                 if (_id == -1) return;
 
                 var epRes = epView.MyEpisodeResultCollection[_id];
-                if(epRes.IsDownloaded) { // REMOVE
+                if (epRes.IsDownloaded) { // REMOVE
 
                 }
-                else if(epRes.IsDownloading) { // PAUSE
+                else if (epRes.IsDownloading) { // PAUSE
 
                 }
                 else { // DOWNLOAD
@@ -1300,7 +1309,7 @@ namespace CloudStreamForms
                 }
             }
             else {
-                GetEpisodeLink(isMovie ? -1 : (episodeResult.Id + 1), currentSeason, isDub: isDub,purgeCurrentLinkThread: currentDownloadSearchesHappening > 0);
+                GetEpisodeLink(isMovie ? -1 : (episodeResult.Id + 1), currentSeason, isDub: isDub, purgeCurrentLinkThread: currentDownloadSearchesHappening > 0);
 
                 await Device.InvokeOnMainThreadAsync(async () => {
                     NormalStack.IsEnabled = false;
@@ -1316,7 +1325,7 @@ namespace CloudStreamForms
                         currentMovie = activeMovie;
                     }
                     NormalStack.IsEnabled = true;
-                   // NormalStack.Opacity = 1f;
+                    // NormalStack.Opacity = 1f;
                     if (episodeResult == null) {
                         print("NULLEP"); episodeView.SelectedItem = null;
 

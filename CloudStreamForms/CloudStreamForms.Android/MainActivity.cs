@@ -174,13 +174,13 @@ namespace CloudStreamForms.Droid
     {
         public string title;
         public string body;
+        public int id;
         public bool autoCancel = true;
         public bool showWhen = true;
         public int smallIcon = Resource.Drawable.bicon;
-        public string bigIcon;
+        public string bigIcon = "";
         public bool mediaStyle = true;
         public string data = "";
-        public int id;
         public bool onGoing = false;
         public int progress = -1;
         public DateTime? when = null;
@@ -223,8 +223,23 @@ namespace CloudStreamForms.Droid
 
         private static readonly DateTime Jan1st1970 = new DateTime
     (1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+
+        public static PendingIntent GetCurrentPending(string data = "")
+        {
+            Intent _resultIntent = new Intent(Application.Context, typeof(MainActivity));
+            _resultIntent.SetAction(Intent.ActionMain);
+            _resultIntent.AddCategory(Intent.CategoryLauncher);
+            if (data != "") {
+                _resultIntent.PutExtra("data", data);
+            }
+            PendingIntent pendingIntent = PendingIntent.GetActivity(activity, 0,
+       _resultIntent, 0);
+            return pendingIntent;
+        }
+
         public static async void ShowLocalNot(LocalNot not, Context context = null)
         {
+
             var cc = context ?? Application.Context;
             var builder = new Notification.Builder(cc);
             builder.SetContentTitle(not.title);
@@ -251,12 +266,14 @@ namespace CloudStreamForms.Droid
 
                 builder.SetChannelId(channelId);
 
-                if (not.bigIcon != "") {
-                    var bitmap = await GetImageBitmapFromUrl(not.bigIcon);
-                    if (bitmap != null) {
-                        builder.SetLargeIcon(bitmap);
-                        if (not.mediaStyle) {
-                            builder.SetStyle(new Notification.MediaStyle()); // NICER IMAGE
+                if (not.bigIcon != null) {
+                    if (not.bigIcon != "") {
+                        var bitmap = await GetImageBitmapFromUrl(not.bigIcon);
+                        if (bitmap != null) {
+                            builder.SetLargeIcon(bitmap);
+                            if (not.mediaStyle) {
+                                builder.SetStyle(new Notification.MediaStyle()); // NICER IMAGE
+                            }
                         }
                     }
                 }
@@ -310,11 +327,28 @@ namespace CloudStreamForms.Droid
                 /* resultIntent.SetAction(Intent.ActionMain);
                  resultIntent.AddCategory(Intent.CategoryLauncher);*/
                 stackBuilder.AddNextIntent(resultIntent);
+
+                builder.SetContentIntent(GetCurrentPending());
+                /*
+                var _resultIntent = new Intent(context, typeof(TrampolineActivity));
+              //  _resultIntent.SetFlags(ActivityFlags.NewTask | ActivityFlags.ClearTask);
+
+                var pending = PendingIntent.GetActivity(context, 42,
+                      _resultIntent,
+                     PendingIntentFlags.UpdateCurrent
+                      );
+
+                stackBuilder.AddNextIntent(_resultIntent);
+                builder.SetContentIntent(pending);*/
+
+
+
                 // resultIntent.SetFlags(ActivityFlags.task);
             }
 
 
             _manager.Notify(not.id, builder.Build());
+
         }
         public static Intent GetLauncherActivity(Context context = null)
         {
@@ -361,12 +395,7 @@ namespace CloudStreamForms.Droid
             base.OnDestroy();
         }
 
-        public override void OnCreate()
-        {
 
-
-            base.OnCreate();
-        }
         protected override void OnHandleIntent(Intent intent)
         {
             //startIntent = intent;
@@ -1011,16 +1040,18 @@ namespace CloudStreamForms.Droid
             //App.ShowToast("ON NEW INTENT");
             //print("DA:::.2132131");
             if (intent.DataString != null) {
-
                 print("INTENTNADADA:::" + intent.DataString);
             }
             Bundle extras = intent.Extras;
             if (extras != null) {
-                print("DADADA:D:A:D:AD:A:D:A:D:A222");
                 if (extras.ContainsKey("data")) {
-                    print("DADADA:D:A:D:AD:A:D:A:D:A2233332");
                     // extract the extra-data in the Notification
                     string msg = extras.GetString("data");
+
+                    if (msg == "openchrome") {
+                        MovieResult.OpenChrome();
+                    }
+
                     print("DADADA:D:A:D:AD:A:D:A:D:A" + msg);
                 }
             }
@@ -1125,12 +1156,16 @@ namespace CloudStreamForms.Droid
                 catch (Exception _ex) {
                     print("EX NOT CHANGED::: " + _ex);
                 }
-            
+
             };
+
             ResumeIntentData();
             StartService(new Intent(BaseContext, typeof(OnKilledService)));
             //ShowBlackToast("Yeet", 3);
             // DownloadHandle.ResumeIntents();
+            //   ShowLocalNot(new LocalNot() { mediaStyle = false, title = "yeet", data = "", progress = -1, showWhen = false, autoCancel = true, onGoing = false, id = 1234, smallIcon = Resource.Drawable.bicon, body = "Download ddddd" }, Application.Context);
+
+            // ShowLocalNot(new LocalNot() { mediaStyle = false, title = "yeet", autoCancel = true, onGoing = false, id = 123545, smallIcon = Resource.Drawable.bicon, body = "Download Failed!",showWhen=false }); // ((e.Cancelled || e.Error != null) ? "Download Failed!"
         }
 
 
@@ -1199,6 +1234,7 @@ namespace CloudStreamForms.Droid
         {
             return (mainPath ? (Android.OS.Environment.ExternalStorageDirectory + "/" + Android.OS.Environment.DirectoryDownloads) : (Android.OS.Environment.ExternalStorageDirectory + "/" + Android.OS.Environment.DirectoryDownloads + "/Extra")) + extraPath;
         }
+
         public static string CensorFilename(string name, bool toLower = true)
         {
             name = Regex.Replace(name, @"[^A-Za-z0-9\.]+", String.Empty);
@@ -1207,11 +1243,6 @@ namespace CloudStreamForms.Droid
                 name = name.ToLower();
             }
             return name;
-        }
-
-        public static void TurnColor()
-        {
-
         }
 
         public static void ShowBlackToast(string msg, double duration)
@@ -1229,14 +1260,12 @@ namespace CloudStreamForms.Droid
                 toast.Show();
             });
         }
-
-
     }
 
 
     public class MainDroid : App.IPlatformDep
     {
-        
+
 
 
         public void SetBrightness(double opacity)
@@ -1458,12 +1487,13 @@ namespace CloudStreamForms.Droid
             var builder = new Notification.Builder(Application.Context);
             builder.SetContentTitle(title);
             builder.SetContentText(body);
-            builder.SetAutoCancel(true);
+            builder.SetAutoCancel(false);
 
             builder.SetSmallIcon(Resource.Drawable.biconWhite);//LocalNotificationIconId);
             builder.SetOngoing(true);
 
 
+            var context = MainActivity.activity.ApplicationContext;
             if (Build.VERSION.SdkInt >= BuildVersionCodes.O) {
                 var channelId = $"{_packageName}.general";
                 var channel = new NotificationChannel(channelId, "General", NotificationImportance.Default);
@@ -1476,7 +1506,6 @@ namespace CloudStreamForms.Droid
                 if (bitmap != null) {
                     builder.SetLargeIcon(bitmap);
                 }
-                var context = MainActivity.activity.ApplicationContext;
 
                 builder.SetStyle(new Notification.MediaStyle().SetMediaSession(mediaSession.SessionToken).SetShowActionsInCompactView(0, 1, 2)); // NICER IMAGE
 
@@ -1489,30 +1518,50 @@ namespace CloudStreamForms.Droid
                 for (int i = 0; i < sprites.Count; i++) {
                     var _resultIntent = new Intent(context, typeof(ChromeCastIntentService));
                     _resultIntent.PutExtra("data", actionIntent[i]);
-                    var pending = PendingIntent.GetService(context, 2337 + i,
+                    var _pending = PendingIntent.GetService(context, 2337 + i,
                      _resultIntent,
                     PendingIntentFlags.UpdateCurrent
                      );
 
-                    actions.Add(new Notification.Action(sprites[i], actionNames[i], pending));
+                    actions.Add(new Notification.Action(sprites[i], actionNames[i], _pending));
                 }
                 builder.SetActions(actions.ToArray());
             }
+            //TrampolineActivity
+
+
+
+
+            /*     var _da = Android.Net.Uri.Parse("cloudstreamforms:tt0371746Name=Iron man=EndAll");
+                 resultIntent.SetData(_da);
+
+                 var stackBuilder = Android.Support.V4.App.TaskStackBuilder.Create(Application.Context);
+                 stackBuilder.AddNextIntent(resultIntent);
+                 var resultPendingIntent =
+                     stackBuilder.GetPendingIntent(0, (int)PendingIntentFlags.UpdateCurrent);
+
+
+                 builder.SetContentIntent(resultPendingIntent);
+
+                 var resultPendingIntent = new PendingIntent() { }*/
+            //  stackBuilder.GetPendingIntent(not.id, (int)PendingIntentFlags.UpdateCurrent);
+            builder.SetContentIntent(GetCurrentPending("openchrome"));
+
             /*
-            var resultIntent = GetLauncherActivity();
-           // resultIntent.SetFlags(ActivityFlags.NewTask | ActivityFlags.ClearTask);
+           var resultIntent = GetLauncherActivity();
+          // resultIntent.SetFlags(ActivityFlags.NewTask | ActivityFlags.ClearTask);
 
-            //var _da = Android.Net.Uri.Parse("cloudstreamforms:tt0371746Name=Iron man=EndAll");
-            // resultIntent.SetData(_da);
+           //var _da = Android.Net.Uri.Parse("cloudstreamforms:tt0371746Name=Iron man=EndAll");
+           // resultIntent.SetData(_da);
 
-            var stackBuilder = Android.Support.V4.App.TaskStackBuilder.Create(Application.Context);
-           stackBuilder.AddNextIntent(resultIntent);
-            var resultPendingIntent =
-                stackBuilder.GetPendingIntent(0, (int)PendingIntentFlags.UpdateCurrent);
+           var stackBuilder = Android.Support.V4.App.TaskStackBuilder.Create(Application.Context);
+          stackBuilder.AddNextIntent(resultIntent);
+           var resultPendingIntent =
+               stackBuilder.GetPendingIntent(0, (int)PendingIntentFlags.UpdateCurrent);
 
 
-            builder.SetContentIntent(resultPendingIntent);
-            */
+           builder.SetContentIntent(resultPendingIntent);
+           */
             _manager.Notify(CHROME_CAST_NOTIFICATION_ID, builder.Build());
         }
 
@@ -2155,8 +2204,7 @@ namespace CloudStreamForms.Droid
             App.platformDep = this;
 
             myAudioFocusListener = new MyAudioFocusListener();
-            myAudioFocusListener.FocusChanged += ((sender, b) =>
-            {
+            myAudioFocusListener.FocusChanged += ((sender, b) => {
                 OnAudioFocusChanged?.Invoke(this, b);
                 if (b) {
                     // play stuff
