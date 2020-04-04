@@ -65,12 +65,12 @@ namespace CloudStreamForms
                         }
                     }
 
-                    if(MainChrome.CurrentTime > 120) {
+                    if (MainChrome.CurrentTime > 120) {
                         changeTime = MainChrome.CurrentTime;
                         print("CHANGE TIME TO " + changeTime);
                     }
 
-                    succ = await MainChrome.CastVideo(episodeResult.mirrosUrls[currentSelected], episodeResult.Mirros[currentSelected], subtitleUrl: _sub, posterUrl: chromeMovieResult.title.hdPosterUrl, movieTitle: chromeMovieResult.title.name,setTime: changeTime);
+                    succ = await MainChrome.CastVideo(episodeResult.mirrosUrls[currentSelected], episodeResult.Mirros[currentSelected], subtitleUrl: _sub, posterUrl: chromeMovieResult.title.hdPosterUrl, movieTitle: chromeMovieResult.title.name, setTime: changeTime);
 
                 }
             }
@@ -249,7 +249,7 @@ namespace CloudStreamForms
 
         void SetPause(bool paused)
         {
-           Pause.Source = paused ? "netflixPlay128v2.png" : "netflixPause128.png";//GetImageSource(paused ? "netflixPlay.png" : "netflixPause.png");//GetImageSource(RoundedPrefix + "_play_arrow_white_48dp.png") : GetImageSource(RoundedPrefix + "_pause_white_48dp.png");
+            Pause.Source = paused ? "netflixPlay128v2.png" : "netflixPause128.png";//GetImageSource(paused ? "netflixPlay.png" : "netflixPause.png");//GetImageSource(RoundedPrefix + "_play_arrow_white_48dp.png") : GetImageSource(RoundedPrefix + "_pause_white_48dp.png");
         }
 
         protected override void OnAppearing()
@@ -276,6 +276,14 @@ namespace CloudStreamForms
         private void AudioClicked(object sender, EventArgs e)
         {
             PopupNavigation.Instance.PushAsync(new CloudStreamForms.MyPopupPage());
+            ScaleAudio();
+        }
+
+        async void ScaleAudio()
+        {
+            Audio.AbortAnimation("ScaleTo");
+            await Audio.ScaleTo(1.4, 100, Easing.SinOut);
+            await Audio.ScaleTo(1.3, 100, Easing.SinOut); 
         }
 
         private void Pause_Clicked(object sender, EventArgs e)
@@ -287,9 +295,9 @@ namespace CloudStreamForms
 
         async void PauseScale()
         {
-            Pause.Scale = 2;
-            await Pause.ScaleTo(1.8, 50, Easing.SinOut);
-            await Pause.ScaleTo(2, 50, Easing.SinOut);
+            Pause.Scale = 1.7;
+            await Pause.ScaleTo(1.6, 50, Easing.SinOut);
+            await Pause.ScaleTo(1.7, 50, Easing.SinOut);
         }
 
         async void ListScale()

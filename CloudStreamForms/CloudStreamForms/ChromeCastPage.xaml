@@ -54,7 +54,7 @@
                 </Grid>-->
              
                 <BoxView VerticalOptions="FillAndExpand" ></BoxView>
-                <StackLayout Margin="0,0,0,60" >
+                <StackLayout Margin="0,0,0,50" >
                     <Grid HorizontalOptions="Center" ColumnSpacing="30" Margin="10" TranslationY="-10">
                         <Grid.ColumnDefinitions >
                             <ColumnDefinition Width="Auto" />
@@ -76,11 +76,11 @@
 
                         <ImageButton x:Name="SkipBack" Grid.Column="0" BackgroundColor="Transparent" Scale="{Binding ScaleAll}" ></ImageButton>
                         <ff:CachedImage x:Name="BackForward" InputTransparent="True" Grid.Column="1" BackgroundColor="Transparent"  Scale="1" HeightRequest="{Binding IconSize}" WidthRequest="{Binding IconSize}" ></ff:CachedImage>
-                            <xe:BorderView  x:Name="BackForwardBtt" xe:TouchEffect.Color="White" Grid.Column="3" TranslationX="0" Opacity="0.6" VerticalOptions="Center" WidthRequest="34" HeightRequest="34" CornerRadius="17" HorizontalOptions="Center" BackgroundColor="Transparent">
+                            <xe:BorderView  x:Name="BackForwardBtt" xe:TouchEffect.Color="White" Grid.Column="1" TranslationX="0" Opacity="0.6" VerticalOptions="Center" WidthRequest="34" HeightRequest="34" CornerRadius="17" HorizontalOptions="Center" BackgroundColor="Transparent">
                             </xe:BorderView>
                         
                         <Label Text="{Binding BackForwardTime}" Grid.Column="1" VerticalOptions="Center" HorizontalOptions="Center" TranslationY="0" TextColor="White" InputTransparent="True" FontSize="17"></Label>
-                            <Image   x:Name="Pause" Source="netflixPause128.png" Grid.Column="2" BackgroundColor="Transparent" Scale="2" Margin="15" WidthRequest="30" HeightRequest="30" InputTransparent="True" > 
+                            <Image   x:Name="Pause" Source="netflixPause128.png" Grid.Column="2" BackgroundColor="Transparent" Scale="1.7" Margin="15" WidthRequest="30" HeightRequest="30" InputTransparent="True" > 
                         </Image>
                         <Button  Clicked="Pause_Clicked" BackgroundColor="Transparent"  Grid.Column="2" WidthRequest="45" ></Button>
                        <!-- <ImageButton x:Name="Pause" Grid.Column="2" BackgroundColor="Transparent" Clicked="Pause_Clicked" Scale="{Binding ScaleAllBig}" Margin="10" WidthRequest="30" HeightRequest="30" ></ImageButton>-->
