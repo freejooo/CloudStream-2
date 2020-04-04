@@ -1112,14 +1112,20 @@ namespace CloudStreamForms.Droid
             };
 
             MainChrome.OnNotificationChanged += (o, e) => {
-                print("CHROMECAST CHANGED::: ");
-                print("ID=====================" + e.isCasting + "|" + e.isPlaying + "|" + e.isPaused);
-                if (!e.isCasting) {// || !e.isPlaying) {
-                    MainDroid.CancelChromecast();
+                try {
+                    print("CHROMECAST CHANGED::: ");
+                    print("ID=====================" + e.isCasting + "|" + e.isPlaying + "|" + e.isPaused);
+                    if (!e.isCasting) {// || !e.isPlaying) {
+                        MainDroid.CancelChromecast();
+                    }
+                    else {
+                        MainDroid.UpdateChromecastNotification(e.title, e.body, e.isPaused, e.posterUrl);
+                    }
                 }
-                else {
-                    MainDroid.UpdateChromecastNotification(e.title, e.body, e.isPaused, e.posterUrl);
+                catch (Exception _ex) {
+                    print("EX NOT CHANGED::: " + _ex);
                 }
+            
             };
             ResumeIntentData();
             StartService(new Intent(BaseContext, typeof(OnKilledService)));
@@ -1668,6 +1674,11 @@ namespace CloudStreamForms.Droid
             print("SET NON TRANSPARENT!");
 
             Window window = MainActivity.activity.Window;
+
+            int uiOptions = (int)window.DecorView.SystemUiVisibility;
+            uiOptions &= ~(int)SystemUiFlags.LayoutHideNavigation;
+            window.DecorView.SystemUiVisibility = (StatusBarVisibility)uiOptions;
+
             window.SetNavigationBarColor(Android.Graphics.Color.Rgb(color, color, color));
             /*
             Window window = MainActivity.activity.Window;
@@ -1676,10 +1687,16 @@ namespace CloudStreamForms.Droid
             if(color < 0) { color = 0; }
             window.SetNavigationBarColor(Android.Graphics.Color.Rgb(color, color, color));*/
         }
+
         public void UpdateBackground()
         {
             Window window = MainActivity.activity.Window;
             print("SET TRANSPARENT!");
+
+            int uiOptions = (int)window.DecorView.SystemUiVisibility;
+            uiOptions |= (int)SystemUiFlags.LayoutHideNavigation;
+            window.DecorView.SystemUiVisibility = (StatusBarVisibility)uiOptions;
+
             window.SetNavigationBarColor(Android.Graphics.Color.Transparent);
         }
 

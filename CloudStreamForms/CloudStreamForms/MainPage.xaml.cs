@@ -213,7 +213,11 @@ namespace CloudStreamForms
         public static event EventHandler<bool> OnPauseChanged;
 
         private static ChromeNotification _notification = new ChromeNotification() { isCasting = false, title = "", body = "", isPaused = false, posterUrl = "" };
-        public static ChromeNotification Notification { set { _notification = value; OnNotificationChanged?.Invoke(null, value); } get { return _notification; } }
+        public static ChromeNotification Notification { set { _notification = value;
+                Device.BeginInvokeOnMainThread(() => {
+                    OnNotificationChanged?.Invoke(null, value);
+                });
+            } get { return _notification; } }
 
         public class ChromeNotification
         {
@@ -244,7 +248,10 @@ namespace CloudStreamForms
         public static bool IsCastingVideo
         {
             set {
-                _isCastingVideo = value; Notification.isCasting = value; OnVideoCastingChanged?.Invoke(null, value); OnNotificationChanged?.Invoke(null, Notification);
+                _isCastingVideo = value; Notification.isCasting = value;
+                Device.BeginInvokeOnMainThread(() => {
+                    OnVideoCastingChanged?.Invoke(null, value); OnNotificationChanged?.Invoke(null, Notification);
+                });
             }
             get { return _isCastingVideo; }
         }
@@ -260,14 +267,20 @@ namespace CloudStreamForms
         public static bool IsPaused
         {
             set {
-                isPaused = value; Notification.isPaused = value; OnNotificationChanged?.Invoke(null, Notification);
+                isPaused = value; Notification.isPaused = value;
+                Device.BeginInvokeOnMainThread(() => {
+                    OnNotificationChanged?.Invoke(null, Notification);
+                });
             }
             get { return isPaused; }
         }
         public static bool IsPlaying
         {
             set {
-                isPlaying = value; Notification.isPlaying = value; OnNotificationChanged?.Invoke(null, Notification);
+                isPlaying = value; Notification.isPlaying = value;
+                Device.BeginInvokeOnMainThread(() => {
+                    OnNotificationChanged?.Invoke(null, Notification);
+                });
             }
             get { return isPlaying; }
         }
@@ -365,7 +378,9 @@ namespace CloudStreamForms
                     CurrentImage = 0;
                 }
                 if (lastImage != CurrentImage) {
-                    OnChromeImageChanged.Invoke(null, CurrentImageSource);
+                    Device.BeginInvokeOnMainThread(() => {
+                        OnChromeImageChanged.Invoke(null, CurrentImageSource);
+                    });
                 }
                 await Task.Delay(500);
             }
@@ -378,7 +393,9 @@ namespace CloudStreamForms
             print("SCANNED");
             print("FOUND " + allChromeDevices.ToList().Count + " CHROME DEVICES");
             if (IsChromeDevicesOnNetwork) {
-                OnChromeDevicesFound?.Invoke(null, null);
+                Device.BeginInvokeOnMainThread(() => {
+                    OnChromeDevicesFound?.Invoke(null, null);
+                });
             }
         }
 
@@ -402,7 +419,9 @@ namespace CloudStreamForms
             IsPaused = (mm.PlayerState == "PAUSED");
             if (_IsPaused != IsPaused) {
                 _IsPaused = IsPaused;
-                OnPauseChanged?.Invoke(null, IsPaused);
+                Device.BeginInvokeOnMainThread(() => {
+                    OnPauseChanged?.Invoke(null, IsPaused);
+                });
             }
             IsPlaying = (mm.PlayerState == "PLAYING");
 
@@ -472,7 +491,9 @@ namespace CloudStreamForms
                 Notification.body = mirrorName;
                 Notification.title = movieTitle;
                 Notification.posterUrl = posterUrl;
-                OnNotificationChanged?.Invoke(null, Notification);
+                Device.BeginInvokeOnMainThread(() => {
+                    OnNotificationChanged?.Invoke(null, Notification);
+                });
                 print("!4");
                 return true;
             }
@@ -496,12 +517,18 @@ namespace CloudStreamForms
 
         public static void PauseAndPlay(bool paused)
         {
-            if (paused) {
-                CurrentChannel.PauseAsync();
+            try {
+                if (paused) {
+                    CurrentChannel.PauseAsync();
+                }
+                else {
+                    CurrentChannel.PlayAsync();
+                }
             }
-            else {
-                CurrentChannel.PlayAsync();
+            catch (Exception _ex) {
+                print("EX PAUSED::: " + _ex);
             }
+
         }
 
         public static async void StopCast()
@@ -518,7 +545,9 @@ namespace CloudStreamForms
             catch (System.Exception) {
 
             }
-            OnDisconnected?.Invoke(null, null);
+            Device.BeginInvokeOnMainThread(() => {
+                OnDisconnected?.Invoke(null, null);
+            });
             IsConnectedToChromeDevice = false;
             IsCastingVideo = false;
             print("STOP CASTING!");
@@ -545,7 +574,9 @@ namespace CloudStreamForms
                         CurrentChannel = chromeSender.GetChannel<IMediaChannel>();
                         await chromeSender.LaunchAsync(CurrentChannel);
                         IsConnectedToChromeDevice = true;
-                        OnConnected?.Invoke(null, null);
+                        Device.BeginInvokeOnMainThread(() => {
+                            OnConnected?.Invoke(null, null);
+                        });
                     }
                     catch (System.Exception) {
                         await Task.CompletedTask; // JUST IN CASE
@@ -2600,7 +2631,7 @@ namespace CloudStreamForms
 
                                         MALSeason ms;
                                         lock (AnimeProviderHelper._lock) {
-                                             ms = activeMovie.title.MALData.seasonData[season].seasons[part - 1];
+                                            ms = activeMovie.title.MALData.seasonData[season].seasons[part - 1];
                                         }
 
                                         string url = "https://animeflix.io/api/episodes?anime_id=" + d.id + "&limit=50&sort=DESC";
@@ -6552,7 +6583,7 @@ https://prettyfast.to/e/66vvrk\/fe1541bb8d2aeaec6bb7e500d070b2ec?sub=https%253A%
             return s;
         }
 
-       
+
 
         public static string DownloadStringOnce(string url, TempThred? tempThred = null, bool UTF8Encoding = true, int waitTime = 1000)
         {

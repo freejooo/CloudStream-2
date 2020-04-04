@@ -4,6 +4,7 @@ using System;
 using System.Threading.Tasks;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
+using XamEffects;
 using static CloudStreamForms.App;
 using static CloudStreamForms.CloudStreamCore;
 using static CloudStreamForms.MainChrome;
@@ -143,34 +144,37 @@ namespace CloudStreamForms
             };
             const bool rotateAllWay = false;
             const int rotate = 90;
-            FastForward.Clicked += async (o, e) => {
+            const int time = 100;
+
+            Commands.SetTap(FastForwardBtt, new Command(async () => {
                 SeekMedia(FastForwardTime);
                 FastForward.Rotation = 0;
                 if (rotateAllWay) {
                     await FastForward.RotateTo(360, 200, Easing.SinOut);
                 }
                 else {
-                    FastForward.ScaleTo(0.9, 50, Easing.SinOut);
-                    await FastForward.RotateTo(rotate, 50, Easing.SinOut);
-                    FastForward.ScaleTo(1, 50, Easing.SinOut);
-                    await FastForward.RotateTo(0, 50, Easing.SinOut);
-
+                    FastForward.ScaleTo(0.9, time, Easing.SinOut);
+                    await FastForward.RotateTo(rotate, time, Easing.SinOut);
+                    FastForward.ScaleTo(1, time, Easing.SinOut);
+                    await FastForward.RotateTo(0, time, Easing.SinOut);
                 }
-            };
+            }));
 
-            BackForward.Clicked += async (o, e) => {
+
+
+            Commands.SetTap(BackForwardBtt, new Command(async () => {
                 SeekMedia(-BackForwardTime);
                 BackForward.Rotation = 0;
                 if (rotateAllWay) {
                     await BackForward.RotateTo(-360, 200, Easing.SinOut);
                 }
                 else {
-                    BackForward.ScaleTo(0.9, 50, Easing.SinOut);
-                    await BackForward.RotateTo(-rotate, 50, Easing.SinOut);
-                    BackForward.ScaleTo(1, 50, Easing.SinOut);
-                    await BackForward.RotateTo(0, 50, Easing.SinOut);
+                    BackForward.ScaleTo(0.9, time, Easing.SinOut);
+                    await BackForward.RotateTo(-rotate, time, Easing.SinOut);
+                    BackForward.ScaleTo(1, time, Easing.SinOut);
+                    await BackForward.RotateTo(0, time, Easing.SinOut);
                 }
-            };
+            }));
 
             StopAll.Clicked += (o, e) => {
                 MainChrome.StopCast();
@@ -245,7 +249,7 @@ namespace CloudStreamForms
 
         void SetPause(bool paused)
         {
-            Pause.Source = GetImageSource(paused ? "netflixPlay.png" : "netflixPause.png");//GetImageSource(RoundedPrefix + "_play_arrow_white_48dp.png") : GetImageSource(RoundedPrefix + "_pause_white_48dp.png");
+           Pause.Source = paused ? "netflixPlay128v2.png" : "netflixPause128.png";//GetImageSource(paused ? "netflixPlay.png" : "netflixPause.png");//GetImageSource(RoundedPrefix + "_play_arrow_white_48dp.png") : GetImageSource(RoundedPrefix + "_pause_white_48dp.png");
         }
 
         protected override void OnAppearing()
@@ -283,9 +287,9 @@ namespace CloudStreamForms
 
         async void PauseScale()
         {
-            Pause.Scale = 2.5;
-            await Pause.ScaleTo(2.3, 50, Easing.SinOut);
-            await Pause.ScaleTo(2.5, 50, Easing.SinOut);
+            Pause.Scale = 2;
+            await Pause.ScaleTo(1.8, 50, Easing.SinOut);
+            await Pause.ScaleTo(2, 50, Easing.SinOut);
         }
 
         async void ListScale()
