@@ -295,7 +295,7 @@ xmlns:ffTransformations="clr-namespace:FFImageLoading.Transformations;assembly=F
             <StackLayout  x:Name="absLayout" VerticalOptions="FillAndExpand" SizeChanged="absLayout_SizeChanged"
                    
                    > -->
-                 <!--   <ProgressBar x:Name="FishProgress" IsVisible="False" IsEnabled="False" ProgressColor="#303F9F" Opacity="0" InputTransparent="True" VerticalOptions="Start" Margin="10,0"></ProgressBar>-->
+                    <!--   <ProgressBar x:Name="FishProgress" IsVisible="False" IsEnabled="False" ProgressColor="#303F9F" Opacity="0" InputTransparent="True" VerticalOptions="Start" Margin="10,0"></ProgressBar>-->
                     <Label x:Name="FishProgressTxt"   Text="" HorizontalOptions="Center" TextColor="#e6e6e6"></Label>
 
                     <Grid >
@@ -325,9 +325,9 @@ xmlns:ffTransformations="clr-namespace:FFImageLoading.Transformations;assembly=F
                                                     <Grid.ColumnDefinitions >
                                                         <ColumnDefinition Width="Auto" />
                                                         <ColumnDefinition Width="Auto" />
-                                                     </Grid.ColumnDefinitions>
-                                                    
-                                                        <!-- <Label Text="{Binding Title}" TextColor="{Binding MainTextColor}" FontAttributes="Bold" FontSize="15"/>-->
+                                                    </Grid.ColumnDefinitions>
+
+                                                    <!-- <Label Text="{Binding Title}" TextColor="{Binding MainTextColor}" FontAttributes="Bold" FontSize="15"/>-->
                                                     <Grid  Grid.Row="0"  Grid.Column="1" Margin="10,0,0,0" >
 
                                                         <Grid RowSpacing="0" Padding="0" VerticalOptions="Center">
@@ -345,13 +345,13 @@ xmlns:ffTransformations="clr-namespace:FFImageLoading.Transformations;assembly=F
                                                                 <Label Text="{Binding Title}" TextColor="{Binding MainTextColor}" MaxLines="3" FontAttributes="Bold" FontSize="15" />
                                                             </Grid>
                                                             <Grid Grid.Row="0"  Grid.Column="1" WidthRequest="30" >
-                                                             </Grid>
+                                                            </Grid>
                                                             <Grid Grid.Row="1"  Grid.Column="0" >
                                                                 <Label Text="{Binding RatingStar}" TextColor="{Binding MainDarkTextColor}" FontAttributes="None" FontSize="14"/>
                                                             </Grid>
                                                         </Grid>
                                                     </Grid>
-                                             
+
 
 
 
@@ -372,12 +372,12 @@ xmlns:ffTransformations="clr-namespace:FFImageLoading.Transformations;assembly=F
                                                     </Grid>
                                                 </Grid>
 
-                                                <Image  Grid.Row="0"  Grid.Column="0" Source="{Binding DownloadSource}" HeightRequest="30" WidthRequest="60"   HorizontalOptions="End" Scale="0.8" BackgroundColor="Transparent" InputTransparent="True"></Image>
+                                                <Image  Grid.Row="0"  Grid.Column="0" Source="{Binding DownloadSource}" IsVisible="{Binding IsNotSearchingDownloadResults}" HeightRequest="30" WidthRequest="60"   HorizontalOptions="End" Scale="0.8" BackgroundColor="Transparent" InputTransparent="True"></Image>
                                                 <Grid  Grid.Row="0"  Grid.Column="0" HeightRequest="60" VerticalOptions="Center">
-                                                    <xe:BorderView  IsVisible="{Binding IsNotSearchingDownloadResults}" Opacity="0.4" xe:TouchEffect.Color="White" TranslationX="0"  WidthRequest="60"  xe:BorderColor="White" xe:CornerRadius="30" HorizontalOptions="End"  xe:Commands.Tap="{Binding TapCom}"  ></xe:BorderView>
+                                                    <xe:BorderView   Opacity="0.4" xe:TouchEffect.Color="White" TranslationX="0"  WidthRequest="60"  xe:BorderColor="White" xe:CornerRadius="30" HorizontalOptions="End"  xe:Commands.Tap="{Binding TapCom}"  ></xe:BorderView>
                                                     <ActivityIndicator IsVisible="{Binding IsSearchingDownloadResults}" IsRunning="True" Color="#4257d8"  BackgroundColor="Transparent" Grid.Row="0"  Grid.Column="0" TranslationX="-10"  HeightRequest="40" WidthRequest="40"   HorizontalOptions="End" Scale="1"  InputTransparent="True"></ActivityIndicator>
                                                 </Grid>
-                                                
+
 
                                                 <Label Text="{Binding Description}"  TextColor="{Binding MainDarkTextColor}" LineHeight="1"  TranslationY="-5"  MaxLines="4" Grid.Row="1" Grid.Column="0" HorizontalOptions="Fill" VerticalOptions="Fill"  Padding="0,0,0,0" Margin="10,0" />
                                             </Grid>
@@ -513,10 +513,10 @@ xmlns:ffTransformations="clr-namespace:FFImageLoading.Transformations;assembly=F
             </StackLayout>
             <StackLayout AbsoluteLayout.LayoutBounds="0, 0, 1, 1" AbsoluteLayout.LayoutFlags="All" InputTransparent="True">
                 <ProgressBar HorizontalOptions="Fill"  x:Name="RecomendationLoaded" InputTransparent="True"  IsVisible="True" IsEnabled="True" ClassId="id" TranslationY="-7" ></ProgressBar>
-                
+
             </StackLayout>
         </AbsoluteLayout>
- 
+
 
 
     </ScrollView>

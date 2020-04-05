@@ -266,6 +266,8 @@ namespace CloudStreamForms
             SkipForwardImg.Source = App.GetImageSource("netflixSkipForward.png");
             SkipForwardBtt.TranslationX = TRANSLATE_START_X;
             Commands.SetTap(SkipForwardBtt, new Command(() => {
+                CurrentTap++;
+                StartFade();
                 SeekMedia(SKIPTIME);
                 lastClick = DateTime.Now;
                 SkipFor();
@@ -275,6 +277,8 @@ namespace CloudStreamForms
             SkipBackImg.Source = App.GetImageSource("netflixSkipBack.png");
             SkipBackBtt.TranslationX = -TRANSLATE_START_X;
             Commands.SetTap(SkipBackBtt, new Command(() => {
+                CurrentTap++;
+                StartFade();
                 SeekMedia(-SKIPTIME);
                 lastClick = DateTime.Now;
                 SkipBac();
@@ -283,6 +287,7 @@ namespace CloudStreamForms
                 isLocked = !isLocked;
                 CurrentTap++;
                 FadeEverything(false);
+                StartFade();
                 SetIsLocked();
             }));
 
@@ -295,6 +300,8 @@ namespace CloudStreamForms
             Commands.SetTap(MirrorsTap, new Command(async () => {
                 string action = await DisplayActionSheet("Mirrors", "Cancel", null, AllMirrorsNames.ToArray());
                 App.ToggleRealFullScreen(true);
+                CurrentTap++;
+                StartFade();
                 print("ACTION = " + action);
                 if (action != "Cancel") {
                     for (int i = 0; i < AllMirrorsNames.Count; i++) {
@@ -444,11 +451,11 @@ namespace CloudStreamForms
             }
             SelectMirror(_currentMirrorId);
         }
-
+         
         protected override void OnAppearing()
         {
             base.OnAppearing();
-
+            print("ON APPEARING");
             App.OnAudioFocusChanged += HandleAudioFocus;
 
             try { // SETTINGS NOW ALLOWED 
@@ -655,7 +662,7 @@ namespace CloudStreamForms
             SkipForwardSmall.Opacity = 0;
             SkipForward.TranslationX = TRANSLATE_START_X;
 
-            await SkipForward.TranslateTo(TRANSLATE_START_X + TRANSLATE_SKIP_X, SkipForward.TranslationY, 200, Easing.SinInOut);
+            await SkipForward.TranslateTo(TRANSLATE_START_X + TRANSLATE_SKIP_X, SkipForward.TranslationY, 200, Easing.SinOut);
 
             SkipForward.TranslationX = TRANSLATE_START_X;
             SkipForward.Opacity = 0;
@@ -672,7 +679,7 @@ namespace CloudStreamForms
             SkipBackSmall.Opacity = 0;
             SkipBack.TranslationX = -TRANSLATE_START_X;
 
-            await SkipBack.TranslateTo(-TRANSLATE_START_X - TRANSLATE_SKIP_X, SkipBack.TranslationY, 200, Easing.SinInOut);
+            await SkipBack.TranslateTo(-TRANSLATE_START_X - TRANSLATE_SKIP_X, SkipBack.TranslationY, 200, Easing.SinOut);
 
             SkipBack.TranslationX = -TRANSLATE_START_X;
             SkipBack.Opacity = 0;
@@ -827,6 +834,8 @@ namespace CloudStreamForms
 
                     bool forward = (TapRec.Width / 2.0 < args.Location.X);
                     SeekMedia(SKIPTIME * (forward ? 1 : -1));
+                    CurrentTap++;
+                    StartFade();
                     if (forward) {
                         SkipFor();
                     }
@@ -845,11 +854,7 @@ namespace CloudStreamForms
                 cursorPosition = args.Location;
 
                 maxVol = Volyme >= 100 ? 200 : 100;
-            }
-
-
-
-
+            }  
             else if (args.Type == TouchTracking.TouchActionType.Moved) {
                 print(startCursorPosition.X - args.Location.X);
                 if ((minimumDistance < Math.Abs(startCursorPosition.X - args.Location.X) || minimumDistance < Math.Abs(startCursorPosition.X - args.Location.X)) && !isMovingCursor) {

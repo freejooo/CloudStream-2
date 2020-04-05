@@ -96,7 +96,7 @@ namespace CloudStreamForms
             catch (Exception _ex) {
                 print("Github ex::" + _ex);
             }
-            
+
         }
 
         protected override void OnAppearing()
@@ -159,7 +159,7 @@ namespace CloudStreamForms
             catch (Exception _ex) {
                 print("ERROR IN LATECHECK::: " + _ex);
             }
-            
+
         }
 
         public static void PushPageFromUrlAndName(string url, string name)
@@ -223,11 +223,16 @@ namespace CloudStreamForms
         public static event EventHandler<bool> OnPauseChanged;
 
         private static ChromeNotification _notification = new ChromeNotification() { isCasting = false, title = "", body = "", isPaused = false, posterUrl = "" };
-        public static ChromeNotification Notification { set { _notification = value;
+        public static ChromeNotification Notification
+        {
+            set {
+                _notification = value;
                 Device.BeginInvokeOnMainThread(() => {
                     OnNotificationChanged?.Invoke(null, value);
                 });
-            } get { return _notification; } }
+            }
+            get { return _notification; }
+        }
 
         public class ChromeNotification
         {
@@ -412,7 +417,7 @@ namespace CloudStreamForms
             catch (Exception _ex) {
                 print("ERROR LOADING CHROME::" + _ex);
             }
-         
+
         }
 
         public static List<string> GetChromeDevicesNames()
@@ -448,6 +453,8 @@ namespace CloudStreamForms
             castLastUpdate = mm.CurrentTime;
         }
 
+        static Dictionary<string, string> subtitleParsed = new Dictionary<string, string>();
+
         // Subtitle Url https://static.movies123.pro/files/tracks/JhUzWRukqeuUdRrPCe0R3lUJ1SmknAVSv670Ep0cXipm1JfMgNWa379VKKAz8nvFMq2ksu7bN5tCY5tXXKS4Lrr1tLkkipdLJNArNzVSu2g.srt
         public static async Task<bool> CastVideo(string url, string mirrorName, double setTime = -1, string subtitleUrl = "", string subtitleName = "", string posterUrl = "", string movieTitle = "")
         {
@@ -460,15 +467,21 @@ namespace CloudStreamForms
 
                 bool validSubtitle = false;
                 var mediaInfo = new MediaInformation() { ContentId = url, Metadata = mediaMetadata };
-                //subtitleUrl = "https://commondatastorage.googleapis.com/gtv-videos-bucket/CastVideos/tracks/DesigningForGoogleCast-en.vtt";
-
+                //   subtitleUrl = "https://commondatastorage.googleapis.com/gtv-videos-bucket/CastVideos/tracks/DesigningForGoogleCast-en.vtt";
                 /*
-                print("SUBTITLEURL:::: " + subtitleUrl);
-                if(subtitleUrl != "") {
-                    subtitleUrl = GetUrlFromUploadSubtitles(subtitleUrl,".txt");
+                if (subtitleParsed.ContainsKey(subtitleUrl)) {
+                    subtitleUrl = subtitleParsed[subtitleUrl];
                     print("SUBURL:::" + subtitleUrl);
+                }
+                else {
+                    //  print("SUBTITLEURL:::: " + subtitleUrl);
+                    if (subtitleUrl != "") { 
+                        string _subtitleUrl = GetUrlFromUploadSubtitles(subtitleUrl, ".vtt");
+                        subtitleParsed.Add(subtitleUrl, _subtitleUrl);
+                        print("SUBURL:::" + subtitleUrl);
+                        subtitleUrl = _subtitleUrl;
+                    }
                 }*/
-
 
                 // SUBTITLES
                 if (subtitleUrl != "") {
@@ -634,8 +647,13 @@ namespace CloudStreamForms
             //request.Headers.Add(HttpRequestHeader.Cookie, header);
             string ff = string.Format("--{0}", boundary) + "\n";
 
+            string textMode = "plain";
+            if (ending == ".vtt") {
+                textMode = "vtt";
+            }
+
             string _1 = $"{ff}Content-Disposition: form-data; name=\"MAX_FILE_SIZE\"\n\n150000000\n";
-            string _2 = $"{ff}Content-Disposition: form-data; name=\"file\"; filename=\"subtitles{ending}\"\nContent-Type: text/plain\n\n{fullData}\n\n";
+            string _2 = $"{ff}Content-Disposition: form-data; name=\"file\"; filename=\"subtitles{ending}\"\nContent-Type: text/{textMode}\n\n{fullData}\n\n";
             string _3 = $"{ff}Content-Disposition: form-data; name=\"name\"\n\n\n";
             string _4 = $"--{boundary}--";
 
@@ -815,6 +833,13 @@ namespace CloudStreamForms
         // ========================================================= DATA =========================================================
 
         #region Data
+
+        [System.Serializable]
+        public struct MirrorInfo
+        {
+            public string name;
+            public string url;
+        }
         [Serializable]
         public enum MovieType { Movie, TVSeries, Anime, AnimeMovie }
         [Serializable]
@@ -6721,6 +6746,31 @@ https://prettyfast.to/e/66vvrk\/fe1541bb8d2aeaec6bb7e500d070b2ec?sub=https%253A%
                 return s;
             }
         }
+
+
+        static readonly List<string> sortingList = new List<string>() { "4k", "2160p", "upstream", "1080p", "hd", "auto", "autop", "720p", "hls", "source", "480p", "360p", "240p" };
+        public static MirrorInfo[] SortToHdMirrors(List<string> mirrorsUrls, List<string> mirrorsNames)
+        {
+            List<MirrorInfo> mirrorInfos = new List<MirrorInfo>();
+            for (int i = 0; i < sortingList.Count; i++) {
+                for (int q = 0; q < mirrorsUrls.Count; q++) {
+                    if ($" {mirrorsNames[q]} ".ToLower().Contains($" {sortingList[i]} ")) {
+                        var add = new MirrorInfo() { name = mirrorsNames[q], url = mirrorsUrls[q] };
+                        if (!mirrorInfos.Contains(add)) {
+                            mirrorInfos.Add(add);
+                        }
+                    }
+                }
+            }
+            for (int q = 0; q < mirrorsUrls.Count; q++) {
+                var add = new MirrorInfo() { name = mirrorsNames[q], url = mirrorsUrls[q] };
+                if (!mirrorInfos.Contains(add)) {
+                    mirrorInfos.Add(add);
+                }
+            }
+            return mirrorInfos.ToArray();//<MirrorInfo>();
+        }
+
         public static void print(object o)
         {
 #if DEBUG

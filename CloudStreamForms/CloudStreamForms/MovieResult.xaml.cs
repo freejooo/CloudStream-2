@@ -597,7 +597,7 @@ namespace CloudStreamForms
         {
             var _episode = ChangeEpisode(episodeResult);
             epView.AllEpisodes[index] = _episode;
-        }
+        } 
 
         EpisodeResult ChangeEpisode(EpisodeResult episodeResult)
         {
@@ -657,20 +657,32 @@ namespace CloudStreamForms
 
                 }
                 else { // DOWNLOAD
-                    epView.MyEpisodeResultCollection[_id].downloadState = 3;
+                    epView.MyEpisodeResultCollection[_id].downloadState = 3; // SET IS SEARCHING
                     ForceUpdate();
                     currentDownloadSearchesHappening++;
                     GetEpisodeLink(isMovie ? -1 : (episodeResult.Id + 1), currentSeason, isDub: isDub, purgeCurrentLinkThread: currentDownloadSearchesHappening > 0);
                     print("!!___" + _id);
-                    await Task.Delay(5000);
-                    if (SameAsActiveMovie()) {
-                        currentMovie = activeMovie;
-                    }
-                    print("!!___" + _id);
-                    epView.MyEpisodeResultCollection[_id].downloadState = 1;
-                    ForceUpdate();
+                    await Task.Delay(10000);
+                    try {
+                        if (!SameAsActiveMovie()) return;
 
-                    App.ShowToast("Yeet" + epRes.mirrosUrls.Count);
+                        currentMovie = activeMovie;
+                        print("!!___" + _id);
+                        epView.MyEpisodeResultCollection[_id].downloadState = 1; // SET IS DOWNLOADING
+                        epRes = epView.MyEpisodeResultCollection[_id];
+                        ForceUpdate();
+                        App.ShowToast("Yeet" + epRes.mirrosUrls.Count);
+                  
+                        var l = SortToHdMirrors(epRes.mirrosUrls, epRes.Mirros);
+                        for (int i = 0; i < l.Length; i++) {
+                            print(l[i].name + "<<<<<<<LD");
+                        }
+                    }
+                    catch (Exception _ex) {
+                        print("EX DLOAD::: " + _ex);
+                        throw;
+                    }
+
                     currentDownloadSearchesHappening--;
                 }
 
