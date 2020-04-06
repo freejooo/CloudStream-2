@@ -11,6 +11,7 @@ using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using Xamarin.Essentials;
 using Xamarin.Forms;
+using static CloudStreamForms.CloudStreamCore;
 
 namespace CloudStreamForms
 {
@@ -51,9 +52,119 @@ namespace CloudStreamForms
             bool GainAudioFocus();
             void ReleaseAudioFocus();
             void CancelNot(int id);
-
+            string DownloadHandleIntent(int id, List<string> mirrorNames, List<string> mirrorUrls, string fileName, string titleName, bool mainPath, string extraPath, bool showNotification = true, bool showNotificationWhenDone = true, bool openWhenDone = false, string poster = "", string beforeTxt = "");
             string DownloadAdvanced(int id, string url, string fileName, string titleName, bool mainPath, string extraPath, bool showNotification = true, bool showNotificationWhenDone = true, bool openWhenDone = false, string poster = "", string beforeTxt = "");
+            DownloadProgressInfo GetDownloadProgressInfo(int id, string fileUrl);
+        }
 
+        public enum DownloadState { Downloading, Downloaded, NotDownloaded, Paused }
+        public enum DownloadType { Normal = 0, YouTube = 1 }
+
+        [System.Serializable]
+        public class DownloadInfo
+        {
+            public DownloadProgressInfo state;
+            public DownloadEpisodeInfo info;
+        }
+
+        public class DownloadProgressInfo
+        {
+            public DownloadState state;
+
+            public long bytesDownloaded;
+            public long totalBytes;
+            public double ProcentageDownloaded { get { return (bytesDownloaded / totalBytes); } }
+        }
+
+        [System.Serializable]
+        public class DownloadEpisodeInfo
+        {
+            /// <summary>
+            /// Youtube is the hashed id, else the IMDB id
+            /// </summary> 
+            public string source;
+
+            public string name;
+            public string description;
+            public int id;
+            public int episode;
+            public int season;
+            public string fileUrl;
+            public int downloadHeader;
+            public DownloadType dtype;
+        }
+
+        [System.Serializable]
+        public class DownloadHeader
+        {
+            public string name;
+            public string ogName;
+            //public string altName;
+            public string id;
+            public int RealId { get { return int.Parse(id.Replace("tt", "")); } }
+            public string year;
+            public string ogYear => year.Substring(0, 4);
+            public string rating;
+            public string runtime;
+            public string posterUrl;
+            public string description;
+            //public int seasons;
+            public string hdPosterUrl;
+            public CloudStreamCore.MovieType movieType;
+
+            //public CloudStreamCore.Title title; 
+        }
+
+        static string GetPathFromType(DownloadHeader header)
+        {
+            string path = "Movies";
+            if (header.movieType == MovieType.Anime) {
+                path = "Anime";
+            }
+            else if (header.movieType == MovieType.TVSeries) {
+                path = "TVSeries";
+            }
+            return path;
+        }
+
+
+        public static string RequestDownload(int id, string name, string description, int episode, int season, List<string> mirrorUrls, List<string> mirrorNames, string downloadTitle, string poster, CloudStreamCore.Title title)
+        {
+            DownloadHeader header = ConvertTitleToHeader(title);
+            string extraPath = "/" + GetPathFromType(header);
+            App.SetKey(nameof(DownloadHeader), "id" + header.id, header);
+            bool isMovie = header.movieType == MovieType.AnimeMovie || header.movieType == MovieType.Movie;
+
+            string fileUrl = platformDep.DownloadHandleIntent(id, mirrorNames, mirrorUrls, downloadTitle, name, true, extraPath, true, true, false, poster, isMovie ? "{name}\n" : ($"S{season}:E{episode} - " + "{name}\n"));
+            App.SetKey(nameof(DownloadEpisodeInfo), "id" + id, new DownloadEpisodeInfo() { dtype = DownloadType.Normal, source = header.id, description = description, downloadHeader = header.RealId, episode = episode, season = season, fileUrl = fileUrl, id = id, name = name });
+
+            return fileUrl;
+            // (isMovie) ? $"{mirrorName}\n" : $"S{currentSeason}:E{episodeResult.Episode} - {mirrorName}\n
+            //  string dpath = App.DownloadAdvanced(GetCorrectId(episodeResult), mirrorUrl, episodeResult.Title + ".mp4", isMovie ? currentMovie.title.name : $"{currentMovie.title.name} · {episodeResult.OgTitle}", true, "/" + GetPathFromType(), true, true, false, episodeResult.PosterUrl, (isMovie) ? $"{mirrorName}\n" : $"S{currentSeason}:E{episodeResult.Episode} - {mirrorName}\n");
+            //   string dpath = App.DownloadAdvanced(GetCorrectId(episodeResult), mirrorUrl, episodeResult.Title + ".mp4", isMovie ? currentMovie.title.name : $"{currentMovie.title.name} · {episodeResult.OgTitle}", true, "/" + GetPathFromType(), true, true, false, episodeResult.PosterUrl, (isMovie) ? $"{mirrorName}\n" : $"S{currentSeason}:E{episodeResult.Episode} - {mirrorName}\n");
+        }
+
+
+        public static DownloadHeader ConvertTitleToHeader(CloudStreamCore.Title title)
+        {
+            return new DownloadHeader() { description = title.description, hdPosterUrl = title.hdPosterUrl, id = title.id, name = title.name, ogName = title.ogName, posterUrl = title.posterUrl, rating = title.rating, runtime = title.runtime, year = title.year };
+        }
+
+        public static DownloadInfo GetDownloadInfo(int id)
+        {
+            var info = GetDownloadEpisodeInfo(id);
+            if (info == null) return null;
+            return new DownloadInfo() { info = info, state = platformDep.GetDownloadProgressInfo(id,info.fileUrl) };
+        }
+
+        public static DownloadEpisodeInfo GetDownloadEpisodeInfo(int id)
+        {
+            return App.GetKey<DownloadEpisodeInfo>(nameof(DownloadEpisodeInfo), "id" + id, null);
+        }
+
+        public static DownloadHeader GetDownloadHeaderInfo(int id)
+        {
+            return App.GetKey<DownloadHeader>(nameof(DownloadHeader), "id" + id, null);
         }
 
         public class StorageInfo
@@ -79,9 +190,14 @@ namespace CloudStreamForms
         }
 
         private static IPlatformDep _platformDep;
-        public static IPlatformDep platformDep { set { _platformDep = value; 
-                _platformDep.OnAudioFocusChanged += (o, e) => { OnAudioFocusChanged?.Invoke(o, e); }; 
-            } get { return _platformDep; } }
+        public static IPlatformDep platformDep
+        {
+            set {
+                _platformDep = value;
+                _platformDep.OnAudioFocusChanged += (o, e) => { OnAudioFocusChanged?.Invoke(o, e); };
+            }
+            get { return _platformDep; }
+        }
 
         public static EventHandler<bool> OnAudioFocusChanged;
 

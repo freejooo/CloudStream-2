@@ -597,7 +597,7 @@ namespace CloudStreamForms
         {
             var _episode = ChangeEpisode(episodeResult);
             epView.AllEpisodes[index] = _episode;
-        } 
+        }
 
         EpisodeResult ChangeEpisode(EpisodeResult episodeResult)
         {
@@ -672,7 +672,7 @@ namespace CloudStreamForms
                         epRes = epView.MyEpisodeResultCollection[_id];
                         ForceUpdate();
                         App.ShowToast("Yeet" + epRes.mirrosUrls.Count);
-                  
+
                         var l = SortToHdMirrors(epRes.mirrosUrls, epRes.Mirros);
                         for (int i = 0; i < l.Length; i++) {
                             print(l[i].name + "<<<<<<<LD");
@@ -1542,7 +1542,9 @@ namespace CloudStreamForms
                                 UserDialogs.Instance.HideLoading();
                                 if (fileSize > 1) {
                                     print("DSUZE:::::" + episodeResult.Episode);
-                                    string dpath = App.DownloadAdvanced(GetCorrectId(episodeResult), mirrorUrl, episodeResult.Title + ".mp4", isMovie ? currentMovie.title.name : $"{currentMovie.title.name} · {episodeResult.OgTitle}", true, "/" + GetPathFromType(), true, true, false, episodeResult.PosterUrl, (isMovie) ? $"{mirrorName}\n" : $"S{currentSeason}:E{episodeResult.Episode} - {mirrorName}\n");
+
+                                    string dpath = App.RequestDownload(GetCorrectId(episodeResult), episodeResult.OgTitle, episodeResult.Description, episodeResult.Episode, currentSeason, new List<string>() { mirrorUrl }, new List<string>() { mirrorName }, episodeResult.Title + ".mp4", episodeResult.PosterUrl, currentMovie.title);
+                                    // string dpath = App.DownloadAdvanced(GetCorrectId(episodeResult), mirrorUrl, episodeResult.Title + ".mp4", isMovie ? currentMovie.title.name : $"{currentMovie.title.name} · {episodeResult.OgTitle}", true, "/" + GetPathFromType(), true, true, false, episodeResult.PosterUrl, (isMovie) ? $"{mirrorName}\n" : $"S{currentSeason}:E{episodeResult.Episode} - {mirrorName}\n");
                                     // string dpath = App.DownloadUrl(s, episodeResult.Title + ".mp4", true, "/" + GetPathFromType(), "Download complete!", true, episodeResult.Title);
                                     //  string ppath = App.DownloadUrl(episodeResult.PosterUrl, "epP" + episodeResult.Title + ".jpg", false, "/Posters");
                                     // string mppath = App.DownloadUrl(currentMovie.title.hdPosterUrl, "hdP" + episodeResult.Title + ".jpg", false, "/TitlePosters");
