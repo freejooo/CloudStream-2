@@ -299,6 +299,10 @@ namespace CloudStreamForms
             }
             get { return isPlaying; }
         }
+
+        public static bool IsBuffering { set; get; }
+        public static bool IsIdle { set; get; }
+
         public static double CurrentCastingDuration { get; set; }
 
         public static IEnumerable<IReceiver> allChromeDevices;
@@ -323,8 +327,15 @@ namespace CloudStreamForms
             get {
                 try {
                     // double test = CurrentChannel.Status.First().CurrentTime; // WILL CAUSE CRASH IF STOPPED BY EXTRARNAL
+                    if (RequestNextTime != -1 && IsBuffering) {
+                        return RequestNextTime;
+                    }
+
                     if (IsPaused) {
                         return PausedTime;
+                    }
+                    else if (IsBuffering || IsIdle) {
+                        return BufferTime;
                     }
                     else {
                         TimeSpan t = DateTime.Now.Subtract(castUpdatedNow);
@@ -339,6 +350,8 @@ namespace CloudStreamForms
         }
 
         public static double PausedTime { set; get; } = 0;
+        public static double BufferTime { set; get; } = 0;
+        public static double RequestNextTime { set; get; } = 0;
 
         private static bool IsStopped
         {
@@ -435,18 +448,30 @@ namespace CloudStreamForms
         private static void ChromeChannel_StatusChanged(object sender, EventArgs e)
         {
             MediaStatus mm = CurrentChannel.Status.FirstOrDefault();
+
+            IsPlaying = (mm.PlayerState == "PLAYING");
+            IsBuffering = (mm.PlayerState == "BUFFERING");
+            IsIdle = (mm.PlayerState == "IDLE");
+            IsPaused = (mm.PlayerState == "PAUSED");
+
+            BufferTime = CurrentTime;
             PausedTime = CurrentTime;
 
-            IsPaused = (mm.PlayerState == "PAUSED");
+            if (IsPlaying && RequestNextTime != -1) {
+                print("SET NEXT REQUEST TO -1");
+                RequestNextTime = -1;
+            }
+
             if (_IsPaused != IsPaused) {
                 _IsPaused = IsPaused;
                 Device.BeginInvokeOnMainThread(() => {
                     OnPauseChanged?.Invoke(null, IsPaused);
                 });
             }
-            IsPlaying = (mm.PlayerState == "PLAYING");
 
-            print(mm.PlayerState);
+
+            print("STATE::" + mm.PlayerState);
+
 
 
             castUpdatedNow = DateTime.Now;
@@ -464,6 +489,7 @@ namespace CloudStreamForms
                 }
 
                 GenericMediaMetadata mediaMetadata = new GenericMediaMetadata();
+                RequestNextTime = setTime;
 
                 bool validSubtitle = false;
                 var mediaInfo = new MediaInformation() { ContentId = url, Metadata = mediaMetadata };
@@ -533,9 +559,23 @@ namespace CloudStreamForms
             }
         }
 
+        public static EventHandler<double> OnForceUpdateTime;
+
+
         public static void SetChromeTime(double time)
         {
             print("Seek To: " + time);
+
+            BufferTime = time;
+            PausedTime = time;
+
+            IsBuffering = true;
+            IsPlaying = false;
+
+            castUpdatedNow = DateTime.Now;
+            castLastUpdate = time;
+
+            OnForceUpdateTime?.Invoke(null, time);
             CurrentChannel.SeekAsync(time);
         }
 
@@ -548,6 +588,7 @@ namespace CloudStreamForms
         {
             try {
                 if (paused) {
+                    PausedTime = CurrentTime;
                     CurrentChannel.PauseAsync();
                 }
                 else {

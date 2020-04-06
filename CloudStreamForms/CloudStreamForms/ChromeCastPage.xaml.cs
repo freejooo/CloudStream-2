@@ -100,6 +100,21 @@ namespace CloudStreamForms
 
         public static bool isActive = false;
 
+
+        public void OnDisconnectedHandle(object sender, EventArgs e)
+        {
+            OnStop();
+        }
+        public void OnPauseChangedHandle(object sender, bool e)
+        {
+            SetPause(e);
+        }    
+        public void OnForceUpdateTimeHandle(object sender, double e)
+        {
+            UpdateTxt();
+        }
+
+
         public ChromeCastPage()
         {
             isActive = true;
@@ -124,18 +139,13 @@ namespace CloudStreamForms
                 print("ERROR LOADING MIRROR " + _ex);
             }
 
-            MainChrome.OnDisconnected += (o, e) => {
-                OnStop();
-            };
-
-            MainChrome.OnPauseChanged += (o, e) => {
-                SetPause(e);
-            };
+ 
 
             //https://material.io/resources/icons/?style=baseline
             VideoSlider.DragStarted += (o, e) => {
                 draging = true;
             };
+
 
             VideoSlider.DragCompleted += (o, e) => {
                 MainChrome.SetChromeTime(VideoSlider.Value * CurrentCastingDuration);
@@ -265,11 +275,20 @@ namespace CloudStreamForms
             SkipForward.Source = GetImageSource(RoundedPrefix + "_skip_next_white_48dp.png");
             Audio.Source = GetImageSource(RoundedPrefix + "_volume_up_white_48dp.png");
             SetPause(IsPaused);
+            UpdateTxt();
+
+            OnDisconnected += OnDisconnectedHandle;
+            OnPauseChanged += OnPauseChangedHandle;
+            OnForceUpdateTime += OnForceUpdateTimeHandle;
         }
+         
 
         protected override void OnDisappearing()
         {
             App.UpdateBackground();
+            OnDisconnected -= OnDisconnectedHandle;
+            OnPauseChanged -= OnPauseChangedHandle;
+            OnForceUpdateTime -= OnForceUpdateTimeHandle;
             base.OnDisappearing();
         }
 
