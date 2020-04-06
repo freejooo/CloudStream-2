@@ -145,17 +145,90 @@ namespace CloudStreamForms
         {
             List<string> keys = App.GetKeys<string>("DownloadIds");
             List<string> keysPaths = App.GetKeysPath("DownloadIds");
+
+            downloads.Clear();
+            downloadHeaders.Clear();
+            downloadHelper.Clear();
+
             for (int i = 0; i < keys.Count; i++) {
                 int id = App.GetKey<int>(keysPaths[i], 0);
                 var info = App.GetDownloadInfo(id);
+
+                if (!downloads.ContainsKey(id)) {
+                    downloads[id] = info;
+                }
+
+                int headerId = info.info.downloadHeader;
+                if (!downloadHeaders.ContainsKey(headerId)) {
+                    var header = App.GetDownloadHeaderInfo(headerId);
+                    downloadHeaders[headerId] = header;
+                }
+
+                if (!downloadHelper.ContainsKey(headerId)) {
+                    downloadHelper[headerId] = new DownloadHeaderHelper() { infoIds = new List<int>() { id }, bytesUsed = new List<long>() { info.state.bytesDownloaded }, totalBytesUsed = new List<long>() { info.state.totalBytes } };
+                }
+                else {
+                    var helper = downloadHelper[headerId];
+                    helper.infoIds.Add(id);
+                    helper.totalBytesUsed.Add(info.state.totalBytes);
+                    helper.bytesUsed.Add(info.state.bytesDownloaded);
+                    downloadHelper.Remove(headerId);
+                    downloadHelper.Add(headerId, helper);
+                }
+
                 print(info.info.name);
                 print(info.info.season);
                 print(info.state.state.ToString() + info.state.bytesDownloaded + "|" + info.state.totalBytes + "|" + info.state.ProcentageDownloaded + "%");
-               // App.GetDownloadHeaderInfo()
+                // App.GetDownloadHeaderInfo()
                 print("ID???????==" + id);
             }
 
+            // ========================== SET VALUES ==========================
+
+            foreach (var key in downloadHeaders.Keys) {
+
+                var val = downloadHeaders[key];
+                var helper = downloadHelper[key];
+
+                if (val.movieType == MovieType.Movie || val.movieType == MovieType.TVSeries) {
+
+                }
+                if (val.movieType == MovieType.TVSeries) {
+                    // redirect to real 
+
+                }
+                else if (val.movieType == MovieType.Anime) {
+                    // redirect to real 
+                }
+            }
+
+            foreach (var dload in downloads.Values) {
+                if (dload.info.dtype == App.DownloadType.YouTube) {
+                    // ADD YOUTUBE EPISODE
+                }
+                else {
+
+                }
+            }
         }
+
+
+
+
+        public class DownloadHeaderHelper
+        {
+            public List<int> infoIds;
+            public List<long> bytesUsed;
+            public List<long> totalBytesUsed;
+            public long TotalBytes { get { return totalBytesUsed.Sum(); } }
+            public long Bytes { get { return bytesUsed.Sum(); } }
+        }
+
+        public static Dictionary<int, DownloadHeaderHelper> downloadHelper = new Dictionary<int, DownloadHeaderHelper>();
+
+        public static Dictionary<int, App.DownloadInfo> downloads = new Dictionary<int, App.DownloadInfo>();
+        public static Dictionary<int, App.DownloadHeader> downloadHeaders = new Dictionary<int, App.DownloadHeader>();
+
 
         void UpdateDownloads()
         {
