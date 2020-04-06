@@ -671,11 +671,26 @@ namespace CloudStreamForms
                         epView.MyEpisodeResultCollection[_id].downloadState = 1; // SET IS DOWNLOADING
                         epRes = epView.MyEpisodeResultCollection[_id];
                         ForceUpdate();
-                        App.ShowToast("Yeet" + epRes.mirrosUrls.Count);
 
-                        var l = SortToHdMirrors(epRes.mirrosUrls, epRes.Mirros);
-                        for (int i = 0; i < l.Length; i++) {
-                            print(l[i].name + "<<<<<<<LD");
+                        if (epRes.mirrosUrls != null) {
+                            if (epRes.mirrosUrls.Count > 0) {
+                                // App.ShowToast("Yeet" + epRes.mirrosUrls.Count);
+
+                                var l = SortToHdMirrors(epRes.mirrosUrls, epRes.Mirros);
+                                for (int i = 0; i < l.Length; i++) {
+                                    print(l[i].name + "<<<<<<<LD");
+                                }
+
+                                List<string> mirrorUrls = new List<string>();
+                                List<string> mirrorNames = new List<string>();
+
+                                for (int i = 0; i < l.Length; i++) {
+                                    mirrorNames.Add(l[i].name);
+                                    mirrorUrls.Add(l[i].url);
+                                }
+
+                                string dpath = App.RequestDownload(GetCorrectId(episodeResult), episodeResult.OgTitle, episodeResult.Description, episodeResult.Episode, currentSeason, mirrorUrls, mirrorNames, episodeResult.Title + ".mp4", episodeResult.PosterUrl, currentMovie.title);
+                            }
                         }
                     }
                     catch (Exception _ex) {

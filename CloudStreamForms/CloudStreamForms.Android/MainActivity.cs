@@ -680,7 +680,7 @@ namespace CloudStreamForms.Droid
                 //  App.GetKey<long>(DOWNLOAD_KEY, path, 0);
                 downloadResumes++;
                 string data = App.GetKey<string>(path, null);
-                HandleIntent(data, true);
+                HandleIntent(data);
             }
 
             if (downloadResumes == 1) {
@@ -766,9 +766,7 @@ namespace CloudStreamForms.Droid
             if (isPaused.ContainsKey(id)) return;
             var context = Application.Context;
 
-            string json = JsonConvert.SerializeObject(new DownloadHandleNot() { id = id, mirrorNames = mirrorNames, mirrorUrls = mirrorUrls, fileName = fileName, showDoneAsToast = showDoneAsToast, openWhenDone = openWhenDone, showDoneNotificaion = showDoneNotificaion, beforeTxt = beforeTxt, mirror = mirror, path = path, poster = poster, showNotificaion = showNotificaion, title = title });
-
-            App.SetKey(DOWNLOAD_KEY_INTENT, id.ToString(), json); //$"{nameof(id)}={id}|||{nameof(title)}={title}|||{nameof(path)}={path}|||{nameof(poster)}={poster}|||{nameof(fileName)}={fileName}|||{nameof(beforeTxt)}={beforeTxt}|||{nameof(openWhenDone)}={openWhenDone}|||{nameof(showDoneNotificaion)}={showDoneNotificaion}|||{nameof(showDoneAsToast)}={showDoneAsToast}|||");
+            //$"{nameof(id)}={id}|||{nameof(title)}={title}|||{nameof(path)}={path}|||{nameof(poster)}={poster}|||{nameof(fileName)}={fileName}|||{nameof(beforeTxt)}={beforeTxt}|||{nameof(openWhenDone)}={openWhenDone}|||{nameof(showDoneNotificaion)}={showDoneNotificaion}|||{nameof(showDoneAsToast)}={showDoneAsToast}|||");
 
             int progress = 0;
 
@@ -794,6 +792,10 @@ namespace CloudStreamForms.Droid
             {
                 Thread t = new Thread(() => {
 
+                    string json = JsonConvert.SerializeObject(new DownloadHandleNot() { id = id, mirrorNames = mirrorNames, mirrorUrls = mirrorUrls, fileName = fileName, showDoneAsToast = showDoneAsToast, openWhenDone = openWhenDone, showDoneNotificaion = showDoneNotificaion, beforeTxt = beforeTxt, mirror = mirror, path = path, poster = poster, showNotificaion = showNotificaion, title = title });
+
+                    App.SetKey(DOWNLOAD_KEY_INTENT, id.ToString(), json);
+
                     string url = mirrorUrls[mirror];
                     string urlName = mirrorNames[mirror];
 
@@ -818,6 +820,7 @@ namespace CloudStreamForms.Droid
                     }
 
                     bool removeKeys = true;
+                    var rFile = new Java.IO.File(path);
 
                     try {
                         try {
@@ -837,7 +840,6 @@ namespace CloudStreamForms.Droid
                         URL _url = new URL(url);
                         URLConnection connection = _url.OpenConnection();
 
-                        var rFile = new Java.IO.File(path);
                         if (!rFile.Exists()) {
                             print("FILE DOSENT EXITS");
                             rFile.CreateNewFile();
@@ -958,9 +960,11 @@ namespace CloudStreamForms.Droid
                     catch (Exception _ex) {
                         print("DOWNLOADURL: " + url);
                         print("DOWNLOAD FAILED BC: " + _ex);
-                        if (mirror < mirrorUrls.Count - 1) { // HAVE MIRRORS LEFT
+                        if (mirror < mirrorUrls.Count - 1 && progress < 2) { // HAVE MIRRORS LEFT
                             mirror++;
                             removeKeys = false;
+                            resumeIntent = false;
+                            rFile.Delete();
                         }
                         else {
                             ShowDone(false);
@@ -1519,7 +1523,7 @@ namespace CloudStreamForms.Droid
 
             bool downloadingOrPaused = DownloadHandle.isPaused.ContainsKey(id);
 
-            var file = new Java.IO.File(URI.Create(fileUrl));
+            var file = new Java.IO.File(fileUrl);
             bool exists = file.Exists();
 
             if (downloadingOrPaused) {

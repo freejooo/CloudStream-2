@@ -393,6 +393,17 @@ namespace CloudStreamForms.UWP
         {
 
         }
+
+        public string DownloadHandleIntent(int id, List<string> mirrorNames, List<string> mirrorUrls, string fileName, string titleName, bool mainPath, string extraPath, bool showNotification = true, bool showNotificationWhenDone = true, bool openWhenDone = false, string poster = "", string beforeTxt = "")
+        {
+            return DownloadUrl(mirrorUrls[0], fileName, mainPath, extraPath, showNotificationWhenDone ? "Download Complete!" : "", true, titleName);
+            //throw new NotImplementedException();
+        }
+
+        public _App.DownloadProgressInfo GetDownloadProgressInfo(int id, string fileUrl)
+        {
+            return new _App.DownloadProgressInfo() { bytesDownloaded = 0, state = _App.DownloadState.NotDownloaded, totalBytes = 0 };
+        }
     }
 
     public static class Message

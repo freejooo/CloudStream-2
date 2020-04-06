@@ -141,8 +141,26 @@ namespace CloudStreamForms
             Device.BeginInvokeOnMainThread(() => episodeView.HeightRequest = epView.MyEpisodeResultCollection.Count * episodeView.RowHeight + 20);
         }
 
+        void UpdateDload()
+        {
+            List<string> keys = App.GetKeys<string>("DownloadIds");
+            List<string> keysPaths = App.GetKeysPath("DownloadIds");
+            for (int i = 0; i < keys.Count; i++) {
+                int id = App.GetKey<int>(keysPaths[i], 0);
+                var info = App.GetDownloadInfo(id);
+                print(info.info.name);
+                print(info.info.season);
+                print(info.state.state.ToString() + info.state.bytesDownloaded + "|" + info.state.totalBytes + "|" + info.state.ProcentageDownloaded + "%");
+               // App.GetDownloadHeaderInfo()
+                print("ID???????==" + id);
+            }
+
+        }
+
         void UpdateDownloads()
         {
+            UpdateDload();
+            return;
             List<string> keys = App.GetKeys<string>("Download");
             List<string> keysPaths = App.GetKeysPath("Download");
             foreach (var item in keysPaths) {
@@ -302,7 +320,7 @@ namespace CloudStreamForms
             Commands.SetTap(s, new Command((o) => {
                 var episodeResult = ((EpisodeResult)o);
                 PlayEpisode(episodeResult);
-             //   PlayEpisodeRes(episodeResult);
+                //   PlayEpisodeRes(episodeResult);
                 //do something
             }));
             Commands.SetTapParameter(s, (EpisodeResult)s.BindingContext);
