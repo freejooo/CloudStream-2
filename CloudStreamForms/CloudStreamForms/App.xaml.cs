@@ -8,6 +8,7 @@ using System.Linq;
 using System.Net;
 using System.Reflection;
 using System.Runtime.Serialization.Formatters.Binary;
+using System.Security.Cryptography;
 using System.Text;
 using Xamarin.Essentials;
 using Xamarin.Forms;
@@ -73,14 +74,14 @@ namespace CloudStreamForms
 
             public long bytesDownloaded;
             public long totalBytes;
-            public double ProcentageDownloaded { get { return ((bytesDownloaded*100.0) / totalBytes); } }
+            public double ProcentageDownloaded { get { return ((bytesDownloaded * 100.0) / totalBytes); } }
         }
 
         [System.Serializable]
         public class DownloadEpisodeInfo
         {
             /// <summary>
-            /// Youtube is the hashed id, else the IMDB id
+            /// Youtube is url, else the IMDB id
             /// </summary> 
             public string source;
 
@@ -101,7 +102,7 @@ namespace CloudStreamForms
             public string ogName;
             //public string altName;
             public string id;
-            public int RealId { get { return int.Parse(id.Replace("tt", "")); } }
+            public int RealId { get { if (id.StartsWith("tt")) { return int.Parse(id.Replace("tt", "")); } else { return ConvertStringToInt(id); } } }
             public string year;
             public string ogYear => year.Substring(0, 4);
             public string rating;
@@ -115,7 +116,7 @@ namespace CloudStreamForms
             //public CloudStreamCore.Title title; 
         }
 
-        static string GetPathFromType(DownloadHeader header)
+        public static string GetPathFromType(DownloadHeader header)
         {
             string path = "Movies";
             if (header.movieType == MovieType.Anime) {
@@ -123,6 +124,9 @@ namespace CloudStreamForms
             }
             else if (header.movieType == MovieType.TVSeries) {
                 path = "TVSeries";
+            }
+            else if (header.movieType == MovieType.YouTube) {
+                path = "YouTube";
             }
             return path;
         }
@@ -147,17 +151,22 @@ namespace CloudStreamForms
             //   string dpath = App.DownloadAdvanced(GetCorrectId(episodeResult), mirrorUrl, episodeResult.Title + ".mp4", isMovie ? currentMovie.title.name : $"{currentMovie.title.name} · {episodeResult.OgTitle}", true, "/" + GetPathFromType(), true, true, false, episodeResult.PosterUrl, (isMovie) ? $"{mirrorName}\n" : $"S{currentSeason}:E{episodeResult.Episode} - {mirrorName}\n");
         }
 
-
+        public static int ConvertStringToInt(string inp)
+        {
+            MD5 md5Hasher = MD5.Create();
+            var hashed = md5Hasher.ComputeHash(Encoding.UTF8.GetBytes(inp));
+            return BitConverter.ToInt32(hashed, 0);
+        }
         public static DownloadHeader ConvertTitleToHeader(CloudStreamCore.Title title)
         {
-            return new DownloadHeader() { description = title.description, hdPosterUrl = title.hdPosterUrl, id = title.id, name = title.name, ogName = title.ogName, posterUrl = title.posterUrl, rating = title.rating, runtime = title.runtime, year = title.year,movieType=title.movieType };
+            return new DownloadHeader() { description = title.description, hdPosterUrl = title.hdPosterUrl, id = title.id, name = title.name, ogName = title.ogName, posterUrl = title.posterUrl, rating = title.rating, runtime = title.runtime, year = title.year, movieType = title.movieType };
         }
 
         public static DownloadInfo GetDownloadInfo(int id)
         {
             var info = GetDownloadEpisodeInfo(id);
             if (info == null) return null;
-            return new DownloadInfo() { info = info, state = platformDep.GetDownloadProgressInfo(id,info.fileUrl) };
+            return new DownloadInfo() { info = info, state = platformDep.GetDownloadProgressInfo(id, info.fileUrl) };
         }
 
         public static DownloadEpisodeInfo GetDownloadEpisodeInfo(int id)

@@ -239,8 +239,7 @@ namespace CloudStreamForms.Droid
         }
 
         public static async void ShowLocalNot(LocalNot not, Context context = null)
-        {
-
+        { 
             var cc = context ?? Application.Context;
             var builder = new Notification.Builder(cc);
             builder.SetContentTitle(not.title);
@@ -347,7 +346,7 @@ namespace CloudStreamForms.Droid
                 // resultIntent.SetFlags(ActivityFlags.task);
             }
 
-
+            print("NOTIFY::: " + not.id);
             _manager.Notify(not.id, builder.Build());
 
         }
@@ -776,14 +775,22 @@ namespace CloudStreamForms.Droid
                 int isPause = isPaused[id];
                 bool canPause = isPause == 0;
                 if (isPause != 2) {
-                    ShowLocalNot(new LocalNot() { actions = new List<LocalAction>() { new LocalAction() { action = $"handleDownload|||id={id}|||dType={(canPause ? 1 : 0)}|||", name = canPause ? "Pause" : "Resume" }, new LocalAction() { action = $"handleDownload|||id={id}|||dType=2|||", name = "Stop" } }, mediaStyle = false, bigIcon = poster, title = title, autoCancel = false, showWhen=false, onGoing = canPause, id = id, smallIcon = Resource.Drawable.bicon, progress = progress, body = progressTxt }, context); //canPause
+                    ShowLocalNot(new LocalNot() { actions = new List<LocalAction>() { new LocalAction() { action = $"handleDownload|||id={id}|||dType={(canPause ? 1 : 0)}|||", name = canPause ? "Pause" : "Resume" }, new LocalAction() { action = $"handleDownload|||id={id}|||dType=2|||", name = "Stop" } }, mediaStyle = false, bigIcon = poster, title = title, autoCancel = false, showWhen = false, onGoing = canPause, id = id, smallIcon = Resource.Drawable.bicon, progress = progress, body = progressTxt }, context); //canPause
                 }
             }
 
             void ShowDone(bool succ, string? overrideText = null)
             {
+                print("DAAAAAAAAAASHOW DONE" + succ);
                 if (showDoneNotificaion) {
-                    ShowLocalNot(new LocalNot() { mediaStyle = poster != "", bigIcon = poster, title = title, autoCancel = true, onGoing = false, id = id, smallIcon = Resource.Drawable.bicon, body = overrideText ?? (succ ? "Download done!" : "Download Failed") }, context); // ((e.Cancelled || e.Error != null) ? "Download Failed!"
+                    Device.BeginInvokeOnMainThread(() => {
+                        print("DAAAAAAAAAASHOW DONE222");
+
+                        ShowLocalNot(new LocalNot() { mediaStyle = poster != "", bigIcon = poster, title = title, autoCancel = true, onGoing = false, id = id, smallIcon = Resource.Drawable.bicon, body = overrideText ?? (succ ? "Download done!" : "Download Failed") }, context); // ((e.Cancelled || e.Error != null) ? "Download Failed!"
+                    });
+                }
+                else {
+                    print("DONT SHOW WHEN DONE");
                 }
                 // Toast.MakeText(context, "PG DONE!!!", ToastLength.Long).Show(); 
             }
@@ -932,18 +939,26 @@ namespace CloudStreamForms.Droid
                                 long diff = total - lastTotal;
                                 //  UpdateDloadNot($"{ConvertBytesToAny(diff/UPDATE_TIME, 2,2)}MB/s | {progress}%");
                                 //{ConvertBytesToAny(diff / UPDATE_TIME, 2, 2)}MB/s | 
-                                UpdateProgress();
+                                if (progress >= 100) {
+                                    print("DLOADPG DONE!");
+                                    ShowDone(true);
+                                }
+                                else {
+                                    UpdateProgress();
+                                    // UpdateDloadNot(progress + "%");
+                                }
                                 lastTotal = total;
                             }
 
                             if (progress >= 100 || progress > previousProgress) {
-                                UpdateProgress();
                                 // Only post progress event if we've made progress.
                                 previousProgress = progress;
                                 if (progress >= 100) {
+                                    print("DLOADPG DONE!");
                                     ShowDone(true);
                                 }
                                 else {
+                                    UpdateProgress();
                                     // UpdateDloadNot(progress + "%");
                                 }
                             }
@@ -1516,7 +1531,7 @@ namespace CloudStreamForms.Droid
 
 
     public class MainDroid : App.IPlatformDep
-    { 
+    {
         public DownloadProgressInfo GetDownloadProgressInfo(int id, string fileUrl)
         {
             DownloadProgressInfo progressInfo = new DownloadProgressInfo();
@@ -1534,12 +1549,16 @@ namespace CloudStreamForms.Droid
             else {
                 //file.Length()
                 progressInfo.state = exists ? DownloadState.Downloaded : DownloadState.NotDownloaded;
+
             }
             progressInfo.bytesDownloaded = exists ? file.Length() : 0;
+
             //                        App.SetKey("dlength", "id" + id, fileLength);
 
             progressInfo.totalBytes = exists ? App.GetKey<int>("dlength", "id" + id, 0) : 0;
-
+            if (progressInfo.bytesDownloaded < progressInfo.totalBytes - 1000 && progressInfo.state == DownloadState.Downloaded) {
+                progressInfo.state = DownloadState.NotDownloaded;
+            }
             return progressInfo;
         }
 
@@ -1600,7 +1619,7 @@ namespace CloudStreamForms.Droid
         public async void ShowNotIntentAsync(string title, string body, int id, string titleId, string titleName, DateTime? time = null, string bigIconUrl = "")
         {
 
-            var localNot = new LocalNot() { title = title, body = body, id = id, data = "cloudstreamforms:" + titleId + "Name=" + titleName + "=EndAll", bigIcon = bigIconUrl, autoCancel = true, mediaStyle = true, notificationImportance = (int)NotificationImportance.Default, showWhen = true, when = time, smallIcon = LocalNotificationIconId };
+            var localNot = new LocalNot() { title = title, body = body, id = id, data = titleId == "-1" ? ("cloudstreamforms:" + titleId + "Name=" + titleName + "=EndAll") : null, bigIcon = bigIconUrl, autoCancel = true, mediaStyle = true, notificationImportance = (int)NotificationImportance.Default, showWhen = true, when = time, smallIcon = LocalNotificationIconId };
 
 
             if (time == null) {
@@ -2579,7 +2598,7 @@ namespace CloudStreamForms.Droid
             string path = GetPath(mainPath, extraPath);
 
             string full = path + "/" + CensorFilename(fileName);
-            DownloadHandle.HandleIntent(id, mirrorNames, mirrorUrls, 0, titleName, full, poster, fileName, beforeTxt, openWhenDone, showNotification, showNotificationWhenDone, false, false);
+            DownloadHandle.HandleIntent(id, mirrorNames, mirrorUrls, 0, titleName, full, poster, fileName, beforeTxt, openWhenDone, showNotification, showNotification, false, false);
             return full;
 
         }

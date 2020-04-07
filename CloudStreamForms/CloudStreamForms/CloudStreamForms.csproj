@@ -298,7 +298,7 @@
     <PackageReference Include="Xamarin.Forms" Version="4.4.0.991640" />
     <PackageReference Include="Xamarin.Essentials" Version="1.4.0" />
     <PackageReference Include="XamEffects" Version="1.6.3" />
-    <PackageReference Include="YoutubeExplode" Version="4.7.13" />
+    <PackageReference Include="YoutubeExplode" Version="4.7.16" />
     <PackageReference Include="YoutubeExplode.Converter" Version="1.4.3" />
   </ItemGroup>
 

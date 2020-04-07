@@ -5,6 +5,8 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
+using System.Text;
 using System.Threading.Tasks;
 using Xamarin.Essentials;
 using Xamarin.Forms;
@@ -13,6 +15,7 @@ using XamEffects;
 using YoutubeExplode;
 using YoutubeExplode.Models;
 using YoutubeExplode.Models.MediaStreams;
+using static CloudStreamForms.App;
 using static CloudStreamForms.CloudStreamCore;
 using static CloudStreamForms.MainPage;
 
@@ -22,6 +25,8 @@ namespace CloudStreamForms
     public partial class Download : ContentPage
     {
         public MainEpisodeView epView;
+
+
 
         public Download()
         {
@@ -55,8 +60,10 @@ namespace CloudStreamForms
                             }
                             else {
                                 try {
-                                    string dpath = YouTube.GetYTPath(v.Title);
+                                    //   string dpath = YouTube.GetYTPath(v.Title);
+                                    var author = await YouTube.GetAuthorFromVideoAsync(v.Id);
                                     var data = await YouTube.GetInfoAsync(v.GetUrl());
+
                                     double mb = App.ConvertBytesToAny(data.Size, 5, 2);
                                     // (episodeResult.mirrosUrls[i], episodeResult.Title + ".mp4", true, "/" + GetPathFromType());
                                     //  string ppath = App.DownloadUrl(episodeResult.PosterUrl, "epP" + episodeResult.Title + ".jpg", false, "/Posters");
@@ -64,24 +71,32 @@ namespace CloudStreamForms
                                     string mppath = v.Thumbnails.HighResUrl;
                                     string ppath = v.Thumbnails.HighResUrl;
 
+                                    DownloadHeader header = new DownloadHeader() { movieType = MovieType.YouTube, id = author.Id, name = author.Title, hdPosterUrl = author.LogoUrl, posterUrl = author.LogoUrl, ogName = author.Title }; //description = v.Description,hdPosterUrl=v.Thumbnails.HighResUrl, };//ConvertTitleToHeader(title);
+                                    int id = ConvertStringToInt(v.Id);
+
+                                    string filePath = YouTube.DownloadVideo(data, v.Title, data, v, id, header, true);
+                                    App.ShowToast("YouTube download started");
+                                    App.SetKey(nameof(DownloadHeader), "id" + header.RealId, header);
+                                    App.SetKey(nameof(DownloadEpisodeInfo), "id" + id, new DownloadEpisodeInfo() { dtype = DownloadType.YouTube, source = v.GetShortUrl(), description = v.Description, downloadHeader = header.RealId, episode = -1, season = -1, fileUrl = filePath, id = id, name = v.Title });
+                                    App.SetKey("DownloadIds", id.ToString(), id);
+
+                                    /*
                                     string key = "_dpath=" + dpath + "|||_ppath=" + ppath + "|||_mppath=" + mppath + "|||_descript=" + v.Description + "|||_maindescript=" + v.Description + "|||_epCounter=" + "-1" + "|||_epId=" + v.Id + "|||_movieId=" + v.GetUrl() + "|||_title=" + v.Title + "|||_movieTitle=" + v.Title + "|||isYouTube=" + true + "|||UploadData=" + v.UploadDate.ToString() + "|||Author=" + v.Author + "|||Duration=" + v.Duration.TotalSeconds + "|||=EndAll";
                                     print("DKEY: " + key);
                                     App.SetKey("Download", v.Id, key);
                                     App.ShowToast("Download Started - " + Math.Round(mb, 1) + "MB");
-                                    App.SetKey("DownloadSize", v.Id, Math.Round(mb, 2));
-                                    YouTube.DownloadVideo(data, v.Title, "Download complete!", true, v.Title);
+                                    App.SetKey("DownloadSize", v.Id, Math.Round(mb, 2));*/
                                     // YouTube.DownloadVideo(data, v.Title);
 
                                 }
-                                catch (Exception) {
+                                catch (Exception _ex) {
+                                    print("MAINERROR:: " + _ex);
                                     App.ShowToast(errorTxt);
                                 }
-
-
                             }
                         }
                     })
-                }); ;
+                });
             };
 
 
@@ -195,9 +210,9 @@ namespace CloudStreamForms
 
                 EpisodeResult ep = new EpisodeResult() { Title = val.name, PosterUrl = val.hdPosterUrl, Description = App.ConvertBytesToAny(helper.TotalBytes, 0, 2) + " MB" };
 
-                if (val.movieType == MovieType.TVSeries || val.movieType == MovieType.Anime) {
+                if (val.movieType == MovieType.TVSeries || val.movieType == MovieType.Anime || val.movieType == MovieType.YouTube) {
                     int count = helper.infoIds.Count;
-                    ep.Description = count + $" Episode{(count > 1 ? "s" : "")} | " + ep.Description;
+                    ep.Description = count + $" {(val.movieType == MovieType.YouTube ? "Video" : "Episode")}{(count > 1 ? "s" : "")} | " + ep.Description;
 
                     int downloadingRn = 0;
                     foreach (var id in helper.infoIds) {
@@ -241,6 +256,9 @@ namespace CloudStreamForms
                     }
 
                     ep.ExtraDescription = extraString + (info.state.state == App.DownloadState.Downloaded ? "" : $" {(int)info.state.ProcentageDownloaded}%");
+                }
+                else if (val.movieType == MovieType.YouTube) {
+
                 }
                 else if (val.movieType == MovieType.TVSeries) {
                     // redirect to real  
@@ -558,11 +576,12 @@ namespace CloudStreamForms
 
         public static async Task<Video> GetYTVideo(string url)
         {
-            YoutubeClient client = new YoutubeClient();
+           // YoutubeClient client = new YoutubeClient();
             print("URL||||" + url);
 
             var id = YoutubeClient.ParseVideoId(url); // "bnsUkE8i0tU"
             print("ID::::" + id);
+            
             return await client.GetVideoAsync(id);
         }
 
@@ -571,6 +590,17 @@ namespace CloudStreamForms
             return App.GetDownloadPath(name, "/YouTube") + ".mp4";
         }
 
+        static readonly YoutubeClient client = new YoutubeClient();
+
+        public static async Task<Channel> GetAuthorAsync(string id)
+        {
+            var _id = await client.GetChannelIdAsync(id);
+            return await client.GetChannelAsync(_id);
+        } 
+        public static async Task<Channel> GetAuthorFromVideoAsync(string videoId)
+        { 
+            return await client.GetVideoAuthorChannelAsync(videoId);
+        }
 
         public static async Task<MuxedStreamInfo> GetInfoAsync(string url)
         {
@@ -595,7 +625,6 @@ namespace CloudStreamForms
             var mediaStreamInfos = new MediaStreamInfo[] { audioStreamInfo, videoStreamInfo };
             print("LEN:" + mediaStreamInfos.Length);
             return mediaStreamInfos;*/
-            var client = new YoutubeClient();
             var id = YoutubeClient.ParseVideoId(url);
 
             // Get metadata for all streams in this video
@@ -615,16 +644,16 @@ namespace CloudStreamForms
             //    .First();
 
             // Get file extension based on stream's container
-            var ext = streamInfo.Container.GetFileExtension();
-            print("EXTENTION:" + ext);
+            // var ext = streamInfo.Container.GetFileExtension();
+            //  print("EXTENTION:" + ext);
             return streamInfo;
         }
 
-        public static async void DownloadVideo(MediaStreamInfo mediaStreamInfos, string name, string toast = "", bool isNotification = false, string body = "")
+        public static string DownloadVideo(MediaStreamInfo mediaStreamInfos, string name, MuxedStreamInfo info, Video v, int id, DownloadHeader header, bool isNotification = false)
         {
 
             // YoutubeConverter converter = new YoutubeConverter();
-            YoutubeClient client = new YoutubeClient();
+          //  YoutubeClient client = new YoutubeClient();
 
             // Download and process them into one file
             /*
@@ -642,15 +671,44 @@ namespace CloudStreamForms
             if (!File.Exists(rootPath)) {
                 Directory.CreateDirectory(rootPath);
             }
-            await client.DownloadMediaStreamAsync(mediaStreamInfos, App.GetDownloadPath(name, "/YouTube") + ".mp4");
-            if (toast != "") {
-                if (isNotification) {
-                    App.ShowNotification(toast, body);
-                }
-                else {
-                    App.ShowToast(toast);
-                }
+
+
+            print("DLOADING " + mediaStreamInfos.Size);
+            print("DURL::" + mediaStreamInfos.Url);
+            string extraPath = "/" + GetPathFromType(header);
+            string fileUrl = platformDep.DownloadHandleIntent(id, new List<string>() { info.Resolution.Height + "p" }, new List<string>() { info.Url }, v.Title + "." + info.Container.GetFileExtension(), name, true, extraPath, true, true, false, v.Thumbnails.HighResUrl, "{name}\n");//isMovie ? "{name}\n" : ($"S{season}:E{episode} - " + "{name}\n"));
+            return fileUrl;
+            //App.SetKey("dlength", "id" + id, mediaStreamInfos.Size);
+            /*
+            try {
+                await client.DownloadMediaStreamAsync(mediaStreamInfos, App.GetDownloadPath(name, "/YouTube") + ".mp4");
             }
+            catch (Exception _ex) {
+                print("EXDLOADYT:::: " + _ex);
+            }
+            if (isNotification) {
+                ShowNotIntent(name, "Download done!", ConvertStringToInt(v.Id), "-1", "-1");
+            }*/
+
+            /*
+            string extraPath = "/" + GetPathFromType(header);
+            print("HEADERID::: " + header.RealId);
+            App.SetKey(nameof(DownloadHeader), "id" + header.RealId, header);
+            bool isMovie = header.movieType == MovieType.AnimeMovie || header.movieType == MovieType.Movie;
+
+            string fileUrl = platformDep.DownloadHandleIntent(id, mirrorNames, mirrorUrls, downloadTitle, name, true, extraPath, true, true, false, poster, isMovie ? "{name}\n" : ($"S{season}:E{episode} - " + "{name}\n"));
+            App.SetKey(nameof(DownloadEpisodeInfo), "id" + id, new DownloadEpisodeInfo() { dtype = DownloadType.Normal, source = header.id, description = description, downloadHeader = header.RealId, episode = episode, season = season, fileUrl = fileUrl, id = id, name = name });
+            */
+
+
+            /* if (toast != "") {
+                 if (isNotification) {
+                     App.ShowNotification(toast, body);
+                 }
+                 else {
+                     App.ShowToast(toast);
+                 }
+             }*/
             //  await converter.DownloadAndProcessMediaStreamsAsync(mediaStreamInfos, basePath + "/" + path + ".mp4",".mp4");
         }
     }

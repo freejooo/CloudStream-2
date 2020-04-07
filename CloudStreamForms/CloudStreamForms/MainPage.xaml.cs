@@ -882,7 +882,7 @@ namespace CloudStreamForms
             public string url;
         }
         [Serializable]
-        public enum MovieType { Movie, TVSeries, Anime, AnimeMovie }
+        public enum MovieType { Movie, TVSeries, Anime, AnimeMovie, YouTube }
         [Serializable]
         public enum PosterType { Imdb, Raw }
 
