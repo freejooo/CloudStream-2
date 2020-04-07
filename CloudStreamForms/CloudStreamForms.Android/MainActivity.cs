@@ -239,7 +239,7 @@ namespace CloudStreamForms.Droid
         }
 
         public static async void ShowLocalNot(LocalNot not, Context context = null)
-        { 
+        {
             var cc = context ?? Application.Context;
             var builder = new Notification.Builder(cc);
             builder.SetContentTitle(not.title);
@@ -346,7 +346,7 @@ namespace CloudStreamForms.Droid
                 // resultIntent.SetFlags(ActivityFlags.task);
             }
 
-            print("NOTIFY::: " + not.id);
+            //   print("NOTIFY::: " + not.id);
             _manager.Notify(not.id, builder.Build());
 
         }
@@ -1069,16 +1069,15 @@ namespace CloudStreamForms.Droid
                         print("FAILED:::" + _ex);
                     }
 
-
                     fileName = CensorFilename(fileName);
-                    path += "/" + fileName;
-                    print("PATH=====" + path + "|" + fileName);
+                    string mpath = path + "/" + fileName;
+                    print("PATH=====" + mpath + "|" + fileName);
 
 
                     URL _url = new URL(url);
                     URLConnection connection = _url.OpenConnection();
 
-                    var rFile = new Java.IO.File(path);
+                    var rFile = new Java.IO.File(mpath);
                     if (!rFile.Exists()) {
                         print("FILE DOSENT EXITS");
                         rFile.CreateNewFile();
@@ -1206,89 +1205,6 @@ namespace CloudStreamForms.Droid
                     changedPause -= UpdateFromId;
                     isPaused.Remove(id);
                 }
-                /*
-                try {
-                    // FILE STUFF
-                    try {
-                        Java.IO.File __file = new Java.IO.File(path);
-                        __file.Mkdirs();
-                    }
-                    catch (Exception _ex) {
-                        print("FAILED:::" + _ex);
-                    }
-
-                    fileName = CensorFilename(fileName);
-                    path += "/" + fileName;
-                    print("PATH=====" + path + "|" + fileName);
-
-                    var rFile = new Java.IO.File(path);
-                    bool exists = true;
-                    if (!rFile.Exists()) {
-                        exists = false;
-                        print("FILE DOSENT EXITS");
-                        rFile.CreateNewFile();
-                    }
-
-
-                    long skip = App.GetKey<long>(DOWNLOAD_KEY, id.ToString(), 0);
-
-                    URL _url = new URL(url);
-                    URLConnection connection = _url.OpenConnection();
-                    if (exists) {
-                        connection.SetRequestProperty("Range", "bytes=" + rFile.Length() + "-");
-                    }
-                    connection.Connect();
-                    //   connection.InputStream.Seek (skip,SeekOrigin.Begin);
-                    int fileLength = connection.ContentLength;
-                    String fileExtension = MimeTypeMap.GetFileExtensionFromUrl(url);
-                    InputStream input = new BufferedInputStream(connection.InputStream);
-       
-                   // App.ShowToast(connection.InputStream.Position + "<<<");
-
-
-
-                    // input.Skip(skip);
-
-                    OutputStream output = new FileOutputStream(rFile, true);
-
-                    outputStreams[id] = output;
-                    inputStreams[id] = input;
-
-                    byte[] data = new byte[1024];
-                    long total = skip;
-                    int count;
-                    int previousProgress = 0;
-                    UpdateDloadNot();
-                    while ((count = input.Read(data)) != -1) {
-                        total += count;
-                        int cprogress = (int)(total * 100 / fileLength);
-                        output.Write(data, 0, count);
-                        progressDownloads[id] = total;
-
-                        if (cprogress == 100 || cprogress > previousProgress) {
-                            // Only post progress event if we've made progress.
-                            previousProgress = cprogress;
-                            progress = cprogress;
-                            UpdateDloadNot();
-                        }
-                    }
-                    ShowDone(true);
-                    output.Flush();
-                    output.Close();
-                    input.Close();
-                    outputStreams.Remove(id);
-                    inputStreams.Remove(id);
-                }
-                catch (Exception _ex) {
-                    print("DOWNLOADURL: " + url);
-                    print("DOWNLOAD FAILED BC: " + _ex);
-                    ShowDone(false);
-                }
-                finally {
-                    App.RemoveKey(DOWNLOAD_KEY, id.ToString());
-                    App.RemoveKey(DOWNLOAD_KEY_INTENT, id.ToString());
-                }
-                */
             });
             t.Start();
         }
@@ -1532,6 +1448,12 @@ namespace CloudStreamForms.Droid
 
     public class MainDroid : App.IPlatformDep
     {
+
+        public void UpdateDownload(int id, int state)
+        {
+            DownloadHandle.isPaused[id] = state;
+        }
+
         public DownloadProgressInfo GetDownloadProgressInfo(int id, string fileUrl)
         {
             DownloadProgressInfo progressInfo = new DownloadProgressInfo();
@@ -1556,9 +1478,21 @@ namespace CloudStreamForms.Droid
             //                        App.SetKey("dlength", "id" + id, fileLength);
 
             progressInfo.totalBytes = exists ? App.GetKey<int>("dlength", "id" + id, 0) : 0;
-            if (progressInfo.bytesDownloaded < progressInfo.totalBytes - 1000 && progressInfo.state == DownloadState.Downloaded) {
+            if (progressInfo.bytesDownloaded < progressInfo.totalBytes - 10 && progressInfo.state == DownloadState.Downloaded) {
                 progressInfo.state = DownloadState.NotDownloaded;
             }
+            if (progressInfo.totalBytes == 0 && progressInfo.state == DownloadState.Downloading) {
+                progressInfo.state = DownloadState.NotDownloaded;
+            }
+            if (progressInfo.bytesDownloaded >= progressInfo.totalBytes - 10) {
+                progressInfo.state = DownloadState.Downloaded;
+            }
+            if (progressInfo.bytesDownloaded == 0 || progressInfo.totalBytes == 0) {
+                progressInfo.state = DownloadState.NotDownloaded;
+            }
+
+            print("STATE:::::==" + progressInfo.totalBytes + "|" + progressInfo.bytesDownloaded);
+
             return progressInfo;
         }
 

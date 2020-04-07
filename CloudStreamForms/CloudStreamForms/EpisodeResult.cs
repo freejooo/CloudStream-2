@@ -8,6 +8,7 @@ namespace CloudStreamForms.Models
     {
         public int Id { set; get; }
         public int Episode { set; get; } = -1;
+        public int Season { set; get; } = -1;
         public string Title { set; get; }
         public string Rating { set; get; }
         public string RatingStar { get { return (Rating.Replace(" ", "") == "" ? "Rating Unavailable" : "★ " + Rating); } } // ★
@@ -16,6 +17,7 @@ namespace CloudStreamForms.Models
         public ImageSource ImageSource { get {  return IsPosterFromStorage ? App.GetImageSource(PosterUrl) : PosterUrl; } }
         public ImageSource VideoSource { get { return App.GetImageSource("nexflixPlayBtt.png");  } }
         public ImageSource DownloadSource { get { return "NetflixDownload1.png"; } }
+        public ImageSource DownloadPlayBttSource { get; set; }
         public Command TapCom { set; get; }
         public bool IsDownloading { get { return downloadState == 2; } }
         public bool IsDownloaded { get { return downloadState == 1; } } 

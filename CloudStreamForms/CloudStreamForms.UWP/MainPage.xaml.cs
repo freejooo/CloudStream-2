@@ -404,6 +404,10 @@ namespace CloudStreamForms.UWP
         {
             return new _App.DownloadProgressInfo() { bytesDownloaded = 0, state = _App.DownloadState.NotDownloaded, totalBytes = 0 };
         }
+
+        public void UpdateDownload(int id, int state)
+        { 
+        }
     }
 
     public static class Message

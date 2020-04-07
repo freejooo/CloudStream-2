@@ -638,8 +638,7 @@ namespace CloudStreamForms
                 episodeResult.PosterUrl = CloudStreamCore.ConvertIMDbImagesToHD(episodeResult.PosterUrl, 224, 126); //episodeResult.PosterUrl.Replace(",126,224_AL", "," + pwidth + "," + pheight + "_AL").Replace("UY126", "UY" + pheight).Replace("UX224", "UX" + pwidth);
             }
 
-            episodeResult.TapCom = new Command(async (s) => {
-
+            episodeResult.TapCom = new Command(async (s) => { 
                 int _id = -1;
                 for (int i = 0; i < epView.MyEpisodeResultCollection.Count; i++) {
                     if (epView.MyEpisodeResultCollection[i].Id == episodeResult.Id) {

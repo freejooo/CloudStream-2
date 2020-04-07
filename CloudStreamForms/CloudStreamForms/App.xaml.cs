@@ -56,6 +56,8 @@ namespace CloudStreamForms
             string DownloadHandleIntent(int id, List<string> mirrorNames, List<string> mirrorUrls, string fileName, string titleName, bool mainPath, string extraPath, bool showNotification = true, bool showNotificationWhenDone = true, bool openWhenDone = false, string poster = "", string beforeTxt = "");
             string DownloadAdvanced(int id, string url, string fileName, string titleName, bool mainPath, string extraPath, bool showNotification = true, bool showNotificationWhenDone = true, bool openWhenDone = false, string poster = "", string beforeTxt = "");
             DownloadProgressInfo GetDownloadProgressInfo(int id, string fileUrl);
+
+            void UpdateDownload(int id, int state);
         }
 
         public enum DownloadState { Downloading, Downloaded, NotDownloaded, Paused }
@@ -90,6 +92,8 @@ namespace CloudStreamForms
             public int id;
             public int episode;
             public int season;
+            public string hdPosterUrl;
+
             public string fileUrl;
             public int downloadHeader;
             public DownloadType dtype;
@@ -131,6 +135,15 @@ namespace CloudStreamForms
             return path;
         }
 
+        /// <summary>
+        /// 0 = download, 1 = Pause, 2 = remove
+        /// </summary>
+        public static void UpdateDownload(int id, int state)
+        {
+            platformDep.UpdateDownload(id, state);
+        }
+
+
 
         public static string RequestDownload(int id, string name, string description, int episode, int season, List<string> mirrorUrls, List<string> mirrorNames, string downloadTitle, string poster, CloudStreamCore.Title title)
         {
@@ -141,7 +154,7 @@ namespace CloudStreamForms
             bool isMovie = header.movieType == MovieType.AnimeMovie || header.movieType == MovieType.Movie;
 
             string fileUrl = platformDep.DownloadHandleIntent(id, mirrorNames, mirrorUrls, downloadTitle, name, true, extraPath, true, true, false, poster, isMovie ? "{name}\n" : ($"S{season}:E{episode} - " + "{name}\n"));
-            App.SetKey(nameof(DownloadEpisodeInfo), "id" + id, new DownloadEpisodeInfo() { dtype = DownloadType.Normal, source = header.id, description = description, downloadHeader = header.RealId, episode = episode, season = season, fileUrl = fileUrl, id = id, name = name });
+            App.SetKey(nameof(DownloadEpisodeInfo), "id" + id, new DownloadEpisodeInfo() { dtype = DownloadType.Normal, source = header.id, description = description, downloadHeader = header.RealId, episode = episode, season = season, fileUrl = fileUrl, id = id, name = name,hdPosterUrl=poster });
 
             App.SetKey("DownloadIds", id.ToString(), id);
 
