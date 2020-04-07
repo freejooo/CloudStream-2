@@ -34,7 +34,9 @@ namespace CloudStreamForms.Models
         public bool DownloadNotDone { set; get; }
 
         string _Description = "";
+        string _ExtraDescription = "";
         public string Description { set { _Description = Settings.EpDecEnabled ? value : ""; } get { return _Description; } }
+        public string ExtraDescription { set { _ExtraDescription = Settings.EpDecEnabled ? value : ""; } get { return _ExtraDescription; } }
         public double Progress { set; get; }
         public List<string> Mirros { set; get; }
         public List<string> mirrosUrls { set; get; }
@@ -44,8 +46,8 @@ namespace CloudStreamForms.Models
         // public LoadResult loadResult { set; get; }
         public bool LoadedLinks { set; get; }
         public string MainTextColor { set; get; } = "#e7e7e7";
-        public string MainDarkTextColor { get; set; } = "#808080";
-        public string ExtraColor { get; set; } = "#808080";
+        public string MainDarkTextColor { get; set; } = "#a4a4a4"; //"#808080";
+        public string ExtraColor { get; set; } = "#a4a4a4"; //"#808080";
         public string OgTitle { set; get; }
         public double TranslateYOffset
         {

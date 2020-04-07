@@ -776,7 +776,7 @@ namespace CloudStreamForms.Droid
                 int isPause = isPaused[id];
                 bool canPause = isPause == 0;
                 if (isPause != 2) {
-                    ShowLocalNot(new LocalNot() { actions = new List<LocalAction>() { new LocalAction() { action = $"handleDownload|||id={id}|||dType={(canPause ? 1 : 0)}|||", name = canPause ? "Pause" : "Resume" }, new LocalAction() { action = $"handleDownload|||id={id}|||dType=2|||", name = "Stop" } }, mediaStyle = false, bigIcon = poster, title = title, autoCancel = false, onGoing = canPause, id = id, smallIcon = Resource.Drawable.bicon, progress = progress, body = progressTxt }, context);
+                    ShowLocalNot(new LocalNot() { actions = new List<LocalAction>() { new LocalAction() { action = $"handleDownload|||id={id}|||dType={(canPause ? 1 : 0)}|||", name = canPause ? "Pause" : "Resume" }, new LocalAction() { action = $"handleDownload|||id={id}|||dType=2|||", name = "Stop" } }, mediaStyle = false, bigIcon = poster, title = title, autoCancel = false, showWhen=false, onGoing = canPause, id = id, smallIcon = Resource.Drawable.bicon, progress = progress, body = progressTxt }, context); //canPause
                 }
             }
 

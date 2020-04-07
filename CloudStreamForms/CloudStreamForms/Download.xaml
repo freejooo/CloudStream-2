@@ -84,7 +84,7 @@
                 <!-- <ProgressBar Progress="0.5"></ProgressBar> -->
                 <ListView ItemsSource="{Binding MyEpisodeResultCollection}"
                              CachingStrategy="RecycleElement" 
-                ItemTapped="episodeView_ItemTapped" RowHeight="100"
+                ItemTapped="episodeView_ItemTapped" RowHeight="104" 
                     x:Name="episodeView"  SeparatorColor="Transparent"                  >
 
 
@@ -107,36 +107,38 @@
                                                 <RowDefinition Height="Auto" />
                                                 <RowDefinition Height="Auto" />
                                                 <RowDefinition Height="Auto" />
+                                                <RowDefinition Height="Auto" />
                                             </Grid.RowDefinitions>
 
                                             <Grid.ColumnDefinitions >
                                                 <ColumnDefinition Width="Auto" />
                                                 <ColumnDefinition Width="Auto" />
+                                                <ColumnDefinition Width="*" />
                                                 <ColumnDefinition Width="Auto" />
                                             </Grid.ColumnDefinitions>
-                                            <Grid Grid.Row="0"  Grid.Column="0"  WidthRequest="126" TranslationY="{Binding TranslateYOffset}" BindingContextChanged="Grid_BindingContextChanged">
+                                            <Grid Grid.Row="0"  Grid.Column="0"  WidthRequest="70" HeightRequest="104" TranslationY="{Binding TranslateYOffset}" BindingContextChanged="Grid_BindingContextChanged">
 
-                                            <ImageButton Clicked="ImageButton_Clicked" BackgroundColor="Transparent" WidthRequest="126"></ImageButton>
+                                            <ImageButton Clicked="ImageButton_Clicked" BackgroundColor="Transparent" WidthRequest="70"></ImageButton>
                                                 <!--PosterUrl-->
-                                                <ff:CachedImage WidthRequest="126" HeightRequest="80" Source="{Binding ImageSource}" InputTransparent="True"   >
+                                                <ff:CachedImage WidthRequest="70" HeightRequest="104" Source="{Binding ImageSource}" InputTransparent="True"   >
 
                                                     <ff:CachedImage.Transformations>
-                                                        <ffTransformations:RoundedTransformation BorderSize="0" Radius="1" BorderHexColor="#303F9F" CropWidthRatio="1.77"  >
+                                                        <ffTransformations:RoundedTransformation BorderSize="0" Radius="1" BorderHexColor="#303F9F" CropHeightRatio="0.66"  >
 
                                                         </ffTransformations:RoundedTransformation>
                                                     </ff:CachedImage.Transformations>
                                                 </ff:CachedImage>
-                                                <ff:CachedImage PropertyChanging="Image_PropertyChanging" InputTransparent="True" BackgroundColor="Transparent">
+                                             <!--   <ff:CachedImage PropertyChanging="Image_PropertyChanging" InputTransparent="True" BackgroundColor="Transparent">
 
-                                                </ff:CachedImage>
-                                                <Grid  xe:TouchEffect.Color="White" Opacity="0.5" WidthRequest="127" HeightRequest="72" Margin="0,4" BackgroundColor="Transparent" xe:EffectsConfig.ChildrenInputTransparent="False" BindingContextChanged="Grid_PlayVid" >
-                                                </Grid>
+                                                </ff:CachedImage>-->
+                                                <!--<Grid  xe:TouchEffect.Color="White" Opacity="0.5" WidthRequest="127" HeightRequest="72" Margin="0,4" BackgroundColor="Transparent" xe:EffectsConfig.ChildrenInputTransparent="False" BindingContextChanged="Grid_PlayVid" >
+                                                </Grid>-->
 
 
 
                                                 <!-- Source="{Binding PosterUrl}"-->
                                             </Grid>
-                                            <Grid  Grid.Row="0"  Grid.Column="1">
+                                            <Grid  Grid.Row="0"  Grid.Column="1" VerticalOptions="Center">
                                                 <Grid RowSpacing="0" Padding="0" >
                                                     <Grid.RowDefinitions >
                                                         <RowDefinition Height="Auto" />
@@ -149,12 +151,22 @@
                                                         <ColumnDefinition Width="Auto" />
                                                     </Grid.ColumnDefinitions>
                                                     <Grid Grid.Row="0"  Grid.Column="0" >
-                                                        <Label Text="{Binding Title}" TextColor="{Binding MainTextColor}" FontAttributes="Bold" FontSize="13"/>
+                                                        <Label Text="{Binding Title}" TextColor="{Binding MainTextColor}" FontAttributes="Bold" FontSize="14"/>
                                                     </Grid>
                                                     <Grid Grid.Row="1"  Grid.Column="0" >
-                                                        <Label Text="{Binding Description}"  TextColor="{Binding MainDarkTextColor}" MaxLines="3"  />
+                                                        <Label Text="{Binding Description}"  TextColor="{Binding MainDarkTextColor}" MaxLines="3" FontSize="12" />
+                                                    </Grid>
+                                                    <Grid Grid.Row="2"  Grid.Column="0" >
+                                                        <Label Text="{Binding ExtraDescription}"  TextColor="#2291ff" MaxLines="3" FontSize="11" />
                                                     </Grid>
                                                 </Grid>
+                                            </Grid>
+                                            <Grid  Grid.Row="0"  Grid.Column="2" HorizontalOptions="End" VerticalOptions="Center">
+                                                <ff:CachedImage  HorizontalOptions="End" Source="outline_navigate_next_white_48dp.png" InputTransparent="True" ScaleX="0.8">
+                                                    <ff:CachedImage.Transformations>
+                                                        <ffTransformations:TintTransformation HexColor="#707070" ></ffTransformations:TintTransformation>
+                                                    </ff:CachedImage.Transformations>
+                                                </ff:CachedImage> 
                                             </Grid>
 
                                         </Grid>

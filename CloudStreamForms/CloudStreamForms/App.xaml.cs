@@ -73,7 +73,7 @@ namespace CloudStreamForms
 
             public long bytesDownloaded;
             public long totalBytes;
-            public double ProcentageDownloaded { get { return (bytesDownloaded / totalBytes); } }
+            public double ProcentageDownloaded { get { return ((bytesDownloaded*100.0) / totalBytes); } }
         }
 
         [System.Serializable]
@@ -132,7 +132,8 @@ namespace CloudStreamForms
         {
             DownloadHeader header = ConvertTitleToHeader(title);
             string extraPath = "/" + GetPathFromType(header);
-            App.SetKey(nameof(DownloadHeader), "id" + header.id, header);
+            print("HEADERID::: " + header.RealId);
+            App.SetKey(nameof(DownloadHeader), "id" + header.RealId, header);
             bool isMovie = header.movieType == MovieType.AnimeMovie || header.movieType == MovieType.Movie;
 
             string fileUrl = platformDep.DownloadHandleIntent(id, mirrorNames, mirrorUrls, downloadTitle, name, true, extraPath, true, true, false, poster, isMovie ? "{name}\n" : ($"S{season}:E{episode} - " + "{name}\n"));
@@ -166,6 +167,7 @@ namespace CloudStreamForms
 
         public static DownloadHeader GetDownloadHeaderInfo(int id)
         {
+            print("HEADERIDFRONM::: " + id);
             return App.GetKey<DownloadHeader>(nameof(DownloadHeader), "id" + id, null);
         }
 

@@ -185,21 +185,72 @@ namespace CloudStreamForms
 
             // ========================== SET VALUES ==========================
 
+            epView.MyEpisodeResultCollection.Clear();
+
+            List<EpisodeResult> eps = new List<EpisodeResult>();
             foreach (var key in downloadHeaders.Keys) {
 
                 var val = downloadHeaders[key];
                 var helper = downloadHelper[key];
 
-                if (val.movieType == MovieType.Movie || val.movieType == MovieType.TVSeries) {
+                EpisodeResult ep = new EpisodeResult() { Title = val.name, PosterUrl = val.hdPosterUrl, Description = App.ConvertBytesToAny(helper.TotalBytes, 0, 2) + " MB" };
 
+                if (val.movieType == MovieType.TVSeries || val.movieType == MovieType.Anime) {
+                    int count = helper.infoIds.Count;
+                    ep.Description = count + $" Episode{(count > 1 ? "s" : "")} | " + ep.Description;
+
+                    int downloadingRn = 0;
+                    foreach (var id in helper.infoIds) {
+                        switch (downloads[id].state.state) {
+                            case App.DownloadState.Downloading:
+                                downloadingRn++;
+                                break;
+                            case App.DownloadState.Downloaded:
+                                break;
+                            case App.DownloadState.NotDownloaded:
+                                break;
+                            case App.DownloadState.Paused:
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+
+                    ep.ExtraDescription = downloadingRn == 0 ? "" : $"Downloading {downloadingRn} of {count}";  //extraString + (info.state.state == App.DownloadState.Downloaded ? "" : $" {(int)info.state.ProcentageDownloaded}%");
                 }
-                if (val.movieType == MovieType.TVSeries) {
-                    // redirect to real 
 
+                if (val.movieType == MovieType.Movie || val.movieType == MovieType.AnimeMovie) {
+                    var info = downloads[helper.infoIds[0]];
+
+                    ep.Description = (info.state.state == App.DownloadState.Downloaded ? "" : App.ConvertBytesToAny(helper.Bytes, 0, 2) + " MB of ") + ep.Description;
+                    string extraString = "Downloading";
+                    switch (info.state.state) {
+                        case App.DownloadState.Downloading:
+                            break;
+                        case App.DownloadState.Downloaded:
+                            extraString = "Downloaded";
+                            break;
+                        case App.DownloadState.NotDownloaded: // SHOULD NEVER HAPPEND; SHOULD BE REMOVED BEFOREHAND
+                            extraString = "Error";
+                            break;
+                        case App.DownloadState.Paused:
+                            extraString = "Paused";
+                            break;
+                        default:
+                            break;
+                    }
+
+                    ep.ExtraDescription = extraString + (info.state.state == App.DownloadState.Downloaded ? "" : $" {(int)info.state.ProcentageDownloaded}%");
+                }
+                else if (val.movieType == MovieType.TVSeries) {
+                    // redirect to real  
                 }
                 else if (val.movieType == MovieType.Anime) {
                     // redirect to real 
                 }
+                AddEpisode(ep);
+                // epView.MyEpisodeResultCollection.Add(ep);
+                // eps.Add(ep);
             }
 
             foreach (var dload in downloads.Values) {
@@ -497,7 +548,7 @@ namespace CloudStreamForms
 
             c.Transformations.Clear();
             var ep = ((EpisodeResult)c.BindingContext);
-            c.Transformations = new List<FFImageLoading.Work.ITransformation>() { new FFImageLoading.Transformations.RoundedTransformation() { BorderHexColor = ep.ExtraColor, BorderSize = 0, Radius = 1, CropWidthRatio = 1.77 } };
+            c.Transformations = new List<FFImageLoading.Work.ITransformation>() { new FFImageLoading.Transformations.RoundedTransformation() { BorderHexColor = ep.ExtraColor, BorderSize = 0, Radius = 1, CropHeightRatio = 1.5 } }; //1.77
 
         }
     }

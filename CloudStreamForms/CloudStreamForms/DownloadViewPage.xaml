@@ -16,17 +16,17 @@
             </Grid.RowDefinitions>
 
             <Grid Grid.Row="1"  Grid.Column="0">
-                <!-- <ProgressBar Progress="0.5"></ProgressBar> -->
+                <!-- <ProgressBar Progress="0.5"></ProgressBar>  ItemTapped="episodeView_ItemTapped" Tapped="ViewCell_Tapped"-->
                 <ListView ItemsSource="{Binding MyEpisodeResultCollection}"
                              CachingStrategy="RecycleElement" 
-                ItemTapped="episodeView_ItemTapped" RowHeight="100"
+                RowHeight="100"
                     x:Name="episodeView"  SeparatorColor="Transparent"                  >
 
 
 
                     <ListView.ItemTemplate>
                         <DataTemplate >
-                            <ViewCell Tapped="ViewCell_Tapped">
+                            <ViewCell >
                                 <Grid RowSpacing="0"  Padding="0"  HorizontalOptions="Fill" >
                                     <!--SizeChanged="ViewCell_SizeChanged"-->
 
@@ -49,9 +49,11 @@
                                                 <ColumnDefinition Width="Auto" />
                                                 <ColumnDefinition Width="Auto" />
                                             </Grid.ColumnDefinitions>
-                                            <Grid Grid.Row="0"  Grid.Column="0"  WidthRequest="126" TranslationY="{Binding TranslateYOffset}" BindingContextChanged="Grid_BindingContextChanged">
 
-                                                <ImageButton Clicked="ImageButton_Clicked" BackgroundColor="Transparent" WidthRequest="126"></ImageButton>
+                                            <!-- BindingContextChanged="Grid_BindingContextChanged" -->
+                                            <Grid Grid.Row="0"  Grid.Column="0"  WidthRequest="126" TranslationY="{Binding TranslateYOffset}" >
+                                                <!--Clicked="ImageButton_Clicked"-->
+                                                <ImageButton  BackgroundColor="Transparent" WidthRequest="126"></ImageButton>
                                                 <!--PosterUrl-->
                                                 <ff:CachedImage WidthRequest="126" HeightRequest="80" Source="{Binding ImageSource}" InputTransparent="True"   >
 
@@ -61,10 +63,12 @@
                                                         </ffTransformations:RoundedTransformation>
                                                     </ff:CachedImage.Transformations>
                                                 </ff:CachedImage>
-                                                <ff:CachedImage PropertyChanging="Image_PropertyChanging" InputTransparent="True" BackgroundColor="Transparent">
+                                                <!--PropertyChanging="Image_PropertyChanging" -->
+                                                <ff:CachedImage InputTransparent="True" BackgroundColor="Transparent">
 
                                                 </ff:CachedImage>
-                                                <Grid  xe:TouchEffect.Color="White" Opacity="0.5" WidthRequest="127" HeightRequest="72" Margin="0,4" BackgroundColor="Transparent" xe:EffectsConfig.ChildrenInputTransparent="False" BindingContextChanged="Grid_PlayVid" >
+                                                <!-- BindingContextChanged="Grid_PlayVid" --> 
+                                                <Grid  xe:TouchEffect.Color="White" Opacity="0.5" WidthRequest="127" HeightRequest="72" Margin="0,4" BackgroundColor="Transparent" xe:EffectsConfig.ChildrenInputTransparent="False">
                                                 </Grid>
 
 
