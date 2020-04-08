@@ -599,8 +599,8 @@ namespace CloudStreamForms
                 try {
                     Launcher.OpenAsync(new Uri(url));
                 }
-                catch (Exception) {
-                    CloudStreamCore.print("BROWSER LOADED ERROR, SHOULD NEVER HAPPEND!!");
+                catch (Exception _ex) {
+                    CloudStreamCore.print("BROWSER LOADED ERROR, SHOULD NEVER HAPPEND!!" + _ex);
                 }
             }
         }

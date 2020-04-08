@@ -1478,6 +1478,11 @@ namespace CloudStreamForms.Droid
             //                        App.SetKey("dlength", "id" + id, fileLength);
 
             progressInfo.totalBytes = exists ? App.GetKey<int>("dlength", "id" + id, 0) : 0;
+            print("STATE:::::==" + progressInfo.totalBytes + "|" + progressInfo.bytesDownloaded);
+            if (!exists) {
+                return progressInfo;
+            }
+
             if (progressInfo.bytesDownloaded < progressInfo.totalBytes - 10 && progressInfo.state == DownloadState.Downloaded) {
                 progressInfo.state = DownloadState.NotDownloaded;
             }
@@ -1487,11 +1492,10 @@ namespace CloudStreamForms.Droid
             if (progressInfo.bytesDownloaded >= progressInfo.totalBytes - 10) {
                 progressInfo.state = DownloadState.Downloaded;
             }
-            if (progressInfo.bytesDownloaded == 0 || progressInfo.totalBytes == 0) {
-                progressInfo.state = DownloadState.NotDownloaded;
+            if (progressInfo.bytesDownloaded < 0 || progressInfo.totalBytes < 0) { 
+                progressInfo.state = DownloadState.NotDownloaded; 
+                progressInfo.totalBytes = 0; 
             }
-
-            print("STATE:::::==" + progressInfo.totalBytes + "|" + progressInfo.bytesDownloaded);
 
             return progressInfo;
         }

@@ -84,9 +84,9 @@
                 <ListView ItemsSource="{Binding MyEpisodeResultCollection}"
                              CachingStrategy="RecycleElement" 
                 ItemTapped="episodeView_ItemTapped" RowHeight="104" 
-                    x:Name="episodeView"  SeparatorColor="Transparent"                  >
-
-
+                    x:Name="episodeView"  SeparatorColor="Transparent" IsPullToRefreshEnabled="True"
+           RefreshCommand="{Binding RefreshCommand}"
+           IsRefreshing="{Binding IsRefreshing}"         >
 
                     <ListView.ItemTemplate>
                         <DataTemplate >

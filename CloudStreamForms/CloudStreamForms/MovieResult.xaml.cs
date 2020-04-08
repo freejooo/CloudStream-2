@@ -592,7 +592,6 @@ namespace CloudStreamForms
         }
 
         int maxEpisodes = 1;
-        int episodeCounter = 0;
         public void AddEpisode(EpisodeResult episodeResult, int index)
         {
             var _episode = ChangeEpisode(episodeResult);

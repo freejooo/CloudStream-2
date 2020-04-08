@@ -20,9 +20,9 @@
                 <ListView ItemsSource="{Binding MyEpisodeResultCollection}"
                              CachingStrategy="RecycleElement"  
                 RowHeight="100"
-                    x:Name="episodeView"  SeparatorColor="Transparent"                  >
-
-
+                    x:Name="episodeView"  SeparatorColor="Transparent"      IsPullToRefreshEnabled="True"
+           RefreshCommand="{Binding RefreshCommand}"
+           IsRefreshing="{Binding IsRefreshing}"             > 
 
                     <ListView.ItemTemplate>
                         <DataTemplate >

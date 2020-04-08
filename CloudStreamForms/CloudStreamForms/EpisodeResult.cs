@@ -28,9 +28,7 @@ namespace CloudStreamForms.Models
         /// 0 = Nothing, 1 = Downloaded, 1 = Downloading, 2 = Paused, 3 = Searching 
         /// </summary>
         public int downloadState { set; get; } = 0;
-
         public string extraInfo { set; get; }
-
         public string ExtraText { set; get; }
         public double ExtraProgress { set; get; }
         public bool DownloadNotDone { set; get; }

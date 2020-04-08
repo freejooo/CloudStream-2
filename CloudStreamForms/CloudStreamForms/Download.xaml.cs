@@ -8,6 +8,7 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Input;
 using Xamarin.Essentials;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
@@ -24,9 +25,36 @@ namespace CloudStreamForms
     [XamlCompilation(XamlCompilationOptions.Compile)]
     public partial class Download : ContentPage
     {
-        public MainEpisodeView epView;
+        private ObservableCollection<EpisodeResult> _MyEpisodeResultCollection;
+        public ObservableCollection<EpisodeResult> MyEpisodeResultCollection { set { Added?.Invoke(null, null); _MyEpisodeResultCollection = value; } get { return _MyEpisodeResultCollection; } }
+
+        public event EventHandler Added;
 
 
+        private bool _isRefreshing = false;
+        public bool IsRefreshing
+        {
+            get { return _isRefreshing; }
+            set {
+                _isRefreshing = value;
+                OnPropertyChanged(nameof(IsRefreshing));
+            }
+        }
+
+        public ICommand RefreshCommand
+        {
+            get {
+                return new Command(async () => {
+                    IsRefreshing = true;
+                    print("YEET;;;;");
+                    UpdateDownloaded();
+                    await Task.Delay(100);
+                    // await RefreshData();
+
+                    IsRefreshing = false;
+                });
+            }
+        }
 
         public Download()
         {
@@ -45,8 +73,8 @@ namespace CloudStreamForms
                     Text = txt,
                     Placeholder = "YouTube Link",
                     OnAction = new Action<PromptResult>(async t => {
-                        if (t.Ok) { 
-                            Device.InvokeOnMainThreadAsync(async () => { 
+                        if (t.Ok) {
+                            await Device.InvokeOnMainThreadAsync(async () => {
                                 string ytUrl = t.Text;
                                 Video v = null;
                                 const string errorTxt = "Error Downloading YouTube Video";
@@ -99,11 +127,10 @@ namespace CloudStreamForms
                         }
                     })
                 });
-            }; 
+            };
 
-            epView = new MainEpisodeView();
-            BindingContext = epView;
-
+            MyEpisodeResultCollection = new ObservableCollection<EpisodeResult>();
+            BindingContext = this;
             BackgroundColor = Settings.BlackRBGColor;
         }
 
@@ -111,8 +138,7 @@ namespace CloudStreamForms
         {
             base.OnAppearing();
             BackgroundColor = Settings.BlackRBGColor;
-            UpdateDownloads();
-
+            UpdateDownloaded();
 
             var d = App.GetStorage();
             try {
@@ -137,27 +163,26 @@ namespace CloudStreamForms
             //print("PRO:" + d.UsedProcentage + " Total Size: " + App.ConvertBytesToGB(d.TotalSpace, 2) + "GB Current Space: " + App.ConvertBytesToGB(d.FreeSpace, 2) + "GB" + " Used Space: " + App.ConvertBytesToGB(d.UsedSpace, 2) + "GB");
 
         }
-        List<DownloadPoster> downloadposter = new List<DownloadPoster>();
-        [Serializable]
-        struct DownloadPoster
-        {
-            public Button button;
-            public int id;
-            public string moviePath;
-            public string name;
-        }
 
-        void AddEpisode(EpisodeResult episodeResult)
-        {
-            epView.MyEpisodeResultCollection.Add(episodeResult);
-            SetHeight();
-        }
         void SetHeight()
         {
-            Device.BeginInvokeOnMainThread(() => episodeView.HeightRequest = epView.MyEpisodeResultCollection.Count * episodeView.RowHeight + 20);
+            Device.BeginInvokeOnMainThread(() => episodeView.HeightRequest = 10000);//episodeView.HeightRequest = MyEpisodeResultCollection.Count * episodeView.RowHeight + 200);
         }
 
-        void UpdateDload()
+        public static void RemoveDownloadCookie(int? id = null, int? headerId = null)
+        {
+            if (id != null) {
+                App.RemoveKey(nameof(DownloadEpisodeInfo), "id" + id);
+                App.RemoveKey("DownloadIds", id.ToString());
+                App.RemoveKey("dlength", "id" + id);
+            }
+
+            if (headerId != null) {
+                App.RemoveKey(nameof(DownloadHeader), "id" + headerId);
+            }
+        }
+
+        void UpdateDownloaded()
         {
             List<string> keys = App.GetKeys<string>("DownloadIds");
             List<string> keysPaths = App.GetKeysPath("DownloadIds");
@@ -166,32 +191,40 @@ namespace CloudStreamForms
             downloadHeaders.Clear();
             downloadHelper.Clear();
 
+            List<int> headerRemovers = new List<int>();
+            Dictionary<int, bool> validHeaders = new Dictionary<int, bool>();
             for (int i = 0; i < keys.Count; i++) {
                 int id = App.GetKey<int>(keysPaths[i], 0);
                 var info = App.GetDownloadInfo(id);
 
-                if (!downloads.ContainsKey(id)) {
-                    downloads[id] = info;
-                }
-
-                int headerId = info.info.downloadHeader;
-                if (!downloadHeaders.ContainsKey(headerId)) {
-                    var header = App.GetDownloadHeaderInfo(headerId);
-                    downloadHeaders[headerId] = header;
-                }
-
-                if (!downloadHelper.ContainsKey(headerId)) {
-                    downloadHelper[headerId] = new DownloadHeaderHelper() { infoIds = new List<int>() { id }, bytesUsed = new List<long>() { info.state.bytesDownloaded }, totalBytesUsed = new List<long>() { info.state.totalBytes } };
+                //if (!downloads.ContainsKey(id)) {
+                downloads[id] = info;
+                //} 
+                if (info.state.totalBytes == 0) {
+                    RemoveDownloadCookie(id);
+                    headerRemovers.Add(info.info.downloadHeader);
                 }
                 else {
-                    var helper = downloadHelper[headerId];
-                    helper.infoIds.Add(id);
-                    helper.totalBytesUsed.Add(info.state.totalBytes);
-                    helper.bytesUsed.Add(info.state.bytesDownloaded);
-                    downloadHelper.Remove(headerId);
-                    downloadHelper.Add(headerId, helper);
-                }
+                    int headerId = info.info.downloadHeader;
+                    print("HEADERSTAET::" + headerId);
+                    validHeaders[headerId] = true;
+                    if (!downloadHeaders.ContainsKey(headerId)) {
+                        var header = App.GetDownloadHeaderInfo(headerId);
+                        downloadHeaders[headerId] = header;
+                    }
 
+                    if (!downloadHelper.ContainsKey(headerId)) {
+                        downloadHelper[headerId] = new DownloadHeaderHelper() { infoIds = new List<int>() { id }, bytesUsed = new List<long>() { info.state.bytesDownloaded }, totalBytesUsed = new List<long>() { info.state.totalBytes } };
+                    }
+                    else {
+                        var helper = downloadHelper[headerId];
+                        helper.infoIds.Add(id);
+                        helper.totalBytesUsed.Add(info.state.totalBytes);
+                        helper.bytesUsed.Add(info.state.bytesDownloaded);
+                        downloadHelper.Remove(headerId);
+                        downloadHelper.Add(headerId, helper);
+                    }
+                }
                 print(info.info.name);
                 print(info.info.season);
                 print(info.state.state.ToString() + info.state.bytesDownloaded + "|" + info.state.totalBytes + "|" + info.state.ProcentageDownloaded + "%");
@@ -199,11 +232,18 @@ namespace CloudStreamForms
                 print("ID???????==" + id);
             }
 
+            for (int i = 0; i < headerRemovers.Count; i++) {
+                if (!validHeaders.ContainsKey(headerRemovers[i])) {
+                    print("HEADER:::==" + headerRemovers[i]);
+                    RemoveDownloadCookie(null, headerRemovers[i]);
+                }
+            }
+
             // ========================== SET VALUES ==========================
 
-            epView.MyEpisodeResultCollection.Clear();
+            MyEpisodeResultCollection.Clear();
 
-            List<EpisodeResult> eps = new List<EpisodeResult>();
+            //   List<EpisodeResult> eps = new List<EpisodeResult>();
             foreach (var key in downloadHeaders.Keys) {
 
                 var val = downloadHeaders[key];
@@ -253,12 +293,13 @@ namespace CloudStreamForms
                     // redirect to real 
                 }
                 // AddEpisode(ep);
-                epView.MyEpisodeResultCollection.Add(ep);
+                MyEpisodeResultCollection.Add(ep);
+                print("ADD EP::: " + ep.Title);
                 // epView.MyEpisodeResultCollection.Add(ep);
                 // eps.Add(ep);
             }
             SetHeight();
-
+            /*
             foreach (var dload in downloads.Values) {
                 if (dload.info.dtype == App.DownloadType.YouTube) {
                     // ADD YOUTUBE EPISODE
@@ -266,7 +307,7 @@ namespace CloudStreamForms
                 else {
 
                 }
-            }
+            }*/
         }
 
         public static string GetExtraString(DownloadState state)
@@ -279,7 +320,7 @@ namespace CloudStreamForms
                     extraString = "Downloaded";
                     break;
                 case App.DownloadState.NotDownloaded: // SHOULD NEVER HAPPEND; SHOULD BE REMOVED BEFOREHAND
-                    extraString = "Error";
+                    extraString = "Downloaded";
                     break;
                 case App.DownloadState.Paused:
                     extraString = "Paused";
@@ -289,9 +330,6 @@ namespace CloudStreamForms
             }
             return extraString;
         }
-
-
-
 
         public class DownloadHeaderHelper
         {
@@ -308,139 +346,6 @@ namespace CloudStreamForms
         public static Dictionary<int, App.DownloadHeader> downloadHeaders = new Dictionary<int, App.DownloadHeader>();
 
 
-        void UpdateDownloads()
-        {
-            UpdateDload();
-            return;
-            List<string> keys = App.GetKeys<string>("Download");
-            List<string> keysPaths = App.GetKeysPath("Download");
-            foreach (var item in keysPaths) {
-                print("KEYPATH:" + item);
-            }
-            List<string> data = new List<string>();
-            downloadposter = new List<DownloadPoster>();
-            // Downloads.Children.Clear();
-            epView.MyEpisodeResultCollection.Clear();
-
-            for (int i = 0; i < keys.Count; i++) {
-                string __key = App.ConvertToObject<string>(keys[i], "");
-                if (__key == "") {
-                    try {
-                        App.RemoveKey(keysPaths[i]);
-                    }
-                    catch (Exception) {
-
-                    }
-                    continue;
-                }
-                string moviePath = FindHTML(__key, "_dpath=", "|||");
-                string posterUrl = FindHTML(__key, "_ppath=", "|||");
-                string movieUrl = FindHTML(__key, "_mppath=", "|||");
-                string episodeDescript = FindHTML(__key, "_descript=", "|||");
-                string movieDescript = FindHTML(__key, "_maindescript=", "|||");
-                string id = FindHTML(__key, "_epId=", "|||");
-                string movieId = FindHTML(__key, "_movieId=", "|||");
-                string episodeTitle = FindHTML(__key, "_title=", "|||");
-                string movieTitle = FindHTML(__key, "_movieTitle=", "|||");
-                string epCounter = FindHTML(__key, "_epCounter=", "|||");
-                print("KEY:" + __key);
-                //  const double height = 80;
-                //  const double width = 126;
-                if (moviePath != "") {
-
-                    bool stuckDownload = false;
-                    long currentBytes = GetFileBytesOnSystem(moviePath);
-                    if (App.GetKey<long>("DownloadSizeBytes", id, -1) == currentBytes) {
-                        stuckDownload = true;
-                    }
-                    else {
-                        App.SetKey("DownloadSizeBytes", id, currentBytes);
-                    }
-
-                    double currentProgress = GetFileSizeOnSystem(moviePath);
-                    double maxProgress = App.GetKey("DownloadSize", id, -1.0);
-                    double dprogress = currentProgress / maxProgress;
-                    if (currentProgress == -1 || maxProgress == -1) {
-                        dprogress = 1;
-                    }
-                    string extra = "";
-                    bool downloadDone = false;
-                    if (dprogress != -1) {
-                        downloadDone = dprogress > 0.98;
-                        if (!downloadDone) {
-
-                            extra = " | " + currentProgress + " MB - " + maxProgress + " MB";
-                        }
-                        else {
-                            extra = " | " + maxProgress + " MB";
-                        }
-                    }
-                    bool isYouTube = __key.Contains("isYouTube=" + true);
-
-                    if (downloadDone) { stuckDownload = false; }
-
-                    AddEpisode(new EpisodeResult() {
-                        Description = episodeDescript,
-                        PosterUrl = posterUrl,
-                        Id = i,
-                        Title = episodeTitle + extra,
-                        ExtraProgress = dprogress,
-                        MainTextColor = stuckDownload ? "#D10E3C" : "#e7e7e7",
-                        ExtraColor = stuckDownload ? "#D10E3C" : "#303F9F",
-                        MainDarkTextColor = stuckDownload ? "#7D0824" : "#808080",
-
-                        DownloadNotDone = !downloadDone,
-                        Mirros = new List<string>() { "Download" },
-                        mirrosUrls = new List<string>() { moviePath },
-                        extraInfo = "KeyPath=" + keysPaths[i] + "|||_mppath=" + movieUrl + "|||_dpath=" + moviePath + "|||_ppath=" + posterUrl + "|||_movieId=" + movieId + "|||_movieTitle=" + movieTitle + "|||isYouTube=" + isYouTube + "|||=EndAll"
-                    });
-                    /*
-                    Grid stackLayout = new Grid();
-                    Button imageButton = new Button() { HeightRequest = height, WidthRequest = width, BackgroundColor = Color.Transparent, VerticalOptions = LayoutOptions.Start };
-                    var ff = new FFImageLoading.Forms.CachedImage {
-                        Source = posterUrl,
-                        HeightRequest = height,
-                        WidthRequest = width,
-                        BackgroundColor = Color.Transparent,
-                        VerticalOptions = LayoutOptions.Start,
-                        Transformations = {
-                                new FFImageLoading.Transformations.RoundedTransformation(10,2.5,1,10,"#303F9F")
-                            },
-                        InputTransparent = true,
-                    };
-                    var epTit = new Label() { Text = episodeTitle };
-                    var epDesc = new Label() { Text = episodeDescript };
-                    //Source = p.posterUrl
-
-                    stackLayout.Children.Add(ff);
-                    stackLayout.Children.Add(imageButton);
-                    stackLayout.Children.Add(epTit);
-                //    stackLayout.Children.Add(epDesc);
-                    //stackLayout.WidthRequest = 0;
-                    var c = new ColumnDefinition(); c.Width = new GridLength(1, GridUnitType.Auto);
-                    stackLayout.ColumnDefinitions = new ColumnDefinitionCollection() { c, c, c };
-
-
-                    Grid.SetColumn(epTit, 1);
-                   // Grid.SetColumn(epDesc, 1);
-                    downloadposter.Add(new DownloadPoster() { button = imageButton, id = i, moviePath = moviePath, name = episodeTitle });
-                 //   Grid.SetRow(stackLayout, Downloads.Children.Count);
-                   // Downloads.Children.Add(stackLayout);
-
-                    // --- RECOMMENDATIONS CLICKED -----
-                    imageButton.Clicked += (o, _e) => {
-                        for (int z = 0; z < downloadposter.Count; z++) {
-                            if (((Button)o).Id == downloadposter[z].button.Id) {
-                                App.PlayVLCWithSingleUrl(downloadposter[z].moviePath, downloadposter[z].name);
-                                // PushPageFromUrlAndName(bookmarkPosters[z].id, bookmarkPosters[z].name);
-                            }
-                        }
-                    };
-                }*/
-
-                }
-            }
-        }
 
         private void episodeView_ItemTapped(object sender, ItemTappedEventArgs e)
         {
@@ -461,13 +366,18 @@ namespace CloudStreamForms
         private void ViewCell_Tapped(object sender, EventArgs e)
         {
             EpisodeResult episodeResult = (EpisodeResult)(((ViewCell)sender).BindingContext);
-            HandleEpisode(episodeResult, this);
+            HandleEpisodeAsync(episodeResult);
             episodeView.SelectedItem = null;
-
             //            EpsodeShow(episodeResult);
             //EpisodeResult episodeResult = ((EpisodeResult)((ImageButton)sender).BindingContext);
             //App.PlayVLCWithSingleUrl(episodeResult.mirrosUrls[0], episodeResult.Title);
             //episodeView.SelectedItem = null;
+        }
+
+        async Task HandleEpisodeAsync(EpisodeResult episodeResult)
+        {
+            await HandleEpisode(episodeResult, this);
+            UpdateDownloaded();
         }
 
         private void Grid_PlayVid(object sender, EventArgs e)
@@ -485,14 +395,14 @@ namespace CloudStreamForms
         }
 
 
-        public static void HandleEpisode(EpisodeResult episodeResult, Page p)
+        public static async Task HandleEpisode(EpisodeResult episodeResult, Page p)
         {
             int key = episodeResult.Id;
 
             DownloadHeader header = downloadHeaders[key];
             if (header.movieType == MovieType.AnimeMovie || header.movieType == MovieType.Movie) {
                 var infoKey = downloadHelper[key].infoIds[0];
-                HandleEpisodeTapped(infoKey, p);
+                await HandleEpisodeTapped(infoKey, p);
             }
             else {
                 p.Navigation.PushModalAsync(new DownloadViewPage(key), false);
@@ -504,7 +414,7 @@ namespace CloudStreamForms
             App.PlayVLCWithSingleUrl(file, name, overrideSelectVideo: false);
         }
 
-        public static async void HandleEpisodeTapped(int key, Page p)
+        public static async Task HandleEpisodeTapped(int key, Page p)
         {
             DownloadInfo info = downloads[key];
             string action = await p.DisplayActionSheet(info.info.name, "Cancel", null, "Play", "Delete File", "Open Source");
@@ -562,7 +472,7 @@ namespace CloudStreamForms
                     PushPageFromUrlAndName(movieId, title);
                 }
             }
-            UpdateDownloads();
+            UpdateDownloaded();
         }
 
         public static void DeleteFileFromFolder(string keyData, string keyFolder, string keyId)
@@ -615,7 +525,8 @@ namespace CloudStreamForms
         private void ImageButton_Clicked(object sender, EventArgs e)
         {
             EpisodeResult episodeResult = ((EpisodeResult)((ImageButton)sender).BindingContext);
-            HandleEpisode(episodeResult, this);
+            HandleEpisodeAsync(episodeResult);
+            //HandleEpisode(episodeResult, this);
             //PlayEpisode(episodeResult);
         }
 
@@ -660,7 +571,21 @@ namespace CloudStreamForms
         public static async Task<Channel> GetAuthorFromVideoAsync(string videoId)
         {
             print("VideoID === " + videoId);
-            return await client.GetVideoAuthorChannelAsync(videoId);
+
+            Channel t = null;
+            for (int i = 0; i < 10; i++) {
+                if (t == null) {
+                    try {
+                        t = await client.GetVideoAuthorChannelAsync(videoId);
+                    }
+                    catch (Exception _ex) {
+                        print("CHANNELL ASYNC FAILED:" + _ex);
+                    }
+                }
+            }
+            if (t == null) throw new Exception("Channel Failed"); 
+
+            return t;
         }
 
         public static async Task<MuxedStreamInfo> GetInfoAsync(string url)
