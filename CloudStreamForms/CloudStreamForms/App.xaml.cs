@@ -3,6 +3,7 @@ using Plugin.Settings;
 using Plugin.Settings.Abstractions;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -179,7 +180,11 @@ namespace CloudStreamForms
         {
             var info = GetDownloadEpisodeInfo(id);
             if (info == null) return null;
-            return new DownloadInfo() { info = info, state = platformDep.GetDownloadProgressInfo(id, info.fileUrl) };
+            Stopwatch stop = new Stopwatch();
+            stop.Start();
+            var i = new DownloadInfo() { info = info, state = platformDep.GetDownloadProgressInfo(id, info.fileUrl) };
+            stop.Stop(); print("DLENNNNN:::" + stop.ElapsedMilliseconds);
+            return i;
         }
 
         public static DownloadEpisodeInfo GetDownloadEpisodeInfo(int id)
@@ -409,14 +414,20 @@ namespace CloudStreamForms
         {
             string path = GetKeyPath(folder, name);
             string _set = ConvertToString(value);
-            if (myApp.Properties.ContainsKey(path)) {
-                CloudStreamCore.print("CONTAINS KEY");
-                myApp.Properties[path] = _set;
+            try {
+                if (myApp.Properties.ContainsKey(path)) {
+                    CloudStreamCore.print("CONTAINS KEY");
+                    myApp.Properties[path] = _set;
+                }
+                else {
+                    CloudStreamCore.print("ADD KEY");
+                    myApp.Properties.Add(path, _set);
+                }
             }
-            else {
-                CloudStreamCore.print("ADD KEY");
-                myApp.Properties.Add(path, _set);
+            catch (Exception _ex) {
+                print("EX SET KEY:" + _ex);
             }
+            
         }
 
         public static T GetKey<T>(string folder, string name, T defVal)
@@ -501,7 +512,6 @@ namespace CloudStreamForms
         {
             try {
                 return FromByteArray<T>(Convert.FromBase64String(str));
-
             }
             catch (Exception) {
                 return defValue;

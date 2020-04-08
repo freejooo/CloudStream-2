@@ -3,10 +3,12 @@ using CloudStreamForms.Models;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Xamarin.Essentials;
@@ -59,6 +61,14 @@ namespace CloudStreamForms
         public Download()
         {
             InitializeComponent();
+
+            /*
+            RefreshView refresh = new RefreshView() { BackgroundColor = Color.Black, RefreshColor = Color.Blue, Command = RefreshCommand };
+            refresh.SetBinding(RefreshView.IsRefreshingProperty, new Binding(nameof(IsRefreshing)));
+            ScrollView scrollView = new ScrollView();
+            scrollView.Content = episodeView;
+            refresh.Content = episodeView;*/
+
             // ytBtt.Source = App.GetImageSource("round_movie_white_48dp.png");
             ytBtt.Source = App.GetImageSource("ytIcon.png");
 
@@ -138,6 +148,8 @@ namespace CloudStreamForms
         {
             base.OnAppearing();
             BackgroundColor = Settings.BlackRBGColor;
+
+
             UpdateDownloaded();
 
             var d = App.GetStorage();
@@ -178,127 +190,205 @@ namespace CloudStreamForms
             }
 
             if (headerId != null) {
+                print("REMOVE COOKIIE:: " + headerId);
                 App.RemoveKey(nameof(DownloadHeader), "id" + headerId);
             }
         }
 
         void UpdateDownloaded()
         {
-            List<string> keys = App.GetKeys<string>("DownloadIds");
-            List<string> keysPaths = App.GetKeysPath("DownloadIds");
 
-            downloads.Clear();
-            downloadHeaders.Clear();
-            downloadHelper.Clear();
+            object clock = new object();
 
-            List<int> headerRemovers = new List<int>();
-            Dictionary<int, bool> validHeaders = new Dictionary<int, bool>();
-            for (int i = 0; i < keys.Count; i++) {
-                int id = App.GetKey<int>(keysPaths[i], 0);
-                var info = App.GetDownloadInfo(id);
 
-                //if (!downloads.ContainsKey(id)) {
-                downloads[id] = info;
-                //} 
-                if (info.state.totalBytes == 0) {
-                    RemoveDownloadCookie(id);
-                    headerRemovers.Add(info.info.downloadHeader);
-                }
-                else {
-                    int headerId = info.info.downloadHeader;
-                    print("HEADERSTAET::" + headerId);
-                    validHeaders[headerId] = true;
-                    if (!downloadHeaders.ContainsKey(headerId)) {
-                        var header = App.GetDownloadHeaderInfo(headerId);
-                        downloadHeaders[headerId] = header;
+            Thread mThread = new Thread(() => {
+                Thread.Sleep(100);
+
+                Stopwatch s = new Stopwatch();
+                s.Start();
+                List<string> keys = App.GetKeys<string>("DownloadIds");
+                List<string> keysPaths = App.GetKeysPath("DownloadIds");
+
+                downloads.Clear();
+                downloadHeaders.Clear();
+                downloadHelper.Clear();
+
+                List<int> headerRemovers = new List<int>();
+                Dictionary<int, bool> validHeaders = new Dictionary<int, bool>();
+                print("MS1:::" + s.ElapsedMilliseconds);
+
+                Parallel.For(0, keys.Count, (i) => {
+                    // Thread.Sleep(1000);
+
+                    //  for (int i = 0; i < keys.Count; i++) {
+                    int id = App.GetKey<int>(keysPaths[i], 0);
+                    print("MS_1:::" + s.ElapsedMilliseconds);
+                    var info = App.GetDownloadInfo(id);
+                    print("MS_2:::" + s.ElapsedMilliseconds);
+
+                    //if (!downloads.ContainsKey(id)) {
+                    lock (clock) {
+                        downloads[id] = info;
                     }
-
-                    if (!downloadHelper.ContainsKey(headerId)) {
-                        downloadHelper[headerId] = new DownloadHeaderHelper() { infoIds = new List<int>() { id }, bytesUsed = new List<long>() { info.state.bytesDownloaded }, totalBytesUsed = new List<long>() { info.state.totalBytes } };
+                    //} 
+                    if (info.state.totalBytes == 0) {
+                        RemoveDownloadCookie(id);
+                        headerRemovers.Add(info.info.downloadHeader);
                     }
                     else {
-                        var helper = downloadHelper[headerId];
-                        helper.infoIds.Add(id);
-                        helper.totalBytesUsed.Add(info.state.totalBytes);
-                        helper.bytesUsed.Add(info.state.bytesDownloaded);
-                        downloadHelper.Remove(headerId);
-                        downloadHelper.Add(headerId, helper);
-                    }
-                }
-                print(info.info.name);
-                print(info.info.season);
-                print(info.state.state.ToString() + info.state.bytesDownloaded + "|" + info.state.totalBytes + "|" + info.state.ProcentageDownloaded + "%");
-                // App.GetDownloadHeaderInfo()
-                print("ID???????==" + id);
-            }
+                        int headerId = info.info.downloadHeader;
+                        print("HEADERSTAET::" + headerId);
+                        lock (clock) {
+                            validHeaders[headerId] = true;
+                        }
+                        bool containsKey;
+                        bool containsHelperKey;
+                        lock (clock) {
+                            containsKey = downloadHeaders.ContainsKey(headerId);
+                            containsHelperKey = downloadHelper.ContainsKey(headerId);
+                        }
 
-            for (int i = 0; i < headerRemovers.Count; i++) {
-                if (!validHeaders.ContainsKey(headerRemovers[i])) {
-                    print("HEADER:::==" + headerRemovers[i]);
-                    RemoveDownloadCookie(null, headerRemovers[i]);
-                }
-            }
+                        if (!containsKey) {
+                            print("MS__1:::" + s.ElapsedMilliseconds);
+                            var header = App.GetDownloadHeaderInfo(headerId);
+                            print("MS__2:::" + s.ElapsedMilliseconds);
+                            lock (clock) {
+                                downloadHeaders[headerId] = header;
+                            }
+                        }
 
-            // ========================== SET VALUES ==========================
-
-            MyEpisodeResultCollection.Clear();
-
-            //   List<EpisodeResult> eps = new List<EpisodeResult>();
-            foreach (var key in downloadHeaders.Keys) {
-
-                var val = downloadHeaders[key];
-                var helper = downloadHelper[key];
-
-                EpisodeResult ep = new EpisodeResult() { Title = val.name, PosterUrl = val.hdPosterUrl, Description = App.ConvertBytesToAny(helper.TotalBytes, 0, 2) + " MB", Id = key };
-
-                if (val.movieType == MovieType.TVSeries || val.movieType == MovieType.Anime || val.movieType == MovieType.YouTube) {
-                    int count = helper.infoIds.Count;
-                    ep.Description = count + $" {(val.movieType == MovieType.YouTube ? "Video" : "Episode")}{(count > 1 ? "s" : "")} | " + ep.Description;
-
-                    int downloadingRn = 0;
-                    foreach (var id in helper.infoIds) {
-                        switch (downloads[id].state.state) {
-                            case App.DownloadState.Downloading:
-                                downloadingRn++;
-                                break;
-                            case App.DownloadState.Downloaded:
-                                break;
-                            case App.DownloadState.NotDownloaded:
-                                break;
-                            case App.DownloadState.Paused:
-                                break;
-                            default:
-                                break;
+                        if (!containsHelperKey) {
+                            lock (clock) {
+                                downloadHelper[headerId] = new DownloadHeaderHelper() { infoIds = new List<int>() { id }, bytesUsed = new List<long>() { info.state.bytesDownloaded }, totalBytesUsed = new List<long>() { info.state.totalBytes } };
+                            }
+                        }
+                        else {
+                            lock (clock) {
+                                var helper = downloadHelper[headerId];
+                                helper.infoIds.Add(id);
+                                helper.totalBytesUsed.Add(info.state.totalBytes);
+                                helper.bytesUsed.Add(info.state.bytesDownloaded);
+                                downloadHelper[headerId] = helper;
+                            }
                         }
                     }
+                    print("MS_3:::" + s.ElapsedMilliseconds);
 
-                    ep.ExtraDescription = downloadingRn == 0 ? "" : $"Downloading {downloadingRn} of {count}";  //extraString + (info.state.state == App.DownloadState.Downloaded ? "" : $" {(int)info.state.ProcentageDownloaded}%");
+                    print(info.info.name);
+                    print(info.info.season);
+                    print(info.state.state.ToString() + info.state.bytesDownloaded + "|" + info.state.totalBytes + "|" + info.state.ProcentageDownloaded + "%");
+                    // App.GetDownloadHeaderInfo()
+                    print("ID???????==" + id);
+                    //  }           
+                });
+
+                print("MS2:::" + s.ElapsedMilliseconds);
+
+                for (int i = 0; i < headerRemovers.Count; i++) {
+                    if (!validHeaders.ContainsKey(headerRemovers[i])) {
+                        print("HEADER:::==" + headerRemovers[i]);
+                        RemoveDownloadCookie(null, headerRemovers[i]);
+                    }
                 }
 
-                if (val.movieType == MovieType.Movie || val.movieType == MovieType.AnimeMovie) {
-                    var info = downloads[helper.infoIds[0]];
+                // ========================== SET VALUES ==========================
+                print("MS3:::" + s.ElapsedMilliseconds);
 
-                    ep.Description = (info.state.state == App.DownloadState.Downloaded ? "" : App.ConvertBytesToAny(helper.Bytes, 0, 2) + " MB of ") + ep.Description;
-                    string extraString = GetExtraString(info.state.state);
 
-                    ep.ExtraDescription = extraString + (info.state.state == App.DownloadState.Downloaded ? "" : $" {(int)info.state.ProcentageDownloaded}%");
-                }
-                else if (val.movieType == MovieType.YouTube) {
+                //   List<EpisodeResult> eps = new List<EpisodeResult>();
+                var ckeys = downloadHeaders.Keys.ToList();
+               // ckeys = ckeys.OrderBy(t => t).ToList();
+                EpisodeResult[] epres = new EpisodeResult[ckeys.Count];
+                Parallel.For(0, ckeys.Count, i => {
+                    int key;
+                    lock (clock) {
+                        key = ckeys[i];
+                    }
+                    // });
+                    //  Parallel.ForEach(, key => {
+                    //  foreach (var key in downloadHeaders.Keys) { 
+                    DownloadHeader val;
+                    DownloadHeaderHelper helper;
+                    lock (clock) {
+                        val = downloadHeaders[key];
+                        helper = downloadHelper[key];
+                    }
 
+                    EpisodeResult ep = new EpisodeResult() { Title = val.name, PosterUrl = val.hdPosterUrl, Description = App.ConvertBytesToAny(helper.TotalBytes, 0, 2) + " MB", Id = key };
+
+                    if (val.movieType == MovieType.TVSeries || val.movieType == MovieType.Anime || val.movieType == MovieType.YouTube) {
+                        int count = helper.infoIds.Count;
+                        ep.Description = count + $" {(val.movieType == MovieType.YouTube ? "Video" : "Episode")}{(count > 1 ? "s" : "")} | " + ep.Description;
+
+                        int downloadingRn = 0;
+                        foreach (var id in helper.infoIds) {
+                            switch (downloads[id].state.state) {
+                                case App.DownloadState.Downloading:
+                                    downloadingRn++;
+                                    break;
+                                case App.DownloadState.Downloaded:
+                                    break;
+                                case App.DownloadState.NotDownloaded:
+                                    break;
+                                case App.DownloadState.Paused:
+                                    break;
+                                default:
+                                    break;
+                            }
+                        }
+
+                        ep.ExtraDescription = downloadingRn == 0 ? "" : $"Downloading {downloadingRn} of {count}";  //extraString + (info.state.state == App.DownloadState.Downloaded ? "" : $" {(int)info.state.ProcentageDownloaded}%");
+                    }
+
+                    if (val.movieType == MovieType.Movie || val.movieType == MovieType.AnimeMovie) {
+                        var info = downloads[helper.infoIds[0]];
+
+                        ep.Description = (info.state.state == App.DownloadState.Downloaded ? "" : App.ConvertBytesToAny(helper.Bytes, 0, 2) + " MB of ") + ep.Description;
+                        string extraString = GetExtraString(info.state.state);
+
+                        ep.ExtraDescription = extraString + (info.state.state == App.DownloadState.Downloaded ? "" : $" {(int)info.state.ProcentageDownloaded}%");
+                    }
+                    else if (val.movieType == MovieType.YouTube) {
+
+                    }
+                    else if (val.movieType == MovieType.TVSeries) {
+                        // redirect to real  
+                    }
+                    else if (val.movieType == MovieType.Anime) {
+                        // redirect to real 
+                    }
+                    // AddEpisode(ep);
+                    lock (clock) {
+                        epres[i] = ep;
+                        //  MyEpisodeResultCollection.Add(ep);
+                    }
+                    print("ADD EP::: " + ep.Title);
+                    // epView.MyEpisodeResultCollection.Add(ep);
+                    // eps.Add(ep);
+                    // }
+                });
+
+                for (int i = 0; i < ckeys.Count; i++) {
+                    print(i + "KEY:::" + ckeys[i]);
                 }
-                else if (val.movieType == MovieType.TVSeries) {
-                    // redirect to real  
+
+                epres = epres.OrderBy(t => t.Title).ToArray();
+
+                MyEpisodeResultCollection.Clear();
+                for (int i = 0; i < epres.Length; i++) {
+                    print("IIIIII::: " + i + "." + epres[i].Title);
+                    MyEpisodeResultCollection.Add(epres[i]);
                 }
-                else if (val.movieType == MovieType.Anime) {
-                    // redirect to real 
-                }
-                // AddEpisode(ep);
-                MyEpisodeResultCollection.Add(ep);
-                print("ADD EP::: " + ep.Title);
-                // epView.MyEpisodeResultCollection.Add(ep);
-                // eps.Add(ep);
-            }
-            SetHeight();
+
+                s.Stop();
+                print("MS4:::" + s.ElapsedMilliseconds);
+                Device.BeginInvokeOnMainThread(() => {
+                    SetHeight();
+                });
+            });
+            mThread.SetApartmentState(ApartmentState.STA);
+            mThread.Start();
+
             /*
             foreach (var dload in downloads.Values) {
                 if (dload.info.dtype == App.DownloadType.YouTube) {
@@ -583,7 +673,7 @@ namespace CloudStreamForms
                     }
                 }
             }
-            if (t == null) throw new Exception("Channel Failed"); 
+            if (t == null) throw new Exception("Channel Failed");
 
             return t;
         }

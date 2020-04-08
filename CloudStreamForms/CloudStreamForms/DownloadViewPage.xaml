@@ -16,13 +16,15 @@
             </Grid.RowDefinitions>
 
             <Grid Grid.Row="1"  Grid.Column="0">
+
+                <RefreshView BackgroundColor="#1D1D1D" RefreshColor="#4e66ff" Command="{Binding RefreshCommand}" 
+           IsRefreshing="{Binding IsRefreshing}"         > 
+                
                 <!-- <ProgressBar Progress="0.5"></ProgressBar>  ItemTapped="episodeView_ItemTapped" Tapped="ViewCell_Tapped"-->
                 <ListView ItemsSource="{Binding MyEpisodeResultCollection}"
                              CachingStrategy="RecycleElement"  
                 RowHeight="100"
-                    x:Name="episodeView"  SeparatorColor="Transparent"      IsPullToRefreshEnabled="True"
-           RefreshCommand="{Binding RefreshCommand}"
-           IsRefreshing="{Binding IsRefreshing}"             > 
+                    x:Name="episodeView"  SeparatorColor="Transparent"    > 
 
                     <ListView.ItemTemplate>
                         <DataTemplate >
@@ -131,6 +133,7 @@
                     </ListView.ItemTemplate>
 
                 </ListView>
+                </RefreshView>
             </Grid>
 
             <Grid Grid.Row="0"  Grid.Column="0">

@@ -39,6 +39,7 @@ using Android.Media;
 using Java.Interop;
 using static Android.Media.AudioManager;
 using Newtonsoft.Json;
+using System.Diagnostics;
 
 namespace CloudStreamForms.Droid
 {
@@ -1296,7 +1297,7 @@ namespace CloudStreamForms.Droid
                 }
             }
             RequestPermission(this);
-
+            
             //App.ShowToast("ON CREATE");
 
             //mainDroid.Test();
@@ -1456,12 +1457,19 @@ namespace CloudStreamForms.Droid
 
         public DownloadProgressInfo GetDownloadProgressInfo(int id, string fileUrl)
         {
+          //  return new DownloadProgressInfo() { bytesDownloaded = 10, totalBytes = 100, state = DownloadState.Downloading };
+          //  Stopwatch s = new Stopwatch();
+
             DownloadProgressInfo progressInfo = new DownloadProgressInfo();
 
             bool downloadingOrPaused = DownloadHandle.isPaused.ContainsKey(id);
 
             var file = new Java.IO.File(fileUrl);
+
+          //  s.Start();
             bool exists = file.Exists();
+          
+
 
             if (downloadingOrPaused) {
 
@@ -1479,6 +1487,10 @@ namespace CloudStreamForms.Droid
 
             progressInfo.totalBytes = exists ? App.GetKey<int>("dlength", "id" + id, 0) : 0;
             print("STATE:::::==" + progressInfo.totalBytes + "|" + progressInfo.bytesDownloaded);
+
+          //  s.Stop();
+          //  print("STIME: " + s.ElapsedMilliseconds);
+
             if (!exists) {
                 return progressInfo;
             }
