@@ -16,16 +16,36 @@ namespace CloudStreamForms.Models
         public bool IsPosterFromStorage { get { return PosterUrl == CloudStreamCore.VIDEO_IMDB_IMAGE_NOT_FOUND; } }
         public ImageSource ImageSource { get {  return IsPosterFromStorage ? App.GetImageSource(PosterUrl) : PosterUrl; } }
         public ImageSource VideoSource { get { return App.GetImageSource("nexflixPlayBtt.png");  } }
-        public ImageSource DownloadSource { get { return "NetflixDownload1.png"; } }
+        public ImageSource DownloadSource { get {
+                if(IsDownloaded) {
+                    return "NetflixDownload2.png";
+                }
+                else if(IsDownloading) {
+                    return "netflixStop128v2.png";
+                }
+                return "NetflixDownload1.png"; 
+            } }
+
+        public double DownloadSize { get {
+                if (IsDownloaded) {
+                    return 0.8;
+                }
+                else if (IsDownloading) {
+                    return 0.6;
+                }
+                return 0.8;
+            } }
+
+
         public ImageSource DownloadPlayBttSource { get; set; }
         public Command TapCom { set; get; }
         public bool IsDownloading { get { return downloadState == 2; } }
         public bool IsDownloaded { get { return downloadState == 1; } } 
-        public bool IsSearchingDownloadResults { get { return downloadState == 3; } } 
+        public bool IsSearchingDownloadResults { get { return downloadState == 4; } } 
         public bool IsNotSearchingDownloadResults { get { return !IsSearchingDownloadResults; } } 
 
         /// <summary>
-        /// 0 = Nothing, 1 = Downloaded, 1 = Downloading, 2 = Paused, 3 = Searching 
+        /// 0 = Nothing, 1 = Downloaded, 2 = Downloading, 3 = Paused, 4 = Searching 
         /// </summary>
         public int downloadState { set; get; } = 0;
         public string extraInfo { set; get; }

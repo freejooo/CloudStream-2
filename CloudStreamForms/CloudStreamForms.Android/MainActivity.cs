@@ -1479,8 +1479,12 @@ namespace CloudStreamForms.Droid
             else {
                 //file.Length()
                 progressInfo.state = exists ? DownloadState.Downloaded : DownloadState.NotDownloaded;
-
             }
+
+            if (progressInfo.bytesDownloaded < progressInfo.totalBytes - 10 && progressInfo.state == DownloadState.Downloaded) {
+                progressInfo.state = DownloadState.NotDownloaded;
+            }
+
             progressInfo.bytesDownloaded = exists ? file.Length() : 0;
 
             //                        App.SetKey("dlength", "id" + id, fileLength);
@@ -1495,9 +1499,7 @@ namespace CloudStreamForms.Droid
                 return progressInfo;
             }
 
-            if (progressInfo.bytesDownloaded < progressInfo.totalBytes - 10 && progressInfo.state == DownloadState.Downloaded) {
-                progressInfo.state = DownloadState.NotDownloaded;
-            }
+          
             if (progressInfo.totalBytes == 0 && progressInfo.state == DownloadState.Downloading) {
                 progressInfo.state = DownloadState.NotDownloaded;
             }

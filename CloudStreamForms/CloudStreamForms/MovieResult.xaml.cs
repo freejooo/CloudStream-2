@@ -555,8 +555,35 @@ namespace CloudStreamForms
                 if (App.KeyExists("ViewHistory", id)) {
                     color = 1;
                 }
-                if (App.KeyExists("Download", id)) {
-                    color = 2;
+
+                if (App.KeyExists("dlength", "id" + GetCorrectId(episodeResult))) {
+                    try {
+                        DownloadState state = App.GetDownloadInfo(GetCorrectId(episodeResult)).state.state;
+                        switch (state) {
+                            case DownloadState.Downloading:
+                                episodeResult.downloadState = 2;
+                                break;
+                            case DownloadState.Downloaded:
+                                episodeResult.downloadState = 1;
+                                break;
+                            case DownloadState.NotDownloaded:
+                                episodeResult.downloadState = 1;
+                                break;
+                            case DownloadState.Paused:
+                                episodeResult.downloadState = 3;
+                                break;
+                            default:
+                                break;
+                        }
+                        print("STATE:::: " + episodeResult.downloadState + "|" + state);
+                      //  color = 2;
+                    }
+                    catch (Exception _ex) {
+                        print("EX:::" + _ex);
+                    }
+
+                } else {
+                    episodeResult.downloadState = 0;
                 }
 
                 episodeResult.MainTextColor = hexColors[color];
@@ -637,7 +664,7 @@ namespace CloudStreamForms
                 episodeResult.PosterUrl = CloudStreamCore.ConvertIMDbImagesToHD(episodeResult.PosterUrl, 224, 126); //episodeResult.PosterUrl.Replace(",126,224_AL", "," + pwidth + "," + pheight + "_AL").Replace("UY126", "UY" + pheight).Replace("UX224", "UX" + pwidth);
             }
 
-            episodeResult.TapCom = new Command(async (s) => { 
+            episodeResult.TapCom = new Command(async (s) => {
                 int _id = -1;
                 for (int i = 0; i < epView.MyEpisodeResultCollection.Count; i++) {
                     if (epView.MyEpisodeResultCollection[i].Id == episodeResult.Id) {
@@ -648,14 +675,17 @@ namespace CloudStreamForms
                 if (_id == -1) return;
 
                 var epRes = epView.MyEpisodeResultCollection[_id];
-                if (epRes.IsDownloaded) { // REMOVE
-
-                }
-                else if (epRes.IsDownloading) { // PAUSE
-
+                if (epRes.downloadState == 4) return;
+                
+                if (epRes.IsDownloaded || epRes.IsDownloading) { // REMOVE
+                    bool action = await DisplayAlert("Delete file", "Do you want to delete " + epRes.OgTitle, "Delete", "Cancel");
+                    if (action) {
+                        string downloadKeyData = App.GetDownloadInfo(GetCorrectId(epRes), false).info.fileUrl;//.GetKey("Download", GetId(episodeResult), "");
+                        DeleteFile(downloadKeyData, epRes);
+                    }
                 }
                 else { // DOWNLOAD
-                    epView.MyEpisodeResultCollection[_id].downloadState = 3; // SET IS SEARCHING
+                    epView.MyEpisodeResultCollection[_id].downloadState = 4; // SET IS SEARCHING
                     ForceUpdate();
                     currentDownloadSearchesHappening++;
                     GetEpisodeLink(isMovie ? -1 : (episodeResult.Id + 1), currentSeason, isDub: isDub, purgeCurrentLinkThread: currentDownloadSearchesHappening > 0);
@@ -666,9 +696,9 @@ namespace CloudStreamForms
 
                         currentMovie = activeMovie;
                         print("!!___" + _id);
-                        epView.MyEpisodeResultCollection[_id].downloadState = 1; // SET IS DOWNLOADING
+                        epView.MyEpisodeResultCollection[_id].downloadState = 2; // SET IS DOWNLOADING
                         epRes = epView.MyEpisodeResultCollection[_id];
-                        ForceUpdate();
+                 
 
                         if (epRes.mirrosUrls != null) {
                             if (epRes.mirrosUrls.Count > 0) {
@@ -689,6 +719,10 @@ namespace CloudStreamForms
 
                                 string dpath = App.RequestDownload(GetCorrectId(episodeResult), episodeResult.OgTitle, episodeResult.Description, episodeResult.Episode, currentSeason, mirrorUrls, mirrorNames, episodeResult.Title + ".mp4", episodeResult.PosterUrl, currentMovie.title);
                             }
+                            print("SET COLOOOROOROROR" + epRes.OgTitle);
+                          //  await Task.Delay(1000);
+                            //SetColor(epRes);
+                            ForceUpdate();
                         }
                     }
                     catch (Exception _ex) {
@@ -1460,13 +1494,14 @@ namespace CloudStreamForms
             // ============================== GET ACTION ==============================
             string action = "";
 
-            bool hasDownloadedFile = App.KeyExists("Download", GetId(episodeResult));
+            bool hasDownloadedFile = App.KeyExists("dlength", "id" + GetCorrectId(episodeResult));
             string downloadKeyData = "";
 
             List<string> actions = new List<string>() { "Play in App", "Play External App", "Download", "Download Subtitles", "Copy Link", "Reload" }; // Play in Browser
 
             if (hasDownloadedFile) {
-                downloadKeyData = App.GetKey("Download", GetId(episodeResult), "");
+                downloadKeyData = App.GetDownloadInfo(GetCorrectId(episodeResult), false).info.fileUrl;//.GetKey("Download", GetId(episodeResult), "");
+                print("INFOOOOOOOOO:::" + downloadKeyData);
                 actions.Add("Play Downloaded File"); actions.Add("Delete Downloaded File");
             }
             if (MainChrome.IsConnectedToChromeDevice) {
@@ -1603,12 +1638,11 @@ namespace CloudStreamForms
                 EpisodeSettings(episodeResult);
             }
             else if (action == "Play Downloaded File") { // ============================== PLAY FILE ==============================
-                Download.PlayFile(downloadKeyData, episodeResult.Title);
+                                                         //  bool succ = App.DeleteFile(info.info.fileUrl); 
+                Download.PlayVLCFile(downloadKeyData, episodeResult.Title);
             }
             else if (action == "Delete Downloaded File") {  // ============================== DELETE FILE ==============================
-                Download.DeleteFileFromFolder(downloadKeyData, "Download", GetId(episodeResult));
-                SetColor(episodeResult);
-                ForceUpdate(episodeResult.Id);
+                DeleteFile(downloadKeyData, episodeResult);
             }
             else if (action == "Download Subtitles") {  // ============================== DOWNLOAD SUBTITLE ==============================
                 TempThred tempThred = new TempThred();
@@ -1639,6 +1673,15 @@ namespace CloudStreamForms
 
         }
 
+
+        void DeleteFile(string downloadKeyData, EpisodeResult episodeResult)
+        { 
+            App.DeleteFile(downloadKeyData);
+            App.UpdateDownload(GetCorrectId(episodeResult), 2);
+            Download.RemoveDownloadCookie(GetCorrectId(episodeResult));//.DeleteFileFromFolder(downloadKeyData, "Download", GetId(episodeResult));
+            SetColor(episodeResult);
+            ForceUpdate(episodeResult.Id);
+        }
 
         public int GetCorrectId(EpisodeResult episodeResult)
         {

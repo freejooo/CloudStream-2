@@ -155,7 +155,7 @@ namespace CloudStreamForms
             bool isMovie = header.movieType == MovieType.AnimeMovie || header.movieType == MovieType.Movie;
 
             string fileUrl = platformDep.DownloadHandleIntent(id, mirrorNames, mirrorUrls, downloadTitle, name, true, extraPath, true, true, false, poster, isMovie ? "{name}\n" : ($"S{season}:E{episode} - " + "{name}\n"));
-            App.SetKey(nameof(DownloadEpisodeInfo), "id" + id, new DownloadEpisodeInfo() { dtype = DownloadType.Normal, source = header.id, description = description, downloadHeader = header.RealId, episode = episode, season = season, fileUrl = fileUrl, id = id, name = name,hdPosterUrl=poster });
+            App.SetKey(nameof(DownloadEpisodeInfo), "id" + id, new DownloadEpisodeInfo() { dtype = DownloadType.Normal, source = header.id, description = description, downloadHeader = header.RealId, episode = episode, season = season, fileUrl = fileUrl, id = id, name = name, hdPosterUrl = poster });
 
             App.SetKey("DownloadIds", id.ToString(), id);
 
@@ -176,14 +176,14 @@ namespace CloudStreamForms
             return new DownloadHeader() { description = title.description, hdPosterUrl = title.hdPosterUrl, id = title.id, name = title.name, ogName = title.ogName, posterUrl = title.posterUrl, rating = title.rating, runtime = title.runtime, year = title.year, movieType = title.movieType };
         }
 
-        public static DownloadInfo GetDownloadInfo(int id)
+        public static DownloadInfo GetDownloadInfo(int id, bool hasState = true)
         {
             var info = GetDownloadEpisodeInfo(id);
             if (info == null) return null;
-            Stopwatch stop = new Stopwatch();
-            stop.Start();
-            var i = new DownloadInfo() { info = info, state = platformDep.GetDownloadProgressInfo(id, info.fileUrl) };
-            stop.Stop(); print("DLENNNNN:::" + stop.ElapsedMilliseconds);
+          //  Stopwatch stop = new Stopwatch();
+            //stop.Start();
+            var i = new DownloadInfo() { info = info, state = hasState ? platformDep.GetDownloadProgressInfo(id, info.fileUrl) : null };
+         //   stop.Stop(); print("DLENNNNN:::" + stop.ElapsedMilliseconds);
             return i;
         }
 
@@ -427,7 +427,7 @@ namespace CloudStreamForms
             catch (Exception _ex) {
                 print("EX SET KEY:" + _ex);
             }
-            
+
         }
 
         public static T GetKey<T>(string folder, string name, T defVal)
@@ -482,7 +482,9 @@ namespace CloudStreamForms
 
         public static List<string> GetKeysPath(string folder)
         {
-            List<string> keyNames = myApp.Properties.Keys.Where(t => t.StartsWith(GetKeyPath(folder))).ToList();
+            string[] copy = new string[myApp.Properties.Keys.Count];
+            myApp.Properties.Keys.CopyTo(copy,0);
+            List<string> keyNames = copy.Where(t => t.StartsWith(GetKeyPath(folder))).ToList();
             return keyNames;
         }
 

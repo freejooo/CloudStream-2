@@ -296,8 +296,7 @@ namespace CloudStreamForms
 
 
                 //   List<EpisodeResult> eps = new List<EpisodeResult>();
-                var ckeys = downloadHeaders.Keys.ToList();
-               // ckeys = ckeys.OrderBy(t => t).ToList();
+                var ckeys = downloadHeaders.Keys.OrderBy(t => t).ToList();
                 EpisodeResult[] epres = new EpisodeResult[ckeys.Count];
                 Parallel.For(0, ckeys.Count, i => {
                     int key;
@@ -358,6 +357,7 @@ namespace CloudStreamForms
                         // redirect to real 
                     }
                     // AddEpisode(ep);
+                    ep.Episode = ConvertToSortOrder(val.movieType)*1000 + i;
                     lock (clock) {
                         epres[i] = ep;
                         //  MyEpisodeResultCollection.Add(ep);
@@ -372,7 +372,7 @@ namespace CloudStreamForms
                     print(i + "KEY:::" + ckeys[i]);
                 }
 
-                epres = epres.OrderBy(t => t.Title).ToArray();
+                epres = epres.OrderBy(t => t.Episode).ToArray(); // MOVIE -> ANIMEMOVIE -> TV-SERIES -> ANIME -> YOUTUBE
 
                 MyEpisodeResultCollection.Clear();
                 for (int i = 0; i < epres.Length; i++) {
@@ -383,6 +383,8 @@ namespace CloudStreamForms
                 s.Stop();
                 print("MS4:::" + s.ElapsedMilliseconds);
                 Device.BeginInvokeOnMainThread(() => {
+                   // episodeView.Opacity = 0;
+                   // episodeView.FadeTo(1, 200);
                     SetHeight();
                 });
             });
@@ -399,6 +401,25 @@ namespace CloudStreamForms
                 }
             }*/
         }
+
+        public static int ConvertToSortOrder(MovieType movieType)
+        {
+            switch (movieType) {
+                case MovieType.Movie:
+                    return 0;
+                case MovieType.TVSeries:
+                    return 2;
+                case MovieType.Anime:
+                    return 3;
+                case MovieType.AnimeMovie:
+                    return 1;
+                case MovieType.YouTube:
+                    return 4;
+                default:
+                    return -1;
+            }
+        }
+
 
         public static string GetExtraString(DownloadState state)
         {

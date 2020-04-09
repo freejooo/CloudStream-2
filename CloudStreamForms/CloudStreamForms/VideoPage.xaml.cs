@@ -628,8 +628,8 @@ namespace CloudStreamForms
             }
         }
 
-        const int TRANSLATE_SKIP_X = 100;
-        const int TRANSLATE_START_X = 170;
+        const int TRANSLATE_SKIP_X = 70;
+        const int TRANSLATE_START_X = 200;
 
         async void SkipForAni()
         {
@@ -722,7 +722,7 @@ namespace CloudStreamForms
 
 
         const uint fadeTime = 100;
-        const int timeUntilFade = 2500;
+        const int timeUntilFade = 3500;
         const bool CAN_FADE_WHEN_PAUSED = false;
         const bool WILL_AUTO_FADE_WHEN_PAUSED = false;
         async void FadeEverything(bool disable, bool overridePaused = false)
