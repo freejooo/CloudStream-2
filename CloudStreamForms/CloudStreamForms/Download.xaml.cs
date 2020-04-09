@@ -242,10 +242,8 @@ namespace CloudStreamForms
                             validHeaders[headerId] = true;
                         }
                         bool containsKey;
-                        bool containsHelperKey;
                         lock (clock) {
                             containsKey = downloadHeaders.ContainsKey(headerId);
-                            containsHelperKey = downloadHelper.ContainsKey(headerId);
                         }
 
                         if (!containsKey) {
@@ -256,14 +254,13 @@ namespace CloudStreamForms
                                 downloadHeaders[headerId] = header;
                             }
                         }
+                        lock (clock) {
+                            bool containsHelperKey = downloadHelper.ContainsKey(headerId);
 
-                        if (!containsHelperKey) {
-                            lock (clock) {
+                            if (!containsHelperKey) {
                                 downloadHelper[headerId] = new DownloadHeaderHelper() { infoIds = new List<int>() { id }, bytesUsed = new List<long>() { info.state.bytesDownloaded }, totalBytesUsed = new List<long>() { info.state.totalBytes } };
                             }
-                        }
-                        else {
-                            lock (clock) {
+                            else {
                                 var helper = downloadHelper[headerId];
                                 helper.infoIds.Add(id);
                                 helper.totalBytesUsed.Add(info.state.totalBytes);
@@ -357,7 +354,7 @@ namespace CloudStreamForms
                         // redirect to real 
                     }
                     // AddEpisode(ep);
-                    ep.Episode = ConvertToSortOrder(val.movieType)*1000 + i;
+                    ep.Episode = ConvertToSortOrder(val.movieType) * 1000 + i;
                     lock (clock) {
                         epres[i] = ep;
                         //  MyEpisodeResultCollection.Add(ep);
@@ -383,8 +380,8 @@ namespace CloudStreamForms
                 s.Stop();
                 print("MS4:::" + s.ElapsedMilliseconds);
                 Device.BeginInvokeOnMainThread(() => {
-                   // episodeView.Opacity = 0;
-                   // episodeView.FadeTo(1, 200);
+                    // episodeView.Opacity = 0;
+                    // episodeView.FadeTo(1, 200);
                     SetHeight();
                 });
             });
@@ -557,53 +554,13 @@ namespace CloudStreamForms
             // info.info.fileUrl
         }
 
-        async void EpsodeShow(EpisodeResult episodeResult)
-        {
-            string action = await DisplayActionSheet(episodeResult.Title, "Cancel", null, "Play", "Delete File", "Open Source");
-            if (action == "Play") {
-                PlayEpisode(episodeResult);
-            }
-            if (action == "Delete File") {
-                string moviePath = FindHTML(episodeResult.extraInfo, "_dpath=", "|||");
-                string keyPath = FindHTML(episodeResult.extraInfo, "KeyPath=", "|||");
-                //string posterUrl = FindHTML(episodeResult.extraInfo, "_ppath=", "|||");
-                // string movieUrl = FindHTML(episodeResult.extraInfo, "_mppath=", "|||");
-                //App.DeleteFile(movieUrl);
-                //App.DeleteFile(posterUrl);
-                DeleteFile(moviePath, keyPath);
-            }
-            if (action == "Open Source") {
-                if (episodeResult.extraInfo.Contains("isYouTube=" + true)) {
-                    App.OpenBrowser(FindHTML(episodeResult.extraInfo, "_movieId=", "|||"));
-                }
-                else {
 
-                    string title = FindHTML(episodeResult.extraInfo, "_movieTitle=", "|||");
-                    string movieId = FindHTML(episodeResult.extraInfo, "_movieId=", "|||");
-                    PushPageFromUrlAndName(movieId, title);
-                }
-            }
-            UpdateDownloaded();
-        }
 
-        public static void DeleteFileFromFolder(string keyData, string keyFolder, string keyId)
-        {
-            string moviePath = FindHTML(keyData, "_dpath=", "|||");
-            DeleteFile(moviePath, keyFolder, keyId);
-        }
 
         public static void DeleteFile(string moviePath, string keyPath)
         {
             if (App.DeleteFile(moviePath)) {
                 App.RemoveKey(keyPath);
-                App.ShowToast("Deleted File");
-            }
-        }
-
-        public static void DeleteFile(string moviePath, string keyFolder, string keyId)
-        {
-            if (App.DeleteFile(moviePath)) {
-                App.RemoveKey(keyFolder, keyId);
                 App.ShowToast("Deleted File");
             }
         }

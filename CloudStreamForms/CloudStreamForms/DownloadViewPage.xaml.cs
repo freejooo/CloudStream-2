@@ -92,7 +92,7 @@ namespace CloudStreamForms
             try {
                 var header = Download.downloadHeaders[currentId];
                 var helper = Download.downloadHelper[currentId];
-               // App.GetDownloadHeaderInfo(currentId);
+                // App.GetDownloadHeaderInfo(currentId);
                 List<EpisodeResult> activeEpisodes = new List<EpisodeResult>();
 
                 foreach (var key in helper.infoIds) {
@@ -130,7 +130,7 @@ namespace CloudStreamForms
                     }
                 }
 
-                activeEpisodes.OrderBy(t => -(t.Episode + t.Season * 1000));
+                activeEpisodes = activeEpisodes.OrderBy(t => (t.Episode + t.Season * 1000)).ToList();
                 for (int i = 0; i < activeEpisodes.Count; i++) {
                     MyEpisodeResultCollection.Add(activeEpisodes[i]);
                 }
@@ -140,7 +140,7 @@ namespace CloudStreamForms
             }
             SetHeight();
 
-            if(MyEpisodeResultCollection.Count == 0) {
+            if (MyEpisodeResultCollection.Count == 0) {
                 Navigation.PopModalAsync();
             }
         }
