@@ -391,8 +391,16 @@ namespace CloudStreamForms
         }
 
         bool hasAppered = false;
+
+        protected override void OnDisappearing()
+        {
+          //  OnIconEnd(0);
+            base.OnDisappearing();
+        }
+
         protected override void OnAppearing()
         {
+           // OnIconStart(0);
             SaveData();
             base.OnAppearing();
              if (!hasAppered) {

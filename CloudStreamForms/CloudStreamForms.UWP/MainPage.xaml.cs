@@ -31,9 +31,7 @@ namespace CloudStreamForms.UWP
             mainUWP = new MainUWP();
             mainUWP.Awake();
 
-        }
-
-
+        } 
 
     }
 

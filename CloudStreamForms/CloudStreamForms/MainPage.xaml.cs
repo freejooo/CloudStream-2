@@ -105,6 +105,19 @@ namespace CloudStreamForms
             App.Test();
         }
 
+        public static readonly string[] baseIcons = new string[] { "outline_home_white_48dp.png", "searchIcon.png", "outline_get_app_white_48dp.png", "outline_settings_white_48dp.png" };
+        public static readonly string[] onSelectedIcons = new string[] { "sharp_home_white_48dp.png", "searchIcon.png", "sharp_get_app_white_48dp.png", "sharp_settings_white_48dp.png" };
+
+        public static void OnIconStart(int i)
+        {
+            mainPage.Children[i].IconImageSource = onSelectedIcons[i];
+        }
+
+        public static void OnIconEnd(int i)
+        {
+            mainPage.Children[i].IconImageSource = baseIcons[i];
+        }
+
         public MainPage()
         {
             InitializeComponent(); mainPage = this; CloudStreamCore.mainPage = mainPage;
@@ -121,20 +134,30 @@ namespace CloudStreamForms
 
             List<string> names = new List<string>() { "Home", "Search", "Downloads", "Settings" };
             //List<string> icons = new List<string>() { "homeIcon.png", "searchIcon.png", "downloadIcon.png", "baseline_settings_applications_white_48dp_inverted_big.png" };
-            List<string> icons = new List<string>() { "outline_home_white_48dp.png", "searchIcon.png", "outline_get_app_white_48dp.png", "outline_settings_white_48dp.png" };
             List<Page> pages = new List<Page>() { new Home(), new Search(), new Download(), new Settings(), };
 
 
             for (int i = 0; i < names.Count; i++) {
                 Children.Add(pages[i]);
                 Children[i].Title = names[i];
-                Children[i].IconImageSource = icons[i];
+                Children[i].IconImageSource = baseIcons[i];
+
             }
 
             LateCheck();
 
             On<Xamarin.Forms.PlatformConfiguration.Android>().SetToolbarPlacement(ToolbarPlacement.Bottom);
 
+            int oldPage = 0;
+            CurrentPageChanged += (o, e) => {
+                OnIconEnd(oldPage); 
+                for (int i = 0; i < pages.Count; i++) { 
+                    if ((pages[i].GetType()) == CurrentPage.GetType()) {
+                        OnIconStart(i);
+                        oldPage = i;
+                    }
+                } 
+            };
 
             // BarBackgroundColor = Color.Black;
             //   BarTextColor = Color.OrangeRed;
@@ -146,6 +169,8 @@ namespace CloudStreamForms
             //PushPageFromUrlAndName("tt0371746", "Iron Man");
             // PushPageFromUrlAndName("tt10954274", "ID: Invaded");
         }
+
+
 
 
         async void LateCheck()

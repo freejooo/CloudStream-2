@@ -422,8 +422,15 @@ namespace CloudStreamForms
             });
         }
 
+        protected override void OnDisappearing()
+        {
+          //  OnIconEnd(3); 
+            base.OnDisappearing();
+        }
+
         protected override void OnAppearing()
         {
+          //  OnIconStart(3);
             base.OnAppearing();
             Apper();
 

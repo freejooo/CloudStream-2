@@ -18,7 +18,7 @@
     <item name="windowNoTitle">true</item>
     <!--We will be using the toolbar so no need to show ActionBar-->
     <item name="windowActionBar">false</item>
-    <!-- Set theme colors from http://www.google.com/design/spec/style/color.html#color-color-palette -->
+     <!-- Set theme colors from http://www.google.com/design/spec/style/color.html#color-color-palette -->
     <!-- colorPrimary is used for the default action bar background -->
     <item name="colorPrimary">#3F51B5</item>
     <!-- colorPrimaryDark is used for the status bar -->
@@ -33,6 +33,8 @@
     <!--1976D2-->
     <item name="android:windowBackground">@color/navigationBarColor</item>
     <item name="android:navigationBarColor">@color/navigationBarColor</item>
+    <!--   <item name="android:navigationBarDividerColor">@color/ListViewHighlighted</item>-->
+
     <item name="android:statusBarColor">@color/statusBarColor</item>
 
     <item name="android:colorLongPressedHighlight">@color/ListViewHighlighted</item>

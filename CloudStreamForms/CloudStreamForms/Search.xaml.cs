@@ -36,7 +36,7 @@ namespace CloudStreamForms
 
             SearchBar searchBar = new SearchBar() {
                 Placeholder = "Movie Search...",
-                CancelButtonColor = Color.FromRgb(190,190,190),
+                CancelButtonColor = Color.FromRgb(190, 190, 190),
             };
             searchBar.TextChanged += SearchBar_TextChanged;
             searchBar.SearchButtonPressed += SearchBar_SearchButtonPressed;
@@ -97,6 +97,7 @@ namespace CloudStreamForms
                                             //birthdayLabel
                                         }
                                         }
+                                 
                                 }
                         }
                     };

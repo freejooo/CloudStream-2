@@ -84,6 +84,7 @@
     <PackageReference Include="Xamarin.Essentials" Version="1.4.0" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CustomTabbedPageRenderer.cs" />
     <Compile Include="CustomSliderRenderer.cs" />
     <Compile Include="CustomLabelRenderer.cs" />
     <Compile Include="CustomProgressBarRenderer.cs" />
@@ -362,6 +363,15 @@
   </ItemGroup>
   <ItemGroup>
     <AndroidResource Include="Resources\drawable-xxhdpi\outline_navigate_next_white_48dp.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\drawable\sharp_settings_white_48dp.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\drawable\sharp_home_white_48dp.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\drawable\sharp_get_app_white_48dp.png" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\Android\Xamarin.Android.CSharp.targets" />
 </Project>

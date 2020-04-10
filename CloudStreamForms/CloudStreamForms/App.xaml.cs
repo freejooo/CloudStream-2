@@ -280,7 +280,7 @@ namespace CloudStreamForms
         public static void UpdateBackground(int color = -1)
         {
             if (color == -1) {
-                color = Math.Max(0, Settings.BlackColor - 10);
+                color = Settings.BlackColor;//Math.Max(0, Settings.BlackColor - 10);
             }
             CloudStreamForms.MainPage.mainPage.BarBackgroundColor = new Color(color / 255.0, color / 255.0, color / 255.0, 1);
             platformDep.UpdateBackground(color);

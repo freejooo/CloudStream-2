@@ -1297,7 +1297,7 @@ namespace CloudStreamForms.Droid
                 }
             }
             RequestPermission(this);
-            
+
             //App.ShowToast("ON CREATE");
 
             //mainDroid.Test();
@@ -1345,6 +1345,9 @@ namespace CloudStreamForms.Droid
 
             ResumeIntentData();
             StartService(new Intent(BaseContext, typeof(OnKilledService)));
+          //  Android.Renderscripts.ta
+           // var bar = new Xamarin.Forms.Platform.Android.TabbedRenderer();//.Platform.Android.
+             
             //ShowBlackToast("Yeet", 3);
             // DownloadHandle.ResumeIntents();
             //   ShowLocalNot(new LocalNot() { mediaStyle = false, title = "yeet", data = "", progress = -1, showWhen = false, autoCancel = true, onGoing = false, id = 1234, smallIcon = Resource.Drawable.bicon, body = "Download ddddd" }, Application.Context);
@@ -1457,8 +1460,8 @@ namespace CloudStreamForms.Droid
 
         public DownloadProgressInfo GetDownloadProgressInfo(int id, string fileUrl)
         {
-          //  return new DownloadProgressInfo() { bytesDownloaded = 10, totalBytes = 100, state = DownloadState.Downloading };
-          //  Stopwatch s = new Stopwatch();
+            //  return new DownloadProgressInfo() { bytesDownloaded = 10, totalBytes = 100, state = DownloadState.Downloading };
+            //  Stopwatch s = new Stopwatch();
 
             DownloadProgressInfo progressInfo = new DownloadProgressInfo();
 
@@ -1466,9 +1469,9 @@ namespace CloudStreamForms.Droid
 
             var file = new Java.IO.File(fileUrl);
 
-          //  s.Start();
+            //  s.Start();
             bool exists = file.Exists();
-          
+
 
 
             if (downloadingOrPaused) {
@@ -1492,23 +1495,23 @@ namespace CloudStreamForms.Droid
             progressInfo.totalBytes = exists ? App.GetKey<int>("dlength", "id" + id, 0) : 0;
             print("STATE:::::==" + progressInfo.totalBytes + "|" + progressInfo.bytesDownloaded);
 
-          //  s.Stop();
-          //  print("STIME: " + s.ElapsedMilliseconds);
+            //  s.Stop();
+            //  print("STIME: " + s.ElapsedMilliseconds);
 
             if (!exists) {
                 return progressInfo;
             }
 
-          
+
             if (progressInfo.totalBytes == 0 && progressInfo.state == DownloadState.Downloading) {
                 progressInfo.state = DownloadState.NotDownloaded;
             }
             if (progressInfo.bytesDownloaded >= progressInfo.totalBytes - 10) {
                 progressInfo.state = DownloadState.Downloaded;
             }
-            if (progressInfo.bytesDownloaded < 0 || progressInfo.totalBytes < 0) { 
-                progressInfo.state = DownloadState.NotDownloaded; 
-                progressInfo.totalBytes = 0; 
+            if (progressInfo.bytesDownloaded < 0 || progressInfo.totalBytes < 0) {
+                progressInfo.state = DownloadState.NotDownloaded;
+                progressInfo.totalBytes = 0;
             }
 
             return progressInfo;
@@ -1973,8 +1976,9 @@ namespace CloudStreamForms.Droid
             int uiOptions = (int)window.DecorView.SystemUiVisibility;
             uiOptions &= ~(int)SystemUiFlags.LayoutHideNavigation;
             window.DecorView.SystemUiVisibility = (StatusBarVisibility)uiOptions;
-
+            // window.NavigationBarDividerColor
             window.SetNavigationBarColor(Android.Graphics.Color.Rgb(color, color, color));
+
             /*
             Window window = MainActivity.activity.Window;
             int color = Settings.BlackColor - 5;

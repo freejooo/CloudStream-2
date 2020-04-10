@@ -143,10 +143,18 @@ namespace CloudStreamForms
             BindingContext = this;
             BackgroundColor = Settings.BlackRBGColor;
         }
+        protected override void OnDisappearing()
+        {
+           // OnIconEnd(2);
+            base.OnDisappearing();
+        }
 
+        
         protected override void OnAppearing()
         {
+            //OnIconStart(2);
             base.OnAppearing();
+ 
             BackgroundColor = Settings.BlackRBGColor;
 
 
