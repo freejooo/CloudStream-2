@@ -999,6 +999,8 @@ namespace CloudStreamForms
             public string name;
             public string japName;
             public string engName;
+            public string startDate;
+            public string endDate;
             public List<string> synonyms;
 
             public GogoAnimeData gogoData;
@@ -1007,10 +1009,20 @@ namespace CloudStreamForms
             public AnimeFlixData animeFlixData;
             public DubbedAnimeNetData dubbedAnimeNetData;
             public AnimekisaData animekisaData;
+            public AnimeDreamData animedreamData;
         }
-        [Serializable]
 
+        [Serializable]
         public struct AnimekisaData
+        {
+            public bool dubExists;
+            public bool subExists;
+            public string[] dubbedEpisodes;
+            public string[] subbedEpisodes;
+        }
+
+        [Serializable]
+        public struct AnimeDreamData
         {
             public bool dubExists;
             public bool subExists;
@@ -1484,7 +1496,7 @@ namespace CloudStreamForms
 
         public static IMovieProvider[] movieProviders = new IMovieProvider[] { new FullMoviesProvider(), new TMDBProvider(), new WatchTVProvider(), new FMoviesProvider(), new LiveMovies123Provider(), new TheMovies123Provider(), new YesMoviesProvider(), new WatchSeriesProvider(), new GomoStreamProvider(), new Movies123Provider() };
 
-        public static IAnimeProvider[] animeProviders = new IAnimeProvider[] { new GogoAnimeProvider(), new KickassAnimeProvider(), new DubbedAnimeProvider(), new AnimeFlixProvider(), new DubbedAnimeNetProvider(), new AnimekisaProvider() };
+        public static IAnimeProvider[] animeProviders = new IAnimeProvider[] { new GogoAnimeProvider(), new KickassAnimeProvider(), new DubbedAnimeProvider(), new AnimeFlixProvider(), new DubbedAnimeNetProvider(), new AnimekisaProvider(), new DreamAnimeProvider() };
 
         public interface IMovieProvider // FOR MOVIES AND SHOWS
         {
@@ -2114,7 +2126,7 @@ namespace CloudStreamForms
             }
         }
 
-        class DubbedAnimeNetProvider : IAnimeProvider
+        public class DubbedAnimeNetProvider : IAnimeProvider
         {
             #region structs
             public struct DubbedAnimeNetRelated
@@ -2406,6 +2418,223 @@ namespace CloudStreamForms
             }
         }
 
+        //TODO: add dreamanime.fun via date
+
+        public class DreamAnimeProvider : IAnimeProvider
+        {
+            public string Name => "DreamAnime";
+            //quick
+            public void FishMainLink(string year, TempThred tempThred, MALData malData)
+            {
+                string search = activeMovie.title.name;
+                string d = DownloadString("https://dreamanime.fun/search?term=" + search);
+
+                const string lookFor = "</div>\n<a href=\"";
+                while (d.Contains(lookFor)) {
+                    string uri = FindHTML(d, lookFor, "\"");
+                    print("MAINURLLLLL::" + uri);
+                    d = RemoveOne(d, lookFor);
+                    string title = FindHTML(d, " id=\'epilink\'>", "<");
+                    print("MAINTITLE::: " + title);
+                    if (title.ToLower().Replace(" ", "").StartsWith(search.ToLower().Replace(" ", ""))) {
+                        string searchdload = DownloadString(uri);
+                        if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
+                        print("SEARCHLOAD::: " + searchdload);
+
+                        string _d = RemoveOne(searchdload, "<div class=\"deta\">Aired:</div>");
+                        string date = FindHTML(_d, "<p class=\"beta\">", "<"); // START MATCH DATE
+                        print("DATA:::" + date);
+                        for (int z = 0; z < activeMovie.title.MALData.seasonData.Count; z++) {
+                            for (int q = 0; q < activeMovie.title.MALData.seasonData[z].seasons.Count; q++) {
+                                //string malUrl = activeMovie.title.MALData.seasonData[z].seasons[q].malUrl;
+                                string startDate = activeMovie.title.MALData.seasonData[z].seasons[q].startDate;
+                                print("STARTDATA:::: " + title + "|" + startDate + "|" + date);
+                                if (startDate != "" && date != "") {
+                                    if (DateTime.Parse(startDate) == DateTime.Parse(date)) { // THE SAME
+                                        print("SAME DATE:::: " + title);
+                                        try {
+
+                                     
+                                        var ms = activeMovie.title.MALData.seasonData[z].seasons[q].animedreamData;
+
+                                        bool dubExists = false;
+                                        bool subExists = false;
+
+
+                                        List<string> dubbedEpisodes = new List<string>();
+                                        List<string> subbedEpisodes = new List<string>();
+
+
+                                        const string lookForSearch = "<div class=\'episode-wrap\'>";
+                                        while (searchdload.Contains(lookForSearch)) {
+                                            searchdload = RemoveOne(searchdload, lookForSearch);
+                                            string href = FindHTML(searchdload, "dreamanime.fun/anime/watch/", " ").Replace("\'", "").Replace("\"", ""); // 157726-overlord-episode-13-english-sub
+                                            bool isDub = href.EndsWith("-dub");
+                                            string ep = FindHTML(searchdload, "<span class=\'text-right ep-num\'>Ep. ", "<");
+                                            int epNum = int.Parse(ep);
+
+                                            if (isDub && !dubExists) {
+                                                dubExists = true;
+                                            }
+                                            if (!isDub && !subExists) {
+                                                subExists = true;
+                                            }
+
+                                            if (isDub) {
+                                                dubbedEpisodes[epNum] = href;
+                                            }
+                                            else {
+                                                subbedEpisodes[epNum] = href;
+                                            }
+
+                                            print("ADDED::: "  + ep + "|" + href + "|" + isDub);
+                                        }
+
+                                        ms.dubExists = dubExists;
+                                        ms.subExists = subExists;
+
+                                        ms.subbedEpisodes = subbedEpisodes.ToArray();
+                                        ms.dubbedEpisodes = dubbedEpisodes.ToArray();
+                                        var val = activeMovie.title.MALData.seasonData[z].seasons[q];
+                                        val.animedreamData = ms;
+                                        activeMovie.title.MALData.seasonData[z].seasons[q] = val;
+                                        }
+                                        catch (Exception _ex) {
+                                            print("MAIN EX::::::::" + _ex);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    print("EDNURI::: " + uri + "|" + title);
+                } 
+            }
+
+            public int GetLinkCount(Movie currentMovie, int currentSeason, bool isDub, TempThred? tempThred)
+            {
+                int len = 0;
+                try {
+                    for (int q = 0; q < currentMovie.title.MALData.seasonData[currentSeason].seasons.Count; q++) {
+                        var ms = currentMovie.title.MALData.seasonData[currentSeason].seasons[q].animedreamData;
+                        if ((ms.dubExists && isDub)) {
+                            len += ms.dubbedEpisodes.Length;
+                        }
+                        else if ((ms.subExists && !isDub)) {
+                            len += ms.subbedEpisodes.Length;
+                        }
+                    }
+                }
+                catch (Exception) {
+                }
+                return len;
+            }
+
+
+            public struct DreamApiName
+            {
+                public string @default { get; set; }
+                public string english { get; set; }
+            }
+
+            public struct DreamApiVideo
+            {
+                public string host { get; set; }
+                public string id { get; set; }
+                public string type { get; set; }
+                public string date { get; set; }
+            }
+
+            public struct DreamAnimeLinkApi
+            {
+                public string id { get; set; }
+                public string anime_id { get; set; }
+                public string slug { get; set; }
+                public string number { get; set; }
+                public DreamApiName name { get; set; }
+                public string title { get; set; }
+                public string description { get; set; }
+                public string date { get; set; }
+                public List<DreamApiVideo> videos { get; set; }
+                public string image { get; set; }
+                public string next_id { get; set; }
+                public string previous_id { get; set; }
+                public string url { get; set; }
+                public string lang { get; set; }
+            }
+
+            public void LoadLinksTSync(int episode, int season, int normalEpisode, bool isDub, TempThred tempThred)
+            {
+                int _episode = 0;
+                for (int q = 0; q < activeMovie.title.MALData.seasonData[season].seasons.Count; q++) {
+                    var ms = activeMovie.title.MALData.seasonData[season].seasons[q].animedreamData;
+
+                    string[] data = new string[0];
+                    if ((ms.dubExists && isDub)) {
+                        //  dstring = ms.baseUrl;
+                        data = ms.dubbedEpisodes;
+                    }
+                    else if ((ms.subExists && !isDub)) {
+                        data = ms.subbedEpisodes;
+                    }
+                    if (_episode + data.Length > normalEpisode) {
+                        string slug = data[normalEpisode - _episode];
+                        try { 
+                            string d = DownloadString(slug);
+
+
+                            if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
+
+
+                            string cepisode = FindHTML(d, "episode = ",";"); //FindHTML(d, "var episode = ", ";");
+                            print("CEPISODE ==== " + cepisode);
+                            var epi = JsonConvert.DeserializeObject<DreamAnimeLinkApi>(cepisode);
+                            for (int i = 0; i < epi.videos.Count; i++) {
+                                var vid = epi.videos[i];
+                                if ((vid.type == "dubbed" && !isDub) || (vid.type == "subbed" && isDub)) continue;
+
+                                //type == dubbed/subbed
+                                //host == mp4upload/trollvid
+                                //id = i9w80jgcwbu7
+                                // Getmp4UploadByFile()
+
+
+                                void AddMp4(string id)
+                                {
+                                    string mp4 = ("https://www.mp4upload.com/embed-" + id);
+                                    string __d = DownloadString(mp4, tempThred);
+                                    if (!GetThredActive(tempThred)) { return; };
+                                    string mxLink = Getmp4UploadByFile(__d);
+                                    AddPotentialLink(normalEpisode, mxLink, "Dream Mp4Upload", 9);
+                                }
+
+                                if (vid.host == "trollvid") {
+                                    string dUrl = "https://mp4.sh/embed/" + vid.id;
+                                    string p = HTMLGet(dUrl, slug);
+
+                                    string src = FindHTML(p, "<source src=\"", "\"");
+                                    AddPotentialLink(normalEpisode, src, "Dream Trollvid", 10);  
+                                }
+                                else if (vid.host == "mp4upload") {
+                                    AddMp4(vid.id);
+                                }
+
+                                print(vid.host + "|" + vid.id + "|" + vid.type);
+                            }
+
+                        }
+                        catch (Exception _ex) {
+                            print("ERROR IN LOADING DUBBEDANIMENET: " + _ex);
+                        }
+
+
+                        return;
+                    }
+                    _episode += data.Length;
+                }
+            }
+        }
+
         public class AnimekisaProvider : IAnimeProvider
         {
             public string Name => "Animekisa";
@@ -2526,7 +2755,6 @@ namespace CloudStreamForms
                 // var ms = activeMovie.title.MALData.seasonData[season];
                 int _episode = 0;
                 for (int q = 0; q < activeMovie.title.MALData.seasonData[season].seasons.Count; q++) {
-
                     var ms = activeMovie.title.MALData.seasonData[season].seasons[q].animekisaData;
 
                     string[] data = new string[0];
@@ -4813,6 +5041,11 @@ namespace CloudStreamForms
                             sqlLink = FindHTML(sequel, "<a href=\"", "\"");
                             string _jap = FindHTML(d, "Japanese:</span> ", "<", decodeToNonHtml: true).Replace("  ", "").Replace("\n", "");
                             string _eng = FindHTML(d, "English:</span> ", "<", decodeToNonHtml: true).Replace("  ", "").Replace("\n", "");
+
+                            string _date = FindHTML(d, "<span class=\"dark_text\">Aired:</span>", "</div>").Replace("  ", "").Replace("\n", "");
+                            string _startDate = FindHTML("|" + _date + "|", "|", "to");
+                            string _endDate = FindHTML("|" + _date + "|", "to", "|");
+
                             if (_eng == "") {
                                 _eng = FindHTML(d, "og:title\" content=\"", "\"", decodeToNonHtml: true);
                             }
@@ -4830,11 +5063,11 @@ namespace CloudStreamForms
 
                             if (currentName.Contains("Part ") && !currentName.Contains("Part 1")) // WILL ONLY WORK UNTIL PART 10, BUT JUST HOPE THAT THAT DOSENT HAPPEND :)
                             {
-                                data[data.Count - 1].seasons.Add(new MALSeason() { name = currentName, engName = _eng, japName = _jap, synonyms = _synos, malUrl = _malLink });
+                                data[data.Count - 1].seasons.Add(new MALSeason() { name = currentName, engName = _eng, japName = _jap, synonyms = _synos, malUrl = _malLink, startDate = _startDate, endDate = _endDate });
                             }
                             else {
                                 data.Add(new MALSeasonData() {
-                                    seasons = new List<MALSeason>() { new MALSeason() { name = currentName, engName = _eng, japName = _jap, synonyms = _synos, malUrl = _malLink } },
+                                    seasons = new List<MALSeason>() { new MALSeason() { name = currentName, engName = _eng, japName = _jap, synonyms = _synos, malUrl = _malLink, startDate = _startDate, endDate = _endDate } },
                                     malUrl = "https://myanimelist.net" + _malLink
                                 });
                             }
