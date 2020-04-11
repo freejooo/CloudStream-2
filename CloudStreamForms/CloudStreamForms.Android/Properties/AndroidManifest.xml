@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android" android:versionCode="12" android:versionName="1.5.5" package="com.CloudStreamForms.CloudStreamForms" android:installLocation="auto">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" android:versionCode="13" android:versionName="1.6.0" package="com.CloudStreamForms.CloudStreamForms" android:installLocation="auto">
 	<uses-sdk android:minSdkVersion="21" android:targetSdkVersion="28" />
 	<application android:label="CloudStream 2" android:icon="@drawable/bicon"></application>
 	<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
@@ -15,10 +15,10 @@
 		</provider>
 		<receiver android:process=":remote" android:name=".AlertReceiver" />
 		<receiver android:process=":remote" android:name=".DownloadUrlReceiver" />
-    <!-- <receiver android:process=":remote" android:name=".DownloadReceiver" />-->
-    <service android:name=".DownloadUrlService"></service>
-    <service android:name=".OnKilledService" android:stopWithTask="false" ></service>
-    <service android:name=".EverService" android:stopWithTask="false" ></service>
-    <activity android:name=".TrampolineActivity" android:taskAffinity=""></activity>
+		<!-- <receiver android:process=":remote" android:name=".DownloadReceiver" />-->
+		<service android:name=".DownloadUrlService"></service>
+		<service android:name=".OnKilledService" android:stopWithTask="false"></service>
+		<service android:name=".EverService" android:stopWithTask="false"></service>
+		<activity android:name=".TrampolineActivity" android:taskAffinity=""></activity>
 	</application>
 </manifest>

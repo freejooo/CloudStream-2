@@ -141,8 +141,8 @@ namespace CloudStreamForms
                 Children.Add(pages[i]);
                 Children[i].Title = names[i];
                 Children[i].IconImageSource = baseIcons[i];
-
             }
+            OnIconStart(0);
 
             LateCheck();
 
@@ -150,13 +150,13 @@ namespace CloudStreamForms
 
             int oldPage = 0;
             CurrentPageChanged += (o, e) => {
-                OnIconEnd(oldPage); 
-                for (int i = 0; i < pages.Count; i++) { 
+                OnIconEnd(oldPage);
+                for (int i = 0; i < pages.Count; i++) {
                     if ((pages[i].GetType()) == CurrentPage.GetType()) {
                         OnIconStart(i);
                         oldPage = i;
                     }
-                } 
+                }
             };
 
             // BarBackgroundColor = Color.Black;
@@ -1006,7 +1006,18 @@ namespace CloudStreamForms
             public KickassAnimeData kickassAnimeData;
             public AnimeFlixData animeFlixData;
             public DubbedAnimeNetData dubbedAnimeNetData;
+            public AnimekisaData animekisaData;
         }
+        [Serializable]
+
+        public struct AnimekisaData
+        {
+            public bool dubExists;
+            public bool subExists;
+            public string[] dubbedEpisodes;
+            public string[] subbedEpisodes;
+        }
+
 
         [System.Serializable]
         public struct DubbedAnimeNetData
@@ -1473,7 +1484,7 @@ namespace CloudStreamForms
 
         public static IMovieProvider[] movieProviders = new IMovieProvider[] { new FullMoviesProvider(), new TMDBProvider(), new WatchTVProvider(), new FMoviesProvider(), new LiveMovies123Provider(), new TheMovies123Provider(), new YesMoviesProvider(), new WatchSeriesProvider(), new GomoStreamProvider(), new Movies123Provider() };
 
-        public static IAnimeProvider[] animeProviders = new IAnimeProvider[] { new GogoAnimeProvider(), new KickassAnimeProvider(), new DubbedAnimeProvider(), new AnimeFlixProvider(), new DubbedAnimeNetProvider() };
+        public static IAnimeProvider[] animeProviders = new IAnimeProvider[] { new GogoAnimeProvider(), new KickassAnimeProvider(), new DubbedAnimeProvider(), new AnimeFlixProvider(), new DubbedAnimeNetProvider(), new AnimekisaProvider() };
 
         public interface IMovieProvider // FOR MOVIES AND SHOWS
         {
@@ -2395,6 +2406,151 @@ namespace CloudStreamForms
             }
         }
 
+        public class AnimekisaProvider : IAnimeProvider
+        {
+            public string Name => "Animekisa";
+
+            public void FishMainLink(string year, TempThred tempThred, MALData malData)
+            {
+                string search = activeMovie.title.name;
+                string d = DownloadString("https://animekisa.tv/search?q=" + search);
+                if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
+                print("ANIMEKISKA ." + d);
+                const string lookFor = "<a class=\"an\" href=\"";
+
+                List<string> urls = new List<string>();
+                List<string> titles = new List<string>();
+
+                while (d.Contains(lookFor)) {
+                    string uri = FindHTML(d, lookFor, "\"");
+
+                    d = RemoveOne(d, lookFor);
+                    string title = FindHTML(d, "<div class=\"similardd\">", "<");
+
+                    urls.Add(uri);
+                    titles.Add(title);
+                    print("DLOAD:::::D:D::D:D:" + uri + "|" + title);
+                }
+
+                for (int i = 0; i < urls.Count; i++) {
+                    try {
+
+
+                        string url = urls[i];
+                        print("DLOADLALDLADLLA:::" + url);
+                        string _d = DownloadString("https://animekisa.tv" + url);
+                        bool isDubbed = url.EndsWith("-dubbed");
+                        if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
+
+                        string id = FindHTML(_d, "href=\"https://myanimelist.net/anime/", "/");
+
+
+                        for (int z = 0; z < activeMovie.title.MALData.seasonData.Count; z++) {
+                            for (int q = 0; q < activeMovie.title.MALData.seasonData[z].seasons.Count; q++) {
+                                string malUrl = activeMovie.title.MALData.seasonData[z].seasons[q].malUrl;
+                                if (FindHTML(malUrl, "/anime/", "/") == id) {
+                                    var ms = activeMovie.title.MALData.seasonData[z].seasons[q].animekisaData;
+                                    if (isDubbed) {
+                                        ms.dubExists = true;
+                                    }
+                                    else {
+                                        ms.subExists = true;
+                                    }
+
+                                    const string _lookFor = "<a class=\"infovan\" href=\"";
+                                    const string epFor = "<div class=\"centerv\">";
+
+
+                                    Dictionary<int, string> hrefs = new Dictionary<int, string>();
+                                    int maxEpisode = 0;
+                                    while (_d.Contains(_lookFor)) {
+                                        string href = FindHTML(_d, _lookFor, "\"");
+                                        _d = RemoveOne(_d, _lookFor);
+                                        _d = RemoveOne(_d, epFor);
+                                        string ep = FindHTML(_d, epFor, "<");
+                                        int epNum = int.Parse(ep);
+                                        if (epNum > maxEpisode) {
+                                            maxEpisode = epNum;
+                                        }
+                                        hrefs[epNum] = href;
+                                        print("Href::" + href + "|" + epNum);
+                                    }
+
+                                    string[] episodes = new string[maxEpisode];
+                                    for (int a = 0; a < maxEpisode; a++) {
+                                        episodes[a] = hrefs[a + 1];
+                                    }
+                                    if (isDubbed) {
+                                        ms.dubbedEpisodes = episodes;
+                                    }
+                                    else {
+                                        ms.subbedEpisodes = episodes;
+                                    }
+
+                                    var data = activeMovie.title.MALData.seasonData[z].seasons[q];
+                                    data.animekisaData = ms;
+                                    activeMovie.title.MALData.seasonData[z].seasons[q] = data;
+                                }
+                            }
+                        }
+                    }
+                    catch (Exception _ex) {
+                        print("MAIN EX::: FORM" + Name + "|" + _ex);
+                    }
+                }
+            }
+
+            public int GetLinkCount(Movie currentMovie, int currentSeason, bool isDub, TempThred? tempThred)
+            {
+                int len = 0;
+                try {
+                    for (int q = 0; q < currentMovie.title.MALData.seasonData[currentSeason].seasons.Count; q++) {
+                        var ms = currentMovie.title.MALData.seasonData[currentSeason].seasons[q].animekisaData;
+                        if ((ms.dubExists && isDub)) {
+                            //  dstring = ms.baseUrl;
+                            len += ms.dubbedEpisodes.Length;
+                        }
+                        else if ((ms.subExists && !isDub)) {
+                            len += ms.subbedEpisodes.Length;
+                        }
+                    }
+                }
+                catch (Exception) {
+                }
+                return len;
+            }
+
+
+            public void LoadLinksTSync(int episode, int season, int normalEpisode, bool isDub, TempThred tempThred)
+            {
+                // var ms = activeMovie.title.MALData.seasonData[season];
+                int _episode = 0;
+                for (int q = 0; q < activeMovie.title.MALData.seasonData[season].seasons.Count; q++) {
+
+                    var ms = activeMovie.title.MALData.seasonData[season].seasons[q].animekisaData;
+
+                    string[] data = new string[0];
+                    if ((ms.dubExists && isDub)) {
+                        //  dstring = ms.baseUrl;
+                        data = ms.dubbedEpisodes;
+                    }
+                    else if ((ms.subExists && !isDub)) {
+                        data = ms.subbedEpisodes;
+                    }
+                    if (_episode + data.Length > normalEpisode) {
+                        string header = data[normalEpisode - _episode];
+
+                        string d = DownloadString("https://animekisa.tv/" + header);
+                        print("HEADER:::::::::-->>>" + header);
+                        AddEpisodesFromMirrors(tempThred, d, normalEpisode, Name);
+
+                        return;
+                    }
+                    _episode += data.Length;
+                }
+            }
+        }
+
         class DubbedAnimeProvider : IAnimeProvider
         {
             public string Name { get => "DubbedAnime"; }
@@ -2709,8 +2865,6 @@ namespace CloudStreamForms
             public void FishMainLink(string year, TempThred tempThred, MALData malData)
             {
                 try {
-
-
                     string result = DownloadString("https://animeflix.io/api/search?q=" + malData.firstName, waitTime: 400, repeats: 1);//activeMovie.title.name);
                     print("FLIX::::" + result);
                     if (result == "") return;
@@ -4073,26 +4227,26 @@ namespace CloudStreamForms
                     }
                 }
                 /*{"html":"<div id=\"servers\">\n                        
-<div class=\"server row\" data-type=\"iframe\" data-id=\"28\">\n            
-<label class=\"name col-md-4 col-sm-5\">\n                
-<i class=\"fa fa-server\"><\/i>\n                 MyCloud\n            <\/label>\n            
-<div class=\"col-md-20 col-sm-19\">\n                                <ul class=\"episodes range active\"\n                    
-data-range-id=\"0\">\n                                        <li>\n                        
-<a  data-id=\"b5a4388f1a2fadb87f94fde2abf3a3e85288d96026d6be3bf4920f6aa718e12c\" href=\"\/film\/iron-man-3.885o\/1n4rzyv\">HD<\/a>\n                    
-<\/li>\n                                    <\/ul>\n                            <\/div>\n        <\/div>\n                            
-<div class=\"server row\" data-type=\"iframe\" data-id=\"36\">\n            <label class=\"name col-md-4 col-sm-5\">\n                
-<i class=\"fa fa-server\"><\/i>\n                 F5 - HQ\n            <\/label>\n            <div class=\"col-md-20 col-sm-19\">\n                                
-<ul class=\"episodes range active\"\n                    data-range-id=\"0\">\n                                        <li>\n                        
-<a  data-id=\"05912e0bb9a837fc540e8ddc66beb8f2047667d192b2bee4aa9ba8e744f0eaea\" href=\"\/film\/iron-man-3.885o\/pr65wqx\">HD<\/a>\n                    
-<\/li>\n                                    <\/ul>\n                            <\/div>\n        <\/div>\n                            
-<div class=\"server row\" data-type=\"iframe\" data-id=\"39\">\n            <label class=\"name col-md-4 col-sm-5\">\n                
-<i class=\"fa fa-server\"><\/i>\n                 Hydrax\n            <\/label>\n            <div class=\"col-md-20 col-sm-19\">\n                                
-<ul class=\"episodes range active\"\n                    data-range-id=\"0\">\n                                        <li>\n                        
-<a class=\"active\" data-id=\"41d881669367be4d23b70715f40410adac4788764836c1b80801639f08621e96\" href=\"\/film\/iron-man-3.885o\/m280668\">HD<\/a>\n                    
-<\/li>\n                                    <\/ul>\n                            <\/div>\n        <\/div>\n            <\/div>"}
+    <div class=\"server row\" data-type=\"iframe\" data-id=\"28\">\n            
+    <label class=\"name col-md-4 col-sm-5\">\n                
+    <i class=\"fa fa-server\"><\/i>\n                 MyCloud\n            <\/label>\n            
+    <div class=\"col-md-20 col-sm-19\">\n                                <ul class=\"episodes range active\"\n                    
+    data-range-id=\"0\">\n                                        <li>\n                        
+    <a  data-id=\"b5a4388f1a2fadb87f94fde2abf3a3e85288d96026d6be3bf4920f6aa718e12c\" href=\"\/film\/iron-man-3.885o\/1n4rzyv\">HD<\/a>\n                    
+    <\/li>\n                                    <\/ul>\n                            <\/div>\n        <\/div>\n                            
+    <div class=\"server row\" data-type=\"iframe\" data-id=\"36\">\n            <label class=\"name col-md-4 col-sm-5\">\n                
+    <i class=\"fa fa-server\"><\/i>\n                 F5 - HQ\n            <\/label>\n            <div class=\"col-md-20 col-sm-19\">\n                                
+    <ul class=\"episodes range active\"\n                    data-range-id=\"0\">\n                                        <li>\n                        
+    <a  data-id=\"05912e0bb9a837fc540e8ddc66beb8f2047667d192b2bee4aa9ba8e744f0eaea\" href=\"\/film\/iron-man-3.885o\/pr65wqx\">HD<\/a>\n                    
+    <\/li>\n                                    <\/ul>\n                            <\/div>\n        <\/div>\n                            
+    <div class=\"server row\" data-type=\"iframe\" data-id=\"39\">\n            <label class=\"name col-md-4 col-sm-5\">\n                
+    <i class=\"fa fa-server\"><\/i>\n                 Hydrax\n            <\/label>\n            <div class=\"col-md-20 col-sm-19\">\n                                
+    <ul class=\"episodes range active\"\n                    data-range-id=\"0\">\n                                        <li>\n                        
+    <a class=\"active\" data-id=\"41d881669367be4d23b70715f40410adac4788764836c1b80801639f08621e96\" href=\"\/film\/iron-man-3.885o\/m280668\">HD<\/a>\n                    
+    <\/li>\n                                    <\/ul>\n                            <\/div>\n        <\/div>\n            <\/div>"}
 
 
-https://prettyfast.to/e/66vvrk\/fe1541bb8d2aeaec6bb7e500d070b2ec?sub=https%253A%252F%252Fstaticf.akacdn.ru%252Ff%252Fsubtitle%252F7309.vtt%253Fv1*/
+    https://prettyfast.to/e/66vvrk\/fe1541bb8d2aeaec6bb7e500d070b2ec?sub=https%253A%252F%252Fstaticf.akacdn.ru%252Ff%252Fsubtitle%252F7309.vtt%253Fv1*/
                 // https://fmovies.to/ajax/episode/info?ts=1574168400&_=694&id=d49ac231d1ddf83114eadf1234a1f5d8136dc4a5b6db299d037c06804b37b1ab&server=28
                 // https://fmovies.to/ajax/episode/info?ts=1574168400&_=199&id=1c7493cc7bf3cc16831ff9bf1599ceb6f4be2a65a57143c5a24c2dbea99104de&server=97
                 d = "";
@@ -4545,7 +4699,16 @@ https://prettyfast.to/e/66vvrk\/fe1541bb8d2aeaec6bb7e500d070b2ec?sub=https%253A%
             return System.Net.WebUtility.HtmlDecode(inp);
         }
 
-
+        /// <summary>
+        /// NOTE, CANT BE PLAYED IN VLC, JUST EXTRACTS THE STREAM, THAT CAN BE DOWNLOADED W REFERER:  https://hydrax.net/watch?v= [SLUG]
+        /// </summary>
+        /// <param name="slug"></param>
+        /// <returns></returns>
+        public static string GetUrlFromHydraX(string slug)
+        {
+            string d = PostRequest("https://ping.idocdn.com/", $"https://hydrax.net/watch?v={slug}", $"slug={slug}");
+            return $"https://{slug}.{FindHTML(d, "\"url\":\"", "\"")}";
+        }
 
         public static void GetMALData(bool cacheData = true)
         {
@@ -5311,7 +5474,7 @@ https://prettyfast.to/e/66vvrk\/fe1541bb8d2aeaec6bb7e500d070b2ec?sub=https%253A%
         {
             try {
                 string rUrl = "https://www.opensubtitles.org/en/search/sublanguageid-" + lang + "/imdbid-" + imdbTitleId + "/sort-7/asc-0"; // best match first
-                //print(rUrl);
+                                                                                                                                            //print(rUrl);
                 string d = DownloadString(rUrl);
                 if (d.Contains("<div class=\"msg warn\"><b>No results</b> found, try")) {
                     return "";
@@ -5438,7 +5601,7 @@ https://prettyfast.to/e/66vvrk\/fe1541bb8d2aeaec6bb7e500d070b2ec?sub=https%253A%
             return rng.Next(min, max);
         }
 
-        static void AddEpisodesFromMirrors(TempThred tempThred, string d, int normalEpisode) // DONT DO THEVIDEO provider, THEY USE GOOGLE CAPTCH TO VERIFY AUTOR; LOOK AT https://vev.io/api/serve/video/qy3pw89xwmr7 IT IS A POST REQUEST
+        static void AddEpisodesFromMirrors(TempThred tempThred, string d, int normalEpisode, string extraId = "") // DONT DO THEVIDEO provider, THEY USE GOOGLE CAPTCH TO VERIFY AUTOR; LOOK AT https://vev.io/api/serve/video/qy3pw89xwmr7 IT IS A POST REQUEST
         {
             string mp4 = "https://www.mp4upload.com/embed-" + FindHTML(d, "data-video=\"https://www.mp4upload.com/embed-", "\"");
             if (mp4 != "https://www.mp4upload.com/embed-") {
@@ -5467,6 +5630,7 @@ https://prettyfast.to/e/66vvrk\/fe1541bb8d2aeaec6bb7e500d070b2ec?sub=https%253A%
             string nameId = "Vidstreaming";
             string vid = FindHTML(d, "data-video=\"//vidstreaming.io/streaming.php?", "\"");
             string beforeId = "https://vidstreaming.io/download?id=";
+            string extraBeforeId = "https://vidstreaming.io/streaming.php?";
             if (vid == "") {
                 vid = FindHTML(d, "//vidstreaming.io/streaming.php?", "\"");
             }
@@ -5474,6 +5638,7 @@ https://prettyfast.to/e/66vvrk\/fe1541bb8d2aeaec6bb7e500d070b2ec?sub=https%253A%
                 vid = FindHTML(d, "//vidnode.net/load.php?id=", "\"");
                 if (vid != "") {
                     beforeId = "https://vidnode.net/download?id=";
+                    extraBeforeId = "https://vidnode.net/load.php?id=";
                     nameId = "VidNode";
                 }
             }
@@ -5481,7 +5646,16 @@ https://prettyfast.to/e/66vvrk\/fe1541bb8d2aeaec6bb7e500d070b2ec?sub=https%253A%
                 vid = FindHTML(d, "//vidnode.net/streaming.php?id=", "\"");
                 if (vid != "") {
                     beforeId = "https://vidnode.net/download?id=";
+                    extraBeforeId = "https://vidnode.net/streaming.php?id=";
                     nameId = "VidNode";
+                }
+            }
+            if (vid == "") {
+                vid = FindHTML(d, "//vidstreaming.io/load.php?id=", "\"");
+                if (vid != "") {
+                    beforeId = "https://vidstreaming.io/download?id=";
+                    extraBeforeId = "https://vidstreaming.io/load.php?id=";
+                    nameId = "VidLoad";
                 }
             }
 
@@ -5490,11 +5664,27 @@ https://prettyfast.to/e/66vvrk\/fe1541bb8d2aeaec6bb7e500d070b2ec?sub=https%253A%
 
                 if (vid != "") {
                     beforeId = "https://vidcloud9.com/download?id=";
+                    extraBeforeId = "https://vidcloud9.com/download?id=";
                     nameId = "VidCloud";
                 }
             }
-            print(">>STREAM::" + vid);
+            print(">>STREAM::" + extraId + "||" + vid + "|" + d);
             if (vid != "") {
+
+                if (extraBeforeId != "") {
+                    string extra = DownloadString(extraBeforeId + vid);
+                    const string elookFor = "file: \'";
+                    print("EXTRA:::==>>" + extra);
+
+                    while (extra.Contains(elookFor)) {
+                        string extraUrl = FindHTML(extra, elookFor, "\'");
+                        extra = RemoveOne(extra, elookFor);
+                        string label = FindHTML(extra, "label: \'", "\'");
+                        print("XTRA:::::::" + extra + "|" + label);
+                        AddPotentialLink(normalEpisode, extraUrl, nameId + " Extra " + label.Replace("hls P", "hls"), label == "Auto" ? 20 : 1);
+                    }
+                }
+
                 string dLink = beforeId + vid.Replace("id=", "");
                 string _d = DownloadString(dLink, tempThred);
 
