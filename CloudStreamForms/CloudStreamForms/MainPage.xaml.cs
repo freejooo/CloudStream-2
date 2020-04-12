@@ -2454,50 +2454,71 @@ namespace CloudStreamForms
                                         print("SAME DATE:::: " + title);
                                         try {
 
-                                     
-                                        var ms = activeMovie.title.MALData.seasonData[z].seasons[q].animedreamData;
 
-                                        bool dubExists = false;
-                                        bool subExists = false;
+                                            var ms = activeMovie.title.MALData.seasonData[z].seasons[q].animedreamData;
 
-
-                                        List<string> dubbedEpisodes = new List<string>();
-                                        List<string> subbedEpisodes = new List<string>();
-
-
-                                        const string lookForSearch = "<div class=\'episode-wrap\'>";
-                                        while (searchdload.Contains(lookForSearch)) {
-                                            searchdload = RemoveOne(searchdload, lookForSearch);
-                                            string href = FindHTML(searchdload, "dreamanime.fun/anime/watch/", " ").Replace("\'", "").Replace("\"", ""); // 157726-overlord-episode-13-english-sub
-                                            bool isDub = href.EndsWith("-dub");
-                                            string ep = FindHTML(searchdload, "<span class=\'text-right ep-num\'>Ep. ", "<");
-                                            int epNum = int.Parse(ep);
-
-                                            if (isDub && !dubExists) {
-                                                dubExists = true;
-                                            }
-                                            if (!isDub && !subExists) {
-                                                subExists = true;
+                                            if(ms.dubExists || ms.subExists) {
+                                                print("SUBDUBEXISTS CONTS");
+                                                continue;
                                             }
 
-                                            if (isDub) {
-                                                dubbedEpisodes[epNum] = href;
+                                            bool dubExists = false;
+                                            bool subExists = false; 
+
+                                            Dictionary<int, string> dubbedEpisodesKeys = new Dictionary<int, string>();
+                                            Dictionary<int, string> subbedEpisodesKeys = new Dictionary<int, string>();
+                                            int maxDubbedEps = 0;
+                                            int maxSubbedEps = 0;
+
+                                            const string lookForSearch = "<div class=\'episode-wrap\'>";
+                                            while (searchdload.Contains(lookForSearch)) {
+                                                searchdload = RemoveOne(searchdload, lookForSearch);
+                                                string href = FindHTML(searchdload, "dreamanime.fun/anime/watch/", " ").Replace("\'", "").Replace("\"", ""); // 157726-overlord-episode-13-english-sub
+                                                bool isDub = href.EndsWith("-dub");
+                                                string ep = FindHTML(searchdload, "<span class=\'text-right ep-num\'>Ep. ", "<");
+                                                int epNum = int.Parse(ep);
+
+                                                if (isDub && !dubExists) {
+                                                    dubExists = true;
+                                                }
+                                                if (!isDub && !subExists) {
+                                                    subExists = true;
+                                                }
+
+                                                if (isDub) {
+                                                    if(maxDubbedEps < epNum) {
+                                                        maxDubbedEps = epNum;
+                                                    }
+                                                    dubbedEpisodesKeys[epNum] = href;
+                                                }
+                                                else {
+                                                    if (maxSubbedEps < epNum) {
+                                                        maxSubbedEps = epNum;
+                                                    }
+                                                    subbedEpisodesKeys[epNum] = href;
+                                                }
+
+                                                print("ADDED::: " + ep + "|" + href + "|" + isDub);
                                             }
-                                            else {
-                                                subbedEpisodes[epNum] = href;
+
+                                            ms.dubExists = dubExists;
+                                            ms.subExists = subExists;
+                                            List<string> dubbedEpisodes = new List<string>();
+                                            List<string> subbedEpisodes = new List<string>();
+                                            
+                                            for (int i = 0; i < maxSubbedEps; i++) {
+                                                subbedEpisodes.Add(subbedEpisodesKeys[i + 1]);
                                             }
 
-                                            print("ADDED::: "  + ep + "|" + href + "|" + isDub);
-                                        }
-
-                                        ms.dubExists = dubExists;
-                                        ms.subExists = subExists;
-
-                                        ms.subbedEpisodes = subbedEpisodes.ToArray();
-                                        ms.dubbedEpisodes = dubbedEpisodes.ToArray();
-                                        var val = activeMovie.title.MALData.seasonData[z].seasons[q];
-                                        val.animedreamData = ms;
-                                        activeMovie.title.MALData.seasonData[z].seasons[q] = val;
+                                            for (int i = 0; i < maxDubbedEps; i++) {
+                                                dubbedEpisodes.Add(dubbedEpisodesKeys[i + 1]);
+                                            }
+                                            print("ADDED:::>>" + title + "|" + subbedEpisodes.Count + "|" + dubbedEpisodes.Count);
+                                            ms.subbedEpisodes = subbedEpisodes.ToArray();
+                                            ms.dubbedEpisodes = dubbedEpisodes.ToArray();
+                                            var val = activeMovie.title.MALData.seasonData[z].seasons[q];
+                                            val.animedreamData = ms;
+                                            activeMovie.title.MALData.seasonData[z].seasons[q] = val;
                                         }
                                         catch (Exception _ex) {
                                             print("MAIN EX::::::::" + _ex);
@@ -2508,7 +2529,7 @@ namespace CloudStreamForms
                         }
                     }
                     print("EDNURI::: " + uri + "|" + title);
-                } 
+                }
             }
 
             public int GetLinkCount(Movie currentMovie, int currentSeason, bool isDub, TempThred? tempThred)
@@ -2565,6 +2586,7 @@ namespace CloudStreamForms
 
             public void LoadLinksTSync(int episode, int season, int normalEpisode, bool isDub, TempThred tempThred)
             {
+                print("FROMSEASONNN:::" + normalEpisode);
                 int _episode = 0;
                 for (int q = 0; q < activeMovie.title.MALData.seasonData[season].seasons.Count; q++) {
                     var ms = activeMovie.title.MALData.seasonData[season].seasons[q].animedreamData;
@@ -2577,17 +2599,20 @@ namespace CloudStreamForms
                     else if ((ms.subExists && !isDub)) {
                         data = ms.subbedEpisodes;
                     }
+                    print("SLIUGLEN::" + data.Length);
                     if (_episode + data.Length > normalEpisode) {
-                        string slug = data[normalEpisode - _episode];
-                        try { 
-                            string d = DownloadString(slug);
+                        print("GOTSLUG::");
+                        string slug = "https://dreamanime.fun/" + data[normalEpisode - _episode];
+                        print("SLUGFROMDREAM::" + slug);
+                        try {
+                            string d = DownloadString( slug);
 
 
                             if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
 
 
-                            string cepisode = FindHTML(d, "episode = ",";"); //FindHTML(d, "var episode = ", ";");
-                            print("CEPISODE ==== " + cepisode);
+                            string cepisode = FindHTML(d, "episode = ", ";"); //FindHTML(d, "var episode = ", ";");
+                            print("CDreamEPISODE ==== " + cepisode);
                             var epi = JsonConvert.DeserializeObject<DreamAnimeLinkApi>(cepisode);
                             for (int i = 0; i < epi.videos.Count; i++) {
                                 var vid = epi.videos[i];
@@ -2613,7 +2638,7 @@ namespace CloudStreamForms
                                     string p = HTMLGet(dUrl, slug);
 
                                     string src = FindHTML(p, "<source src=\"", "\"");
-                                    AddPotentialLink(normalEpisode, src, "Dream Trollvid", 10);  
+                                    AddPotentialLink(normalEpisode, src, "Dream Trollvid", 10);
                                 }
                                 else if (vid.host == "mp4upload") {
                                     AddMp4(vid.id);
