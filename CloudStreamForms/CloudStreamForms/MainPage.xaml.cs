@@ -7186,7 +7186,7 @@ namespace CloudStreamForms
                 return "Error, index not found";
             }
 
-            return "https://" + server + ".viduplayer.com/" + inter + "/v.mp4";
+            return "https://" + server + ".viduplayer.com/" + inter.Replace("|file","") + "/v.mp4";
         }
 
         /// <summary>

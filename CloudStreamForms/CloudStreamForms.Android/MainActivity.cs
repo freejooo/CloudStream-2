@@ -763,7 +763,13 @@ namespace CloudStreamForms.Droid
 
         public static void HandleIntent(int id, List<string> mirrorNames, List<string> mirrorUrls, int mirror, string title, string path, string poster, string fileName, string beforeTxt, bool openWhenDone, bool showNotificaion, bool showDoneNotificaion, bool showDoneAsToast, bool resumeIntent)
         {
-            if (isPaused.ContainsKey(id)) return;
+            if (isPaused.ContainsKey(id)) {
+                if (isPaused[id] == 2) {
+                    isPaused.Remove(id);
+                    print("YEET DELETED KEEEE");
+                    return;
+                } 
+            }
             var context = Application.Context;
 
             //$"{nameof(id)}={id}|||{nameof(title)}={title}|||{nameof(path)}={path}|||{nameof(poster)}={poster}|||{nameof(fileName)}={fileName}|||{nameof(beforeTxt)}={beforeTxt}|||{nameof(openWhenDone)}={openWhenDone}|||{nameof(showDoneNotificaion)}={showDoneNotificaion}|||{nameof(showDoneAsToast)}={showDoneAsToast}|||");
@@ -795,9 +801,16 @@ namespace CloudStreamForms.Droid
                 }
                 // Toast.MakeText(context, "PG DONE!!!", ToastLength.Long).Show(); 
             }
-
+            print("START DLOADING");
             void StartT()
             {
+                if (isPaused.ContainsKey(id)) {
+                    if (isPaused[id] == 2) {
+                        isPaused.Remove(id); 
+                        return;
+                    }
+                }
+
                 Thread t = new Thread(() => {
 
                     string json = JsonConvert.SerializeObject(new DownloadHandleNot() { id = id, mirrorNames = mirrorNames, mirrorUrls = mirrorUrls, fileName = fileName, showDoneAsToast = showDoneAsToast, openWhenDone = openWhenDone, showDoneNotificaion = showDoneNotificaion, beforeTxt = beforeTxt, mirror = mirror, path = path, poster = poster, showNotificaion = showNotificaion, title = title });
@@ -876,6 +889,14 @@ namespace CloudStreamForms.Droid
 
                         outputStreams[id] = output;
                         inputStreams[id] = input;
+
+                        if (isPaused.ContainsKey(id)) {
+                            if (isPaused[id] == 2) {
+                                isPaused.Remove(id); 
+                                return;
+                            }
+                        }
+
                         isPaused[id] = 0;
                         activeIds.Add(id);
 
@@ -929,6 +950,7 @@ namespace CloudStreamForms.Droid
                                 rFile.Delete();
                                 App.RemoveKey(DOWNLOAD_KEY, id.ToString());
                                 App.RemoveKey(DOWNLOAD_KEY_INTENT, id.ToString());
+                                App.RemoveKey(App.hasDownloadedFolder, id.ToString());
                                 changedPause -= UpdateFromId;
                                 activeIds.Remove(id);
                                 Thread.Sleep(100);
@@ -1345,9 +1367,9 @@ namespace CloudStreamForms.Droid
 
             ResumeIntentData();
             StartService(new Intent(BaseContext, typeof(OnKilledService)));
-          //  Android.Renderscripts.ta
-           // var bar = new Xamarin.Forms.Platform.Android.TabbedRenderer();//.Platform.Android.
-             
+            //  Android.Renderscripts.ta
+            // var bar = new Xamarin.Forms.Platform.Android.TabbedRenderer();//.Platform.Android.
+
             //ShowBlackToast("Yeet", 3);
             // DownloadHandle.ResumeIntents();
             //   ShowLocalNot(new LocalNot() { mediaStyle = false, title = "yeet", data = "", progress = -1, showWhen = false, autoCancel = true, onGoing = false, id = 1234, smallIcon = Resource.Drawable.bicon, body = "Download ddddd" }, Application.Context);

@@ -145,16 +145,16 @@ namespace CloudStreamForms
         }
         protected override void OnDisappearing()
         {
-           // OnIconEnd(2);
+            // OnIconEnd(2);
             base.OnDisappearing();
         }
 
-        
+
         protected override void OnAppearing()
         {
             //OnIconStart(2);
             base.OnAppearing();
- 
+
             BackgroundColor = Settings.BlackRBGColor;
 
 
@@ -192,6 +192,7 @@ namespace CloudStreamForms
         public static void RemoveDownloadCookie(int? id = null, int? headerId = null)
         {
             if (id != null) {
+                App.RemoveKey(App.hasDownloadedFolder, id.ToString());
                 App.RemoveKey(nameof(DownloadEpisodeInfo), "id" + id);
                 App.RemoveKey("DownloadIds", id.ToString());
                 App.RemoveKey("dlength", "id" + id);
@@ -543,11 +544,12 @@ namespace CloudStreamForms
                 bool succ = App.DeleteFile(info.info.fileUrl);
                 if (succ) {
                     App.ShowToast("Deleted File");
+                    App.UpdateDownload(info.info.id, 2);
+                    RemoveDownloadCookie(info.info.id);
                 }
                 else {
                     App.ShowToast("Failed to delete file");
                 }
-                App.UpdateDownload(info.info.id, 2);
             }
             else if (action == "Open Source") {
                 if (info.info.dtype == DownloadType.YouTube) {
@@ -562,16 +564,6 @@ namespace CloudStreamForms
             // info.info.fileUrl
         }
 
-
-
-
-        public static void DeleteFile(string moviePath, string keyPath)
-        {
-            if (App.DeleteFile(moviePath)) {
-                App.RemoveKey(keyPath);
-                App.ShowToast("Deleted File");
-            }
-        }
 
         public static void PlayFile(string keyData, string title = "")
         {

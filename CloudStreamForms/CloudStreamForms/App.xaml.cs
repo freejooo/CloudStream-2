@@ -23,6 +23,20 @@ namespace CloudStreamForms
     {
         public const string baseM3u8Name = @"mirrorlist.m3u8";
         public const string baseSubtitleName = @"subtitles.srt";
+        public const string hasDownloadedFolder = "dloaded";
+
+        public static DownloadState GetDstate(int epId)
+        {
+            bool isDownloaded = App.GetKey(hasDownloadedFolder, epId.ToString(), false);
+            if(!isDownloaded) {
+                return DownloadState.NotDownloaded;
+            }
+            else {
+                return App.GetDownloadInfo(epId).state.state;
+            } 
+        }
+
+
 
         public interface IPlatformDep
         {
@@ -148,6 +162,8 @@ namespace CloudStreamForms
 
         public static string RequestDownload(int id, string name, string description, int episode, int season, List<string> mirrorUrls, List<string> mirrorNames, string downloadTitle, string poster, CloudStreamCore.Title title)
         {
+            App.SetKey(hasDownloadedFolder, id.ToString(), true);
+
             DownloadHeader header = ConvertTitleToHeader(title);
             string extraPath = "/" + GetPathFromType(header);
             print("HEADERID::: " + header.RealId);
@@ -180,10 +196,10 @@ namespace CloudStreamForms
         {
             var info = GetDownloadEpisodeInfo(id);
             if (info == null) return null;
-          //  Stopwatch stop = new Stopwatch();
+            //  Stopwatch stop = new Stopwatch();
             //stop.Start();
             var i = new DownloadInfo() { info = info, state = hasState ? platformDep.GetDownloadProgressInfo(id, info.fileUrl) : null };
-         //   stop.Stop(); print("DLENNNNN:::" + stop.ElapsedMilliseconds);
+            //   stop.Stop(); print("DLENNNNN:::" + stop.ElapsedMilliseconds);
             return i;
         }
 
@@ -262,7 +278,7 @@ namespace CloudStreamForms
             return platformDep.GetBrightness();
         }
 
-        public static string DownloadAdvanced(int id, string url, string fileName, string titleName, bool mainPath, string extraPath, bool showNotification = true, bool showNotificationWhenDone = true, bool openWhenDone = false, string poster = "", string beforeTxt = "")
+        private static string DownloadAdvanced(int id, string url, string fileName, string titleName, bool mainPath, string extraPath, bool showNotification = true, bool showNotificationWhenDone = true, bool openWhenDone = false, string poster = "", string beforeTxt = "")
         {
             return platformDep.DownloadAdvanced(id, url, fileName, titleName, mainPath, extraPath, showNotification, showNotificationWhenDone, openWhenDone, poster, beforeTxt);
         }
@@ -483,7 +499,7 @@ namespace CloudStreamForms
         public static List<string> GetKeysPath(string folder)
         {
             string[] copy = new string[myApp.Properties.Keys.Count];
-            myApp.Properties.Keys.CopyTo(copy,0);
+            myApp.Properties.Keys.CopyTo(copy, 0);
             List<string> keyNames = copy.Where(t => t.StartsWith(GetKeyPath(folder))).ToList();
             return keyNames;
         }
