@@ -205,10 +205,8 @@ namespace CloudStreamForms
         }
 
         void UpdateDownloaded()
-        {
-
-            object clock = new object();
-
+        { 
+            object clock = new object(); 
 
             Thread mThread = new Thread(() => {
                 Thread.Sleep(100);

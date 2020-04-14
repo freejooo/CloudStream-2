@@ -981,7 +981,7 @@ namespace CloudStreamForms.Droid
                                     ShowDone(true);
                                 }
                                 else {
-                                    UpdateProgress();
+                                    // UpdateProgress();
                                     // UpdateDloadNot(progress + "%");
                                 }
                             }

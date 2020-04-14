@@ -1483,7 +1483,9 @@ namespace CloudStreamForms
         public struct FishLoaded
         {
             public string name;
-            public double progress;
+            public double progressProcentage;
+            public int maxProgress;
+            public int currentProgress;
         }
 
         public static event EventHandler<FishLoaded> fishProgressLoaded;
@@ -2184,7 +2186,7 @@ namespace CloudStreamForms
                         if (ToDown(titles[i], replaceSpace: "") == ToDown(activeMovie.title.name, replaceSpace: "")) {
                             var ep = GetDubbedAnimeEpisode(hrefs[i]);
                             if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
-                            DubbedAnimeProvider.AddMirrors(ep,normalEpisode);
+                            DubbedAnimeProvider.AddMirrors(ep, normalEpisode);
                             return;
                         }
                     }
@@ -3034,7 +3036,7 @@ namespace CloudStreamForms
                tempthread.Thread.Name = "DubAnime Thread";
                tempthread.Thread.Start();*/
             }
-    
+
             public static void AddMirrors(DubbedAnimeEpisode dubbedEp, int normalEpisode)
             {
                 string serverUrls = dubbedEp.serversHTML;
@@ -3072,7 +3074,7 @@ namespace CloudStreamForms
                     }
                     serverUrls = RemoveOne(serverUrls, sLookFor);
                 }
-            } 
+            }
 
             public int GetLinkCount(Movie currentMovie, int currentSeason, bool isDub, TempThred? tempThred)
             {
@@ -5233,21 +5235,41 @@ namespace CloudStreamForms
 
 
                     // FASTER, BUT.. VERY WEIRD BUG BECAUSE THEY ARE ALL WRITING TO SAME CLASS
+                    shouldSkipAnimeLoading = false;
+                    Thread t = new Thread(() => {
+                        try {
+                            int count = 0;
 
-                    int count = 0;
-                    Parallel.For(0, animeProviders.Length, (int i) => {
-                        print("STARTEDANIME: " + animeProviders[i].ToString() + "|" + i);
-                        fishProgressLoaded?.Invoke(null, new FishLoaded() { name = animeProviders[i].Name, progress = ((double)count) / animeProviders.Length });
-                        animeProviders[i].FishMainLink(currentSelectedYear, tempThred, activeMovie.title.MALData);
-                        count++;
-                        print("COUNT INCRESED < -------------------------------- " + count);
-                        //if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
+                            Parallel.For(0, animeProviders.Length, (int i) => {
+                                print("STARTEDANIME: " + animeProviders[i].ToString() + "|" + i);
+                                fishProgressLoaded?.Invoke(null, new FishLoaded() { name = animeProviders[i].Name, progressProcentage = ((double)count) / animeProviders.Length, maxProgress = animeProviders.Length, currentProgress = count });
+                                animeProviders[i].FishMainLink(currentSelectedYear, tempThred, activeMovie.title.MALData);
+                                count++;
+                                fishProgressLoaded?.Invoke(null, new FishLoaded() { name = animeProviders[i].Name, progressProcentage = ((double)count) / animeProviders.Length, maxProgress = animeProviders.Length, currentProgress = count });
+                                print("COUNT INCRESED < -------------------------------- " + count);
+                                //if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
+                            });
+                        }
+                        catch (Exception _ex) {
+                            print("EX:::Loaded" + _ex);
+                        }
+                        
+                      
                     });
-                    fishProgressLoaded?.Invoke(null, new FishLoaded() { name = "", progress = 1 });
+                    t.Start();
+
+                    while (t.IsAlive && !shouldSkipAnimeLoading) {
+                        Thread.Sleep(100); 
+                    }
+                    if(shouldSkipAnimeLoading) {
+                        shouldSkipAnimeLoading = false;
+                        //t.Abort();
+                    }
+                    fishProgressLoaded?.Invoke(null, new FishLoaded() { name = "Done!", progressProcentage = 1, maxProgress = animeProviders.Length, currentProgress = animeProviders.Length });
+
+                    // fishProgressLoaded?.Invoke(null, new FishLoaded() { name = "", progress = 1 });
 
                     if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
-
-
 
 
                     /*
@@ -5283,7 +5305,7 @@ namespace CloudStreamForms
             tempThred.Thread.Name = "MAL Search";
             tempThred.Thread.Start();
         }
-
+        public static bool shouldSkipAnimeLoading = false;
         public struct AnimeNotTitle
         {
             public string romaji { get; set; }
@@ -6029,7 +6051,7 @@ namespace CloudStreamForms
                     while (extra.Contains(elookFor)) {
                         string extraUrl = FindHTML(extra, elookFor, "\'");
                         extra = RemoveOne(extra, elookFor);
-                        string label = FindHTML(extra, "label: \'", "\'");
+                        string label = FindHTML(extra, "label: \'", "\'").Replace("autop","Auto").Replace("auto p", "Auto");
                         print("XTRA:::::::" + extra + "|" + label);
                         AddPotentialLink(normalEpisode, extraUrl, nameId + " Extra " + label.Replace("hls P", "hls"), label == "Auto" ? 20 : 1);
                     }
@@ -7186,7 +7208,7 @@ namespace CloudStreamForms
                 return "Error, index not found";
             }
 
-            return "https://" + server + ".viduplayer.com/" + inter.Replace("|file","") + "/v.mp4";
+            return "https://" + server + ".viduplayer.com/" + inter.Replace("|file", "") + "/v.mp4";
         }
 
         /// <summary>

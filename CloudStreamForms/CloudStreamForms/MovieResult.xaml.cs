@@ -415,38 +415,64 @@ namespace CloudStreamForms
                 ToggleNotify();
             }));
 
+            SkipAnimeBtt.Clicked += (o, e) => {
+                // Grid.SetColumn(SkipAnimeBtt, 0);
+                shouldSkipAnimeLoading = true;
+                SkipAnimeBtt.IsVisible = false;
+                SkipAnimeBtt.IsEnabled = false;
+                hasSkipedLoading = true;
+            };
+
             fishProgressLoaded += (o, e) => {
                 if (!SameAsActiveMovie()) return;
-                return;
-                /*
+
                 Device.InvokeOnMainThreadAsync(async () => {
-                    if (e.progress >= 1 && (!FishProgress.IsVisible || FishProgress.Progress >= 1)) return;
-                    FishProgress.IsVisible = true;
-                    FishProgress.IsEnabled = true;
-                    FishProgressTxt.IsVisible = true;
-                    FishProgressTxt.IsEnabled = true;
-                    if (FishProgress.Opacity == 0) {
-                        FishProgress.FadeTo(1);
+                    SkipAnimeBtt.Text = $"Skip - {e.currentProgress} of {e.maxProgress}"; // {(int)(e.progressProcentage * 100)}%
+
+                    if (e.progressProcentage > 0) {
+                        if (!SkipAnimeBtt.IsVisible && !hasSkipedLoading) {
+                            SkipAnimeBtt.Opacity = 0;
+                            // Grid.SetColumn(SkipAnimeBtt, 1);
+                            SkipAnimeBtt.IsVisible = true;
+                            SkipAnimeBtt.IsEnabled = true;
+                            SkipAnimeBtt.FadeTo(1);
+                        }
+                    }
+                    if (e.progressProcentage >= 1) {
+                        hasSkipedLoading = true;
+                        //  Grid.SetColumn(SkipAnimeBtt, 0);
+                        SkipAnimeBtt.IsVisible = false;
+                        SkipAnimeBtt.IsEnabled = false;
                     }
 
-                    // FishProgressTxt.Text = e.name;
-                    await FishProgress.ProgressTo(e.progress, 250, Easing.SinIn);
-                    if (e.progress >= 1) {
+                    /*
+                   if (e.progress >= 1 && (!FishProgress.IsVisible || FishProgress.Progress >= 1)) return;
+                   FishProgress.IsVisible = true;
+                   FishProgress.IsEnabled = true;
+                   FishProgressTxt.IsVisible = true;
+                   FishProgressTxt.IsEnabled = true;
+                   if (FishProgress.Opacity == 0) {
+                       FishProgress.FadeTo(1);
+                   }
 
-                        FishProgressTxt.IsVisible = false;
-                        FishProgressTxt.IsEnabled = false;
+                   // FishProgressTxt.Text = e.name;
+                   await FishProgress.ProgressTo(e.progress, 250, Easing.SinIn);
+                   if (e.progress >= 1) {
 
-                        await FishProgress.FadeTo(0);
-                        FishProgress.IsVisible = false;
-                        FishProgress.IsEnabled = false;
-                    }
+                       FishProgressTxt.IsVisible = false;
+                       FishProgressTxt.IsEnabled = false;
+
+                       await FishProgress.FadeTo(0);
+                       FishProgress.IsVisible = false;
+                       FishProgress.IsEnabled = false;
+                   }*/
                 });
-                */
+
             };
 
         }
 
-
+        bool hasSkipedLoading = false;
 
         void CancelNotifications()
         {
@@ -748,21 +774,18 @@ namespace CloudStreamForms
                             //  await Task.Delay(1000);
                             //SetColor(epRes);
                         }
-                        if(!hasMirrors) {
+                        if (!hasMirrors) {
                             App.ShowToast("Download Failed");
                         }
 
-                        ForceUpdate(); 
+                        ForceUpdate();
                     }
                     catch (Exception _ex) {
                         print("EX DLOAD::: " + _ex);
                         throw;
                     }
-
                     currentDownloadSearchesHappening--;
                 }
-
-
             });
 
             return episodeResult;

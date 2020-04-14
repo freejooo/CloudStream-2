@@ -236,7 +236,7 @@ xmlns:ffTransformations="clr-namespace:FFImageLoading.Transformations;assembly=F
 
                     <Grid Margin="0,-13,0,-5">
                         <Grid.RowDefinitions >
-                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" /> 
                         </Grid.RowDefinitions>
 
                         <Grid x:Name="EpPickers" Grid.Row="1"  Grid.Column="0" Margin="10,10,0,0">
@@ -257,8 +257,11 @@ xmlns:ffTransformations="clr-namespace:FFImageLoading.Transformations;assembly=F
                             <Label x:Name="NotificationTime" Grid.Column="4" VerticalOptions="Center" HorizontalOptions="End" Margin="10,0"></Label>
                             <!--   <Picker x:Name="DubPicker" IsVisible="False" VerticalOptions="Center" HorizontalOptions="Start"  FontAttributes="Bold" FontSize="Body" TextColor="Transparent" TranslationX="13"></Picker> -->
                             <!-- </StackLayout>-->
+                            <Button x:Name="SkipAnimeBtt" IsEnabled="False" Grid.Row="0" Grid.Column="1" HorizontalOptions="Center" VerticalOptions="Center" IsVisible="False" InputTransparent="False" BackgroundColor="#333333" Text="Skip Loading" TextColor="#e7e7e7" FontAttributes="Bold" FontSize="Body" CornerRadius="5" HeightRequest="37" WidthRequest="100" ></Button>
 
                         </Grid>
+
+                        
 
                         <Grid Grid.Row="0"  Grid.Column="0">
                             <!--
