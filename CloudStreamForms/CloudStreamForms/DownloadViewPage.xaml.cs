@@ -100,6 +100,7 @@ namespace CloudStreamForms
                     if (info != null) {
                         Download.downloads[key] = info;
                         if (info.state.totalBytes == 0) {
+                            print("DC 0 DATAA:::: ");
                             Download.RemoveDownloadCookie(key);
                         }
                         else {

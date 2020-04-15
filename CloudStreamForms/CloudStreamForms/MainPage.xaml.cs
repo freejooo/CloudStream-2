@@ -6310,10 +6310,21 @@ namespace CloudStreamForms
                         temp.typeId = 3; // MAKE SURE THIS IS BEFORE YOU CREATE THE THRED
                         temp.Thread = new System.Threading.Thread(() => { });
                         temp.Thread.Name = "Testing";
-                        Parallel.For(0, movieProviders.Length, (int i) => {
-                            movieProviders[i].LoadLinksTSync(episode, season, normalEpisode, isMovie, temp);
-                            print("LOADED DONE:::: " + movieProviders[i].GetType().Name);
-                        });
+                        try {
+                            Parallel.For(0, movieProviders.Length, (int i) => {
+                                try {
+                                    movieProviders[i].LoadLinksTSync(episode, season, normalEpisode, isMovie, temp);
+                                    print("LOADED DONE:::: " + movieProviders[i].GetType().Name);
+                                }
+                                catch (Exception _ex) {
+                                    print("CLICKED CHRASH::: " + _ex);
+                                }
+                            });
+                        }
+                        catch (Exception _ex) {
+                            print("TESTRING::: " + _ex);
+                        }
+                     
                         JoinThred(temp);
 
 

@@ -600,7 +600,7 @@ namespace CloudStreamForms
                     default:
                         break;
                 }
-
+                print("SETCOLOR::: " + state);
 
                 /*
                 if (App.KeyExists("dlength", "id" + GetCorrectId(episodeResult))) {
@@ -751,6 +751,7 @@ namespace CloudStreamForms
                             if (epRes.mirrosUrls.Count > 0) {
                                 hasMirrors = true;
                                 epView.MyEpisodeResultCollection[_id].downloadState = 2; // SET IS DOWNLOADING
+                                ForceUpdate();
 
                                 // App.ShowToast("Yeet" + epRes.mirrosUrls.Count);
 
@@ -766,23 +767,24 @@ namespace CloudStreamForms
                                     mirrorNames.Add(l[i].name);
                                     mirrorUrls.Add(l[i].url);
                                 }
-                                App.UpdateDownload(GetCorrectId(episodeResult), 0);
 
+                                App.UpdateDownload(GetCorrectId(episodeResult), -1);
                                 string dpath = App.RequestDownload(GetCorrectId(episodeResult), episodeResult.OgTitle, episodeResult.Description, episodeResult.Episode, currentSeason, mirrorUrls, mirrorNames, episodeResult.Title + ".mp4", episodeResult.PosterUrl, currentMovie.title);
+                                print("SETCOLOR:::");
+                              //  SetColor(epView.MyEpisodeResultCollection[_id]);
+
                             }
                             print("SET COLOOOROOROROR" + epRes.OgTitle);
-                            //  await Task.Delay(1000);
-                            //SetColor(epRes);
+                            //await Task.Delay(1000);
+                            ForceUpdate();
+
                         }
                         if (!hasMirrors) {
                             App.ShowToast("Download Failed");
                         }
-
-                        ForceUpdate();
                     }
                     catch (Exception _ex) {
                         print("EX DLOAD::: " + _ex);
-                        throw;
                     }
                     currentDownloadSearchesHappening--;
                 }
@@ -1453,8 +1455,7 @@ namespace CloudStreamForms
                             print("NULLEP3");
 
                             print("LINKCOUNT: " + episodeResult.mirrosUrls.Count);
-                            if (episodeResult.mirrosUrls.Count > 0) {
-
+                            if (episodeResult.mirrosUrls.Count > 0) { 
                                 if (autoPlay) { PlayEpisode(episodeResult); }
                                 episodeResult.LoadedLinks = true;
                             }
@@ -1643,8 +1644,8 @@ namespace CloudStreamForms
                                 if (fileSize > 1) {
                                     print("DSUZE:::::" + episodeResult.Episode);
 
-                                    ImageService.Instance.LoadUrl(episodeResult.PosterUrl, TimeSpan.FromDays(30)); // CASHE IMAGE
-                                    App.UpdateDownload(GetCorrectId(episodeResult), 0);
+                                   // ImageService.Instance.LoadUrl(episodeResult.PosterUrl, TimeSpan.FromDays(30)); // CASHE IMAGE
+                                    App.UpdateDownload(GetCorrectId(episodeResult), -1);
                                     string dpath = App.RequestDownload(GetCorrectId(episodeResult), episodeResult.OgTitle, episodeResult.Description, episodeResult.Episode, currentSeason, new List<string>() { mirrorUrl }, new List<string>() { mirrorName }, episodeResult.Title + ".mp4", episodeResult.PosterUrl, currentMovie.title);
                                     // string dpath = App.DownloadAdvanced(GetCorrectId(episodeResult), mirrorUrl, episodeResult.Title + ".mp4", isMovie ? currentMovie.title.name : $"{currentMovie.title.name} · {episodeResult.OgTitle}", true, "/" + GetPathFromType(), true, true, false, episodeResult.PosterUrl, (isMovie) ? $"{mirrorName}\n" : $"S{currentSeason}:E{episodeResult.Episode} - {mirrorName}\n");
                                     // string dpath = App.DownloadUrl(s, episodeResult.Title + ".mp4", true, "/" + GetPathFromType(), "Download complete!", true, episodeResult.Title);
@@ -1656,7 +1657,8 @@ namespace CloudStreamForms
                                     // App.SetKey("Download", GetId(episodeResult), key);
                                     App.ShowToast("Download Started - " + fileSize + "MB");
                                     //App.SetKey("DownloadSize", GetId(episodeResult), fileSize);
-                                    SetColor(episodeResult);
+                                    episodeResult.downloadState = 2;
+                                    //SetColor(episodeResult);
                                     ForceUpdate(episodeResult.Id);
                                 }
                                 else {

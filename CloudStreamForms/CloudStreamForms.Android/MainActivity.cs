@@ -348,7 +348,12 @@ namespace CloudStreamForms.Droid
             }
 
             //   print("NOTIFY::: " + not.id);
-            _manager.Notify(not.id, builder.Build());
+            try {
+                _manager.Notify(not.id, builder.Build()); 
+            }
+            catch (Exception _ex)  {
+                print("ED MANGAER::: " + _ex);
+            }
 
         }
         public static Intent GetLauncherActivity(Context context = null)
@@ -691,41 +696,8 @@ namespace CloudStreamForms.Droid
             }
 
         }
-        public static void HandleIntent(string intent, bool resumeIntent = false)
-        {
-            if (intent == null) return;
-
-            int id = int.Parse(FindHTML(intent, $"{nameof(id)}=", "|||"));
-            string url = FindHTML(intent, $"{nameof(url)}=", "|||");
-            string title = FindHTML(intent, $"{nameof(title)}=", "|||");
-            string path = FindHTML(intent, $"{nameof(path)}=", "|||");
-            bool showNotification = bool.Parse(FindHTML(intent, $"{nameof(showNotification)}=", "|||"));
-            bool showNotificationWhenDone = bool.Parse(FindHTML(intent, $"{nameof(showNotificationWhenDone)}=", "|||"));
-            bool openWhenDone = bool.Parse(FindHTML(intent, $"{nameof(openWhenDone)}=", "|||"));
-            string poster = FindHTML(intent, $"{nameof(poster)}=", "|||");
-            string fileName = FindHTML(intent, $"{nameof(fileName)}=", "|||");
-            string beforeTxt = FindHTML(intent, $"{nameof(beforeTxt)}=", "|||");
-            HandleIntent(id, url, title, path, showNotification, showNotificationWhenDone, openWhenDone, poster, fileName, beforeTxt, resumeIntent);
-        }
-
-        public static void HandleIntent(Intent intent)
-        {
-            if (intent == null) return;
-
-            var context = Application.Context;
-            int id = intent.Extras.GetInt("id", -1);
-            string url = intent.Extras.GetString("url", "");
-            string title = intent.Extras.GetString("title", "");
-            string path = intent.Extras.GetString("path", "");
-            bool showNotification = intent.Extras.GetBoolean("not", false);
-            bool showNotificationWhenDone = intent.Extras.GetBoolean("notdone", false);
-            bool openWhenDone = intent.Extras.GetBoolean("opendone", false);
-            string poster = intent.Extras.GetString("poster", "");
-            string fileName = intent.Extras.GetString("file", "");
-            string beforeTxt = intent.Extras.GetString("beforeTxt", "");
-            HandleIntent(id, url, title, path, showNotification, showNotificationWhenDone, openWhenDone, poster, fileName, beforeTxt);
-        }
-
+      
+      
 
         static Dictionary<int, OutputStream> outputStreams = new Dictionary<int, OutputStream>();
         static Dictionary<int, InputStream> inputStreams = new Dictionary<int, InputStream>();
@@ -764,11 +736,11 @@ namespace CloudStreamForms.Droid
         public static void HandleIntent(int id, List<string> mirrorNames, List<string> mirrorUrls, int mirror, string title, string path, string poster, string fileName, string beforeTxt, bool openWhenDone, bool showNotificaion, bool showDoneNotificaion, bool showDoneAsToast, bool resumeIntent)
         {
             if (isPaused.ContainsKey(id)) {
-                if (isPaused[id] == 2) {
-                    isPaused.Remove(id);
-                    print("YEET DELETED KEEEE");
+                //if (isPaused[id] == 2) {
+                  //  isPaused.Remove(id);
+                //    print("YEET DELETED KEEEE");
                     return;
-                } 
+              //  }
             }
             var context = Application.Context;
 
@@ -805,10 +777,10 @@ namespace CloudStreamForms.Droid
             void StartT()
             {
                 if (isPaused.ContainsKey(id)) {
-                    if (isPaused[id] == 2) {
-                        isPaused.Remove(id); 
+                    //if (isPaused[id] == 2) {
+                    //    isPaused.Remove(id);
                         return;
-                    }
+                  //  }
                 }
 
                 Thread t = new Thread(() => {
@@ -853,9 +825,9 @@ namespace CloudStreamForms.Droid
                         }
 
 
-                        fileName = CensorFilename(fileName);
-                        path += "/" + fileName;
-                        print("PATH=====" + path + "|" + fileName);
+                      //  fileName = CensorFilename(fileName);
+                      // string rpath = path + "/" + fileName;
+                     //   print("PATH=====" + rpath + "|" + fileName);
 
 
                         URL _url = new URL(url);
@@ -878,6 +850,22 @@ namespace CloudStreamForms.Droid
                         connection.SetRequestProperty("Accept-Encoding", "identity");
 
                         connection.Connect();
+
+
+                        print("TOTALLLLL::: " + total);
+
+                        if(total == 0) {
+                            if (mirror < mirrorUrls.Count - 1 && progress < 2 && rFile.Length() < 1000000  ) { // HAVE MIRRORS LEFT
+                                mirror++;
+                                removeKeys = false;
+                                resumeIntent = false;
+                                rFile.Delete();
+                            }
+                            else {
+                                ShowDone(false);
+                            }
+                        }
+
                         fileLength = connection.ContentLength + (int)total;
                         App.SetKey("dlength", "id" + id, fileLength);
                         String fileExtension = MimeTypeMap.GetFileExtensionFromUrl(url);
@@ -891,10 +879,10 @@ namespace CloudStreamForms.Droid
                         inputStreams[id] = input;
 
                         if (isPaused.ContainsKey(id)) {
-                            if (isPaused[id] == 2) {
-                                isPaused.Remove(id); 
-                                return;
-                            }
+                            //if (isPaused[id] == 2) {
+                            //    isPaused.Remove(id);
+                            return;
+                            //  }
                         }
 
                         isPaused[id] = 0;
@@ -953,6 +941,7 @@ namespace CloudStreamForms.Droid
                                 App.RemoveKey(App.hasDownloadedFolder, id.ToString());
                                 changedPause -= UpdateFromId;
                                 activeIds.Remove(id);
+                                removeKeys = true ;
                                 Thread.Sleep(100);
                                 return;
                             }
@@ -1477,7 +1466,14 @@ namespace CloudStreamForms.Droid
 
         public void UpdateDownload(int id, int state)
         {
-            DownloadHandle.isPaused[id] = state;
+            if (state == -1) {
+                if (DownloadHandle.isPaused.ContainsKey(id)) {
+                    DownloadHandle.isPaused.Remove(id);
+                }
+            }
+            else {
+                DownloadHandle.isPaused[id] = state;
+            }
         }
 
         public DownloadProgressInfo GetDownloadProgressInfo(int id, string fileUrl)
@@ -1494,10 +1490,7 @@ namespace CloudStreamForms.Droid
             //  s.Start();
             bool exists = file.Exists();
 
-
-
             if (downloadingOrPaused) {
-
                 int paused = DownloadHandle.isPaused[id];
                 progressInfo.state = paused == 1 ? DownloadState.Paused : DownloadState.Downloading;
             }
@@ -1524,13 +1517,13 @@ namespace CloudStreamForms.Droid
                 return progressInfo;
             }
 
-
-            if (progressInfo.totalBytes == 0 && progressInfo.state == DownloadState.Downloading) {
-                progressInfo.state = DownloadState.NotDownloaded;
-            }
             if (progressInfo.bytesDownloaded >= progressInfo.totalBytes - 10) {
                 progressInfo.state = DownloadState.Downloaded;
             }
+            else if (progressInfo.state == DownloadState.Downloaded) {
+                progressInfo.state = DownloadState.NotDownloaded;
+            }
+
             if (progressInfo.bytesDownloaded < 0 || progressInfo.totalBytes < 0) {
                 progressInfo.state = DownloadState.NotDownloaded;
                 progressInfo.totalBytes = 0;
@@ -1833,7 +1826,13 @@ namespace CloudStreamForms.Droid
 
            builder.SetContentIntent(resultPendingIntent);
            */
+            try {
             _manager.Notify(CHROME_CAST_NOTIFICATION_ID, builder.Build());
+
+            }
+            catch (Exception _ex) {
+                print("EX NOTTIFY;; " + _ex);
+            }
         }
 
 
@@ -2431,8 +2430,9 @@ namespace CloudStreamForms.Droid
 
             if (subfile != "") {
                 var sfile = Android.Net.Uri.FromFile(new Java.IO.File(subfile));  //"content://" + Android.Net.Uri.Parse(subfile);
+                print("SUBFILE::::" + subfile + "|" + sfile.Path);
                                                                                   //  print(sfile.Path);
-                intent.PutExtra("subtitles_location", sfile);//Android.Net.Uri.FromFile(subFile));
+                intent.PutExtra("subtitles_location", "/sdcard/Download/subtitles.srt");//sfile);//Android.Net.Uri.FromFile(subFile));
                                                              // intent.PutExtra("subtitles_location", );//Android.Net.Uri.FromFile(subFile));
             }
 
@@ -2579,46 +2579,6 @@ namespace CloudStreamForms.Droid
             DownloadHandle.HandleIntent(id, mirrorNames, mirrorUrls, 0, titleName, full, poster, fileName, beforeTxt, openWhenDone, showNotification, showNotification, false, false);
             return full;
 
-        }
-
-        public string DownloadAdvanced(int id, string url, string fileName, string titleName, bool mainPath, string extraPath, bool showNotification = true, bool showNotificationWhenDone = true, bool openWhenDone = false, string poster = "", string beforeTxt = "")
-        {
-            var context = MainActivity.activity.ApplicationContext;
-            Intent downloadIntent = new Intent(context, typeof(DownloadUrlService));
-
-            //string title = fileName;
-            string path = GetPath(mainPath, extraPath);
-
-            downloadIntent.PutExtra("id", id);
-            downloadIntent.PutExtra("url", url);
-            downloadIntent.PutExtra("title", titleName);
-            downloadIntent.PutExtra("file", fileName);
-            downloadIntent.PutExtra("path", path);
-            downloadIntent.PutExtra("not", showNotification);
-            downloadIntent.PutExtra("notdone", showNotificationWhenDone);
-            downloadIntent.PutExtra("opendone", openWhenDone);
-            downloadIntent.PutExtra("poster", poster);
-            downloadIntent.PutExtra("beforeTxt", beforeTxt);
-            DownloadHandle.HandleIntent(downloadIntent);
-            // MainActivity.activity.StartForegroundService(downloadIntent);
-            //  activity.BindService(downloadIntent, f.Class , Bind.AutoCreate);
-            // Application.Context.SendBroadcast(downloadIntent);
-            /*
-            var pending = PendingIntent.GetBroadcast(context, id,
-                  downloadIntent,
-                 PendingIntentFlags.UpdateCurrent
-                  );
-
-
-
-
-            var triggerTime = CurrentTimeMillis(DateTime.UtcNow);// NotifyTimeInMilliseconds((DateTime)time);
-            var alarmManager = GetAlarmManager();
-
-            alarmManager.SetExactAndAllowWhileIdle(AlarmType.RtcWakeup, triggerTime, pending);*/
-
-            // MainActivity.activity.SendBroadcast(downloadIntent);
-            return path + "/" + CensorFilename(fileName);
         }
 
         public string DownloadUrl(string url, string fileName, bool mainPath, string extraPath, string toast = "", bool isNotification = false, string body = "")

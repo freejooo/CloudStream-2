@@ -1,5 +1,6 @@
 ﻿using Acr.UserDialogs;
 using CloudStreamForms.Models;
+using FFImageLoading;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -205,14 +206,12 @@ namespace CloudStreamForms
         }
 
         void UpdateDownloaded()
-        { 
-            object clock = new object(); 
+        {
+            object clock = new object();
 
             Thread mThread = new Thread(() => {
                 Thread.Sleep(100);
 
-                Stopwatch s = new Stopwatch();
-                s.Start();
                 List<string> keys = App.GetKeys<string>("DownloadIds");
                 List<string> keysPaths = App.GetKeysPath("DownloadIds");
 
@@ -222,16 +221,13 @@ namespace CloudStreamForms
 
                 List<int> headerRemovers = new List<int>();
                 Dictionary<int, bool> validHeaders = new Dictionary<int, bool>();
-                print("MS1:::" + s.ElapsedMilliseconds);
 
                 Parallel.For(0, keys.Count, (i) => {
                     // Thread.Sleep(1000);
 
                     //  for (int i = 0; i < keys.Count; i++) {
                     int id = App.GetKey<int>(keysPaths[i], 0);
-                    print("MS_1:::" + s.ElapsedMilliseconds);
                     var info = App.GetDownloadInfo(id);
-                    print("MS_2:::" + s.ElapsedMilliseconds);
 
                     //if (!downloads.ContainsKey(id)) {
                     lock (clock) {
@@ -239,6 +235,7 @@ namespace CloudStreamForms
                     }
                     //} 
                     if (info.state.totalBytes == 0) {
+                        print("REMOVE HEADER INFO ID BC 0 data");
                         RemoveDownloadCookie(id);
                         headerRemovers.Add(info.info.downloadHeader);
                     }
@@ -254,9 +251,7 @@ namespace CloudStreamForms
                         }
 
                         if (!containsKey) {
-                            print("MS__1:::" + s.ElapsedMilliseconds);
                             var header = App.GetDownloadHeaderInfo(headerId);
-                            print("MS__2:::" + s.ElapsedMilliseconds);
                             lock (clock) {
                                 downloadHeaders[headerId] = header;
                             }
@@ -276,7 +271,6 @@ namespace CloudStreamForms
                             }
                         }
                     }
-                    print("MS_3:::" + s.ElapsedMilliseconds);
 
                     print(info.info.name);
                     print(info.info.season);
@@ -286,7 +280,6 @@ namespace CloudStreamForms
                     //  }           
                 });
 
-                print("MS2:::" + s.ElapsedMilliseconds);
 
                 for (int i = 0; i < headerRemovers.Count; i++) {
                     if (!validHeaders.ContainsKey(headerRemovers[i])) {
@@ -296,7 +289,6 @@ namespace CloudStreamForms
                 }
 
                 // ========================== SET VALUES ==========================
-                print("MS3:::" + s.ElapsedMilliseconds);
 
 
                 //   List<EpisodeResult> eps = new List<EpisodeResult>();
@@ -384,15 +376,13 @@ namespace CloudStreamForms
                     MyEpisodeResultCollection.Add(epres[i]);
                 }
 
-                s.Stop();
-                print("MS4:::" + s.ElapsedMilliseconds);
                 Device.BeginInvokeOnMainThread(() => {
                     // episodeView.Opacity = 0;
                     // episodeView.FadeTo(1, 200);
                     SetHeight();
                 });
             });
-            mThread.SetApartmentState(ApartmentState.STA);
+            //mThread.SetApartmentState(ApartmentState.STA);
             mThread.Start();
 
             /*
@@ -727,6 +717,8 @@ namespace CloudStreamForms
 
             print("DLOADING " + mediaStreamInfos.Size);
             print("DURL::" + mediaStreamInfos.Url);
+
+            ImageService.Instance.LoadUrl(v.Thumbnails.HighResUrl, TimeSpan.FromDays(30)); // CASHE IMAGE
             string extraPath = "/" + GetPathFromType(header);
             string fileUrl = platformDep.DownloadHandleIntent(id, new List<string>() { info.Resolution.Height + "p" }, new List<string>() { info.Url }, v.Title + "." + info.Container.GetFileExtension(), name, true, extraPath, true, true, false, v.Thumbnails.HighResUrl, "{name}\n");//isMovie ? "{name}\n" : ($"S{season}:E{episode} - " + "{name}\n"));
             return fileUrl;

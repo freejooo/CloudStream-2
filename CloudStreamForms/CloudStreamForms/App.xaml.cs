@@ -69,7 +69,6 @@ namespace CloudStreamForms
             void ReleaseAudioFocus();
             void CancelNot(int id);
             string DownloadHandleIntent(int id, List<string> mirrorNames, List<string> mirrorUrls, string fileName, string titleName, bool mainPath, string extraPath, bool showNotification = true, bool showNotificationWhenDone = true, bool openWhenDone = false, string poster = "", string beforeTxt = "");
-            string DownloadAdvanced(int id, string url, string fileName, string titleName, bool mainPath, string extraPath, bool showNotification = true, bool showNotificationWhenDone = true, bool openWhenDone = false, string poster = "", string beforeTxt = "");
             DownloadProgressInfo GetDownloadProgressInfo(int id, string fileUrl);
 
             void UpdateDownload(int id, int state);
@@ -156,9 +155,7 @@ namespace CloudStreamForms
         public static void UpdateDownload(int id, int state)
         {
             platformDep.UpdateDownload(id, state);
-        }
-
-
+        } 
 
         public static string RequestDownload(int id, string name, string description, int episode, int season, List<string> mirrorUrls, List<string> mirrorNames, string downloadTitle, string poster, CloudStreamCore.Title title)
         {
@@ -170,10 +167,9 @@ namespace CloudStreamForms
             App.SetKey(nameof(DownloadHeader), "id" + header.RealId, header);
             bool isMovie = header.movieType == MovieType.AnimeMovie || header.movieType == MovieType.Movie;
 
+            App.SetKey("DownloadIds", id.ToString(), id);
             string fileUrl = platformDep.DownloadHandleIntent(id, mirrorNames, mirrorUrls, downloadTitle, name, true, extraPath, true, true, false, poster, isMovie ? "{name}\n" : ($"S{season}:E{episode} - " + "{name}\n"));
             App.SetKey(nameof(DownloadEpisodeInfo), "id" + id, new DownloadEpisodeInfo() { dtype = DownloadType.Normal, source = header.id, description = description, downloadHeader = header.RealId, episode = episode, season = season, fileUrl = fileUrl, id = id, name = name, hdPosterUrl = poster });
-
-            App.SetKey("DownloadIds", id.ToString(), id);
 
             return fileUrl;
             // (isMovie) ? $"{mirrorName}\n" : $"S{currentSeason}:E{episodeResult.Episode} - {mirrorName}\n
@@ -276,13 +272,7 @@ namespace CloudStreamForms
         public static double GetBrightness()
         {
             return platformDep.GetBrightness();
-        }
-
-        private static string DownloadAdvanced(int id, string url, string fileName, string titleName, bool mainPath, string extraPath, bool showNotification = true, bool showNotificationWhenDone = true, bool openWhenDone = false, string poster = "", string beforeTxt = "")
-        {
-            return platformDep.DownloadAdvanced(id, url, fileName, titleName, mainPath, extraPath, showNotification, showNotificationWhenDone, openWhenDone, poster, beforeTxt);
-        }
-
+        } 
         public static void SetBrightness(double brightness)
         {
             platformDep.SetBrightness(brightness);
