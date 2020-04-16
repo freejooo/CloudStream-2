@@ -19,6 +19,7 @@ using System.Threading.Tasks;
 using Xamarin.Forms;
 using Xamarin.Forms.PlatformConfiguration.AndroidSpecific;
 using static CloudStreamForms.CloudStreamCore;
+using static CloudStreamForms.MovieHelper;
 using Application = Xamarin.Forms.Application;
 using Button = Xamarin.Forms.Button;
 
@@ -236,6 +237,14 @@ namespace CloudStreamForms
             return Color.FromRgba((int)red, (int)green, (int)blue, color.A);
         }
         // -------------------------------- END --------------------------------
+    }
+
+    public static class MovieHelper
+    {
+        public static bool IsMovie(this MovieType mtype)
+        {
+            return mtype == MovieType.AnimeMovie || mtype == MovieType.Movie;
+        }
     }
 
     public static class MainChrome
@@ -908,6 +917,8 @@ namespace CloudStreamForms
         }
         [Serializable]
         public enum MovieType { Movie, TVSeries, Anime, AnimeMovie, YouTube }
+
+
         [Serializable]
         public enum PosterType { Imdb, Raw }
 
@@ -1142,6 +1153,12 @@ namespace CloudStreamForms
 
             public List<WatchSeriesHdMetaData> watchSeriesHdMetaData;// NOT SORTED; MAKE SURE TO SEARCH ALL
             public List<FMoviesData> fmoviesMetaData;// NOT SORTED; MAKE SURE TO SEARCH ALL
+            /// <summary>
+            /// -1 = movie, 1-inf is seasons
+            /// </summary>
+            public Dictionary<int, string> watchMovieSeasonsData;
+
+
 
             public string shortEpView;
 
@@ -1496,7 +1513,7 @@ namespace CloudStreamForms
 
         // ========================================================= ALL METHODS =========================================================
 
-        public static IMovieProvider[] movieProviders = new IMovieProvider[] { new FullMoviesProvider(), new TMDBProvider(), new WatchTVProvider(), new FMoviesProvider(), new LiveMovies123Provider(), new TheMovies123Provider(), new YesMoviesProvider(), new WatchSeriesProvider(), new GomoStreamProvider(), new Movies123Provider(), new DubbedAnimeMovieProvider() };
+        public static IMovieProvider[] movieProviders = new IMovieProvider[] { new FullMoviesProvider(), new TMDBProvider(), new WatchTVProvider(), new FMoviesProvider(), new LiveMovies123Provider(), new TheMovies123Provider(), new YesMoviesProvider(), new WatchSeriesProvider(), new GomoStreamProvider(), new Movies123Provider(), new DubbedAnimeMovieProvider(), new TheMovieMovieProvider() };
 
         public static IAnimeProvider[] animeProviders = new IAnimeProvider[] { new GogoAnimeProvider(), new KickassAnimeProvider(), new DubbedAnimeProvider(), new AnimeFlixProvider(), new DubbedAnimeNetProvider(), new AnimekisaProvider(), new DreamAnimeProvider() };
 
@@ -2127,7 +2144,6 @@ namespace CloudStreamForms
                 return GetAllLinks(currentMovie, currentSeason, isDub).Count;
             }
         }
-
 
         public class DubbedAnimeMovieProvider : IMovieProvider
         {
@@ -3101,7 +3117,7 @@ namespace CloudStreamForms
         }
 
 
-
+        #region AnimeFlixData
         public struct AnimeFlixSearchItem
         {
             public int id { get; set; }
@@ -3123,13 +3139,13 @@ namespace CloudStreamForms
             public double? rating_scores { get; set; }
             public double gwa_rating { get; set; }
         }
-
+        [Serializable]
         public struct AnimeFlixQuickSearch
         {
             public List<AnimeFlixSearchItem> data { get; set; }
         }
 
-
+        [Serializable]
         public struct AnimeFlixAnimeEpisode
         {
             public int id { get; set; }
@@ -3143,6 +3159,7 @@ namespace CloudStreamForms
             public string thumbnail { get; set; }
         }
 
+        [Serializable]
         public struct AnimeFlixAnimeLink
         {
             public string first { get; set; }
@@ -3151,6 +3168,7 @@ namespace CloudStreamForms
             public string next { get; set; }
         }
 
+        [Serializable]
         public struct AnimeFlixAnimeMetaData
         {
             public int current_page { get; set; }
@@ -3162,6 +3180,7 @@ namespace CloudStreamForms
             public int total { get; set; }
         }
 
+        [Serializable]
         public struct AnimeFlixAnimeData
         {
             public int id { get; set; }
@@ -3184,6 +3203,7 @@ namespace CloudStreamForms
             public double gwa_rating { get; set; }
         }
 
+        [Serializable]
         public struct AnimeFlixAnimeSeason
         {
             public List<AnimeFlixAnimeEpisode> data { get; set; }
@@ -3192,6 +3212,7 @@ namespace CloudStreamForms
             public AnimeFlixAnimeData anime { get; set; }
         }
 
+        [Serializable]
         public struct AnimeFlixRawEpisode
         {
             public string id { get; set; }
@@ -3203,7 +3224,7 @@ namespace CloudStreamForms
             public string thumbnail { get; set; }
             public string resolution { get; set; }
         }
-
+        #endregion
 
         class AnimeFlixProvider : IAnimeProvider
         {
@@ -4766,6 +4787,136 @@ namespace CloudStreamForms
             }
         }
 
+
+
+
+        public static class TheMovieHelper
+        {
+            [System.Serializable]
+            public struct TheMovieTitle
+            {
+                public string href;
+                public string name;
+                public bool isDub;
+                public int season;
+            }
+
+            public static int GetMaxEp(string d, string href)
+            {
+                string ending = FindHTML(href + "|", "watchmovie.movie", "|");
+                return int.Parse(FindHTML(d, ending + "-episode-", "\""));
+            }
+
+
+            /// <summary>
+            /// BLOCKING SEARCH QRY, NOT SORTED OR FILTERED
+            /// </summary>
+            /// <param name="search"></param>
+            /// <returns></returns>
+            public static List<TheMovieTitle> SearchQuary(string search)
+            {
+                List<TheMovieTitle> titles = new List<TheMovieTitle>();
+
+                string d = DownloadString("https://www4.watchmovie.movie/search.html?keyword=" + search);
+                string lookFor = "<div class=\"video_image_container sdimg\">";
+                while (d.Contains(lookFor)) {
+                    d = RemoveOne(d, lookFor);
+                    string href = "https://www4.watchmovie.movie" + FindHTML(d, "<a href=\"", "\""); // as /series/castaways-season-1
+                    string name = FindHTML(d, "title=\"", "\"");
+
+                    int season = -1;
+                    if (name.Contains("- Season")) {
+                        season = int.Parse(FindHTML(name + "|", "- Season", "|"));
+                    }
+                    bool isDub = name.Contains("(Dub)") || name.Contains("(English Audio)");
+
+                    name = name.Replace("- Season " + season, "").Replace("(Dub)", "").Replace("(English Audio)", "").Replace("  ", "");
+                    if (name.EndsWith(" ")) {
+                        name = name.Substring(0, name.Length - 1);
+                    }
+
+                    titles.Add(new TheMovieTitle() { href = href, isDub = isDub, name = name, season = season });
+                }
+                return titles;
+            }
+        }
+
+        public class TheMovieMovieProvider : IMovieProvider
+        {
+            public void FishMainLinkTSync()
+            {
+                TempThred tempThred = new TempThred();
+                tempThred.typeId = 2; // MAKE SURE THIS IS BEFORE YOU CREATE THE THRED
+                tempThred.Thread = new System.Threading.Thread(() => {
+                    try {
+                        var list = TheMovieHelper.SearchQuary(activeMovie.title.name);
+                        if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
+                        MovieType mType = activeMovie.title.movieType;
+                        string compare = ToDown(activeMovie.title.name, true, "");
+                        activeMovie.title.watchMovieSeasonsData = new Dictionary<int, string>();
+
+                        if (mType.IsMovie()) {
+                            string mustContain = mType == MovieType.AnimeMovie ? "/anime-info/" : "/series/";
+                            TheMovieHelper.TheMovieTitle[] matching = list.Where(t => ToDown(t.name, true, "") == compare && t.season == -1 && t.href.Contains(mustContain)).ToArray();
+                            if (matching.Length > 0) {
+                                TheMovieHelper.TheMovieTitle title = matching[0];
+                                print("LOADED:::::::::-->>>1 " + title.href);
+
+                                string d = DownloadString(title.href);
+                                int maxEp = TheMovieHelper.GetMaxEp(d, title.href);
+                                if (maxEp == 0 || maxEp == 1) {
+                                    string rEp = title.href + "-episode-" + maxEp;
+                                    activeMovie.title.watchMovieSeasonsData[-1] = rEp;
+                                    print("LOADED:::::::::-->>>2 " + rEp);
+                                }
+                            }
+                        }
+                        else { // MovieType.TVSeries
+                            var episodes = list.Where(t => !t.isDub && t.season != -1 && ToDown(t.name, true, "") == compare && t.href.Contains("/series/")).ToList().OrderBy(t => t.season).ToArray();
+
+                            for (int i = 0; i < episodes.Length; i++) {
+                                activeMovie.title.watchMovieSeasonsData[episodes[i].season] = episodes[i].href;
+                                print("LOADED:::::::::-->>>" + episodes[i].name + "|" + episodes[i].season + "|" + episodes[i].href);
+                            }
+                        }
+                    }
+                    finally {
+                        JoinThred(tempThred);
+                    }
+                });
+                tempThred.Thread.Name = "TheMovieMovieProvider";
+                tempThred.Thread.Start();
+            }
+
+            public void LoadLinksTSync(int episode, int season, int normalEpisode, bool isMovie, TempThred tempThred)
+            {
+                void GetFromUrl(string url)
+                {
+                    print("GET FROM URLLLLLLL:::: " + url);
+
+                    string d = DownloadString(url);
+
+                    print("RES FROM URLLLLL:::: " + d);
+
+                    if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
+                    AddEpisodesFromMirrors(tempThred, d, normalEpisode, "Watch");
+                    LookForFembedInString(tempThred, normalEpisode, d);
+                }
+
+                if (activeMovie.title.movieType.IsMovie()) {
+                    if (activeMovie.title.watchMovieSeasonsData.ContainsKey(-1)) {
+                        GetFromUrl(activeMovie.title.watchMovieSeasonsData[-1]);
+                    }
+                }
+                else {
+                    if (activeMovie.title.watchMovieSeasonsData.ContainsKey(season)) {
+                        GetFromUrl(activeMovie.title.watchMovieSeasonsData[season] + "-episode-" + episode);
+                    }
+                }
+            }
+        }
+
+
         #endregion
 
         static void GetSeasonAndPartFromName(string name, out int season, out int part)
@@ -5253,15 +5404,15 @@ namespace CloudStreamForms
                         catch (Exception _ex) {
                             print("EX:::Loaded" + _ex);
                         }
-                        
-                      
+
+
                     });
                     t.Start();
 
                     while (t.IsAlive && !shouldSkipAnimeLoading) {
-                        Thread.Sleep(100); 
+                        Thread.Sleep(100);
                     }
-                    if(shouldSkipAnimeLoading) {
+                    if (shouldSkipAnimeLoading) {
                         shouldSkipAnimeLoading = false;
                         //t.Abort();
                     }
@@ -5973,6 +6124,24 @@ namespace CloudStreamForms
             return rng.Next(min, max);
         }
 
+        [System.Serializable]
+        class VidStreamingNames
+        {
+            public string name;
+            public string compareUrl;
+            public string downloadUrl;
+            public string ExtraBeforeId { get { return "https:" + compareUrl; } }
+            public VidStreamingNames(string _name, string _compareUrl, string _downloadUrl)
+            {
+                name = _name;
+                compareUrl = _compareUrl;
+                downloadUrl = _downloadUrl;
+            }
+            public VidStreamingNames()
+            {
+
+            }
+        }
         static void AddEpisodesFromMirrors(TempThred tempThred, string d, int normalEpisode, string extraId = "") // DONT DO THEVIDEO provider, THEY USE GOOGLE CAPTCH TO VERIFY AUTOR; LOOK AT https://vev.io/api/serve/video/qy3pw89xwmr7 IT IS A POST REQUEST
         {
             string mp4 = "https://www.mp4upload.com/embed-" + FindHTML(d, "data-video=\"https://www.mp4upload.com/embed-", "\"");
@@ -6000,46 +6169,31 @@ namespace CloudStreamForms
             bool fembedAdded = LookForFembedInString(tempThred, normalEpisode, d);
 
             string nameId = "Vidstreaming";
-            string vid = FindHTML(d, "data-video=\"//vidstreaming.io/streaming.php?", "\"");
-            string beforeId = "https://vidstreaming.io/download?id=";
-            string extraBeforeId = "https://vidstreaming.io/streaming.php?";
-            if (vid == "") {
-                vid = FindHTML(d, "//vidstreaming.io/streaming.php?", "\"");
-            }
-            if (vid == "") {
-                vid = FindHTML(d, "//vidnode.net/load.php?id=", "\"");
-                if (vid != "") {
-                    beforeId = "https://vidnode.net/download?id=";
-                    extraBeforeId = "https://vidnode.net/load.php?id=";
-                    nameId = "VidNode";
-                }
-            }
-            if (vid == "") {
-                vid = FindHTML(d, "//vidnode.net/streaming.php?id=", "\"");
-                if (vid != "") {
-                    beforeId = "https://vidnode.net/download?id=";
-                    extraBeforeId = "https://vidnode.net/streaming.php?id=";
-                    nameId = "VidNode";
-                }
-            }
-            if (vid == "") {
-                vid = FindHTML(d, "//vidstreaming.io/load.php?id=", "\"");
-                if (vid != "") {
-                    beforeId = "https://vidstreaming.io/download?id=";
-                    extraBeforeId = "https://vidstreaming.io/load.php?id=";
-                    nameId = "VidLoad";
-                }
-            }
+            string vid = "";//FindHTML(d, "data-video=\"//vidstreaming.io/streaming.php?", "\"");
+            string beforeId = "";//"https://vidstreaming.io/download?id=";
+            string extraBeforeId = "";// "https://vidstreaming.io/streaming.php?id=";
 
-            if (vid == "") {
-                vid = FindHTML(d, "//vidcloud9.com/download?id=", "\"");
+            List<VidStreamingNames> names = new List<VidStreamingNames>() {
+                new VidStreamingNames("Vidstreaming","//vidstreaming.io/streaming.php?","https://vidstreaming.io/download?id="),
+                new VidStreamingNames("VidNode","//vidnode.net/load.php?id=","https://vidnode.net/download?id="),
+                new VidStreamingNames("VidNode","//vidnode.net/streaming.php?id=","https://vidnode.net/download?id="),
+                new VidStreamingNames("VidLoad","//vidstreaming.io/load.php?id=","https://vidstreaming.io/download?id="),
+                new VidStreamingNames("VidCloud","//vidcloud9.com/download?id=","https://vidcloud9.com/download?id="),
+                new VidStreamingNames("VidCloud","//vidcloud9.com/streaming.php?id=","https://vidcloud9.com/download?id="),
+                new VidStreamingNames("VidCloud","//vidcloud9.com/load.php?id=","https://vidcloud9.com/download?id="),
+            };
 
-                if (vid != "") {
-                    beforeId = "https://vidcloud9.com/download?id=";
-                    extraBeforeId = "https://vidcloud9.com/download?id=";
-                    nameId = "VidCloud";
+            for (int i = 0; i < names.Count; i++) {
+                if (vid == "") {
+                    vid = FindHTML(d, names[i].compareUrl, "\"");
+                    if (vid != "") {
+                        beforeId = names[i].downloadUrl;
+                        extraBeforeId = names[i].ExtraBeforeId;
+                        break;
+                    }
                 }
-            }
+            } 
+
             print(">>STREAM::" + extraId + "||" + vid + "|" + d);
             if (vid != "") {
 
@@ -6051,7 +6205,7 @@ namespace CloudStreamForms
                     while (extra.Contains(elookFor)) {
                         string extraUrl = FindHTML(extra, elookFor, "\'");
                         extra = RemoveOne(extra, elookFor);
-                        string label = FindHTML(extra, "label: \'", "\'").Replace("autop","Auto").Replace("auto p", "Auto");
+                        string label = FindHTML(extra, "label: \'", "\'").Replace("autop", "Auto").Replace("auto p", "Auto");
                         print("XTRA:::::::" + extra + "|" + label);
                         AddPotentialLink(normalEpisode, extraUrl, nameId + " Extra " + label.Replace("hls P", "hls"), label == "Auto" ? 20 : 1);
                     }
@@ -6324,7 +6478,7 @@ namespace CloudStreamForms
                         catch (Exception _ex) {
                             print("TESTRING::: " + _ex);
                         }
-                     
+
                         JoinThred(temp);
 
 

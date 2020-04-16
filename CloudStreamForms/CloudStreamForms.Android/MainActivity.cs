@@ -2431,8 +2431,8 @@ namespace CloudStreamForms.Droid
             if (subfile != "") {
                 var sfile = Android.Net.Uri.FromFile(new Java.IO.File(subfile));  //"content://" + Android.Net.Uri.Parse(subfile);
                 print("SUBFILE::::" + subfile + "|" + sfile.Path);
-                                                                                  //  print(sfile.Path);
-                intent.PutExtra("subtitles_location", "/sdcard/Download/subtitles.srt");//sfile);//Android.Net.Uri.FromFile(subFile));
+                //  print(sfile.Path);
+                intent.PutExtra("subtitles_location", subfile);//"/sdcard/Download/subtitles.srt");//sfile);//Android.Net.Uri.FromFile(subFile));
                                                              // intent.PutExtra("subtitles_location", );//Android.Net.Uri.FromFile(subFile));
             }
 
