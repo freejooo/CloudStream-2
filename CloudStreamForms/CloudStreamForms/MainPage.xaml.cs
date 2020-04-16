@@ -1021,7 +1021,20 @@ namespace CloudStreamForms
             public DubbedAnimeNetData dubbedAnimeNetData;
             public AnimekisaData animekisaData;
             public AnimeDreamData animedreamData;
+            public WatchMovieAnimeData watchMovieAnimeData;
         }
+
+        [Serializable]
+        public struct WatchMovieAnimeData
+        {
+            public bool dubExists;
+            public bool subExists;
+            public int maxSubbedEpisodes;
+            public int maxDubbedEpisodes;
+            public string dubUrl;
+            public string subUrl;
+        }
+
 
         [Serializable]
         public struct AnimekisaData
@@ -1515,7 +1528,7 @@ namespace CloudStreamForms
 
         public static IMovieProvider[] movieProviders = new IMovieProvider[] { new FullMoviesProvider(), new TMDBProvider(), new WatchTVProvider(), new FMoviesProvider(), new LiveMovies123Provider(), new TheMovies123Provider(), new YesMoviesProvider(), new WatchSeriesProvider(), new GomoStreamProvider(), new Movies123Provider(), new DubbedAnimeMovieProvider(), new TheMovieMovieProvider() };
 
-        public static IAnimeProvider[] animeProviders = new IAnimeProvider[] { new GogoAnimeProvider(), new KickassAnimeProvider(), new DubbedAnimeProvider(), new AnimeFlixProvider(), new DubbedAnimeNetProvider(), new AnimekisaProvider(), new DreamAnimeProvider() };
+        public static IAnimeProvider[] animeProviders = new IAnimeProvider[] { new GogoAnimeProvider(), new KickassAnimeProvider(), new DubbedAnimeProvider(), new AnimeFlixProvider(), new DubbedAnimeNetProvider(), new AnimekisaProvider(), new DreamAnimeProvider(), new TheMovieAnimeProvider() };
 
         public interface IMovieProvider // FOR MOVIES AND SHOWS
         {
@@ -4803,8 +4816,10 @@ namespace CloudStreamForms
 
             public static int GetMaxEp(string d, string href)
             {
+                print("GOT MAX EP::: " + d);
                 string ending = FindHTML(href + "|", "watchmovie.movie", "|");
-                return int.Parse(FindHTML(d, ending + "-episode-", "\""));
+                print("GOT MAX EP::: ENDING " + ending);
+                return int.Parse(FindHTML(d, ending.Replace("-info", "") + "-episode-", "\""));
             }
 
 
@@ -4838,6 +4853,104 @@ namespace CloudStreamForms
                     titles.Add(new TheMovieTitle() { href = href, isDub = isDub, name = name, season = season });
                 }
                 return titles;
+            }
+        }
+
+        public class TheMovieAnimeProvider : IAnimeProvider
+        {
+            public string Name => "WatchMovies";
+
+            public void FishMainLink(string year, TempThred tempThred, MALData malData)
+            {
+                var list = TheMovieHelper.SearchQuary(activeMovie.title.name);
+                if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
+                for (int z = 0; z < activeMovie.title.MALData.seasonData.Count; z++) {
+                    for (int q = 0; q < activeMovie.title.MALData.seasonData[z].seasons.Count; q++) {
+                        //  var ms = activeMovie.title.MALData.seasonData[z].seasons[q].watchMovieAnimeData;
+                        string name;
+                        lock (AnimeProviderHelper._lock) {
+                            name = activeMovie.title.MALData.seasonData[z].seasons[q].name;
+                        }
+
+                        string compare = ToDown(name, true, "");
+                        var end = list.Where(t => (t.href.Contains("/anime-info/")) && ToDown(t.name, true, "") == compare).OrderBy(t => { FuzzyMatch(t.name, name, out int score); return -score; }).ToArray();
+
+                        bool subExists = false;
+                        bool dubExists = false;
+                        string subUrl = "";
+                        string dubUrl = "";
+                        for (int k = 0; k < end.Length; k++) {
+                            if (!subExists && !end[k].isDub) {
+                                subExists = true;
+                                subUrl = end[k].href;
+                            }
+                            if (!dubExists && end[k].isDub) {
+                                dubExists = true;
+                                dubUrl = end[k].href;
+                            }
+                            //print("COMPARE::::: " + name + "|" + end[k].name + "||" + end[k].href);
+                        }
+
+
+                        print("SUDADADDA:::111: " + name + "|" + subExists + "|" + dubExists + "|" + subUrl + "|" + dubUrl);
+                        try {
+                            int maxSubbedEp = subExists ? TheMovieHelper.GetMaxEp(DownloadString(subUrl), subUrl) : 0;
+                            int maxDubbedEp = dubExists ? TheMovieHelper.GetMaxEp(DownloadString(dubUrl), dubUrl) : 0;
+
+                            print("SUDADADDA:::: " + name + "|" + subExists + "|" + dubExists + "|" + subUrl + "|" + dubUrl + "|" + maxDubbedEp + "|" + maxSubbedEp);
+
+                            lock (AnimeProviderHelper._lock) {
+                                var ms = activeMovie.title.MALData.seasonData[z].seasons[q];
+                                ms.watchMovieAnimeData = new WatchMovieAnimeData() { subUrl = subUrl, dubExists = dubExists, dubUrl = dubUrl, maxDubbedEpisodes = maxDubbedEp, maxSubbedEpisodes = maxSubbedEp, subExists = subExists };
+                                activeMovie.title.MALData.seasonData[z].seasons[q] = ms;
+                            }
+                        }
+                        catch (Exception _ex) {
+                            print("ANIME ERROROROROOR.::" + _ex);
+                        }
+                    }
+                }
+
+
+            }
+
+            public int GetLinkCount(Movie currentMovie, int currentSeason, bool isDub, TempThred? tempThred)
+            {
+                int len = 0;
+                try {
+                    for (int q = 0; q < currentMovie.title.MALData.seasonData[currentSeason].seasons.Count; q++) {
+                        var ms = currentMovie.title.MALData.seasonData[currentSeason].seasons[q].watchMovieAnimeData;
+                        len += isDub ? ms.maxDubbedEpisodes : ms.maxSubbedEpisodes;
+                    }
+                }
+                catch (Exception) {
+                }
+                return len;
+            }
+
+            public void LoadLinksTSync(int episode, int season, int normalEpisode, bool isDub, TempThred tempThred)
+            {
+                int maxEp = 0;
+                int _maxEp = 0;
+                for (int q = 0; q < activeMovie.title.MALData.seasonData[season].seasons.Count; q++) {
+                    var ms = activeMovie.title.MALData.seasonData[season].seasons[q].watchMovieAnimeData;
+                    maxEp += isDub ? ms.maxDubbedEpisodes : ms.maxSubbedEpisodes;
+                    if (maxEp > normalEpisode) {
+                        string url = (isDub ? ms.dubUrl : ms.subUrl) + "-episode-" + (episode - _maxEp);
+                        print("FETH MAIN URLLLL::: " + url);
+                        string d = DownloadString(url);
+
+                        print("RES FROM URLLLLL:::: " + d);
+
+                        if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
+                        AddEpisodesFromMirrors(tempThred, d, normalEpisode, "Watch");
+                        LookForFembedInString(tempThred, normalEpisode, d);
+                        return;
+                    }
+                    _maxEp = maxEp;
+                }
+
+
             }
         }
 
@@ -4905,12 +5018,12 @@ namespace CloudStreamForms
 
                 if (activeMovie.title.movieType.IsMovie()) {
                     if (activeMovie.title.watchMovieSeasonsData.ContainsKey(-1)) {
-                        GetFromUrl(activeMovie.title.watchMovieSeasonsData[-1]);
+                        GetFromUrl(activeMovie.title.watchMovieSeasonsData[-1].Replace("/anime-info/", "/anime/"));
                     }
                 }
                 else {
                     if (activeMovie.title.watchMovieSeasonsData.ContainsKey(season)) {
-                        GetFromUrl(activeMovie.title.watchMovieSeasonsData[season] + "-episode-" + episode);
+                        GetFromUrl(activeMovie.title.watchMovieSeasonsData[season].Replace("/anime-info/", "/anime/") + "-episode-" + episode);
                     }
                 }
             }
@@ -6192,7 +6305,7 @@ namespace CloudStreamForms
                         break;
                     }
                 }
-            } 
+            }
 
             print(">>STREAM::" + extraId + "||" + vid + "|" + d);
             if (vid != "") {
