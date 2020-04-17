@@ -655,7 +655,7 @@ namespace CloudStreamForms.Droid
                         bool Completed = ExecuteWithTimeLimit(TimeSpan.FromMilliseconds(10000), () => {
                             connection.Connect();
                             clen = connection.ContentLength;
-                            if(clen < 5000000) { // min of 5 MB 
+                            if(clen < 5000000 && !path.Contains("/YouTube/")) { // min of 5 MB 
                                 clen = 0;
                             }
                             //
