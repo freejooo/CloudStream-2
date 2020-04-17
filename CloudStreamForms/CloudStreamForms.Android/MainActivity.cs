@@ -70,8 +70,6 @@ namespace CloudStreamForms.Droid
         }
     }
 
-
-
     [Service]
     public class DemoIntentService : IntentService
     {
@@ -349,9 +347,9 @@ namespace CloudStreamForms.Droid
 
             //   print("NOTIFY::: " + not.id);
             try {
-                _manager.Notify(not.id, builder.Build()); 
+                _manager.Notify(not.id, builder.Build());
             }
-            catch (Exception _ex)  {
+            catch (Exception _ex) {
                 print("ED MANGAER::: " + _ex);
             }
 
@@ -379,221 +377,6 @@ namespace CloudStreamForms.Droid
 
         }
     }
-
-
-    [Service]
-    public class DownloadUrlService : IntentService
-    {
-        public DownloadUrlService() : base("DownloadUrlService")
-        {
-            SetIntentRedelivery(true);
-        }
-        string poster;
-        string title;
-        int id;
-
-
-
-        public override void OnDestroy()
-        {
-            ShowLocalNot(new LocalNot() { mediaStyle = poster != "", bigIcon = poster, title = title, autoCancel = true, onGoing = false, id = id, smallIcon = Resource.Drawable.bicon, body = "Download ddddd" });
-
-            base.OnDestroy();
-        }
-
-
-        protected override void OnHandleIntent(Intent intent)
-        {
-            //startIntent = intent;
-            var context = Application.Context;
-            id = intent.Extras.GetInt("id", -1);
-            string url = intent.Extras.GetString("url", "");
-            title = intent.Extras.GetString("title", "");
-            string path = intent.Extras.GetString("path", "");
-            bool showNotification = intent.Extras.GetBoolean("not", false);
-            bool showNotificationWhenDone = intent.Extras.GetBoolean("notdone", false);
-            bool openWhenDone = intent.Extras.GetBoolean("opendone", false);
-            poster = intent.Extras.GetString("poster", "");
-            string fileName = intent.Extras.GetString("file", "");
-
-            int progress = 0;
-            int _progress = 0;
-
-            void UpdateDloadNot()
-            {
-                //poster != ""
-                ShowLocalNot(new LocalNot() { mediaStyle = false, bigIcon = poster, title = title, autoCancel = false, onGoing = false, id = id, smallIcon = Resource.Drawable.bicon, progress = progress, body = progress + "%" }, context);
-            }
-            bool isDone = false;
-
-            void ShowDone()
-            {
-                if (showNotificationWhenDone) {
-                    ShowLocalNot(new LocalNot() { mediaStyle = poster != "", bigIcon = poster, title = title, autoCancel = true, onGoing = false, id = id, smallIcon = Resource.Drawable.bicon, body = "Download done!" }, context); // ((e.Cancelled || e.Error != null) ? "Download Failed!"
-                }
-                // Toast.MakeText(context, "PG DONE!!!", ToastLength.Long).Show(); 
-            }
-            /*
-            try { 
-                URL _url = new URL(url);
-                URLConnection connection = _url.OpenConnection();
-                connection.Connect();
-                int fileLength = connection.ContentLength;
-                String fileExtension = MimeTypeMap.GetFileExtensionFromUrl(url);
-                fileName = CensorFilename(fileName);
-                InputStream input = new BufferedInputStream(connection.InputStream);
-                Java.IO.File _file = new Java.IO.File(path);
-                _file.Mkdirs();
-                path += "/" + CensorFilename(fileName);
-
-                OutputStream output = new FileOutputStream(new Java.IO.File(path));
-                byte[] data = new byte[1024];
-                long total = 0;
-                int count;
-                int previousProgress = 0;
-                while ((count = input.Read(data)) != -1) {
-                    total += count;
-                    int cprogress = (int)(total * 100 / fileLength);
-                    output.Write(data, 0, count);
-                    if (cprogress == 100 || cprogress > previousProgress + 4) {
-                        // Only post progress event if we've made progress.
-                        previousProgress = cprogress;
-                        progress = cprogress;
-                        UpdateDloadNot();
-
-                    }
-                }
-                output.Flush();
-                output.Close();
-                input.Close();
-            }
-            catch (Exception) {
-                throw;
-            }*/
-
-            //  fileName = System.CurrentTimeMillis() + "." + fileExtension;
-
-            try {
-                Java.IO.File _file = new Java.IO.File(path);
-                _file.Mkdirs();
-                path += "/" + CensorFilename(fileName);
-
-                using (WebClient wc = new WebClient()) {
-                    wc.DownloadProgressChanged += (o, e) => {
-                        progress = e.ProgressPercentage;
-                        // Toast.MakeText(context, "PROGRESS::" + e.ProgressPercentage, ToastLength.Short).Show();
-                        if (progress < 100) {
-
-                            if (_progress != progress) {
-                                _progress = progress;
-                                if (showNotification && id != -1) {
-                                    UpdateDloadNot();
-                                }
-                            }
-                        }
-                        else {
-                            isDone = true;
-                            ShowDone();
-                        }
-                    };
-                    wc.DownloadFileCompleted += (o, e) => {
-                        if (isDone) {
-                            ShowDone();
-                        }
-                        else {
-                            ShowLocalNot(new LocalNot() { mediaStyle = poster != "", bigIcon = poster, title = title, autoCancel = true, onGoing = false, id = id, smallIcon = Resource.Drawable.bicon, body = "Download Failed!" }, context); // ((e.Cancelled || e.Error != null) ? "Download Failed!"
-                        }
-                    };
-
-                    wc.DownloadFileAsync(
-                         new System.Uri(url),
-                         path
-                    );
-                }
-            }
-            catch (Exception) {
-                if (showNotificationWhenDone) {
-                    ShowLocalNot(new LocalNot() { mediaStyle = poster != "", bigIcon = poster, title = title, autoCancel = true, onGoing = false, id = id, smallIcon = Resource.Drawable.bicon, body = "Download Failed!" }, context);
-                }
-                //App.ShowToast("Download Failed");
-            }
-            StopSelf();
-            //  return GetPath(mainPath, extraPath) + "/" + CensorFilename(fileName);
-        }
-
-
-    }
-
-
-    [BroadcastReceiver]
-    public class DownloadUrlReceiver : BroadcastReceiver
-    {
-
-        /*
-        [return: GeneratedEnum]
-        public override StartCommandResult OnStartCommand(Intent intent, [GeneratedEnum] StartCommandFlags flags, int startId)
-        {
-            return StartCommandResult.Sticky;
-           // return base.OnStartCommand(intent, flags, startId);
-        }*/
-
-        /*
-    public override void OnTaskRemoved(Intent rootIntent)
-    {
-        ShowLocalNot(new LocalNot() { mediaStyle = poster != "", bigIcon = poster, title = title, autoCancel = true, onGoing = false, id = id, smallIcon = Resource.Drawable.bicon, body = "Download Failed, App killed Task!" });
-        //  StartService(rootIntent);
-       var triggerTime = CurrentTimeMillis(DateTime.UtcNow.AddSeconds(10)); // NotifyTimeInMilliseconds((DateTime)time);
-        var alarmManager = GetAlarmManager();
-        var context = Application.Context;
-
-        var _resultIntent = new Intent(context, typeof(DownloadUrlService));
-        //  _resultIntent.PutExtra("data", App.ConvertToString(localNot)); 
-        var pending = PendingIntent.GetBroadcast(context, id,
-             _resultIntent,
-            PendingIntentFlags.CancelCurrent
-             );
-
-
-        alarmManager.SetExactAndAllowWhileIdle(AlarmType.RtcWakeup, triggerTime, pending);
-        MainActivity.mainDroid.ShowNotIntentAsync("Hello", "yeet", id, "tt4869896", "IronYeet", System.DateTime.Now.AddSeconds(10));
-        //  base.OnTaskRemoved(rootIntent);
-    }*/
-
-
-
-        string poster;
-        string title;
-        int id;
-        //Intent startIntent;
-        public override void OnReceive(Context context, Intent intent)
-        {
-            Intent downloadIntent = new Intent(context, typeof(DownloadUrlService));
-            downloadIntent.PutExtras(intent.Extras);
-            context.StartService(downloadIntent);
-            /*
-            var _resultIntent = new Intent(context, typeof(DownloadUrlReceiver));
-            //  _resultIntent.PutExtra("data", App.ConvertToString(localNot)); 
-            var pending = PendingIntent.GetBroadcast(context, id,
-                 _resultIntent,
-                PendingIntentFlags.CancelCurrent
-                 );
-            var alarmManager = MainHelper.GetAlarmManager();
-            var triggerTime = CurrentTimeMillis(DateTime.UtcNow.AddSeconds(2));
-            alarmManager.SetExactAndAllowWhileIdle(AlarmType.RtcWakeup, triggerTime, pending);*/
-            //LocalNot.ShowLocalNot(new LocalNot() { title = "da", id = 12345 });
-            //ShowLocalNot(new LocalNot() { mediaStyle = poster != "", bigIcon = poster, title = title, autoCancel = true, onGoing = false, id = 1234, smallIcon = Resource.Drawable.bicon, body = "Download Failed, App killed Task!" });
-
-            MainActivity.mainDroid.ShowNotIntentAsync("Hello", "yeet", 12345, "tt4869896", "IronYeet", System.DateTime.Now);
-            // return;
-
-
-        }
-
-
-
-
-    }
-
 
     [BroadcastReceiver]
     public class AlertReceiver : BroadcastReceiver
@@ -694,10 +477,7 @@ namespace CloudStreamForms.Droid
             else if (downloadResumes != 0) {
                 App.ShowToast($"Resumed {downloadResumes} downloads");
             }
-
         }
-      
-      
 
         static Dictionary<int, OutputStream> outputStreams = new Dictionary<int, OutputStream>();
         static Dictionary<int, InputStream> inputStreams = new Dictionary<int, InputStream>();
@@ -706,6 +486,8 @@ namespace CloudStreamForms.Droid
         /// 0 = download, 1 = Pause, 2 = remove
         /// </summary>
         public static Dictionary<int, int> isPaused = new Dictionary<int, int>();
+
+        public static Dictionary<int, bool> isStartProgress = new Dictionary<int, bool>();
 
         public static EventHandler<int> changedPause;
 
@@ -732,15 +514,27 @@ namespace CloudStreamForms.Droid
             DownloadHandleNot d = JsonConvert.DeserializeObject<DownloadHandleNot>(data);
             HandleIntent(d.id, d.mirrorNames, d.mirrorUrls, d.mirror, d.title, d.path, d.poster, d.fileName, d.beforeTxt, d.openWhenDone, d.showNotificaion, d.showDoneNotificaion, d.showDoneAsToast, true);
         }
-
+        public static bool ExecuteWithTimeLimit(TimeSpan timeSpan, Action codeBlock)
+        {
+            try {
+                Task task = Task.Factory.StartNew(() => codeBlock());
+                task.Wait(timeSpan);
+                return task.IsCompleted;
+            }
+            catch (AggregateException ae) {
+                throw ae.InnerExceptions[0];
+            }
+        }
         public static void HandleIntent(int id, List<string> mirrorNames, List<string> mirrorUrls, int mirror, string title, string path, string poster, string fileName, string beforeTxt, bool openWhenDone, bool showNotificaion, bool showDoneNotificaion, bool showDoneAsToast, bool resumeIntent)
         {
+            isStartProgress[id] = true;
+            print("START DLOAD::: " + id);
             if (isPaused.ContainsKey(id)) {
                 //if (isPaused[id] == 2) {
-                  //  isPaused.Remove(id);
+                //  isPaused.Remove(id);
                 //    print("YEET DELETED KEEEE");
-                    return;
-              //  }
+                return;
+                //  }
             }
             var context = Application.Context;
 
@@ -773,18 +567,22 @@ namespace CloudStreamForms.Droid
                 }
                 // Toast.MakeText(context, "PG DONE!!!", ToastLength.Long).Show(); 
             }
+
+
+
             print("START DLOADING");
             void StartT()
             {
+                isStartProgress[id] = true;
                 if (isPaused.ContainsKey(id)) {
                     //if (isPaused[id] == 2) {
                     //    isPaused.Remove(id);
-                        return;
-                  //  }
+                    return;
+                    //  }
                 }
 
                 Thread t = new Thread(() => {
-
+                    print("START:::");
                     string json = JsonConvert.SerializeObject(new DownloadHandleNot() { id = id, mirrorNames = mirrorNames, mirrorUrls = mirrorUrls, fileName = fileName, showDoneAsToast = showDoneAsToast, openWhenDone = openWhenDone, showDoneNotificaion = showDoneNotificaion, beforeTxt = beforeTxt, mirror = mirror, path = path, poster = poster, showNotificaion = showNotificaion, title = title });
 
                     App.SetKey(DOWNLOAD_KEY_INTENT, id.ToString(), json);
@@ -799,6 +597,7 @@ namespace CloudStreamForms.Droid
                     }
                     long total = 0;
                     int fileLength = 0;
+                    print("START:::2");
 
                     void UpdateProgress()
                     {
@@ -812,8 +611,10 @@ namespace CloudStreamForms.Droid
                         }
                     }
 
+                    print("START:::3");
                     bool removeKeys = true;
                     var rFile = new Java.IO.File(path);
+                    print("START:::4");
 
                     try {
                         try {
@@ -823,16 +624,17 @@ namespace CloudStreamForms.Droid
                         catch (Exception _ex) {
                             print("FAILED:::" + _ex);
                         }
+                        print("START:::5");
+
+                        //  fileName = CensorFilename(fileName);
+                        // string rpath = path + "/" + fileName;
+                        //   print("PATH=====" + rpath + "|" + fileName);
 
 
-                      //  fileName = CensorFilename(fileName);
-                      // string rpath = path + "/" + fileName;
-                     //   print("PATH=====" + rpath + "|" + fileName);
-
-
+                        print("OPEN URL:L::" + url);
                         URL _url = new URL(url);
                         URLConnection connection = _url.OpenConnection();
-
+                        print("SET CONNECT ::");
                         if (!rFile.Exists()) {
                             print("FILE DOSENT EXITS");
                             rFile.CreateNewFile();
@@ -847,142 +649,168 @@ namespace CloudStreamForms.Droid
                                 rFile.CreateNewFile();
                             }
                         }
+                        print("SET CONNECT ::2");
                         connection.SetRequestProperty("Accept-Encoding", "identity");
+                        int clen = 0;
+                        bool Completed = ExecuteWithTimeLimit(TimeSpan.FromMilliseconds(10000), () => {
+                            connection.Connect();
+                            clen = connection.ContentLength;
+                            if(clen < 5000000) { // min of 5 MB 
+                                clen = 0;
+                            }
+                            //
+                            // Write your time bounded code here
+                            // 
+                        });
+                        if (!Completed) {
+                            print("FAILED MASS");
+                            clen = 0;
+                        }
+                        print("SET CONNECT ::3");
 
-                        connection.Connect();
 
+                        print("TOTALLLLL::: " + clen);
 
-                        print("TOTALLLLL::: " + total);
-
-                        if(total == 0) {
-                            if (mirror < mirrorUrls.Count - 1 && progress < 2 && rFile.Length() < 1000000  ) { // HAVE MIRRORS LEFT
+                        if (clen == 0) {
+                            if (isStartProgress.ContainsKey(id)) {
+                                isStartProgress.Remove(id);
+                            }
+                            if (mirror < mirrorUrls.Count - 1 && progress < 2 && rFile.Length() < 1000000) { // HAVE MIRRORS LEFT
                                 mirror++;
                                 removeKeys = false;
                                 resumeIntent = false;
                                 rFile.Delete();
+
+                                print("DELETE;;;");
                             }
                             else {
                                 ShowDone(false);
                             }
                         }
+                        else { 
+                            fileLength = clen + (int)total;
+                            print("FILELEN:::: " + fileLength);
+                            App.SetKey("dlength", "id" + id, fileLength);
+                            String fileExtension = MimeTypeMap.GetFileExtensionFromUrl(url);
+                            InputStream input = new BufferedInputStream(connection.InputStream);
 
-                        fileLength = connection.ContentLength + (int)total;
-                        App.SetKey("dlength", "id" + id, fileLength);
-                        String fileExtension = MimeTypeMap.GetFileExtensionFromUrl(url);
-                        InputStream input = new BufferedInputStream(connection.InputStream);
+                            //long skip = App.GetKey<long>(DOWNLOAD_KEY, id.ToString(), 0);
 
-                        //long skip = App.GetKey<long>(DOWNLOAD_KEY, id.ToString(), 0);
+                            OutputStream output = new FileOutputStream(rFile, true);
 
-                        OutputStream output = new FileOutputStream(rFile, true);
+                            outputStreams[id] = output;
+                            inputStreams[id] = input;
 
-                        outputStreams[id] = output;
-                        inputStreams[id] = input;
+                            if (isPaused.ContainsKey(id)) {
+                                //if (isPaused[id] == 2) {
+                                //    isPaused.Remove(id);
+                                return;
+                                //  }
+                            }
 
-                        if (isPaused.ContainsKey(id)) {
-                            //if (isPaused[id] == 2) {
-                            //    isPaused.Remove(id);
-                            return;
-                            //  }
-                        }
+                            isPaused[id] = 0;
+                            activeIds.Add(id);
 
-                        isPaused[id] = 0;
-                        activeIds.Add(id);
-
-                        int cProgress()
-                        {
-                            return (int)(total * 100 / fileLength);
-                        }
-                        progress = cProgress();
-
-                        byte[] data = new byte[1024];
-                        // skip;
-                        int count;
-                        int previousProgress = 0;
-                        UpdateDloadNot(total == 0 ? "Download starting" : "Download resuming");
-
-                        System.DateTime lastUpdateTime = System.DateTime.Now;
-                        long lastTotal = total;
-                        const int UPDATE_TIME = 1;
-
-                        changedPause += UpdateFromId;
-
-                        while ((count = input.Read(data)) != -1) {
-                            total += count;
-
-                            output.Write(data, 0, count);
-                            progressDownloads[id] = total;
+                            int cProgress()
+                            {
+                                return (int)(total * 100 / fileLength);
+                            }
                             progress = cProgress();
 
+                            byte[] data = new byte[1024];
+                            // skip;
+                            int count;
+                            int previousProgress = 0;
+                            UpdateDloadNot(total == 0 ? "Download starting" : "Download resuming");
 
-                            if (isPaused[id] == 1) {
-                                print("PAUSEDOWNLOAD");
-                                UpdateProgress();
-                                while (isPaused[id] == 1) {
+                            System.DateTime lastUpdateTime = System.DateTime.Now;
+                            long lastTotal = total;
+                            const int UPDATE_TIME = 1;
+
+                            changedPause += UpdateFromId;
+
+                            if (isStartProgress.ContainsKey(id)) {
+                                isStartProgress.Remove(id);
+                            }
+
+                            while ((count = input.Read(data)) != -1) {
+                                total += count;
+
+                                output.Write(data, 0, count);
+                                progressDownloads[id] = total;
+                                progress = cProgress();
+
+
+                                if (isPaused[id] == 1) {
+                                    print("PAUSEDOWNLOAD");
+                                    UpdateProgress();
+                                    while (isPaused[id] == 1) {
+                                        Thread.Sleep(100);
+                                    }
+                                    if (isPaused[id] != 2) {
+                                        UpdateProgress();
+                                    }
+                                }
+                                if (isPaused[id] == 2) { // DELETE FILE
+                                    print("DOWNLOAD STOPPED");
+                                    ShowDone(false, "Download Stopped");
+                                    //  Thread.Sleep(100);
+                                    output.Flush();
+                                    output.Close();
+                                    input.Close();
+                                    outputStreams.Remove(id);
+                                    inputStreams.Remove(id);
+                                    isPaused.Remove(id);
+                                    // Thread.Sleep(100);
+                                    rFile.Delete();
+                                    App.RemoveKey(DOWNLOAD_KEY, id.ToString());
+                                    App.RemoveKey(DOWNLOAD_KEY_INTENT, id.ToString());
+                                    App.RemoveKey(App.hasDownloadedFolder, id.ToString());
+                                    changedPause -= UpdateFromId;
+                                    activeIds.Remove(id);
+                                    removeKeys = true;
                                     Thread.Sleep(100);
+                                    return;
                                 }
-                                if (isPaused[id] != 2) {
-                                    UpdateProgress();
+
+                                if (DateTime.Now.Subtract(lastUpdateTime).TotalSeconds > UPDATE_TIME) {
+                                    lastUpdateTime = DateTime.Now;
+                                    long diff = total - lastTotal;
+                                    //  UpdateDloadNot($"{ConvertBytesToAny(diff/UPDATE_TIME, 2,2)}MB/s | {progress}%");
+                                    //{ConvertBytesToAny(diff / UPDATE_TIME, 2, 2)}MB/s | 
+                                    if (progress >= 100) {
+                                        print("DLOADPG DONE!");
+                                        ShowDone(true);
+                                    }
+                                    else {
+                                        UpdateProgress();
+                                        // UpdateDloadNot(progress + "%");
+                                    }
+                                    lastTotal = total;
                                 }
-                            }
-                            if (isPaused[id] == 2) { // DELETE FILE
-                                print("DOWNLOAD STOPPED");
-                                ShowDone(false, "Download Stopped");
-                                //  Thread.Sleep(100);
-                                output.Flush();
-                                output.Close();
-                                input.Close();
-                                outputStreams.Remove(id);
-                                inputStreams.Remove(id);
-                                isPaused.Remove(id);
-                                // Thread.Sleep(100);
-                                rFile.Delete();
-                                App.RemoveKey(DOWNLOAD_KEY, id.ToString());
-                                App.RemoveKey(DOWNLOAD_KEY_INTENT, id.ToString());
-                                App.RemoveKey(App.hasDownloadedFolder, id.ToString());
-                                changedPause -= UpdateFromId;
-                                activeIds.Remove(id);
-                                removeKeys = true ;
-                                Thread.Sleep(100);
-                                return;
+
+                                if (progress >= 100 || progress > previousProgress) {
+                                    // Only post progress event if we've made progress.
+                                    previousProgress = progress;
+                                    if (progress >= 100) {
+                                        print("DLOADPG DONE!");
+                                        ShowDone(true);
+                                    }
+                                    else {
+                                        // UpdateProgress();
+                                        // UpdateDloadNot(progress + "%");
+                                    }
+                                }
                             }
 
-                            if (DateTime.Now.Subtract(lastUpdateTime).TotalSeconds > UPDATE_TIME) {
-                                lastUpdateTime = DateTime.Now;
-                                long diff = total - lastTotal;
-                                //  UpdateDloadNot($"{ConvertBytesToAny(diff/UPDATE_TIME, 2,2)}MB/s | {progress}%");
-                                //{ConvertBytesToAny(diff / UPDATE_TIME, 2, 2)}MB/s | 
-                                if (progress >= 100) {
-                                    print("DLOADPG DONE!");
-                                    ShowDone(true);
-                                }
-                                else {
-                                    UpdateProgress();
-                                    // UpdateDloadNot(progress + "%");
-                                }
-                                lastTotal = total;
-                            }
-
-                            if (progress >= 100 || progress > previousProgress) {
-                                // Only post progress event if we've made progress.
-                                previousProgress = progress;
-                                if (progress >= 100) {
-                                    print("DLOADPG DONE!");
-                                    ShowDone(true);
-                                }
-                                else {
-                                    // UpdateProgress();
-                                    // UpdateDloadNot(progress + "%");
-                                }
-                            }
+                            ShowDone(true);
+                            output.Flush();
+                            output.Close();
+                            input.Close();
+                            outputStreams.Remove(id);
+                            inputStreams.Remove(id);
+                            activeIds.Remove(id);
                         }
-
-                        ShowDone(true);
-                        output.Flush();
-                        output.Close();
-                        input.Close();
-                        outputStreams.Remove(id);
-                        inputStreams.Remove(id);
-                        activeIds.Remove(id);
                     }
                     catch (Exception _ex) {
                         print("DOWNLOADURL: " + url);
@@ -1000,6 +828,9 @@ namespace CloudStreamForms.Droid
                     finally {
                         changedPause -= UpdateFromId;
                         isPaused.Remove(id);
+                        if (isStartProgress.ContainsKey(id)) {
+                            isStartProgress.Remove(id);
+                        }
                         if (removeKeys) {
                             App.RemoveKey(DOWNLOAD_KEY, id.ToString());
                             App.RemoveKey(DOWNLOAD_KEY_INTENT, id.ToString());
@@ -1012,213 +843,6 @@ namespace CloudStreamForms.Droid
                 t.Start();
             }
             StartT();
-        }
-
-
-        public static void HandleIntent(int id, string url, string title, string path, bool showNotification, bool showNotificationWhenDone, bool openWhenDone, string poster, string fileName, string beforeTxt, bool resumeIntent = false)
-        {
-            if (isPaused.ContainsKey(id)) return;
-
-            var context = Application.Context;
-            App.SetKey(DOWNLOAD_KEY_INTENT, id.ToString(), $"{nameof(id)}={id}|||{nameof(url)}={url}|||{nameof(title)}={title}|||{nameof(path)}={path}|||{nameof(showNotification)}={showNotification}|||{nameof(showNotificationWhenDone)}={showNotificationWhenDone}|||{nameof(openWhenDone)}={openWhenDone}|||{nameof(poster)}={poster}|||{nameof(fileName)}={fileName}|||{nameof(beforeTxt)}={beforeTxt}|||");
-
-            int progress = 0;
-
-            void UpdateDloadNot(string progressTxt)
-            {
-                //poster != ""
-                int isPause = isPaused[id];
-                bool canPause = isPause == 0;
-                if (isPause != 2) {
-                    ShowLocalNot(new LocalNot() { actions = new List<LocalAction>() { new LocalAction() { action = $"handleDownload|||id={id}|||dType={(canPause ? 1 : 0)}|||", name = canPause ? "Pause" : "Resume" }, new LocalAction() { action = $"handleDownload|||id={id}|||dType=2|||", name = "Stop" } }, mediaStyle = false, bigIcon = poster, title = title, autoCancel = false, onGoing = canPause, id = id, smallIcon = Resource.Drawable.bicon, progress = progress, body = progressTxt }, context);
-                }
-            }
-
-            void ShowDone(bool succ, string? overrideText = null)
-            {
-                if (showNotificationWhenDone) {
-                    ShowLocalNot(new LocalNot() { mediaStyle = poster != "", bigIcon = poster, title = title, autoCancel = true, onGoing = false, id = id, smallIcon = Resource.Drawable.bicon, body = overrideText ?? (succ ? "Download done!" : "Download Failed") }, context); // ((e.Cancelled || e.Error != null) ? "Download Failed!"
-                }
-                // Toast.MakeText(context, "PG DONE!!!", ToastLength.Long).Show(); 
-            }
-            /*
-       var manager = DownloadManager.FromContext(Application.Context);
-       var request = new DownloadManager.Request( Android.Net.Uri.Parse(url));
-       request.SetNotificationVisibility(DownloadVisibility.Hidden);
-       request.SetDestinationUri(Android.Net.Uri.Parse(path));
-
-       long downloadId = manager.Enqueue(request);
-       return;*/
-
-            Thread t = new Thread(() => {
-
-                if ((int)Android.OS.Build.VERSION.SdkInt > 9) {
-                    StrictMode.ThreadPolicy policy = new
-                    StrictMode.ThreadPolicy.Builder().PermitAll().Build();
-                    StrictMode.SetThreadPolicy(policy);
-                }
-                long total = 0;
-                int fileLength = 0;
-
-                void UpdateProgress()
-                {
-                    UpdateDloadNot($"{beforeTxt}{progress} % ({ConvertBytesToAny(total, 1, 2)} MB/{ConvertBytesToAny(fileLength, 1, 2)} MB)");
-                }
-
-                void UpdateFromId(object sender, int _id)
-                {
-                    if (_id == id) {
-                        UpdateProgress();
-                    }
-                }
-
-                try {
-                    try {
-                        Java.IO.File __file = new Java.IO.File(path);
-                        __file.Mkdirs();
-                    }
-                    catch (Exception _ex) {
-                        print("FAILED:::" + _ex);
-                    }
-
-                    fileName = CensorFilename(fileName);
-                    string mpath = path + "/" + fileName;
-                    print("PATH=====" + mpath + "|" + fileName);
-
-
-                    URL _url = new URL(url);
-                    URLConnection connection = _url.OpenConnection();
-
-                    var rFile = new Java.IO.File(mpath);
-                    if (!rFile.Exists()) {
-                        print("FILE DOSENT EXITS");
-                        rFile.CreateNewFile();
-                    }
-                    else {
-                        if (resumeIntent) {
-                            total = rFile.Length();
-                            connection.SetRequestProperty("Range", "bytes=" + rFile.Length() + "-");
-                        }
-                        else {
-                            rFile.Delete();
-                            rFile.CreateNewFile();
-                        }
-                    }
-                    connection.SetRequestProperty("Accept-Encoding", "identity");
-
-                    connection.Connect();
-                    fileLength = connection.ContentLength + (int)total;
-                    String fileExtension = MimeTypeMap.GetFileExtensionFromUrl(url);
-                    InputStream input = new BufferedInputStream(connection.InputStream);
-
-                    //long skip = App.GetKey<long>(DOWNLOAD_KEY, id.ToString(), 0);
-
-                    OutputStream output = new FileOutputStream(rFile, true);
-
-                    outputStreams[id] = output;
-                    inputStreams[id] = input;
-                    isPaused[id] = 0;
-                    activeIds.Add(id);
-
-                    int cProgress()
-                    {
-                        return (int)(total * 100 / fileLength);
-                    }
-                    progress = cProgress();
-
-                    byte[] data = new byte[1024];
-                    // skip;
-                    int count;
-                    int previousProgress = 0;
-                    UpdateDloadNot(total == 0 ? "Download starting" : "Download resuming");
-
-                    System.DateTime lastUpdateTime = System.DateTime.Now;
-                    long lastTotal = total;
-                    const int UPDATE_TIME = 1;
-
-                    changedPause += UpdateFromId;
-
-                    while ((count = input.Read(data)) != -1) {
-                        total += count;
-
-                        output.Write(data, 0, count);
-                        progressDownloads[id] = total;
-                        progress = cProgress();
-
-
-                        if (isPaused[id] == 1) {
-                            print("PAUSEDOWNLOAD");
-                            UpdateProgress();
-                            while (isPaused[id] == 1) {
-                                Thread.Sleep(100);
-                            }
-                            if (isPaused[id] != 2) {
-                                UpdateProgress();
-                            }
-                        }
-                        if (isPaused[id] == 2) { // DELETE FILE
-                            print("DOWNLOAD STOPPED");
-                            ShowDone(false, "Download Stopped");
-                            //  Thread.Sleep(100);
-                            output.Flush();
-                            output.Close();
-                            input.Close();
-                            outputStreams.Remove(id);
-                            inputStreams.Remove(id);
-                            isPaused.Remove(id);
-                            // Thread.Sleep(100);
-                            rFile.Delete();
-                            App.RemoveKey(DOWNLOAD_KEY, id.ToString());
-                            App.RemoveKey(DOWNLOAD_KEY_INTENT, id.ToString());
-                            changedPause -= UpdateFromId;
-                            activeIds.Remove(id);
-                            Thread.Sleep(100);
-                            return;
-                        }
-
-                        if (DateTime.Now.Subtract(lastUpdateTime).TotalSeconds > UPDATE_TIME) {
-                            lastUpdateTime = DateTime.Now;
-                            long diff = total - lastTotal;
-                            //  UpdateDloadNot($"{ConvertBytesToAny(diff/UPDATE_TIME, 2,2)}MB/s | {progress}%");
-                            //{ConvertBytesToAny(diff / UPDATE_TIME, 2, 2)}MB/s | 
-                            UpdateProgress();
-                            lastTotal = total;
-                        }
-
-                        if (progress >= 100 || progress > previousProgress) {
-                            UpdateProgress();
-                            // Only post progress event if we've made progress.
-                            previousProgress = progress;
-                            if (progress >= 100) {
-                                ShowDone(true);
-                            }
-                            else {
-                                // UpdateDloadNot(progress + "%");
-                            }
-                        }
-                    }
-
-                    ShowDone(true);
-                    output.Flush();
-                    output.Close();
-                    input.Close();
-                    outputStreams.Remove(id);
-                    inputStreams.Remove(id);
-                    activeIds.Remove(id);
-                }
-                catch (Exception _ex) {
-                    print("DOWNLOADURL: " + url);
-                    print("DOWNLOAD FAILED BC: " + _ex);
-                    ShowDone(false);
-                }
-                finally {
-                    App.RemoveKey(DOWNLOAD_KEY, id.ToString());
-                    App.RemoveKey(DOWNLOAD_KEY_INTENT, id.ToString());
-                    changedPause -= UpdateFromId;
-                    isPaused.Remove(id);
-                }
-            });
-            t.Start();
         }
     }
 
@@ -1502,8 +1126,8 @@ namespace CloudStreamForms.Droid
             if (progressInfo.bytesDownloaded < progressInfo.totalBytes - 10 && progressInfo.state == DownloadState.Downloaded) {
                 progressInfo.state = DownloadState.NotDownloaded;
             }
-
-            progressInfo.bytesDownloaded = exists ? file.Length() : 0;
+            print("CONTAINS ::>>" + DownloadHandle.isStartProgress.ContainsKey(id));
+            progressInfo.bytesDownloaded = (exists ? (file.Length()) : 0) + (DownloadHandle.isStartProgress.ContainsKey(id) ? 1 : 0);
 
             //                        App.SetKey("dlength", "id" + id, fileLength);
 
@@ -1827,7 +1451,7 @@ namespace CloudStreamForms.Droid
            builder.SetContentIntent(resultPendingIntent);
            */
             try {
-            _manager.Notify(CHROME_CAST_NOTIFICATION_ID, builder.Build());
+                _manager.Notify(CHROME_CAST_NOTIFICATION_ID, builder.Build());
 
             }
             catch (Exception _ex) {
@@ -2433,7 +2057,7 @@ namespace CloudStreamForms.Droid
                 print("SUBFILE::::" + subfile + "|" + sfile.Path);
                 //  print(sfile.Path);
                 intent.PutExtra("subtitles_location", subfile);//"/sdcard/Download/subtitles.srt");//sfile);//Android.Net.Uri.FromFile(subFile));
-                                                             // intent.PutExtra("subtitles_location", );//Android.Net.Uri.FromFile(subFile));
+                                                               // intent.PutExtra("subtitles_location", );//Android.Net.Uri.FromFile(subFile));
             }
 
             intent.AddFlags(ActivityFlags.GrantReadUriPermission);

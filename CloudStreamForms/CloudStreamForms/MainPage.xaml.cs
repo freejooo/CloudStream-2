@@ -4895,7 +4895,9 @@ namespace CloudStreamForms
                         print("SUDADADDA:::111: " + name + "|" + subExists + "|" + dubExists + "|" + subUrl + "|" + dubUrl);
                         try {
                             int maxSubbedEp = subExists ? TheMovieHelper.GetMaxEp(DownloadString(subUrl), subUrl) : 0;
+                            if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
                             int maxDubbedEp = dubExists ? TheMovieHelper.GetMaxEp(DownloadString(dubUrl), dubUrl) : 0;
+                            if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS 
 
                             print("SUDADADDA:::: " + name + "|" + subExists + "|" + dubExists + "|" + subUrl + "|" + dubUrl + "|" + maxDubbedEp + "|" + maxSubbedEp);
 

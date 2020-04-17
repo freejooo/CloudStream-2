@@ -99,7 +99,7 @@ namespace CloudStreamForms
                     var info = App.GetDownloadInfo(key);//Download.downloads[key];
                     if (info != null) {
                         Download.downloads[key] = info;
-                        if (info.state.totalBytes == 0) {
+                        if (info.state.totalBytes == 0 && info.state.bytesDownloaded != 1) {
                             print("DC 0 DATAA:::: ");
                             Download.RemoveDownloadCookie(key);
                         }

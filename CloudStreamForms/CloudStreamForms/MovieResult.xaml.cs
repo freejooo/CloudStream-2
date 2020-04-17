@@ -684,8 +684,8 @@ namespace CloudStreamForms
             }
 
             if (!isMovie) {
-                print("ADDMOVIE:___" + episodeResult.Episode);
                 episodeResult.Title = episodeResult.Episode + ". " + episodeResult.Title;
+                print("ADDMOVIE:___" + episodeResult.Episode +"|"+ episodeResult.Title);
             }
 
             if (episodeResult.PosterUrl == "") {

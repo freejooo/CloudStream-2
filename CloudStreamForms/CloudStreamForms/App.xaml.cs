@@ -488,10 +488,21 @@ namespace CloudStreamForms
 
         public static List<string> GetKeysPath(string folder)
         {
-            string[] copy = new string[myApp.Properties.Keys.Count];
-            myApp.Properties.Keys.CopyTo(copy, 0);
-            List<string> keyNames = copy.Where(t => t.StartsWith(GetKeyPath(folder))).ToList();
-            return keyNames;
+                string[] copy = new string[myApp.Properties.Keys.Count];
+            try {
+                myApp.Properties.Keys.CopyTo(copy, 0);
+                List<string> keyNames = copy.Where(t => t != null).Where(t => t.StartsWith(GetKeyPath(folder))).ToList();
+                return keyNames;
+            }
+            catch (Exception _ex) {
+                print("MAN EX GET KEY PARKKK " + _ex);
+                for (int i = 0; i < copy.Length; i++) {
+
+                print("MAX COPY::" + copy[i]);
+                }
+                throw;
+            }
+            
         }
 
         public static bool KeyExists(string folder, string name)
