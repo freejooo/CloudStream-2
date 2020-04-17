@@ -237,6 +237,7 @@ namespace CloudStreamForms
                     if (info.state.totalBytes == 0 && info.state.bytesDownloaded != 1) {
                         print("REMOVE HEADER INFO ID BC 0 data");
                         RemoveDownloadCookie(id);
+                        App.UpdateDownload(id, 2);
                         headerRemovers.Add(info.info.downloadHeader);
                     }
                     else {
