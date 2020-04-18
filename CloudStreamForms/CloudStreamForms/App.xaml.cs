@@ -28,12 +28,12 @@ namespace CloudStreamForms
         public static DownloadState GetDstate(int epId)
         {
             bool isDownloaded = App.GetKey(hasDownloadedFolder, epId.ToString(), false);
-            if(!isDownloaded) {
+            if (!isDownloaded) {
                 return DownloadState.NotDownloaded;
             }
             else {
                 return App.GetDownloadInfo(epId).state.state;
-            } 
+            }
         }
 
 
@@ -155,7 +155,7 @@ namespace CloudStreamForms
         public static void UpdateDownload(int id, int state)
         {
             platformDep.UpdateDownload(id, state);
-        } 
+        }
 
         public static string RequestDownload(int id, string name, string description, int episode, int season, List<string> mirrorUrls, List<string> mirrorNames, string downloadTitle, string poster, CloudStreamCore.Title title)
         {
@@ -272,7 +272,7 @@ namespace CloudStreamForms
         public static double GetBrightness()
         {
             return platformDep.GetBrightness();
-        } 
+        }
         public static void SetBrightness(double brightness)
         {
             platformDep.SetBrightness(brightness);
@@ -488,7 +488,7 @@ namespace CloudStreamForms
 
         public static List<string> GetKeysPath(string folder)
         {
-                string[] copy = new string[myApp.Properties.Keys.Count];
+            string[] copy = new string[myApp.Properties.Keys.Count];
             try {
                 myApp.Properties.Keys.CopyTo(copy, 0);
                 List<string> keyNames = copy.Where(t => t != null).Where(t => t.StartsWith(GetKeyPath(folder))).ToList();
@@ -497,12 +497,12 @@ namespace CloudStreamForms
             catch (Exception _ex) {
                 print("MAN EX GET KEY PARKKK " + _ex);
                 for (int i = 0; i < copy.Length; i++) {
-
-                print("MAX COPY::" + copy[i]);
+                    print("MAX COPY::" + copy[i]);
                 }
-                throw;
+                App.ShowToast("Error");
+                return new List<string>();
             }
-            
+
         }
 
         public static bool KeyExists(string folder, string name)

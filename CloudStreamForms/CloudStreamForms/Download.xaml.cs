@@ -418,23 +418,18 @@ namespace CloudStreamForms
 
         public static string GetExtraString(DownloadState state)
         {
-            string extraString = "Downloading";
             switch (state) {
                 case App.DownloadState.Downloading:
-                    break;
+                    return "Downloading";
                 case App.DownloadState.Downloaded:
-                    extraString = "Downloaded";
-                    break;
-                case App.DownloadState.NotDownloaded: // SHOULD NEVER HAPPEND; SHOULD BE REMOVED BEFOREHAND
-                    extraString = "Downloaded";
-                    break;
+                    return "Downloaded";
+                case App.DownloadState.NotDownloaded: // CAN HEPPEND IF DOWNLOADED, BUT STOPPED DUE TO INTERNET or NOT DOWNLOADED
+                   return "Stopped";
                 case App.DownloadState.Paused:
-                    extraString = "Paused";
-                    break;
+                   return "Paused";
                 default:
-                    break;
+                    return "";
             }
-            return extraString;
         }
 
         public class DownloadHeaderHelper

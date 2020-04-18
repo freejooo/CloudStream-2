@@ -245,6 +245,16 @@ namespace CloudStreamForms
         {
             return mtype == MovieType.AnimeMovie || mtype == MovieType.Movie;
         }
+
+        /// <summary>
+        /// If is not null and is not ""
+        /// </summary>
+        /// <param name="s"></param>
+        /// <returns></returns>
+        public static bool IsClean(this string s)
+        {
+            return s != null && s != "";
+        } 
     }
 
     public static class MainChrome
@@ -1134,9 +1144,7 @@ namespace CloudStreamForms
             public List<int> currentActiveDubbedMaxEpsPerSeason;
             public List<int> currentActiveKickassMaxEpsPerSeason;
             public string currentSelectedYear;
-        }
-
-
+        } 
 
         [Serializable]
         public struct Title
@@ -1170,7 +1178,8 @@ namespace CloudStreamForms
             /// -1 = movie, 1-inf is seasons
             /// </summary>
             public Dictionary<int, string> watchMovieSeasonsData;
-
+            public string kickassSubUrl;
+            public string kickassDubUrl;
 
 
             public string shortEpView;
@@ -1526,7 +1535,7 @@ namespace CloudStreamForms
 
         // ========================================================= ALL METHODS =========================================================
 
-        public static IMovieProvider[] movieProviders = new IMovieProvider[] { new FullMoviesProvider(), new TMDBProvider(), new WatchTVProvider(), new FMoviesProvider(), new LiveMovies123Provider(), new TheMovies123Provider(), new YesMoviesProvider(), new WatchSeriesProvider(), new GomoStreamProvider(), new Movies123Provider(), new DubbedAnimeMovieProvider(), new TheMovieMovieProvider() };
+        public static IMovieProvider[] movieProviders = new IMovieProvider[] { new FullMoviesProvider(), new TMDBProvider(), new WatchTVProvider(), new FMoviesProvider(), new LiveMovies123Provider(), new TheMovies123Provider(), new YesMoviesProvider(), new WatchSeriesProvider(), new GomoStreamProvider(), new Movies123Provider(), new DubbedAnimeMovieProvider(), new TheMovieMovieProvider(), new KickassMovieProvider() };
 
         public static IAnimeProvider[] animeProviders = new IAnimeProvider[] { new GogoAnimeProvider(), new KickassAnimeProvider(), new DubbedAnimeProvider(), new AnimeFlixProvider(), new DubbedAnimeNetProvider(), new AnimekisaProvider(), new DreamAnimeProvider(), new TheMovieAnimeProvider() };
 
@@ -1812,6 +1821,100 @@ namespace CloudStreamForms
             }
         }
 
+        class KickassMovieProvider : IMovieProvider
+        {
+            public void FishMainLinkTSync()
+            {
+                print("MAIN FISHHH::: " + activeMovie.title.movieType);
+                if (activeMovie.title.movieType != MovieType.AnimeMovie) return;
+
+                TempThred tempThred = new TempThred();
+                tempThred.typeId = 2; // MAKE SURE THIS IS BEFORE YOU CREATE THE THRED
+                tempThred.Thread = new System.Threading.Thread(() => {
+                    try {
+                        string query = activeMovie.title.name;
+                        string url = "https://www.kickassanime.rs/search?q=" + query;
+                        string d = DownloadString(url);
+                        if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
+
+                        string subUrl = "";
+                        string dubUrl = "";
+                        const string lookfor = "\"name\":\"";
+                        string compare = ToDown(activeMovie.title.name, true, "");
+
+
+                        while (d.Contains(lookfor)) {
+                            string animeTitle = FindHTML(d, lookfor, "\"");
+                            const string dubTxt = "(Dub)";
+                            const string cenTxt = "(Censored)";
+                            bool isDub = animeTitle.Contains(dubTxt);
+                            print("ANIMETITLELL::: " + animeTitle);
+                            //bool cencored = animeTitle.Contains(cenTxt);
+                            d = RemoveOne(d, lookfor);
+                            string animeT = animeTitle.Replace(dubTxt, "").Replace(cenTxt, "");
+                            print("REAL ANIME T:::" + animeT + "|" + isDub + "|" + ToDown(animeT, true, "") + "|" + compare);
+                            if (ToDown(animeT, true, "") == compare && ((isDub && dubUrl == "") || (!isDub && (subUrl == "")))) {
+                                string slug = "https://www.kickassanime.rs" + FindHTML(d, "\"slug\":\"", "\"").Replace("\\/", "/");
+                                print("ADD SLUG::: " + slug);
+                                if (isDub) {
+                                    dubUrl = slug;
+                                }
+                                else {
+                                    subUrl = slug;
+                                }
+                            }
+                        }
+
+                        string ConvertUrlToEpisode(string u)
+                        {
+                            string _d = DownloadString(u);
+                            if (_d == "") return "";
+                            _d = RemoveOne(_d, "epnum\":\"Episode 01");
+                            string slug = FindHTML(_d, "slug\":\"", "\"").Replace("\\/", "/");
+                            if (slug == "") return "";
+                            return "https://www.kickassanime.rs" + slug;
+                        }
+                        print("SUBURLL:: " + subUrl + "|dubrrrll::" + dubUrl);
+
+                        if (dubUrl != "") {
+                            dubUrl = ConvertUrlToEpisode(dubUrl);
+                            activeMovie.title.kickassDubUrl = dubUrl;
+                        }
+                        if (subUrl != "") {
+                            subUrl = ConvertUrlToEpisode(subUrl);
+                            activeMovie.title.kickassSubUrl = subUrl;
+                        }
+                    }
+                    catch(Exception _ex) {
+                        print("MAIN EX from Kickass::: " + _ex);
+                    }
+                    finally {
+                        JoinThred(tempThred);
+                    }
+                });
+                tempThred.Thread.Name = "Kickass Movie";
+                tempThred.Thread.Start();
+            }
+
+            public void LoadLinksTSync(int episode, int season, int normalEpisode, bool isMovie, TempThred tempThred)
+            {
+                if (activeMovie.title.movieType != MovieType.AnimeMovie) return;
+                try {
+                    var dubUrl = activeMovie.title.kickassDubUrl;
+                    if (dubUrl.IsClean()) {
+                        KickassAnimeProvider.GetKickassVideoFromURL(dubUrl, normalEpisode, tempThred);
+                    }
+                    var subUrl = activeMovie.title.kickassSubUrl;
+                    if (subUrl.IsClean()) {
+                        KickassAnimeProvider.GetKickassVideoFromURL(dubUrl, normalEpisode, tempThred);
+                    }
+                }
+                catch (Exception _ex) {
+                    print("ERROR LOADING Kickassmovie::" + _ex);
+                } 
+            }
+        }
+
         class KickassAnimeProvider : IAnimeProvider
         {
             public string Name { get => "Kickassanime"; }
@@ -1822,6 +1925,7 @@ namespace CloudStreamForms
                 string url = "https://www.kickassanime.rs/search?q=" + query;//activeMovie.title.name.Replace(" ", "%20");
                 print("COMPAREURL:" + url);
                 string d = DownloadString(url);
+                if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
                 print("DOWNLOADEDDDD::" + d);
                 const string lookfor = "\"name\":\"";
                 while (d.Contains(lookfor)) {
@@ -1862,7 +1966,6 @@ namespace CloudStreamForms
                                 // print(d);
                                 const string _lookfor = "\"epnum\":\"";
 
-
                                 int slugCount = Regex.Matches(_d, _lookfor).Count;
                                 string[] episodes = new string[slugCount];
                                 print("SLIGCOUNT:::DA" + slugCount);
@@ -1892,7 +1995,6 @@ namespace CloudStreamForms
                                     catch (Exception) {
                                         print("SOMETHING LIKE 25.5");
                                     }
-
                                 }
                                 //    s.Stop();
                                 print("EPISODES::::" + episodes.Length);
@@ -1965,7 +2067,7 @@ namespace CloudStreamForms
                 }
             }
 
-            static void GetKickassVideoFromURL(string url, int normalEpisode, TempThred tempThred)
+            public static void GetKickassVideoFromURL(string url, int normalEpisode, TempThred tempThred)
             {/*
                 print("GETLINK;;;::" + url);
                 TempThred tempThred = new TempThred();
