@@ -685,7 +685,7 @@ namespace CloudStreamForms
 
             if (!isMovie) {
                 episodeResult.Title = episodeResult.Episode + ". " + episodeResult.Title;
-                print("ADDMOVIE:___" + episodeResult.Episode +"|"+ episodeResult.Title);
+                print("ADDMOVIE:___" + episodeResult.Episode + "|" + episodeResult.Title);
             }
 
             if (episodeResult.PosterUrl == "") {
@@ -771,7 +771,7 @@ namespace CloudStreamForms
                                 App.UpdateDownload(GetCorrectId(episodeResult), -1);
                                 string dpath = App.RequestDownload(GetCorrectId(episodeResult), episodeResult.OgTitle, episodeResult.Description, episodeResult.Episode, currentSeason, mirrorUrls, mirrorNames, episodeResult.Title + ".mp4", episodeResult.PosterUrl, currentMovie.title);
                                 print("SETCOLOR:::");
-                              //  SetColor(epView.MyEpisodeResultCollection[_id]);
+                                //  SetColor(epView.MyEpisodeResultCollection[_id]);
 
                             }
                             print("SET COLOOOROOROROR" + epRes.OgTitle);
@@ -1133,19 +1133,19 @@ namespace CloudStreamForms
 
         private void MovieResult_epsiodesLoaded(object sender, List<Episode> e)
         {
-            print("GOT RESULTS; LETS GO");
-            if (!SameAsActiveMovie()) return;
+            Device.BeginInvokeOnMainThread(() => {
+                print("GOT RESULTS; LETS GO");
+                if (!SameAsActiveMovie()) return;
 
-            if (e == null || e.Count == 0) {
-                RecomendationLoaded.IsVisible = false;
-                return;
-            };
-            print("episodes loaded");
+                if (e == null || e.Count == 0) {
+                    RecomendationLoaded.IsVisible = false;
+                    return;
+                };
+                print("episodes loaded");
 
-            currentMovie = activeMovie;
+                currentMovie = activeMovie;
 
-            currentMovie.episodes = e;
-            MainThread.BeginInvokeOnMainThread(() => {
+                currentMovie.episodes = e;
                 CurrentEpisodes = e;
                 ClearEpisodes();
                 //bool isLocalMovie = false;
@@ -1247,6 +1247,7 @@ namespace CloudStreamForms
                 DubPicker.IsVisible = DubPicker.ItemsSource.Count > 0;
                 DubPicker.button.FadeTo(DubPicker.IsVisible ? 1 : 0, FATE_TIME_MS);
             });
+
         }
 
 
@@ -1455,7 +1456,7 @@ namespace CloudStreamForms
                             print("NULLEP3");
 
                             print("LINKCOUNT: " + episodeResult.mirrosUrls.Count);
-                            if (episodeResult.mirrosUrls.Count > 0) { 
+                            if (episodeResult.mirrosUrls.Count > 0) {
                                 if (autoPlay) { PlayEpisode(episodeResult); }
                                 episodeResult.LoadedLinks = true;
                             }
@@ -1644,7 +1645,7 @@ namespace CloudStreamForms
                                 if (fileSize > 1) {
                                     print("DSUZE:::::" + episodeResult.Episode);
 
-                                   // ImageService.Instance.LoadUrl(episodeResult.PosterUrl, TimeSpan.FromDays(30)); // CASHE IMAGE
+                                    // ImageService.Instance.LoadUrl(episodeResult.PosterUrl, TimeSpan.FromDays(30)); // CASHE IMAGE
                                     App.UpdateDownload(GetCorrectId(episodeResult), -1);
                                     string dpath = App.RequestDownload(GetCorrectId(episodeResult), episodeResult.OgTitle, episodeResult.Description, episodeResult.Episode, currentSeason, new List<string>() { mirrorUrl }, new List<string>() { mirrorName }, episodeResult.Title + ".mp4", episodeResult.PosterUrl, currentMovie.title);
                                     // string dpath = App.DownloadAdvanced(GetCorrectId(episodeResult), mirrorUrl, episodeResult.Title + ".mp4", isMovie ? currentMovie.title.name : $"{currentMovie.title.name} · {episodeResult.OgTitle}", true, "/" + GetPathFromType(), true, true, false, episodeResult.PosterUrl, (isMovie) ? $"{mirrorName}\n" : $"S{currentSeason}:E{episodeResult.Episode} - {mirrorName}\n");
