@@ -254,7 +254,7 @@ namespace CloudStreamForms
         public static bool IsClean(this string s)
         {
             return s != null && s != "";
-        } 
+        }
     }
 
     public static class MainChrome
@@ -1144,7 +1144,7 @@ namespace CloudStreamForms
             public List<int> currentActiveDubbedMaxEpsPerSeason;
             public List<int> currentActiveKickassMaxEpsPerSeason;
             public string currentSelectedYear;
-        } 
+        }
 
         [Serializable]
         public struct Title
@@ -1832,7 +1832,7 @@ namespace CloudStreamForms
                 tempThred.typeId = 2; // MAKE SURE THIS IS BEFORE YOU CREATE THE THRED
                 tempThred.Thread = new System.Threading.Thread(() => {
                     try {
-                        string query = activeMovie.title.name;
+                        string query = ToDown(activeMovie.title.name);
                         string url = "https://www.kickassanime.rs/search?q=" + query;
                         string d = DownloadString(url);
                         if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
@@ -1885,7 +1885,7 @@ namespace CloudStreamForms
                             activeMovie.title.kickassSubUrl = subUrl;
                         }
                     }
-                    catch(Exception _ex) {
+                    catch (Exception _ex) {
                         print("MAIN EX from Kickass::: " + _ex);
                     }
                     finally {
@@ -1902,16 +1902,16 @@ namespace CloudStreamForms
                 try {
                     var dubUrl = activeMovie.title.kickassDubUrl;
                     if (dubUrl.IsClean()) {
-                        KickassAnimeProvider.GetKickassVideoFromURL(dubUrl, normalEpisode, tempThred);
+                        KickassAnimeProvider.GetKickassVideoFromURL(dubUrl, normalEpisode, tempThred, " (Dub)");
                     }
                     var subUrl = activeMovie.title.kickassSubUrl;
                     if (subUrl.IsClean()) {
-                        KickassAnimeProvider.GetKickassVideoFromURL(dubUrl, normalEpisode, tempThred);
+                        KickassAnimeProvider.GetKickassVideoFromURL(subUrl, normalEpisode, tempThred, " (Sub)");
                     }
                 }
                 catch (Exception _ex) {
                     print("ERROR LOADING Kickassmovie::" + _ex);
-                } 
+                }
             }
         }
 
@@ -2067,13 +2067,15 @@ namespace CloudStreamForms
                 }
             }
 
-            public static void GetKickassVideoFromURL(string url, int normalEpisode, TempThred tempThred)
+            public static void GetKickassVideoFromURL(string url, int normalEpisode, TempThred tempThred, string extra = "")
             {/*
                 print("GETLINK;;;::" + url);
                 TempThred tempThred = new TempThred();
                 tempThred.typeId = 3; // MAKE SURE THIS IS BEFORE YOU CREATE THE THRED
                 tempThred.Thread = new System.Threading.Thread(() => {
                     try {*/
+
+                print("FROM :::::: " + url);
                 string CorrectURL(string u)
                 {
                     if (u.StartsWith("//")) {
@@ -2086,6 +2088,7 @@ namespace CloudStreamForms
                     var base64EncodedBytes = System.Convert.FromBase64String(base64EncodedData);
                     return System.Text.Encoding.UTF8.GetString(base64EncodedBytes);
                 }
+
                 string GetCode(string _d)
                 {
                     string res = FindHTML(_d, "Base64.decode(\"", "\"");
@@ -2102,7 +2105,7 @@ namespace CloudStreamForms
                         string f = DownloadString(dalyKey);
                         if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
 
-                        print(f);
+                        print("DALYJEY:" + f);
 
                         string qulitys = FindHTML(f, "qualities\":{", "]}");
                         string find = "\"url\":\"";
@@ -2110,7 +2113,7 @@ namespace CloudStreamForms
                             string burl = FindHTML(qulitys, find, "\"").Replace("\\/", "/");
                             qulitys = RemoveOne(qulitys, find);
                             if (qulitys.Replace(" ", "") != "") {
-                                AddPotentialLink(normalEpisode, burl, "KickassDaily", 0);
+                                AddPotentialLink(normalEpisode, burl, "KickassDaily" + extra, 0);
                             }
                             print("URL::" + burl);
                         }
@@ -2123,8 +2126,7 @@ namespace CloudStreamForms
                         print("UR: " + mp4UploadKey);
                         __s = RemoveOne(__s, mp4Upload);
                         string label = FindHTML(__s, "label=\"", "\"");
-                        AddPotentialLink(normalEpisode, mp4UploadKey, "KickassMp4 " + label, 2);
-
+                        AddPotentialLink(normalEpisode, mp4UploadKey, "KickassMp4 " + label + extra, 2); 
                     }
 
 
@@ -2158,7 +2160,7 @@ namespace CloudStreamForms
                             s = RemoveOne(s, lookFor);
                             string label = FindHTML(s, "label:\"", "\"");
                             if (label.Replace(" ", "") != "") {
-                                AddPotentialLink(normalEpisode, uri, "KickassSource " + label.Replace("720P", "720p"), 1);
+                                AddPotentialLink(normalEpisode, uri, "KickassSource " + label.Replace("720P", "720p") + extra, 1);
                             }
                             print("UR: " + label + "|" + uri);
                         }
@@ -2186,7 +2188,7 @@ namespace CloudStreamForms
                         img = beforeAdd + img;
                         string next = GetBase(_url) + "/" + img;
                         string __d = DownloadString(next);
-                        print(__d);
+                        print("FROMIMG:::" + __d);
                         UrlDecoder(__d, next);
                     }
                     else {
@@ -2200,7 +2202,7 @@ namespace CloudStreamForms
                             if (subEr.StartsWith("https://vidstreaming.io")) {
                                 string dEr = DownloadString(subEr);
                                 if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
-                                AddEpisodesFromMirrors(tempThred, dEr, normalEpisode);
+                                AddEpisodesFromMirrors(tempThred, dEr, normalEpisode, "", extra);
                             }
                             else {
                                 UrlDecoder(DownloadString(subEr, repeats: 2, waitTime: 100), subEr);
@@ -2220,30 +2222,41 @@ namespace CloudStreamForms
                 string d = DownloadString(url);
                 if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
 
+             //   string extraD = d.ToString();
+                //AddEpisodesFromMirrors(tempThred, d.ToString(), normalEpisode, "", extra);
+
                 //"link":"
-
-                string link1 = FindHTML(d, "link1\":\"", "\"").Replace("\\/", "/");
-                link1 = CorrectURL(link1);
-                string look1 = "\"link\":\"";
-                string main = DownloadString(link1);
-                if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
-
-                UrlDecoder(main, link1);
-                string look = "\"src\":\"";
-                while (main.Contains(look)) {
-                    string source = FindHTML(main, look, "\"").Replace("\\/", "/");
-                    UrlDecoder(DownloadString(source), source);
+                try { 
+                    string link1 = FindHTML(d, "link1\":\"", "\"").Replace("\\/", "/");
+                    link1 = CorrectURL(link1);
+                    string look1 = "\"link\":\"";
+                    string main = DownloadString(link1);
                     if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
-                    main = RemoveOne(main, look);
+
+                    UrlDecoder(main, link1);
+                    string look = "\"src\":\"";
+                    while (main.Contains(look)) {
+                        string source = FindHTML(main, look, "\"").Replace("\\/", "/");
+                        UrlDecoder(DownloadString(source), source);
+                        if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
+                        main = RemoveOne(main, look);
+                    }
+
+                    while (d.Contains(look1)) {
+                        string source = FindHTML(d, look1, "\"").Replace("\\/", "/");
+                        print(source);
+                        UrlDecoder(DownloadString(source), source);
+                        if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
+                        d = RemoveOne(d, look1);
+                    }
+
+                    print("END::::____");
+                  //  print("ISSSAMMEMME::: " + d == extraD);
+                }
+                catch (Exception _ex) {
+                    print("MAIN EX::: FROM KICK LOAD:: " + _ex);
                 }
 
-                while (d.Contains(look1)) {
-                    string source = FindHTML(d, look1, "\"").Replace("\\/", "/");
-                    print(source);
-                    UrlDecoder(DownloadString(source), source);
-                    if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
-                    d = RemoveOne(d, look1);
-                }
                 /*  }
                   finally {
                       JoinThred(tempThred);
@@ -2815,9 +2828,7 @@ namespace CloudStreamForms
                         try {
                             string d = DownloadString(slug);
 
-
-                            if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
-
+                            if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS 
 
                             string cepisode = FindHTML(d, "episode = ", ";"); //FindHTML(d, "var episode = ", ";");
                             print("CDreamEPISODE ==== " + cepisode);
@@ -6304,14 +6315,12 @@ namespace CloudStreamForms
             tempThred.Thread.Start();
         }
 
-        static bool LookForFembedInString(TempThred tempThred, int normalEpisode, string d)
+        static bool LookForFembedInString(TempThred tempThred, int normalEpisode, string d, string extra = "")
         {
             string source = "https://www.fembed.com";
             string _ref = "www.fembed.com";
 
             print("FMEMEDOSOOS:" + d);
-
-
 
             string fembed = FindHTML(d, "data-video=\"https://www.fembed.com/v/", "\"");
             if (fembed == "") {
@@ -6322,7 +6331,7 @@ namespace CloudStreamForms
                 }
             }
             if (fembed != "") {
-                GetFembed(fembed, tempThred, normalEpisode, source, _ref);
+                GetFembed(fembed, tempThred, normalEpisode, source, _ref, extra);
             }
             const string lookFor = "file: \'";
             int prio = 5;
@@ -6331,7 +6340,7 @@ namespace CloudStreamForms
                 d = RemoveOne(d, lookFor);
                 string label = FindHTML(d, "label: \'", "\'").Replace("hls P", "live").Replace(" P", "p");
                 prio--;
-                AddPotentialLink(normalEpisode, ur, "Fembed " + label, prio);
+                AddPotentialLink(normalEpisode, ur, "Fembed " + label + extra, prio);
             }
             return fembed != "";
         }
@@ -6359,7 +6368,7 @@ namespace CloudStreamForms
 
             }
         }
-        static void AddEpisodesFromMirrors(TempThred tempThred, string d, int normalEpisode, string extraId = "") // DONT DO THEVIDEO provider, THEY USE GOOGLE CAPTCH TO VERIFY AUTOR; LOOK AT https://vev.io/api/serve/video/qy3pw89xwmr7 IT IS A POST REQUEST
+        static void AddEpisodesFromMirrors(TempThred tempThred, string d, int normalEpisode, string extraId = "", string extra = "") // DONT DO THEVIDEO provider, THEY USE GOOGLE CAPTCH TO VERIFY AUTOR; LOOK AT https://vev.io/api/serve/video/qy3pw89xwmr7 IT IS A POST REQUEST
         {
             string mp4 = "https://www.mp4upload.com/embed-" + FindHTML(d, "data-video=\"https://www.mp4upload.com/embed-", "\"");
             if (mp4 != "https://www.mp4upload.com/embed-") {
@@ -6367,7 +6376,7 @@ namespace CloudStreamForms
                     string _d = DownloadString(mp4, tempThred);
                     if (!GetThredActive(tempThred)) { return; };
                     string mxLink = Getmp4UploadByFile(_d);
-                    AddPotentialLink(normalEpisode, mxLink, "Mp4Upload", 9);
+                    AddPotentialLink(normalEpisode, mxLink, "Mp4Upload" + extra, 9);
                 }
                 catch (System.Exception) {
                 }
@@ -6381,9 +6390,9 @@ namespace CloudStreamForms
                 string all = FindHTML(__d, "|", "}");
                 string url = FindHTML(all, ":", "\'");
                 string label = FindHTML(all, "label: \'", "\'").Replace(" P", "p");
-                AddPotentialLink(normalEpisode, "h" + url, "GoogleVideo " + label, prio);
+                AddPotentialLink(normalEpisode, "h" + url, "GoogleVideo " + label + extra, prio);
             }
-            bool fembedAdded = LookForFembedInString(tempThred, normalEpisode, d);
+            bool fembedAdded = LookForFembedInString(tempThred, normalEpisode, d, extra);
 
             string nameId = "Vidstreaming";
             string vid = "";//FindHTML(d, "data-video=\"//vidstreaming.io/streaming.php?", "\"");
@@ -6412,19 +6421,20 @@ namespace CloudStreamForms
             }
 
             print(">>STREAM::" + extraId + "||" + vid + "|" + d);
+
             if (vid != "") {
 
                 if (extraBeforeId != "") {
-                    string extra = DownloadString(extraBeforeId + vid);
+                    string _extra = DownloadString(extraBeforeId + vid);
                     const string elookFor = "file: \'";
-                    print("EXTRA:::==>>" + extra);
+                    print("EXTRA:::==>>" + _extra);
 
-                    while (extra.Contains(elookFor)) {
-                        string extraUrl = FindHTML(extra, elookFor, "\'");
-                        extra = RemoveOne(extra, elookFor);
-                        string label = FindHTML(extra, "label: \'", "\'").Replace("autop", "Auto").Replace("auto p", "Auto");
-                        print("XTRA:::::::" + extra + "|" + label);
-                        AddPotentialLink(normalEpisode, extraUrl, nameId + " Extra " + label.Replace("hls P", "hls"), label == "Auto" ? 20 : 1);
+                    while (_extra.Contains(elookFor)) {
+                        string extraUrl = FindHTML(_extra, elookFor, "\'");
+                        _extra = RemoveOne(_extra, elookFor);
+                        string label = FindHTML(_extra, "label: \'", "\'").Replace("autop", "Auto").Replace("auto p", "Auto");
+                        print("XTRA:::::::" + _extra + "|" + label);
+                        AddPotentialLink(normalEpisode, extraUrl, nameId + " Extra " + label.Replace("hls P", "hls") + extra, label == "Auto" ? 20 : 1);
                     }
                 }
 
@@ -6435,13 +6445,13 @@ namespace CloudStreamForms
 
                 if (!GetThredActive(tempThred)) { return; };
 
-                GetVidNode(_d, normalEpisode, nameId);
+                GetVidNode(_d, normalEpisode, nameId, extra: extra);
                 // if (!fembedAdded) {
                 string fMds = dLink.Replace("download", "streaming.php");
                 print("FMEMEDST: " + fMds);
                 string ___d = DownloadString(fMds, tempThred);
                 if (!GetThredActive(tempThred)) { return; };
-                LookForFembedInString(tempThred, normalEpisode, ___d);
+                LookForFembedInString(tempThred, normalEpisode, ___d, extra);
                 // }
 
 
@@ -6465,6 +6475,8 @@ namespace CloudStreamForms
             else {
                 print("Error :(");
             }
+            LookForFembedInString(tempThred, normalEpisode, d, extra);
+
         }
 
         public static void GetEpisodeLink(int episode = -1, int season = 1, bool purgeCurrentLinkThread = true, bool onlyEpsCount = false, bool isDub = true)
@@ -6526,8 +6538,16 @@ namespace CloudStreamForms
                             animeProviders[i].LoadLinksTSync(episode, season, normalEpisode, isDub, temp);
                             print("LOADED DONE:::: " + animeProviders[i].Name);
                         });
-                        JoinThred(temp);
 
+                        /*
+                        async void JoinT(TempThred t, int wait)
+                        {
+                            await Task.Delay(wait);
+                            JoinThred(t); 
+                        }
+
+                        JoinT(temp, 10000);*/
+                        JoinThred(temp);
                         /*
                         int _episode = int.Parse(episode.ToString()); // READ ONLY
 
@@ -6812,7 +6832,7 @@ namespace CloudStreamForms
             tempThred.Thread.Start();
         }
 
-        static void GetVidNode(string _d, int normalEpisode, string urlName = "Vidstreaming")
+        static void GetVidNode(string _d, int normalEpisode, string urlName = "Vidstreaming", string extra = "")
         {
             string linkContext = FindHTML(_d, "<h6>Link download</h6>", " </div>");
             const string lookFor = "href=\"";
@@ -6837,13 +6857,13 @@ namespace CloudStreamForms
                     }
                     activeMovie.episodes[normalEpisode].links.Add(new Link() { priority = prio, url = link, name = name }); // [MIRRORCOUNTER] IS LATER REPLACED WITH A NUMBER TO MAKE IT EASIER TO SEPERATE THEM, CAN'T DO IT HERE BECAUSE IT MUST BE ABLE TO RUN SEPARETE THREADS AT THE SAME TIME
                     linkAdded?.Invoke(null, 1);*/
-                    AddPotentialLink(normalEpisode, link, name, prio);
+                    AddPotentialLink(normalEpisode, link, name + extra, prio);
                 }
                 linkContext = RemoveOne(linkContext, lookFor);
             }
         }
 
-        public static void GetFembed(string fembed, TempThred tempThred, int normalEpisode, string urlType = "https://www.fembed.com", string referer = "www.fembed.com")
+        public static void GetFembed(string fembed, TempThred tempThred, int normalEpisode, string urlType = "https://www.fembed.com", string referer = "www.fembed.com", string extra = "")
         {
             if (fembed != "") {
                 int prio = 10;
@@ -6861,7 +6881,7 @@ namespace CloudStreamForms
                         print(label + "|" + link);
                         if (CheckIfURLIsValid(link)) {
                             prio++;
-                            AddPotentialLink(normalEpisode, link, "XStream " + label, prio);
+                            AddPotentialLink(normalEpisode, link, "XStream " + label + extra, prio);
                         }
                         _d = RemoveOne(_d, _labelFind);
                     }
