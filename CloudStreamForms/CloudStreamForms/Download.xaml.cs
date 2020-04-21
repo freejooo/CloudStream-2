@@ -17,8 +17,11 @@ using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 using XamEffects;
 using YoutubeExplode;
-using YoutubeExplode.Models;
-using YoutubeExplode.Models.MediaStreams;
+using YoutubeExplode.Common;
+using YoutubeExplode.Converter;
+using YoutubeExplode.Videos;
+using YoutubeExplode.Channels;
+using YoutubeExplode.Videos.Streams;
 using static CloudStreamForms.App;
 using static CloudStreamForms.CloudStreamCore;
 using static CloudStreamForms.MainPage;
@@ -101,10 +104,10 @@ namespace CloudStreamForms
                                 else {
                                     try {
                                         //   string dpath = YouTube.GetYTPath(v.Title);
-                                        var author = await YouTube.GetAuthorFromVideoAsync(v.Id);
-                                        var data = await YouTube.GetInfoAsync(v.GetUrl());
+                                        var author = await YouTube.GetAuthorFromVideoAsync(v);
+                                        var data = await YouTube.GetInfoAsync(v);
 
-                                        double mb = App.ConvertBytesToAny(data.Size, 5, 2);
+                                        double mb = App.ConvertBytesToAny(data.Size.TotalBytes, 5, 2);
                                         // (episodeResult.mirrosUrls[i], episodeResult.Title + ".mp4", true, "/" + GetPathFromType());
                                         //  string ppath = App.DownloadUrl(episodeResult.PosterUrl, "epP" + episodeResult.Title + ".jpg", false, "/Posters");
                                         // string mppath = App.DownloadUrl(currentMovie.title.hdPosterUrl, "hdP" + episodeResult.Title + ".jpg", false, "/TitlePosters");
@@ -117,7 +120,7 @@ namespace CloudStreamForms
                                         string filePath = YouTube.DownloadVideo(data, v.Title, data, v, id, header, true);
                                         App.ShowToast("YouTube download started");
                                         App.SetKey(nameof(DownloadHeader), "id" + header.RealId, header);
-                                        App.SetKey(nameof(DownloadEpisodeInfo), "id" + id, new DownloadEpisodeInfo() { dtype = DownloadType.YouTube, source = v.GetShortUrl(), description = v.Description, downloadHeader = header.RealId, episode = -1, season = -1, fileUrl = filePath, id = id, name = v.Title, hdPosterUrl = v.Thumbnails.HighResUrl });
+                                        App.SetKey(nameof(DownloadEpisodeInfo), "id" + id, new DownloadEpisodeInfo() { dtype = DownloadType.YouTube, source = v.Url, description = v.Description, downloadHeader = header.RealId, episode = -1, season = -1, fileUrl = filePath, id = id, name = v.Title, hdPosterUrl = v.Thumbnails.HighResUrl });
                                         App.SetKey("DownloadIds", id.ToString(), id);
 
                                         /*
@@ -596,39 +599,22 @@ namespace CloudStreamForms
 
     public static class YouTube
     {
-
         public static async Task<Video> GetYTVideo(string url)
         {
-            // YoutubeClient client = new YoutubeClient();
-            print("URL||||" + url);
 
-            var id = YoutubeClient.ParseVideoId(url); // "bnsUkE8i0tU"
-            print("ID::::" + id);
-
-            return await client.GetVideoAsync(id);
-        }
-
-        public static string GetYTPath(string name)
-        {
-            return App.GetDownloadPath(name, "/YouTube") + ".mp4";
+            return await client.Videos.GetAsync(url);
         }
 
         static readonly YoutubeClient client = new YoutubeClient();
 
-        public static async Task<Channel> GetAuthorAsync(string id)
+        public static async Task<Channel> GetAuthorFromVideoAsync(Video videoId)
         {
-            var _id = await client.GetChannelIdAsync(id);
-            return await client.GetChannelAsync(_id);
-        }
-        public static async Task<Channel> GetAuthorFromVideoAsync(string videoId)
-        {
-            print("VideoID === " + videoId);
-
             Channel t = null;
             for (int i = 0; i < 10; i++) {
                 if (t == null) {
                     try {
-                        t = await client.GetVideoAuthorChannelAsync(videoId);
+                        t = await client.Channels.GetByVideoAsync(videoId.Id);
+                         //await client.Videos.GetVideoAuthorChannelAsync(videoId);
                     }
                     catch (Exception _ex) {
                         print("CHANNELL ASYNC FAILED:" + _ex);
@@ -640,116 +626,30 @@ namespace CloudStreamForms
             return t;
         }
 
-        public static async Task<MuxedStreamInfo> GetInfoAsync(string url)
+        public static async Task<MuxedStreamInfo> GetInfoAsync(Video v)
         {
-            /*
-            print("URL2||||" + url);
-
-
-            YoutubeClient client = new YoutubeClient();
-
-            var id = YoutubeClient.ParseVideoId(url);
-            print("ID2::::" + id);
-
-            var mediaStreamInfoSet = await client.GetVideoMediaStreamInfosAsync(id);
-            
-            // Select audio stream
-            var audioStreamInfo = mediaStreamInfoSet.Audio.WithHighestBitrate();
-
-            // Select video stream
-            var videoStreamInfo = mediaStreamInfoSet.Video.OrderBy(t => (t.Resolution.Height * t.Resolution.Width * t.Framerate)).First();//.FirstOrDefault(s => s.VideoQualityLabel == "1080p60");
-
-            // Combine them into a collection
-            var mediaStreamInfos = new MediaStreamInfo[] { audioStreamInfo, videoStreamInfo };
-            print("LEN:" + mediaStreamInfos.Length);
-            return mediaStreamInfos;*/
-            var id = YoutubeClient.ParseVideoId(url);
-
-            // Get metadata for all streams in this video
-            var streamInfoSet = await client.GetVideoMediaStreamInfosAsync(id);
-
-            // Select one of the streams, e.g. highest quality muxed stream
-            var streamInfo = streamInfoSet.Muxed.WithHighestVideoQuality();
-
-            // ...or highest bitrate audio stream
-            // var streamInfo = streamInfoSet.Audio.WithHighestBitrate();
-
-            // ...or highest quality & highest framerate MP4 video stream
-            // var streamInfo = streamInfoSet.Video
-            //    .Where(s => s.Container == Container.Mp4)
-            //    .OrderByDescending(s => s.VideoQuality)
-            //    .ThenByDescending(s => s.Framerate)
-            //    .First();
-
-            // Get file extension based on stream's container
-            // var ext = streamInfo.Container.GetFileExtension();
-            //  print("EXTENTION:" + ext);
-            return streamInfo;
+            var manifest =await client.Videos.Streams.GetManifestAsync(v.Id);
+            return manifest.GetMuxed().WithHighestVideoQuality() as MuxedStreamInfo; 
         }
 
-        public static string DownloadVideo(MediaStreamInfo mediaStreamInfos, string name, MuxedStreamInfo info, Video v, int id, DownloadHeader header, bool isNotification = false)
+        public static string DownloadVideo(MuxedStreamInfo mediaStreamInfos, string name, MuxedStreamInfo info, Video v, int id, DownloadHeader header, bool isNotification = false)
         {
-
-            // YoutubeConverter converter = new YoutubeConverter();
-            //  YoutubeClient client = new YoutubeClient();
-
-            // Download and process them into one file
-            /*
-            string basePath = App.GetDownloadPath("", "/YouTube");
-            string path = App.GetDownloadPath(name, "/YouTube").Replace(basePath, "");
-            if (basePath.EndsWith("\\")) {
-                basePath = basePath.Substring(0, basePath.Length - 1);
-            }
-            print("BasePath: " + basePath);
-            print("ExtraPath " + path);*/
             string rootPath = App.GetDownloadPath("", "/YouTube");
             if (rootPath.EndsWith("\\")) {
                 rootPath = rootPath.Substring(0, rootPath.Length - 1);
             }
+
             if (!File.Exists(rootPath)) {
                 Directory.CreateDirectory(rootPath);
-            }
-
+            } 
 
             print("DLOADING " + mediaStreamInfos.Size);
             print("DURL::" + mediaStreamInfos.Url);
 
             ImageService.Instance.LoadUrl(v.Thumbnails.HighResUrl, TimeSpan.FromDays(30)); // CASHE IMAGE
             string extraPath = "/" + GetPathFromType(header);
-            string fileUrl = platformDep.DownloadHandleIntent(id, new List<string>() { info.Resolution.Height + "p" }, new List<string>() { info.Url }, v.Title + "." + info.Container.GetFileExtension(), name, true, extraPath, true, true, false, v.Thumbnails.HighResUrl, "{name}\n");//isMovie ? "{name}\n" : ($"S{season}:E{episode} - " + "{name}\n"));
+            string fileUrl = platformDep.DownloadHandleIntent(id, new List<string>() { info.VideoQualityLabel }, new List<string>() { info.Url }, v.Title + "." + info.Container.Name, name, true, extraPath, true, true, false, v.Thumbnails.HighResUrl, "{name}\n");//isMovie ? "{name}\n" : ($"S{season}:E{episode} - " + "{name}\n"));
             return fileUrl;
-            //App.SetKey("dlength", "id" + id, mediaStreamInfos.Size);
-            /*
-            try {
-                await client.DownloadMediaStreamAsync(mediaStreamInfos, App.GetDownloadPath(name, "/YouTube") + ".mp4");
-            }
-            catch (Exception _ex) {
-                print("EXDLOADYT:::: " + _ex);
-            }
-            if (isNotification) {
-                ShowNotIntent(name, "Download done!", ConvertStringToInt(v.Id), "-1", "-1");
-            }*/
-
-            /*
-            string extraPath = "/" + GetPathFromType(header);
-            print("HEADERID::: " + header.RealId);
-            App.SetKey(nameof(DownloadHeader), "id" + header.RealId, header);
-            bool isMovie = header.movieType == MovieType.AnimeMovie || header.movieType == MovieType.Movie;
-
-            string fileUrl = platformDep.DownloadHandleIntent(id, mirrorNames, mirrorUrls, downloadTitle, name, true, extraPath, true, true, false, poster, isMovie ? "{name}\n" : ($"S{season}:E{episode} - " + "{name}\n"));
-            App.SetKey(nameof(DownloadEpisodeInfo), "id" + id, new DownloadEpisodeInfo() { dtype = DownloadType.Normal, source = header.id, description = description, downloadHeader = header.RealId, episode = episode, season = season, fileUrl = fileUrl, id = id, name = name });
-            */
-
-
-            /* if (toast != "") {
-                 if (isNotification) {
-                     App.ShowNotification(toast, body);
-                 }
-                 else {
-                     App.ShowToast(toast);
-                 }
-             }*/
-            //  await converter.DownloadAndProcessMediaStreamsAsync(mediaStreamInfos, basePath + "/" + path + ".mp4",".mp4");
         }
     }
 
@@ -764,6 +664,5 @@ namespace CloudStreamForms
         {
             MyEpisodeResultCollection = new ObservableCollection<EpisodeResult>();
         }
-    }
-
+    } 
 }
