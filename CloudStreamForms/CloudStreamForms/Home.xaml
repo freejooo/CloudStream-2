@@ -49,7 +49,7 @@
                         <!--    <Image Source="dropdown.png" WidthRequest="10" HorizontalOptions="Start" TranslationX="0" InputTransparent="True" /> -->
                     </Grid>
                     <Grid Grid.Row="0"  Grid.Column="0"  Margin="10,0">
-                        <Button x:Name="ImdbTypePickerBtt" InputTransparent="False"  Text="Recommendations" TextColor="#e7e7e7" FontAttributes="Bold" FontSize="Body" CornerRadius="5" HeightRequest="40" BackgroundColor="#333333" ></Button>
+                        <Button x:Name="ImdbTypePickerBtt" InputTransparent="False"   Text="Recommendations" TextColor="#e7e7e7" FontAttributes="Bold" FontSize="Body" CornerRadius="5" HeightRequest="40" BackgroundColor="#333333" ></Button>
 
                       <!--  <Picker x:Name="ImdbTypePicker" HorizontalOptions="Start" TranslationX="10" TextColor="#e7e7e7" FontAttributes="Bold" FontSize="Body">
                         </Picker>-->

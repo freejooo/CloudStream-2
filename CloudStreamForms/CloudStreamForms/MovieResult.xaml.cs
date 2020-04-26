@@ -1283,7 +1283,9 @@ namespace CloudStreamForms
                         });
                     }
                     else {
-                        RecomendationLoaded.IsVisible = false;
+                        Device.BeginInvokeOnMainThread(() => {
+                            RecomendationLoaded.IsVisible = false;
+                        });
                     }
                 }
                 finally {

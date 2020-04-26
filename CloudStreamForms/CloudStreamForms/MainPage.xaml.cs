@@ -1958,8 +1958,8 @@ namespace CloudStreamForms
                             }
 
                             //  print(animeTitle.ToLower() + "|" + ms.name.ToLower() + "|" + ms.engName.ToLower() + "|" + ___year + "___" + ___year2 + "|" + containsSyno);
-                            print("COMPARE: " + compareName + "|" + animeTitle);
-                            if (ToLowerAndReplace(compareName) == ToLowerAndReplace(animeTitle) || ToLowerAndReplace(ms.engName.Replace(" ", "")) == ToLowerAndReplace(animeTitle) || containsSyno || (animeTitle.ToLower().Replace(compareName.ToLower(), "").Length / (float)animeTitle.Length) < 0.3f) { // OVER 70 MATCH
+                            print("COMPARE: " + "SEASON:::" + i + "|ELDA:" + q + "| " + compareName + " | " + animeTitle);
+                            if (ToLowerAndReplace(compareName) == ToLowerAndReplace(animeTitle) || ToLowerAndReplace(ms.engName.Replace(" ", "")) == ToLowerAndReplace(animeTitle) || containsSyno) { //|| (animeTitle.ToLower().Replace(compareName.ToLower(), "").Length / (float)animeTitle.Length) < 0.3f) { // OVER 70 MATCH
                                 print("FINISHED:::::" + slug);
 
                                 string _d = DownloadString(slug);
@@ -2015,9 +2015,12 @@ namespace CloudStreamForms
 
                                     activeMovie.title.MALData.seasonData[i].seasons[q] = baseData;
                                 }
+                                goto endloop;
                             }
                         }
                     }
+
+                endloop:
                     print(slug + "|" + animeTitle);
                 }
                 /*
@@ -2126,7 +2129,7 @@ namespace CloudStreamForms
                         print("UR: " + mp4UploadKey);
                         __s = RemoveOne(__s, mp4Upload);
                         string label = FindHTML(__s, "label=\"", "\"");
-                        AddPotentialLink(normalEpisode, mp4UploadKey, "KickassMp4 " + label + extra, 2); 
+                        AddPotentialLink(normalEpisode, mp4UploadKey, "KickassMp4 " + label + extra, 2);
                     }
 
 
@@ -2222,11 +2225,11 @@ namespace CloudStreamForms
                 string d = DownloadString(url);
                 if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
 
-             //   string extraD = d.ToString();
+                //   string extraD = d.ToString();
                 //AddEpisodesFromMirrors(tempThred, d.ToString(), normalEpisode, "", extra);
 
                 //"link":"
-                try { 
+                try {
                     string link1 = FindHTML(d, "link1\":\"", "\"").Replace("\\/", "/");
                     link1 = CorrectURL(link1);
                     string look1 = "\"link\":\"";
@@ -2251,7 +2254,7 @@ namespace CloudStreamForms
                     }
 
                     print("END::::____");
-                  //  print("ISSSAMMEMME::: " + d == extraD);
+                    //  print("ISSSAMMEMME::: " + d == extraD);
                 }
                 catch (Exception _ex) {
                     print("MAIN EX::: FROM KICK LOAD:: " + _ex);
@@ -5318,24 +5321,26 @@ namespace CloudStreamForms
             string d = GetHTML(trueUrl, true);
             print("FALSEURL:" + trueUrl);
 
-            const string lookFor = "class=\"loadlate\"";
+            const string lookFor = "s=\"lo";//"class=\"loadlate\"";
             int place = start - 1;
             int counter = 0;
+            Stopwatch s = new Stopwatch();
+            s.Start();
             while (d.Contains(lookFor)) {
                 place++;
                 d = RemoveOne(d, lookFor);
-
-                string img = FindHTML(d, "loadlate=\"", "\"");
-                string id = FindHTML(d, "data-tconst=\"", "\"");
-                string runtime = FindHTML(d, "<span class=\"runtime\">", "<");
-                string name = FindHTML(d, "ref_=adv_li_tt\"\n>", "<");
-                string rating = FindHTML(d, "</span>\n        <strong>", "<");
-                string _genres = FindHTML(d, "<span class=\"genre\">\n", "<").Replace("  ", "");
-                string descript = FindHTML(d, "<p class=\"text-muted\">\n    ", "<").Replace("  ", "");
+                string __d = "ate=\"" + FindHTML(d, "ate=\"", "<p class=\"\">");
+                string img = FindHTML(__d, "ate=\"", "\"");// FindHTML(d, "loadlate=\"", "\"");
+                string id = FindHTML(__d, "st=\"", "\"");   //FindHTML(d, "data-tconst=\"", "\"");
+                string runtime = FindHTML(__d, "ime\">", "<");//FindHTML(d, "<span class=\"runtime\">", "<");
+                string name = FindHTML(__d, "_=adv_li_tt\"\n>", "<");//FindHTML(d, "ref_=adv_li_tt\"\n>", "<");
+                string rating = FindHTML(__d, "</span>\n        <strong>", "<");//FindHTML(d, "</span>\n        <strong>", "<");
+                string _genres = FindHTML(__d, "nre\">\n", "<").Replace("  ", "");//FindHTML(d, "<span class=\"genre\">\n", "<").Replace("  ", "");
+                string descript = FindHTML(__d, "p class=\"text-muted\">\n    ", "<").Replace("  ", ""); // FindHTML(d, "<p class=\"text-muted\">\n    ", "<").Replace("  ", "");
                 topLists[counter] = (new IMDbTopList() { descript = descript, genres = _genres, id = id, img = img, name = name, place = place, rating = rating, runtime = runtime });
                 counter++;
             }
-            print("------------------------------------ DONE! ------------------------------------");
+            print("------------------------------------ DONE! ------------------------------------" + s.ElapsedMilliseconds);
             return topLists.ToList();
         }
 
@@ -5811,13 +5816,16 @@ namespace CloudStreamForms
 
         }
 
-        public static string ToLowerAndReplace(string inp, bool seasonReplace = true)
+        public static string ToLowerAndReplace(string inp, bool seasonReplace = true, bool replaceSpace = true)
         {
             string _inp = inp.ToLower();
             if (seasonReplace) {
                 _inp = _inp.Replace("2nd season", "season 2").Replace("3th season", "season 3").Replace("4th season", "season 4");
             }
-            _inp = inp.Replace("-", " ").Replace("`", "\'");
+            _inp = _inp.Replace("-", " ").Replace("`", "\'").Replace("?", "");
+            if (replaceSpace) {
+                _inp = _inp.Replace(" ", "");
+            }
             return _inp;
         }
 

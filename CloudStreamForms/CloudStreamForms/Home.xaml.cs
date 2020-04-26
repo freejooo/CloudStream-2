@@ -23,7 +23,7 @@ namespace CloudStreamForms
         readonly List<string> genres = new List<string>() { "", "action", "adventure", "animation", "biography", "comedy", "crime", "drama", "family", "fantasy", "film-noir", "history", "horror", "music", "musical", "mystery", "romance", "sci-fi", "sport", "thriller", "war", "western" };
         readonly List<string> genresNames = new List<string>() { "Any", "Action", "Adventure", "Animation", "Biography", "Comedy", "Crime", "Drama", "Family", "Fantasy", "Film-Noir", "History", "Horror", "Music", "Musical", "Mystery", "Romance", "Sci-Fi", "Sport", "Thriller", "War", "Western" };
 
-        readonly List<string> recomendationTypes = new List<string> { "Recommended", "Top 100" };
+        readonly List<string> recomendationTypes = new List<string> { "Related", "Top 100" };
 
         LabelList MovieTypePicker;
         LabelList ImdbTypePicker;
