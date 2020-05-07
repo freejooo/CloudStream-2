@@ -5326,6 +5326,10 @@ namespace CloudStreamForms
             int counter = 0;
             Stopwatch s = new Stopwatch();
             s.Start();
+
+
+            
+
             while (d.Contains(lookFor)) {
                 place++;
                 d = RemoveOne(d, lookFor);

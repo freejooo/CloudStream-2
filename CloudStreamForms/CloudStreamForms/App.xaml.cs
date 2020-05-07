@@ -37,6 +37,11 @@ namespace CloudStreamForms
         }
 
 
+        public struct BluetoothDeviceID
+        {
+            public string name;
+            public string id;
+        }
 
         public interface IPlatformDep
         {
@@ -72,6 +77,9 @@ namespace CloudStreamForms
             DownloadProgressInfo GetDownloadProgressInfo(int id, string fileUrl);
 
             void UpdateDownload(int id, int state);
+            BluetoothDeviceID[] GetBluetoothDevices();
+
+            void SearchBluetoothDevices();
         }
 
         public enum DownloadState { Downloading, Downloaded, NotDownloaded, Paused }
@@ -157,6 +165,32 @@ namespace CloudStreamForms
             platformDep.UpdateDownload(id, state);
         }
 
+        public static BluetoothDeviceID[] GetBluetoothDevices()
+        {
+            return platformDep.GetBluetoothDevices();
+        }
+
+        private static int _AudioDelay = 0;
+        public static int AudioDelay { set { _AudioDelay = value; SetAudioDelay(value); } get { return _AudioDelay; } }
+        //  public static string AudioDeviceId = "";
+        public static BluetoothDeviceID current;
+        public void UpdateDevice()
+        {
+            var devices = GetBluetoothDevices();
+            current = devices.FirstOrDefault();
+        }
+
+        public static int GetDelayAudio()
+        {
+            return App.GetKey("audiodelay", current.id, 0);
+        }
+
+        public static void SetAudioDelay(int delay)
+        {
+            App.GetKey("audiodelay", current.id, delay);
+        }
+
+
         public static string RequestDownload(int id, string name, string description, int episode, int season, List<string> mirrorUrls, List<string> mirrorNames, string downloadTitle, string poster, CloudStreamCore.Title title)
         {
             App.SetKey(hasDownloadedFolder, id.ToString(), true);
@@ -233,8 +267,7 @@ namespace CloudStreamForms
         }
 
         private static IPlatformDep _platformDep;
-        public static IPlatformDep platformDep
-        {
+        public static IPlatformDep platformDep {
             set {
                 _platformDep = value;
                 _platformDep.OnAudioFocusChanged += (o, e) => { OnAudioFocusChanged?.Invoke(o, e); };

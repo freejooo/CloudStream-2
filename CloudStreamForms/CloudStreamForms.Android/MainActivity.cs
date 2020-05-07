@@ -40,6 +40,7 @@ using Java.Interop;
 using static Android.Media.AudioManager;
 using Newtonsoft.Json;
 using System.Diagnostics;
+using Android.Bluetooth;
 
 namespace CloudStreamForms.Droid
 {
@@ -421,6 +422,8 @@ namespace CloudStreamForms.Droid
         }
     }
 
+
+
     public static class DownloadHandle
     {
 
@@ -655,7 +658,7 @@ namespace CloudStreamForms.Droid
                         bool Completed = ExecuteWithTimeLimit(TimeSpan.FromMilliseconds(10000), () => {
                             connection.Connect();
                             clen = connection.ContentLength;
-                            if(clen < 5000000 && !path.Contains("/YouTube/")) { // min of 5 MB 
+                            if (clen < 5000000 && !path.Contains("/YouTube/")) { // min of 5 MB 
                                 clen = 0;
                             }
                             //
@@ -687,7 +690,7 @@ namespace CloudStreamForms.Droid
                                 ShowDone(false);
                             }
                         }
-                        else { 
+                        else {
                             fileLength = clen + (int)total;
                             print("FILELEN:::: " + fileLength);
                             App.SetKey("dlength", "id" + id, fileLength);
@@ -1021,14 +1024,11 @@ namespace CloudStreamForms.Droid
         }
 
         public static int REQUEST_START = 112;
-        public static int REQUEST_INSTALL = 113;
-        public static int REQUEST_INSTALL2 = 113;
-        public static int REQUEST_INSTALL3 = 114;
         private static void RequestPermission(Activity context)
         {
 
             List<string> requests = new List<string>() {
-                Manifest.Permission.WriteExternalStorage, Manifest.Permission.RequestInstallPackages,Manifest.Permission.InstallPackages,Manifest.Permission.WriteSettings
+                Manifest.Permission.WriteExternalStorage, Manifest.Permission.RequestInstallPackages,Manifest.Permission.InstallPackages,Manifest.Permission.WriteSettings, Manifest.Permission.Bluetooth
             };
 
             for (int i = 0; i < requests.Count; i++) {
@@ -1085,8 +1085,61 @@ namespace CloudStreamForms.Droid
     }
 
 
+    public class BluetoothServiceListener : Java.Lang.Object
+        , IBluetoothProfileServiceListener
+    {
+        public BluetoothHeadset btHeadset;
+        public void Dispose()
+        {
+            print("TRYIGNT O DISPOSE");
+            throw new NotImplementedException();
+        }
+
+        public void OnServiceConnected(ProfileType profile, IBluetoothProfile proxy)
+        {
+            print("ON CONNECTED");
+            if (profile == ProfileType.Headset) {
+                btHeadset = (BluetoothHeadset)proxy;
+            }
+        }
+
+        public void OnServiceDisconnected(ProfileType profile)
+        {
+            print("ON DISSSS:S::S:S:");
+            if (profile == ProfileType.Headset) {
+                btHeadset = null;
+            }
+        }
+    }
+
     public class MainDroid : App.IPlatformDep
     {
+        BluetoothAdapter bluetoothAdapter = BluetoothAdapter.DefaultAdapter;
+        BluetoothServiceListener bluetoothServiceListener = new BluetoothServiceListener();
+
+        public BluetoothDeviceID[] GetBluetoothDevices()
+        {
+            if (bluetoothServiceListener == null) return null;
+            if (bluetoothServiceListener.btHeadset == null) return null;
+            if (bluetoothServiceListener.btHeadset.ConnectedDevices == null) return null;
+            if (bluetoothServiceListener.btHeadset.ConnectedDevices.Count == 0) return null;
+            return bluetoothServiceListener.btHeadset.ConnectedDevices.Select(t => new BluetoothDeviceID() { name = t.Name, id = t.Address }).ToArray();
+        }
+        public void SearchBluetoothDevices()
+        {
+            // true == headset connected && connected headset is support hands free
+
+            var state = bluetoothAdapter.GetProfileConnectionState(ProfileType.Headset);
+            if (state != ProfileState.Connected)
+                return;
+            try {
+                bluetoothAdapter.GetProfileProxy(MainActivity.activity.ApplicationContext, bluetoothServiceListener, ProfileType.Headset);
+            }
+            catch (Exception e) {
+                print("MAIN EX IN >>>>>><" + nameof(SearchBluetoothDevices) + "<<<<");
+            }
+        }
+
 
         public void UpdateDownload(int id, int state)
         {
@@ -1178,8 +1231,7 @@ namespace CloudStreamForms.Droid
 
 
 
-        int LocalNotificationIconId
-        {
+        int LocalNotificationIconId {
             get {
                 if (NotificationIconId != 0) {
                     return NotificationIconId;
@@ -2098,7 +2150,6 @@ namespace CloudStreamForms.Droid
         public void Awake()
         {
             App.platformDep = this;
-
             myAudioFocusListener = new MyAudioFocusListener();
             myAudioFocusListener.FocusChanged += ((sender, b) => {
                 OnAudioFocusChanged?.Invoke(this, b);
