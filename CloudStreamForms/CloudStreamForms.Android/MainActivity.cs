@@ -41,6 +41,10 @@ using static Android.Media.AudioManager;
 using Newtonsoft.Json;
 using System.Diagnostics;
 using Android.Bluetooth;
+using LibVLCSharp.Shared;
+using AudioTrack = Android.Media.AudioTrack;
+using Android.Net.Rtp;
+using GoogleCast.Models.Media;
 
 namespace CloudStreamForms.Droid
 {
@@ -1152,6 +1156,92 @@ namespace CloudStreamForms.Droid
                 DownloadHandle.isPaused[id] = state;
             }
         }
+        /**
+  * The audio latency has not been estimated yet
+  */
+        private static long AUDIO_LATENCY_NOT_ESTIMATED = long.MinValue + 1;
+
+        /**
+         * The audio latency default value if we cannot estimate it
+         */
+        private static long DEFAULT_AUDIO_LATENCY = 100L * 1000L * 1000L; // 100ms
+
+        private static long _framesToNanoSeconds(long frames)
+        {
+            return frames * 1000000000L / 16000;
+        }
+        private static long nanoTime()
+        {
+            long nano = 10000L * Stopwatch.GetTimestamp();
+            nano /= TimeSpan.TicksPerMillisecond;
+            nano *= 100L;
+            return nano;
+        }
+
+        // Source: https://stackoverflow.com/a/52559996/497368
+        private long getDelay()
+        {
+            long estimatedAudioLatency = AUDIO_LATENCY_NOT_ESTIMATED;
+            long audioFramesWritten = 0;
+
+
+            var outputBufferSize = AudioTrack.GetMinBufferSize(16000, ChannelOut.Stereo, Encoding.Pcm16bit);
+
+            AudioTrack track = new AudioTrack(Android.Media.Stream.Music, 16000, ChannelOut.Mono, Encoding.Pcm16bit, outputBufferSize, AudioTrackMode.Stream);//AudioManager.USE_DEFAULT_STREAM_TYPE, 16000, AudioFormat.CHANNEL_OUT_MONO, AudioFormat.ENCODING_PCM_16BIT, outputBufferSize, AudioTrack.MODE_STREAM);
+
+            // First method. SDK >= 19.
+            if ((int)Build.VERSION.SdkInt >= 19 && track != null) {
+
+                AudioTimestamp audioTimestamp = new AudioTimestamp();
+                if (track.GetTimestamp(audioTimestamp)) {
+
+                    // Calculate the number of frames between our known frame and the write index
+                    long frameIndexDelta = audioFramesWritten - audioTimestamp.FramePosition;
+
+                    // Calculate the time which the next frame will be presented
+                    long frameTimeDelta = _framesToNanoSeconds(frameIndexDelta);
+                    long nextFramePresentationTime = audioTimestamp.NanoTime + frameTimeDelta;
+
+                    // Assume that the next frame will be written at the current time
+                    long nextFrameWriteTime = nanoTime();
+
+                    // Calculate the latency
+                    estimatedAudioLatency = nextFramePresentationTime - nextFrameWriteTime; 
+                }
+            }
+
+            // Second method. SDK >= 18.
+            if (estimatedAudioLatency == AUDIO_LATENCY_NOT_ESTIMATED && (int)Build.VERSION.SdkInt >= 18) {
+                System.Reflection.MethodInfo getLatencyMethod;
+                try {
+                    getLatencyMethod = typeof(AudioTrack).GetMethod("getLatency");
+                    estimatedAudioLatency = (int)getLatencyMethod.Invoke(track, (Object[])null) * 1000000L;
+                }
+                catch (Exception ignored) {
+                    print("IGNORED:::2222::: " + ignored);
+                }
+            }
+
+            // If no method has successfully gave us a value, let's try a third method
+            if (estimatedAudioLatency == AUDIO_LATENCY_NOT_ESTIMATED) {
+                AudioManager audioManager = Application.Context.GetSystemService(Context.AudioService) as AudioManager;
+                try { 
+                    System.Reflection.MethodInfo getOutputLatencyMethod = typeof(AudioManager).GetMethod("getOutputLatency");
+                    estimatedAudioLatency = (int)getOutputLatencyMethod.Invoke(audioManager, new object[] { AudioContentType.Music }) * 1000000L;
+                }
+                catch (Exception ignored) {
+                    print("IGNORED::: " + ignored);
+                }
+            }
+
+            // No method gave us a value. Let's use a default value. Better than nothing.
+            if (estimatedAudioLatency == AUDIO_LATENCY_NOT_ESTIMATED) {
+                print("DEF LATENCY");
+                estimatedAudioLatency = DEFAULT_AUDIO_LATENCY;
+            }
+
+            return estimatedAudioLatency;
+        }
 
         public DownloadProgressInfo GetDownloadProgressInfo(int id, string fileUrl)
         {
@@ -2170,13 +2260,20 @@ namespace CloudStreamForms.Droid
                 .SetAcceptsDelayedFocusGain(true)
                 .SetOnAudioFocusChangeListener(myAudioFocusListener, handler)
                 .Build();
+
+
+            long delay = getDelay();
+
+            print("MAIN DELAYYYY::: " + delay);
+
+
         }
 
         MyAudioFocusListener myAudioFocusListener;
 
         public class MyAudioFocusListener
-    : Java.Lang.Object
-    , AudioManager.IOnAudioFocusChangeListener
+        : Java.Lang.Object
+        , AudioManager.IOnAudioFocusChangeListener
         {
             public event EventHandler<bool> FocusChanged;
 
