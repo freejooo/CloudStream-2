@@ -42,6 +42,9 @@
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
                     <Label Grid.Row="0" Text="General" x:Name="G_GeneralTxt"  FontSize="Body" FontAttributes="Bold" TranslationX="10" Margin="10,20,10,10" TextColor="#ffffff"></Label>
                     <!-- INSTANT SEARCH -->
@@ -256,7 +259,8 @@
 
                     <Label Text="Build Version: "  x:Name="BuildNumber" TranslationX="10"  ></Label>
                     <Label Text="Github: https://github.com/LagradOst/CloudStream-2"  x:Name="G_GithubTxt" TranslationX="10"    ></Label>
-                    <Button  x:Name="StarMe" Text="Open Github" BackgroundColor="#212121"  HeightRequest="50"></Button>
+                    <Button x:Name="StarMe" Text="Open Github" BackgroundColor="#212121"  HeightRequest="50"></Button>
+                    <Button x:Name="FeedbackBtt" Text="Leave Feedback" BackgroundColor="#212121" Clicked="FeedbackBtt_Clicked"  HeightRequest="50"></Button>
                     <Button x:Name="SetTheme" Text="Theme" BackgroundColor="#212121"  HeightRequest="50"></Button>
                     <Button Text="Update To..."  x:Name="UpdateBtt" IsEnabled="False" IsVisible="False" BackgroundColor="#212121" HeightRequest="50"></Button>
                     <Image x:Name="OffBar" InputTransparent="True" VerticalOptions="Start"></Image>

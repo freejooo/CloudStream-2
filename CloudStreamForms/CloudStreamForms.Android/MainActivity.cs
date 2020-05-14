@@ -2262,9 +2262,9 @@ namespace CloudStreamForms.Droid
                 .Build();
 
 
-            long delay = getDelay();
+           // long delay = getDelay();
 
-            print("MAIN DELAYYYY::: " + delay);
+          //  print("MAIN DELAYYYY::: " + delay);
 
 
         }

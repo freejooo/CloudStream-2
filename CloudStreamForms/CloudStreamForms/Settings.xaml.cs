@@ -228,6 +228,7 @@ namespace CloudStreamForms
                 BuildNumber,
                 G_GithubTxt,
                 StarMe,
+                FeedbackBtt,
                 SetTheme,
                // UpdateBtt,
             };
@@ -386,38 +387,8 @@ namespace CloudStreamForms
                 InstantSearchToggle.IsToggled = SearchEveryCharEnabled;
                 CacheDataToggle.IsToggled = CacheData;
                 StatusbarToggle.IsToggled = HasStatusBar;
-                /*
-                SubtitesToggle.On = SubtitlesEnabled;
-                DubToggle.On = DefaultDub;
-                ViewHistoryToggle.On = !ViewHistory;
-                DecToggle.On = MovieDecEnabled;
-                EpsDecToggle.On = EpDecEnabled;
-                SearchToggle.On = SearchEveryCharEnabled;
-                CacheToggle.On = CacheData;
-                StaturBarToggle.On = HasStatusBar;*/
-
                 TopToggle.IsToggled = Top100Enabled;
-
-                //   ColorPicker.ItemsSource = 
                 ColorPicker.SelectedIndex = BlackBgType;
-
-                /* if (Device.RuntimePlatform == Device.UWP) {
-                     BlackBgToggle.IsEnabled = false;
-                     BlackBgToggle.On = true;
-                 }
-                 else {
-                     BlackBgToggle.On = BlackBg;
-                 }*/
-                /*
-                if (Device.RuntimePlatform == Device.UWP) {
-                    DataTxt.Detail = DataTxt.Detail.Replace("|" + FindHTML(DataTxt.Text, "|", "|") + "|", "");
-                    DataTxt2.Detail = DataTxt2.Detail.Replace("|" + FindHTML(DataTxt2.Text, "|", "|") + "|", "");
-                }
-                else {
-                    DataTxt2.Detail = DataTxt2.Detail.Replace("|", "");
-                    DataTxt.Detail = DataTxt2.Detail.Replace("|", "");
-                }*/
-
 
             });
         }
@@ -520,6 +491,11 @@ namespace CloudStreamForms
                 App.RemoveFolder("Settings");
                 Apper();
             }
+        }
+
+        private void FeedbackBtt_Clicked(object sender, EventArgs e)
+        {
+            Navigation.PushModalAsync(new Feedback());
         }
     }
 }

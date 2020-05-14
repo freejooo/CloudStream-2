@@ -1,0 +1,38 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:d="http://xamarin.com/schemas/2014/forms/design"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             x:Class="CloudStreamForms.Feedback">
+    <ContentPage.Content>
+        <StackLayout >
+            <StackLayout AbsoluteLayout.LayoutBounds="0, 0, 1, 1" AbsoluteLayout.LayoutFlags="All" InputTransparent="True">
+                <ProgressBar HorizontalOptions="Fill"  x:Name="FormsLoading" InputTransparent="True"  IsVisible="False" IsEnabled="True" ClassId="id" TranslationY="-7" ></ProgressBar>
+            </StackLayout>
+            <Label Margin="3,5.1" Text="Feedback" HorizontalOptions="Center"  FontSize="25"   TextColor="#ffffff" ></Label>
+
+            <Grid RowSpacing="10" >
+                <Grid.RowDefinitions >
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <Grid >
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"></ColumnDefinition>
+                        <ColumnDefinition Width="Auto"></ColumnDefinition>
+                        <ColumnDefinition Width="Auto"></ColumnDefinition>
+                    </Grid.ColumnDefinitions>
+                    <Entry Grid.Row="0" x:Name="TitleEntry"  IsPassword="False" Placeholder="Title"></Entry>
+                    <Button Grid.Column="1" Text="Bug" x:Name="RequestType" TextColor="#e7e7e7" FontAttributes="Bold" FontSize="15" CornerRadius="5" HeightRequest="20"   BackgroundColor="#333333"   WidthRequest="110"></Button>
+                </Grid>
+                <Editor Grid.Row="1" x:Name="EditorEntry"  HeightRequest="100" Placeholder="Feedback..." ></Editor>
+                <Button Grid.Row="2" x:Name="SubmitBtt" BackgroundColor="#212121" Text="Submit feedback"></Button>
+                <Label Grid.Row="3" x:Name="ErrorTxt" Text="" Margin="10"  TextColor="#C10000"></Label>
+
+            </Grid>
+        </StackLayout>
+
+    </ContentPage.Content>
+</ContentPage>
