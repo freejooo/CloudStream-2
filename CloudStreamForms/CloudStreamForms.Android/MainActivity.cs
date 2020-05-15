@@ -552,11 +552,20 @@ namespace CloudStreamForms.Droid
             void UpdateDloadNot(string progressTxt)
             {
                 //poster != ""
-                int isPause = isPaused[id];
-                bool canPause = isPause == 0;
-                if (isPause != 2) {
-                    ShowLocalNot(new LocalNot() { actions = new List<LocalAction>() { new LocalAction() { action = $"handleDownload|||id={id}|||dType={(canPause ? 1 : 0)}|||", name = canPause ? "Pause" : "Resume" }, new LocalAction() { action = $"handleDownload|||id={id}|||dType=2|||", name = "Stop" } }, mediaStyle = false, bigIcon = poster, title = title, autoCancel = false, showWhen = false, onGoing = canPause, id = id, smallIcon = Resource.Drawable.bicon, progress = progress, body = progressTxt }, context); //canPause
+                if(!isPaused.ContainsKey(id)) {
+                    isPaused[id] = 0;
                 }
+                try {
+                    int isPause = isPaused[id];
+                    bool canPause = isPause == 0;
+                    if (isPause != 2) {
+                        ShowLocalNot(new LocalNot() { actions = new List<LocalAction>() { new LocalAction() { action = $"handleDownload|||id={id}|||dType={(canPause ? 1 : 0)}|||", name = canPause ? "Pause" : "Resume" }, new LocalAction() { action = $"handleDownload|||id={id}|||dType=2|||", name = "Stop" } }, mediaStyle = false, bigIcon = poster, title = title, autoCancel = false, showWhen = false, onGoing = canPause, id = id, smallIcon = Resource.Drawable.bicon, progress = progress, body = progressTxt }, context); //canPause
+                    }
+                }
+                catch (Exception _ex) {
+                    print("ERRORLOADING PROGRESS:::" + _ex);
+                }
+                
             }
 
             void ShowDone(bool succ, string? overrideText = null)

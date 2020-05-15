@@ -38,8 +38,7 @@ namespace CloudStreamForms
 
 
         private bool _isRefreshing = false;
-        public bool IsRefreshing
-        {
+        public bool IsRefreshing {
             get { return _isRefreshing; }
             set {
                 _isRefreshing = value;
@@ -47,8 +46,7 @@ namespace CloudStreamForms
             }
         }
 
-        public ICommand RefreshCommand
-        {
+        public ICommand RefreshCommand {
             get {
                 return new Command(async () => {
                     IsRefreshing = true;
@@ -226,62 +224,65 @@ namespace CloudStreamForms
                 Dictionary<int, bool> validHeaders = new Dictionary<int, bool>();
 
                 Parallel.For(0, keys.Count, (i) => {
-                    // Thread.Sleep(1000);
+                    try {
 
-                    //  for (int i = 0; i < keys.Count; i++) {
-                    int id = App.GetKey<int>(keysPaths[i], 0);
-                    var info = App.GetDownloadInfo(id);
+                        // Thread.Sleep(1000);
 
-                    //if (!downloads.ContainsKey(id)) {
-                    lock (clock) {
-                        downloads[id] = info;
-                    }
-                    //} 
-                    if (info.state.totalBytes == 0 && info.state.bytesDownloaded != 1) {
-                        print("REMOVE HEADER INFO ID BC 0 data");
-                        RemoveDownloadCookie(id);
-                        App.UpdateDownload(id, 2);
-                        headerRemovers.Add(info.info.downloadHeader);
-                    }
-                    else {
-                        int headerId = info.info.downloadHeader;
-                        print("HEADERSTAET::" + headerId);
+                        //  for (int i = 0; i < keys.Count; i++) {
+                        int id = App.GetKey<int>(keysPaths[i], 0);
+                        var info = App.GetDownloadInfo(id);
+
+                        //if (!downloads.ContainsKey(id)) {
                         lock (clock) {
-                            validHeaders[headerId] = true;
+                            downloads[id] = info;
                         }
-                        bool containsKey;
-                        lock (clock) {
-                            containsKey = downloadHeaders.ContainsKey(headerId);
+                        //} 
+                        if (info.state.totalBytes == 0 && info.state.bytesDownloaded != 1) {
+                            print("REMOVE HEADER INFO ID BC 0 data");
+                            RemoveDownloadCookie(id);
+                            App.UpdateDownload(id, 2);
+                            headerRemovers.Add(info.info.downloadHeader);
                         }
-
-                        if (!containsKey) {
-                            var header = App.GetDownloadHeaderInfo(headerId);
+                        else {
+                            int headerId = info.info.downloadHeader;
+                            print("HEADERSTAET::" + headerId);
                             lock (clock) {
-                                downloadHeaders[headerId] = header;
+                                validHeaders[headerId] = true;
                             }
-                        }
-                        lock (clock) {
-                            bool containsHelperKey = downloadHelper.ContainsKey(headerId);
+                            bool containsKey;
+                            lock (clock) {
+                                containsKey = downloadHeaders.ContainsKey(headerId);
+                            }
 
-                            if (!containsHelperKey) {
-                                downloadHelper[headerId] = new DownloadHeaderHelper() { infoIds = new List<int>() { id }, bytesUsed = new List<long>() { info.state.bytesDownloaded }, totalBytesUsed = new List<long>() { info.state.totalBytes } };
+                            if (!containsKey) {
+                                var header = App.GetDownloadHeaderInfo(headerId);
+                                lock (clock) {
+                                    downloadHeaders[headerId] = header;
+                                }
                             }
-                            else {
-                                var helper = downloadHelper[headerId];
-                                helper.infoIds.Add(id);
-                                helper.totalBytesUsed.Add(info.state.totalBytes);
-                                helper.bytesUsed.Add(info.state.bytesDownloaded);
-                                downloadHelper[headerId] = helper;
+                            lock (clock) {
+                                bool containsHelperKey = downloadHelper.ContainsKey(headerId);
+
+                                if (!containsHelperKey) {
+                                    downloadHelper[headerId] = new DownloadHeaderHelper() { infoIds = new List<int>() { id }, bytesUsed = new List<long>() { info.state.bytesDownloaded }, totalBytesUsed = new List<long>() { info.state.totalBytes } };
+                                }
+                                else {
+                                    var helper = downloadHelper[headerId];
+                                    helper.infoIds.Add(id);
+                                    helper.totalBytesUsed.Add(info.state.totalBytes);
+                                    helper.bytesUsed.Add(info.state.bytesDownloaded);
+                                    downloadHelper[headerId] = helper;
+                                }
                             }
                         }
+                         
+                        print("ID???????==" + id + "  > " + info.info.name + " |" + info.info.season + "|"+ info.state.state.ToString() + " Bytes: "+ info.state.bytesDownloaded + "|" + info.state.totalBytes + "|" + info.state.ProcentageDownloaded + "%");
+                      
+
                     }
-
-                    print(info.info.name);
-                    print(info.info.season);
-                    print(info.state.state.ToString() + info.state.bytesDownloaded + "|" + info.state.totalBytes + "|" + info.state.ProcentageDownloaded + "%");
-                    // App.GetDownloadHeaderInfo()
-                    print("ID???????==" + id);
-                    //  }           
+                    catch (Exception _ex) {
+                        print("ERROR WHILE DOWNLOADLOADING::" + _ex);
+                    }
                 });
 
 
@@ -427,9 +428,9 @@ namespace CloudStreamForms
                 case App.DownloadState.Downloaded:
                     return "Downloaded";
                 case App.DownloadState.NotDownloaded: // CAN HEPPEND IF DOWNLOADED, BUT STOPPED DUE TO INTERNET or NOT DOWNLOADED
-                   return "Stopped";
+                    return "Stopped";
                 case App.DownloadState.Paused:
-                   return "Paused";
+                    return "Paused";
                 default:
                     return "";
             }
@@ -614,7 +615,7 @@ namespace CloudStreamForms
                 if (t == null) {
                     try {
                         t = await client.Channels.GetByVideoAsync(videoId.Id);
-                         //await client.Videos.GetVideoAuthorChannelAsync(videoId);
+                        //await client.Videos.GetVideoAuthorChannelAsync(videoId);
                     }
                     catch (Exception _ex) {
                         print("CHANNELL ASYNC FAILED:" + _ex);
@@ -628,8 +629,8 @@ namespace CloudStreamForms
 
         public static async Task<MuxedStreamInfo> GetInfoAsync(Video v)
         {
-            var manifest =await client.Videos.Streams.GetManifestAsync(v.Id);
-            return manifest.GetMuxed().WithHighestVideoQuality() as MuxedStreamInfo; 
+            var manifest = await client.Videos.Streams.GetManifestAsync(v.Id);
+            return manifest.GetMuxed().WithHighestVideoQuality() as MuxedStreamInfo;
         }
 
         public static string DownloadVideo(MuxedStreamInfo mediaStreamInfos, string name, MuxedStreamInfo info, Video v, int id, DownloadHeader header, bool isNotification = false)
@@ -641,7 +642,7 @@ namespace CloudStreamForms
 
             if (!File.Exists(rootPath)) {
                 Directory.CreateDirectory(rootPath);
-            } 
+            }
 
             print("DLOADING " + mediaStreamInfos.Size);
             print("DURL::" + mediaStreamInfos.Url);
@@ -664,5 +665,5 @@ namespace CloudStreamForms
         {
             MyEpisodeResultCollection = new ObservableCollection<EpisodeResult>();
         }
-    } 
+    }
 }
