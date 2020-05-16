@@ -32,7 +32,12 @@ namespace CloudStreamForms
                 return DownloadState.NotDownloaded;
             }
             else {
-                return App.GetDownloadInfo(epId).state.state;
+                try {
+                    return App.GetDownloadInfo(epId).state.state;
+                }
+                catch (Exception) {
+                    return DownloadState.NotDownloaded;
+                }
             }
         }
 
