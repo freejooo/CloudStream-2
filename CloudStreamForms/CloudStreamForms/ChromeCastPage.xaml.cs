@@ -26,6 +26,7 @@ namespace CloudStreamForms
         public string PosterUrl { set { Poster.Source = value; } }
         public int IconSize { set; get; } = 48;
         public int BigIconSize { set; get; } = 60;
+
         public int FastForwardTime
         {
             get { return Settings.LoadingChromeSec; }
@@ -34,6 +35,7 @@ namespace CloudStreamForms
         {
             get { return Settings.LoadingChromeSec; }
         }
+
         public float ScaleAll { set; get; } = 1.4f;
         public float ScaleAllBig { set; get; } = 2f;
 

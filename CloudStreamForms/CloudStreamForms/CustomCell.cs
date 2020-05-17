@@ -16,6 +16,7 @@ namespace CloudStreamForms
         protected override void OnAppearing()
         {
             base.OnAppearing();
+            if (!Settings.FastListViewPopupAnimation) return;
             if (View.Opacity == 0 || View.Opacity == 1) {
                 View.Opacity = 0;
                 View.Scale = 0.8;

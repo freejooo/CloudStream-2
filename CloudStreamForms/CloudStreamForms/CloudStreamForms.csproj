@@ -31,6 +31,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Remove="Resource\animation.png" />
     <None Remove="Resource\baseline_get_app_white_48dp.png" />
     <None Remove="Resource\baseline_keyboard_arrow_down_white_48dp.png" />
     <None Remove="Resource\baseline_keyboard_arrow_left_white_48dp.png" />
@@ -153,6 +154,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="Resource\animation.png" />
     <EmbeddedResource Include="Resource\baseline_get_app_white_48dp.png" />
     <EmbeddedResource Include="Resource\baseline_keyboard_arrow_down_white_48dp.png" />
     <EmbeddedResource Include="Resource\baseline_keyboard_arrow_left_white_48dp.png" />

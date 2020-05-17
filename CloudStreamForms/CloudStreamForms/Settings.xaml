@@ -178,6 +178,19 @@
                         <Switch Grid.Column="2" x:Name="DescriptToggle" HorizontalOptions="End" VerticalOptions="Center"></Switch>
                     </Grid>
 
+                    <Grid x:Name="G_Animation"  BackgroundColor="#212121" ColumnSpacing="10" HeightRequest="50">
+                        <Grid.ColumnDefinitions >
+                            <ColumnDefinition Width="Auto"></ColumnDefinition>
+                        </Grid.ColumnDefinitions>
+                        <ff:CachedImage Grid.Column="0" x:Name="ListAniImg" HorizontalOptions="Start" WidthRequest="25" HeightRequest="25" Margin="5" TranslationX="5"  VerticalOptions="Center" BackgroundColor="Transparent" >
+                            <ff:CachedImage.Transformations >
+                                <ffTransformations:TintTransformation HexColor="#707070" ></ffTransformations:TintTransformation>
+                            </ff:CachedImage.Transformations>
+                        </ff:CachedImage>
+                        <Label Grid.Column="1" Text="List Animations" HorizontalOptions="Start" VerticalOptions="Center"  FontSize="Body" TextColor="{Binding MainTxtColor}"></Label>
+                        <Switch Grid.Column="2" x:Name="ListAniToggle" HorizontalOptions="End" VerticalOptions="Center"></Switch>
+                    </Grid>
+
 
                     <Label x:Name="G_ClearData" Text="Clear Data" FontSize="Body" FontAttributes="Bold" TranslationX="10" Margin="10" TextColor="#ffffff"></Label>
 

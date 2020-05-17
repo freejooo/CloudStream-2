@@ -21,16 +21,16 @@ namespace CloudStreamForms.Droid.Renderers
      
         public CustomTabbedPageRenderer(Context context) : base(context) { }
 
-        protected override void OnElementPropertyChanged(object sender, PropertyChangedEventArgs e)
+        protected override void OnElementPropertyChanged(object sender, PropertyChangedEventArgs e) // HOMESCREEN LINE HERE
         {
             base.OnElementPropertyChanged(sender, e);
-            System.Console.WriteLine("sender::::" + sender.ToString());
+            //System.Console.WriteLine("sender::::" + sender.ToString());
             // System.Console.WriteLine(ViewGroup.GetChildAt(1).ToString());
 
             var rel = (Android.Widget.RelativeLayout)ViewGroup.GetChildAt(0);
-            for (int i = 0; i < rel.ChildCount; i++) {
+            /*for (int i = 0; i < rel.ChildCount; i++) {
                 System.Console.WriteLine(i + "S::S:S:S::S:S:" + rel.GetChildAt(i));
-            }
+            }*/
             var pager = (ViewPager)rel.GetChildAt(0);
             var view = (BottomNavigationView)rel.GetChildAt(1);
             if (view.ChildCount == 1) {

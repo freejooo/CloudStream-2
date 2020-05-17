@@ -16,8 +16,7 @@ namespace CloudStreamForms
 
 
         public const string errorEpisodeToast = "No Links Found";
-        public static int LoadingMiliSec
-        {
+        public static int LoadingMiliSec {
             set {
                 App.SetKey("Settings", nameof(LoadingMiliSec), value);
             }
@@ -25,8 +24,7 @@ namespace CloudStreamForms
                 return App.GetKey("Settings", nameof(LoadingMiliSec), 5000);
             }
         }
-        public static int LoadingChromeSec
-        {
+        public static int LoadingChromeSec {
             set {
                 App.SetKey("Settings", nameof(LoadingChromeSec), value);
             }
@@ -35,8 +33,19 @@ namespace CloudStreamForms
             }
         }
 
-        public static bool DefaultDub
-        {
+        public static bool ListViewPopupAnimation {
+            set {
+                App.SetKey("Settings", nameof(ListViewPopupAnimation), value);
+                FastListViewPopupAnimation = value;
+            }
+            get {
+                return App.GetKey("Settings", nameof(ListViewPopupAnimation), true);
+            }
+        }
+
+        public static bool FastListViewPopupAnimation { get; private set; }
+
+        public static bool DefaultDub {
             set {
                 App.SetKey("Settings", nameof(DefaultDub), value);
             }
@@ -45,8 +54,7 @@ namespace CloudStreamForms
             }
         }
 
-        public static bool SubtitlesEnabled
-        {
+        public static bool SubtitlesEnabled {
             set {
                 App.SetKey("Settings", nameof(SubtitlesEnabled), value);
             }
@@ -55,8 +63,7 @@ namespace CloudStreamForms
             }
         }
 
-        public static bool HasStatusBar
-        {
+        public static bool HasStatusBar {
             set {
                 App.SetKey("Settings", nameof(HasStatusBar), value);
             }
@@ -68,8 +75,7 @@ namespace CloudStreamForms
         /// <summary>
         /// 0 = Almond black, 1 = Dark, 2 = Netflix, 3 = YouTube
         /// </summary>
-        public static int BlackBgType
-        {
+        public static int BlackBgType {
             set {
                 App.SetKey("Settings", nameof(BlackBgType), value);
             }
@@ -81,24 +87,21 @@ namespace CloudStreamForms
         /// <summary>
         /// Almond black = 0, Dark = 17, Netflix = 26, YouTube = 40
         /// </summary>
-        public static int BlackColor
-        {
+        public static int BlackColor {
             get {
                 int[] colors = { 0, 17, 26, 40 };
                 return colors[BlackBgType];
             }
         }
 
-        public static Color BlackRBGColor
-        {
+        public static Color BlackRBGColor {
             get {
                 return Color.FromRgb(BlackColor, BlackColor, BlackColor);
             }
         }
 
 
-        public static bool ViewHistory
-        {
+        public static bool ViewHistory {
             set {
                 App.SetKey("Settings", nameof(ViewHistory), value);
             }
@@ -107,8 +110,7 @@ namespace CloudStreamForms
             }
         }
 
-        public static bool EpDecEnabled
-        {
+        public static bool EpDecEnabled {
             set {
                 App.SetKey("Settings", nameof(EpDecEnabled), value);
             }
@@ -116,8 +118,7 @@ namespace CloudStreamForms
                 return App.GetKey("Settings", nameof(EpDecEnabled), true);
             }
         }
-        public static bool MovieDecEnabled
-        {
+        public static bool MovieDecEnabled {
             set {
                 App.SetKey("Settings", nameof(MovieDecEnabled), value);
             }
@@ -126,8 +127,8 @@ namespace CloudStreamForms
                 //return App.GetKey("Settings", nameof(MovieDecEnabled), true);
             }
         }
-        public static bool SearchEveryCharEnabled
-        {
+
+        public static bool SearchEveryCharEnabled {
             set {
                 App.SetKey("Settings", nameof(SearchEveryCharEnabled), value);
             }
@@ -136,8 +137,7 @@ namespace CloudStreamForms
             }
         }
 
-        public static bool CacheData
-        {
+        public static bool CacheData {
             set {
                 App.SetKey("Settings", nameof(CacheData), value);
             }
@@ -146,8 +146,7 @@ namespace CloudStreamForms
             }
         }
 
-        public static bool UseVideoPlayer
-        {
+        public static bool UseVideoPlayer {
             set {
                 App.SetKey("Settings", nameof(UseVideoPlayer), value);
             }
@@ -156,8 +155,7 @@ namespace CloudStreamForms
             }
         }
 
-        public static bool Top100Enabled
-        {
+        public static bool Top100Enabled {
             set {
                 App.SetKey("Settings", nameof(Top100Enabled), value);
             }
@@ -171,8 +169,7 @@ namespace CloudStreamForms
         {
             return c.ToHex(); //"#" + c.R.ToString("X2") + c.G.ToString("X2") + c.B.ToString("X2");
         }
-        public static string MainBackgroundColor
-        {
+        public static string MainBackgroundColor {
             get {
                 if (Device.RuntimePlatform == Device.UWP) {
                     return "#000000";
@@ -183,15 +180,13 @@ namespace CloudStreamForms
             }
         }
 
-        public static bool HasScrollBar
-        {
+        public static bool HasScrollBar {
             get {
                 return Device.RuntimePlatform == Device.UWP;
             }
         }
 
-        public static ScrollBarVisibility ScrollBarVisibility
-        {
+        public static ScrollBarVisibility ScrollBarVisibility {
             get { return HasScrollBar ? ScrollBarVisibility.Default : ScrollBarVisibility.Never; }
         }
 
@@ -216,6 +211,8 @@ namespace CloudStreamForms
                 G_Top100,
                 G_VideoPlayer,
                 G_Descript,
+                G_Animation,
+
                 G_ClearData,
                 ClearHistoryTap,
                 ClearBookmarksTap,
@@ -248,6 +245,7 @@ namespace CloudStreamForms
             DescriptImg.Source = App.GetImageSource("outline_description_white_48dp.png");
 
             VideoImg.Source = App.GetImageSource("baseline_ondemand_video_white_48dp.png");
+            ListAniImg.Source = App.GetImageSource("animation.png");
 
             var ClearSource = App.GetImageSource("outline_delete_white_48dp.png");
             ClearImg1.Source = ClearSource;
@@ -319,7 +317,9 @@ namespace CloudStreamForms
                 HasStatusBar = e.Value;
                 App.UpdateStatusBar();
             };
-
+            ListAniToggle.Toggled += (o, e) => {
+                ListViewPopupAnimation = e.Value;
+            }; 
 
             Commands.SetTap(ClearHistoryTap, new Command((o) => {
                 ClearHistory();
@@ -389,19 +389,21 @@ namespace CloudStreamForms
                 StatusbarToggle.IsToggled = HasStatusBar;
                 TopToggle.IsToggled = Top100Enabled;
                 ColorPicker.SelectedIndex = BlackBgType;
+                ListAniToggle.IsToggled = ListViewPopupAnimation;
+                FastListViewPopupAnimation = ListViewPopupAnimation;
 
             });
         }
 
         protected override void OnDisappearing()
         {
-          //  OnIconEnd(3); 
+            //  OnIconEnd(3); 
             base.OnDisappearing();
         }
 
         protected override void OnAppearing()
         {
-          //  OnIconStart(3);
+            //  OnIconStart(3);
             base.OnAppearing();
             Apper();
 
