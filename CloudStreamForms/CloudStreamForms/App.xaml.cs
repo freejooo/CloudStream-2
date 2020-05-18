@@ -430,16 +430,18 @@ namespace CloudStreamForms
         }
 
 
-        public static void PlayVLCWithSingleUrl(List<string> url, List<string> name, string subtitleLoc = "", string publicName = "", int episode = -1, int season = -1, bool? overrideSelectVideo = null)
+        public static void PlayVLCWithSingleUrl(List<string> url, List<string> name, List<string> subtitleData, List<string> subtitleNames, string publicName = "", int episode = -1, int season = -1, bool? overrideSelectVideo = null)
         {
             bool useVideo = overrideSelectVideo ?? Settings.UseVideoPlayer;
 
+
+
             if (useVideo) {
-                Page p = new VideoPage(new VideoPage.PlayVideo() { descript = "", name = publicName, isSingleMirror = false, episode = episode, season = season, MirrorNames = name, MirrorUrls = url, Subtitles = new List<string>(), SubtitlesNames = new List<string>() });//new List<string>() { "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" }, new List<string>() { "Black" }, new List<string>() { });// { mainPoster = mainPoster };
+                Page p = new VideoPage(new VideoPage.PlayVideo() { descript = "", name = publicName, isSingleMirror = false, episode = episode, season = season, MirrorNames = name, MirrorUrls = url, Subtitles = subtitleData, SubtitlesNames = subtitleNames });//new List<string>() { "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" }, new List<string>() { "Black" }, new List<string>() { });// { mainPoster = mainPoster };
                 ((MainPage)CloudStreamCore.mainPage).Navigation.PushModalAsync(p, false);
             }
             else {
-                platformDep.PlayVlc(url, name, subtitleLoc);
+                platformDep.PlayVlc(url, name, subtitleData.Count > 0 ? subtitleData[0] : "");
             }
             //PlayVlc?.Invoke(null, url);
 

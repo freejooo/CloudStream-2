@@ -1489,13 +1489,15 @@ namespace CloudStreamForms
                 }
             }
 
+            /*
             string _sub = "";
             if (currentMovie.subtitles != null) {
                 if (currentMovie.subtitles.Count > 0) {
                     _sub = currentMovie.subtitles[0].data;
                 }
-            }
-            App.PlayVLCWithSingleUrl(episodeResult.mirrosUrls, episodeResult.Mirros, _sub, currentMovie.title.name, episodeResult.Episode, currentSeason, overrideSelectVideo);
+            }*/
+
+            App.PlayVLCWithSingleUrl(episodeResult.mirrosUrls, episodeResult.Mirros, currentMovie.subtitles.Select(t => t.data).ToList(), currentMovie.subtitles.Select(t => t.name).ToList(), currentMovie.title.name, episodeResult.Episode, currentSeason, overrideSelectVideo);
         }
 
         // ============================== FORCE UPDATE ==============================

@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Reactive.Subjects;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -10,6 +11,7 @@ using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 using XamEffects;
 using static CloudStreamForms.CloudStreamCore;
+using SubtitleTrack = CloudStreamForms.CloudStreamCore.SubtitleTrack;
 
 namespace CloudStreamForms
 {
@@ -93,7 +95,7 @@ namespace CloudStreamForms
         /// </summary>
         public static int maxEpisodes = 0;
         public static int currentMirrorId = 0;
-        public static int currentSubtitlesId = 0;
+        public static int currentSubtitlesId = -2; // -2 = null, -1 = none, 0 = def
         public static PlayVideo currentVideo;
 
         const string NONE_SUBTITLES = "None";
@@ -105,10 +107,14 @@ namespace CloudStreamForms
         public static string CurrentDisplayName { get { return BeforeAddToName + (IsSeries ? ADD_BEFORE_EPISODE : "") + currentVideo.name + (IsSeries ? ADD_AFTER_EPISODE : "") + (IsSingleMirror ? "" : (" · " + CurrentMirrorName)); } }
         public static string CurrentMirrorName { get { return currentVideo.MirrorNames[currentMirrorId]; } }
         public static string CurrentMirrorUrl { get { return currentVideo.MirrorUrls[currentMirrorId]; } }
-        public static string CurrentSubtitles { get { if (currentSubtitlesId == -1) { return ""; } else { return currentVideo.Subtitles[currentMirrorId]; } } }
-        public static string CurrentSubtitlesNames { get { if (currentSubtitlesId == -1) { return NONE_SUBTITLES; } else { return currentVideo.SubtitlesNames[currentMirrorId]; } } }
+        public static string CurrentSubtitles { get { if (currentSubtitlesId == -1) { return ""; } else { return currentVideo.Subtitles[currentSubtitlesId]; } } }
+
+        public static string CurrentSubtitlesNames { get { if (currentSubtitlesId == -1) { return NONE_SUBTITLES; } else { return currentVideo.SubtitlesNames[currentSubtitlesId]; } } }
         public static List<string> AllSubtitlesNames { get { var f = new List<string>() { NONE_SUBTITLES }; f.AddRange(currentVideo.SubtitlesNames); return f; } }
         public static List<string> AllSubtitlesUrls { get { var f = new List<string>() { "" }; f.AddRange(currentVideo.Subtitles); return f; } }
+
+        public static List<SubtitleTrack[]> ParsedSubtitles = new List<SubtitleTrack[]>();
+        public static SubtitleTrack[] Subtrack { get { return ParsedSubtitles[currentSubtitlesId]; } }
         public static List<string> AllMirrorsNames { get { return currentVideo.MirrorNames; } }
         public static List<string> AllMirrorsUrls { get { return currentVideo.MirrorUrls; } }
 
@@ -142,6 +148,11 @@ namespace CloudStreamForms
                     Player.SetPause(true);
                 }
             }
+        }
+
+        public void OnSubtitlesAdded(string _inp)
+        {
+            ParsedSubtitles.Add(ParseSubtitles(_inp));
         }
 
 
@@ -195,6 +206,182 @@ namespace CloudStreamForms
             currentSubtitlesId = subtitles;
         }
 
+        void SeekSubtitles(double milisec)
+        {
+            for (int i = 0; i < Subtrack.Length - 1; i++) {
+                // print("FFFF:::" + i + "|" + milisec + "|" + Subtrack[i].toMilisec);
+                if (milisec > Subtrack[i].toMilisec && milisec < Subtrack[i + 1].toMilisec) {
+                    print("SEEK::: " + currentSubtitleIndexInCurrent);
+                    currentSubtitleIndexInCurrent = i;
+                    timeToNextSubtitle = Subtrack[i + 1].fromMilisec - milisec;
+                    nextSubtitle = true;
+                    if (timeToNextSubtitle < 0) timeToNextSubtitle = 0;
+                    return;
+                }
+            }
+            currentSubtitleIndexInCurrent = -1;
+        }
+        static int currentSubtitleIndexInCurrent = 0;
+        static bool nextSubtitle = false;
+        static double timeToNextSubtitle = 0;
+
+        static string subtitleText1; // TOP
+        static string subtitleText2; // BOTTOM
+
+
+
+        double currentTime = 0;
+
+        void UpdateSubtitles()
+        {
+            Device.BeginInvokeOnMainThread(() => {
+                print("TITLL:::: " + subtitleText1 + "|" + subtitleText2);
+                SubtitleTxt1.Text = subtitleText1;
+                SubtitleTxt2.Text = subtitleText2;
+            });
+        }
+        public async void SubtitlesLoop2()
+        {
+            int last = 0;
+            bool lastType = false;
+
+            while (true) {
+                if (currentSubtitlesId != -1 && currentSubtitleIndexInCurrent != -1 && Subtrack.Length > 0) {
+                    try {
+
+
+                        var track = Subtrack[currentSubtitleIndexInCurrent];
+                        // SET CORRECT TIME
+                        bool IsTooHigh()
+                        {
+                            //  print("::::::>>>>>" + currentSubtitleIndexInCurrent + "|" + currentTime + "<>" + track.fromMilisec);
+                            track = Subtrack[currentSubtitleIndexInCurrent];
+                            return currentTime < track.fromMilisec && currentSubtitleIndexInCurrent > 0;
+                        }
+                        bool IsTooLow()
+                        {
+                            track = Subtrack[currentSubtitleIndexInCurrent];
+                            return currentTime > track.toMilisec && currentSubtitleIndexInCurrent < Subtrack.Length - 1;
+                        }
+                        if (IsTooHigh()) {
+                            while (IsTooHigh()) {
+                                currentSubtitleIndexInCurrent--;
+                            }
+                            continue;
+                        }
+                        if (IsTooLow()) {
+                            while (IsTooLow()) {
+                                currentSubtitleIndexInCurrent++;
+                            }
+                            continue;
+                        }
+
+
+                        if (currentTime < track.toMilisec && currentTime > track.fromMilisec && last != currentSubtitleIndexInCurrent) {
+                            var lines = track.subtitleLines;
+                            if (lines.Count > 0) {
+                                if (lines.Count == 1) {
+                                    subtitleText1 = "";//lines[1].line;
+                                    subtitleText2 = lines[0].line;
+                                }
+                                else {
+                                    subtitleText1 = lines[0].line;
+                                    subtitleText2 = lines[1].line;
+                                }
+                            }
+                            UpdateSubtitles();
+                            print("SETSUB:" + track.fromMilisec + "|" + currentTime);
+                            lastType = false; 
+                        }
+                        else {
+                            if (!lastType) {
+                                subtitleText1 = "";
+                                subtitleText2 = "";
+                                UpdateSubtitles();
+                                lastType = true;
+                            }
+                        }
+
+                        last = currentSubtitleIndexInCurrent;
+
+
+                        await Task.Delay(10);
+                    }
+                    catch (Exception _ex) {
+                        print("EX::X:X::X:X: " + _ex);
+                    }
+                }
+            }
+        }
+
+        public async void SubtitlesLoop()
+        {
+            while (true) {
+                if (currentSubtitlesId != -1 && currentSubtitleIndexInCurrent != -1 && Subtrack.Length > 0) {
+                    print("TIME::: " + timeToNextSubtitle);
+                    for (int i = 0; i < (int)timeToNextSubtitle / 10; i++) {
+                        await Task.Delay(10);
+                        if (nextSubtitle) {
+                            nextSubtitle = false; continue;
+                        }
+                    }
+
+                    try {
+                        var track = Subtrack[currentSubtitleIndexInCurrent];
+                        var nextTrack = Subtrack[currentSubtitleIndexInCurrent + 1];
+                        int _sub = int.Parse(currentSubtitleIndexInCurrent.ToString());
+                        while (currentTime - 1 < track.fromMilisec) {
+                            await Task.Delay(1);
+                            if (nextSubtitle) {
+                                nextSubtitle = false; continue;
+                            }
+                        }
+                        if (nextSubtitle) {
+                            nextSubtitle = false; continue;
+                        }
+
+                        var lines = track.subtitleLines;
+                        if (lines.Count > 0) {
+                            if (lines.Count == 1) {
+                                subtitleText1 = "";//lines[1].line;
+                                subtitleText2 = lines[0].line;
+                            }
+                            else {
+                                subtitleText1 = lines[0].line;
+                                subtitleText2 = lines[1].line;
+                            }
+                        }
+                        print("SETSUB:" + track.fromMilisec + "|" + currentTime);
+
+                        UpdateSubtitles();
+                        currentSubtitleIndexInCurrent++;
+                        var _timeToNextSubtitle = track.toMilisec - track.fromMilisec;
+                        print("TIME:::2: " + _timeToNextSubtitle);
+
+                        for (int i = 0; i < (int)_timeToNextSubtitle / 10; i++) {
+                            await Task.Delay(10);
+                            if (nextSubtitle) {
+                                nextSubtitle = false; continue;
+                            }
+                        }
+                        subtitleText1 = "";
+                        subtitleText2 = "";
+                        UpdateSubtitles();
+
+                        timeToNextSubtitle = nextTrack.fromMilisec - track.toMilisec;
+                    }
+                    catch (Exception _ex) {
+                        subtitleText1 = "";
+                        subtitleText2 = "";
+                        print("_____:::: " + _ex + "\n|" + currentSubtitleIndexInCurrent + ":FROMTO:" + Subtrack.Length);
+                    }
+                }
+                else {
+                    await Task.Delay(1);
+                }
+            }
+        }
+
 
         public void PlayerTimeChanged(long time)
         {
@@ -202,8 +389,8 @@ namespace CloudStreamForms
                 try {
                     double val = ((double)(time / 1000) / (double)(Player.Length / 1000));
                     ChangeTime(val);
+                    currentTime = time;
                     VideoSlider.Value = val;
-
                     if (Player.Length != -1 && Player.Length > 10000 && Player.Length <= Player.Time + 1000) {
                         //TODO: NEXT EPISODE
                         Navigation.PopModalAsync();
@@ -292,7 +479,26 @@ namespace CloudStreamForms
             }));
 
             MirrorsTap.IsVisible = AllMirrorsUrls.Count > 1;
-            SubTap.IsVisible = false; // TODO: ADD SUBTITLES
+            try {
+
+                ParsedSubtitles = new List<SubtitleTrack[]>();
+                for (int i = 0; i < currentVideo.Subtitles.Count; i++) {
+                    OnSubtitlesAdded(currentVideo.Subtitles[i]);
+                }
+
+                currentSubtitlesId = 0;
+                print("--->>>>>>> " + ParsedSubtitles.Count + "|" + currentSubtitlesId);
+                currentSubtitleIndexInCurrent = 0;
+                SubtitlesLoop2();
+
+                SubTap.IsVisible = CurrentSubtitles.IsClean(); // TODO: ADD SUBTITLES
+
+            }
+            catch (Exception _ex) {
+                print("A_A__A__A:: " + _ex);
+            }
+
+
             EpisodesTap.IsVisible = false; // TODO: ADD EPISODES SWITCH
             NextEpisodeTap.IsVisible = false; // TODO: ADD NEXT EPISODE
 
@@ -362,7 +568,6 @@ namespace CloudStreamForms
                 Navigation.PopModalAsync();
                 //Navigation.PopModalAsync();
             }));
-
 
 
 
@@ -451,7 +656,7 @@ namespace CloudStreamForms
             }
             SelectMirror(_currentMirrorId);
         }
-         
+
         protected override void OnAppearing()
         {
             base.OnAppearing();
@@ -590,6 +795,7 @@ namespace CloudStreamForms
 
                 long len = (long)(VideoSlider.Value * Player.Length);
                 Player.Time = len;
+                SeekSubtitles(len);
 
                 if (App.GainAudioFocus()) {
                     Player.SetPause(false);
@@ -699,8 +905,7 @@ namespace CloudStreamForms
 
 
         double _Volyme = 100;
-        double Volyme
-        {
+        double Volyme {
             set {
                 _Volyme = value; Player.Volume = (int)value;
             }
@@ -710,8 +915,7 @@ namespace CloudStreamForms
         int maxVol = 100;
         bool canChangeBrightness = true;
         double _BrightnessProcentage = 100;
-        double BrightnessProcentage
-        {
+        double BrightnessProcentage {
             set {
                 _BrightnessProcentage = value; /*OverlayBlack.Opacity = 1 - (value / 100.0);*/ App.SetBrightness(value / 100);
             }
@@ -854,7 +1058,7 @@ namespace CloudStreamForms
                 cursorPosition = args.Location;
 
                 maxVol = Volyme >= 100 ? 200 : 100;
-            }  
+            }
             else if (args.Type == TouchTracking.TouchActionType.Moved) {
                 print(startCursorPosition.X - args.Location.X);
                 if ((minimumDistance < Math.Abs(startCursorPosition.X - args.Location.X) || minimumDistance < Math.Abs(startCursorPosition.X - args.Location.X)) && !isMovingCursor) {
@@ -929,9 +1133,11 @@ namespace CloudStreamForms
             }
 
             print("SEEK MEDIA to " + ms);
-            Player.Time = Player.Time + ms;
+            var newTime = Player.Time + ms;
+            Player.Time = newTime;
 
-            PlayerTimeChanged(Player.Time);
+            SeekSubtitles(newTime);
+            PlayerTimeChanged(newTime);
 
 
 
