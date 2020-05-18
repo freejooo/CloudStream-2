@@ -55,8 +55,7 @@ namespace CloudStreamForms
             //  public Button button;
         }
 
-        public static bool NewGithubUpdate
-        {
+        public static bool NewGithubUpdate {
             get {
                 if (githubUpdateTag == "") { return false; }
                 else { return ("v" + App.GetBuildNumber() != githubUpdateTag); }
@@ -267,8 +266,7 @@ namespace CloudStreamForms
         public static event EventHandler<bool> OnPauseChanged;
 
         private static ChromeNotification _notification = new ChromeNotification() { isCasting = false, title = "", body = "", isPaused = false, posterUrl = "" };
-        public static ChromeNotification Notification
-        {
+        public static ChromeNotification Notification {
             set {
                 _notification = value;
                 Device.BeginInvokeOnMainThread(() => {
@@ -291,8 +289,7 @@ namespace CloudStreamForms
         public static event EventHandler<ChromeNotification> OnNotificationChanged;
 
 
-        public static bool IsChromeDevicesOnNetwork
-        {
+        public static bool IsChromeDevicesOnNetwork {
             get {
                 if (allChromeDevices == null) { return false; }
                 foreach (IReceiver r in allChromeDevices) {
@@ -304,8 +301,7 @@ namespace CloudStreamForms
 
         public static bool IsConnectedToChromeDevice { set; get; }
         public static bool IsPendingConnection { set; get; }
-        public static bool IsCastingVideo
-        {
+        public static bool IsCastingVideo {
             set {
                 _isCastingVideo = value; Notification.isCasting = value;
                 Device.BeginInvokeOnMainThread(() => {
@@ -323,8 +319,7 @@ namespace CloudStreamForms
 
         private static bool isPaused;
         private static bool isPlaying;
-        public static bool IsPaused
-        {
+        public static bool IsPaused {
             set {
                 isPaused = value; Notification.isPaused = value;
                 Device.BeginInvokeOnMainThread(() => {
@@ -333,8 +328,7 @@ namespace CloudStreamForms
             }
             get { return isPaused; }
         }
-        public static bool IsPlaying
-        {
+        public static bool IsPlaying {
             set {
                 isPlaying = value; Notification.isPlaying = value;
                 Device.BeginInvokeOnMainThread(() => {
@@ -358,16 +352,14 @@ namespace CloudStreamForms
         static double castLastUpdate;
 
         private static float _Volume = 1;
-        public static float Volume
-        {
+        public static float Volume {
             set {
                 SetVolumeAsync(value); _Volume = value;
             }
             get { return _Volume; }
         }
 
-        public static double CurrentTime
-        {
+        public static double CurrentTime {
             get {
                 try {
                     // double test = CurrentChannel.Status.First().CurrentTime; // WILL CAUSE CRASH IF STOPPED BY EXTRARNAL
@@ -397,8 +389,7 @@ namespace CloudStreamForms
         public static double BufferTime { set; get; } = 0;
         public static double RequestNextTime { set; get; } = 0;
 
-        private static bool IsStopped
-        {
+        private static bool IsStopped {
             get {
                 return CurrentChannel.Status == null || !string.IsNullOrEmpty(CurrentChannel.Status.FirstOrDefault()?.IdleReason);
             }
@@ -955,8 +946,7 @@ namespace CloudStreamForms
             public int ThredId { private set { _thredId = value; } get { return _thredId; } }
 
             public System.Threading.Thread _thread;
-            public System.Threading.Thread Thread
-            {
+            public System.Threading.Thread Thread {
                 set {
                     if (_thread == null) {
                         thredNumber++; _thredId = thredNumber; activeThredIds.Add(_thredId); tempThreds.Add(this);
@@ -1898,6 +1888,7 @@ namespace CloudStreamForms
 
             public void LoadLinksTSync(int episode, int season, int normalEpisode, bool isMovie, TempThred tempThred)
             {
+
                 if (activeMovie.title.movieType != MovieType.AnimeMovie) return;
                 try {
                     var dubUrl = activeMovie.title.kickassDubUrl;
@@ -2328,15 +2319,20 @@ namespace CloudStreamForms
 
             public void LoadLinksTSync(int episode, int season, int normalEpisode, bool isMovie, TempThred tempThred)
             {
-                if (activeMovie.title.movieType == MovieType.AnimeMovie) {
-                    for (int i = 0; i < titles.Count; i++) {
-                        if (ToDown(titles[i], replaceSpace: "") == ToDown(activeMovie.title.name, replaceSpace: "")) {
-                            var ep = GetDubbedAnimeEpisode(hrefs[i]);
-                            if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
-                            DubbedAnimeProvider.AddMirrors(ep, normalEpisode);
-                            return;
+                try {
+                    if (activeMovie.title.movieType == MovieType.AnimeMovie) {
+                        for (int i = 0; i < titles.Count; i++) {
+                            if (ToDown(titles[i], replaceSpace: "") == ToDown(activeMovie.title.name, replaceSpace: "")) {
+                                var ep = GetDubbedAnimeEpisode(hrefs[i]);
+                                if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
+                                DubbedAnimeProvider.AddMirrors(ep, normalEpisode);
+                                return;
+                            }
                         }
                     }
+                }
+                catch (Exception _ex) {
+                    print("PROVIDER ERROR: " + _ex);
                 }
             }
         }
@@ -3535,19 +3531,24 @@ namespace CloudStreamForms
 
             public void LoadLinksTSync(int episode, int season, int normalEpisode, bool isMovie, TempThred tempThred)
             {
-                /*  if (isMovie) return;
+                try {
+                    /*  if (isMovie) return;
 
-                  TempThred tempThred = new TempThred();
-                  tempThred.typeId = 1; // MAKE SURE THIS IS BEFORE YOU CREATE THE THRED
-                  tempThred.Thread = new System.Threading.Thread(() => {
-                      try {*/
-                string url = "https://www.tvseries.video/series/" + ToDown(activeMovie.title.name, replaceSpace: "-") + "/" + "season-" + season + "-episode-" + episode;
+                      TempThred tempThred = new TempThred();
+                      tempThred.typeId = 1; // MAKE SURE THIS IS BEFORE YOU CREATE THE THRED
+                      tempThred.Thread = new System.Threading.Thread(() => {
+                          try {*/
+                    string url = "https://www.tvseries.video/series/" + ToDown(activeMovie.title.name, replaceSpace: "-") + "/" + "season-" + season + "-episode-" + episode;
 
-                string d = DownloadString(url);
-                string vidId = FindHTML(d, " data-vid=\"", "\"");
-                if (vidId != "") {
-                    d = DownloadString("https://www.tvseries.video" + vidId);
-                    AddEpisodesFromMirrors(tempThred, d, normalEpisode);
+                    string d = DownloadString(url);
+                    string vidId = FindHTML(d, " data-vid=\"", "\"");
+                    if (vidId != "") {
+                        d = DownloadString("https://www.tvseries.video" + vidId);
+                        AddEpisodesFromMirrors(tempThred, d, normalEpisode);
+                    }
+                }
+                catch (Exception _ex) {
+                    print("PROVIDER ERROR: " + _ex);
                 }
                 /*  }
                   finally {
@@ -3563,8 +3564,13 @@ namespace CloudStreamForms
         {
             public void LoadLinksTSync(int episode, int season, int normalEpisode, bool isMovie, TempThred tempThred)
             {
-                GetLiveMovies123Links(normalEpisode, episode, season, isMovie, "https://movies123.live", tempThred);
-                GetLiveMovies123Links(normalEpisode, episode, season, isMovie, "https://c123movies.com", tempThred);
+                try {
+                    GetLiveMovies123Links(normalEpisode, episode, season, isMovie, "https://movies123.live", tempThred);
+                    GetLiveMovies123Links(normalEpisode, episode, season, isMovie, "https://c123movies.com", tempThred);
+                }
+                catch (Exception _ex) {
+                    print("PROVIDER ERROR: " + _ex);
+                }
             }
             static void GetLiveMovies123Links(int normalEpisode, int episode, int season, bool isMovie, string provider = "https://c123movies.com", TempThred tempThred = default) // https://movies123.live & https://c123movies.com
             {
@@ -3806,37 +3812,43 @@ namespace CloudStreamForms
 
             public void LoadLinksTSync(int episode, int season, int normalEpisode, bool isMovie, TempThred tempThred)
             {
-                /*
-                TempThred tempThred = new TempThred();
-                tempThred.typeId = 1; // MAKE SURE THIS IS BEFORE YOU CREATE THE THRED
-                tempThred.Thread = new System.Threading.Thread(() => {
-                    try {*/
-                if (activeMovie.title.movies123MetaData.movieLink != null) {
-                    if (activeMovie.title.movieType == MovieType.TVSeries) {
-                        int normalSeason = season - 1;
-                        List<Movies123SeasonData> seasonData = activeMovie.title.movies123MetaData.seasonData;
-                        // ---- TO PREVENT ERRORS START ----
-                        if (seasonData != null) {
-                            if (seasonData.Count > normalSeason) {
-                                if (seasonData[normalSeason].episodeUrls != null) {
-                                    if (seasonData[normalSeason].episodeUrls.Count > normalEpisode) {
-                                        // ---- END ----
-                                        string fwordLink = seasonData[normalSeason].seasonUrl + "/" + seasonData[normalSeason].episodeUrls[normalEpisode];
-                                        print(fwordLink);
-                                        for (int f = 0; f < MIRROR_COUNT; f++) {
-                                            GetLinkServer(f, fwordLink, normalEpisode);
+                try {
+
+                    /*
+                    TempThred tempThred = new TempThred();
+                    tempThred.typeId = 1; // MAKE SURE THIS IS BEFORE YOU CREATE THE THRED
+                    tempThred.Thread = new System.Threading.Thread(() => {
+                        try {*/
+                    if (activeMovie.title.movies123MetaData.movieLink != null) {
+                        if (activeMovie.title.movieType == MovieType.TVSeries) {
+                            int normalSeason = season - 1;
+                            List<Movies123SeasonData> seasonData = activeMovie.title.movies123MetaData.seasonData;
+                            // ---- TO PREVENT ERRORS START ----
+                            if (seasonData != null) {
+                                if (seasonData.Count > normalSeason) {
+                                    if (seasonData[normalSeason].episodeUrls != null) {
+                                        if (seasonData[normalSeason].episodeUrls.Count > normalEpisode) {
+                                            // ---- END ----
+                                            string fwordLink = seasonData[normalSeason].seasonUrl + "/" + seasonData[normalSeason].episodeUrls[normalEpisode];
+                                            print(fwordLink);
+                                            for (int f = 0; f < MIRROR_COUNT; f++) {
+                                                GetLinkServer(f, fwordLink, normalEpisode);
+                                            }
                                         }
                                     }
                                 }
                             }
                         }
-                    }
-                    else {
-                        for (int f = 0; f < MIRROR_COUNT; f++) {
-                            print(">::" + f);
-                            GetLinkServer(f, activeMovie.title.movies123MetaData.movieLink); // JUST GET THE MOVIE
+                        else {
+                            for (int f = 0; f < MIRROR_COUNT; f++) {
+                                print(">::" + f);
+                                GetLinkServer(f, activeMovie.title.movies123MetaData.movieLink); // JUST GET THE MOVIE
+                            }
                         }
                     }
+                }
+                catch (Exception _ex) {
+                    print("PROVIDER ERROR: " + _ex);
                 }
                 /*}
                  finally {
@@ -3894,40 +3906,45 @@ namespace CloudStreamForms
 
             public void LoadLinksTSync(int episode, int season, int normalEpisode, bool isMovie, TempThred tempThred)
             {
-                if (!isMovie) return;
+                try {
+                    if (!isMovie) return;
 
-                // freefullmovies
-                /* TempThred tempThred = new TempThred();
-                 tempThred.typeId = 3; // MAKE SURE THIS IS BEFORE YOU CREATE THE THRED
-                 tempThred.Thread = new System.Threading.Thread(() => {
-                     try {*/
-                string d = DownloadString("https://www.freefullmovies.zone/movies/watch." + ToDown(activeMovie.title.name, true, "-").Replace(" ", "-") + "-" + activeMovie.title.year.Substring(0, 4) + ".movie.html", tempThred);
+                    // freefullmovies
+                    /* TempThred tempThred = new TempThred();
+                     tempThred.typeId = 3; // MAKE SURE THIS IS BEFORE YOU CREATE THE THRED
+                     tempThred.Thread = new System.Threading.Thread(() => {
+                         try {*/
+                    string d = DownloadString("https://www.freefullmovies.zone/movies/watch." + ToDown(activeMovie.title.name, true, "-").Replace(" ", "-") + "-" + activeMovie.title.year.Substring(0, 4) + ".movie.html", tempThred);
 
-                if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
-                string find = "<source src=\"";
-                string link = FindHTML(d, find, "\"");
-                if (link != "") {
-                    double dSize = GetFileSize(link);
-                    if (dSize > 100) { // TO REMOVE TRAILERS
-                        AddPotentialLink(episode, link, "HD FullMovies", 13);
+                    if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
+                    string find = "<source src=\"";
+                    string link = FindHTML(d, find, "\"");
+                    if (link != "") {
+                        double dSize = GetFileSize(link);
+                        if (dSize > 100) { // TO REMOVE TRAILERS
+                            AddPotentialLink(episode, link, "HD FullMovies", 13);
+                        }
                     }
-                }
-                /*}
-                finally {
-                    JoinThred(tempThred);
-                }
-            });
-            tempThred.Thread.Name = "FullMovies";
-            tempThred.Thread.Start();*/
+                    /*}
+                    finally {
+                        JoinThred(tempThred);
+                    }
+                });
+                tempThred.Thread.Name = "FullMovies";
+                tempThred.Thread.Start();*/
 
-                // 1movietv
-                /*
-                TempThred _tempThred = new TempThred();
-                _tempThred.typeId = 3; // MAKE SURE THIS IS BEFORE YOU CREATE THE THRED
-                _tempThred.Thread = new System.Threading.Thread(() => {
-                    try {*/
-                string __d = DownloadString("https://1movietv.com/playstream/" + activeMovie.title.id, tempThred);
-                GetMovieTv(episode, __d, tempThred);
+                    // 1movietv
+                    /*
+                    TempThred _tempThred = new TempThred();
+                    _tempThred.typeId = 3; // MAKE SURE THIS IS BEFORE YOU CREATE THE THRED
+                    _tempThred.Thread = new System.Threading.Thread(() => {
+                        try {*/
+                    string __d = DownloadString("https://1movietv.com/playstream/" + activeMovie.title.id, tempThred);
+                    GetMovieTv(episode, __d, tempThred);
+                }
+                catch (Exception _ex) {
+                    print("PROVIDER ERROR: " + _ex);
+                }
                 /* }
                  finally {
                      JoinThred(_tempThred);
@@ -3944,20 +3961,25 @@ namespace CloudStreamForms
 
             public void LoadLinksTSync(int episode, int season, int normalEpisode, bool isMovie, TempThred tempThred)
             {
-                /*
-                TempThred tempThred = new TempThred();
+                try {
+                    /*
+                    TempThred tempThred = new TempThred();
 
-                tempThred.typeId = 3; // MAKE SURE THIS IS BEFORE YOU CREATE THE THRED
-                tempThred.Thread = new System.Threading.Thread(() => {
-                    try {*/
-                string extra = ToDown(activeMovie.title.name, true, "-") + (isMovie ? ("-" + activeMovie.title.ogYear) : ("-" + season + "x" + episode));
-                string d = DownloadString("https://on.the123movies.eu/" + extra);
-                if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
-                string ts = FindHTML(d, "data-vs=\"", "\"");
-                print("DATATS::" + ts);
-                d = DownloadString(ts);
-                if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
-                AddEpisodesFromMirrors(tempThred, d, normalEpisode);
+                    tempThred.typeId = 3; // MAKE SURE THIS IS BEFORE YOU CREATE THE THRED
+                    tempThred.Thread = new System.Threading.Thread(() => {
+                        try {*/
+                    string extra = ToDown(activeMovie.title.name, true, "-") + (isMovie ? ("-" + activeMovie.title.ogYear) : ("-" + season + "x" + episode));
+                    string d = DownloadString("https://on.the123movies.eu/" + extra);
+                    if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
+                    string ts = FindHTML(d, "data-vs=\"", "\"");
+                    print("DATATS::" + ts);
+                    d = DownloadString(ts);
+                    if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
+                    AddEpisodesFromMirrors(tempThred, d, normalEpisode);
+                }
+                catch (Exception _ex) {
+                    print("PROVIDER ERROR: " + _ex);
+                }
                 /* }
                  finally {
                      JoinThred(tempThred);
@@ -4405,21 +4427,28 @@ namespace CloudStreamForms
 
             public void LoadLinksTSync(int episode, int season, int normalEpisode, bool isMovie, TempThred tempThred)
             {
-                if (isMovie) return;
-                /*
-                TempThred tempThred = new TempThred();
-                tempThred.typeId = 3; // MAKE SURE THIS IS BEFORE YOU CREATE THE THRED
-                tempThred.Thread = new System.Threading.Thread(() => {
-                    try {*/
-                string d = DownloadString("https://www.themoviedb.org/search/tv?query=" + activeMovie.title.name + "&language=en-US");
-                if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
-                if (d != "") {
-                    string tmdbId = FindHTML(d, "<a id=\"tv_", "\"");
-                    if (tmdbId != "") {
-                        string _d = DownloadString("https://1movietv.com/playstream/" + tmdbId + "-" + season + "-" + episode, tempThred);
-                        GetMovieTv(normalEpisode, _d, tempThred);
-                        //https://1movietv.com/playstream/71340-2-8
+                try {
+
+
+                    if (isMovie) return;
+                    /*
+                    TempThred tempThred = new TempThred();
+                    tempThred.typeId = 3; // MAKE SURE THIS IS BEFORE YOU CREATE THE THRED
+                    tempThred.Thread = new System.Threading.Thread(() => {
+                        try {*/
+                    string d = DownloadString("https://www.themoviedb.org/search/tv?query=" + activeMovie.title.name + "&language=en-US");
+                    if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
+                    if (d != "") {
+                        string tmdbId = FindHTML(d, "<a id=\"tv_", "\"");
+                        if (tmdbId != "") {
+                            string _d = DownloadString("https://1movietv.com/playstream/" + tmdbId + "-" + season + "-" + episode, tempThred);
+                            GetMovieTv(normalEpisode, _d, tempThred);
+                            //https://1movietv.com/playstream/71340-2-8
+                        }
                     }
+                }
+                catch (Exception _ex) {
+                    print("PROVIDER ERROR: " + _ex);
                 }
                 /* }
                  finally {
@@ -4553,29 +4582,36 @@ namespace CloudStreamForms
                 tempThred.typeId = 3; // MAKE SURE THIS IS BEFORE YOU CREATE THE THRED
                 tempThred.Thread = new System.Threading.Thread(() => {
                     try {*/
-                if (activeMovie.title.watchSeriesHdMetaData.Count == 1) {
-                    season = activeMovie.title.watchSeriesHdMetaData[0].season;
-                }
-                for (int i = 0; i < activeMovie.title.watchSeriesHdMetaData.Count; i++) {
-                    var meta = activeMovie.title.watchSeriesHdMetaData[i];
-                    if (meta.season == season) {
-                        string href = "http://watchserieshd.tv" + meta.url + "-episode-" + (normalEpisode + 1);
-                        string d = DownloadString(href, tempThred);
-                        if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
-                        string dError = "<h1 class=\"entry-title\">Page not found</h1>";
-                        if (d.Contains(dError) && activeMovie.title.movieType == MovieType.Movie) {
-                            href = "http://watchserieshd.tv" + meta.url + "-episode-0";
-                            d = DownloadString(href, tempThred);
-                            if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
-                        }
-                        if (d.Contains(dError)) {
+                try {
 
-                        }
-                        else {
-                            AddEpisodesFromMirrors(tempThred, d, normalEpisode);
-                        }
-                        print("HREF:" + href);
+
+                    if (activeMovie.title.watchSeriesHdMetaData.Count == 1) {
+                        season = activeMovie.title.watchSeriesHdMetaData[0].season;
                     }
+                    for (int i = 0; i < activeMovie.title.watchSeriesHdMetaData.Count; i++) {
+                        var meta = activeMovie.title.watchSeriesHdMetaData[i];
+                        if (meta.season == season) {
+                            string href = "http://watchserieshd.tv" + meta.url + "-episode-" + (normalEpisode + 1);
+                            string d = DownloadString(href, tempThred);
+                            if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
+                            string dError = "<h1 class=\"entry-title\">Page not found</h1>";
+                            if (d.Contains(dError) && activeMovie.title.movieType == MovieType.Movie) {
+                                href = "http://watchserieshd.tv" + meta.url + "-episode-0";
+                                d = DownloadString(href, tempThred);
+                                if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
+                            }
+                            if (d.Contains(dError)) {
+
+                            }
+                            else {
+                                AddEpisodesFromMirrors(tempThred, d, normalEpisode);
+                            }
+                            print("HREF:" + href);
+                        }
+                    }
+                }
+                catch (Exception _ex) {
+                    print("PROVIDER ERROR: " + _ex);
                 }
                 /*  }
                   finally {
@@ -4856,62 +4892,67 @@ namespace CloudStreamForms
 
             public void LoadLinksTSync(int episode, int season, int normalEpisode, bool isMovie, TempThred tempThred)
             {
-                if (activeMovie.title.yesmoviessSeasonDatas != null) {
-                    for (int i = 0; i < activeMovie.title.yesmoviessSeasonDatas.Count; i++) {
-                        //     print(activeMovie.title.yesmoviessSeasonDatas[i].id + "<-IDS:" + season);
-                        if (activeMovie.title.yesmoviessSeasonDatas[i].id == (isMovie ? 1 : season)) {
-                            string url = activeMovie.title.yesmoviessSeasonDatas[i].url;
+                try { 
+                    if (activeMovie.title.yesmoviessSeasonDatas != null) {
+                        for (int i = 0; i < activeMovie.title.yesmoviessSeasonDatas.Count; i++) {
+                            //     print(activeMovie.title.yesmoviessSeasonDatas[i].id + "<-IDS:" + season);
+                            if (activeMovie.title.yesmoviessSeasonDatas[i].id == (isMovie ? 1 : season)) {
+                                string url = activeMovie.title.yesmoviessSeasonDatas[i].url;
 
-                            /* TempThred tempThred = new TempThred();
-                             tempThred.typeId = 6; // MAKE SURE THIS IS BEFORE YOU CREATE THE THRED
-                             tempThred.Thread = new System.Threading.Thread(() => {
-                                 try {*/
-                            int _episode = normalEpisode + 1;
-                            string d = DownloadString(url.Replace("watching.html", "") + "watching.html");
+                                /* TempThred tempThred = new TempThred();
+                                 tempThred.typeId = 6; // MAKE SURE THIS IS BEFORE YOU CREATE THE THRED
+                                 tempThred.Thread = new System.Threading.Thread(() => {
+                                     try {*/
+                                int _episode = normalEpisode + 1;
+                                string d = DownloadString(url.Replace("watching.html", "") + "watching.html");
 
-                            string movieId = FindHTML(d, "var movie_id = \'", "\'");
-                            if (movieId == "") return;
+                                string movieId = FindHTML(d, "var movie_id = \'", "\'");
+                                if (movieId == "") return;
 
-                            d = DownloadString("https://yesmoviess.to/ajax/v2_get_episodes/" + movieId);
-                            if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
-
-                            string episodeId = FindHTML(d, "title=\"Episode " + _episode + "\" class=\"btn-eps\" episode-id=\"", "\"");
-                            if (episodeId == "") return;
-                            d = DownloadString("https://yesmoviess.to/ajax/load_embed/mov" + episodeId);
-
-                            if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
-
-                            string embedededUrl = FindHTML(d, "\"embed_url\":\"", "\"").Replace("\\", "") + "=EndAll";
-                            string __url = FindHTML(embedededUrl, "id=", "=EndAll");
-                            if (__url == "") return;
-                            embedededUrl = "https://video.opencdn.co/api/?id=" + __url;
-                            print(embedededUrl + "<<<<<<<<<<<<<<<<");
-                            d = DownloadString(embedededUrl);
-
-                            if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
-                            string link = FindHTML(d, "\"link\":\"", "\"").Replace("\\", "").Replace("//", "https://").Replace("https:https:", "https:");
-                            print("LINK:" + link);
-                            d = DownloadString(link);
-
-                            if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
-
-                            string secondLink = FindHTML(d, "https://vidnode.net/download?id=", "\"");
-                            print("FIRST: " + secondLink);
-                            if (secondLink != "") {
-                                d = DownloadString("https://vidnode.net/download?id=" + secondLink);
+                                d = DownloadString("https://yesmoviess.to/ajax/v2_get_episodes/" + movieId);
                                 if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
-                                GetVidNode(d, normalEpisode);
+
+                                string episodeId = FindHTML(d, "title=\"Episode " + _episode + "\" class=\"btn-eps\" episode-id=\"", "\"");
+                                if (episodeId == "") return;
+                                d = DownloadString("https://yesmoviess.to/ajax/load_embed/mov" + episodeId);
+
+                                if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
+
+                                string embedededUrl = FindHTML(d, "\"embed_url\":\"", "\"").Replace("\\", "") + "=EndAll";
+                                string __url = FindHTML(embedededUrl, "id=", "=EndAll");
+                                if (__url == "") return;
+                                embedededUrl = "https://video.opencdn.co/api/?id=" + __url;
+                                print(embedededUrl + "<<<<<<<<<<<<<<<<");
+                                d = DownloadString(embedededUrl);
+
+                                if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
+                                string link = FindHTML(d, "\"link\":\"", "\"").Replace("\\", "").Replace("//", "https://").Replace("https:https:", "https:");
+                                print("LINK:" + link);
+                                d = DownloadString(link);
+
+                                if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
+
+                                string secondLink = FindHTML(d, "https://vidnode.net/download?id=", "\"");
+                                print("FIRST: " + secondLink);
+                                if (secondLink != "") {
+                                    d = DownloadString("https://vidnode.net/download?id=" + secondLink);
+                                    if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
+                                    GetVidNode(d, normalEpisode);
+                                }
+                                LookForFembedInString(tempThred, normalEpisode, d);
+                                /*  }
+                                  finally {
+                                      JoinThred(tempThred);
+                                  }
+                              });
+                              tempThred.Thread.Name = "YesMovies";
+                              tempThred.Thread.Start();*/
                             }
-                            LookForFembedInString(tempThred, normalEpisode, d);
-                            /*  }
-                              finally {
-                                  JoinThred(tempThred);
-                              }
-                          });
-                          tempThred.Thread.Name = "YesMovies";
-                          tempThred.Thread.Start();*/
                         }
                     }
+                }
+                catch (Exception _ex) {
+                    print("PROVIDER ERROR: " + _ex);
                 }
             }
         }
@@ -5193,42 +5234,49 @@ namespace CloudStreamForms
         /// <returns></returns>
         public static string ShareMovieCode(string extra, string redirectingName = "Redirecting to CloudStream 2")
         {
-            const string baseUrl = "CloudStreamForms";
-            //Because I don't want to host my own servers I "Save" a js code on a free js hosting site. This code will automaticly give a responseurl that will redirect to the CloudStream app.
-            string code = ("var x = document.createElement('body');\n var s = document.createElement(\"script\");\n s.innerHTML = \"window.location.href = '" + baseUrl + ":" + extra + "';\";\n var h = document.createElement(\"H1\");\n var div = document.createElement(\"div\");\n div.style.width = \"100%\";\n div.style.height = \"100%\";\n div.align = \"center\";\n div.style.padding = \"130px 0\";\n div.style.margin = \"auto\";\n div.innerHTML = \"" + redirectingName + "\";\n h.append(div);\n x.append(h);\n x.append(s);\n parent.document.body = x;").Replace("%", "%25");
-            // Create a request using a URL that can receive a post. 
-            WebRequest request = WebRequest.Create("https://js.do/mod_perl/js.pl");
-            // Set the Method property of the request to POST.
-            request.Method = "POST";
-            // Create POST data and convert it to a byte array.
-            string postData = "action=save_code&js_code=" + code + "&js_title=&js_permalink=&js_id=&is_update=false";
-            byte[] byteArray = Encoding.UTF8.GetBytes(postData);
-            // Set the ContentType property of the WebRequest.
-            request.ContentType = "application/x-www-form-urlencoded";
-            // Set the ContentLength property of the WebRequest.
-            request.ContentLength = byteArray.Length;
-            // Get the request stream.
-            Stream dataStream = request.GetRequestStream();
-            // Write the data to the request stream.
-            dataStream.Write(byteArray, 0, byteArray.Length);
-            // Close the Stream object.
-            dataStream.Close();
-            // Get the response.
-            WebResponse response = request.GetResponse();
-            // Display the status.
-            // Console.WriteLine(((HttpWebResponse)response).StatusDescription);
-            // Get the stream containing content returned by the server.
-            dataStream = response.GetResponseStream();
-            // Open the stream using a StreamReader for easy access.
-            StreamReader reader = new StreamReader(dataStream);
-            // Read the content.
-            string responseFromServer = reader.ReadToEnd();
-            // Display the content.
-            reader.Close();
-            dataStream.Close();
-            response.Close();
-            string rLink = "https://js.do/code/" + FindHTML(responseFromServer, "js_permalink\":\"", "\"");
-            return rLink;
+            try {
+
+
+                const string baseUrl = "CloudStreamForms";
+                //Because I don't want to host my own servers I "Save" a js code on a free js hosting site. This code will automaticly give a responseurl that will redirect to the CloudStream app.
+                string code = ("var x = document.createElement('body');\n var s = document.createElement(\"script\");\n s.innerHTML = \"window.location.href = '" + baseUrl + ":" + extra + "';\";\n var h = document.createElement(\"H1\");\n var div = document.createElement(\"div\");\n div.style.width = \"100%\";\n div.style.height = \"100%\";\n div.align = \"center\";\n div.style.padding = \"130px 0\";\n div.style.margin = \"auto\";\n div.innerHTML = \"" + redirectingName + "\";\n h.append(div);\n x.append(h);\n x.append(s);\n parent.document.body = x;").Replace("%", "%25");
+                // Create a request using a URL that can receive a post. 
+                WebRequest request = WebRequest.Create("https://js.do/mod_perl/js.pl");
+                // Set the Method property of the request to POST.
+                request.Method = "POST";
+                // Create POST data and convert it to a byte array.
+                string postData = "action=save_code&js_code=" + code + "&js_title=&js_permalink=&js_id=&is_update=false";
+                byte[] byteArray = Encoding.UTF8.GetBytes(postData);
+                // Set the ContentType property of the WebRequest.
+                request.ContentType = "application/x-www-form-urlencoded";
+                // Set the ContentLength property of the WebRequest.
+                request.ContentLength = byteArray.Length;
+                // Get the request stream.
+                Stream dataStream = request.GetRequestStream();
+                // Write the data to the request stream.
+                dataStream.Write(byteArray, 0, byteArray.Length);
+                // Close the Stream object.
+                dataStream.Close();
+                // Get the response.
+                WebResponse response = request.GetResponse();
+                // Display the status.
+                // Console.WriteLine(((HttpWebResponse)response).StatusDescription);
+                // Get the stream containing content returned by the server.
+                dataStream = response.GetResponseStream();
+                // Open the stream using a StreamReader for easy access.
+                StreamReader reader = new StreamReader(dataStream);
+                // Read the content.
+                string responseFromServer = reader.ReadToEnd();
+                // Display the content.
+                reader.Close();
+                dataStream.Close();
+                response.Close();
+                string rLink = "https://js.do/code/" + FindHTML(responseFromServer, "js_permalink\":\"", "\"");
+                return rLink;
+            }
+            catch (Exception) {
+                return "Error";
+            }
             // Clean up the streams.
         }
 
@@ -5328,7 +5376,7 @@ namespace CloudStreamForms
             s.Start();
 
 
-            
+
 
             while (d.Contains(lookFor)) {
                 place++;
@@ -7912,7 +7960,7 @@ namespace CloudStreamForms
             string[] lines = _inp.Replace("\r", "").Split('\n');
             int currentLine = 1;
             SubtitleTrack st = new SubtitleTrack();
-             
+
             int lineNum = 0;
 
             bool isUnderline = false;
@@ -7937,17 +7985,17 @@ namespace CloudStreamForms
                     if (lineNum == -1) { // FROM MILI
 
                         string st1 = FindHTML("|" + s, "|", " ").Replace(",", ".");
-                        string st2 = FindHTML(s + "|", "--> ", "|").Replace(",",".");
+                        string st2 = FindHTML(s + "|", "--> ", "|").Replace(",", ".");
 
-                        try { 
+                        try {
                             st.fromMilisec = TimeSpan.Parse(st1).TotalMilliseconds;
                             st.toMilisec = TimeSpan.Parse(st2).TotalMilliseconds;
                         }
-                        catch (Exception _ex) { 
+                        catch (Exception _ex) {
                             print("MAIN EX IN SUBTITLES::: " + _ex);
                             throw;
                         }
-                        
+
                         lineNum = 0;
 
                         isUnderline = false;
@@ -7988,7 +8036,7 @@ namespace CloudStreamForms
                             }
                             if (ContansEnd(s, "u")) {
                                 isUnderline = false;
-                            } 
+                            }
                         }
 
 

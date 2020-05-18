@@ -255,43 +255,48 @@ namespace CloudStreamForms
                         bool IsTooHigh()
                         {
                             //  print("::::::>>>>>" + currentSubtitleIndexInCurrent + "|" + currentTime + "<>" + track.fromMilisec);
-                            track = Subtrack[currentSubtitleIndexInCurrent];
-                            return currentTime < track.fromMilisec && currentSubtitleIndexInCurrent > 0;
+                            return currentTime < Subtrack[currentSubtitleIndexInCurrent].fromMilisec && currentSubtitleIndexInCurrent > 0;
                         }
+
                         bool IsTooLow()
                         {
-                            track = Subtrack[currentSubtitleIndexInCurrent];
-                            return currentTime > track.toMilisec && currentSubtitleIndexInCurrent < Subtrack.Length - 1;
+                            return currentTime > Subtrack[currentSubtitleIndexInCurrent + 1].fromMilisec && currentSubtitleIndexInCurrent < Subtrack.Length - 1;
                         }
+
                         if (IsTooHigh()) {
                             while (IsTooHigh()) {
                                 currentSubtitleIndexInCurrent--;
                             }
+                            print("SKIPP::1");
                             continue;
                         }
+
                         if (IsTooLow()) {
                             while (IsTooLow()) {
                                 currentSubtitleIndexInCurrent++;
                             }
+                            print("SKIPP::2");
                             continue;
                         }
 
 
-                        if (currentTime < track.toMilisec && currentTime > track.fromMilisec && last != currentSubtitleIndexInCurrent) {
-                            var lines = track.subtitleLines;
-                            if (lines.Count > 0) {
-                                if (lines.Count == 1) {
-                                    subtitleText1 = "";//lines[1].line;
-                                    subtitleText2 = lines[0].line;
+                        if (currentTime < track.toMilisec && currentTime > track.fromMilisec) {
+                            if (last != currentSubtitleIndexInCurrent) {
+                                var lines = track.subtitleLines;
+                                if (lines.Count > 0) {
+                                    if (lines.Count == 1) {
+                                        subtitleText1 = "";//lines[1].line;
+                                        subtitleText2 = lines[0].line;
+                                    }
+                                    else {
+                                        subtitleText1 = lines[0].line;
+                                        subtitleText2 = lines[1].line;
+                                    }
                                 }
-                                else {
-                                    subtitleText1 = lines[0].line;
-                                    subtitleText2 = lines[1].line;
-                                }
+                                UpdateSubtitles();
+                                print("SETSUB:" + track.fromMilisec + "|" + currentTime);
+                                lastType = false;
                             }
-                            UpdateSubtitles();
-                            print("SETSUB:" + track.fromMilisec + "|" + currentTime);
-                            lastType = false; 
                         }
                         else {
                             if (!lastType) {
@@ -303,8 +308,7 @@ namespace CloudStreamForms
                         }
 
                         last = currentSubtitleIndexInCurrent;
-
-
+                        print("DELAY!::: " + currentSubtitleIndexInCurrent);
                         await Task.Delay(10);
                     }
                     catch (Exception _ex) {
