@@ -350,7 +350,7 @@ namespace CloudStreamForms
                 MainChrome.GetAllChromeDevices();
             }
 
-            RecStack.SizeChanged += (o, e) => {
+            Recommendations.SizeChanged += (o, e) => {
                 SetRecs();
             };
 
@@ -377,6 +377,7 @@ namespace CloudStreamForms
             moeDone += MovieResult_moeDone;
 
             BackgroundColor = Settings.BlackRBGColor;
+            BgColorSet.BackgroundColor = Settings.BlackRBGColor;
 
             MALB.IsVisible = false;
             MALB.IsEnabled = false;
@@ -393,7 +394,7 @@ namespace CloudStreamForms
 
             BindingContext = epView;
             episodeView.VerticalScrollBarVisibility = Settings.ScrollBarVisibility;
-            MScroll.HorizontalScrollBarVisibility = Settings.ScrollBarVisibility; // REPLACE REC
+          //  RecStack.HorizontalScrollBarVisibility = Settings.ScrollBarVisibility; // REPLACE REC
 
             ReloadAllBtt.Clicked += (o, e) => {
                 App.RemoveKey("CacheImdb", currentMovie.title.id);
@@ -1012,8 +1013,8 @@ namespace CloudStreamForms
                     Poster p = e.title.recomended[i];
                     string posterURL = ConvertIMDbImagesToHD(p.posterUrl, 76, 113, 1.75); //.Replace(",76,113_AL", "," + pwidth + "," + pheight + "_AL").Replace("UY113", "UY" + pheight).Replace("UX76", "UX" + pwidth);
                     if (CheckIfURLIsValid(posterURL)) {
-                        Grid stackLayout = new Grid();
-                        Button imageButton = new Button() { HeightRequest = RecPosterHeight, WidthRequest = RecPosterWith, BackgroundColor = Color.Transparent, VerticalOptions = LayoutOptions.Center };
+                        Grid stackLayout = new Grid() { VerticalOptions = LayoutOptions.Start};
+                        Button imageButton = new Button() { HeightRequest = RecPosterHeight, WidthRequest = RecPosterWith, BackgroundColor = Color.Transparent, VerticalOptions = LayoutOptions.Start };
                         var ff = new FFImageLoading.Forms.CachedImage {
                             Source = posterURL,
                             HeightRequest = RecPosterHeight,
@@ -1071,12 +1072,13 @@ namespace CloudStreamForms
             Device.BeginInvokeOnMainThread(() => {
                 const int total = 12;
                 int perCol = (Application.Current.MainPage.Width < Application.Current.MainPage.Height) ? 3 : 6;
-                Recommendations.HeightRequest = RecPosterHeight * (total / perCol);
 
                 for (int i = 0; i < Recommendations.Children.Count; i++) { // GRID
                     Grid.SetColumn(Recommendations.Children[i], i % perCol);
                     Grid.SetRow(Recommendations.Children[i], (int)Math.Floor(i / (double)perCol));
                 }
+               // Recommendations.HeightRequest = (RecPosterHeight + Recommendations.RowSpacing) * (total / perCol);
+                Recommendations.HeightRequest = (RecPosterHeight + Recommendations.RowSpacing) * (total / perCol);
             });
         }
 
@@ -1832,7 +1834,7 @@ namespace CloudStreamForms
             Device.BeginInvokeOnMainThread(() => {
                 Grid.SetRow(EpPickers, (state == 0) ? 1 : 0);
 
-                episodeView.Scale = (state == 0) ? 1 : 0;
+                FadeEpisodes.Scale = (state == 0) ? 1 : 0;
                 //episodeView.IsEnabled = state == 0;
 
                 trailerStack.Scale = (state == 2) ? 1 : 0;
@@ -1845,10 +1847,10 @@ namespace CloudStreamForms
                 EpPickers.Scale = state == 0 ? 1 : 0;
                 EpPickers.IsVisible = state == 0;
 
-                RecStack.Scale = state == 1 ? 1 : 0;
-                RecStack.IsVisible = state == 1;
-                RecStack.IsEnabled = state == 1;
-                RecStack.InputTransparent = state != 1;
+                Recommendations.Scale = state == 1 ? 1 : 0;
+                Recommendations.IsVisible = state == 1;
+                Recommendations.IsEnabled = state == 1;
+                Recommendations.InputTransparent = state != 1;
 
                 SetHeight(state != 0);
                 //SetTrailerRec(state == 2);

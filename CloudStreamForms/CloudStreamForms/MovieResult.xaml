@@ -16,32 +16,10 @@ xmlns:ffTransformations="clr-namespace:FFImageLoading.Transformations;assembly=F
     <!-- xmlns:local="clr-namespace:CloudStreamForms"-->
 
     <ScrollView  VerticalScrollBarVisibility="Never">
-        <AbsoluteLayout HorizontalOptions="Fill">
+        <AbsoluteLayout HorizontalOptions="Fill" x:Name="BgColorSet" >
 
             <StackLayout  >
-                <StackLayout x:Name="NormalStack">
-
-                    <!--
-        <Grid
-
-            RowSpacing="0"
-				    VerticalOptions="Start">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="*" />
-                <RowDefinition Height="*" />
-                <RowDefinition Height="*" />
-            </Grid.RowDefinitions>
-            <Grid Grid.Row="0"  Grid.Column="0">
-                <ImageButton x:Name="TrailerBtt"  HorizontalOptions="Start"  Source="https://m.media-amazon.com/images/M/MV5BMjEyNzQ0MjE2OF5BMl5BanBnXkFtZTcwMTkyNjE5Ng@@._V1_CR0,60,640,360_AL_UX477_CR0,0,477,268_AL_.jpg" HeightRequest="250"></ImageButton>
-
-            </Grid>
-            <Grid Grid.Row="0" Grid.Column="1">
-
-                <ImageButton x:Name="PosterBtt"  HorizontalOptions="Start"  Source="https://m.media-amazon.com/images/M/MV5BMTczNTI2ODUwOF5BMl5BanBnXkFtZTcwMTU0NTIzMw@@._V1_UX182_CR0,0,182,268_AL_.jpg" HeightRequest="250"></ImageButton>
-            </Grid>
-
-        </Grid>
--->
+                <StackLayout x:Name="NormalStack"> 
                     <Grid x:Name="XGRID" HorizontalOptions="Center" 
             RowSpacing="10" Margin="0,-8,0,0" MinimumHeightRequest="0" 
 				    VerticalOptions="Start">
@@ -234,7 +212,7 @@ xmlns:ffTransformations="clr-namespace:FFImageLoading.Transformations;assembly=F
 
                     </Grid>
 
-                    <Grid Margin="0,-13,0,-5">
+                    <Grid Margin="0,-13,0,-5"  >
                         <Grid.RowDefinitions >
                             <RowDefinition Height="Auto" /> 
                         </Grid.RowDefinitions>
@@ -299,10 +277,10 @@ xmlns:ffTransformations="clr-namespace:FFImageLoading.Transformations;assembly=F
                    
                    > -->
                     <!--   <ProgressBar x:Name="FishProgress" IsVisible="False" IsEnabled="False" ProgressColor="#303F9F" Opacity="0" InputTransparent="True" VerticalOptions="Start" Margin="10,0"></ProgressBar>-->
-                    <Label x:Name="FishProgressTxt"   Text="" HorizontalOptions="Center" TextColor="#e6e6e6"></Label>
+                 <!--   <Label x:Name="FishProgressTxt"   Text="" HorizontalOptions="Center" TextColor="#e6e6e6"></Label>-->
 
-                    <Grid >
-                        <StackLayout x:Name="FadeEpisodes">
+                    <Grid  x:Name="RecFadeEpisodes">
+                        <StackLayout x:Name="FadeEpisodes" >
 
                             <ListView ItemsSource="{Binding MyEpisodeResultCollection}" VerticalOptions="Fill" 
                                  CachingStrategy="RecycleElement" 
@@ -348,8 +326,11 @@ xmlns:ffTransformations="clr-namespace:FFImageLoading.Transformations;assembly=F
                                                                 <Label Text="{Binding Title}" TextColor="{Binding MainTextColor}"  FontAttributes="Bold" FontSize="15" />
                                                                 <!--MaxLines="5"-->
                                                             </Grid>
+                                                            
+                                                            <!-- TEXT MARGIN -->
                                                             <Grid Grid.Row="0"  Grid.Column="1" WidthRequest="30" >
                                                             </Grid>
+                                                            
                                                             <Grid Grid.Row="1"  Grid.Column="0" >
                                                                 <Label Text="{Binding RatingStar}" TextColor="{Binding MainDarkTextColor}" FontAttributes="None" FontSize="14"/>
                                                             </Grid>
@@ -422,45 +403,8 @@ xmlns:ffTransformations="clr-namespace:FFImageLoading.Transformations;assembly=F
 
                             </ListView>
                         </StackLayout>
-                        <!--
-                    <ListView ItemsSource="{Binding CurrentTrailers}"
-                                 CachingStrategy="RecycleElement" 
-                    ItemTapped="ListView_ItemTapped" RowHeight="5000" HasUnevenRows="False" 
-                        x:Name="trailerView" SeparatorColor="Transparent" VerticalScrollBarVisibility="Never">
-                        <ListView.ItemTemplate>
-                            <DataTemplate >
-                                <ViewCell>
-                                    <Grid  RowSpacing="0"  HorizontalOptions="Start" TranslationY="0" >
-
-                                        <Grid.RowDefinitions>
-                                            <RowDefinition Height="Auto" />
-                                            <RowDefinition Height="Auto" />
-                                            <RowDefinition Height="Auto" />
-                                        </Grid.RowDefinitions>
-                                        <Grid Grid.Row="0"  Grid.Column="0" TranslationY="10" VerticalOptions="Fill">
-
-                                        <ImageButton  BackgroundColor="Transparent"  HorizontalOptions="Fill" VerticalOptions="Fill"  Scale="1"></ImageButton>
-
-                                            <ff:CachedImage  Source="{Binding PosterUrl}" InputTransparent="True" Scale="1" Margin="0,10">
-
-                                        </ff:CachedImage>
-                               
-                                    </Grid>
-                                        <ff:CachedImage PropertyChanging="Image_PropertyChanging" InputTransparent="True" BackgroundColor="Transparent" Scale="0.2"  >
-
-                                        </ff:CachedImage>
-                                        <Grid  Grid.Row="1">
-
-                                            <Label Text="{Binding Name}"  TextColor="#e7e7e7" FontAttributes="Bold" FontSize="Body" TranslationY="0"  />
-                                        </Grid>
-
-                                    </Grid>
-                                </ViewCell>
-                            </DataTemplate>
-                        </ListView.ItemTemplate>
-                    </ListView>
--->
-                        <StackLayout  x:Name="trailerStack" >
+                    
+                        <StackLayout  x:Name="trailerStack">
                             <Grid x:Name="trailerView" VerticalOptions="Start" HorizontalOptions="CenterAndExpand" Margin="10" RowSpacing="10" >
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="Auto" />
@@ -487,41 +431,25 @@ xmlns:ffTransformations="clr-namespace:FFImageLoading.Transformations;assembly=F
                             </Grid>
                         </StackLayout>
 
-                        <StackLayout Margin="0,0,0,40" x:Name="RecStack">
+                        <!--<StackLayout Padding="0,10,0,400" x:Name="RecStack" BackgroundColor="Blue">-->
                             <!--  <Label x:Name="RText" Text="Recommendations" FontAttributes="Bold" TranslationX="10" VerticalOptions="Start" FontSize="Medium" TextColor="White"></Label>-->
-                            <ScrollView Orientation="Vertical" x:Name="MScroll" VerticalOptions="Start" HorizontalScrollBarVisibility="Never">
-                                <StackLayout>
-                                    <Grid x:Name="Recommendations" VerticalOptions="Start" HorizontalOptions="Fill" HeightRequest="130" RowSpacing="10" >
+                      <!--  <ScrollView Orientation="Vertical" x:Name="RecStack" VerticalOptions="Fill"  Padding="0,10,0,0" HorizontalScrollBarVisibility="Never">-->
+                                <!--<StackLayout>-->
+                                    <Grid x:Name="Recommendations" VerticalOptions="Fill" HorizontalOptions="FillAndExpand" HeightRequest="130" RowSpacing="10" Padding="0,0,0,40">
 
                                     </Grid>
-                                </StackLayout>
-                            </ScrollView>
+                              <!--  </StackLayout>-->
+                           <!-- </ScrollView>-->
                             <!--   <ActivityIndicator x:Name="RecomendationLoaded" IsRunning="True" IsVisible="True" IsEnabled="True" ></ActivityIndicator>-->
-                        </StackLayout>
-                    </Grid>
-
-                    <!--
-                <StackLayout Margin="0,-10,0,0">
-                    <Label x:Name="RText" Text="Recommendations" FontAttributes="Bold" TranslationX="10" VerticalOptions="Start" FontSize="Medium" TextColor="White"></Label>
-                    <ScrollView Orientation="Horizontal" x:Name="MScroll" VerticalOptions="Start" HorizontalScrollBarVisibility="Never">
-                        <StackLayout>
-                            <Grid x:Name="Recommendations" VerticalOptions="Start" HorizontalOptions="Start" HeightRequest="130">
-
-                            </Grid>
-                        </StackLayout>
-                    </ScrollView>
-                    <ActivityIndicator x:Name="RecomendationLoaded" IsRunning="True" IsVisible="True" IsEnabled="True" ></ActivityIndicator>
-                </StackLayout>-->
+                      <!--  </StackLayout>-->
+                    </Grid> 
                 </StackLayout>
 
             </StackLayout>
-            <StackLayout AbsoluteLayout.LayoutBounds="0, 0, 1, 1" AbsoluteLayout.LayoutFlags="All" InputTransparent="True">
+            <StackLayout AbsoluteLayout.LayoutBounds="0, 0, 1, 1" AbsoluteLayout.LayoutFlags="All" InputTransparent="True"  >
                 <ProgressBar HorizontalOptions="Fill"  x:Name="RecomendationLoaded" InputTransparent="True"  IsVisible="True" IsEnabled="True" ClassId="id" TranslationY="-7" ></ProgressBar>
 
             </StackLayout>
-        </AbsoluteLayout>
-
-
-
+        </AbsoluteLayout> 
     </ScrollView>
 </ContentPage>

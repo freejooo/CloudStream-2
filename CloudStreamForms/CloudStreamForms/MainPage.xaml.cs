@@ -102,11 +102,22 @@ namespace CloudStreamForms
         protected override void OnAppearing()
         {
             base.OnAppearing();
-            App.Test();
+            App.isOnMainPage = true;
+            App.UpdateBackground();
+           // App.Test();
         }
 
-        public static readonly string[] baseIcons = new string[] { "outline_home_white_48dp.png", "searchIcon.png", "outline_get_app_white_48dp.png", "outline_settings_white_48dp.png" };
-        public static readonly string[] onSelectedIcons = new string[] { "sharp_home_white_48dp.png", "searchIcon.png", "sharp_get_app_white_48dp.png", "sharp_settings_white_48dp.png" };
+        protected override void OnDisappearing()
+        {
+            base.OnDisappearing();
+            App.isOnMainPage = false;
+            App.UpdateBackground();
+        }
+
+       // public static readonly string[] baseIcons = new string[] { "outline_home_white_48dp.png", "searchIcon.png", "outline_get_app_white_48dp.png", "outline_settings_white_48dp.png" };
+        public static readonly string[] baseIcons = new string[] { "outline_home_white_48dp.png", "MainSearchIcon.png", "MainNetflixDownloadIcon.png", "MainSettingsIcon_backup.png" };
+        public static readonly string[] onSelectedIcons = new string[] { "outline_home_white_48dp.png", "MainSearchIcon.png", "MainNetflixDownloadIcon.png", "MainSettingsIcon_backup.png" };
+    //    public static readonly string[] onSelectedIcons = new string[] { "sharp_home_white_48dp.png", "searchIcon.png", "sharp_get_app_white_48dp.png", "sharp_settings_white_48dp.png" };
 
         public static void OnIconStart(int i)
         {
@@ -166,12 +177,9 @@ namespace CloudStreamForms
             //  PushPageFromUrlAndName("tt0409591", "Naruto");
             //  PushPageFromUrlAndName("tt10885406", "Ascendance of a Bookworm");
             // PushPageFromUrlAndName("tt9054364", "That Time I Got Reincarnated as a Slime");
-            PushPageFromUrlAndName("tt0371746", "Iron Man");
+            //  PushPageFromUrlAndName("tt0371746", "Iron Man");
             // PushPageFromUrlAndName("tt10954274", "ID: Invaded");
         }
-
-
-
 
         async void LateCheck()
         {
@@ -4004,33 +4012,40 @@ namespace CloudStreamForms
                 minorTempThred.typeId = 3; // MAKE SURE THIS IS BEFORE YOU CREATE THE THRED
                 minorTempThred.Thread = new System.Threading.Thread(() => {
                     try {*/
-                string find = activeMovie.title.name.ToLower() + (activeMovie.title.movieType == MovieType.TVSeries ? "-season-" + season : "");
-                find = find.Replace("\'", "-");
-                Regex rgx = new Regex("[^a-zA-Z0-9 -]");
-                find = rgx.Replace(find, "");
+                try {
 
-                find = find.Replace(" - ", "-").Replace(" ", "-");
 
-                if (activeMovie.title.movieType == MovieType.TVSeries) { // ADD CORRECT FORMAT; https://gomostream.com/show/game-of-thrones/01-01
-                    find = find.Replace("-season-", "/");
+                    string find = activeMovie.title.name.ToLower() + (activeMovie.title.movieType == MovieType.TVSeries ? "-season-" + season : "");
+                    find = find.Replace("\'", "-");
+                    Regex rgx = new Regex("[^a-zA-Z0-9 -]");
+                    find = rgx.Replace(find, "");
 
-                    for (int i = 0; i < 10; i++) {
-                        if (find.EndsWith("/" + i)) {
-                            find = find.Replace("/" + i, "/0" + i);
+                    find = find.Replace(" - ", "-").Replace(" ", "-");
+
+                    if (activeMovie.title.movieType == MovieType.TVSeries) { // ADD CORRECT FORMAT; https://gomostream.com/show/game-of-thrones/01-01
+                        find = find.Replace("-season-", "/");
+
+                        for (int i = 0; i < 10; i++) {
+                            if (find.EndsWith("/" + i)) {
+                                find = find.Replace("/" + i, "/0" + i);
+                            }
+                        }
+                        if (episode.ToString() != "-1") {
+                            find += "-" + episode;
+                        }
+                        for (int i = 0; i < 10; i++) {
+                            if (find.EndsWith("-" + i)) {
+                                find = find.Replace("-" + i, "-0" + i);
+                            }
                         }
                     }
-                    if (episode.ToString() != "-1") {
-                        find += "-" + episode;
-                    }
-                    for (int i = 0; i < 10; i++) {
-                        if (find.EndsWith("-" + i)) {
-                            find = find.Replace("-" + i, "-0" + i);
-                        }
-                    }
+                    string gomoUrl = "https://" + GOMOURL + "/" + ((activeMovie.title.movieType == MovieType.Movie || activeMovie.title.movieType == MovieType.AnimeMovie) ? "movie" : "show") + "/" + find;
+                    print("GOMOURL==: " + gomoUrl);
+                    DownloadGomoSteam(gomoUrl, tempThred, normalEpisode);
                 }
-                string gomoUrl = "https://" + GOMOURL + "/" + ((activeMovie.title.movieType == MovieType.Movie || activeMovie.title.movieType == MovieType.AnimeMovie) ? "movie" : "show") + "/" + find;
-                print("GOMOURL==: " + gomoUrl);
-                DownloadGomoSteam(gomoUrl, tempThred, normalEpisode);
+                catch (Exception _ex) {
+                    print("PROVIDER ERROR: " + _ex);
+                }
                 /*  }
                   finally {
                       JoinThred(minorTempThred);
@@ -4892,7 +4907,7 @@ namespace CloudStreamForms
 
             public void LoadLinksTSync(int episode, int season, int normalEpisode, bool isMovie, TempThred tempThred)
             {
-                try { 
+                try {
                     if (activeMovie.title.yesmoviessSeasonDatas != null) {
                         for (int i = 0; i < activeMovie.title.yesmoviessSeasonDatas.Count; i++) {
                             //     print(activeMovie.title.yesmoviessSeasonDatas[i].id + "<-IDS:" + season);
@@ -5162,28 +5177,37 @@ namespace CloudStreamForms
 
             public void LoadLinksTSync(int episode, int season, int normalEpisode, bool isMovie, TempThred tempThred)
             {
-                void GetFromUrl(string url)
-                {
-                    print("GET FROM URLLLLLLL:::: " + url);
 
-                    string d = DownloadString(url);
 
-                    print("RES FROM URLLLLL:::: " + d);
+                try {
 
-                    if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
-                    AddEpisodesFromMirrors(tempThred, d, normalEpisode, "Watch");
-                    LookForFembedInString(tempThred, normalEpisode, d);
-                }
+                    void GetFromUrl(string url)
+                    {
+                        print("GET FROM URLLLLLLL:::: " + url);
 
-                if (activeMovie.title.movieType.IsMovie()) {
-                    if (activeMovie.title.watchMovieSeasonsData.ContainsKey(-1)) {
-                        GetFromUrl(activeMovie.title.watchMovieSeasonsData[-1].Replace("/anime-info/", "/anime/"));
+                        string d = DownloadString(url);
+
+                        print("RES FROM URLLLLL:::: " + d);
+
+                        if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
+                        AddEpisodesFromMirrors(tempThred, d, normalEpisode, "Watch");
+                        LookForFembedInString(tempThred, normalEpisode, d);
+                    }
+
+                    if (activeMovie.title.movieType.IsMovie()) {
+                        if (activeMovie.title.watchMovieSeasonsData.ContainsKey(-1)) {
+                            GetFromUrl(activeMovie.title.watchMovieSeasonsData[-1].Replace("/anime-info/", "/anime/"));
+                        }
+                    }
+                    else {
+                        if (activeMovie.title.watchMovieSeasonsData.ContainsKey(season)) {
+                            GetFromUrl(activeMovie.title.watchMovieSeasonsData[season].Replace("/anime-info/", "/anime/") + "-episode-" + episode);
+                        }
                     }
                 }
-                else {
-                    if (activeMovie.title.watchMovieSeasonsData.ContainsKey(season)) {
-                        GetFromUrl(activeMovie.title.watchMovieSeasonsData[season].Replace("/anime-info/", "/anime/") + "-episode-" + episode);
-                    }
+                catch (Exception _ex) {
+                    print("PROVIDER ERROR: " + _ex);
+
                 }
             }
         }
@@ -7771,7 +7795,8 @@ namespace CloudStreamForms
 
                 // return client.DownloadString(url);
             }
-            catch (Exception) {
+            catch (Exception _ex) {
+                print("DLOAD EX: " + _ex);
                 return "";
             }
         }

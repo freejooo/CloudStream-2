@@ -20,10 +20,11 @@ namespace CloudStreamForms.Droid.Renderers
     {
      
         public CustomTabbedPageRenderer(Context context) : base(context) { }
-
+        const bool line = false;
         protected override void OnElementPropertyChanged(object sender, PropertyChangedEventArgs e) // HOMESCREEN LINE HERE
         {
             base.OnElementPropertyChanged(sender, e);
+            if (!line) return; 
             //System.Console.WriteLine("sender::::" + sender.ToString());
             // System.Console.WriteLine(ViewGroup.GetChildAt(1).ToString());
 
@@ -34,7 +35,6 @@ namespace CloudStreamForms.Droid.Renderers
             var pager = (ViewPager)rel.GetChildAt(0);
             var view = (BottomNavigationView)rel.GetChildAt(1);
             if (view.ChildCount == 1) {
-
                 // rel.SetBackgroundColor(Android.Graphics.Color.Blue);
                 var _v = new Android.Widget.ImageView(Context) { };
                 _v.SetBackgroundColor(new Android.Graphics.Color(50, 50, 50));

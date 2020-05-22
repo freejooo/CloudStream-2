@@ -208,6 +208,7 @@ namespace CloudStreamForms
 
         void SeekSubtitles(double milisec)
         {
+            return;
             for (int i = 0; i < Subtrack.Length - 1; i++) {
                 // print("FFFF:::" + i + "|" + milisec + "|" + Subtrack[i].toMilisec);
                 if (milisec > Subtrack[i].toMilisec && milisec < Subtrack[i + 1].toMilisec) {
@@ -483,6 +484,7 @@ namespace CloudStreamForms
             }));
 
             MirrorsTap.IsVisible = AllMirrorsUrls.Count > 1;
+            /*
             try {
 
                 ParsedSubtitles = new List<SubtitleTrack[]>();
@@ -500,9 +502,9 @@ namespace CloudStreamForms
             }
             catch (Exception _ex) {
                 print("A_A__A__A:: " + _ex);
-            }
+            }*/
 
-
+            SubTap.IsVisible = false;
             EpisodesTap.IsVisible = false; // TODO: ADD EPISODES SWITCH
             NextEpisodeTap.IsVisible = false; // TODO: ADD NEXT EPISODE
 
