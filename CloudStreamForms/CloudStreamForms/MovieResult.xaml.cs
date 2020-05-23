@@ -4,6 +4,7 @@ using FFImageLoading;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Data;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
@@ -53,8 +54,7 @@ namespace CloudStreamForms
         Movie currentMovie = new Movie();
         bool isDub = true;
         bool RunningWindows { get { return DeviceInfo.Platform == DevicePlatform.UWP; } }
-        string CurrentMalLink
-        {
+        string CurrentMalLink {
             get {
 
                 try {
@@ -394,7 +394,7 @@ namespace CloudStreamForms
 
             BindingContext = epView;
             episodeView.VerticalScrollBarVisibility = Settings.ScrollBarVisibility;
-          //  RecStack.HorizontalScrollBarVisibility = Settings.ScrollBarVisibility; // REPLACE REC
+            //  RecStack.HorizontalScrollBarVisibility = Settings.ScrollBarVisibility; // REPLACE REC
 
             ReloadAllBtt.Clicked += (o, e) => {
                 App.RemoveKey("CacheImdb", currentMovie.title.id);
@@ -712,24 +712,53 @@ namespace CloudStreamForms
                 episodeResult.PosterUrl = CloudStreamCore.ConvertIMDbImagesToHD(episodeResult.PosterUrl, 224, 126); //episodeResult.PosterUrl.Replace(",126,224_AL", "," + pwidth + "," + pheight + "_AL").Replace("UY126", "UY" + pheight).Replace("UX224", "UX" + pwidth);
             }
 
-            episodeResult.TapCom = new Command(async (s) => {
-                int _id = -1;
+            int GetRealIdFromId()
+            {
                 for (int i = 0; i < epView.MyEpisodeResultCollection.Count; i++) {
                     if (epView.MyEpisodeResultCollection[i].Id == episodeResult.Id) {
-                        _id = i;
-                        break;
+                        return i;
                     }
                 }
+                return -1;
+            }
+
+            episodeResult.TapComTwo = new Command(async (s) => {
+                int _id = GetRealIdFromId();
+                if (_id == -1) return;
+                var epRes = epView.MyEpisodeResultCollection[_id];
+                if(epRes.downloadState == 1) {
+                    PlayDownloadedEp(epRes);
+                }
+                else {
+                    await LoadLinksForEpisode(epRes);
+                } 
+            });
+            episodeResult.TapCom = new Command(async (s) => {
+                int _id = GetRealIdFromId(); 
                 if (_id == -1) return;
 
                 var epRes = epView.MyEpisodeResultCollection[_id];
                 if (epRes.downloadState == 4) return;
 
-                if (epRes.IsDownloaded || epRes.IsDownloading) { // REMOVE
+                void DeleteData()
+                {
+                    string downloadKeyData = App.GetDownloadInfo(GetCorrectId(epRes), false).info.fileUrl;//.GetKey("Download", GetId(episodeResult), "");
+                    DeleteFile(downloadKeyData, epRes);
+                }
+
+                if (epRes.IsDownloading) { // REMOVE
                     bool action = await DisplayAlert("Delete file", "Do you want to delete " + epRes.OgTitle, "Delete", "Cancel");
                     if (action) {
-                        string downloadKeyData = App.GetDownloadInfo(GetCorrectId(epRes), false).info.fileUrl;//.GetKey("Download", GetId(episodeResult), "");
-                        DeleteFile(downloadKeyData, epRes);
+                        DeleteData();
+                    }
+                }
+                else if (epRes.IsDownloaded) {
+                    string action = await DisplayActionSheet(epRes.OgTitle, "Cancel", null, "Play", "Delete File");
+                    if (action == "Delete File") {
+                        DeleteData();
+                    }
+                    else if (action == "Play") {
+                        PlayDownloadedEp(epRes);
                     }
                 }
                 else { // DOWNLOAD
@@ -1013,7 +1042,7 @@ namespace CloudStreamForms
                     Poster p = e.title.recomended[i];
                     string posterURL = ConvertIMDbImagesToHD(p.posterUrl, 76, 113, 1.75); //.Replace(",76,113_AL", "," + pwidth + "," + pheight + "_AL").Replace("UY113", "UY" + pheight).Replace("UX76", "UX" + pwidth);
                     if (CheckIfURLIsValid(posterURL)) {
-                        Grid stackLayout = new Grid() { VerticalOptions = LayoutOptions.Start};
+                        Grid stackLayout = new Grid() { VerticalOptions = LayoutOptions.Start };
                         Button imageButton = new Button() { HeightRequest = RecPosterHeight, WidthRequest = RecPosterWith, BackgroundColor = Color.Transparent, VerticalOptions = LayoutOptions.Start };
                         var ff = new FFImageLoading.Forms.CachedImage {
                             Source = posterURL,
@@ -1077,7 +1106,7 @@ namespace CloudStreamForms
                     Grid.SetColumn(Recommendations.Children[i], i % perCol);
                     Grid.SetRow(Recommendations.Children[i], (int)Math.Floor(i / (double)perCol));
                 }
-               // Recommendations.HeightRequest = (RecPosterHeight + Recommendations.RowSpacing) * (total / perCol);
+                // Recommendations.HeightRequest = (RecPosterHeight + Recommendations.RowSpacing) * (total / perCol);
                 Recommendations.HeightRequest = (RecPosterHeight + Recommendations.RowSpacing) * (total / perCol);
             });
         }
@@ -1387,6 +1416,13 @@ namespace CloudStreamForms
             App.OpenBrowser(CurrentMalLink);
         }
 
+        void PlayDownloadedEp(EpisodeResult episodeResult, string data = null)
+        {
+            var downloadKeyData = data ?? App.GetDownloadInfo(GetCorrectId(episodeResult), false).info.fileUrl;
+            Download.PlayVLCFile(downloadKeyData, episodeResult.Title);
+        }
+
+        /*
         void PlayEpisodeRes(EpisodeResult episodeResult)
         {
             string hasDownloadedFile = App.GetKey("Download", GetId(episodeResult), "");
@@ -1396,16 +1432,17 @@ namespace CloudStreamForms
             else {
                 LoadLinksForEpisode(episodeResult);
             }
-        }
+        }*/
 
-        private void ImageButton_Clicked(object sender, EventArgs e) // LOAD
-        {
-            if (!SameAsActiveMovie()) return;
-            EpisodeResult episodeResult = ((EpisodeResult)((ImageButton)sender).BindingContext);
-            PlayEpisodeRes(episodeResult);
+        /*
+    private void ImageButton_Clicked(object sender, EventArgs e) // LOAD
+    {
+        if (!SameAsActiveMovie()) return;
+        EpisodeResult episodeResult = ((EpisodeResult)((ImageButton)sender).BindingContext);
+        PlayEpisodeRes(episodeResult);
 
-            episodeView.SelectedItem = null;
-        }
+        episodeView.SelectedItem = null;
+    }*/
 
         bool loadingLinks = false;
 
@@ -1701,7 +1738,8 @@ namespace CloudStreamForms
             }
             else if (action == "Play Downloaded File") { // ============================== PLAY FILE ==============================
                                                          //  bool succ = App.DeleteFile(info.info.fileUrl); 
-                Download.PlayVLCFile(downloadKeyData, episodeResult.Title);
+                                                         //  Download.PlayVLCFile(downloadKeyData, episodeResult.Title);
+                PlayDownloadedEp(episodeResult, downloadKeyData);
             }
             else if (action == "Delete Downloaded File") {  // ============================== DELETE FILE ==============================
                 DeleteFile(downloadKeyData, episodeResult);
@@ -1795,14 +1833,14 @@ namespace CloudStreamForms
         }
 
         // ============================== USED FOR SMALL VIDEO PLAY ==============================
-        private void Grid_LayoutChanged(object sender, EventArgs e)
-        {
-            var s = ((Grid)sender);
-            Commands.SetTap(s, new Command((o) => {
-                var episodeResult = (EpisodeResult)s.BindingContext;
-                PlayEpisodeRes(episodeResult);
-            }));
-        }
+        /*  private void Grid_LayoutChanged(object sender, EventArgs e)
+          {
+              var s = ((Grid)sender);
+              Commands.SetTap(s, new Command((o) => {
+                  var episodeResult = (EpisodeResult)s.BindingContext;
+                  PlayEpisodeRes(episodeResult);
+              }));
+          }*/
 
         // ============================== SHOW SETTINGS OF VIDEO ==============================
         private void ViewCell_Tapped(object sender, EventArgs e)

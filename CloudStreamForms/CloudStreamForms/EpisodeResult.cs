@@ -18,7 +18,7 @@ namespace CloudStreamForms.Models
         public ImageSource VideoSource { get { return App.GetImageSource("nexflixPlayBtt.png");  } }
         public ImageSource DownloadSource { get {
                 if(IsDownloaded) {
-                    return "NetflixDownload2.png";
+                    return "NetflixDownload3v2.png";//"NetflixDownload2.png";
                 }
                 else if(IsDownloading) {
                     return "netflixStop128v2.png";
@@ -36,9 +36,10 @@ namespace CloudStreamForms.Models
                 return 0.8;
             } }
 
-
+        public bool ForceDescript = false;
         public ImageSource DownloadPlayBttSource { get; set; }
         public Command TapCom { set; get; }
+        public Command TapComTwo { set; get; }
         public bool IsDownloading { get { return downloadState == 2; } }
         public bool IsDownloaded { get { return downloadState == 1; } } 
         public bool IsSearchingDownloadResults { get { return downloadState == 4; } } 
@@ -55,8 +56,8 @@ namespace CloudStreamForms.Models
 
         string _Description = "";
         string _ExtraDescription = "";
-        public string Description { set { _Description = Settings.EpDecEnabled ? value : ""; } get { return _Description; } }
-        public string ExtraDescription { set { _ExtraDescription = Settings.EpDecEnabled ? value : ""; } get { return _ExtraDescription; } }
+        public string Description { set { _Description = (Settings.EpDecEnabled || ForceDescript) ? value : ""; } get { return _Description; } }
+        public string ExtraDescription { set { _ExtraDescription = (Settings.EpDecEnabled || ForceDescript) ? value : ""; } get { return _ExtraDescription; } }
         public double Progress { set; get; }
         public List<string> Mirros { set; get; }
         public List<string> mirrosUrls { set; get; }

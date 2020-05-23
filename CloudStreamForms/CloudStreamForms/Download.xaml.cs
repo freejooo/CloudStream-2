@@ -552,12 +552,12 @@ namespace CloudStreamForms
             // info.info.fileUrl
         }
 
-
+        /*
         public static void PlayFile(string keyData, string title = "")
         {
             string moviePath = FindHTML(keyData, "_dpath=", "|||");
             App.PlayVLCWithSingleUrl(moviePath, title);
-        }
+        }*/
 
         List<FFImageLoading.Forms.CachedImage> play_btts = new List<FFImageLoading.Forms.CachedImage>();
         private void Image_PropertyChanging(object sender, PropertyChangingEventArgs e)

@@ -339,17 +339,20 @@ xmlns:ffTransformations="clr-namespace:FFImageLoading.Transformations;assembly=F
 
 
 
+                                                    <!--HeightRequest="72"  WidthRequest="127" WidthRequest="127" HeightRequest="72"-->
+                                                    <Grid TranslationY="{Binding TranslateYOffset}" BackgroundColor="Blue" xe:TouchEffect.Color="White" Grid.Row="0"  Grid.Column="0" HeightRequest="72" WidthRequest="126" MinimumWidthRequest="126"  xe:EffectsConfig.ChildrenInputTransparent="False" xe:Commands.Tap="{Binding TapComTwo}"  >
 
-                                                    <Grid TranslationY="{Binding TranslateYOffset}"  xe:TouchEffect.Color="White" Grid.Row="0"  Grid.Column="0" WidthRequest="127" HeightRequest="72"  BackgroundColor="Transparent" xe:EffectsConfig.ChildrenInputTransparent="False" LayoutChanged="Grid_LayoutChanged"  >
-                                                        <ff:CachedImage WidthRequest="127" HeightRequest="72" Source="{Binding ImageSource}" InputTransparent="True" >
+                                                        <!-- Image -->
+                                                        <ff:CachedImage HeightRequest="72" Source="{Binding ImageSource}" InputTransparent="True" >
 
                                                             <ff:CachedImage.Transformations >
-                                                                <ffTransformations:RoundedTransformation Radius="1" CropWidthRatio="1.8"  >
+                                                                <ffTransformations:RoundedTransformation Radius="1" CropWidthRatio="1.75"  >
 
                                                                 </ffTransformations:RoundedTransformation>
                                                             </ff:CachedImage.Transformations>
 
                                                         </ff:CachedImage>
+                                                        <!-- Play Icon -->
                                                         <ff:CachedImage   Source="{Binding VideoSource}" Scale="0.5" InputTransparent="True"  BackgroundColor="Transparent">
 
                                                         </ff:CachedImage>
@@ -435,7 +438,7 @@ xmlns:ffTransformations="clr-namespace:FFImageLoading.Transformations;assembly=F
                             <!--  <Label x:Name="RText" Text="Recommendations" FontAttributes="Bold" TranslationX="10" VerticalOptions="Start" FontSize="Medium" TextColor="White"></Label>-->
                       <!--  <ScrollView Orientation="Vertical" x:Name="RecStack" VerticalOptions="Fill"  Padding="0,10,0,0" HorizontalScrollBarVisibility="Never">-->
                                 <!--<StackLayout>-->
-                                    <Grid x:Name="Recommendations" VerticalOptions="Fill" HorizontalOptions="FillAndExpand" HeightRequest="130" RowSpacing="10" Padding="0,0,0,40">
+                                    <Grid x:Name="Recommendations" VerticalOptions="Fill" HorizontalOptions="FillAndExpand" HeightRequest="130" RowSpacing="5" Padding="0,0,0,40">
 
                                     </Grid>
                               <!--  </StackLayout>-->
