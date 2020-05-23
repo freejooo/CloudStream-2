@@ -23,12 +23,14 @@ namespace CloudStreamForms
         readonly List<string> genres = new List<string>() { "", "action", "adventure", "animation", "biography", "comedy", "crime", "drama", "family", "fantasy", "film-noir", "history", "horror", "music", "musical", "mystery", "romance", "sci-fi", "sport", "thriller", "war", "western" };
         readonly List<string> genresNames = new List<string>() { "Any", "Action", "Adventure", "Animation", "Biography", "Comedy", "Crime", "Drama", "Family", "Fantasy", "Film-Noir", "History", "Horror", "Music", "Musical", "Mystery", "Romance", "Sci-Fi", "Sport", "Thriller", "War", "Western" };
 
-        readonly List<string> recomendationTypes = new List<string> { "Related", "Top 100" };
+        readonly List<string> recomendationTypes = new List<string> { "Related", "Top 100", "Popular" };
 
         LabelList MovieTypePicker;
         LabelList ImdbTypePicker;
 
         public bool IsRecommended { get { return ImdbTypePicker.SelectedIndex == 0; } }
+        public bool IsTop100 { get { return ImdbTypePicker.SelectedIndex == 1; } }
+        public bool IsPopular { get { return ImdbTypePicker.SelectedIndex == 1; } }
 
         public int currentImageCount = 0;
         public void LoadMoreImages(bool setHeight = true)
@@ -106,8 +108,7 @@ namespace CloudStreamForms
         }
 
         bool _fething = false;
-        public bool Fething
-        {
+        public bool Fething {
             set {
                 if ((value && epView.MyEpisodeResultCollection.Count == 0) || !value) {
                     Device.BeginInvokeOnMainThread(() => { LoadingIndicator.IsVisible = value; LoadingIndicator.IsEnabled = value; /*LoadingIndicator.IsRunning = value;*/ });
@@ -116,6 +117,7 @@ namespace CloudStreamForms
             }
             get { return _fething; }
         }
+
         public void GetFetch(int start = 1)
         {
             if (!Settings.Top100Enabled) return;
@@ -125,7 +127,7 @@ namespace CloudStreamForms
             tempThred.typeId = 21; // MAKE SURE THIS IS BEFORE YOU CREATE THE THRED
             tempThred.Thread = new System.Threading.Thread(() => {
                 try {
-                    var f = FetchTop100(new List<string>() { genres[MovieTypePicker.SelectedIndex] }, start);
+                    var f = FetchTop100(new List<string>() { genres[MovieTypePicker.SelectedIndex] }, start, top100: IsTop100);
                     if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
 
                     iMDbTopList.AddRange(f);
@@ -153,9 +155,8 @@ namespace CloudStreamForms
             });
             tempThred.Thread.Name = "FethTop100";
             tempThred.Thread.Start();
-
-
         }
+
         private void episodeView_ItemTapped(object sender, ItemTappedEventArgs e)
         {
             episodeView.SelectedItem = null;
@@ -220,13 +221,13 @@ namespace CloudStreamForms
             ImdbTypePicker = new LabelList(ImdbTypePickerBtt, recomendationTypes);
 
             // MovieTypePicker.ItemsSource = genresNames;
-           // ImdbTypePicker.ItemsSource = recomendationTypes;
+            // ImdbTypePicker.ItemsSource = recomendationTypes;
             //   UpdateBookmarks();
 
             MovieTypePicker.SelectedIndex = 0;
             ImdbTypePicker.SelectedIndex = -1;
 
-            
+
 
             ImdbTypePicker.SelectedIndexChanged += (o, e) => {
                 ClearEpisodes();
@@ -394,16 +395,16 @@ namespace CloudStreamForms
 
         protected override void OnDisappearing()
         {
-          //  OnIconEnd(0);
+            //  OnIconEnd(0);
             base.OnDisappearing();
         }
 
         protected override void OnAppearing()
         {
-           // OnIconStart(0);
+            // OnIconStart(0);
             SaveData();
             base.OnAppearing();
-             if (!hasAppered) {
+            if (!hasAppered) {
                 App.UpdateStatusBar();
                 App.UpdateBackground();
 
@@ -496,9 +497,9 @@ namespace CloudStreamForms
             MScroll.HeightRequest = keys.Count > 0 ? 130 : 0;
             if (ImdbTypePicker.SelectedIndex == -1) {
 
-                ImdbTypePicker.SelectedIndex = bookmarkPosters.Count > 0 ? 0 : 1;
+                ImdbTypePicker.SelectedIndex = bookmarkPosters.Count > 0 ? 0 : 2; // SET TO POPULAR BY DEAFULT
             }
-            
+
 
         }
         public double currentWidth { get { return Application.Current.MainPage.Width; } }
