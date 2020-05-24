@@ -340,7 +340,7 @@ xmlns:ffTransformations="clr-namespace:FFImageLoading.Transformations;assembly=F
 
 
                                                     <!--HeightRequest="72"  WidthRequest="127" WidthRequest="127" HeightRequest="72"-->
-                                                    <Grid TranslationY="{Binding TranslateYOffset}" BackgroundColor="Blue" xe:TouchEffect.Color="White" Grid.Row="0"  Grid.Column="0" HeightRequest="72" WidthRequest="126" MinimumWidthRequest="126"  xe:EffectsConfig.ChildrenInputTransparent="False" xe:Commands.Tap="{Binding TapComTwo}"  >
+                                                    <Grid TranslationY="{Binding TranslateYOffset}" BackgroundColor="Transparent" xe:TouchEffect.Color="White" Grid.Row="0"  Grid.Column="0" HeightRequest="72" WidthRequest="126" MinimumWidthRequest="126"  xe:EffectsConfig.ChildrenInputTransparent="False" xe:Commands.Tap="{Binding TapComTwo}"  >
 
                                                         <!-- Image -->
                                                         <ff:CachedImage HeightRequest="72" Source="{Binding ImageSource}" InputTransparent="True" >

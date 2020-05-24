@@ -677,7 +677,7 @@ namespace CloudStreamForms
                 canChangeBrightness = false;
             }
 
-            Volyme = 100;
+            Volume = 100;
             Hide();
             App.LandscapeOrientation();
             App.ToggleRealFullScreen(true);
@@ -910,12 +910,12 @@ namespace CloudStreamForms
         long isMovingSkipTime = 0;
 
 
-        double _Volyme = 100;
-        double Volyme {
+        double _Volume = 100;
+        double Volume {
             set {
-                _Volyme = value; Player.Volume = (int)value;
+                _Volume = value; Player.Volume = (int)value;
             }
-            get { return _Volyme; }
+            get { return _Volume; }
         }
 
         int maxVol = 100;
@@ -1063,7 +1063,7 @@ namespace CloudStreamForms
                 isMovingCursor = false;
                 cursorPosition = args.Location;
 
-                maxVol = Volyme >= 100 ? 200 : 100;
+                maxVol = Volume >= 100 ? 200 : 100;
             }
             else if (args.Type == TouchTracking.TouchActionType.Moved) {
                 print(startCursorPosition.X - args.Location.X);
@@ -1094,9 +1094,9 @@ namespace CloudStreamForms
                             }
                         }
                         else {
-                            Volyme -= (args.Location.Y - cursorPosition.Y) / 2.0;
-                            Volyme = Math.Max(Math.Min(Volyme, maxVol), 0); // CLAM
-                            SkiptimeLabel.Text = $"Volyme {(int)Volyme}%";
+                            Volume -= (args.Location.Y - cursorPosition.Y) / 2.0;
+                            Volume = Math.Max(Math.Min(Volume, maxVol), 0); // CLAM
+                            SkiptimeLabel.Text = $"Volume {(int)Volume}%";
                         }
                     }
 
