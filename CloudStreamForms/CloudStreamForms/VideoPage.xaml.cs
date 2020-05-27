@@ -89,6 +89,7 @@ namespace CloudStreamForms
             public int season; //-1 = null, movie  
             public bool isSingleMirror;
             public int startPos; // -2 from progress, -1 = from start
+            public string episodeId;
         }
 
         /// <summary>
@@ -722,18 +723,48 @@ namespace CloudStreamForms
         }
 
 
+
         protected override void OnDisappearing()
         {
-            App.OnAudioFocusChanged -= HandleAudioFocus;
+            print("ONDIS:::::::");
+            try {
+                App.OnAudioFocusChanged -= HandleAudioFocus;
 
-            // App.ShowStatusBar();
-            App.NormalOrientation();
-            App.ToggleRealFullScreen(false);
-            //App.ToggleFullscreen(!Settings.HasStatusBar);
+                if (Player != null) {
+                    if (Player.State != VLCState.Error && Player.State != VLCState.Opening) {
+                        string lastId = currentVideo.episodeId;
+                        if (lastId != null) {
+                            if (!lastId.StartsWith("tt")) {
+                                lastId = "tt" + lastId;
+                            }
+                            long pos = Player.Time;//Last position in media when player exited
+                            if (pos > -1) {
+                                App.SetKey("ViewHistoryTimePos", lastId, pos);
+                                print("ViewHistoryTimePos SET TO: " + lastId + "|" + pos);
+                            }
+                            long dur = Player.Length;//	long	Total duration of the media
+                            if (dur > -1) {
+                                App.SetKey("ViewHistoryTimeDur", lastId, dur);
+                                print("ViewHistoryTimeDur SET TO: " + lastId + "|" + dur);
 
-            Player.Stop();
+                            }
+                        }
+                    }
+                }
+                // App.ShowStatusBar();
+                App.NormalOrientation();
+                App.ToggleRealFullScreen(false);
+                //App.ToggleFullscreen(!Settings.HasStatusBar);
+                App.ForceUpdateVideo?.Invoke(null, EventArgs.Empty);
+                Player.Stop();
+                print("STOPDIS::");
+                // Player.Dispose();
+            }
+            catch (Exception _ex) {
+                print("ERROR IN DISAPEERING" + _ex);
+                throw;
+            }
 
-            // Player.Dispose();
             base.OnDisappearing();
         }
 

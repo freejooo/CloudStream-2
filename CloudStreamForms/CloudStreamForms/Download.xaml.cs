@@ -504,9 +504,9 @@ namespace CloudStreamForms
             }
         }
 
-        public static void PlayVLCFile(string file, string name)
+        public static void PlayVLCFile(string file, string name, string episodeId)
         {
-            RequestVlc(new List<string>() { file }, new List<string>() { name }, name, "");
+            RequestVlc(new List<string>() { file }, new List<string>() { name }, name, episodeId);
             //App.PlayVLCWithSingleUrl(file, name, overrideSelectVideo: false);
         }
 
@@ -516,7 +516,7 @@ namespace CloudStreamForms
             string action = await p.DisplayActionSheet(info.info.name, "Cancel", null, "Play", "Delete File", "Open Source");
 
             if (action == "Play") {
-                PlayVLCFile(info.info.fileUrl, info.info.name);
+                PlayVLCFile(info.info.fileUrl, info.info.name, info.info.id.ToString());
                 //App.PlayVLCWithSingleUrl(, overrideSelectVideo: false);
             }
             else if (action == "Delete File") {

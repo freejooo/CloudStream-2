@@ -233,11 +233,30 @@ namespace CloudStreamForms
             NameLabel.Margin = new Thickness((enabled ? 50 : 15), 10, 10, 10);
         }
 
+ 
+        bool hasAppeared = false;
         protected override void OnAppearing()
         {
             base.OnAppearing();
+            if (!hasAppeared) {
+                hasAppeared = true;
+                ForceUpdateVideo += ForceUpdateAppearing;
+            }
+            print("APPEARING;::");
             //FadeAppear();
             SetChromeCast(MainChrome.IsChromeDevicesOnNetwork);
+         
+        }
+
+        protected override void OnDisappearing()
+        {
+            ForceUpdateVideo += ForceUpdateAppearing;
+            base.OnDisappearing();
+        }
+
+        public void ForceUpdateAppearing(object s, EventArgs e)
+        {
+            ForceUpdate();
         }
 
         private void ChromeCastBtt_Clicked(object sender, EventArgs e)
@@ -674,6 +693,23 @@ namespace CloudStreamForms
             epView.AllEpisodes[index] = _episode;
         }
 
+        EpisodeResult UpdateLoad(EpisodeResult episodeResult)
+        {
+            long pos;
+            long len;
+            print("POST PRO ON: " + GetId(episodeResult));
+            string realId = GetId(episodeResult);
+            print("ID::::::: ON " + realId + "|" + App.GetKey("ViewHistoryTimePos", realId, -1L));
+            if ((pos = App.GetKey("ViewHistoryTimePos", realId, -1L)) > 0) {
+                if ((len = App.GetKey("ViewHistoryTimeDur", realId, -1L)) > 0) {
+                    episodeResult.Progress = (double)pos / (double)len;
+                    episodeResult.ProgressState = pos;
+                    print("MAIN DRI:: " + pos + "|" + len + "|" + episodeResult.Progress);
+                }//tt8993804
+            }
+            return episodeResult;
+        }
+
         EpisodeResult ChangeEpisode(EpisodeResult episodeResult)
         {
             episodeResult.OgTitle = episodeResult.Title;
@@ -713,6 +749,10 @@ namespace CloudStreamForms
                 episodeResult.PosterUrl = CloudStreamCore.ConvertIMDbImagesToHD(episodeResult.PosterUrl, 224, 126); //episodeResult.PosterUrl.Replace(",126,224_AL", "," + pwidth + "," + pheight + "_AL").Replace("UY126", "UY" + pheight).Replace("UX224", "UX" + pwidth);
             }
 
+            episodeResult.Progress = 0;
+
+            UpdateLoad(episodeResult);
+
             int GetRealIdFromId()
             {
                 for (int i = 0; i < epView.MyEpisodeResultCollection.Count; i++) {
@@ -734,6 +774,7 @@ namespace CloudStreamForms
                     await LoadLinksForEpisode(epRes);
                 }
             });
+
             episodeResult.TapCom = new Command(async (s) => {
                 int _id = GetRealIdFromId();
                 if (_id == -1) return;
@@ -918,7 +959,7 @@ namespace CloudStreamForms
             if (trailerUrl != null) {
                 if (trailerUrl != "") {
                     App.RequestVlc(trailerUrl, currentMovie.title.name + " - Trailer");
-                  //  App.PlayVLCWithSingleUrl(trailerUrl, currentMovie.title.name + " - Trailer");
+                    //  App.PlayVLCWithSingleUrl(trailerUrl, currentMovie.title.name + " - Trailer");
                 }
             }
         }
@@ -1423,7 +1464,7 @@ namespace CloudStreamForms
         {
             var downloadKeyData = data ?? App.GetDownloadInfo(GetCorrectId(episodeResult), false).info.fileUrl;
             SetEpisode(episodeResult);
-            Download.PlayVLCFile(downloadKeyData, episodeResult.Title);
+            Download.PlayVLCFile(downloadKeyData, episodeResult.Title, GetCorrectId(episodeResult).ToString());
         }
 
         /*
@@ -1539,7 +1580,7 @@ namespace CloudStreamForms
                     _sub = currentMovie.subtitles[0].data;
                 }
             }*/
-            App.RequestVlc(episodeResult.mirrosUrls, episodeResult.Mirros, episodeResult.OgTitle, episodeResult.Id.ToString(), episode: episodeResult.Episode, season: currentSeason, subtitleFull: currentMovie.subtitles.Select(t => t.data).FirstOrDefault(), descript: episodeResult.Description, overrideSelectVideo: overrideSelectVideo);
+            App.RequestVlc(episodeResult.mirrosUrls, episodeResult.Mirros, episodeResult.OgTitle, GetId(episodeResult), episode: episodeResult.Episode, season: currentSeason, subtitleFull: currentMovie.subtitles.Select(t => t.data).FirstOrDefault(), descript: episodeResult.Description, overrideSelectVideo: overrideSelectVideo, startId: (int)episodeResult.ProgressState);
             //App.PlayVLCWithSingleUrl(episodeResult.mirrosUrls, episodeResult.Mirros, currentMovie.subtitles.Select(t => t.data).ToList(), currentMovie.subtitles.Select(t => t.name).ToList(), currentMovie.title.name, episodeResult.Episode, currentSeason, overrideSelectVideo);
         }
 
@@ -1547,7 +1588,7 @@ namespace CloudStreamForms
         void ForceUpdate(int? item = null)
         {
             //return;
-
+            print("FORCE UPDATING");
             var _e = epView.MyEpisodeResultCollection.ToList();
             Device.BeginInvokeOnMainThread(() => {
 
@@ -1555,9 +1596,7 @@ namespace CloudStreamForms
                 epView.MyEpisodeResultCollection.Clear();
                 for (int i = 0; i < _e.Count; i++) {
                     // print("Main::" + _e[i].MainTextColor);
-                    EpisodeResult e = (EpisodeResult)_e[i].Clone();
-
-                    epView.MyEpisodeResultCollection.Add(e);//new EpisodeResult() { Title = e.Title,Episode = e.Episode, Description = e.Description, MainTextColor = e.MainTextColor, MainDarkTextColor = e.MainDarkTextColor, Rating = e.Rating, epVis = e.epVis, Id = e.Id, LoadedLinks = e.LoadedLinks, Mirros = e.Mirros, mirrosUrls = e.mirrosUrls, OgTitle = e.OgTitle, PosterUrl = e.PosterUrl, Progress = e.Progress, subtitles = e.subtitles, subtitlesUrls = e.subtitlesUrls }); // , loadResult = e.loadResult
+                    epView.MyEpisodeResultCollection.Add(UpdateLoad((EpisodeResult)_e[i].Clone()));
                 }
                 /*  }
                   else {

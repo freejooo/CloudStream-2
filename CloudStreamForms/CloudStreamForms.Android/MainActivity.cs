@@ -881,17 +881,23 @@ namespace CloudStreamForms.Droid
         {
             if (REQUEST_CODE == requestCode) {
                 if (resultCode == Result.Ok) {
+                    if(!lastId.StartsWith("tt")) {
+                        lastId = "tt" + lastId;
+                    }
                     long pos = data.GetLongExtra(EXTRA_POSITION_OUT, -1);//Last position in media when player exited
                     if (pos > -1) {
-                        App.SetKey("ViewHistoryTimePos", lastId, pos);
+                        App.SetKey("ViewHistoryTimePos",  lastId , pos) ;
+                        print("ViewHistoryTimePos SET TO: " + lastId + "|" + pos);
                     }
                     long dur = data.GetLongExtra(EXTRA_DURATION_OUT, -1);//	long	Total duration of the media
                     if (dur > -1) {
-                        App.SetKey("ViewHistoryTimeDur", lastId, pos);
+                        App.SetKey("ViewHistoryTimeDur", lastId, dur);
+                        print("ViewHistoryTimeDur SET TO: " + lastId + "|" + dur);
+
                     }
                 }
             }
-
+            App.ForceUpdateVideo?.Invoke(null,EventArgs.Empty);
             base.OnActivityResult(requestCode, resultCode, data);
         }
 

@@ -352,10 +352,13 @@ xmlns:ffTransformations="clr-namespace:FFImageLoading.Transformations;assembly=F
                                                             </ff:CachedImage.Transformations>
 
                                                         </ff:CachedImage>
+                                                        <ProgressBar IsVisible="{Binding HasProgress}" Progress="{Binding Progress}" ProgressColor="#829eff" VerticalOptions="End" HeightRequest="3"></ProgressBar>
+
                                                         <!-- Play Icon -->
                                                         <ff:CachedImage   Source="{Binding VideoSource}" Scale="0.5" InputTransparent="True"  BackgroundColor="Transparent">
 
                                                         </ff:CachedImage>
+
 
                                                     </Grid>
                                                 </Grid>

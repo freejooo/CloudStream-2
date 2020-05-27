@@ -204,6 +204,9 @@ namespace CloudStreamForms
             RequestVlc(new List<string>() { url }, new List<string>() { name }, episodeName ?? name, episodeId, startId, subtitleFull, episode, season, descript, overrideSelectVideo);
         }
 
+        public static EventHandler ForceUpdateVideo ;
+
+
         /// <summary>
         /// More advanced VLC launch, note subtitles seams to not work on android; can open in 
         /// </summary>
@@ -229,6 +232,7 @@ namespace CloudStreamForms
                     Subtitles = subtitlesEnabled ? new List<string>() { subtitleFull } : new List<string>(),
                     SubtitlesNames = subtitlesEnabled ? new List<string>() { "English" } : new List<string>(),
                     startPos = startId,
+                    episodeId = episodeId,
                 });//new List<string>() { "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" }, new List<string>() { "Black" }, new List<string>() { });// { mainPoster = mainPoster };
                 ((MainPage)CloudStreamCore.mainPage).Navigation.PushModalAsync(p, false);
             }
