@@ -881,12 +881,12 @@ namespace CloudStreamForms.Droid
         {
             if (REQUEST_CODE == requestCode) {
                 if (resultCode == Result.Ok) {
-                    if(!lastId.StartsWith("tt")) {
+                    if (!lastId.StartsWith("tt")) {
                         lastId = "tt" + lastId;
                     }
                     long pos = data.GetLongExtra(EXTRA_POSITION_OUT, -1);//Last position in media when player exited
                     if (pos > -1) {
-                        App.SetKey("ViewHistoryTimePos",  lastId , pos) ;
+                        App.SetKey("ViewHistoryTimePos", lastId, pos);
                         print("ViewHistoryTimePos SET TO: " + lastId + "|" + pos);
                     }
                     long dur = data.GetLongExtra(EXTRA_DURATION_OUT, -1);//	long	Total duration of the media
@@ -897,7 +897,7 @@ namespace CloudStreamForms.Droid
                     }
                 }
             }
-            App.ForceUpdateVideo?.Invoke(null,EventArgs.Empty);
+            App.ForceUpdateVideo?.Invoke(null, EventArgs.Empty);
             base.OnActivityResult(requestCode, resultCode, data);
         }
 
@@ -2259,10 +2259,21 @@ namespace CloudStreamForms.Droid
         public static ComponentName VLC_COMPONENT = new ComponentName(VLC_PACKAGE, "org.videolan.vlc.gui.video.VideoPlayerActivity");
 
 
+        public static bool IsAppInstalled(string packageName)
+        {
+            PackageManager pm = activity.PackageManager;
+            try {
+                pm.GetPackageInfo(packageName, PackageInfoFlags.Activities);
+                return true;
+            }
+            catch (PackageManager.NameNotFoundException e) {
+                return false;
+            } 
+        }
+
         public static bool IsVlcInstalled()
         {
-            var res = Java.Lang.Package.GetPackage(VLC_PACKAGE);
-            return res != null;
+            return IsAppInstalled(VLC_PACKAGE);
         }
 
         public static void openVlc(Activity _activity, int requestId, Android.Net.Uri uri, long time, String title, string subfile = "")
@@ -2297,8 +2308,7 @@ namespace CloudStreamForms.Droid
 
         public void RequestVlc(List<string> urls, List<string> names, string episodeName, string episodeId, int startId = -2, string subtitleFull = "")
         {
-            try {
-
+            try { 
                 string absolutePath = Android.OS.Environment.ExternalStorageDirectory + "/" + Android.OS.Environment.DirectoryDownloads;
                 subtitleFull = subtitleFull ?? "";
                 bool subtitlesEnabled = subtitleFull != "";
@@ -2364,10 +2374,7 @@ namespace CloudStreamForms.Droid
         public static void OpenVlcIntent(string path, string subfile = "", string overrideName = null) //Java.IO.File subFile)
         {
             //   OpenStore("org.videolan.vlc");
-            IsVlcInstalled();
-
-            openVlc(activity, REQUEST_CODE, Android.Net.Uri.Parse(path), 90000, overrideName ?? "", subfile);
-            return;
+            
             Android.Net.Uri uri = Android.Net.Uri.Parse(path);
 
             Intent intent = new Intent(Intent.ActionView); //
@@ -2394,10 +2401,10 @@ namespace CloudStreamForms.Droid
 
             intent.AddFlags(ActivityFlags.NewTask);
 
-
+            /*
             intent.PutExtra("position", 50000);//"/sdcard/Download/subtitles.srt");//sfile);//Android.Net.Uri.FromFile(subFile));
             intent.PutExtra("from_start", false);
-            intent.PutExtra("title", "Hello world");
+            intent.PutExtra("title", "Hello world");*/
 
             // Android.App.Application.Context.ApplicationContext.start
             //var comp = Android.App.Application.Context.StartService(intent);

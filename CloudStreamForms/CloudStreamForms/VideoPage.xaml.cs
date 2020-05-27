@@ -745,8 +745,7 @@ namespace CloudStreamForms
                             long dur = Player.Length;//	long	Total duration of the media
                             if (dur > -1) {
                                 App.SetKey("ViewHistoryTimeDur", lastId, dur);
-                                print("ViewHistoryTimeDur SET TO: " + lastId + "|" + dur);
-
+                                print("ViewHistoryTimeDur SET TO: " + lastId + "|" + dur); 
                             }
                         }
                     }
