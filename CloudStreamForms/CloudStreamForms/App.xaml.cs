@@ -85,6 +85,7 @@ namespace CloudStreamForms
             BluetoothDeviceID[] GetBluetoothDevices();
 
             void SearchBluetoothDevices();
+            void RequestVlc(List<string> urls, List<string> names, string episodeName, string episodeId, int startId = FROM_PROGRESS, string subtitleFull = "");
         }
 
         public enum DownloadState { Downloading, Downloaded, NotDownloaded, Paused }
@@ -195,6 +196,46 @@ namespace CloudStreamForms
             App.GetKey("audiodelay", current.id, delay);
         }
 
+        public const int FROM_START = -1;
+        public const int FROM_PROGRESS = -2;
+
+        public static void RequestVlc(string url, string name, string episodeName = null, string episodeId = "", int startId = FROM_PROGRESS, string subtitleFull = "", int episode = -1, int season = -1, string descript = "", bool? overrideSelectVideo = null)
+        {
+            RequestVlc(new List<string>() { url }, new List<string>() { name }, episodeName ?? name, episodeId, startId, subtitleFull, episode, season, descript, overrideSelectVideo);
+        }
+
+        /// <summary>
+        /// More advanced VLC launch, note subtitles seams to not work on android; can open in 
+        /// </summary>
+        /// <param name="urls">File or url</param>
+        /// <param name="names">Name of eatch url</param>
+        /// <param name="episodeName">Main name, name of the episode</param>
+        /// <param name="episodeId">id for key of lenght seen</param>
+        /// <param name="startId">FROM_START, FROM_PROGRESS or time in ms</param>
+        /// <param name="subtitleFull">Leave emty for no subtitles, full subtitle text as seen in a regular .srt</param>
+        public static void RequestVlc(List<string> urls, List<string> names, string episodeName, string episodeId, int startId = FROM_PROGRESS, string subtitleFull = "", int episode = -1, int season = -1, string descript = "", bool? overrideSelectVideo = null)
+        {
+            bool useVideo = overrideSelectVideo ?? Settings.UseVideoPlayer;
+            bool subtitlesEnabled = subtitleFull != "";
+            if (useVideo) {
+                Page p = new VideoPage(new VideoPage.PlayVideo() {
+                    descript = descript,
+                    name = episodeName,
+                    isSingleMirror = urls.Count == 1,
+                    episode = episode,
+                    season = season,
+                    MirrorNames = names,
+                    MirrorUrls = urls,
+                    Subtitles = subtitlesEnabled ? new List<string>() { subtitleFull } : new List<string>(),
+                    SubtitlesNames = subtitlesEnabled ? new List<string>() { "English" } : new List<string>(),
+                    startPos = startId,
+                });//new List<string>() { "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" }, new List<string>() { "Black" }, new List<string>() { });// { mainPoster = mainPoster };
+                ((MainPage)CloudStreamCore.mainPage).Navigation.PushModalAsync(p, false);
+            }
+            else {
+                platformDep.RequestVlc(urls, names, episodeName, episodeId, startId, subtitleFull);
+            }
+        } 
 
         public static string RequestDownload(int id, string name, string description, int episode, int season, List<string> mirrorUrls, List<string> mirrorNames, string downloadTitle, string poster, CloudStreamCore.Title title)
         {
@@ -328,7 +369,7 @@ namespace CloudStreamForms
                 color = Math.Max(0, Settings.BlackColor - 5); // Settings.BlackColor;//
             }
             CloudStreamForms.MainPage.mainPage.BarBackgroundColor = new Color(color / 255.0, color / 255.0, color / 255.0, 1);
-            
+
             platformDep.UpdateBackground(isOnMainPage ? color : Settings.BlackColor);
         }
 

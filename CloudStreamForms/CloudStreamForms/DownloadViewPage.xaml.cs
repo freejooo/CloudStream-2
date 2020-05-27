@@ -124,7 +124,7 @@ namespace CloudStreamForms
                                 Season = ss,
                                 Id = info.info.id,
                                 PosterUrl = info.info.hdPosterUrl,
-                                TapCom = new Command((s) => { Download.PlayVLCFile(fileUrl, fileName); }),
+                                TapCom = new Command((s) => { if(info.info.dtype == App.DownloadType.Normal) MovieResult.SetEpisode("tt"+ info.info.id); Download.PlayVLCFile(fileUrl, fileName); }),
                                 DownloadPlayBttSource = App.GetImageSource("nexflixPlayBtt.png")
                             });
                         }

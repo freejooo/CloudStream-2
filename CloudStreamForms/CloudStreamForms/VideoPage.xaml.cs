@@ -88,6 +88,7 @@ namespace CloudStreamForms
             public int episode; //-1 = null, movie  
             public int season; //-1 = null, movie  
             public bool isSingleMirror;
+            public int startPos; // -2 from progress, -1 = from start
         }
 
         /// <summary>

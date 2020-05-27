@@ -462,11 +462,15 @@ namespace CloudStreamForms
 
         }
 
+        /*
         void PlayEpisode(EpisodeResult episodeResult)
         {
             App.PlayVLCWithSingleUrl(episodeResult.mirrosUrls[0], episodeResult.Title);
+            print("MAIN EP FROM DLOAD: " + episodeResult.Id.ToString());
+            
+            MovieResult.SetEpisode("tt"+ episodeResult.Id);
             episodeView.SelectedItem = null;
-        }
+        }*/
 
         private void ViewCell_Tapped(object sender, EventArgs e)
         {
@@ -484,21 +488,7 @@ namespace CloudStreamForms
             await HandleEpisode(episodeResult, this);
             UpdateDownloaded();
         }
-
-        private void Grid_PlayVid(object sender, EventArgs e)
-        {
-            //print("DA");
-            var s = ((Grid)sender);
-            Commands.SetTap(s, new Command((o) => {
-                var episodeResult = ((EpisodeResult)o);
-                PlayEpisode(episodeResult);
-                //   PlayEpisodeRes(episodeResult);
-                //do something
-            }));
-            Commands.SetTapParameter(s, (EpisodeResult)s.BindingContext);
-            //s.BindingContext = this;
-        }
-
+         
 
         public static async Task HandleEpisode(EpisodeResult episodeResult, Page p)
         {
@@ -516,7 +506,8 @@ namespace CloudStreamForms
 
         public static void PlayVLCFile(string file, string name)
         {
-            App.PlayVLCWithSingleUrl(file, name, overrideSelectVideo: false);
+            RequestVlc(new List<string>() { file }, new List<string>() { name }, name, "");
+            //App.PlayVLCWithSingleUrl(file, name, overrideSelectVideo: false);
         }
 
         public static async Task HandleEpisodeTapped(int key, Page p)

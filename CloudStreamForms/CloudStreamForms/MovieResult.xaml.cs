@@ -516,6 +516,7 @@ namespace CloudStreamForms
             bool hasNot = overrideNot ?? App.GetKey<bool>("Notifications", currentMovie.title.id, false);
             NotificationImg.Source = App.GetImageSource(hasNot ? "baseline_notifications_active_white_48dp.png" : "baseline_notifications_none_white_48dp.png");
             NotificationImg.Transformations = new List<FFImageLoading.Work.ITransformation>() { (new FFImageLoading.Transformations.TintTransformation(hasNot ? DARK_BLUE_COLOR : LIGHT_LIGHT_BLACK_COLOR)) };
+            NotificationTime.TextColor = hasNot ? Color.FromHex(DARK_BLUE_COLOR) : Color.Gray;
         }
 
         List<MoeEpisode> setNotificationsTimes = new List<MoeEpisode>();
@@ -726,15 +727,15 @@ namespace CloudStreamForms
                 int _id = GetRealIdFromId();
                 if (_id == -1) return;
                 var epRes = epView.MyEpisodeResultCollection[_id];
-                if(epRes.downloadState == 1) {
+                if (epRes.downloadState == 1) {
                     PlayDownloadedEp(epRes);
                 }
                 else {
                     await LoadLinksForEpisode(epRes);
-                } 
+                }
             });
             episodeResult.TapCom = new Command(async (s) => {
-                int _id = GetRealIdFromId(); 
+                int _id = GetRealIdFromId();
                 if (_id == -1) return;
 
                 var epRes = epView.MyEpisodeResultCollection[_id];
@@ -916,7 +917,8 @@ namespace CloudStreamForms
         {
             if (trailerUrl != null) {
                 if (trailerUrl != "") {
-                    App.PlayVLCWithSingleUrl(trailerUrl, currentMovie.title.name + " - Trailer");
+                    App.RequestVlc(trailerUrl, currentMovie.title.name + " - Trailer");
+                  //  App.PlayVLCWithSingleUrl(trailerUrl, currentMovie.title.name + " - Trailer");
                 }
             }
         }
@@ -1384,7 +1386,8 @@ namespace CloudStreamForms
                         Commands.SetTap(stackLayout, new Command((o) => {
                             int z = (int)o;
                             var _t = epView.CurrentTrailers[z];
-                            PlayVLCWithSingleUrl(_t.Url, _t.Name);
+                            RequestVlc(_t.Url, _t.Name);
+                            //PlayVLCWithSingleUrl(_t.Url, _t.Name);
                         }));
                         Commands.SetTapParameter(stackLayout, _sel);
                         Grid.SetRow(stackLayout, (i + 1) * 2 - 2);
@@ -1419,6 +1422,7 @@ namespace CloudStreamForms
         void PlayDownloadedEp(EpisodeResult episodeResult, string data = null)
         {
             var downloadKeyData = data ?? App.GetDownloadInfo(GetCorrectId(episodeResult), false).info.fileUrl;
+            SetEpisode(episodeResult);
             Download.PlayVLCFile(downloadKeyData, episodeResult.Title);
         }
 
@@ -1535,8 +1539,8 @@ namespace CloudStreamForms
                     _sub = currentMovie.subtitles[0].data;
                 }
             }*/
-
-            App.PlayVLCWithSingleUrl(episodeResult.mirrosUrls, episodeResult.Mirros, currentMovie.subtitles.Select(t => t.data).ToList(), currentMovie.subtitles.Select(t => t.name).ToList(), currentMovie.title.name, episodeResult.Episode, currentSeason, overrideSelectVideo);
+            App.RequestVlc(episodeResult.mirrosUrls, episodeResult.Mirros, episodeResult.OgTitle, episodeResult.Id.ToString(), episode: episodeResult.Episode, season: currentSeason, subtitleFull: currentMovie.subtitles.Select(t => t.data).FirstOrDefault(), descript: episodeResult.Description, overrideSelectVideo: overrideSelectVideo);
+            //App.PlayVLCWithSingleUrl(episodeResult.mirrosUrls, episodeResult.Mirros, currentMovie.subtitles.Select(t => t.data).ToList(), currentMovie.subtitles.Select(t => t.name).ToList(), currentMovie.title.name, episodeResult.Episode, currentSeason, overrideSelectVideo);
         }
 
         // ============================== FORCE UPDATE ==============================
@@ -1785,7 +1789,6 @@ namespace CloudStreamForms
         public int GetCorrectId(EpisodeResult episodeResult)
         {
             return int.Parse(((currentMovie.title.movieType == MovieType.TVSeries || currentMovie.title.movieType == MovieType.Anime) ? currentMovie.episodes[episodeResult.Id].id : currentMovie.title.id).Replace("tt", ""));
-
         }
 
         // ============================== ID OF EPISODE ==============================
@@ -1816,21 +1819,40 @@ namespace CloudStreamForms
             ViewToggle.Transformations = new List<FFImageLoading.Work.ITransformation>() { (new FFImageLoading.Transformations.TintTransformation(toggleViewState ? DARK_BLUE_COLOR : LIGHT_LIGHT_BLACK_COLOR)) };
         }
 
+        public void SetEpisode(EpisodeResult episodeResult)
+        {
+            string id = GetId(episodeResult);
+            SetEpisode(id);
+            SetColor(episodeResult);
+            ForceUpdate(episodeResult.Id);
+        }
+
+        public static void SetEpisode(string id)
+        {
+            App.SetKey("ViewHistory", id, true);
+        }
+
         void ToggleEpisode(EpisodeResult episodeResult)
         {
             string id = GetId(episodeResult);
+            ToggleEpisode(id);
+            SetColor(episodeResult);
+            ForceUpdate(episodeResult.Id);
+        }
+
+        public static void ToggleEpisode(string id)
+        {
             if (id != "") {
                 if (App.KeyExists("ViewHistory", id)) {
                     App.RemoveKey("ViewHistory", id);
                 }
                 else {
-                    App.SetKey("ViewHistory", id, true);
+                    SetEpisode(id);
                 }
             }
-            //episodeResult.MainTextColor = App.KeyExists("ViewHistory", id) ? primaryLightColor : "#ffffff";
-            SetColor(episodeResult);
-            ForceUpdate(episodeResult.Id);
         }
+
+
 
         // ============================== USED FOR SMALL VIDEO PLAY ==============================
         /*  private void Grid_LayoutChanged(object sender, EventArgs e)
