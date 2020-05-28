@@ -233,24 +233,23 @@ namespace CloudStreamForms
             NameLabel.Margin = new Thickness((enabled ? 50 : 15), 10, 10, 10);
         }
 
- 
+
         bool hasAppeared = false;
         protected override void OnAppearing()
         {
             base.OnAppearing();
-            if (!hasAppeared) {
-                hasAppeared = true;
-                ForceUpdateVideo += ForceUpdateAppearing;
-            }
+
+            ForceUpdateVideo += ForceUpdateAppearing;
+
             print("APPEARING;::");
             //FadeAppear();
             SetChromeCast(MainChrome.IsChromeDevicesOnNetwork);
-         
+
         }
 
         protected override void OnDisappearing()
         {
-            ForceUpdateVideo += ForceUpdateAppearing;
+            ForceUpdateVideo -= ForceUpdateAppearing;
             base.OnDisappearing();
         }
 
@@ -1580,7 +1579,7 @@ namespace CloudStreamForms
                     _sub = currentMovie.subtitles[0].data;
                 }
             }*/
-            App.RequestVlc(episodeResult.mirrosUrls, episodeResult.Mirros, episodeResult.OgTitle, GetId(episodeResult), episode: episodeResult.Episode, season: currentSeason, subtitleFull: currentMovie.subtitles.Select(t => t.data).FirstOrDefault(), descript: episodeResult.Description, overrideSelectVideo: overrideSelectVideo, startId:FROM_PROGRESS); //  (int)episodeResult.ProgressState
+            App.RequestVlc(episodeResult.mirrosUrls, episodeResult.Mirros, episodeResult.OgTitle, GetId(episodeResult), episode: episodeResult.Episode, season: currentSeason, subtitleFull: currentMovie.subtitles.Select(t => t.data).FirstOrDefault(), descript: episodeResult.Description, overrideSelectVideo: overrideSelectVideo, startId: FROM_PROGRESS); //  (int)episodeResult.ProgressState
             //App.PlayVLCWithSingleUrl(episodeResult.mirrosUrls, episodeResult.Mirros, currentMovie.subtitles.Select(t => t.data).ToList(), currentMovie.subtitles.Select(t => t.name).ToList(), currentMovie.title.name, episodeResult.Episode, currentSeason, overrideSelectVideo);
         }
 

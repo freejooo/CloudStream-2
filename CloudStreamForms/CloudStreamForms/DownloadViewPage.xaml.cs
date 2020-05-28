@@ -23,8 +23,7 @@ namespace CloudStreamForms
         public event EventHandler Added;
 
         private bool _isRefreshing = false;
-        public bool IsRefreshing
-        {
+        public bool IsRefreshing {
             get { return _isRefreshing; }
             set {
                 _isRefreshing = value;
@@ -32,8 +31,7 @@ namespace CloudStreamForms
             }
         }
 
-        public ICommand RefreshCommand
-        {
+        public ICommand RefreshCommand {
             get {
                 return new Command(async () => {
                     IsRefreshing = true;
@@ -115,6 +113,18 @@ namespace CloudStreamForms
                             // string extra = (info.state.state == App.DownloadState.Downloaded ? "" : App.ConvertBytesToAny(info.state.bytesDownloaded, 0, 2) + " MB of " + App.ConvertBytesToAny(info.state.totalBytes, 0, 2) + " MB"); 
                             string extra = $" {(int)info.state.ProcentageDownloaded }%";
                             //.TapCom = new Command(async (s) => {
+                            long pos;
+                            long len;
+                            string realId = "tt" + info.info.id;
+                            double _progress = 0;
+                            print("REALID::: " + realId);
+                            if ((pos = App.GetKey("ViewHistoryTimePos", realId, -1L)) > 0) {
+                                if ((len = App.GetKey("ViewHistoryTimeDur", realId, -1L)) > 0) {
+                                    _progress = (double)pos / (double)len;
+                                    print("SET PROGRES:::" + realId + "|" + _progress);
+                                }
+                            }
+
                             activeEpisodes.Add(new EpisodeResult() {
                                 OgTitle = info.info.name,
                                 ExtraDescription = $"{Download.GetExtraString(info.state.state)}{(info.state.state == App.DownloadState.Downloaded ? "" : extra)}",
@@ -124,7 +134,8 @@ namespace CloudStreamForms
                                 Season = ss,
                                 Id = info.info.id,
                                 PosterUrl = info.info.hdPosterUrl,
-                                TapCom = new Command((s) => { if(info.info.dtype == App.DownloadType.Normal) MovieResult.SetEpisode("tt"+ info.info.id); Download.PlayVLCFile(fileUrl, fileName, info.info.id.ToString()); }),
+                                Progress = _progress,
+                                TapCom = new Command((s) => { if (info.info.dtype == App.DownloadType.Normal) MovieResult.SetEpisode("tt" + info.info.id); Download.PlayVLCFile(fileUrl, fileName, info.info.id.ToString()); }),
                                 DownloadPlayBttSource = App.GetImageSource("nexflixPlayBtt.png")
                             });
                         }
@@ -146,10 +157,22 @@ namespace CloudStreamForms
             }
         }
 
+        public void ForceUpdateAppearing(object s, EventArgs e)
+        {
+            UpdateEpisodes();
+        }
+
+        protected override void OnDisappearing()
+        {
+            base.OnDisappearing();
+            App.ForceUpdateVideo -= ForceUpdateAppearing; 
+        }
+
         protected override void OnAppearing()
         {
             base.OnAppearing();
             UpdateEpisodes();
+            App.ForceUpdateVideo += ForceUpdateAppearing;
 
             if (Device.RuntimePlatform == Device.UWP) {
                 OffBar.IsVisible = false;

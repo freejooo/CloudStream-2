@@ -56,20 +56,25 @@
                                             <Grid Grid.Row="0"  Grid.Column="0"  WidthRequest="126" TranslationY="{Binding TranslateYOffset}" >
                                                 <!--Clicked="ImageButton_Clicked"-->
                                                 <ImageButton  BackgroundColor="Transparent" WidthRequest="126"></ImageButton>
-                                                <!--PosterUrl-->
-                                                <ff:CachedImage WidthRequest="126" HeightRequest="80" Source="{Binding ImageSource}" InputTransparent="True"   >
 
-                                                    <ff:CachedImage.Transformations>
-                                                        <ffTransformations:RoundedTransformation BorderSize="0" Radius="1" BorderHexColor="#303F9F" CropWidthRatio="1.77"  >
+                                                    <!--PosterUrl-->
+                                                    <ff:CachedImage WidthRequest="126" HeightRequest="80" Source="{Binding ImageSource}" InputTransparent="True"   >
 
-                                                        </ffTransformations:RoundedTransformation>
-                                                    </ff:CachedImage.Transformations>
+                                                        <ff:CachedImage.Transformations>
+                                                            <ffTransformations:RoundedTransformation BorderSize="0" Radius="1" BorderHexColor="#303F9F" CropWidthRatio="1.77"  >
+
+                                                            </ffTransformations:RoundedTransformation>
+                                                        </ff:CachedImage.Transformations>
+                                                    </ff:CachedImage>
+                                                    <ProgressBar IsVisible="{Binding HasProgress}" Progress="{Binding Progress}" ProgressColor="#829eff" VerticalOptions="End" HeightRequest="3" TranslationY="-4"></ProgressBar>
+
+                                                    <!--PropertyChanging="Image_PropertyChanging" -->
+
+                                                    <ff:CachedImage InputTransparent="True" BackgroundColor="Transparent" Source="{Binding DownloadPlayBttSource}" Scale="0.5">
+
                                                 </ff:CachedImage>
-                                                <!--PropertyChanging="Image_PropertyChanging" -->
-                                                <ff:CachedImage InputTransparent="True" BackgroundColor="Transparent" Source="{Binding DownloadPlayBttSource}" Scale="0.5">
 
-                                                </ff:CachedImage>
-                                                <!-- BindingContextChanged="Grid_PlayVid" -->
+                                                    <!-- BindingContextChanged="Grid_PlayVid" -->
                                                 <Grid  xe:TouchEffect.Color="White" Opacity="0.5" WidthRequest="127" HeightRequest="72" Margin="0,4" BackgroundColor="Transparent" xe:EffectsConfig.ChildrenInputTransparent="False" xe:Commands.Tap="{Binding TapCom}">
                                                 </Grid>
 

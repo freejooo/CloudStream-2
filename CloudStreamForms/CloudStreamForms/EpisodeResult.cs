@@ -60,7 +60,7 @@ namespace CloudStreamForms.Models
         public string ExtraDescription { set { _ExtraDescription = (Settings.EpDecEnabled || ForceDescript) ? value : ""; } get { return _ExtraDescription; } }
         public double Progress { set; get; }
         public long ProgressState = -2;
-        public bool HasProgress { get { return Progress > 0; } }
+        public bool HasProgress { get { return Progress > 0.05; } } // OVER 5% SO YOU CAN REMOVE IT
         public List<string> Mirros { set; get; }
         public List<string> mirrosUrls { set; get; }
         public List<string> subtitles { set; get; }

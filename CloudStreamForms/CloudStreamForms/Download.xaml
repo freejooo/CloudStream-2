@@ -82,128 +82,129 @@
             <Grid Grid.Row="1"  Grid.Column="0">
                 <RefreshView BackgroundColor="#1D1D1D" RefreshColor="#4e66ff" Command="{Binding RefreshCommand}" 
            IsRefreshing="{Binding IsRefreshing}"         >
-                    
-                <!-- <ProgressBar Progress="0.5"></ProgressBar> -->
-                <ListView ItemsSource="{Binding MyEpisodeResultCollection}"
+
+                    <!-- <ProgressBar Progress="0.5"></ProgressBar> -->
+                    <ListView ItemsSource="{Binding MyEpisodeResultCollection}"
                              CachingStrategy="RecycleElement" 
                 ItemTapped="episodeView_ItemTapped" RowHeight="104" 
                     x:Name="episodeView"  SeparatorColor="Transparent"  
          >
-                      
-                    
-                    <!--  RefreshCommand="{Binding RefreshCommand}"
+
+
+                        <!--  RefreshCommand="{Binding RefreshCommand}"
            IsRefreshing="{Binding IsRefreshing}"       RefreshControlColor="#303F9F"  -->
-                    <ListView.ItemTemplate>
-                        <DataTemplate >
-                            <ViewCell Tapped="ViewCell_Tapped">
-                                <Grid RowSpacing="0"  Padding="0"  HorizontalOptions="Fill" >
-                                    <!--SizeChanged="ViewCell_SizeChanged"-->
+                        <ListView.ItemTemplate>
+                            <DataTemplate >
+                                <ViewCell Tapped="ViewCell_Tapped">
+                                    <Grid RowSpacing="0"  Padding="0"  HorizontalOptions="Fill" >
+                                        <!--SizeChanged="ViewCell_SizeChanged"-->
 
-                                    <Grid.RowDefinitions >
-                                        <RowDefinition Height="Auto" />
-                                        <RowDefinition Height="Auto" />
-                                        <RowDefinition Height="Auto" />
-                                    </Grid.RowDefinitions>
+                                        <Grid.RowDefinitions >
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                        </Grid.RowDefinitions>
 
-                                    <Grid Grid.Row="0" Grid.Column="0" HorizontalOptions="Fill" >
-                                        <Grid  RowSpacing="0"  Padding="10" >
-                                            <Grid.RowDefinitions >
-                                                <RowDefinition Height="Auto" />
-                                                <RowDefinition Height="Auto" />
-                                                <RowDefinition Height="Auto" />
-                                                <RowDefinition Height="Auto" />
-                                            </Grid.RowDefinitions>
+                                        <Grid Grid.Row="0" Grid.Column="0" HorizontalOptions="Fill" >
+                                            <Grid  RowSpacing="0"  Padding="10" >
+                                                <Grid.RowDefinitions >
+                                                    <RowDefinition Height="Auto" />
+                                                    <RowDefinition Height="Auto" />
+                                                    <RowDefinition Height="Auto" />
+                                                    <RowDefinition Height="Auto" />
+                                                </Grid.RowDefinitions>
 
-                                            <Grid.ColumnDefinitions >
-                                                <ColumnDefinition Width="Auto" />
-                                                <ColumnDefinition Width="Auto" />
-                                                <ColumnDefinition Width="*" />
-                                                <ColumnDefinition Width="Auto" />
-                                            </Grid.ColumnDefinitions>
-                                            <Grid Grid.Row="0"  Grid.Column="0"  WidthRequest="70" HeightRequest="104" TranslationY="{Binding TranslateYOffset}" BindingContextChanged="Grid_BindingContextChanged">
+                                                <Grid.ColumnDefinitions >
+                                                    <ColumnDefinition Width="Auto" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                </Grid.ColumnDefinitions>
+                                                <Grid Grid.Row="0"  Grid.Column="0"  WidthRequest="70" HeightRequest="104" TranslationY="{Binding TranslateYOffset}" BindingContextChanged="Grid_BindingContextChanged">
 
-                                                <ImageButton Clicked="ImageButton_Clicked" BackgroundColor="Transparent" WidthRequest="70"></ImageButton>
-                                                <!--PosterUrl-->
-                                                <ff:CachedImage WidthRequest="70" HeightRequest="104" Source="{Binding ImageSource}" InputTransparent="True"   >
+                                                    <ImageButton Clicked="ImageButton_Clicked" BackgroundColor="Transparent" WidthRequest="70"></ImageButton>
+                                                    <!--PosterUrl-->
+                                                    <ff:CachedImage WidthRequest="70" HeightRequest="104" Source="{Binding ImageSource}" InputTransparent="True"   >
 
-                                                    <ff:CachedImage.Transformations>
-                                                        <ffTransformations:RoundedTransformation BorderSize="0" Radius="1" BorderHexColor="#303F9F" CropHeightRatio="0.66"  >
+                                                        <ff:CachedImage.Transformations>
+                                                            <ffTransformations:RoundedTransformation BorderSize="0" Radius="1" BorderHexColor="#303F9F" CropHeightRatio="0.66"  >
 
-                                                        </ffTransformations:RoundedTransformation>
-                                                    </ff:CachedImage.Transformations>
-                                                </ff:CachedImage>
-                                                <!--   <ff:CachedImage PropertyChanging="Image_PropertyChanging" InputTransparent="True" BackgroundColor="Transparent">
+                                                            </ffTransformations:RoundedTransformation>
+                                                        </ff:CachedImage.Transformations>
+                                                    </ff:CachedImage>
+
+                                                    <!--   <ff:CachedImage PropertyChanging="Image_PropertyChanging" InputTransparent="True" BackgroundColor="Transparent">
 
                                                 </ff:CachedImage>-->
-                                                <!--<Grid  xe:TouchEffect.Color="White" Opacity="0.5" WidthRequest="127" HeightRequest="72" Margin="0,4" BackgroundColor="Transparent" xe:EffectsConfig.ChildrenInputTransparent="False" BindingContextChanged="Grid_PlayVid" >
+                                                    <!--<Grid  xe:TouchEffect.Color="White" Opacity="0.5" WidthRequest="127" HeightRequest="72" Margin="0,4" BackgroundColor="Transparent" xe:EffectsConfig.ChildrenInputTransparent="False" BindingContextChanged="Grid_PlayVid" >
                                                 </Grid>-->
 
 
 
-                                                <!-- Source="{Binding PosterUrl}"-->
-                                            </Grid>
-                                            <Grid  Grid.Row="0"  Grid.Column="1" VerticalOptions="Center">
-                                                <Grid RowSpacing="0" Padding="0" >
-                                                    <Grid.RowDefinitions >
-                                                        <RowDefinition Height="Auto" />
-                                                        <RowDefinition Height="Auto" />
-                                                        <RowDefinition Height="Auto" />
-                                                    </Grid.RowDefinitions>
-                                                    <Grid.ColumnDefinitions >
-                                                        <ColumnDefinition Width="Auto" />
-                                                        <ColumnDefinition Width="Auto" />
-                                                        <ColumnDefinition Width="Auto" />
-                                                    </Grid.ColumnDefinitions>
-                                                    <Grid Grid.Row="0"  Grid.Column="0" >
-                                                        <Label Text="{Binding Title}" TextColor="{Binding MainTextColor}" FontAttributes="Bold" FontSize="14"/>
-                                                    </Grid>
-                                                    <Grid Grid.Row="1"  Grid.Column="0" >
-                                                        <Label Text="{Binding Description}"  TextColor="{Binding MainDarkTextColor}" MaxLines="3" FontSize="12" />
-                                                    </Grid>
-                                                    <Grid Grid.Row="2"  Grid.Column="0" >
-                                                        <Label Text="{Binding ExtraDescription}"  TextColor="#2291ff" MaxLines="3" FontSize="11" />
+                                                    <!-- Source="{Binding PosterUrl}"-->
+                                                </Grid>
+                                                <Grid  Grid.Row="0"  Grid.Column="1" VerticalOptions="Center">
+                                                    <Grid RowSpacing="0" Padding="0" >
+                                                        <Grid.RowDefinitions >
+                                                            <RowDefinition Height="Auto" />
+                                                            <RowDefinition Height="Auto" />
+                                                            <RowDefinition Height="Auto" />
+                                                        </Grid.RowDefinitions>
+                                                        <Grid.ColumnDefinitions >
+                                                            <ColumnDefinition Width="Auto" />
+                                                            <ColumnDefinition Width="Auto" />
+                                                            <ColumnDefinition Width="Auto" />
+                                                        </Grid.ColumnDefinitions>
+                                                        <Grid Grid.Row="0"  Grid.Column="0" >
+                                                            <Label Text="{Binding Title}" TextColor="{Binding MainTextColor}" FontAttributes="Bold" FontSize="14"/>
+                                                        </Grid>
+                                                        <Grid Grid.Row="1"  Grid.Column="0" >
+                                                            <Label Text="{Binding Description}"  TextColor="{Binding MainDarkTextColor}" MaxLines="3" FontSize="12" />
+                                                        </Grid>
+                                                        <Grid Grid.Row="2"  Grid.Column="0" >
+                                                            <Label Text="{Binding ExtraDescription}"  TextColor="#2291ff" MaxLines="3" FontSize="11" />
+                                                        </Grid>
                                                     </Grid>
                                                 </Grid>
-                                            </Grid>
-                                            <Grid  Grid.Row="0"  Grid.Column="2" HorizontalOptions="End" VerticalOptions="Center">
-                                                <ff:CachedImage  HorizontalOptions="End" Source="outline_navigate_next_white_48dp.png" InputTransparent="True" ScaleX="0.8">
-                                                    <ff:CachedImage.Transformations>
-                                                        <ffTransformations:TintTransformation HexColor="#707070" ></ffTransformations:TintTransformation>
-                                                    </ff:CachedImage.Transformations>
-                                                </ff:CachedImage>
+                                                <Grid  Grid.Row="0"  Grid.Column="2" HorizontalOptions="End" VerticalOptions="Center">
+                                                    <ff:CachedImage  HorizontalOptions="End" Source="outline_navigate_next_white_48dp.png" InputTransparent="True" ScaleX="0.8">
+                                                        <ff:CachedImage.Transformations>
+                                                            <ffTransformations:TintTransformation HexColor="#707070" ></ffTransformations:TintTransformation>
+                                                        </ff:CachedImage.Transformations>
+                                                    </ff:CachedImage>
+                                                </Grid>
+
                                             </Grid>
 
                                         </Grid>
-
-                                    </Grid>
-                                    <Grid Grid.Row="0" Grid.Column="0" HorizontalOptions="Fill" TranslationY="95">
-                                        <ProgressBar Progress="{Binding ExtraProgress}" IsVisible="{Binding DownloadNotDone}" IsEnabled="{Binding DownloadNotDone}" HeightRequest="5" ProgressColor="{Binding ExtraColor}" VerticalOptions="Start"/>
-                                    </Grid>
-                                    <!--
+                                        <Grid Grid.Row="0" Grid.Column="0" HorizontalOptions="Fill" TranslationY="95">
+                                            <ProgressBar Progress="{Binding ExtraProgress}" IsVisible="{Binding DownloadNotDone}" IsEnabled="{Binding DownloadNotDone}" HeightRequest="5" ProgressColor="{Binding ExtraColor}" VerticalOptions="Start"/>
+                                        </Grid>
+                                        <!--
                                     <Grid Grid.Row="1" x:Name="PBar"  Grid.Column="0" VerticalOptions="Center">
                                         <ContentView VerticalOptions="Center">
                                             <ProgressBar Progress="{Binding Progress}" VerticalOptions="Center" PropertyChanged="ProgressBar_BindingContextChanged" IsVisible="False" IsEnabled="False"></ProgressBar>
                                         </ContentView>
                                     </Grid>
 -->
-                                    <!--  Progress="{Binding Progress}"  IsVisible="False" WidthRequest="126"-->
+                                        <!--  Progress="{Binding Progress}"  IsVisible="False" WidthRequest="126"-->
 
-                                    <!--    <Label Text="{Binding Description}" /> -->
+                                        <!--    <Label Text="{Binding Description}" /> -->
 
-                                    <!--  d:Text="{Binding .}"   LineBreakMode="NoWrap" 
+                                        <!--  d:Text="{Binding .}"   LineBreakMode="NoWrap" 
                                 FontSize="16" />-->
-                                    <!--   Style="{DynamicResource ListItemDetailTextStyle}"        LineBreakMode="NoWrap"
+                                        <!--   Style="{DynamicResource ListItemDetailTextStyle}"        LineBreakMode="NoWrap"
                                 FontSize="13"                           d:Text="Item descripton"
 -->
 
 
-                                </Grid>
+                                    </Grid>
 
-                            </ViewCell>
-                        </DataTemplate>
-                    </ListView.ItemTemplate>
+                                </ViewCell>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
 
-                </ListView>
+                    </ListView>
                 </RefreshView>
 
             </Grid>
