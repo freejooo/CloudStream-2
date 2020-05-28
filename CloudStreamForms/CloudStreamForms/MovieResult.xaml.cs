@@ -239,7 +239,10 @@ namespace CloudStreamForms
         {
             base.OnAppearing();
 
-            ForceUpdateVideo += ForceUpdateAppearing;
+            if (!hasAppeared) {
+                hasAppeared = true;
+                ForceUpdateVideo += ForceUpdateAppearing;
+            }
 
             print("APPEARING;::");
             //FadeAppear();
@@ -249,7 +252,7 @@ namespace CloudStreamForms
 
         protected override void OnDisappearing()
         {
-            ForceUpdateVideo -= ForceUpdateAppearing;
+            //  ForceUpdateVideo -= ForceUpdateAppearing; // CANT REMOVE IT BECAUSE VIDEOPAGE TRIGGERS ONDIS
             base.OnDisappearing();
         }
 
