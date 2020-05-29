@@ -5438,7 +5438,7 @@ namespace CloudStreamForms
                     if (text == "") {
                         return;
                     }
-                    string qSearchLink = "https://v2.sg.media-imdb.com/suggestion/" + text.Substring(0, 1) + "/" + text.Replace(" ", "_") + ".json";
+                    string qSearchLink = "https://v2.sg.media-imdb.com/suggestion/titles/" + text.Substring(0, 1) + "/" + text.Replace(" ", "_") + ".json";
                     string result = DownloadString(qSearchLink, tempThred);
                     //print(qSearchLink+ "|" +result);
                     //  string lookFor = "{\"i\":{\"";

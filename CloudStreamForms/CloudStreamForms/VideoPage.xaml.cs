@@ -532,7 +532,7 @@ namespace CloudStreamForms
 
             _libVLC = new LibVLC();
             _mediaPlayer = new MediaPlayer(_libVLC) { EnableHardwareDecoding = true };
-
+            
             vvideo.MediaPlayer = _mediaPlayer; // = new VideoView() { MediaPlayer = _mediaPlayer };
 
 
