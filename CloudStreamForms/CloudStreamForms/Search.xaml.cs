@@ -38,6 +38,7 @@ namespace CloudStreamForms
                 Placeholder = "Movie Search...",
                 CancelButtonColor = Color.FromRgb(190, 190, 190),
             };
+
             searchBar.TextChanged += SearchBar_TextChanged;
             searchBar.SearchButtonPressed += SearchBar_SearchButtonPressed;
             if (Device.RuntimePlatform == Device.Android) {
@@ -50,6 +51,7 @@ namespace CloudStreamForms
             listView = new ListView {
                 // Source of data items.
                 ItemsSource = mySearchResultCollection,
+                RowHeight=50,
 
                 // Define template for displaying each item.
                 // (Argument of DataTemplate constructor is called for 
@@ -62,11 +64,17 @@ namespace CloudStreamForms
                     nameLabel.SetBinding(Label.TextProperty, "Title");
                     desLabel.SetBinding(Label.TextProperty, "Extra");
                     // poster.SetBinding(Image.SourceProperty, "Poster");
-                    desLabel.FontSize = nameLabel.FontSize / 1.2f;
+                  //  desLabel.FontSize = nameLabel.FontSize / 1.2f;
+                    desLabel.FontSize = 12;
                     desLabel.TextColor = Color.Gray;
+                    nameLabel.TextColor = Color.FromHex("#e6e6e6");
+                    nameLabel.FontSize = 15;
 
                     desLabel.TranslationX = 10;
                     nameLabel.TranslationX = 10;
+
+
+
                     //nameLabel.SetBinding(Label.d, "Extra");
                     /*
                     Label birthdayLabel = new Label();
@@ -80,7 +88,7 @@ namespace CloudStreamForms
                     // Return an assembled ViewCell.
                     return new ViewCell {
                         View = new StackLayout {
-                            Padding = new Thickness(0, 5),
+                            Padding = new Thickness(0, 7),
                             Orientation = StackOrientation.Horizontal,
                             Children =
                             {
@@ -163,8 +171,7 @@ namespace CloudStreamForms
 
         private void SearchBar_TextChanged(object sender, TextChangedEventArgs e)
         {
-            if (Settings.SearchEveryCharEnabled) {
-
+            if (Settings.SearchEveryCharEnabled) { 
                 QuickSearch(e.NewTextValue);
             }
         }

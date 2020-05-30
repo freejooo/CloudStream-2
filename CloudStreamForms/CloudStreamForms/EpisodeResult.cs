@@ -21,7 +21,7 @@ namespace CloudStreamForms.Models
                     return "NetflixDownload3v2.png";//"NetflixDownload2.png";
                 }
                 else if(IsDownloading) {
-                    return "netflixStop128v2.png";
+                    return "CancelCrossV2.png";//"netflixStop128v2.png";
                 }
                 return "NetflixDownload1.png"; 
             } }
@@ -31,7 +31,7 @@ namespace CloudStreamForms.Models
                     return 0.8;
                 }
                 else if (IsDownloading) {
-                    return 0.6;
+                    return 0.8;
                 }
                 return 0.8;
             } }
