@@ -4044,7 +4044,14 @@ namespace CloudStreamForms
                     }
                     string gomoUrl = "https://" + GOMOURL + "/" + ((activeMovie.title.movieType == MovieType.Movie || activeMovie.title.movieType == MovieType.AnimeMovie) ? "movie" : "show") + "/" + find;
                     print("GOMOURL==: " + gomoUrl);
+
                     DownloadGomoSteam(gomoUrl, tempThred, normalEpisode);
+                    /*
+                    Parallel.For(1, 5, (i) => {
+                        DownloadGomoSteam(gomoUrl + "?src=mirror" + i, tempThred, normalEpisode);
+                    });*/
+                    JoinThred(tempThred);
+
                 }
                 catch (Exception _ex) {
                     print("PROVIDER ERROR: " + _ex);
@@ -4066,7 +4073,7 @@ namespace CloudStreamForms
             static void DownloadGomoSteam(string url, TempThred tempThred, int episode)
             {
                 bool done = true;
-
+                print("EXTRACTING GOMO: " + url);
                 try {
                     try {
                         string d = "";
@@ -4432,7 +4439,6 @@ namespace CloudStreamForms
                     catch (Exception) {
 
                     }
-                    JoinThred(tempThred);
                 }
             }
         }
@@ -5269,7 +5275,11 @@ namespace CloudStreamForms
                 //Because I don't want to host my own servers I "Save" a js code on a free js hosting site. This code will automaticly give a responseurl that will redirect to the CloudStream app.
                 string code = ("var x = document.createElement('body');\n var s = document.createElement(\"script\");\n s.innerHTML = \"window.location.href = '" + baseUrl + ":" + extra + "';\";\n var h = document.createElement(\"H1\");\n var div = document.createElement(\"div\");\n div.style.width = \"100%\";\n div.style.height = \"100%\";\n div.align = \"center\";\n div.style.padding = \"130px 0\";\n div.style.margin = \"auto\";\n div.innerHTML = \"" + redirectingName + "\";\n h.append(div);\n x.append(h);\n x.append(s);\n parent.document.body = x;").Replace("%", "%25");
                 // Create a request using a URL that can receive a post. 
-                WebRequest request = WebRequest.Create("https://js.do/mod_perl/js.pl");
+           //     WebRequest request = WebRequest.Create("https://js.do/mod_perl/js.pl");
+                HttpWebRequest request = (HttpWebRequest)HttpWebRequest.Create("https://js.do/mod_perl/js.pl");
+
+                request.ServerCertificateValidationCallback = delegate { return true; };
+
                 // Set the Method property of the request to POST.
                 request.Method = "POST";
                 // Create POST data and convert it to a byte array.
@@ -7009,17 +7019,26 @@ namespace CloudStreamForms
         public static double GetFileSize(string url)
         {
             try {
-                var webRequest = HttpWebRequest.Create(new System.Uri(url));
+             //   var webRequest = HttpWebRequest.Create(new System.Uri(url));
+                HttpWebRequest webRequest = (HttpWebRequest)HttpWebRequest.Create(url);
+
+                webRequest.ServerCertificateValidationCallback = delegate { return true; };
                 webRequest.Method = "HEAD";
                 print("RESPONSEGET:");
                 webRequest.Timeout = 10000;
                 using (var webResponse = webRequest.GetResponse()) {
-                    print("RESPONSE:");
-                    var fileSize = webResponse.Headers.Get("Content-Length");
-                    var fileSizeInMegaByte = Math.Round(Convert.ToDouble(fileSize) / Math.Pow((double)App.GetSizeOfJumpOnSystem(), 2.0), 2);
-                    print("GETFILESIZE: " + fileSizeInMegaByte);
+                    try {
+                        print("RESPONSE:");
+                        var fileSize = webResponse.Headers.Get("Content-Length");
+                        var fileSizeInMegaByte = Math.Round(Convert.ToDouble(fileSize) / Math.Pow((double)App.GetSizeOfJumpOnSystem(), 2.0), 2);
+                        print("GETFILESIZE: " + fileSizeInMegaByte);
 
-                    return fileSizeInMegaByte;
+                        return fileSizeInMegaByte;
+                    }
+                    catch (Exception) {
+                        return -1;
+                    }
+                   
                 }
             }
             catch (Exception) {
@@ -7246,7 +7265,7 @@ namespace CloudStreamForms
             }
         }
 
-
+        static object LinkLock = new object();
         public static bool AddPotentialLink(int normalEpisode, string _url, string _name, int _priority)
         {
             if (activeMovie.episodes == null) return false;
@@ -7256,39 +7275,40 @@ namespace CloudStreamForms
             _name = _name.Replace("  ", " ");
             _url = _url.Replace(" ", "%20");
             try {
-                if (!LinkListContainsString(activeMovie.episodes[normalEpisode].links, _url)) {
-                    if (CheckIfURLIsValid(_url)) {
-                        // if (GetFileSize(_url) > 0) {
-                        print("ADD LINK:" + normalEpisode + "|" + _name + "|" + _priority + "|" + _url);
-                        Episode ep = activeMovie.episodes[normalEpisode];
-                        if (ep.links == null) {
-                            activeMovie.episodes[normalEpisode] = new Episode() { links = new List<Link>(), date = ep.date, description = ep.description, name = ep.name, posterUrl = ep.posterUrl, rating = ep.rating, id = ep.id };
-                            ep = activeMovie.episodes[normalEpisode];
-                        }
+                lock (LinkLock) {
+                    if (!LinkListContainsString(activeMovie.episodes[normalEpisode].links, _url)) {
+                        if (CheckIfURLIsValid(_url)) {
+                            // if (GetFileSize(_url) > 0) {
+                            print("ADD LINK:" + normalEpisode + "|" + _name + "|" + _priority + "|" + _url);
+                            Episode ep = activeMovie.episodes[normalEpisode];
+                            if (ep.links == null) {
+                                activeMovie.episodes[normalEpisode] = new Episode() { links = new List<Link>(), date = ep.date, description = ep.description, name = ep.name, posterUrl = ep.posterUrl, rating = ep.rating, id = ep.id };
+                                ep = activeMovie.episodes[normalEpisode];
+                            }
 
-                        bool done = false;
-                        int count = 1;
-                        string realName = _name;
-                        while (!done && !realName.Contains("[MIRRORCOUNTER]")) {
-                            count++;
-                            done = true;
-                            for (int i = 0; i < ep.links.Count; i++) {
-                                if (ep.links[i].name == realName) {
-                                    realName = _name + " (Mirror " + count + ")";
-                                    done = false;
-                                    break;
+                            bool done = false;
+                            int count = 1;
+                            string realName = _name;
+                            while (!done && !realName.Contains("[MIRRORCOUNTER]")) {
+                                count++;
+                                done = true;
+                                for (int i = 0; i < ep.links.Count; i++) {
+                                    if (ep.links[i].name == realName) {
+                                        realName = _name + " (Mirror " + count + ")";
+                                        done = false;
+                                        break;
+                                    }
                                 }
                             }
+                            realName = realName.Replace("  ", " ");
+                            var link = new Link() { priority = _priority, url = _url, name = realName };
+                            activeMovie.episodes[normalEpisode].links.Add(link); // [MIRRORCOUNTER] IS LATER REPLACED WITH A NUMBER TO MAKE IT EASIER TO SEPERATE THEM, CAN'T DO IT HERE BECAUSE IT MUST BE ABLE TO RUN SEPARETE THREADS AT THE SAME TIME
+                            linkAdded?.Invoke(null, link);
+                            return true;
+                            //}
                         }
-                        realName = realName.Replace("  ", " ");
-                        var link = new Link() { priority = _priority, url = _url, name = realName };
-                        activeMovie.episodes[normalEpisode].links.Add(link); // [MIRRORCOUNTER] IS LATER REPLACED WITH A NUMBER TO MAKE IT EASIER TO SEPERATE THEM, CAN'T DO IT HERE BECAUSE IT MUST BE ABLE TO RUN SEPARETE THREADS AT THE SAME TIME
-                        linkAdded?.Invoke(null, link);
-                        return true;
-                        //}
                     }
                 }
-
             }
             catch (Exception) {
                 return false;
@@ -7546,13 +7566,23 @@ namespace CloudStreamForms
                     __webRequest.Timeout = 12000;
                     __webRequest.ContentType = "application/json";
                     __webRequest.Headers.Add("X-Requested-With", "XMLHttpRequest");
-
-                    using (System.IO.Stream s = __webRequest.GetResponse().GetResponseStream()) {
-                        using (System.IO.StreamReader sr = new System.IO.StreamReader(s)) {
-                            var jsonResponse = sr.ReadToEnd();
-                            return jsonResponse.ToString();
-                            // Console.WriteLine(String.Format("Response: {0}", jsonResponse));
+                    try { 
+                        using (System.IO.Stream s = __webRequest.GetResponse().GetResponseStream()) {
+                            try {
+                                using (System.IO.StreamReader sr = new System.IO.StreamReader(s)) {
+                                    var jsonResponse = sr.ReadToEnd();
+                                    return jsonResponse.ToString();
+                                    // Console.WriteLine(String.Format("Response: {0}", jsonResponse));
+                                }
+                            }
+                            catch (Exception _ex) {
+                                print("FATAL EX IN : " + _ex); 
+                            }
+                           
                         }
+                    }
+                    catch (Exception _ex) {
+                        print("FATAL EX IN : " + _ex);
                     }
                 }
             }
@@ -7761,21 +7791,69 @@ namespace CloudStreamForms
                 HttpWebRequest webRequest = (HttpWebRequest)HttpWebRequest.Create(url);
                 webRequest.ServerCertificateValidationCallback = delegate { return true; };
                 webRequest.Method = "GET";
+                webRequest.Timeout = waitTime * 10;
+                webRequest.ReadWriteTimeout = waitTime * 10;
+                webRequest.ContinueTimeout = waitTime * 10;
 
-                string _s = "";
-                bool done = false;
+            //    string _s = "";
+              //  bool done = false;
+                print("REQUEST::: " + url);
 
-                webRequest.BeginGetResponse(new AsyncCallback((IAsyncResult _callbackResult) => {
+                using (var webResponse = webRequest.GetResponse()) {
+                    try {
+                        using (StreamReader httpWebStreamReader = new StreamReader(webResponse.GetResponseStream(), Encoding.UTF8)) {
+                            try {
+                                if (tempThred != null) { if (!GetThredActive((TempThred)tempThred)) {return ""; }; } //  done = true; 
+                                return httpWebStreamReader.ReadToEnd();
+                             //   _s = httpWebStreamReader.ReadToEnd();
+                              //  done = true;
+                            }
+                            catch (Exception _ex) {
+                                print("FATAL ERROR DLOAD3: " + _ex + "|" + url);
+                            }
+
+                        }
+                    }
+                    catch (Exception) {
+                        return "";
+                    }
+
+                }
+                return "";
+
+                /*
+                try {
+
+                webRequest.BeginGetResponse(
+                    
+                    new AsyncCallback((IAsyncResult _callbackResult) => {
                     HttpWebRequest _request = (HttpWebRequest)_callbackResult.AsyncState;
                     HttpWebResponse response = (HttpWebResponse)_request.EndGetResponse(_callbackResult);
-                    using (StreamReader httpWebStreamReader = new StreamReader(response.GetResponseStream(), Encoding.UTF8)) {
-                        if (tempThred != null) { if (!GetThredActive((TempThred)tempThred)) { done = true; return; }; }
-                        _s = httpWebStreamReader.ReadToEnd();
-                        done = true;
+                    try {
+                        using (StreamReader httpWebStreamReader = new StreamReader(response.GetResponseStream(), Encoding.UTF8)) {
+                            try {
+                                if (tempThred != null) { if (!GetThredActive((TempThred)tempThred)) { done = true; return; }; }
+                                _s = httpWebStreamReader.ReadToEnd();
+                                done = true;
+                            }
+                            catch (Exception _ex) {
+                                print("FATAL ERROR DLOAD3: " + _ex + "|" + url); 
+                            }
+
+                        }
                     }
+                    catch (Exception _ex) {
+                        print("FATAL ERROR DLOAD2: " + _ex + "|" + url);
+                    }
+
                 }), webRequest);
 
-
+                }
+                catch (Exception _ex) {
+                    print("FATAL ERROR DLOAD4: " + _ex + "|" + url);
+                }
+                */
+                /*
                 for (int i = 0; i < waitTime; i++) {
                     Thread.Sleep(10);
                     try {
@@ -7793,7 +7871,7 @@ namespace CloudStreamForms
                         return _s;
                     }
                 }
-                return "";
+                return "";*/
             }
             catch (Exception _ex) {
                 print("FATAL ERROR DLOAD: " + _ex + "|" + url);

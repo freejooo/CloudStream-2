@@ -610,8 +610,7 @@ namespace CloudStreamForms
             };
             Player.TimeChanged += (o, e) => {
                 PlayerTimeChanged(Player.Time);
-            };
-
+            }; 
 
             Player.Buffering += (o, e) => {
                 Device.BeginInvokeOnMainThread(() => {
@@ -628,11 +627,10 @@ namespace CloudStreamForms
                 });
 
             };
+            
             Player.EncounteredError += (o, e) => {
                 // TODO: SKIP TO NEXT
-                ErrorWhenLoading();
-
-
+                ErrorWhenLoading(); 
             };
             SelectMirror(0);
             ShowNextMirror();
