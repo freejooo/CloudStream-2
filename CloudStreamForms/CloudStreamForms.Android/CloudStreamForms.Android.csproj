@@ -36,9 +36,11 @@
     <EnableLLVM>false</EnableLLVM>
     <AndroidEnableProfiledAot>false</AndroidEnableProfiledAot>
     <BundleAssemblies>false</BundleAssemblies>
-    <MandroidI18n />
+    <MandroidI18n>
+    </MandroidI18n>
     <AndroidTlsProvider>btls</AndroidTlsProvider>
-    <AndroidHttpClientHandlerType>System.Net.Http.HttpClientHandler</AndroidHttpClientHandlerType>
+    <AndroidHttpClientHandlerType>
+    </AndroidHttpClientHandlerType>
     <AndroidSupportedAbis />
     <LangVersion>8.0</LangVersion>
   </PropertyGroup>

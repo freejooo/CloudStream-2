@@ -3045,18 +3045,22 @@ namespace CloudStreamForms
             public void FishMainLink(string year, TempThred tempThred, MALData malData)
             {
                 string _imdb = activeMovie.title.name; //"Attack On Titan";
+                string _imdb2 = activeMovie.title.ogName; //"Attack On Titan";
                 string imdb = _imdb.Replace(".", "").Replace("/", "");
-                string d = DownloadString("https://bestdubbedanime.com/search/" + imdb);
+                string searchUrl = "https://bestdubbedanime.com/search/" + imdb;
+                print("MAIN DUBBED SEARCH URL: " + searchUrl);
+                string d = DownloadString(searchUrl); // TrustFailure (Authentication failed, see inner exception.)
                 if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
 
                 const string lookFor = "class=\"resulta\" href=\"";
                 string nameLookFor = "<div class=\"titleresults\">";
-                print(d);
+                print("DUBBED:::::FROM: " + d);
 
                 List<int> alreadyAdded = new List<int>();
                 while (d.Contains(nameLookFor)) {
                     string name = FindHTML(d, nameLookFor, "<", decodeToNonHtml: true);
-                    if (name.ToLower().Contains(_imdb.ToLower())) {
+                    print("DUBBEDNAME: " + name + "|" + _imdb + "|" + _imdb);
+                    if (name.ToLower().Contains(_imdb.ToLower()) || name.ToLower().Contains(_imdb2.ToLower())) {
 
                         string url = FindHTML(d, lookFor, "\"").Replace("\\/", "/");
                         string slug = url.Replace("//bestdubbedanime.com/", "");
@@ -3090,25 +3094,24 @@ namespace CloudStreamForms
                         if (!alreadyAdded.Contains(id)) {
                             alreadyAdded.Add(id);
                             try {
-                                print("SEASON::" + season + "PART" + part);
+                                print("DUBBEDSEASON::" + season + "PART" + part);
                                 lock (AnimeProviderHelper._lock) {
                                     var ms = activeMovie.title.MALData.seasonData[season].seasons[part - 1];
                                     ms.dubbedAnimeData.dubExists = true;
                                     ms.dubbedAnimeData.slug = slug;
                                     activeMovie.title.MALData.seasonData[season].seasons[part - 1] = ms;
 
-                                    print("ÖÖ>>");
-                                    print(activeMovie.title.MALData.seasonData[season].seasons[part - 1].dubbedAnimeData.dubExists);
+                                    print("ÖÖ>>" + activeMovie.title.MALData.seasonData[season].seasons[part - 1].dubbedAnimeData.dubExists);
                                 }
                             }
-                            catch (Exception) {
-                                print("ERROR IN " + "SEASON::" + season + "PART" + part);
+                            catch (Exception _ex) {
+                                print("ERROR IN SEASON::" + season + "PART" + part + ": EX: " + _ex);
                                 //throw;
                                 // ERROR
                             }
                         }
 
-                        print("-->" + name + "|" + url + "| Season " + season + "|" + slug + "|Park" + part);
+                        print("DUBBEDANIME: -->" + name + "|" + url + "| Season " + season + "|" + slug + "|Park" + part);
 
                         //print("Season " + season + "||" + slug);
                     }
@@ -3366,7 +3369,7 @@ namespace CloudStreamForms
             public void FishMainLink(string year, TempThred tempThred, MALData malData)
             {
                 try {
-                    string result = DownloadString("https://animeflix.io/api/search?q=" + malData.firstName, waitTime: 400, repeats: 1);//activeMovie.title.name);
+                    string result = DownloadString("https://animeflix.io/api/search?q=" + malData.firstName, waitTime: 600, repeats: 1);//activeMovie.title.name);
                     print("FLIX::::" + result);
                     if (result == "") return;
                     if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
@@ -4069,10 +4072,11 @@ namespace CloudStreamForms
                         string d = "";
                         if (d == "") {
                             try {
-                                d = DownloadString(url, tempThred, false, 2); if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
+                                // d = DownloadString(url, tempThred, false, 2); if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS TODO CHECK
+                                d = DownloadString(url, tempThred, 2); if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
                             }
                             catch (System.Exception) {
-                                debug("Error gogo");
+                                print("Error gogo");
                             }
                         }
 
@@ -4156,7 +4160,6 @@ namespace CloudStreamForms
 
                                                 // --------------- GOT RESULT!!!!! ---------------
 
-                                                WebClient client = new WebClient();
 
                                                 // --------------- MIRROR LINKS ---------------
                                                 string veryURL = FindHTML(result, "https:\\/\\/verystream.com\\/e\\/", "\"");
@@ -4164,7 +4167,7 @@ namespace CloudStreamForms
                                                 string onlyURL = "https://onlystream.tv" + FindHTML(result, "https:\\/\\/onlystream.tv", "\"").Replace("\\", "");
                                                 //string gogoStream = FindHTML(result, "https:\\/\\/" + GOMOURL, "\"");
                                                 string upstream = FindHTML(result, "https:\\/\\/upstream.to\\/embed-", "\"");
-                                                string mightyupload = FindHTML(result, "http:\\/\\/mightyupload.com\\/", "\"").Replace("\\/", "/");
+                                                string mightyupload = FindHTML(result, "https:\\/\\/mightyupload.com\\/embed-", "\"");//FindHTML(result, "http:\\/\\/mightyupload.com\\/", "\"").Replace("\\/", "/");
                                                 //["https:\/\/upstream.to\/embed-05mzggpp3ohg.html","https:\/\/gomo.to\/vid\/eyJ0eXBlIjoidHYiLCJzIjoiMDEiLCJlIjoiMDEiLCJpbWQiOiJ0dDA5NDQ5NDciLCJfIjoiMzQyMDk0MzQzMzE4NTEzNzY0IiwidG9rZW4iOiI2NjQ0MzkifQ,,&noneemb","https:\/\/hqq.tv\/player\/embed_player.php?vid=SGVsWVI5aUNlVTZxTTdTV09RY0x6UT09&autoplay=no",""]
 
                                                 if (upstream != "") {
@@ -4181,18 +4184,19 @@ namespace CloudStreamForms
                                                     }
                                                 }
 
+                                                /*
                                                 if (mightyupload != "") {
-                                                    print("MIGHT" + mightyupload);
-                                                    string baseUri = "http://mightyupload.com/" + mightyupload;
+                                                    print("MIGHT: " + mightyupload);
+                                                    string baseUri = "http://mightyupload.com/embed-" + mightyupload;
                                                     //string _d = DownloadString("http://mightyupload.com/" + mightyupload);
-                                                    string post = "op=download1&usr_login=&id=" + FindHTML("|" + mightyupload, "|", "/") + "&fname=" + FindHTML(mightyupload, "/", ".html") + "&referer=&method_free=Free+Download+%3E%3E";
+                                                    string post = "op=download1&usr_login=&id=" + (mightyupload.Replace(".html", "")) + "&fname=" + (mightyupload.Replace(".html", "") + "_play.mp4") + "&referer=&method_free=Free+Download+%3E%3E";
 
                                                     string _d = PostRequest(baseUri, baseUri, post, tempThred);//op=download1&usr_login=&id=k9on84m2bvr9&fname=tt0371746_play.mp4&referer=&method_free=Free+Download+%3E%3E
                                                     print("RESMIGHT:" + _d);
                                                     if (!GetThredActive(tempThred)) { return; };
                                                     string ur = FindHTML(_d, "<source src=\"", "\"");
                                                     AddPotentialLink(episode, ur, "HD MightyUpload", 16);
-                                                }
+                                                }*/
                                                 /*
                                                 if (gogoStream.EndsWith(",&noneemb")) {
                                                     result = RemoveOne(result, ",&noneemb");
@@ -4213,7 +4217,7 @@ namespace CloudStreamForms
                                                     try {
                                                         if (!GetThredActive(tempThred)) { return; };
 
-                                                        d = client.DownloadString("https://verystream.com/e/" + veryURL);
+                                                        d = DownloadString("https://verystream.com/e/" + veryURL);
                                                         if (!GetThredActive(tempThred)) { return; };
 
                                                         // print(d);
@@ -4254,7 +4258,7 @@ namespace CloudStreamForms
                                                             if (!GetThredActive(tempThred)) { return; };
                                                             string trueUrl = "https://" + GOMOURL + "/vid/" + gogoStream;
                                                             print(trueUrl);
-                                                            d = client.DownloadString(trueUrl);
+                                                            d = DownloadString(trueUrl);
                                                             print("-->><<__" + d);
                                                             if (!GetThredActive(tempThred)) { return; };
 
@@ -4294,7 +4298,7 @@ namespace CloudStreamForms
                                                     try {
                                                         if (!GetThredActive(tempThred)) { return; };
 
-                                                        d = client.DownloadString(gunURL);
+                                                        d = DownloadString(gunURL);
                                                         if (!GetThredActive(tempThred)) { return; };
 
                                                         string mid = FindHTML(d, "mp4|", "|");
@@ -4333,7 +4337,7 @@ namespace CloudStreamForms
                                                     try {
                                                         if (!GetThredActive(tempThred)) { return; };
 
-                                                        d = client.DownloadString(onlyURL);
+                                                        d = DownloadString(onlyURL);
                                                         if (!GetThredActive(tempThred)) { return; };
 
                                                         string _url = FindHTML(d, "file:\"", "\"");
@@ -5596,11 +5600,11 @@ namespace CloudStreamForms
                         */
 
                         if (url == "") return;
-
+                        /*
                         WebClient webClient = new WebClient();
-                        webClient.Encoding = Encoding.UTF8;
+                        webClient.Encoding = Encoding.UTF8;*/
 
-                        string d = webClient.DownloadString(url);
+                        string d = DownloadString(url);
                         if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
 
                         string jap = FindHTML(d, "Japanese:</span> ", "<").Replace("  ", "").Replace("\n", ""); // JAP NAME IS FOR SEARCHING, BECAUSE ALL SEASONS USE THE SAME NAME
@@ -5652,7 +5656,7 @@ namespace CloudStreamForms
                             }
                             if (sqlLink != "") {
                                 try {
-                                    d = webClient.DownloadString("https://myanimelist.net" + sqlLink);
+                                    d = DownloadString("https://myanimelist.net" + sqlLink);
                                 }
                                 catch (Exception) {
                                     d = "";
@@ -7560,6 +7564,7 @@ namespace CloudStreamForms
         {
             try {
                 HttpWebRequest webRequest = (HttpWebRequest)HttpWebRequest.Create(myUri);
+                webRequest.ServerCertificateValidationCallback = delegate { return true; }; // FOR System.Net.WebException: Error: TrustFailure
 
                 webRequest.Method = "POST";
                 //  webRequest.Headers.Add("x-token", realXToken);
@@ -7596,19 +7601,26 @@ namespace CloudStreamForms
                     // BEGIN RESPONSE
 
                     _webRequest.BeginGetResponse(new AsyncCallback((IAsyncResult _callbackResult) => {
-                        HttpWebRequest request = (HttpWebRequest)_callbackResult.AsyncState;
-                        HttpWebResponse response = (HttpWebResponse)request.EndGetResponse(_callbackResult);
-                        if (_tempThred != null) {
-                            TempThred tempThred = (TempThred)_tempThred;
-                            if (!GetThredActive(tempThred)) { return; }
-                        }
-                        using (StreamReader httpWebStreamReader = new StreamReader(response.GetResponseStream())) {
+                        try {
+
+                            HttpWebRequest request = (HttpWebRequest)_callbackResult.AsyncState;
+                            HttpWebResponse response = (HttpWebResponse)request.EndGetResponse(_callbackResult);
                             if (_tempThred != null) {
                                 TempThred tempThred = (TempThred)_tempThred;
                                 if (!GetThredActive(tempThred)) { return; }
                             }
-                            _res = httpWebStreamReader.ReadToEnd();
-                            done = true;
+                            using (StreamReader httpWebStreamReader = new StreamReader(response.GetResponseStream())) {
+                                if (_tempThred != null) {
+                                    TempThred tempThred = (TempThred)_tempThred;
+                                    if (!GetThredActive(tempThred)) { return; }
+                                }
+                                _res = httpWebStreamReader.ReadToEnd();
+                                done = true;
+                            }
+
+                        }
+                        catch (Exception _ex) {
+                            print("FATAL EX IN POST2: " + _ex);
                         }
                     }), _webRequest);
                 }), webRequest);
@@ -7622,8 +7634,8 @@ namespace CloudStreamForms
                 }
                 return _res;
             }
-            catch (Exception) {
-
+            catch (Exception _ex) {
+                print("FATAL EX IN POST: " + _ex);
                 return "";
             }
         }
@@ -7728,23 +7740,73 @@ namespace CloudStreamForms
         /// <param name="url"></param>
         /// <param name="UTF8Encoding"></param>
         /// <returns></returns>
-        public static string DownloadString(string url, TempThred? tempThred = null, bool UTF8Encoding = true, int repeats = 2, int waitTime = 1000)
+        public static string DownloadString(string url, TempThred? tempThred = null, int repeats = 2, int waitTime = 1000)
         {
             string s = "";
             for (int i = 0; i < repeats; i++) {
                 if (s == "") {
-                    s = DownloadStringOnce(url, tempThred, UTF8Encoding, waitTime);
+                    //s = DownloadStringOnce(url, tempThred, UTF8Encoding, waitTime);
+                    s = DownloadStringWithCert(url, tempThred, waitTime);
                 }
             }
             return s;
         }
 
 
+        public static string DownloadStringWithCert(string url, TempThred? tempThred = null, int waitTime = 1000, string requestBody = "")
+        {
+            if (!url.IsClean()) return "";
+
+            try {
+                HttpWebRequest webRequest = (HttpWebRequest)HttpWebRequest.Create(url);
+                webRequest.ServerCertificateValidationCallback = delegate { return true; };
+                webRequest.Method = "GET";
+
+                string _s = "";
+                bool done = false;
+
+                webRequest.BeginGetResponse(new AsyncCallback((IAsyncResult _callbackResult) => {
+                    HttpWebRequest _request = (HttpWebRequest)_callbackResult.AsyncState;
+                    HttpWebResponse response = (HttpWebResponse)_request.EndGetResponse(_callbackResult);
+                    using (StreamReader httpWebStreamReader = new StreamReader(response.GetResponseStream(), Encoding.UTF8)) {
+                        if (tempThred != null) { if (!GetThredActive((TempThred)tempThred)) { done = true; return; }; }
+                        _s = httpWebStreamReader.ReadToEnd();
+                        done = true;
+                    }
+                }), webRequest);
+
+
+                for (int i = 0; i < waitTime; i++) {
+                    Thread.Sleep(10);
+                    try {
+                        if (tempThred != null) {
+                            if (!GetThredActive((TempThred)tempThred)) {
+                                return "";
+                            }
+                        }
+                    }
+                    catch (Exception) { }
+
+                    if (done) {
+                        //print(_s);
+                        print(">>" + i);
+                        return _s;
+                    }
+                }
+                return "";
+            }
+            catch (Exception _ex) {
+                print("FATAL ERROR DLOAD: " + _ex + "|" + url);
+                return "";
+            }
+        }
+
 
         public static string DownloadStringOnce(string url, TempThred? tempThred = null, bool UTF8Encoding = true, int waitTime = 1000)
         {
             try {
                 WebClient client = new WebClient();
+
                 if (UTF8Encoding) {
                     client.Encoding = Encoding.UTF8; // TO GET SPECIAL CHARACTERS ECT
                 }
@@ -7762,7 +7824,7 @@ namespace CloudStreamForms
                         else {
                             _s = "";
                             error = true;
-                            print(e.Error.Message + "|" + url);
+                            print("DSTRING ERROR: " + url + "\n ERROR-->" + e.Error);
                         }
                     }
                     else {
