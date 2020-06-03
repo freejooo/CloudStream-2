@@ -73,7 +73,7 @@ namespace CloudStreamForms.Droid
                 CloudStreamCore.print("EX FROM SEARCH: " + _ex);
                 throw;
             }
-            */
+            *
             /*
               var _v = new Android.Widget.ImageView(Context) { };
               _v.SetBackgroundColor(new Android.Graphics.Color(200, 0, 0));

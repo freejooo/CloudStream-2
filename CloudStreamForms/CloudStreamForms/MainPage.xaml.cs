@@ -1030,6 +1030,21 @@ namespace CloudStreamForms
             public AnimekisaData animekisaData;
             public AnimeDreamData animedreamData;
             public WatchMovieAnimeData watchMovieAnimeData;
+            public KissanimefreeData kissanimefreeData;
+        }
+
+
+        [Serializable]
+        public struct KissanimefreeData
+        {
+            public bool dubExists;
+            public bool subExists;
+            public int maxSubbedEpisodes;
+            public int maxDubbedEpisodes;
+            public string dubUrl;
+            public string subUrl;
+            public string dubReferer;
+            public string subReferer;
         }
 
         [Serializable]
@@ -1535,7 +1550,7 @@ namespace CloudStreamForms
 
         public static IMovieProvider[] movieProviders = new IMovieProvider[] { new FullMoviesProvider(), new TMDBProvider(), new WatchTVProvider(), new FMoviesProvider(), new LiveMovies123Provider(), new TheMovies123Provider(), new YesMoviesProvider(), new WatchSeriesProvider(), new GomoStreamProvider(), new Movies123Provider(), new DubbedAnimeMovieProvider(), new TheMovieMovieProvider(), new KickassMovieProvider() };
 
-        public static IAnimeProvider[] animeProviders = new IAnimeProvider[] { new GogoAnimeProvider(), new KickassAnimeProvider(), new DubbedAnimeProvider(), new AnimeFlixProvider(), new DubbedAnimeNetProvider(), new AnimekisaProvider(), new DreamAnimeProvider(), new TheMovieAnimeProvider() };
+        public static IAnimeProvider[] animeProviders = new IAnimeProvider[] { new GogoAnimeProvider(), new KickassAnimeProvider(), new DubbedAnimeProvider(), new AnimeFlixProvider(), new DubbedAnimeNetProvider(), new AnimekisaProvider(), new DreamAnimeProvider(), new TheMovieAnimeProvider(), new KissFreeAnimeProvider() };
 
         public interface IMovieProvider // FOR MOVIES AND SHOWS
         {
@@ -2342,6 +2357,234 @@ namespace CloudStreamForms
                 catch (Exception _ex) {
                     print("PROVIDER ERROR: " + _ex);
                 }
+            }
+        }
+
+        public class KissFreeAnimeProvider : IAnimeProvider
+        {
+            public string Name => "Kissanimefree";
+
+            public const bool isApiRequred = false;
+            public const bool apiSearch = false;
+
+            static string ajaxNonce = "";
+            static string apiNonce = "";
+            static string mainNonce = "";
+
+            [System.Serializable]
+            struct FreeAnimeQuickSearch
+            {
+                public string path;
+                public string url;
+                public string title;
+            }
+
+            static void GetApi()
+            {
+                string main = GetHTML("https://kissanimefree.xyz/");
+
+                main = RemoveOne(main, "ajax_url\":\"");
+                ajaxNonce = FindHTML(main, "nonce\":\"", "\"");
+                main = RemoveOne(main, "api\":\"");
+                apiNonce = FindHTML(main, "nonce\":\"", "\"");
+                main = RemoveOne(main, "nonce\":\"");
+                mainNonce = FindHTML(main, "nonce\":\"", "\"");
+
+                print("AJAX: " + ajaxNonce);
+                print("API: " + apiNonce);
+                print("Main: " + mainNonce);
+            }
+
+            /// <summary>
+            /// Get max ep of anime provided path (data-id)
+            /// </summary>
+            /// <param name="path"></param>
+            /// <returns></returns>
+            static int GetMaxEp(string path)
+            {
+                int maxEp = 0;
+                for (int i = 1; i < 100; i++) {
+                    string d = GetHTML("https://kissanimefree.xyz/load-list-episode/?pstart=" + i + "&id=" + path + "&ide=");
+                    try {
+                        int max = int.Parse(FindHTML(d, "/\">", "<"));
+                        if (max != i * 100) {
+                            maxEp = max;
+                            break;
+                        }
+                    }
+                    catch (Exception) { // MOVIE
+                        break;
+                    }
+                }
+                return maxEp;
+            }
+
+            /// <summary>
+            /// Faster than Normalsearch, but requres apikey and dosent show all results
+            /// </summary>
+            /// <param name="search"></param>
+            /// <returns></returns>
+            static List<FreeAnimeQuickSearch> ApiQuickSearch(string search)
+            {
+                string d = GetHTML("https://kissanimefree.xyz/wp-json/kiss/search/?keyword=" + search + "&nonce=" + apiNonce);
+
+                const string lookFor = "\"title\":\"";
+                string path = FindHTML(d, "{\"", "\"");
+                List<FreeAnimeQuickSearch> quickSearch = new List<FreeAnimeQuickSearch>();
+                int count = 0;
+                while (d.Contains(lookFor)) {
+                    string title = FindHTML(d, lookFor, "\"");
+                    d = RemoveOne(d, lookFor);
+                    string url = FindHTML(d, "\"url\":\"", "\"");
+                    // d = RemoveOne(d, "}");
+                    quickSearch.Add(new FreeAnimeQuickSearch() { url = url, title = title, path = path });
+                    print(count + "|" + title);
+                    count++;
+
+                    path = FindHTML(d, "},\"", "\"");
+                }
+                return quickSearch;
+            }
+
+            /// <summary>
+            /// Slower than API search, but more results
+            /// </summary>
+            /// <param name="search"></param>
+            /// <returns></returns>
+            static List<FreeAnimeQuickSearch> NormalQuickSearch(string search)
+            {
+                string d = GetHTML("https://kissanimefree.xyz/?s=" + search);
+                const string lookFor = "<div class=\"movie-preview-content\">";
+                List<FreeAnimeQuickSearch> quickSearch = new List<FreeAnimeQuickSearch>();
+                while (d.Contains(lookFor)) {
+                    d = RemoveOne(d, lookFor);
+                    string url = FindHTML(d, "<a href=\"", "\"");
+                    string name = FindHTML(d, "alt=\"", "\"");
+                    string id = FindHTML(d, " data-id=\"", "\"");
+                    quickSearch.Add(new FreeAnimeQuickSearch() { path = id, title = name, url = url });
+                }
+                return quickSearch;
+            }
+
+
+
+
+            public void FishMainLink(string year, TempThred tempThred, MALData malData)
+            {
+                if (isApiRequred && !ajaxNonce.IsClean()) { // FOR API REQUESTS, LIKE QUICKSEARCH
+                    GetApi();
+                }
+                string search = malData.engName;
+                List<FreeAnimeQuickSearch> res = apiSearch ? ApiQuickSearch(search) : NormalQuickSearch(search);
+
+                foreach (var re in res) {
+                    bool isDub = re.title.Contains("(Dub)");
+                    string animeTitle = re.title.Replace("(Dub)", "").Replace("  ", "");
+                    string slug = re.path;
+
+                    print("DADADADA::: " + isDub + "|" + animeTitle + "|" + slug);
+
+                    for (int i = 0; i < activeMovie.title.MALData.seasonData.Count; i++) {
+                        for (int q = 0; q < activeMovie.title.MALData.seasonData[i].seasons.Count; q++) {
+                            MALSeason ms;
+
+                            lock (AnimeProviderHelper._lock) {
+                                ms = activeMovie.title.MALData.seasonData[i].seasons[q];
+                            }
+
+                            string compareName = ms.name.Replace(" ", "");
+                            bool containsSyno = false;
+                            for (int s = 0; s < ms.synonyms.Count; s++) {
+                                if (ToLowerAndReplace(ms.synonyms[s]) == ToLowerAndReplace(animeTitle)) {
+                                    containsSyno = true;
+                                }
+                            }
+
+                            //  print(animeTitle.ToLower() + "|" + ms.name.ToLower() + "|" + ms.engName.ToLower() + "|" + ___year + "___" + ___year2 + "|" + containsSyno);
+                            print("COMPAREKISKC: SEASON:::" + i + "|ELDA:" + q + "| " + compareName + " | " + animeTitle + "|" + ms.engName + "|" + containsSyno);
+                            if (ToLowerAndReplace(compareName) == ToLowerAndReplace(animeTitle) || ToLowerAndReplace(ms.engName.Replace(" ", "")) == ToLowerAndReplace(animeTitle) || containsSyno) { //|| (animeTitle.ToLower().Replace(compareName.ToLower(), "").Length / (float)animeTitle.Length) < 0.3f) { // OVER 70 MATCH
+                                print("CRRECT");
+                                int episodes = GetMaxEp(slug);
+                                lock (AnimeProviderHelper._lock) {
+                                    var baseData = activeMovie.title.MALData.seasonData[i].seasons[q];
+                                    if (!isDub) {
+                                        baseData.kissanimefreeData.subExists = true;
+                                        baseData.kissanimefreeData.subUrl = slug;
+                                        baseData.kissanimefreeData.maxSubbedEpisodes = episodes;
+                                        baseData.kissanimefreeData.subReferer = re.url;
+                                    }
+                                    else {
+                                        baseData.kissanimefreeData.dubExists = true;
+                                        baseData.kissanimefreeData.dubUrl = slug;
+                                        baseData.kissanimefreeData.maxDubbedEpisodes = episodes;
+                                        baseData.kissanimefreeData.dubReferer = re.url;
+                                    }
+                                    activeMovie.title.MALData.seasonData[i].seasons[q] = baseData;
+                                }
+                                goto kissanimefreeouterloop;
+                            }
+                        }
+                    }
+                kissanimefreeouterloop:;
+                }
+            }
+
+            static int GetLinkCount(Movie currentMovie, int currentSeason, bool isDub)
+            {
+                int count = 0;
+                print("CURRENSTSEASON:::" + currentSeason + "|" + isDub + "|" + currentMovie.title.MALData.seasonData.Count);
+                try {
+                    for (int q = 0; q < currentMovie.title.MALData.seasonData[currentSeason].seasons.Count; q++) {
+                        var ms = currentMovie.title.MALData.seasonData[currentSeason].seasons[q].kissanimefreeData;
+
+                        if ((ms.dubExists && isDub) || (ms.subExists && !isDub)) {
+                            //  dstring = ms.baseUrl;
+                            count += (isDub ? ms.maxDubbedEpisodes : ms.maxSubbedEpisodes);
+                        }
+                    }
+                }
+                catch (Exception) {
+                }
+                return count;
+            }
+
+
+            public int GetLinkCount(Movie currentMovie, int currentSeason, bool isDub, TempThred? tempThred)
+            {
+                return GetLinkCount(currentMovie, currentSeason, isDub);
+            }
+
+            public void LoadLinksTSync(int episode, int season, int normalEpisode, bool isDub, TempThred tempThred)
+            {
+                // int maxEp = GetLinkCount(activeMovie, season, isDub);
+                int currentMax = 0;
+                int lastCount = 0;
+                for (int q = 0; q < activeMovie.title.MALData.seasonData[season].seasons.Count; q++) {
+                    var ms = activeMovie.title.MALData.seasonData[season].seasons[q].kissanimefreeData;
+                    currentMax += isDub ? ms.maxDubbedEpisodes : ms.maxSubbedEpisodes;
+                    if (episode <= currentMax) {
+                        int realEp = episode - lastCount;
+                        int slug = int.Parse(isDub ? ms.dubUrl : ms.subUrl);
+                        int realId = realEp + slug + 2;
+                        // 35425 = 35203 + 220
+                        // 35206 = 35203 + 1
+                        // 12221 = 12218 + 1
+                        // admin ajax = id + 2 + episode id
+                        string referer = FindHTML(isDub ? ms.dubReferer : ms.subReferer, "kissanimefree.xyz/", "/");
+                        print("REFERRR:: " + referer);
+                        if (referer != "") {
+                            string d = PostRequest("https://kissanimefree.xyz/wp-admin/admin-ajax.php", "https://kissanimefree.xyz/episode/" + referer + "-episode-" + realEp + "/", "action=kiss_player_ajax&server=vidcdn&filmId=" + realId);
+                            print("MAND: " + d);
+                            if (d != "") {
+                                d = DownloadString("https:" + d);
+                                print("_D:::: " + d);
+                                AddEpisodesFromMirrors(tempThred, d, normalEpisode);
+                            }
+                        }
+                    }
+                    lastCount = currentMax;
+                }
+
             }
         }
 
@@ -5275,7 +5518,7 @@ namespace CloudStreamForms
                 //Because I don't want to host my own servers I "Save" a js code on a free js hosting site. This code will automaticly give a responseurl that will redirect to the CloudStream app.
                 string code = ("var x = document.createElement('body');\n var s = document.createElement(\"script\");\n s.innerHTML = \"window.location.href = '" + baseUrl + ":" + extra + "';\";\n var h = document.createElement(\"H1\");\n var div = document.createElement(\"div\");\n div.style.width = \"100%\";\n div.style.height = \"100%\";\n div.align = \"center\";\n div.style.padding = \"130px 0\";\n div.style.margin = \"auto\";\n div.innerHTML = \"" + redirectingName + "\";\n h.append(div);\n x.append(h);\n x.append(s);\n parent.document.body = x;").Replace("%", "%25");
                 // Create a request using a URL that can receive a post. 
-           //     WebRequest request = WebRequest.Create("https://js.do/mod_perl/js.pl");
+                //     WebRequest request = WebRequest.Create("https://js.do/mod_perl/js.pl");
                 HttpWebRequest request = (HttpWebRequest)HttpWebRequest.Create("https://js.do/mod_perl/js.pl");
 
                 request.ServerCertificateValidationCallback = delegate { return true; };
@@ -5915,6 +6158,9 @@ namespace CloudStreamForms
             _inp = _inp.Replace("-", " ").Replace("`", "\'").Replace("?", "");
             if (replaceSpace) {
                 _inp = _inp.Replace(" ", "");
+            }
+            if (_inp.EndsWith(" ")) {
+                _inp = _inp.Substring(0, _inp.Length - 1);
             }
             return _inp;
         }
@@ -7019,7 +7265,7 @@ namespace CloudStreamForms
         public static double GetFileSize(string url)
         {
             try {
-             //   var webRequest = HttpWebRequest.Create(new System.Uri(url));
+                //   var webRequest = HttpWebRequest.Create(new System.Uri(url));
                 HttpWebRequest webRequest = (HttpWebRequest)HttpWebRequest.Create(url);
 
                 webRequest.ServerCertificateValidationCallback = delegate { return true; };
@@ -7038,7 +7284,7 @@ namespace CloudStreamForms
                     catch (Exception) {
                         return -1;
                     }
-                   
+
                 }
             }
             catch (Exception) {
@@ -7566,7 +7812,7 @@ namespace CloudStreamForms
                     __webRequest.Timeout = 12000;
                     __webRequest.ContentType = "application/json";
                     __webRequest.Headers.Add("X-Requested-With", "XMLHttpRequest");
-                    try { 
+                    try {
                         using (System.IO.Stream s = __webRequest.GetResponse().GetResponseStream()) {
                             try {
                                 using (System.IO.StreamReader sr = new System.IO.StreamReader(s)) {
@@ -7576,9 +7822,9 @@ namespace CloudStreamForms
                                 }
                             }
                             catch (Exception _ex) {
-                                print("FATAL EX IN : " + _ex); 
+                                print("FATAL EX IN : " + _ex);
                             }
-                           
+
                         }
                     }
                     catch (Exception _ex) {
@@ -7795,18 +8041,18 @@ namespace CloudStreamForms
                 webRequest.ReadWriteTimeout = waitTime * 10;
                 webRequest.ContinueTimeout = waitTime * 10;
 
-            //    string _s = "";
-              //  bool done = false;
+                //    string _s = "";
+                //  bool done = false;
                 print("REQUEST::: " + url);
 
                 using (var webResponse = webRequest.GetResponse()) {
                     try {
                         using (StreamReader httpWebStreamReader = new StreamReader(webResponse.GetResponseStream(), Encoding.UTF8)) {
                             try {
-                                if (tempThred != null) { if (!GetThredActive((TempThred)tempThred)) {return ""; }; } //  done = true; 
+                                if (tempThred != null) { if (!GetThredActive((TempThred)tempThred)) { return ""; }; } //  done = true; 
                                 return httpWebStreamReader.ReadToEnd();
-                             //   _s = httpWebStreamReader.ReadToEnd();
-                              //  done = true;
+                                //   _s = httpWebStreamReader.ReadToEnd();
+                                //  done = true;
                             }
                             catch (Exception _ex) {
                                 print("FATAL ERROR DLOAD3: " + _ex + "|" + url);
