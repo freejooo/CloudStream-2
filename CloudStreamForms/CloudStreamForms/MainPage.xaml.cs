@@ -1031,6 +1031,15 @@ namespace CloudStreamForms
             public AnimeDreamData animedreamData;
             public WatchMovieAnimeData watchMovieAnimeData;
             public KissanimefreeData kissanimefreeData;
+            public AnimeSimpleData animeSimpleData;
+        }
+
+        [Serializable]
+        public struct AnimeSimpleData
+        {
+            public int dubbedEpisodes;
+            public int subbedEpisodes;
+            public string[] urls;
         }
 
 
@@ -1550,7 +1559,7 @@ namespace CloudStreamForms
 
         public static IMovieProvider[] movieProviders = new IMovieProvider[] { new FullMoviesProvider(), new TMDBProvider(), new WatchTVProvider(), new FMoviesProvider(), new LiveMovies123Provider(), new TheMovies123Provider(), new YesMoviesProvider(), new WatchSeriesProvider(), new GomoStreamProvider(), new Movies123Provider(), new DubbedAnimeMovieProvider(), new TheMovieMovieProvider(), new KickassMovieProvider() };
 
-        public static IAnimeProvider[] animeProviders = new IAnimeProvider[] { new GogoAnimeProvider(), new KickassAnimeProvider(), new DubbedAnimeProvider(), new AnimeFlixProvider(), new DubbedAnimeNetProvider(), new AnimekisaProvider(), new DreamAnimeProvider(), new TheMovieAnimeProvider(), new KissFreeAnimeProvider() };
+        public static IAnimeProvider[] animeProviders = new IAnimeProvider[] { new GogoAnimeProvider(), new KickassAnimeProvider(), new DubbedAnimeProvider(), new AnimeFlixProvider(), new DubbedAnimeNetProvider(), new AnimekisaProvider(), new DreamAnimeProvider(), new TheMovieAnimeProvider(), new KissFreeAnimeProvider(), new AnimeSimpleProvider() };
 
         public interface IMovieProvider // FOR MOVIES AND SHOWS
         {
@@ -2360,6 +2369,178 @@ namespace CloudStreamForms
             }
         }
 
+        public class AnimeSimpleProvider : IAnimeProvider
+        {
+            struct AnimeSimpleTitle
+            {
+                public string malId;
+                public string title;
+                public string japName;
+                public string id;
+            }
+
+            struct AnimeSimpleEpisodes
+            {
+                public int dubbedEpisodes;
+                public int subbedEpisodes;
+                public string[] urls;
+            }
+
+            /// <summary>
+            /// Get title from main url, Check id
+            /// </summary>
+            /// <param name="url"></param>
+            /// <returns></returns>
+            AnimeSimpleTitle GetAnimeSimpleTitle(string url)
+            {
+                string _d = DownloadString(url);
+                string malId = FindHTML(_d, "https://myanimelist.net/anime/", "\"");
+                string title = FindHTML(_d, "media-heading\">", "<");
+                string japName = FindHTML(_d, "text-muted\">", "<");
+                string id = FindHTML(_d, "value=\"", "\"");
+                return new AnimeSimpleTitle() { japName = japName, title = title, malId = malId, id = id };
+            }
+
+            /// <summary>
+            /// Less advanced episode ajax request
+            /// </summary>
+            /// <param name="id"></param>
+            /// <returns></returns>
+            AnimeSimpleEpisodes GetAnimeSimpleEpisodes(string id)
+            {
+                string _d = DownloadString("https://ww1.animesimple.com/request?anime-id=" + id + "&epi-page=4&top=10000&bottom=1");
+                const string lookFor = "href=\"";
+
+                int dubbedEpisodes = 0;
+                int subbedEpisodes = 0;
+                List<string> urls = new List<string>();
+                while (_d.Contains(lookFor)) {
+                    string url = FindHTML(_d, lookFor, "\"");
+                    _d = RemoveOne(_d, lookFor);
+                    urls.Add(url);
+                    string subDub = FindHTML(_d, "success\">", "<");
+                    bool isDub = subDub.Contains("Dubbed");
+                    bool isSub = subDub.Contains("Subbed");
+                    string _ep = FindHTML(_d, "</i> Episode ", "<");
+                    print("HDD: " + isDub + "|" + isSub + "|" + url + "|" + _ep + "|" + subDub);
+                    int episode = int.Parse(_ep);
+                    if (isDub) {
+                        dubbedEpisodes = episode;
+                    }
+                    if (isSub) {
+                        subbedEpisodes = episode;
+                    }
+                }
+                return new AnimeSimpleEpisodes() { urls = urls.ToArray(), dubbedEpisodes = dubbedEpisodes, subbedEpisodes = subbedEpisodes };
+            }
+
+            public string Name => "AnimeSimple";
+
+            public void FishMainLink(string year, TempThred tempThred, MALData malData)
+            {
+                try {
+                    string search = activeMovie.title.name;
+                    string d = DownloadString("https://ww1.animesimple.com/search?q=" + search);
+                    const string lookFor = "cutoff-fix\" href=\"";
+                    while (d.Contains(lookFor)) {
+                        string href = FindHTML(d, lookFor, "\"");
+                        print("ANIMESIMPLE HREF; " + href);
+                        d = RemoveOne(d, lookFor);
+                        string title = FindHTML(d, "title=\"", "\"");
+                        var ctit = GetAnimeSimpleTitle(href);
+                        for (int i = 0; i < activeMovie.title.MALData.seasonData.Count; i++) {
+                            for (int q = 0; q < activeMovie.title.MALData.seasonData[i].seasons.Count; q++) {
+                                MALSeason ms;
+
+                                lock (AnimeProviderHelper._lock) {
+                                    ms = activeMovie.title.MALData.seasonData[i].seasons[q];
+                                }
+                                if (FindHTML(ms.malUrl, "/anime/", "/") == ctit.malId) {
+                                    print("SIMPLECRRECT SIMPLE:" + ms.malUrl);
+                                    var eps = GetAnimeSimpleEpisodes(ctit.id);
+                                    lock (AnimeProviderHelper._lock) {
+                                        var baseData = activeMovie.title.MALData.seasonData[i].seasons[q];
+                                        baseData.animeSimpleData.dubbedEpisodes = eps.dubbedEpisodes;
+                                        baseData.animeSimpleData.subbedEpisodes = eps.subbedEpisodes;
+                                        baseData.animeSimpleData.urls = eps.urls;
+                                        activeMovie.title.MALData.seasonData[i].seasons[q] = baseData;
+                                    }
+                                    goto animesimpleouterloop;
+                                }
+                            }
+                        }
+                    animesimpleouterloop:;
+                        print("HREF>>>: " + href + "|" + title);
+                    }
+                }
+                catch (Exception _ex) {
+                    print("MAIN EX IN FISH SIMPLE: " + _ex);
+                }
+            }
+
+            public int GetLinkCount(Movie currentMovie, int currentSeason, bool isDub, TempThred? tempThred)
+            {
+                int count = 0;
+                print("SIMPLECURRENSTSEASON:::" + currentSeason + "|" + isDub + "|" + currentMovie.title.MALData.seasonData.Count);
+                try {
+                    for (int q = 0; q < currentMovie.title.MALData.seasonData[currentSeason].seasons.Count; q++) {
+                        var ms = currentMovie.title.MALData.seasonData[currentSeason].seasons[q].animeSimpleData;
+                        count += isDub ? ms.dubbedEpisodes : ms.subbedEpisodes;
+                    }
+                }
+                catch (Exception) {
+                }
+                return count;
+            }
+
+            public void LoadLinksTSync(int episode, int season, int normalEpisode, bool isDub, TempThred tempThred)
+            {
+                try {
+                    int currentMax = 0;
+                    int lastCount = 0;
+                    for (int q = 0; q < activeMovie.title.MALData.seasonData[season].seasons.Count; q++) {
+                        var ms = activeMovie.title.MALData.seasonData[season].seasons[q].animeSimpleData;
+                        currentMax += isDub ? ms.dubbedEpisodes : ms.subbedEpisodes;
+                        if (episode <= currentMax) {
+                            int realEp = normalEpisode - lastCount; // ep1 = index0; normalep = ep -1
+                            string url = ms.urls[realEp];
+                            print("SIMPLEURL::: " + url);
+
+                            string d = DownloadString(url);
+                            string json = FindHTML(d, "var json = ", "</");
+                            const string lookFor = "\"id\":\"";
+                            print(" LOADDDD::D:D: " + json);
+
+                            while (json.Contains(lookFor)) {
+                                string id = FindHTML(json, lookFor, "\"");
+                                json = RemoveOne(json, lookFor);
+                                string host = FindHTML(json, "host\":\"", "\"");
+                                string type = FindHTML(json, "type\":\"", "\"");
+                                if ((type == "dubbed" && isDub) || (type == "subbed" && !isDub)) {
+                                    if (host == "mp4upload") {
+                                        AddMp4(id, normalEpisode, tempThred);
+                                    }
+                                    else if (host == "trollvid") {
+                                        AddTrollvid(id, normalEpisode, url, tempThred, " Simple");
+                                    }
+                                    else if (host == "vidstreaming") {
+                                        AddEpisodesFromMirrors(tempThred, DownloadString("https://vidstreaming.io//streaming.php?id=" + id), normalEpisode, "", " Simple");
+                                    }
+                                }
+                                print("HI: " + host + "|" + id + "|" + type);
+                            }
+
+
+                        }
+                        lastCount = currentMax;
+                    }
+                }
+                catch (Exception _ex) {
+                    print("MAIN EX IN SIMPLEANIME: " + _ex);
+                }
+            }
+        }
+
         public class KissFreeAnimeProvider : IAnimeProvider
         {
             public string Name => "Kissanimefree";
@@ -2465,9 +2646,6 @@ namespace CloudStreamForms
                 }
                 return quickSearch;
             }
-
-
-
 
             public void FishMainLink(string year, TempThred tempThred, MALData malData)
             {
@@ -2586,6 +2764,22 @@ namespace CloudStreamForms
                 }
 
             }
+        }
+
+
+        public static void AddMp4(string id, int normalEpisode, TempThred tempThred)
+        {
+            string mp4 = ("https://www.mp4upload.com/embed-" + id);
+            string __d = DownloadString(mp4, tempThred);
+            if (!GetThredActive(tempThred)) { return; };
+            string mxLink = Getmp4UploadByFile(__d);
+            AddPotentialLink(normalEpisode, mxLink, "Mp4Upload", 9);
+        }
+
+        public static void AddTrollvid(string id, int normalEpisode, string referer, TempThred tempThred, string extra = "")
+        {
+            string d = HTMLGet("https://trollvid.net/embed/" + id, referer);
+            AddPotentialLink(normalEpisode, FindHTML(d, "<source src=\"", "\""), "Trollvid" + extra, 7);
         }
 
         public class DubbedAnimeNetProvider : IAnimeProvider
@@ -2819,17 +3013,8 @@ namespace CloudStreamForms
                         //type == dubbed/subbed
                         //host == mp4upload/trollvid
                         //id = i9w80jgcwbu7
-                        // Getmp4UploadByFile()
+                        // Getmp4UploadByFile() 
 
-
-                        void AddMp4(string id)
-                        {
-                            string mp4 = ("https://www.mp4upload.com/embed-" + id);
-                            string __d = DownloadString(mp4, tempThred);
-                            if (!GetThredActive(tempThred)) { return; };
-                            string mxLink = Getmp4UploadByFile(__d);
-                            AddPotentialLink(normalEpisode, mxLink, "Mp4Upload", 9);
-                        }
 
                         if (vid.host == "trollvid") {
                             string dUrl = "https://mp4.sh/embed/" + vid.id + xtoken;
@@ -2847,7 +3032,7 @@ namespace CloudStreamForms
                                     var res = JsonConvert.DeserializeObject<List<DubbedAnimeNetEpisodeExternalAPI>>(_d);
                                     for (int q = 0; q < res.Count; q++) {
                                         if (res[q].host == "mp4upload") {
-                                            AddMp4(res[q].id);
+                                            AddMp4(res[q].id, normalEpisode, tempThred);
                                         }
                                         else if (res[q].host == "vidstreaming") {
                                             string __d = "https://vidstreaming.io/streaming.php?id=" + res[q].id;
@@ -2869,7 +3054,7 @@ namespace CloudStreamForms
                             print(p);
                         }
                         else if (vid.host == "mp4upload") {
-                            AddMp4(vid.id);
+                            AddMp4(vid.id, normalEpisode, tempThred);
                         }
 
                         print(vid.host + "|" + vid.id + "|" + vid.type);
@@ -3092,7 +3277,7 @@ namespace CloudStreamForms
                                 //id = i9w80jgcwbu7
                                 // Getmp4UploadByFile()
 
-
+                                /*
                                 void AddMp4(string id)
                                 {
                                     string mp4 = ("https://www.mp4upload.com/embed-" + id);
@@ -3100,7 +3285,7 @@ namespace CloudStreamForms
                                     if (!GetThredActive(tempThred)) { return; };
                                     string mxLink = Getmp4UploadByFile(__d);
                                     AddPotentialLink(normalEpisode, mxLink, "Dream Mp4Upload", 9);
-                                }
+                                }*/
 
                                 if (vid.host == "trollvid") {
                                     string dUrl = "https://mp4.sh/embed/" + vid.id;
@@ -3110,7 +3295,7 @@ namespace CloudStreamForms
                                     AddPotentialLink(normalEpisode, src, "Dream Trollvid", 10);
                                 }
                                 else if (vid.host == "mp4upload") {
-                                    AddMp4(vid.id);
+                                    AddMp4(vid.id, normalEpisode, tempThred);
                                 }
 
                                 print(vid.host + "|" + vid.id + "|" + vid.type);
