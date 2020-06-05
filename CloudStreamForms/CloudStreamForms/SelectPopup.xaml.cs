@@ -14,12 +14,34 @@ namespace CloudStreamForms
 {
     public static class ActionPopup
     {
+        public static bool isOpen = false;
         public static async Task<string> DisplayActionSheet(string title, params string[] buttons)
         {
             var page = new SelectPopup(buttons.ToList(), -1, title, true);
             await PopupNavigation.Instance.PushAsync(page);
             return await page.WaitForResult();
         }
+         
+        public static async Task DisplayLoadingBar(int loadingTime, string title = "Loading")
+        {
+            await PopupNavigation.Instance.PushAsync(new LoadingPopupPage(loadingTime, title));
+            await Task.Delay(loadingTime);
+        }
+
+        static LoadingPopupPage currentLoading;
+        public static void StartIndeterminateLoadinbar(string title)
+        {
+            currentLoading = new LoadingPopupPage(-1, title);
+            PopupNavigation.Instance.PushAsync(currentLoading);
+        }
+
+        public static async Task StopIndeterminateLoadinbar()
+        {
+            if(currentLoading != null) {
+                await currentLoading.End();
+            }
+             //PopupNavigation.PopAsync(false);
+        } 
     }
 
     public class LabelList
@@ -68,7 +90,6 @@ namespace CloudStreamForms
     {
         public static int selected = -1;
         public static EventHandler<int> OnSelectedChanged;
-        public static bool isOpen = false;
         SelectLabelView selectBinding;
         const int fullNum = 12;
         const int halfNum = 6;
@@ -82,11 +103,11 @@ namespace CloudStreamForms
             if (setOnLeft) {
                 CrossbttLayout.VerticalOptions = hightOverWidth ? LayoutOptions.End : LayoutOptions.Center;
                 CrossbttLayout.HorizontalOptions = hightOverWidth ? LayoutOptions.Center : LayoutOptions.End;
-                CrossbttLayout.TranslationY = hightOverWidth ? -40 : 0;
+                CrossbttLayout.TranslationY = hightOverWidth ? -40 : -20;
                 CrossbttLayout.TranslationX = hightOverWidth ? 0 : 40;
                 TheStack.TranslationX = hightOverWidth ? 0 : 40;
                 //TheStack.HorizontalOptions = hightOverWidth ? LayoutOptions.Center : LayoutOptions.CenterAndExpand;
-                TheStack.TranslationY = hightOverWidth ? 40 : 0;
+                TheStack.TranslationY = hightOverWidth ? 40 : 20;
                 Grid.SetRow(CrossbttLayout, hightOverWidth ? 1 : 0);
                 Grid.SetColumn(CrossbttLayout, hightOverWidth ? 0 : 1);
             }
@@ -108,10 +129,10 @@ namespace CloudStreamForms
         {
             currentOptions = options;
 
-            if (isOpen) {
+            if (ActionPopup.isOpen) {
                 PopupNavigation.PopAsync(false);
             }
-            isOpen = true;
+            ActionPopup.isOpen = true;
             //  BackgroundColor = Color.Transparent;
             //   BackgroundImageSource = null;
             BackgroundColor = new Color(0, 0, 0, 0.9);
@@ -161,9 +182,7 @@ namespace CloudStreamForms
             }
 
         }
-
-
-
+         
         public class PopupName
         {
             public string Name { set; get; } = "Hello";
@@ -180,7 +199,7 @@ namespace CloudStreamForms
 
         protected override void OnDisappearing()
         {
-            isOpen = false;
+            ActionPopup.isOpen = false;
             base.OnDisappearing();
         }
 

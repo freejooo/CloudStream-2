@@ -604,7 +604,6 @@ namespace CloudStreamForms
 
         public static EventHandler<double> OnForceUpdateTime;
 
-
         public static void SetChromeTime(double time)
         {
             print("Seek To: " + time);
@@ -642,6 +641,26 @@ namespace CloudStreamForms
                 print("EX PAUSED::: " + _ex);
             }
 
+        }
+
+        public static async void JustStopVideo()
+        {
+            try {
+                await CurrentChannel.StopAsync();
+            }
+            catch (System.Exception) {
+                await Task.CompletedTask;
+            }
+            try {
+                await chromeSender.LaunchAsync(CurrentChannel);
+            }
+            catch (Exception) {
+                await Task.CompletedTask;
+            }
+
+
+            IsCastingVideo = false;
+            print("STOP CASTING! VIDEO");
         }
 
         public static async void StopCast()

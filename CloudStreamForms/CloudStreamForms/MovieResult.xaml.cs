@@ -297,8 +297,8 @@ namespace CloudStreamForms
             }
             else {
                 List<string> names = MainChrome.GetChromeDevicesNames();
-                if(MainChrome.IsConnectedToChromeDevice) { names.Add("Disconnect"); }
-                    string a = await ActionPopup.DisplayActionSheet("Cast to", names.ToArray());//await DisplayActionSheet("Cast to", "Cancel", MainChrome.IsConnectedToChromeDevice ? "Disconnect" : null, names.ToArray());
+                if (MainChrome.IsConnectedToChromeDevice) { names.Add("Disconnect"); }
+                string a = await ActionPopup.DisplayActionSheet("Cast to", names.ToArray());//await DisplayActionSheet("Cast to", "Cancel", MainChrome.IsConnectedToChromeDevice ? "Disconnect" : null, names.ToArray());
                 if (a != "Cancel") {
                     MainChrome.ConnectToChromeDevice(a);
                 }
@@ -790,14 +790,15 @@ namespace CloudStreamForms
                     string downloadKeyData = App.GetDownloadInfo(GetCorrectId(epRes), false).info.fileUrl;//.GetKey("Download", GetId(episodeResult), "");
                     DeleteFile(downloadKeyData, epRes);
                 }
-
+                /*
                 if (epRes.IsDownloading) { // REMOVE
                     bool action = await DisplayAlert("Delete file", "Do you want to delete " + epRes.OgTitle, "Delete", "Cancel");
                     if (action) {
                         DeleteData();
                     }
                 }
-                else if (epRes.IsDownloaded) {
+                else*/
+                if (epRes.IsDownloaded || epRes.IsDownloading) {
                     string action = await ActionPopup.DisplayActionSheet(epRes.OgTitle, "Play", "Delete File"); //await DisplayActionSheet(epRes.OgTitle, "Cancel", null, "Play", "Delete File");
                     if (action == "Delete File") {
                         DeleteData();
@@ -1515,50 +1516,57 @@ namespace CloudStreamForms
                 GetEpisodeLink(isMovie ? -1 : (episodeResult.Id + 1), currentSeason, isDub: isDub, purgeCurrentLinkThread: currentDownloadSearchesHappening > 0);
 
                 await Device.InvokeOnMainThreadAsync(async () => {
-                    NormalStack.IsEnabled = false;
+                    // NormalStack.IsEnabled = false;
                     loadingLinks = true;
 
+                    await ActionPopup.DisplayLoadingBar(LoadingMiliSec, "Loading Links...");
+
+                    /*
                     UserDialogs.Instance.ShowLoading("Loading links...", MaskType.Gradient);
                     await Task.Delay(LoadingMiliSec);
-                    UserDialogs.Instance.HideLoading();
-
+                    UserDialogs.Instance.HideLoading();*/
+                    int errorCount = 0;
+                    const int maxErrorcount = 1;
+                    bool gotError = false;
                     loadingLinks = false;
 
                     if (SameAsActiveMovie()) {
                         currentMovie = activeMovie;
                     }
-                    NormalStack.IsEnabled = true;
-                    // NormalStack.Opacity = 1f;
+                //NormalStack.IsEnabled = true;
+                // NormalStack.Opacity = 1f;
+                checkerror:;
                     if (episodeResult == null) {
-                        print("NULLEP"); episodeView.SelectedItem = null;
-
-                        App.ShowToast(errorEpisodeToast);
-
+                        gotError = true;
                     }
                     else {
                         if (episodeResult.mirrosUrls == null) {
-                            print("NULLE2");
-                            episodeView.SelectedItem = null;
-                            App.ShowToast(errorEpisodeToast);
+                            gotError = true;
                         }
                         else {
-                            print("NULLEP3");
-
-                            print("LINKCOUNT: " + episodeResult.mirrosUrls.Count);
                             if (episodeResult.mirrosUrls.Count > 0) {
                                 if (autoPlay) { PlayEpisode(episodeResult); }
                                 episodeResult.LoadedLinks = true;
                             }
                             else {
-                                print("NULL3P3");
-                                episodeView.SelectedItem = null;
-
-                                App.ShowToast(errorEpisodeToast);
+                                gotError = true;
                             }
+                        }
+                    }
+                    if (gotError) {
+                        if (errorCount < maxErrorcount) {
+                            errorCount++;
+                            await ActionPopup.DisplayLoadingBar(2000, "Loading More Links...");
+                            goto checkerror;
+                        }
+                        else {
+                            episodeView.SelectedItem = null;
+                            App.ShowToast(errorEpisodeToast);
                         }
                     }
                 });
             }
+
             return episodeResult;
         }
 
@@ -1624,15 +1632,16 @@ namespace CloudStreamForms
                 }
                 catch (Exception) { }
             }
+            /*
             if (loadingLinks) {
                 await Task.Delay(LoadingMiliSec + 40);
-            }
+            }*/
 
             if (!episodeResult.LoadedLinks) {
-                App.ShowToast(errorEpisodeToast); episodeView.SelectedItem = null;
+             //   App.ShowToast(errorEpisodeToast); episodeView.SelectedItem = null;
                 return;
             }
-
+            
 
             // ============================== GET ACTION ==============================
             string action = "";
@@ -1726,11 +1735,13 @@ namespace CloudStreamForms
 
                         TempThred tempThred = new TempThred();
                         tempThred.typeId = 4; // MAKE SURE THIS IS BEFORE YOU CREATE THE THRED
-                        tempThred.Thread = new System.Threading.Thread(() => {
+                        tempThred.Thread = new System.Threading.Thread(async () => {
                             try {
-                                UserDialogs.Instance.ShowLoading("Checking link...", MaskType.Gradient);
+                                //UserDialogs.Instance.ShowLoading("Checking link...", MaskType.Gradient);
+                                ActionPopup.StartIndeterminateLoadinbar("Checking link...");
                                 double fileSize = CloudStreamCore.GetFileSize(mirrorUrl);
-                                UserDialogs.Instance.HideLoading();
+                                //    UserDialogs.Instance.HideLoading();
+                                await ActionPopup.StopIndeterminateLoadinbar();
                                 if (fileSize > 1) {
                                     print("DSUZE:::::" + episodeResult.Episode);
 
@@ -1758,7 +1769,7 @@ namespace CloudStreamForms
                                 }
                             }
                             finally {
-                                UserDialogs.Instance.HideLoading();
+                                //UserDialogs.Instance.HideLoading();
                                 JoinThred(tempThred);
                             }
                         });
@@ -1773,11 +1784,9 @@ namespace CloudStreamForms
                 }
                 catch (Exception) { }
 
-                await Task.Delay(LoadingMiliSec + 40);
+                //await Task.Delay(LoadingMiliSec + 40);
 
-                if (!episodeResult.LoadedLinks) {
-                    episodeView.SelectedItem = null;
-                    App.ShowToast(errorEpisodeToast);
+                if (!episodeResult.LoadedLinks) { 
                     return;
                 }
                 EpisodeSettings(episodeResult);
@@ -1836,10 +1845,16 @@ namespace CloudStreamForms
         // ============================== ID OF EPISODE ==============================
         public string GetId(EpisodeResult episodeResult)
         {
+            return GetId(episodeResult, currentMovie);
+        }
+
+        public static string GetId(EpisodeResult episodeResult, Movie currentMovie)
+        {
             try {
                 return (currentMovie.title.movieType == MovieType.TVSeries || currentMovie.title.movieType == MovieType.Anime) ? currentMovie.episodes[episodeResult.Id].id : currentMovie.title.id;
             }
-            catch (Exception) {
+            catch (Exception _ex) {
+                print("FATAL EX IN GETID: " + _ex);
                 return episodeResult.Id + "Extra=" + ToDown(episodeResult.Title) + "=EndAll";
             }
         }

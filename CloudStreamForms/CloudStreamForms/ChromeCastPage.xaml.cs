@@ -152,6 +152,7 @@ namespace CloudStreamForms
                 draging = false;
                 UpdateTxt();
             };
+
             const bool rotateAllWay = false;
             const int rotate = 90;
             const int time = 100;
@@ -170,8 +171,6 @@ namespace CloudStreamForms
                 }
             }));
 
-
-
             Commands.SetTap(BackForwardBtt, new Command(async () => {
                 SeekMedia(-BackForwardTime);
                 BackForward.Rotation = 0;
@@ -187,7 +186,8 @@ namespace CloudStreamForms
             }));
 
             StopAll.Clicked += (o, e) => {
-                MainChrome.StopCast();
+                //  MainChrome.StopCast();
+                JustStopVideo();
                 OnStop();
             };
 
@@ -285,6 +285,15 @@ namespace CloudStreamForms
 
         protected override void OnDisappearing()
         {
+            string lastId = MovieResult.GetId(episodeResult, chromeMovieResult);
+            if (!lastId.StartsWith("tt")) {
+                lastId = "tt" + lastId;
+            }
+            print("SETTITME::: : " + lastId + "|" + (long)(MainChrome.CurrentTime * 1000) + "|" + (long)(MainChrome.CurrentCastingDuration * 1000));
+            App.SetKey("ViewHistoryTimePos", lastId, (long)(MainChrome.CurrentTime * 1000));
+            App.SetKey("ViewHistoryTimeDur", lastId, (long)(MainChrome.CurrentCastingDuration * 1000));
+            App.ForceUpdateVideo?.Invoke(null, EventArgs.Empty);
+
             App.UpdateBackground();
             OnDisconnected -= OnDisconnectedHandle;
             OnPauseChanged -= OnPauseChangedHandle;

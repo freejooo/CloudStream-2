@@ -158,7 +158,8 @@ namespace CloudStreamForms.Droid
                     MainChrome.SeekMedia(-30);
                     break;
                 case "stop":
-                    MainChrome.StopCast();
+                  //  MainChrome.StopCast();
+                    MainChrome.JustStopVideo();
                     break;
                 default:
                     break;

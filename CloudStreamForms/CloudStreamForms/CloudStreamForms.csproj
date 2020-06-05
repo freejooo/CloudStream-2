@@ -322,6 +322,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Update="LoadingPopupPage.xaml.cs">
+      <DependentUpon>LoadingPopupPage.xaml</DependentUpon>
+    </Compile>
     <Compile Update="MyPopupPage.xaml.cs">
       <DependentUpon>MyPopupPage.xaml</DependentUpon>
     </Compile>
@@ -343,6 +346,9 @@
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
     </EmbeddedResource>
     <EmbeddedResource Update="Feedback.xaml">
+      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="LoadingPopupPage.xaml">
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
     </EmbeddedResource>
     <EmbeddedResource Update="MyPopupPage.xaml">
