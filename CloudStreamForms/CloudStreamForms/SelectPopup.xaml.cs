@@ -12,6 +12,16 @@ using static CloudStreamForms.SelectPopup;
 
 namespace CloudStreamForms
 {
+    public static class ActionPopup
+    {
+        public static async Task<string> DisplayActionSheet(string title, params string[] buttons)
+        {
+            var page = new SelectPopup(buttons.ToList(), -1, title, true);
+            await PopupNavigation.Instance.PushAsync(page);
+            return await page.WaitForResult();
+        }
+    }
+
     public class LabelList
     {
         public Button button;
@@ -60,14 +70,41 @@ namespace CloudStreamForms
         public static EventHandler<int> OnSelectedChanged;
         public static bool isOpen = false;
         SelectLabelView selectBinding;
+        const int fullNum = 12;
+        const int halfNum = 6;
+        const bool setOnLeft = true;
 
         List<string> currentOptions = new List<string>();
         void UpdateScreenRot()
         {
-            epview.HeightRequest = epview.RowHeight * (Math.Min(currentOptions.Count, (Bounds.Height > Bounds.Width) ? 12 : 3)) + epview.RowHeight / 4;
+            bool hightOverWidth = Bounds.Height > Bounds.Width;
+            epview.HeightRequest = epview.RowHeight * (Math.Min(currentOptions.Count, (hightOverWidth) ? fullNum : halfNum)) + epview.RowHeight / 4;
+            if (setOnLeft) {
+                CrossbttLayout.VerticalOptions = hightOverWidth ? LayoutOptions.End : LayoutOptions.Center;
+                CrossbttLayout.HorizontalOptions = hightOverWidth ? LayoutOptions.Center : LayoutOptions.End;
+                CrossbttLayout.TranslationY = hightOverWidth ? -40 : 0;
+                CrossbttLayout.TranslationX = hightOverWidth ? 0 : 40;
+                TheStack.TranslationX = hightOverWidth ? 0 : 40;
+                //TheStack.HorizontalOptions = hightOverWidth ? LayoutOptions.Center : LayoutOptions.CenterAndExpand;
+                TheStack.TranslationY = hightOverWidth ? 40 : 0;
+                Grid.SetRow(CrossbttLayout, hightOverWidth ? 1 : 0);
+                Grid.SetColumn(CrossbttLayout, hightOverWidth ? 0 : 1);
+            }
         }
 
-        public SelectPopup(List<string> options, int selected)
+        public async Task<string> WaitForResult()
+        {
+            while (true) {
+                await Task.Delay(10);
+                if (optionSelected != "") {
+                    return optionSelected;
+                }
+            }
+        }
+
+        string optionSelected = "";
+
+        public SelectPopup(List<string> options, int selected, string header = "", bool isCenter = true)
         {
             currentOptions = options;
 
@@ -84,54 +121,45 @@ namespace CloudStreamForms
                 UpdateScreenRot();
             };
 
+            HeaderTitle.Text = header;
+            HeaderTitle.IsEnabled = header != "";
+            HeaderTitle.IsVisible = header != "";
 
 
 
             CancelButton.Source = GetImageSource("netflixCancel.png");
             CancelButtonBtt.Clicked += (o, e) => {
                 OnSelectedChanged = null;
+                optionSelected = "Cancel";
                 PopupNavigation.PopAsync(true);
             };
 
 
             epview.ItemSelected += (o, e) => {
-                if (selected != e.SelectedItemIndex) {
-                    OnSelectedChanged?.Invoke(this, e.SelectedItemIndex);
-                }
-                epview.SelectedItem = null;
-                OnSelectedChanged = null;
-                PopupNavigation.PopAsync(true);
-            };
+                if (e.SelectedItemIndex != -1) {
+                    if (selected != e.SelectedItemIndex) {
+                        OnSelectedChanged?.Invoke(this, e.SelectedItemIndex);
+                    }
+                    epview.SelectedItem = null;
+                    OnSelectedChanged = null;
 
+                    optionSelected = options[e.SelectedItemIndex];
+                    PopupNavigation.PopAsync(true);
+                }
+            };
 
             selectBinding = new SelectLabelView();
             BindingContext = selectBinding;
 
             for (int i = 0; i < currentOptions.Count; i++) {
                 bool isSel = i == selected;
-
-                selectBinding.MyNameCollection.Add(new PopupName() { IsSelected = isSel, Name = currentOptions[i] });
-                //  MyNameCollection.Add(p);
+                selectBinding.MyNameCollection.Add(new PopupName() { IsSelected = isSel, Name = currentOptions[i].Replace("(Mirror ", "("), LayoutCenter = isCenter ? LayoutOptions.Center : LayoutOptions.Start });
             }
-            epview.ScrollTo(selectBinding.MyNameCollection[selected], ScrollToPosition.Center, false);
 
-            // MyNameCollection = new ObservableCollection<PopupName>();
+            if (selected != -1) {
+                epview.ScrollTo(selectBinding.MyNameCollection[selected], ScrollToPosition.Center, false);
+            }
 
-            /*
-            for (int i = 0; i < options.Count; i++) {
-                bool isSel = i == selected;
-                PopupName p = new PopupName() { IsSelected = isSel, Name = options[i] };//, FontAtt = isSel ? FontAttributes.Bold : FontAttributes.None };
-                selectBinding.MyNameCollection.Add(p);
-                //  MyNameCollection.Add(p);
-            }*/
-
-
-            //   print("EPC:" + selectBinding.MyNameCollection.Count);
-            //   epview.ItemsSource = MyNameCollection;
-
-            /*
-
-                       */
         }
 
 
@@ -142,10 +170,8 @@ namespace CloudStreamForms
             public bool IsSelected { set; get; } = false;
             public FontAttributes FontAtt { get { return IsSelected ? FontAttributes.Bold : FontAttributes.None; } }
             public int FontSize { get { return IsSelected ? 21 : 19; } }
+            public LayoutOptions LayoutCenter { get; set; }
         }
-
-
-
 
         protected override void OnAppearing()
         {

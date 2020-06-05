@@ -513,7 +513,7 @@ namespace CloudStreamForms
         public static async Task HandleEpisodeTapped(int key, Page p)
         {
             DownloadInfo info = downloads[key];
-            string action = await p.DisplayActionSheet(info.info.name, "Cancel", null, "Play", "Delete File", "Open Source");
+            string action = await ActionPopup.DisplayActionSheet(info.info.name, "Play", "Delete File", "Open Source");//await p.DisplayActionSheet(info.info.name, "Cancel", null, "Play", "Delete File", "Open Source");
 
             if (action == "Play") {
                 PlayVLCFile(info.info.fileUrl, info.info.name, info.info.id.ToString());

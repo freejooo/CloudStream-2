@@ -140,7 +140,7 @@ namespace CloudStreamForms
             if (trailerUrl != "") {
                 actions.Insert(actions.Count - 2, "Trailer Link");
             }
-            string a = await DisplayActionSheet("Copy", "Cancel", null, actions.ToArray());
+            string a = await ActionPopup.DisplayActionSheet("Copy", actions.ToArray());//await DisplayActionSheet("Copy", "Cancel", null, actions.ToArray());
             string copyTxt = "";
             if (a == "CloudStream Link") {
                 string _s = CloudStreamCore.ShareMovieCode(currentMovie.title.id + "Name=" + currentMovie.title.name + "=EndAll");
@@ -297,7 +297,8 @@ namespace CloudStreamForms
             }
             else {
                 List<string> names = MainChrome.GetChromeDevicesNames();
-                string a = await DisplayActionSheet("Cast to", "Cancel", MainChrome.IsConnectedToChromeDevice ? "Disconnect" : null, names.ToArray());
+                if(MainChrome.IsConnectedToChromeDevice) { names.Add("Disconnect"); }
+                    string a = await ActionPopup.DisplayActionSheet("Cast to", names.ToArray());//await DisplayActionSheet("Cast to", "Cancel", MainChrome.IsConnectedToChromeDevice ? "Disconnect" : null, names.ToArray());
                 if (a != "Cancel") {
                     MainChrome.ConnectToChromeDevice(a);
                 }
@@ -797,7 +798,7 @@ namespace CloudStreamForms
                     }
                 }
                 else if (epRes.IsDownloaded) {
-                    string action = await DisplayActionSheet(epRes.OgTitle, "Cancel", null, "Play", "Delete File");
+                    string action = await ActionPopup.DisplayActionSheet(epRes.OgTitle, "Play", "Delete File"); //await DisplayActionSheet(epRes.OgTitle, "Cancel", null, "Play", "Delete File");
                     if (action == "Delete File") {
                         DeleteData();
                     }
@@ -1650,11 +1651,11 @@ namespace CloudStreamForms
                 actions.Insert(0, "Chromecast");
             }
 
-            action = await DisplayActionSheet(episodeResult.Title, "Cancel", null, actions.ToArray());
+            action = await ActionPopup.DisplayActionSheet(episodeResult.Title, actions.ToArray());//await DisplayActionSheet(episodeResult.Title, "Cancel", null, actions.ToArray());
 
 
             if (action == "Play in Browser") {
-                string copy = await DisplayActionSheet("Open Link", "Cancel", null, episodeResult.Mirros.ToArray());
+                string copy = await ActionPopup.DisplayActionSheet("Open Link", episodeResult.Mirros.ToArray()); // await DisplayActionSheet("Open Link", "Cancel", null, episodeResult.Mirros.ToArray());
                 for (int i = 0; i < episodeResult.Mirros.Count; i++) {
                     if (episodeResult.Mirros[i] == copy) {
                         App.OpenBrowser(episodeResult.mirrosUrls[i]);
@@ -1708,7 +1709,7 @@ namespace CloudStreamForms
                 PlayEpisode(episodeResult, true);
             }
             else if (action == "Copy Link") { // ============================== COPY LINK ==============================
-                string copy = await DisplayActionSheet("Copy Link", "Cancel", null, episodeResult.Mirros.ToArray());
+                string copy = await ActionPopup.DisplayActionSheet("Copy Link", episodeResult.Mirros.ToArray());//await DisplayActionSheet("Copy Link", "Cancel", null, episodeResult.Mirros.ToArray());
                 for (int i = 0; i < episodeResult.Mirros.Count; i++) {
                     if (episodeResult.Mirros[i] == copy) {
                         await Clipboard.SetTextAsync(episodeResult.mirrosUrls[i]);
@@ -1717,7 +1718,7 @@ namespace CloudStreamForms
                 }
             }
             else if (action == "Download") {  // ============================== DOWNLOAD FILE ==============================
-                string download = await DisplayActionSheet("Download", "Cancel", null, episodeResult.Mirros.ToArray());
+                string download = await ActionPopup.DisplayActionSheet("Download", episodeResult.Mirros.ToArray()); //await DisplayActionSheet("Download", "Cancel", null, episodeResult.Mirros.ToArray());
                 for (int i = 0; i < episodeResult.Mirros.Count; i++) {
                     if (episodeResult.Mirros[i] == download) {
                         string mirrorUrl = episodeResult.mirrosUrls[i];

@@ -512,7 +512,7 @@ namespace CloudStreamForms
 
 
             Commands.SetTap(MirrorsTap, new Command(async () => {
-                string action = await DisplayActionSheet("Mirrors", "Cancel", null, AllMirrorsNames.ToArray());
+                string action = await ActionPopup.DisplayActionSheet("Mirrors", AllMirrorsNames.ToArray());//await DisplayActionSheet("Mirrors", "Cancel", null, AllMirrorsNames.ToArray());
                 App.ToggleRealFullScreen(true);
                 CurrentTap++;
                 StartFade();
@@ -532,7 +532,7 @@ namespace CloudStreamForms
 
             _libVLC = new LibVLC();
             _mediaPlayer = new MediaPlayer(_libVLC) { EnableHardwareDecoding = true };
-            
+
             vvideo.MediaPlayer = _mediaPlayer; // = new VideoView() { MediaPlayer = _mediaPlayer };
 
 
@@ -610,7 +610,7 @@ namespace CloudStreamForms
             };
             Player.TimeChanged += (o, e) => {
                 PlayerTimeChanged(Player.Time);
-            }; 
+            };
 
             Player.Buffering += (o, e) => {
                 Device.BeginInvokeOnMainThread(() => {
@@ -627,10 +627,10 @@ namespace CloudStreamForms
                 });
 
             };
-            
+
             Player.EncounteredError += (o, e) => {
                 // TODO: SKIP TO NEXT
-                ErrorWhenLoading(); 
+                ErrorWhenLoading();
             };
             SelectMirror(0);
             ShowNextMirror();
@@ -743,7 +743,7 @@ namespace CloudStreamForms
                             long dur = Player.Length;//	long	Total duration of the media
                             if (dur > -1) {
                                 App.SetKey("ViewHistoryTimeDur", lastId, dur);
-                                print("ViewHistoryTimeDur SET TO: " + lastId + "|" + dur); 
+                                print("ViewHistoryTimeDur SET TO: " + lastId + "|" + dur);
                             }
                         }
                     }

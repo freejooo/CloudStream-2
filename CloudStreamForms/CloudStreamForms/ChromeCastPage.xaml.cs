@@ -27,12 +27,10 @@ namespace CloudStreamForms
         public int IconSize { set; get; } = 48;
         public int BigIconSize { set; get; } = 60;
 
-        public int FastForwardTime
-        {
+        public int FastForwardTime {
             get { return Settings.LoadingChromeSec; }
         }
-        public int BackForwardTime
-        {
+        public int BackForwardTime {
             get { return Settings.LoadingChromeSec; }
         }
 
@@ -110,7 +108,7 @@ namespace CloudStreamForms
         public void OnPauseChangedHandle(object sender, bool e)
         {
             SetPause(e);
-        }    
+        }
         public void OnForceUpdateTimeHandle(object sender, double e)
         {
             UpdateTxt();
@@ -141,7 +139,7 @@ namespace CloudStreamForms
                 print("ERROR LOADING MIRROR " + _ex);
             }
 
- 
+
 
             //https://material.io/resources/icons/?style=baseline
             VideoSlider.DragStarted += (o, e) => {
@@ -211,7 +209,7 @@ namespace CloudStreamForms
 
             PlayList.Clicked += async (o, e) => {
                 //ListScale();
-                string a = await DisplayActionSheet("Select Mirror", "Cancel", null, episodeResult.Mirros.ToArray());
+                string a = await ActionPopup.DisplayActionSheet("Select Mirror", episodeResult.Mirros.ToArray()); //await DisplayActionSheet("Select Mirror", "Cancel", null, episodeResult.Mirros.ToArray());
                 //ListScale();
 
                 for (int i = 0; i < episodeResult.Mirros.Count; i++) {
@@ -283,7 +281,7 @@ namespace CloudStreamForms
             OnPauseChanged += OnPauseChangedHandle;
             OnForceUpdateTime += OnForceUpdateTimeHandle;
         }
-         
+
 
         protected override void OnDisappearing()
         {
@@ -304,7 +302,7 @@ namespace CloudStreamForms
         {
             Audio.AbortAnimation("ScaleTo");
             await Audio.ScaleTo(1.4, 100, Easing.SinOut);
-            await Audio.ScaleTo(1.3, 100, Easing.SinOut); 
+            await Audio.ScaleTo(1.3, 100, Easing.SinOut);
         }
 
         private void Pause_Clicked(object sender, EventArgs e)
