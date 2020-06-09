@@ -878,14 +878,11 @@ namespace CloudStreamForms
 
                 }
                 catch (Exception) {
-                }*/
-
-
+                }*/ 
             }
             catch (Exception) {
 
-            }
-
+            } 
         }
 
         /// <summary>
@@ -5715,9 +5712,7 @@ namespace CloudStreamForms
         /// <returns></returns>
         public static string ShareMovieCode(string extra, string redirectingName = "Redirecting to CloudStream 2")
         {
-            try {
-
-
+            try { 
                 const string baseUrl = "CloudStreamForms";
                 //Because I don't want to host my own servers I "Save" a js code on a free js hosting site. This code will automaticly give a responseurl that will redirect to the CloudStream app.
                 string code = ("var x = document.createElement('body');\n var s = document.createElement(\"script\");\n s.innerHTML = \"window.location.href = '" + baseUrl + ":" + extra + "';\";\n var h = document.createElement(\"H1\");\n var div = document.createElement(\"div\");\n div.style.width = \"100%\";\n div.style.height = \"100%\";\n div.align = \"center\";\n div.style.padding = \"130px 0\";\n div.style.margin = \"auto\";\n div.innerHTML = \"" + redirectingName + "\";\n h.append(div);\n x.append(h);\n x.append(s);\n parent.document.body = x;").Replace("%", "%25");
@@ -5756,11 +5751,11 @@ namespace CloudStreamForms
                 reader.Close();
                 dataStream.Close();
                 response.Close();
-                string rLink = "https://js.do/code/" + FindHTML(responseFromServer, "js_permalink\":\"", "\"");
+                string rLink = "https://js.do/code/" + FindHTML(responseFromServer, "js_permalink\":", ",");
                 return rLink;
             }
             catch (Exception) {
-                return "Error";
+                return "";
             }
             // Clean up the streams.
         }
@@ -6173,15 +6168,15 @@ namespace CloudStreamForms
                         }
                         catch (Exception _ex) {
                             print("EX:::Loaded" + _ex);
-                        }
-
-
+                        } 
                     });
                     t.Start();
 
                     while (t.IsAlive && !shouldSkipAnimeLoading) {
-                        Thread.Sleep(100);
+                        Thread.Sleep(10);
                     }
+
+                    print("SKIPPPED::: " + shouldSkipAnimeLoading);
                     if (shouldSkipAnimeLoading) {
                         shouldSkipAnimeLoading = false;
                         //t.Abort();
@@ -6348,9 +6343,7 @@ namespace CloudStreamForms
                 }
             });
             tempThred.Thread.Name = "FishMALNotification";
-            tempThred.Thread.Start();
-
-
+            tempThred.Thread.Start(); 
         }
 
         public static string ToLowerAndReplace(string inp, bool seasonReplace = true, bool replaceSpace = true)

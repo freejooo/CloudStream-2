@@ -21,10 +21,10 @@
             HasBackgroundAnimation="False"/>
     </pages:PopupPage.Animation>-->
     <!--You can use any elements here which are extended from Xamarin.Forms.View-->
-    <StackLayout>
+    <StackLayout BackgroundColor="Transparent">
 
         <AbsoluteLayout x:Name="TheStack" HorizontalOptions="Center" VerticalOptions="CenterAndExpand" BackgroundColor="Transparent">
-            <Grid  RowSpacing="0" VerticalOptions="Center"    >
+            <Grid  RowSpacing="0" VerticalOptions="Center"   BackgroundColor="Transparent" >
                 <Grid.RowDefinitions >
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
@@ -34,15 +34,14 @@
                 </Grid.RowDefinitions>
                 
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"></ColumnDefinition>
+                    <ColumnDefinition Width="Auto"></ColumnDefinition>
                     <ColumnDefinition Width="Auto"></ColumnDefinition>
                     <ColumnDefinition Width="Auto"></ColumnDefinition>
                 </Grid.ColumnDefinitions>
 
                 <Label x:Name="HeaderTitle" HorizontalOptions="Center" FontSize="20" FontAttributes="Bold" Text="Episode 1 hello world" TextColor="#e6e6e6" ></Label>
                 
-                
-                <ListView x:Name="epview"  Grid.Row="0" Grid.Column="0"   ItemsSource="{Binding MyNameCollection}" SeparatorColor="Transparent"  VerticalOptions="CenterAndExpand" RowHeight="40" Margin="0,50"  BackgroundColor="Transparent" >
+                <ListView BackgroundColor="Transparent" x:Name="epview"  Grid.Row="0" Grid.Column="0"    ItemsSource="{Binding MyNameCollection}" SeparatorColor="Transparent"  VerticalOptions="Fill" RowHeight="40" Margin="0,40"  >
                     <ListView.ItemTemplate >
                         <DataTemplate >
                             <ViewCell >
@@ -56,7 +55,7 @@
                 <!-- <Button Grid.Row="1" Text="d">
                 
             </Button>-->
-                <AbsoluteLayout Grid.Row="1" Grid.Column="1" HorizontalOptions="Center" VerticalOptions="End" BackgroundColor="Transparent"  TranslationY="0" x:Name="CrossbttLayout">
+                <AbsoluteLayout BackgroundColor="Transparent" Grid.Row="1" Grid.Column="1" HorizontalOptions="Center" VerticalOptions="End"   TranslationY="0" x:Name="CrossbttLayout" Margin="40">
                     <Grid> 
                         <Button   x:Name="CancelButtonBtt" BackgroundColor="Transparent" HeightRequest="80" WidthRequest="80" Padding="0"  VerticalOptions="Center"   HorizontalOptions="Center">
                             <!-- CornerRadius="100" -->

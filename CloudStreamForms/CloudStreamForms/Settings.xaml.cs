@@ -255,7 +255,7 @@ namespace CloudStreamForms
             ResetImg.Source = App.GetImageSource("baseline_refresh_white_48dp.png");
 
 
-            ColorPicker = new LabelList(SetTheme, new List<string> { "Black", "Dark", "Netflix", "YouTube" });
+            ColorPicker = new LabelList(SetTheme, new List<string> { "Black", "Dark", "Netflix", "YouTube" },"Select Theme");
             //outline_reorder_white_48dp.png
 
 

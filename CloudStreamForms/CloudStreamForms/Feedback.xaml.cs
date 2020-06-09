@@ -66,7 +66,7 @@ namespace CloudStreamForms
         public Feedback()
         {
             InitializeComponent();
-            requestType = new LabelList(RequestType, headers.Select(t => t.Replace("+", " ")).ToList()) {
+            requestType = new LabelList(RequestType, headers.Select(t => t.Replace("+", " ")).ToList(), "Feedback Type") {
                 SelectedIndex = 0
             };
             BackgroundColor = Settings.BlackRBGColor;

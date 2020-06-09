@@ -143,7 +143,9 @@ namespace CloudStreamForms
             string a = await ActionPopup.DisplayActionSheet("Copy", actions.ToArray());//await DisplayActionSheet("Copy", "Cancel", null, actions.ToArray());
             string copyTxt = "";
             if (a == "CloudStream Link") {
+                ActionPopup.StartIndeterminateLoadinbar("Loading...");
                 string _s = CloudStreamCore.ShareMovieCode(currentMovie.title.id + "Name=" + currentMovie.title.name + "=EndAll");
+                await ActionPopup.StopIndeterminateLoadinbar();
                 if (_s != "") {
                     copyTxt = _s;
                 }
@@ -165,8 +167,10 @@ namespace CloudStreamForms
             }
             else if (a == "Everything") {
                 copyTxt = currentMovie.title.name + " | " + RatingLabel.Text + "\n" + currentMovie.title.description;
-
+                ActionPopup.StartIndeterminateLoadinbar("Loading...");
                 string _s = CloudStreamCore.ShareMovieCode(currentMovie.title.id + "Name=" + currentMovie.title.name + "=EndAll");
+                await ActionPopup.StopIndeterminateLoadinbar();
+
                 if (_s != "") {
                     copyTxt = copyTxt + "\nCloudStream: " + _s;
                 }
@@ -440,10 +444,12 @@ namespace CloudStreamForms
 
             SkipAnimeBtt.Clicked += (o, e) => {
                 // Grid.SetColumn(SkipAnimeBtt, 0);
-                shouldSkipAnimeLoading = true;
-                SkipAnimeBtt.IsVisible = false;
-                SkipAnimeBtt.IsEnabled = false;
-                hasSkipedLoading = true;
+                Device.BeginInvokeOnMainThread(() => { 
+                    shouldSkipAnimeLoading = true;
+                    SkipAnimeBtt.IsVisible = false;
+                    SkipAnimeBtt.IsEnabled = false;
+                    hasSkipedLoading = true;
+                });
             };
 
             fishProgressLoaded += (o, e) => {
@@ -1198,7 +1204,7 @@ namespace CloudStreamForms
                     source.Add(f);
                 }
 
-                FromToPicker = new LabelList(FromToBtt, source);//.IsVisible = FromToPicker.ItemsSource.Count > 1;                
+                FromToPicker = new LabelList(FromToBtt, source, "Select Episode");//.IsVisible = FromToPicker.ItemsSource.Count > 1;                
                 FromToPicker.SelectedIndex = 0;//.IsVisible = FromToPicker.ItemsSource.Count > 1;           
                 FromToPicker.IsVisible = FromToPicker.ItemsSource.Count > 1;
                 FromToPicker.button.IsEnabled = FromToPicker.ItemsSource.Count > 1;
@@ -1304,6 +1310,7 @@ namespace CloudStreamForms
                     if (DubPicker.ItemsSource.Count > 0) {
                         DubPicker.SelectedIndex = 0;
                     }
+                    DubPicker.OnUpdateList();
                     SetDubExist();
                 }
 

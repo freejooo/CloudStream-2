@@ -21,7 +21,7 @@ namespace CloudStreamForms
             await PopupNavigation.Instance.PushAsync(page);
             return await page.WaitForResult();
         }
-         
+
         public static async Task DisplayLoadingBar(int loadingTime, string title = "Loading")
         {
             await PopupNavigation.Instance.PushAsync(new LoadingPopupPage(loadingTime, title));
@@ -37,17 +37,19 @@ namespace CloudStreamForms
 
         public static async Task StopIndeterminateLoadinbar()
         {
-            if(currentLoading != null) {
+            if (currentLoading != null) {
                 await currentLoading.End();
             }
-             //PopupNavigation.PopAsync(false);
-        } 
+            //PopupNavigation.PopAsync(false);
+        }
     }
 
     public class LabelList
     {
         public Button button;
-        public List<string> ItemsSource;
+
+        private List<string> _ItemsSource;
+        public List<string> ItemsSource { set { _ItemsSource = value; OnUpdateList(); } get { return _ItemsSource; } }
         public EventHandler<int> SelectedIndexChanged;
         private int _SelectedIndex = -1;
 
@@ -57,18 +59,26 @@ namespace CloudStreamForms
 
         // public List<string> Items { get { return ItemsSource; } }
 
-        public LabelList(Button _Button, List<string> _ItemSource)
+        readonly Color bgColor;
+        public void OnUpdateList()
+        {
+            bool isEmty = ItemsSource.Count <= 1;
+            button.BackgroundColor = isEmty ? Color.Transparent : bgColor;
+            button.InputTransparent = isEmty; 
+        }
+
+        public LabelList(Button _Button, List<string> __ItemSource, string title = "")
         {
             button = _Button;
-            ItemsSource = _ItemSource;
+            bgColor = button.BackgroundColor;
+            ItemsSource = __ItemSource;
 
             button.Clicked += async (o, e) => {
-                await PopupNavigation.Instance.PushAsync(new SelectPopup(ItemsSource, SelectedIndex));
+                await PopupNavigation.Instance.PushAsync(new SelectPopup(ItemsSource, SelectedIndex, title));
                 SelectPopup.OnSelectedChanged += (_o, _e) => {
                     SelectedIndex = _e;
                 };
-            };
-
+            }; 
 
             SelectedIndexChanged += (o, e) => {
                 if (this == o) {
@@ -103,11 +113,13 @@ namespace CloudStreamForms
             if (setOnLeft) {
                 CrossbttLayout.VerticalOptions = hightOverWidth ? LayoutOptions.End : LayoutOptions.Center;
                 CrossbttLayout.HorizontalOptions = hightOverWidth ? LayoutOptions.Center : LayoutOptions.End;
-                CrossbttLayout.TranslationY = hightOverWidth ? -40 : -20;
+                CrossbttLayout.TranslationY = hightOverWidth ? -80 : -40;
                 CrossbttLayout.TranslationX = hightOverWidth ? 0 : 40;
-                TheStack.TranslationX = hightOverWidth ? 0 : 40;
+                TheStack.TranslationX = hightOverWidth ? 0 : 80;
                 //TheStack.HorizontalOptions = hightOverWidth ? LayoutOptions.Center : LayoutOptions.CenterAndExpand;
-                TheStack.TranslationY = hightOverWidth ? 40 : 20;
+                TheStack.TranslationY = hightOverWidth ? 40 : 40;
+                epview.TranslationY = hightOverWidth ? 0 : -40;
+                HeaderTitle.TranslationY = hightOverWidth ? 0 : -30;
                 Grid.SetRow(CrossbttLayout, hightOverWidth ? 1 : 0);
                 Grid.SetColumn(CrossbttLayout, hightOverWidth ? 0 : 1);
             }
@@ -145,9 +157,7 @@ namespace CloudStreamForms
             HeaderTitle.Text = header;
             HeaderTitle.IsEnabled = header != "";
             HeaderTitle.IsVisible = header != "";
-
-
-
+             
             CancelButton.Source = GetImageSource("netflixCancel.png");
             CancelButtonBtt.Clicked += (o, e) => {
                 OnSelectedChanged = null;
@@ -182,7 +192,7 @@ namespace CloudStreamForms
             }
 
         }
-         
+
         public class PopupName
         {
             public string Name { set; get; } = "Hello";
