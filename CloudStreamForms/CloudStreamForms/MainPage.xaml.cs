@@ -6787,9 +6787,9 @@ namespace CloudStreamForms
                         }
                     }
                     s = s.Replace("\n\n", "");
-                    if (!s.StartsWith("WEBVTT")) {
+                    /*if (!s.StartsWith("WEBVTT")) {
                         s = "WEBVTT\n\n" + s; // s.Insert(0, "WEBVTT\n");
-                    }
+                    }*/
                     if (showToast) {
                         App.ShowToast("Subtitles Downloaded");
                     }
@@ -8493,169 +8493,8 @@ namespace CloudStreamForms
 #endif
         }
 
-        //https://en.wikipedia.org/wiki/SubRip
-        public struct SubtitleLine
-        {
-            public string line;
-            public bool isBold;
-            public bool isItalic;
-            public bool isUnderline;
-            public string hexColor;
-        }
-
-        public struct SubtitleTrack
-        {
-            public double fromMilisec;
-            public double toMilisec;
-            public List<SubtitleLine> subtitleLines;
-        }
-
-        public static SubtitleTrack[] ParseSubtitles(string _inp)
-        {
-            string[] colorCodes = new string[] { "White", "Silver", "Gray", "Black", "Red", "Maroon", "Yellow", "Olive", "Lime", "Green", "Aqua", "Teal", "Blue", "Navy", "Fuchsia", "Purple" };
-            string[] colorHexes = new string[] { "#FFFFFF", "#C0C0C0", "#808080", "#000000", "#FF0000", "#800000", "#FFFF00", "#808000", "#00FF00", "#008000", "#00FFFF", "#008080", "#0000FF", "#000080", "#FF00FF", "#800080" };
-
-            string GetHexColor(string inp)
-            {
-                string color = FindHTML(inp, "font color=\"", "\"");
-                if (color == "") {
-                    return "#FFFFFF";
-                }
-                else if (color.StartsWith("#")) {
-                    return color.ToUpper();
-                }
-                else {
-                    for (int i = 0; i < colorCodes.Length; i++) {
-                        if (colorCodes[i] == color) {
-                            return colorHexes[i];
-                        }
-                    }
-                    return "#FFFFFF";
-                }
-            }
-
-            string ConvertToNormalLine(string inp)
-            {
-
-                while (ContainsStartColor(inp)) {
-                    inp = inp.Replace($"<font color=\"{FindHTML(inp, "<font color=\"", "\"")}\">", "");
-                }
-                return inp.Replace("<i>", "").Replace("{i}", "").Replace("<b>", "").Replace("{b}", "").Replace("<u>", "").Replace("{u}", "").Replace("</i>", "").Replace("{/i}", "").Replace("</b>", "").Replace("{/b}", "").Replace("</u>", "").Replace("{/u}", "").Replace("</font>", "");
-            }
-
-            bool ContainsStart(string inp, string lookFor)
-            {
-                return inp.Contains($"<{lookFor}>") || inp.Contains("{" + lookFor + "}");
-            }
-
-            bool ContansEnd(string inp, string lookFor)
-            {
-                return inp.Contains($"</{lookFor}>") || inp.Contains("{/" + lookFor + "}");
-            }
-
-            bool ContainsStartColor(string inp)
-            {
-                return inp.Contains("<font color=");
-            }
-
-            bool ContainsEndColor(string inp)
-            {
-                return inp.Contains("</font>");
-            }
-
-            List<SubtitleTrack> tracks = new List<SubtitleTrack>();
-
-            string[] lines = _inp.Replace("\r", "").Split('\n');
-            int currentLine = 1;
-            SubtitleTrack st = new SubtitleTrack();
-
-            int lineNum = 0;
-
-            bool isUnderline = false;
-            bool isBold = false;
-            bool isItalic = false;
-            string hexColor = "#FFFFFF";
-
-            for (int i = 0; i < lines.Length; i++) {
-                string s = lines[i];
-                if (s == currentLine.ToString()) { // HEADER INT
-
-                    if (st.fromMilisec != new SubtitleTrack().fromMilisec) {
-                        tracks.Add(st);
-                    }
-
-                    lineNum = -1;
-                    st = new SubtitleTrack() { subtitleLines = new List<SubtitleLine>(), fromMilisec = 0 };
-
-                    currentLine++;
-                }
-                else {
-                    if (lineNum == -1) { // FROM MILI
-
-                        string st1 = FindHTML("|" + s, "|", " ").Replace(",", ".");
-                        string st2 = FindHTML(s + "|", "--> ", "|").Replace(",", ".");
-
-                        try {
-                            st.fromMilisec = TimeSpan.Parse(st1).TotalMilliseconds;
-                            st.toMilisec = TimeSpan.Parse(st2).TotalMilliseconds;
-                        }
-                        catch (Exception _ex) {
-                            print("MAIN EX IN SUBTITLES::: " + _ex);
-                            throw;
-                        }
-
-                        lineNum = 0;
-
-                        isUnderline = false;
-                        isBold = false;
-                        isItalic = false;
-                        hexColor = "#FFFFFF";
-                    }
-                    else if (lineNum >= 0) {
-                        if (s.Replace(" ", "") == "" || s.Replace(" ", "").ToUpper() == "WEBVTT") { // EMTY 
-
-                        }
-                        else if (st.subtitleLines != null) {
-                            if (ContainsStartColor(s)) {
-                                hexColor = GetHexColor(s);
-                            }
-                            if (!isBold) {
-                                isBold = ContainsStart(s, "b");
-                            }
-                            if (!isItalic) {
-                                isItalic = ContainsStart(s, "i");
-                            }
-                            if (!isUnderline) {
-                                isUnderline = ContainsStart(s, "u");
-                            }
-                            string line = ConvertToNormalLine(s);
-
-                            st.subtitleLines.Add(new SubtitleLine() { hexColor = hexColor, isBold = isBold, isItalic = isItalic, isUnderline = isUnderline, line = line });
-                            //print(s + "|" + line + "|" + isItalic + "|" + ContainsStart(s, "i") + "|" + ContansEnd(s, "i") + "|" + changed);
-
-                            if (ContainsEndColor(s)) {
-                                hexColor = "#FFFFFF";
-                            }
-                            if (ContansEnd(s, "b")) {
-                                isBold = false;
-                            }
-                            if (ContansEnd(s, "i")) {
-                                isItalic = false;
-                            }
-                            if (ContansEnd(s, "u")) {
-                                isUnderline = false;
-                            }
-                        }
-
-
-                        lineNum++;
-                    }
-                }
-            }
-            return tracks.ToArray();
-
-        }
-
+    
+ 
 
         // LICENSE
         //

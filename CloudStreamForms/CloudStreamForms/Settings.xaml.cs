@@ -10,8 +10,10 @@ namespace CloudStreamForms
     [XamlCompilation(XamlCompilationOptions.Compile)]
     public partial class Settings : ContentPage
     {
+        public const bool SUBTITLES_INVIDEO_ENABELD = false;
 
         LabelList ColorPicker;
+
         public string MainTxtColor { set; get; } = "#e1e1e1";
 
 
