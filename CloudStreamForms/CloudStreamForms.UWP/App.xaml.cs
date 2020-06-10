@@ -49,7 +49,7 @@ namespace CloudStreamForms.UWP
 
                 // ======================================= INIT =======================================
                 FFImageLoading.Forms.Platform.CachedImageRenderer.Init();
-                Rg.Plugins.Popup.Popup.Init();
+              //  Rg.Plugins.Popup.Popup.Init();
                 LibVLCSharpFormsRenderer.Init();
                // UserDialogs.Init();
 

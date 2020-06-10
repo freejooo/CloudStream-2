@@ -1,0 +1,62 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<pages:PopupPage 
+    xmlns="http://xamarin.com/schemas/2014/forms"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:pages="clr-namespace:Rg.Plugins.Popup.Pages;assembly=Rg.Plugins.Popup"
+    xmlns:animations="clr-namespace:Rg.Plugins.Popup.Animations;assembly=Rg.Plugins.Popup"            xmlns:ff="clr-namespace:FFImageLoading.Forms;assembly=FFImageLoading.Forms"  
+
+             x:Class="CloudStreamForms.InputPopupPage">
+    <!--You can set an animation in the xaml file or in the csharp code behind-->
+    <!--
+    <pages:PopupPage.Animation>
+        <animations:ScaleAnimation 
+            PositionIn="Center"
+            PositionOut="Center"
+            ScaleIn="1.2"
+            ScaleOut="0.8"
+            DurationIn="400"
+            DurationOut="300"
+            EasingIn="SpringIn"
+            EasingOut="SpringOut"
+            HasBackgroundAnimation="False"/>
+    </pages:PopupPage.Animation>-->
+    <!--You can use any elements here which are extended from Xamarin.Forms.View-->
+    <StackLayout BackgroundColor="Transparent">
+
+        <AbsoluteLayout x:Name="TheStack" HorizontalOptions="Center" VerticalOptions="CenterAndExpand" BackgroundColor="Transparent">
+            <Grid  RowSpacing="50" VerticalOptions="Center"   BackgroundColor="Transparent" >
+                <Grid.RowDefinitions >
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"></ColumnDefinition>
+                    <ColumnDefinition Width="Auto"></ColumnDefinition>
+                    <ColumnDefinition Width="Auto"></ColumnDefinition>
+                </Grid.ColumnDefinitions>
+
+                <Label x:Name="HeaderTitle" HorizontalOptions="Center" FontSize="20" FontAttributes="Bold" Text="Episode 1 hello world" TextColor="#e6e6e6" ></Label>
+
+                <Entry x:Name="InputF" Margin="20" WidthRequest="200" FontSize="20" HeightRequest="50" MinimumHeightRequest="50"></Entry>
+
+                <AbsoluteLayout BackgroundColor="Transparent" Grid.Row="1" Grid.Column="1" HorizontalOptions="Center" VerticalOptions="End"   TranslationY="0" x:Name="CrossbttLayout" Margin="40">
+                    <Grid>
+                        <Button   x:Name="CancelButtonBtt" BackgroundColor="Transparent" HeightRequest="80" WidthRequest="80" Padding="0"  VerticalOptions="Center"   HorizontalOptions="Center">
+                        </Button>
+                        <ff:CachedImage x:Name="CancelButton" InputTransparent="True" BackgroundColor="Transparent" HeightRequest="60" WidthRequest="60"   VerticalOptions="Center"  HorizontalOptions="Center">
+
+                        </ff:CachedImage>
+                    </Grid>
+                </AbsoluteLayout>
+                <Label Grid.Row="1" IsEnabled="False" InputTransparent="True"></Label>
+            </Grid>
+
+
+        </AbsoluteLayout>
+    </StackLayout>
+
+</pages:PopupPage>

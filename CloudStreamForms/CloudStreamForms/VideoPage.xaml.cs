@@ -158,13 +158,28 @@ namespace CloudStreamForms
         {
             ParsedSubtitles.Add(ParseSubtitles(_inp).ToArray());
         }
-
+        static bool ContainsStartColor(string inp)
+        {
+            return inp.Contains("<font color=");
+        }
         public static List<SubtitleItem> ParseSubtitles(string _inp)
         {
             var parser = GetSubtiteParser(_inp);
             byte[] byteArray = Encoding.UTF8.GetBytes(_inp);
             MemoryStream stream = new MemoryStream(byteArray);
-            return parser.ParseStream(stream, Encoding.UTF8);
+            return parser.ParseStream(stream, Encoding.UTF8).Select(t => {
+
+                // REMOVE BLOAT
+                for (int i = 0; i < t.Lines.Count; i++) {
+                    var inp = t.Lines[i];
+                    while (ContainsStartColor(inp)) {
+                        t.Lines[i] = inp.Replace($"<font color=\"{FindHTML(inp, "<font color=\"", "\"")}\">", "");
+                    }
+                }
+              
+                t.Lines = t.Lines.Select(_t => _t.Replace("<i>", "").Replace("{i}", "").Replace("<b>", "").Replace("{b}", "").Replace("<u>", "").Replace("{u}", "").Replace("</i>", "").Replace("{/i}", "").Replace("</b>", "").Replace("{/b}", "").Replace("</u>", "").Replace("{/u}", "").Replace("</font>", "")).ToList();
+                return t;
+            }).ToList();
         }
 
         public static ISubtitlesParser GetSubtiteParser(string _inp)

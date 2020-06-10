@@ -9,6 +9,7 @@ using Rg.Plugins.Popup.Services;
 using System.Linq;
 using static CloudStreamForms.CloudStreamCore;
 using static CloudStreamForms.SelectPopup;
+using static CloudStreamForms.InputPopupPage;
 
 namespace CloudStreamForms
 {
@@ -42,6 +43,23 @@ namespace CloudStreamForms
             }
             //PopupNavigation.PopAsync(false);
         }
+
+        public static async Task<string> DisplayEntry(InputPopupResult result, string placeHolder, string title = "", int offset = -1, bool autoPaste = true, string setText = null)
+        {
+            var page = new InputPopupPage(result, placeHolder, title, offset, autoPaste, setText);
+            await PopupNavigation.Instance.PushAsync(page);
+            return await page.WaitForResult();
+        }
+
+        public static async Task<decimal> DisplayDecimalEntry(string placeHolder, string title = "", int offset = -1, bool autoPaste = true, string setText = null)
+        {
+            return decimal.Parse((await DisplayEntry(InputPopupResult.decimalNumber, placeHolder, title, offset, autoPaste, setText)).Replace(".", ","));
+        }
+
+        public static async Task<int> DisplayIntEntry(string placeHolder, string title = "", int offset = -1, bool autoPaste = true, string setText = null)
+        {
+            return int.Parse(await DisplayEntry(InputPopupResult.integrerNumber, placeHolder, title, offset, autoPaste, setText));
+        }
     }
 
     public class LabelList
@@ -64,7 +82,7 @@ namespace CloudStreamForms
         {
             bool isEmty = ItemsSource.Count <= 1;
             button.BackgroundColor = isEmty ? Color.Transparent : bgColor;
-            button.InputTransparent = isEmty; 
+            button.InputTransparent = isEmty;
         }
 
         public LabelList(Button _Button, List<string> __ItemSource, string title = "")
@@ -74,11 +92,14 @@ namespace CloudStreamForms
             ItemsSource = __ItemSource;
 
             button.Clicked += async (o, e) => {
+               // await ActionPopup.DisplayEntry(InputPopupResult.decimalNumber, "Delay in ms", "Audio Delay");
+               // await ActionPopup.DisplayEntry(InputPopupResult.url, "https://youtu.be/", "Youtube link");
+
                 await PopupNavigation.Instance.PushAsync(new SelectPopup(ItemsSource, SelectedIndex, title));
                 SelectPopup.OnSelectedChanged += (_o, _e) => {
                     SelectedIndex = _e;
                 };
-            }; 
+            };
 
             SelectedIndexChanged += (o, e) => {
                 if (this == o) {
@@ -157,7 +178,7 @@ namespace CloudStreamForms
             HeaderTitle.Text = header;
             HeaderTitle.IsEnabled = header != "";
             HeaderTitle.IsVisible = header != "";
-             
+
             CancelButton.Source = GetImageSource("netflixCancel.png");
             CancelButtonBtt.Clicked += (o, e) => {
                 OnSelectedChanged = null;
