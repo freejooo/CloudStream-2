@@ -1260,6 +1260,83 @@ namespace CloudStreamForms
                         for (int q = 0; q < currentMovie.title.MALData.seasonData[currentSeason].seasons.Count; q++) {
                             MALSeason ms = currentMovie.title.MALData.seasonData[currentSeason].seasons[q];
                             try {
+                                if (ms.watchMovieAnimeData.dubExists) {
+                                    dubExists = true;
+                                }
+                                if (ms.watchMovieAnimeData.subExists) {
+                                    subExists = true;
+                                }
+                            }
+                            catch (Exception) { }
+                            try {
+                                if (ms.kissanimefreeData.dubExists) {
+                                    dubExists = true;
+                                }
+                                if (ms.kissanimefreeData.subExists) {
+                                    subExists = true;
+                                }
+                            }
+                            catch (Exception) { }
+                            try {
+                                if (ms.kickassAnimeData.dubExists) {
+                                    dubExists = true;
+                                }
+                                if (ms.kickassAnimeData.subExists) {
+                                    subExists = true;
+                                }
+                            }
+                            catch (Exception) { }
+                            try {
+                                if (ms.dubbedAnimeNetData.dubExists) {
+                                    dubExists = true;
+                                }
+                                if (ms.dubbedAnimeNetData.subExists) {
+                                    subExists = true;
+                                }
+                            }
+                            catch (Exception) { }
+
+                  
+
+                            try {
+                                if (ms.animeSimpleData.dubbedEpisodes > 0) {
+                                    dubExists = true;
+                                }
+                                if (ms.animeSimpleData.subbedEpisodes > 0) {
+                                    subExists = true;
+                                }
+                            }
+                            catch (Exception) { }
+
+                            try {
+                                if (ms.animekisaData.dubExists) {
+                                    dubExists = true;
+                                }
+                                if (ms.animekisaData.subExists) {
+                                    subExists = true;
+                                }
+                            }
+                            catch (Exception) { }
+                            try {
+                                if (ms.animeFlixData.dubExists) {
+                                    dubExists = true;
+                                }
+                                if (ms.animeFlixData.subExists) {
+                                    subExists = true;
+                                }
+                            }
+                            catch (Exception) { }
+
+                            try {
+                                if (ms.animedreamData.dubExists) {
+                                    dubExists = true;
+                                }
+                                if (ms.animedreamData.subExists) {
+                                    subExists = true;
+                                }
+                            }
+                            catch (Exception) { }
+                            try {
                                 if (ms.dubbedAnimeData.dubExists) {
                                     dubExists = true;
                                 }
