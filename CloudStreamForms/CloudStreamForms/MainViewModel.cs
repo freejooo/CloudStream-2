@@ -24,8 +24,7 @@ namespace MediaElement
         /// <summary>
         /// Gets the <see cref="LibVLCSharp.Shared.LibVLC"/> instance.
         /// </summary>
-        public LibVLC LibVLC
-        {
+        public LibVLC LibVLC {
             get => _libVLC;
             private set => Set(nameof(LibVLC), ref _libVLC, value);
         }
@@ -34,8 +33,7 @@ namespace MediaElement
         /// <summary>
         /// Gets the <see cref="LibVLCSharp.Shared.MediaPlayer"/> instance.
         /// </summary>
-        public MediaPlayer MediaPlayer
-        {
+        public MediaPlayer MediaPlayer {
             get => _mediaPlayer;
             private set => Set(nameof(MediaPlayer), ref _mediaPlayer, value);
         }

@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Xamarin.Forms;
+﻿using Xamarin.Forms;
 
 namespace CloudStreamForms
 {
@@ -9,7 +6,7 @@ namespace CloudStreamForms
     {
         protected override void OnParentSet()
         {
-            base.OnParentSet(); 
+            base.OnParentSet();
             //View.Opacity = 0;
         }
 

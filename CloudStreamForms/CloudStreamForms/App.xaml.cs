@@ -3,7 +3,6 @@ using Plugin.Settings;
 using Plugin.Settings.Abstractions;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -204,7 +203,7 @@ namespace CloudStreamForms
             RequestVlc(new List<string>() { url }, new List<string>() { name }, episodeName ?? name, episodeId, startId, subtitleFull, episode, season, descript, overrideSelectVideo);
         }
 
-        public static EventHandler ForceUpdateVideo ;
+        public static EventHandler ForceUpdateVideo;
 
 
         /// <summary>
@@ -239,7 +238,7 @@ namespace CloudStreamForms
             else {
                 platformDep.RequestVlc(urls, names, episodeName, episodeId, startId, subtitleFull);
             }
-        } 
+        }
 
         public static string RequestDownload(int id, string name, string description, int episode, int season, List<string> mirrorUrls, List<string> mirrorNames, string downloadTitle, string poster, CloudStreamCore.Title title)
         {

@@ -1,14 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Xamarin.Forms;
+﻿using Xamarin.Forms;
 
 namespace CloudStreamForms
 {
     public class CustomTabbedPage : TabbedPage
     {
-        public Color SelectedIconColor
-        {
+        public Color SelectedIconColor {
             get { return (Color)GetValue(SelectedIconColorProperty); }
             set { SetValue(SelectedIconColorProperty, value); }
         }
@@ -19,8 +15,7 @@ namespace CloudStreamForms
             typeof(CustomTabbedPage),
             Color.White);
 
-        public Color UnselectedIconColor
-        {
+        public Color UnselectedIconColor {
             get { return (Color)GetValue(UnelectedIconColorProperty); }
             set { SetValue(UnelectedIconColorProperty, value); }
         }
@@ -31,8 +26,7 @@ namespace CloudStreamForms
             typeof(CustomTabbedPage),
             Color.White);
 
-        public Color SelectedTextColor
-        {
+        public Color SelectedTextColor {
             get { return (Color)GetValue(SelectedTextColorProperty); }
             set { SetValue(SelectedTextColorProperty, value); }
         }
@@ -43,8 +37,7 @@ namespace CloudStreamForms
             typeof(CustomTabbedPage),
             Color.White);
 
-        public Color UnselectedTextColor
-        {
+        public Color UnselectedTextColor {
             get { return (Color)GetValue(UnselectedTextColorProperty); }
             set { SetValue(UnselectedTextColorProperty, value); }
         }

@@ -1,26 +1,8 @@
-﻿
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Text;
-
-using Android.App;
-using Android.Content;
-using Android.Content.Res;
-using Android.Graphics;
-using Android.OS;
-using Android.Runtime;
-using Android.Support.V4.Content.Res;
-using Android.Views;
-using Android.Widget;
-using CloudStreamForms.Droid;
-using Xamarin.Forms;
-using Xamarin.Forms.Platform.Android;
-using static Java.Util.ResourceBundle;
-using static CloudStreamForms.CloudStreamCore;
+﻿using Android.Content;
 using Android.Graphics.Drawables;
 using Android.Graphics.Drawables.Shapes;
+using Xamarin.Forms;
+using Xamarin.Forms.Platform.Android;
 
 [assembly: ExportRenderer(typeof(Slider), typeof(CustomSliderRenderer))]
 public class CustomSliderRenderer : SliderRenderer

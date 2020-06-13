@@ -18,7 +18,7 @@ namespace CloudStreamForms.Droid
             this.context = context;
         }
 
-          
+
 
         protected override void OnElementChanged(ElementChangedEventArgs<SearchBar> args)
         {
@@ -26,7 +26,7 @@ namespace CloudStreamForms.Droid
             // Get native control (background set in shared code, but can use SetBackgroundColor here)
             SearchView searchView = (base.Control as SearchView);
             searchView.SetInputType(InputTypes.ClassText | InputTypes.TextVariationNormal);
-            
+
 
             // Access search textview within control
             int textViewId = searchView.Context.Resources.GetIdentifier("android:id/search_src_text", null, null);

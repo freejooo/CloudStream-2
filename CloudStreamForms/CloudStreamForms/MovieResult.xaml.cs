@@ -1,13 +1,9 @@
-﻿using Acr.UserDialogs;
-using CloudStreamForms.Models;
-using FFImageLoading;
+﻿using CloudStreamForms.Models;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Data;
 using System.Linq;
 using System.Reflection;
-using System.Threading;
 using System.Threading.Tasks;
 using Xamarin.Essentials;
 using Xamarin.Forms;
@@ -444,7 +440,7 @@ namespace CloudStreamForms
 
             SkipAnimeBtt.Clicked += (o, e) => {
                 // Grid.SetColumn(SkipAnimeBtt, 0);
-                Device.BeginInvokeOnMainThread(() => { 
+                Device.BeginInvokeOnMainThread(() => {
                     shouldSkipAnimeLoading = true;
                     SkipAnimeBtt.IsVisible = false;
                     SkipAnimeBtt.IsEnabled = false;
@@ -1645,10 +1641,10 @@ namespace CloudStreamForms
             }*/
 
             if (!episodeResult.LoadedLinks) {
-             //   App.ShowToast(errorEpisodeToast); episodeView.SelectedItem = null;
+                //   App.ShowToast(errorEpisodeToast); episodeView.SelectedItem = null;
                 return;
             }
-            
+
 
             // ============================== GET ACTION ==============================
             string action = "";
@@ -1793,7 +1789,7 @@ namespace CloudStreamForms
 
                 //await Task.Delay(LoadingMiliSec + 40);
 
-                if (!episodeResult.LoadedLinks) { 
+                if (!episodeResult.LoadedLinks) {
                     return;
                 }
                 EpisodeSettings(episodeResult);

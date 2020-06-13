@@ -1,30 +1,24 @@
 ﻿using Android.Content;
-using Android.Graphics;
 using Android.Support.Design.Widget;
-using Android.Support.V4.Content;
 using Android.Support.V4.View;
 using Android.Views;
-using CloudStreamForms;
-using System.ComponentModel;
 using CloudStreamForms.Droid.Renderers;
+using System.ComponentModel;
 using Xamarin.Forms;
-using Xamarin.Forms.Platform.Android;
 using Xamarin.Forms.Platform.Android.AppCompat;
-using Color = Xamarin.Forms.Color;
-using Android.Graphics.Drawables.Shapes;
 
 [assembly: ExportRenderer(typeof(TabbedPage), typeof(CustomTabbedPageRenderer))]
 namespace CloudStreamForms.Droid.Renderers
-{ 
+{
     public class CustomTabbedPageRenderer : TabbedPageRenderer
     {
-     
+
         public CustomTabbedPageRenderer(Context context) : base(context) { }
         const bool line = false;
         protected override void OnElementPropertyChanged(object sender, PropertyChangedEventArgs e) // HOMESCREEN LINE HERE
         {
             base.OnElementPropertyChanged(sender, e);
-            if (!line) return; 
+            if (!line) return;
             //System.Console.WriteLine("sender::::" + sender.ToString());
             // System.Console.WriteLine(ViewGroup.GetChildAt(1).ToString());
 
@@ -44,7 +38,7 @@ namespace CloudStreamForms.Droid.Renderers
                 view.AddView(_v);
                 ////            _v.SetHeight(2);
                 //rel.AddView(_v);
-            } 
+            }
         }
     }
 }

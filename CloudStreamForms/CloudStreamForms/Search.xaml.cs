@@ -51,7 +51,7 @@ namespace CloudStreamForms
             listView = new ListView {
                 // Source of data items.
                 ItemsSource = mySearchResultCollection,
-                RowHeight=50,
+                RowHeight = 50,
 
                 // Define template for displaying each item.
                 // (Argument of DataTemplate constructor is called for 
@@ -64,7 +64,7 @@ namespace CloudStreamForms
                     nameLabel.SetBinding(Label.TextProperty, "Title");
                     desLabel.SetBinding(Label.TextProperty, "Extra");
                     // poster.SetBinding(Image.SourceProperty, "Poster");
-                  //  desLabel.FontSize = nameLabel.FontSize / 1.2f;
+                    //  desLabel.FontSize = nameLabel.FontSize / 1.2f;
                     desLabel.FontSize = 12;
                     desLabel.TextColor = Color.Gray;
                     nameLabel.TextColor = Color.FromHex("#e6e6e6");
@@ -105,7 +105,7 @@ namespace CloudStreamForms
                                             //birthdayLabel
                                         }
                                         }
-                                 
+
                                 }
                         }
                     };
@@ -171,7 +171,7 @@ namespace CloudStreamForms
 
         private void SearchBar_TextChanged(object sender, TextChangedEventArgs e)
         {
-            if (Settings.SearchEveryCharEnabled) { 
+            if (Settings.SearchEveryCharEnabled) {
                 QuickSearch(e.NewTextValue);
             }
         }

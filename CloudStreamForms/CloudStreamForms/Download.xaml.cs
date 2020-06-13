@@ -4,23 +4,17 @@ using FFImageLoading;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Security.Cryptography;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Xamarin.Essentials;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
-using XamEffects;
 using YoutubeExplode;
-using YoutubeExplode.Common;
-using YoutubeExplode.Converter;
-using YoutubeExplode.Videos;
 using YoutubeExplode.Channels;
+using YoutubeExplode.Videos;
 using YoutubeExplode.Videos.Streams;
 using static CloudStreamForms.App;
 using static CloudStreamForms.CloudStreamCore;
@@ -275,9 +269,9 @@ namespace CloudStreamForms
                                 }
                             }
                         }
-                         
-                        print("ID???????==" + id + "  > " + info.info.name + " |" + info.info.season + "|"+ info.state.state.ToString() + " Bytes: "+ info.state.bytesDownloaded + "|" + info.state.totalBytes + "|" + info.state.ProcentageDownloaded + "%");
-                      
+
+                        print("ID???????==" + id + "  > " + info.info.name + " |" + info.info.season + "|" + info.state.state.ToString() + " Bytes: " + info.state.bytesDownloaded + "|" + info.state.totalBytes + "|" + info.state.ProcentageDownloaded + "%");
+
 
                     }
                     catch (Exception _ex) {
@@ -488,7 +482,7 @@ namespace CloudStreamForms
             await HandleEpisode(episodeResult, this);
             UpdateDownloaded();
         }
-         
+
 
         public static async Task HandleEpisode(EpisodeResult episodeResult, Page p)
         {

@@ -1,19 +1,16 @@
 ﻿using LibVLCSharp.Shared;
+using SubtitlesParser.Classes;
+using SubtitlesParser.Classes.Parsers;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
+using System.IO;
 using System.Linq;
-using System.Reactive.Subjects;
 using System.Text;
 using System.Threading.Tasks;
-
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 using XamEffects;
 using static CloudStreamForms.CloudStreamCore;
-using SubtitlesParser.Classes.Parsers;
-using System.IO;
-using SubtitlesParser.Classes;
 
 namespace CloudStreamForms
 {
@@ -176,7 +173,7 @@ namespace CloudStreamForms
                         t.Lines[i] = inp.Replace($"<font color=\"{FindHTML(inp, "<font color=\"", "\"")}\">", "");
                     }
                 }
-              
+
                 t.Lines = t.Lines.Select(_t => _t.Replace("<i>", "").Replace("{i}", "").Replace("<b>", "").Replace("{b}", "").Replace("<u>", "").Replace("{u}", "").Replace("</i>", "").Replace("{/i}", "").Replace("</b>", "").Replace("{/b}", "").Replace("</u>", "").Replace("{/u}", "").Replace("</font>", "")).ToList();
                 return t;
             }).ToList();

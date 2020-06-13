@@ -1,15 +1,15 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
+﻿using Rg.Plugins.Popup.Services;
 using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
+using System.Threading.Tasks;
+using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 using static CloudStreamForms.App;
-using Xamarin.Forms;
-using System.Collections.ObjectModel;
-using Rg.Plugins.Popup.Services;
-using System.Linq;
 using static CloudStreamForms.CloudStreamCore;
-using static CloudStreamForms.SelectPopup;
 using static CloudStreamForms.InputPopupPage;
+using static CloudStreamForms.SelectPopup;
 
 namespace CloudStreamForms
 {
@@ -92,8 +92,8 @@ namespace CloudStreamForms
             ItemsSource = __ItemSource;
 
             button.Clicked += async (o, e) => {
-               // await ActionPopup.DisplayEntry(InputPopupResult.decimalNumber, "Delay in ms", "Audio Delay");
-               // await ActionPopup.DisplayEntry(InputPopupResult.url, "https://youtu.be/", "Youtube link");
+                // await ActionPopup.DisplayEntry(InputPopupResult.decimalNumber, "Delay in ms", "Audio Delay");
+                // await ActionPopup.DisplayEntry(InputPopupResult.url, "https://youtu.be/", "Youtube link");
 
                 await PopupNavigation.Instance.PushAsync(new SelectPopup(ItemsSource, SelectedIndex, title));
                 SelectPopup.OnSelectedChanged += (_o, _e) => {

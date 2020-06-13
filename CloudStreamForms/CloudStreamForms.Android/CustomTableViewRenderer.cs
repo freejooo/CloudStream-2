@@ -14,7 +14,7 @@ public class CustomTableViewRenderer : TableViewRenderer
 
     protected override void OnElementChanged(ElementChangedEventArgs<TableView> e)
     {
-       // System.Console.WriteLine("daaaaaaaaaaaaaaaaaaaaaaaa--");
+        // System.Console.WriteLine("daaaaaaaaaaaaaaaaaaaaaaaa--");
         base.OnElementChanged(e);
         if (Control == null)
             return;

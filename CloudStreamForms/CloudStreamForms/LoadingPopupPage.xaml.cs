@@ -1,14 +1,8 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
+﻿using Rg.Plugins.Popup.Services;
 using System;
-using Xamarin.Forms.Xaml;
-using static CloudStreamForms.App;
+using System.Threading.Tasks;
 using Xamarin.Forms;
-using System.Collections.ObjectModel;
-using Rg.Plugins.Popup.Services;
-using System.Linq;
-using static CloudStreamForms.CloudStreamCore;
-using static CloudStreamForms.SelectPopup;
+using Xamarin.Forms.Xaml;
 
 namespace CloudStreamForms
 {
@@ -37,7 +31,7 @@ namespace CloudStreamForms
         {
             await MainProgressBar.ProgressTo(1, (uint)Math.Max(loadingMs - RELEASE_MS, 0), Easing.SinIn);
             End();
-        } 
+        }
 
         public async Task End()
         {

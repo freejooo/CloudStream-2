@@ -3,7 +3,6 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Xamarin.Forms;
@@ -165,7 +164,7 @@ namespace CloudStreamForms
         protected override void OnDisappearing()
         {
             base.OnDisappearing();
-            App.ForceUpdateVideo -= ForceUpdateAppearing; 
+            App.ForceUpdateVideo -= ForceUpdateAppearing;
         }
 
         protected override void OnAppearing()

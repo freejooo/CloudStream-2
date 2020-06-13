@@ -257,7 +257,7 @@ namespace CloudStreamForms
             ResetImg.Source = App.GetImageSource("baseline_refresh_white_48dp.png");
 
 
-            ColorPicker = new LabelList(SetTheme, new List<string> { "Black", "Dark", "Netflix", "YouTube" },"Select Theme");
+            ColorPicker = new LabelList(SetTheme, new List<string> { "Black", "Dark", "Netflix", "YouTube" }, "Select Theme");
             //outline_reorder_white_48dp.png
 
 
@@ -321,7 +321,7 @@ namespace CloudStreamForms
             };
             ListAniToggle.Toggled += (o, e) => {
                 ListViewPopupAnimation = e.Value;
-            }; 
+            };
 
             Commands.SetTap(ClearHistoryTap, new Command((o) => {
                 ClearHistory();

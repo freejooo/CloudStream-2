@@ -1,9 +1,5 @@
 ﻿using Rg.Plugins.Popup.Pages;
 using Rg.Plugins.Popup.Services;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
@@ -90,7 +86,7 @@ namespace CloudStreamForms
 
             InputF.Completed += (o, e) => {
                 Done();
-            }; 
+            };
         }
 
         string text = "";

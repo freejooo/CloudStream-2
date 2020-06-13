@@ -1,9 +1,6 @@
 ﻿using Android.Content;
-using Android.Graphics;
-using Android.Widget;
 using CloudStreamForms.Droid;
 using System;
-using System.ComponentModel;
 using Xamarin.Forms;
 using Xamarin.Forms.Platform.Android;
 

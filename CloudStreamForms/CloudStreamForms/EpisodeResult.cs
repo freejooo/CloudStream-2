@@ -14,19 +14,22 @@ namespace CloudStreamForms.Models
         public string RatingStar { get { return (Rating.Replace(" ", "") == "" ? "Rating Unavailable" : "★ " + Rating); } } // ★
         public string PosterUrl { set; get; }
         public bool IsPosterFromStorage { get { return PosterUrl == CloudStreamCore.VIDEO_IMDB_IMAGE_NOT_FOUND; } }
-        public ImageSource ImageSource { get {  return IsPosterFromStorage ? App.GetImageSource(PosterUrl) : PosterUrl; } }
-        public ImageSource VideoSource { get { return App.GetImageSource("nexflixPlayBtt.png");  } }
-        public ImageSource DownloadSource { get {
-                if(IsDownloaded) {
+        public ImageSource ImageSource { get { return IsPosterFromStorage ? App.GetImageSource(PosterUrl) : PosterUrl; } }
+        public ImageSource VideoSource { get { return App.GetImageSource("nexflixPlayBtt.png"); } }
+        public ImageSource DownloadSource {
+            get {
+                if (IsDownloaded) {
                     return "NetflixDownload3v2.png";//"NetflixDownload2.png";
                 }
-                else if(IsDownloading) {
+                else if (IsDownloading) {
                     return "CancelCrossV2.png";//"netflixStop128v2.png";
                 }
-                return "NetflixDownload1.png"; 
-            } }
+                return "NetflixDownload1.png";
+            }
+        }
 
-        public double DownloadSize { get {
+        public double DownloadSize {
+            get {
                 if (IsDownloaded) {
                     return 0.8;
                 }
@@ -34,16 +37,17 @@ namespace CloudStreamForms.Models
                     return 0.8;
                 }
                 return 0.8;
-            } }
+            }
+        }
 
         public bool ForceDescript = false;
         public ImageSource DownloadPlayBttSource { get; set; }
         public Command TapCom { set; get; }
         public Command TapComTwo { set; get; }
         public bool IsDownloading { get { return downloadState == 2; } }
-        public bool IsDownloaded { get { return downloadState == 1; } } 
-        public bool IsSearchingDownloadResults { get { return downloadState == 4; } } 
-        public bool IsNotSearchingDownloadResults { get { return !IsSearchingDownloadResults; } } 
+        public bool IsDownloaded { get { return downloadState == 1; } }
+        public bool IsSearchingDownloadResults { get { return downloadState == 4; } }
+        public bool IsNotSearchingDownloadResults { get { return !IsSearchingDownloadResults; } }
 
         /// <summary>
         /// 0 = Nothing, 1 = Downloaded, 2 = Downloading, 3 = Paused, 4 = Searching 
@@ -72,8 +76,7 @@ namespace CloudStreamForms.Models
         public string MainDarkTextColor { get; set; } = "#a4a4a4"; //"#808080";
         public string ExtraColor { get; set; } = "#a4a4a4"; //"#808080";
         public string OgTitle { set; get; }
-        public double TranslateYOffset
-        {
+        public double TranslateYOffset {
             get {
                 if (Device.RuntimePlatform == Device.UWP) {
                     return -20;
@@ -83,8 +86,7 @@ namespace CloudStreamForms.Models
                 }
             }
         }
-        public double TranslateYOffsetVertical
-        {
+        public double TranslateYOffsetVertical {
             get {
                 if (Device.RuntimePlatform == Device.UWP) {
                     return 0;

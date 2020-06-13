@@ -1,51 +1,42 @@
 ﻿using Acr.UserDialogs;
 using Android;
 using Android.App;
+using Android.Bluetooth;
 using Android.Content;
 using Android.Content.PM;
 using Android.Graphics;
+using Android.Media;
 using Android.Media.Session;
 using Android.OS;
 using Android.Runtime;
 using Android.Support.V4.App;
 using Android.Support.V4.Content;
-using Android.Support.V7.App;
+using Android.Text;
 using Android.Views;
+using Android.Webkit;
 using Android.Widget;
 using Java.IO;
 using Java.Net;
 using LibVLCSharp.Forms.Shared;
+using Newtonsoft.Json;
 using Plugin.LocalNotifications;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
-using System.Xml.Serialization;
 using Xamarin.Forms;
 using static CloudStreamForms.App;
 using static CloudStreamForms.CloudStreamCore;
-using static CloudStreamForms.Droid.MainActivity;
-using Application = Android.App.Application;
 using static CloudStreamForms.Droid.LocalNot;
+using static CloudStreamForms.Droid.MainActivity;
 using static CloudStreamForms.Droid.MainHelper;
-using System.Threading;
-using Android.Webkit;
-using static Android.App.ActivityManager;
-using Android.Text;
-using Android.Media;
-using Java.Interop;
-using static Android.Media.AudioManager;
-using Newtonsoft.Json;
-using System.Diagnostics;
-using Android.Bluetooth;
-using LibVLCSharp.Shared;
+using Application = Android.App.Application;
 using AudioTrack = Android.Media.AudioTrack;
-using Android.Net.Rtp;
-using GoogleCast.Models.Media;
-using Android.Preferences;
 
 namespace CloudStreamForms.Droid
 {
@@ -158,7 +149,7 @@ namespace CloudStreamForms.Droid
                     MainChrome.SeekMedia(-30);
                     break;
                 case "stop":
-                  //  MainChrome.StopCast();
+                    //  MainChrome.StopCast();
                     MainChrome.JustStopVideo();
                     break;
                 default:
@@ -1050,6 +1041,10 @@ namespace CloudStreamForms.Droid
         public void Killed()
         {
             // ShowNotification("finish", "Yeet");
+#if DEBUG
+            EndDebugging();
+#endif
+
             MainDroid.CancelChromecast(); // TO REMOVE IT, CANT INTERACT WITHOUT THE CORE
             DownloadHandle.OnKilled();
         }
@@ -2269,7 +2264,7 @@ namespace CloudStreamForms.Droid
             }
             catch (PackageManager.NameNotFoundException e) {
                 return false;
-            } 
+            }
         }
 
         public static bool IsVlcInstalled()
@@ -2309,7 +2304,7 @@ namespace CloudStreamForms.Droid
 
         public void RequestVlc(List<string> urls, List<string> names, string episodeName, string episodeId, int startId = -2, string subtitleFull = "")
         {
-            try { 
+            try {
                 string absolutePath = Android.OS.Environment.ExternalStorageDirectory + "/" + Android.OS.Environment.DirectoryDownloads;
                 subtitleFull = subtitleFull ?? "";
                 bool subtitlesEnabled = subtitleFull != "";
@@ -2375,7 +2370,7 @@ namespace CloudStreamForms.Droid
         public static void OpenVlcIntent(string path, string subfile = "", string overrideName = null) //Java.IO.File subFile)
         {
             //   OpenStore("org.videolan.vlc");
-            
+
             Android.Net.Uri uri = Android.Net.Uri.Parse(path);
 
             Intent intent = new Intent(Intent.ActionView); //

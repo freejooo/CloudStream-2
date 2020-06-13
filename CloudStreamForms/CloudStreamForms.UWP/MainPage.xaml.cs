@@ -31,7 +31,7 @@ namespace CloudStreamForms.UWP
             mainUWP = new MainUWP();
             mainUWP.Awake();
 
-        } 
+        }
 
     }
 
@@ -404,7 +404,7 @@ namespace CloudStreamForms.UWP
         }
 
         public void UpdateDownload(int id, int state)
-        { 
+        {
         }
     }
 
