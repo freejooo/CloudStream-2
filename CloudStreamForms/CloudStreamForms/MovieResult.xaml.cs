@@ -915,41 +915,47 @@ namespace CloudStreamForms
                     for (int i = 0; i < CurrentEpisodes.Count; i++) {
                         if (CurrentEpisodes[i].links != null) {
                             if (CurrentEpisodes[i].links.Count > 0) {
-                                List<Link> links = CurrentEpisodes[i].links;
                                 try {
-                                    links = links.OrderBy(l => -l.priority).ToList();
-                                }
-                                catch (Exception) { }
-                                //  if (links.Count != 0) {
-                                // print("LINK ADDED" + links.Count + "|" + links[links.Count - 1].name);
-                                //  }
-                                int realFrom = i % MovieResultMainEpisodeView.MAX_EPS_PER;
-                                epView.MyEpisodeResultCollection[realFrom].epVis = true;
-                                List<string> mirrors = new List<string>();
-                                List<string> mirrorsUrls = new List<string>();
-                                int mirrorCounter = 0;
-                                // myEpisodeResultCollection[i].Mirros.Clear();
-                                for (int f = 0; f < links.Count; f++) {
+                                    List<Link> links = CurrentEpisodes[i].links;
                                     try {
-                                        Link link = links[f];
-                                        if (CheckIfURLIsValid(link.url)) {
-                                            string name = link.name;
-                                            if (name.Contains("[MIRRORCOUNTER]")) {
-                                                mirrorCounter++;
-                                                name = name.Replace("[MIRRORCOUNTER]", mirrorCounter.ToString());
-                                            }
-                                            mirrors.Add(name);
-                                            mirrorsUrls.Add(link.url);
-                                        }
+                                        links = links.OrderBy(l => -l.priority).ToList();
                                     }
                                     catch (Exception) { }
-                                }
+                                    //  if (links.Count != 0) {
+                                    // print("LINK ADDED" + links.Count + "|" + links[links.Count - 1].name);
+                                    //  }
+                                    int realFrom = i % MovieResultMainEpisodeView.MAX_EPS_PER;
+                                    epView.MyEpisodeResultCollection[realFrom].epVis = true;
+                                    List<string> mirrors = new List<string>();
+                                    List<string> mirrorsUrls = new List<string>();
+                                    int mirrorCounter = 0;
+                                    // myEpisodeResultCollection[i].Mirros.Clear();
+                                    for (int f = 0; f < links.Count; f++) {
+                                        try {
+                                            Link link = links[f];
+                                            if (CheckIfURLIsValid(link.url)) {
+                                                string name = link.name;
+                                                if (name.Contains("[MIRRORCOUNTER]")) {
+                                                    mirrorCounter++;
+                                                    name = name.Replace("[MIRRORCOUNTER]", mirrorCounter.ToString());
+                                                }
+                                                mirrors.Add(name);
+                                                mirrorsUrls.Add(link.url);
+                                            }
+                                        }
+                                        catch (Exception) { }
+                                    }
 
-                                if (mirrors.Count > epView.MyEpisodeResultCollection[realFrom].Mirros.Count) {
-                                    //EpisodeResult epRes = epView.MyEpisodeResultCollection[i];
-                                    epView.MyEpisodeResultCollection[realFrom].mirrosUrls = mirrorsUrls;
-                                    epView.MyEpisodeResultCollection[realFrom].epVis = mirrors.Count > 0;
-                                    epView.MyEpisodeResultCollection[realFrom].Mirros = mirrors;// = new EpisodeResult() { mirros = mirrors, Description = epRes.Description, epVis = mirrors.Count > 0, Id = epRes.Id, mirrosUrls = mirrorsUrls, PosterUrl = epRes.PosterUrl, progress = epRes.progress, Rating = epRes.Rating, subtitles = epRes.subtitles, Title = epRes.Title };
+                                    if (mirrors.Count > epView.MyEpisodeResultCollection[realFrom].Mirros.Count) {
+                                        //EpisodeResult epRes = epView.MyEpisodeResultCollection[i];
+                                        epView.MyEpisodeResultCollection[realFrom].mirrosUrls = mirrorsUrls;
+                                        epView.MyEpisodeResultCollection[realFrom].epVis = mirrors.Count > 0;
+                                        epView.MyEpisodeResultCollection[realFrom].Mirros = mirrors;// = new EpisodeResult() { mirros = mirrors, Description = epRes.Description, epVis = mirrors.Count > 0, Id = epRes.Id, mirrosUrls = mirrorsUrls, PosterUrl = epRes.PosterUrl, progress = epRes.progress, Rating = epRes.Rating, subtitles = epRes.subtitles, Title = epRes.Title };
+                                    }
+                                }
+                                catch (Exception _ex) {
+                                    print("THIS SHOULD NEVER EVER HAPPEND");
+                                    print("VERY FATAL EX IN " + _ex);
                                 }
                             }
                         }
@@ -1296,7 +1302,7 @@ namespace CloudStreamForms
                             }
                             catch (Exception) { }
 
-                  
+
 
                             try {
                                 if (ms.animeSimpleData.dubbedEpisodes > 0) {

@@ -7021,15 +7021,30 @@ namespace CloudStreamForms
             }
         }
 
-
-
-        static void AddEpisodesFromMirrors(TempThred tempThred, string d, int normalEpisode, string extraId = "", string extra = "") // DONT DO THEVIDEO provider, THEY USE GOOGLE CAPTCH TO VERIFY AUTOR; LOOK AT https://vev.io/api/serve/video/qy3pw89xwmr7 IT IS A POST REQUEST
+        /// <summary>
+        /// Cloud9, fcdn, mp4, google, fembed 
+        /// </summary>
+        /// <param name="d"></param>
+        /// <param name="normalEpisode"></param>
+        /// <param name="tempThred"></param>
+        /// <param name="extra"></param>
+        static void LookForCommon(string d, int normalEpisode, TempThred tempThred, string extra = "")
         {
-            print("MAIND: " + d);
+            string mainD = d.ToString();
+
+            const string mainLookFor = "file: \'";
+            int _prio = 6;
+            while (mainD.Contains(mainLookFor)) {
+                string url = FindHTML(mainD, mainLookFor, "\"");
+                mainD = RemoveOne(mainD, mainLookFor);
+                string label = FindHTML(mainD, "label: \'", "\'");
+                AddPotentialLink(normalEpisode, url, "VidCommon " + label, _prio);
+                _prio++;
+            }
 
             string cloud9 = FindHTML(d, "https://cloud9.to/embed/", "\"");
             if (cloud9 != "") {
-                string _d = DownloadString("https://api.cloud9.to/stream" + cloud9);
+                string _d = DownloadString("https://api.cloud9.to/stream/" + cloud9);
                 const string _lookFor = "\"file\":\"";
                 while (_d.Contains(_lookFor)) {
                     string link = FindHTML(_d, _lookFor, "\"");
@@ -7041,18 +7056,17 @@ namespace CloudStreamForms
             if (fcdn != "") {
                 string _d = PostRequest("https://fcdn.stream/api/source/" + fcdn, "https://fcdn.stream/v/" + fcdn, "r=&d=fcdn.stream").Replace("\\", "");
                 const string _lookFor = "\"file\":\"";
-                int prop = 0;
+                int __prio = 6;
                 while (_d.Contains(_lookFor)) {
                     string link = FindHTML(_d, _lookFor, "\"");
                     _d = RemoveOne(_d, _lookFor);
                     string label = FindHTML(_d, "label\":\"", "\"");
-                    AddPotentialLink(normalEpisode, link, "FembedFast" + extra + " " + label, 6 + prop);
-                    prop++;
+                    AddPotentialLink(normalEpisode, link, "FembedFast" + extra + " " + label, __prio);
+                    __prio++;
                 }
             }
 
-
-            string mp4 = FindHTML(d, "data-video=\"https://www.mp4upload.com/embed-", "\"");
+            string mp4 = FindHTML(d, "https://www.mp4upload.com/embed-", "\"");
             if (mp4 != "") {
                 AddMp4(mp4, normalEpisode, tempThred);
             }
@@ -7069,14 +7083,22 @@ namespace CloudStreamForms
             }
             bool fembedAdded = LookForFembedInString(tempThred, normalEpisode, d, extra);
 
-            string nameId = "Vidstreaming";
-            string vid = "";//FindHTML(d, "data-video=\"//vidstreaming.io/streaming.php?", "\"");
-            string beforeId = "";//"https://vidstreaming.io/download?id=";
-            string extraBeforeId = "";// "https://vidstreaming.io/streaming.php?id=";
-                                      // string realId = "";
+        }
 
-            // https://vidstreaming.io/download?id= ; CAPTCHA ON DLOAD
-            List<VidStreamingNames> names = new List<VidStreamingNames>() {
+        static void AddEpisodesFromMirrors(TempThred tempThred, string d, int normalEpisode, string extraId = "", string extra = "") // DONT DO THEVIDEO provider, THEY USE GOOGLE CAPTCH TO VERIFY AUTOR; LOOK AT https://vev.io/api/serve/video/qy3pw89xwmr7 IT IS A POST REQUEST
+        {
+            // print("MAIND: " + d);
+            try {
+                LookForCommon((string)d.Clone(), normalEpisode, tempThred, extra);
+
+                string nameId = "Vidstreaming";
+                string vid = "";//FindHTML(d, "data-video=\"//vidstreaming.io/streaming.php?", "\"");
+                string beforeId = "";//"https://vidstreaming.io/download?id=";
+                string extraBeforeId = "";// "https://vidstreaming.io/streaming.php?id=";
+                                          // string realId = "";
+
+                // https://vidstreaming.io/download?id= ; CAPTCHA ON DLOAD
+                List<VidStreamingNames> names = new List<VidStreamingNames>() {
                 new VidStreamingNames("Vidstreaming","//vidstreaming.io/streaming.php?","https://vidstreaming.io/download?id="),
                 new VidStreamingNames("VidNode","//vidnode.net/load.php?id=","https://vidnode.net/download?id="),
                 new VidStreamingNames("VidNode","//vidnode.net/streaming.php?id=","https://vidnode.net/download?id="),
@@ -7084,78 +7106,84 @@ namespace CloudStreamForms
                 new VidStreamingNames("VidCloud","//vidcloud9.com/download?id=","https://vidcloud9.com/download?id="),
                 new VidStreamingNames("VidCloud","//vidcloud9.com/streaming.php?id=","https://vidcloud9.com/download?id="),
                 new VidStreamingNames("VidCloud","//vidcloud9.com/load.php?id=","https://vidcloud9.com/download?id="),
+                new VidStreamingNames("VidstreamingLoad","//vidstreaming.io/loadserver.php?id=","https://vidstreaming.io/download?id="),
             };
 
-
-            for (int i = 0; i < names.Count; i++) {
-                if (vid == "") {
+                for (int i = 0; i < names.Count; i++) {
+                    print("COMPARE:NAMES " + names[i]);
                     vid = FindHTML(d, names[i].compareUrl, "\"");
                     if (vid != "") {
                         beforeId = names[i].downloadUrl;
                         extraBeforeId = names[i].ExtraBeforeId;
+                        nameId = names[i].name;
                         // realId = names[i].compareUrl;
-                        break;
+
+
+                        bool dontDownload = beforeId.Contains("vidstreaming.io"); // HAVE CAPTCHA
+
+                        print(">>STREAM::" + extraId + "|" + extraBeforeId + "||" + vid + "|" + nameId + "|" + d);
+
+                        if (vid != "") {
+                            if (extraBeforeId != "") {
+                                print("EXTRABEFOREID: " + extraBeforeId + vid + "|" + nameId);
+                                string _extra = DownloadString(extraBeforeId + vid);
+
+                                const string elookFor = "file: \'";
+                                print("EXTRA:::==>>" + _extra);
+
+                                while (_extra.Contains(elookFor)) {
+                                    string extraUrl = FindHTML(_extra, elookFor, "\'");
+                                    _extra = RemoveOne(_extra, elookFor);
+                                    string label = FindHTML(_extra, "label: \'", "\'").Replace("autop", "Auto").Replace("auto p", "Auto");
+                                    print("XTRA:::::::" + _extra + "|" + label);
+                                    AddPotentialLink(normalEpisode, extraUrl, nameId + " Extra " + label.Replace("hls P", "hls") + extra, label == "Auto" ? 20 : 1);
+                                }
+
+
+                                LookForCommon(_extra, normalEpisode, tempThred, extra);
+                                // LookForFembedInString(tempThred, normalEpisode, _extra, extra);
+                                GetVidNode(_extra, normalEpisode, nameId, extra: extra);
+
+                                if (beforeId != "" && !dontDownload) {
+
+                                    string dLink = beforeId + vid.Replace("id=", "");
+                                    string _d = DownloadString(dLink, tempThred);
+
+
+                                    //https://gcloud.live/v/ky5g0h3zqylzmq4#caption=https://xcdnfile.com/sub/iron-man-hd-720p/iron-man-hd-720p.vtt
+
+                                    if (!GetThredActive(tempThred)) { return; };
+
+                                    GetVidNode(_d, normalEpisode, nameId, extra: extra);
+                                }
+                            }
+
+
+                            /* // OLD CODE, ONLY 403 ERROR DOSEN'T WORK ANYMORE
+                            vid = "http://vidstreaming.io/streaming.php?" + vid;
+                            string _d = DownloadString(vid); if (!GetThredActive(tempThred)) { return; };
+                            string mxLink = FindHTML(_d, "sources:[{file: \'", "\'");
+                            print("Browser: " + vid + " | RAW (NO ADS): " + mxLink);
+                            if (CheckIfURLIsValid(mxLink)) {
+                                Episode ep = activeMovie.episodes[normalEpisode];
+                                if (ep.links == null) {
+                                    activeMovie.episodes[normalEpisode] = new Episode() { links = new List<Link>(), date = ep.date, description = ep.description, name = ep.name, posterUrl = ep.posterUrl, rating = ep.rating };
+                                }
+                                activeMovie.episodes[normalEpisode].links.Add(new Link() { priority = 0, url = mxLink, name = "Vidstreaming" }); // [MIRRORCOUNTER] IS LATER REPLACED WITH A NUMBER TO MAKE IT EASIER TO SEPERATE THEM, CAN'T DO IT HERE BECAUSE IT MUST BE ABLE TO RUN SEPARETE THREADS AT THE SAME TIME
+                                linkAdded?.Invoke(null, 2);
+
+                            }
+                            */
+                        }
+                        else {
+                            print("Error :(");
+                        }
                     }
                 }
             }
-
-            bool dontDownload = beforeId.Contains("vidstreaming.io"); // HAVE CAPTCHA
-
-            print(">>STREAM::" + extraId + "||" + vid + "|" + d);
-
-            if (vid != "") {
-                if (extraBeforeId != "") {
-                    string _extra = DownloadString(extraBeforeId + vid);
-                    LookForFembedInString(tempThred, normalEpisode, _extra, extra);
-                    GetVidNode(_extra, normalEpisode, nameId, extra: extra);
-
-                    const string elookFor = "file: \'";
-                    print("EXTRA:::==>>" + _extra);
-
-                    while (_extra.Contains(elookFor)) {
-                        string extraUrl = FindHTML(_extra, elookFor, "\'");
-                        _extra = RemoveOne(_extra, elookFor);
-                        string label = FindHTML(_extra, "label: \'", "\'").Replace("autop", "Auto").Replace("auto p", "Auto");
-                        print("XTRA:::::::" + _extra + "|" + label);
-                        AddPotentialLink(normalEpisode, extraUrl, nameId + " Extra " + label.Replace("hls P", "hls") + extra, label == "Auto" ? 20 : 1);
-                    }
-
-                    if (beforeId != "" && !dontDownload) {
-
-                        string dLink = beforeId + vid.Replace("id=", "");
-                        string _d = DownloadString(dLink, tempThred);
-
-
-                        //https://gcloud.live/v/ky5g0h3zqylzmq4#caption=https://xcdnfile.com/sub/iron-man-hd-720p/iron-man-hd-720p.vtt
-
-                        if (!GetThredActive(tempThred)) { return; };
-
-                        GetVidNode(_d, normalEpisode, nameId, extra: extra);
-                    }
-                }
-
-
-                /* // OLD CODE, ONLY 403 ERROR DOSEN'T WORK ANYMORE
-                vid = "http://vidstreaming.io/streaming.php?" + vid;
-                string _d = DownloadString(vid); if (!GetThredActive(tempThred)) { return; };
-                string mxLink = FindHTML(_d, "sources:[{file: \'", "\'");
-                print("Browser: " + vid + " | RAW (NO ADS): " + mxLink);
-                if (CheckIfURLIsValid(mxLink)) {
-                    Episode ep = activeMovie.episodes[normalEpisode];
-                    if (ep.links == null) {
-                        activeMovie.episodes[normalEpisode] = new Episode() { links = new List<Link>(), date = ep.date, description = ep.description, name = ep.name, posterUrl = ep.posterUrl, rating = ep.rating };
-                    }
-                    activeMovie.episodes[normalEpisode].links.Add(new Link() { priority = 0, url = mxLink, name = "Vidstreaming" }); // [MIRRORCOUNTER] IS LATER REPLACED WITH A NUMBER TO MAKE IT EASIER TO SEPERATE THEM, CAN'T DO IT HERE BECAUSE IT MUST BE ABLE TO RUN SEPARETE THREADS AT THE SAME TIME
-                    linkAdded?.Invoke(null, 2);
-
-                }
-                */
+            catch (Exception _ex) {
+                print("THIS SHOULD NEVER HAPPEND: " + _ex);
             }
-            else {
-                print("Error :(");
-            }
-            LookForFembedInString(tempThred, normalEpisode, d, extra);
-
         }
 
         public static void GetEpisodeLink(int episode = -1, int season = 1, bool purgeCurrentLinkThread = true, bool onlyEpsCount = false, bool isDub = true)
@@ -8019,7 +8047,7 @@ namespace CloudStreamForms
         /// <returns></returns>
         static string Getmp4UploadByFile(string result)
         {
-            if(!result.IsClean()) {
+            if (!result.IsClean()) {
                 return "";
             }
 
@@ -8652,18 +8680,24 @@ namespace CloudStreamForms
         }
         static void EndStopwatchNum(int num, string name)
         {
-            var _s = stopwatchs[num];
-            lock (stopwatchLock) {
-                if (stopwatchPairs.ContainsKey(name)) {
-                    stopwatchPairs[name] += _s.ElapsedMilliseconds;
-                    stopwatchCalls[name]++;
+            try {
+                var _s = stopwatchs[num];
+                lock (stopwatchLock) {
+                    if (stopwatchPairs.ContainsKey(name)) {
+                        stopwatchPairs[name] += _s.ElapsedMilliseconds;
+                        stopwatchCalls[name]++;
+                    }
+                    else {
+                        stopwatchPairs[name] = _s.ElapsedMilliseconds;
+                        stopwatchCalls[name] = 1;
+                    }
                 }
-                else {
-                    stopwatchPairs[name] = _s.ElapsedMilliseconds;
-                    stopwatchCalls[name] = 1;
-                }
+                stopwatchs.Remove(num);
+
             }
-            stopwatchs.Remove(num);
+            catch (Exception _ex) {
+                print(nameof(EndStopwatchNum) + " NON FATAL EX");
+            }
         }
 #endif
 
