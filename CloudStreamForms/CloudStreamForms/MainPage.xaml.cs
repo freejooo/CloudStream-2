@@ -7035,7 +7035,7 @@ namespace CloudStreamForms
             const string mainLookFor = "file: \'";
             int _prio = 6;
             while (mainD.Contains(mainLookFor)) {
-                string url = FindHTML(mainD, mainLookFor, "\"");
+                string url = FindHTML(mainD, mainLookFor, "\'");
                 mainD = RemoveOne(mainD, mainLookFor);
                 string label = FindHTML(mainD, "label: \'", "\'");
                 AddPotentialLink(normalEpisode, url, "VidCommon " + label, _prio);

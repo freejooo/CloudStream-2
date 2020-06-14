@@ -261,6 +261,7 @@ namespace CloudStreamForms
 
         void SeekSubtitles(double milisec)
         {
+            return;
             for (int i = 0; i < Subtrack.Length - 1; i++) {
                 // print("FFFF:::" + i + "|" + milisec + "|" + Subtrack[i].toMilisec);
                 if (milisec > Subtrack[i].EndTime && milisec < Subtrack[i + 1].EndTime) {
@@ -794,6 +795,7 @@ namespace CloudStreamForms
             if (Player == null) return;
             if (Player.State == VLCState.Error || Player.State == VLCState.Opening) return;
             if (Player.Length == -1) return;
+            if (!Player.IsSeekable) return;
             if (!Player.CanPause) return;
 
             Player.SetPause(true);
