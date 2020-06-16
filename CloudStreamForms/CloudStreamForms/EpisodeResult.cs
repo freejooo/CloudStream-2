@@ -76,6 +76,17 @@ namespace CloudStreamForms.Models
         public string MainDarkTextColor { get; set; } = "#a4a4a4"; //"#808080";
         public string ExtraColor { get; set; } = "#a4a4a4"; //"#808080";
         public string OgTitle { set; get; }
+
+        public string GetDownloadTitle(int season, int episode)
+        {
+            if (season == -1 || episode == -1) {
+                return OgTitle;
+            }
+            else {
+                return $"S{season}:E{episode} {OgTitle}";
+            }
+        }
+         
         public double TranslateYOffset {
             get {
                 if (Device.RuntimePlatform == Device.UWP) {

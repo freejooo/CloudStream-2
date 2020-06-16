@@ -847,7 +847,7 @@ namespace CloudStreamForms
                                 }
 
                                 App.UpdateDownload(GetCorrectId(episodeResult), -1);
-                                string dpath = App.RequestDownload(GetCorrectId(episodeResult), episodeResult.OgTitle, episodeResult.Description, episodeResult.Episode, currentSeason, mirrorUrls, mirrorNames, episodeResult.Title + ".mp4", episodeResult.PosterUrl, currentMovie.title);
+                                string dpath = App.RequestDownload(GetCorrectId(episodeResult), episodeResult.OgTitle, episodeResult.Description, episodeResult.Episode, currentSeason, mirrorUrls, mirrorNames, episodeResult.GetDownloadTitle(currentSeason, episodeResult.Episode) + ".mp4", episodeResult.PosterUrl, currentMovie.title);
                                 print("SETCOLOR:::");
                                 //  SetColor(epView.MyEpisodeResultCollection[_id]);
 
@@ -1735,7 +1735,7 @@ namespace CloudStreamForms
             bool hasDownloadedFile = App.KeyExists("dlength", "id" + GetCorrectId(episodeResult));
             string downloadKeyData = "";
 
-            List<string> actions = new List<string>() { "Play in App", "Play External App", "Download", "Download Subtitles", "Copy Link", "Reload" }; // Play in Browser
+            List<string> actions = new List<string>() { "Play in App", "Play External App", "Play in Browser", "Download", "Download Subtitles", "Copy Link", "Remove Link", "Reload" }; // 
 
             if (hasDownloadedFile) {
                 downloadKeyData = App.GetDownloadInfo(GetCorrectId(episodeResult), false).info.fileUrl;//.GetKey("Download", GetId(episodeResult), "");
@@ -1753,12 +1753,23 @@ namespace CloudStreamForms
                 string copy = await ActionPopup.DisplayActionSheet("Open Link", episodeResult.Mirros.ToArray()); // await DisplayActionSheet("Open Link", "Cancel", null, episodeResult.Mirros.ToArray());
                 for (int i = 0; i < episodeResult.Mirros.Count; i++) {
                     if (episodeResult.Mirros[i] == copy) {
-                        App.OpenBrowser(episodeResult.mirrosUrls[i]);
+                        App.OpenSpecifiedBrowser(episodeResult.mirrosUrls[i]);
                     }
                 }
             }
-
-            if (action == "Chromecast") { // ============================== CHROMECAST ==============================
+            else if (action == "Remove Link") {
+                string rLink = await ActionPopup.DisplayActionSheet("Remove Link", episodeResult.Mirros.ToArray()); //await DisplayActionSheet("Download", "Cancel", null, episodeResult.Mirros.ToArray());
+                for (int i = 0; i < episodeResult.Mirros.Count; i++) {
+                    if (episodeResult.Mirros[i] == rLink) {
+                        App.ShowToast("Removed " + episodeResult.Mirros[i]);
+                        episodeResult.mirrosUrls.RemoveAt(i);
+                        episodeResult.Mirros.RemoveAt(i);
+                        EpisodeSettings(episodeResult);
+                        break;
+                    }
+                }
+            }
+            else if (action == "Chromecast") { // ============================== CHROMECAST ==============================
                 chromeResult = episodeResult;
                 chromeMovieResult = currentMovie;
                 bool succ = false;
@@ -1809,6 +1820,7 @@ namespace CloudStreamForms
                     if (episodeResult.Mirros[i] == copy) {
                         await Clipboard.SetTextAsync(episodeResult.mirrosUrls[i]);
                         App.ShowToast("Copied Link to Clipboard");
+                        break;
                     }
                 }
             }
@@ -1818,7 +1830,7 @@ namespace CloudStreamForms
                     if (episodeResult.Mirros[i] == download) {
                         string mirrorUrl = episodeResult.mirrosUrls[i];
                         string mirrorName = episodeResult.Mirros[i];
-
+                        DownloadSubtitlesToFileLocation(episodeResult, currentMovie, currentSeason);
                         TempThred tempThred = new TempThred();
                         tempThred.typeId = 4; // MAKE SURE THIS IS BEFORE YOU CREATE THE THRED
                         tempThred.Thread = new System.Threading.Thread(async () => {
@@ -1833,19 +1845,12 @@ namespace CloudStreamForms
 
                                     // ImageService.Instance.LoadUrl(episodeResult.PosterUrl, TimeSpan.FromDays(30)); // CASHE IMAGE
                                     App.UpdateDownload(GetCorrectId(episodeResult), -1);
-                                    string dpath = App.RequestDownload(GetCorrectId(episodeResult), episodeResult.OgTitle, episodeResult.Description, episodeResult.Episode, currentSeason, new List<string>() { mirrorUrl }, new List<string>() { mirrorName }, episodeResult.Title + ".mp4", episodeResult.PosterUrl, currentMovie.title);
-                                    // string dpath = App.DownloadAdvanced(GetCorrectId(episodeResult), mirrorUrl, episodeResult.Title + ".mp4", isMovie ? currentMovie.title.name : $"{currentMovie.title.name} · {episodeResult.OgTitle}", true, "/" + GetPathFromType(), true, true, false, episodeResult.PosterUrl, (isMovie) ? $"{mirrorName}\n" : $"S{currentSeason}:E{episodeResult.Episode} - {mirrorName}\n");
-                                    // string dpath = App.DownloadUrl(s, episodeResult.Title + ".mp4", true, "/" + GetPathFromType(), "Download complete!", true, episodeResult.Title);
-                                    //  string ppath = App.DownloadUrl(episodeResult.PosterUrl, "epP" + episodeResult.Title + ".jpg", false, "/Posters");
-                                    // string mppath = App.DownloadUrl(currentMovie.title.hdPosterUrl, "hdP" + episodeResult.Title + ".jpg", false, "/TitlePosters");
-                                    // string mppath = currentMovie.title.hdPosterUrl;
-                                    //string key = "_dpath=" + dpath + "|||_ppath=" + ppath + "|||_mppath=" + mppath + "|||_descript=" + episodeResult.Description + "|||_maindescript=" + currentMovie.title.description + "|||_epCounter=" + episodeResult.Id + "|||_epId=" + GetId(episodeResult) + "|||_movieId=" + currentMovie.title.id + "|||_title=" + episodeResult.Title + "|||_movieTitle=" + currentMovie.title.name + "|||=EndAll";
-                                    //print("DKEY: " + key);
-                                    // App.SetKey("Download", GetId(episodeResult), key);
+                                    print("CURRENTSESON: " + currentSeason);
+
+                                    string dpath = App.RequestDownload(GetCorrectId(episodeResult), episodeResult.OgTitle, episodeResult.Description, episodeResult.Episode, currentSeason, new List<string>() { mirrorUrl }, new List<string>() { mirrorName }, episodeResult.GetDownloadTitle(currentSeason, episodeResult.Episode) + ".mp4", episodeResult.PosterUrl, currentMovie.title);
+
                                     App.ShowToast("Download Started - " + fileSize + "MB");
-                                    //App.SetKey("DownloadSize", GetId(episodeResult), fileSize);
                                     episodeResult.downloadState = 2;
-                                    //SetColor(episodeResult);
                                     ForceUpdate(episodeResult.Id);
                                 }
                                 else {
@@ -1886,32 +1891,47 @@ namespace CloudStreamForms
                 DeleteFile(downloadKeyData, episodeResult);
             }
             else if (action == "Download Subtitles") {  // ============================== DOWNLOAD SUBTITLE ==============================
-                TempThred tempThred = new TempThred();
-                tempThred.typeId = 4; // MAKE SURE THIS IS BEFORE YOU CREATE THE THRED
-                tempThred.Thread = new System.Threading.Thread(() => {
-                    try {
-                        string id = GetId(episodeResult);
-                        if (id.Replace(" ", "") == "") { App.ShowToast("Id not found"); return; }
-
-                        string s = DownloadSubtitle(id);
-                        if (s == "") {
-                            App.ShowToast("No Subtitles Found");
-                            return;
-                        }
-                        else {
-                            App.DownloadFile(s, episodeResult.Title + ".srt", true, "/Subtitles");
-                            App.ShowToast("Subtitles Downloaded");
-                        }
-                    }
-                    finally {
-                        JoinThred(tempThred);
-                    }
-                });
-                tempThred.Thread.Name = "Subtitle Download";
-                tempThred.Thread.Start();
+                DownloadSubtitlesToFileLocation(episodeResult, currentMovie, currentSeason, true);
             }
             episodeView.SelectedItem = null;
+        }
 
+        static Dictionary<string, bool> hasSubtitles = new Dictionary<string, bool>();
+
+        static void DownloadSubtitlesToFileLocation(EpisodeResult episodeResult, Movie currentMovie, int currentSeason, bool renew = false)
+        {
+            string id = GetId(episodeResult, currentMovie);
+            if (!renew && hasSubtitles.ContainsKey(id)) {
+                App.ShowToast("Subtitles Already Downloaded");
+                return;
+            }
+            TempThred tempThred = new TempThred();
+            tempThred.typeId = 4; // MAKE SURE THIS IS BEFORE YOU CREATE THE THRED
+            tempThred.Thread = new System.Threading.Thread(() => {
+                try {
+                    if (id.Replace(" ", "") == "") { App.ShowToast("Id not found"); return; }
+
+                    string s = DownloadSubtitle(id, showToast: false);
+                    if (s == "") {
+                        App.ShowToast("No Subtitles Found");
+                        return;
+                    }
+                    else {
+                        string extraPath = "/" + GetPathFromType(currentMovie.title.movieType);
+                        if (!currentMovie.title.IsMovie) {
+                            extraPath += "/" + CensorFilename(currentMovie.title.name);
+                        }
+                        App.DownloadFile(s, episodeResult.GetDownloadTitle(currentSeason, episodeResult.Episode) + ".srt", true, extraPath); // "/Subtitles" +
+                        App.ShowToast("Subtitles Downloaded");
+                        hasSubtitles.Add(id, true);
+                    }
+                }
+                finally {
+                    JoinThred(tempThred);
+                }
+            });
+            tempThred.Thread.Name = "Subtitle Download";
+            tempThred.Thread.Start();
         }
 
         void DeleteFile(string downloadKeyData, EpisodeResult episodeResult)
@@ -1933,6 +1953,7 @@ namespace CloudStreamForms
         {
             return GetId(episodeResult, currentMovie);
         }
+
 
         public static string GetId(EpisodeResult episodeResult, Movie currentMovie)
         {

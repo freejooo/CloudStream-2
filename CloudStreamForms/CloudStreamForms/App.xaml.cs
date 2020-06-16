@@ -10,18 +10,17 @@ using System.Reflection;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.RegularExpressions;
 using Xamarin.Essentials;
 using Xamarin.Forms;
 using static CloudStreamForms.CloudStreamCore;
 
 namespace CloudStreamForms
 {
-
-
     public partial class App : Application
     {
         public const string baseM3u8Name = @"mirrorlist.m3u8";
-        public const string baseSubtitleName = @"subtitles.srt";
+        public const string baseSubtitleName = @"mirrorlist.srt";
         public const string hasDownloadedFolder = "dloaded";
 
         public static DownloadState GetDstate(int epId)
@@ -147,19 +146,27 @@ namespace CloudStreamForms
             //public CloudStreamCore.Title title; 
         }
 
+        public static string GetPathFromType(MovieType t)
+        {
+            switch (t) {
+                case MovieType.Movie:
+                    return "Movies";
+                case MovieType.TVSeries:
+                    return "TVSeries";
+                case MovieType.Anime:
+                    return "Anime";
+                case MovieType.AnimeMovie:
+                    return "Movies";
+                case MovieType.YouTube:
+                    return "YouTube";
+                default:
+                    return "Error";
+            }
+        }
+
         public static string GetPathFromType(DownloadHeader header)
         {
-            string path = "Movies";
-            if (header.movieType == MovieType.Anime) {
-                path = "Anime";
-            }
-            else if (header.movieType == MovieType.TVSeries) {
-                path = "TVSeries";
-            }
-            else if (header.movieType == MovieType.YouTube) {
-                path = "YouTube";
-            }
-            return path;
+            return GetPathFromType(header.movieType);
         }
 
         /// <summary>
@@ -240,15 +247,30 @@ namespace CloudStreamForms
             }
         }
 
+        public static string CensorFilename(string name, bool toLower = false)
+        {
+            name = Regex.Replace(name, @"[^A-Za-z0-9\.\-\: ]", string.Empty);//Regex.Replace(name, @"[^A-Za-z0-9\.]+", String.Empty);
+            name.Replace(" ", "");
+            if (toLower) {
+                name = name.ToLower();
+            }
+            return name;
+        }
+
         public static string RequestDownload(int id, string name, string description, int episode, int season, List<string> mirrorUrls, List<string> mirrorNames, string downloadTitle, string poster, CloudStreamCore.Title title)
         {
             App.SetKey(hasDownloadedFolder, id.ToString(), true);
 
             DownloadHeader header = ConvertTitleToHeader(title);
             string extraPath = "/" + GetPathFromType(header);
+            bool isMovie = header.movieType == MovieType.AnimeMovie || header.movieType == MovieType.Movie;
+
+            if (!isMovie) {
+                extraPath += "/" + CensorFilename(title.name);
+            }
+
             print("HEADERID::: " + header.RealId);
             App.SetKey(nameof(DownloadHeader), "id" + header.RealId, header);
-            bool isMovie = header.movieType == MovieType.AnimeMovie || header.movieType == MovieType.Movie;
 
             App.SetKey("DownloadIds", id.ToString(), id);
             string fileUrl = platformDep.DownloadHandleIntent(id, mirrorNames, mirrorUrls, downloadTitle, name, true, extraPath, true, true, false, poster, isMovie ? "{name}\n" : ($"S{season}:E{episode} - " + "{name}\n"));
@@ -707,6 +729,19 @@ namespace CloudStreamForms
             return Encoding.UTF8.GetBytes(ConvertPathAndNameToM3U8(path, name, isSubtitleEnabled, beforePath));
         }
 
+        public static void OpenSpecifiedBrowser(string url)
+        {
+            CloudStreamCore.print("SPECTrying to open: " + url);
+            if (CloudStreamCore.CheckIfURLIsValid(url)) {
+                try {
+                    Browser.OpenAsync(new Uri(url));
+                }
+                catch (Exception _ex) {
+                    CloudStreamCore.print("SPECBROWSER LOADED ERROR, SHOULD NEVER HAPPEND!!" + _ex);
+                }
+            }
+        }
+
         public static void OpenBrowser(string url)
         {
             CloudStreamCore.print("Trying to open: " + url);
@@ -719,6 +754,7 @@ namespace CloudStreamForms
                 }
             }
         }
+
         protected override void OnStart()
         {
             // Handle when your app starts

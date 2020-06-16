@@ -525,8 +525,28 @@ namespace CloudStreamForms.Droid
                 throw ae.InnerExceptions[0];
             }
         }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="mirrorNames"></param>
+        /// <param name="mirrorUrls"></param>
+        /// <param name="mirror"></param>
+        /// <param name="title"></param>
+        /// <param name="path">NOT FULL PATH, just subpath, filname will handle the rest</param>
+        /// <param name="poster"></param>
+        /// <param name="fileName"></param>
+        /// <param name="beforeTxt"></param>
+        /// <param name="openWhenDone"></param>
+        /// <param name="showNotificaion"></param>
+        /// <param name="showDoneNotificaion"></param>
+        /// <param name="showDoneAsToast"></param>
+        /// <param name="resumeIntent"></param>
         public static void HandleIntent(int id, List<string> mirrorNames, List<string> mirrorUrls, int mirror, string title, string path, string poster, string fileName, string beforeTxt, bool openWhenDone, bool showNotificaion, bool showDoneNotificaion, bool showDoneAsToast, bool resumeIntent)
         {
+            fileName = CensorFilename(fileName);
+
             isStartProgress[id] = true;
             print("START DLOAD::: " + id);
             if (isPaused.ContainsKey(id)) {
@@ -620,12 +640,13 @@ namespace CloudStreamForms.Droid
                         }
                     }
 
-                    print("START:::3");
+                    print("START:::3" + path);
                     bool removeKeys = true;
-                    var rFile = new Java.IO.File(path);
+                    var rFile = new Java.IO.File(path,fileName);
                     print("START:::4");
 
                     try {
+                        // CREATED DIRECTORY IF NEEDED
                         try {
                             Java.IO.File __file = new Java.IO.File(path);
                             __file.Mkdirs();
@@ -1095,16 +1116,6 @@ namespace CloudStreamForms.Droid
         public static string GetPath(bool mainPath, string extraPath)
         {
             return (mainPath ? (Android.OS.Environment.ExternalStorageDirectory + "/" + Android.OS.Environment.DirectoryDownloads) : (Android.OS.Environment.ExternalStorageDirectory + "/" + Android.OS.Environment.DirectoryDownloads + "/Extra")) + extraPath;
-        }
-
-        public static string CensorFilename(string name, bool toLower = true)
-        {
-            name = Regex.Replace(name, @"[^A-Za-z0-9\.]+", String.Empty);
-            name.Replace(" ", "");
-            if (toLower) {
-                name = name.ToLower();
-            }
-            return name;
         }
 
         public static void ShowBlackToast(string msg, double duration)
@@ -2543,11 +2554,9 @@ namespace CloudStreamForms.Droid
         public string DownloadHandleIntent(int id, List<string> mirrorNames, List<string> mirrorUrls, string fileName, string titleName, bool mainPath, string extraPath, bool showNotification = true, bool showNotificationWhenDone = true, bool openWhenDone = false, string poster = "", string beforeTxt = "")//, int mirror, string title, string path, string poster, string fileName, string beforeTxt, bool openWhenDone, bool showNotificaion, bool showDoneNotificaion, bool showDoneAsToast, bool resumeIntent)
         {
             string path = GetPath(mainPath, extraPath);
-
             string full = path + "/" + CensorFilename(fileName);
-            DownloadHandle.HandleIntent(id, mirrorNames, mirrorUrls, 0, titleName, full, poster, fileName, beforeTxt, openWhenDone, showNotification, showNotification, false, false);
+            DownloadHandle.HandleIntent(id, mirrorNames, mirrorUrls, 0, titleName, path, poster, fileName, beforeTxt, openWhenDone, showNotification, showNotification, false, false);
             return full;
-
         }
 
         public string DownloadUrl(string url, string fileName, bool mainPath, string extraPath, string toast = "", bool isNotification = false, string body = "")

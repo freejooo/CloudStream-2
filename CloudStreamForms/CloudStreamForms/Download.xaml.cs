@@ -100,11 +100,8 @@ namespace CloudStreamForms
                                         var data = await YouTube.GetInfoAsync(v);
 
                                         double mb = App.ConvertBytesToAny(data.Size.TotalBytes, 5, 2);
-                                        // (episodeResult.mirrosUrls[i], episodeResult.Title + ".mp4", true, "/" + GetPathFromType());
-                                        //  string ppath = App.DownloadUrl(episodeResult.PosterUrl, "epP" + episodeResult.Title + ".jpg", false, "/Posters");
-                                        // string mppath = App.DownloadUrl(currentMovie.title.hdPosterUrl, "hdP" + episodeResult.Title + ".jpg", false, "/TitlePosters");
-                                        string mppath = v.Thumbnails.HighResUrl;
-                                        string ppath = v.Thumbnails.HighResUrl;
+                                     
+                                        ImageService.Instance.LoadUrl(v.Thumbnails.HighResUrl, TimeSpan.FromDays(30)); // CASHE IMAGE
 
                                         DownloadHeader header = new DownloadHeader() { movieType = MovieType.YouTube, id = author.Id, name = author.Title, hdPosterUrl = author.LogoUrl, posterUrl = author.LogoUrl, ogName = author.Title }; //description = v.Description,hdPosterUrl=v.Thumbnails.HighResUrl, };//ConvertTitleToHeader(title);
                                         int id = ConvertStringToInt(v.Id);
@@ -113,16 +110,7 @@ namespace CloudStreamForms
                                         App.ShowToast("YouTube download started");
                                         App.SetKey(nameof(DownloadHeader), "id" + header.RealId, header);
                                         App.SetKey(nameof(DownloadEpisodeInfo), "id" + id, new DownloadEpisodeInfo() { dtype = DownloadType.YouTube, source = v.Url, description = v.Description, downloadHeader = header.RealId, episode = -1, season = -1, fileUrl = filePath, id = id, name = v.Title, hdPosterUrl = v.Thumbnails.HighResUrl });
-                                        App.SetKey("DownloadIds", id.ToString(), id);
-
-                                        /*
-                                        string key = "_dpath=" + dpath + "|||_ppath=" + ppath + "|||_mppath=" + mppath + "|||_descript=" + v.Description + "|||_maindescript=" + v.Description + "|||_epCounter=" + "-1" + "|||_epId=" + v.Id + "|||_movieId=" + v.GetUrl() + "|||_title=" + v.Title + "|||_movieTitle=" + v.Title + "|||isYouTube=" + true + "|||UploadData=" + v.UploadDate.ToString() + "|||Author=" + v.Author + "|||Duration=" + v.Duration.TotalSeconds + "|||=EndAll";
-                                        print("DKEY: " + key);
-                                        App.SetKey("Download", v.Id, key);
-                                        App.ShowToast("Download Started - " + Math.Round(mb, 1) + "MB");
-                                        App.SetKey("DownloadSize", v.Id, Math.Round(mb, 2));*/
-                                        // YouTube.DownloadVideo(data, v.Title);
-
+                                        App.SetKey("DownloadIds", id.ToString(), id); 
                                     }
                                     catch (Exception _ex) {
                                         print("MAINERROR:: " + _ex);
