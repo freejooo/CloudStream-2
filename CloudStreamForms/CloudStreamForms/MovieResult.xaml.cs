@@ -704,13 +704,13 @@ namespace CloudStreamForms
 			long len;
 			print("POST PRO ON: " + GetId(episodeResult));
 			string realId = GetId(episodeResult);
-			print("ID::::::: ON " + realId + "|" + App.GetKey("ViewHistoryTimePos", realId, -1L));
-			if ((pos = App.GetKey("ViewHistoryTimePos", realId, -1L)) > 0) {
-				if ((len = App.GetKey("ViewHistoryTimeDur", realId, -1L)) > 0) {
+			print("ID::::::: ON " + realId + "|" + App.GetKey(VIEW_TIME_POS, realId, -1L));
+			if ((pos = App.GetViewPos(realId)) > 0) {
+				if ((len = App.GetViewDur(realId)) > 0) {
 					episodeResult.Progress = (double)pos / (double)len;
 					episodeResult.ProgressState = pos;
 					print("MAIN DRI:: " + pos + "|" + len + "|" + episodeResult.Progress);
-				}//tt8993804
+				}//tt8993804 // tt0772328
 			}
 			return episodeResult;
 		}
@@ -1691,8 +1691,7 @@ namespace CloudStreamForms
                     _sub = currentMovie.subtitles[0].data;
                 }
             }*/
-			App.RequestVlc(episodeResult.mirrosUrls, episodeResult.Mirros, episodeResult.OgTitle, GetId(episodeResult), episode: episodeResult.Episode, season: currentSeason, subtitleFull: currentMovie.subtitles.Select(t => t.data).FirstOrDefault(), descript: episodeResult.Description, overrideSelectVideo: overrideSelectVideo, startId: FROM_PROGRESS); //  (int)episodeResult.ProgressState
-																																																																																								  //App.PlayVLCWithSingleUrl(episodeResult.mirrosUrls, episodeResult.Mirros, currentMovie.subtitles.Select(t => t.data).ToList(), currentMovie.subtitles.Select(t => t.name).ToList(), currentMovie.title.name, episodeResult.Episode, currentSeason, overrideSelectVideo);
+			App.RequestVlc(episodeResult.mirrosUrls, episodeResult.Mirros, episodeResult.OgTitle, GetId(episodeResult), episode: episodeResult.Episode, season: currentSeason, subtitleFull: currentMovie.subtitles.Select(t => t.data).FirstOrDefault(), descript: episodeResult.Description, overrideSelectVideo: overrideSelectVideo, startId:(int)episodeResult.ProgressState);// startId: FROM_PROGRESS); //  (int)episodeResult.ProgressState																																																																													  //App.PlayVLCWithSingleUrl(episodeResult.mirrosUrls, episodeResult.Mirros, currentMovie.subtitles.Select(t => t.data).ToList(), currentMovie.subtitles.Select(t => t.name).ToList(), currentMovie.title.name, episodeResult.Episode, currentSeason, overrideSelectVideo);
 		}
 
 		// ============================== FORCE UPDATE ==============================
@@ -1844,7 +1843,7 @@ namespace CloudStreamForms
 					if (episodeResult.Mirros[i] == download) {
 						string mirrorUrl = episodeResult.mirrosUrls[i];
 						string mirrorName = episodeResult.Mirros[i];
-						DownloadSubtitlesToFileLocation(episodeResult, currentMovie, currentSeason);
+						DownloadSubtitlesToFileLocation(episodeResult, currentMovie, currentSeason,showToast:false);
 						TempThred tempThred = new TempThred();
 						tempThred.typeId = 4; // MAKE SURE THIS IS BEFORE YOU CREATE THE THRED
 						tempThred.Thread = new System.Threading.Thread(async () => {
@@ -1912,22 +1911,31 @@ namespace CloudStreamForms
 
 		static Dictionary<string, bool> hasSubtitles = new Dictionary<string, bool>();
 
-		static void DownloadSubtitlesToFileLocation(EpisodeResult episodeResult, Movie currentMovie, int currentSeason, bool renew = false)
+		static void DownloadSubtitlesToFileLocation(EpisodeResult episodeResult, Movie currentMovie, int currentSeason, bool renew = false, bool showToast = true)
 		{
 			string id = GetId(episodeResult, currentMovie);
 			if (!renew && hasSubtitles.ContainsKey(id)) {
-				App.ShowToast("Subtitles Already Downloaded");
+				if (showToast) {
+					App.ShowToast("Subtitles Already Downloaded");
+				}
 				return;
 			}
 			TempThred tempThred = new TempThred();
 			tempThred.typeId = 4; // MAKE SURE THIS IS BEFORE YOU CREATE THE THRED
 			tempThred.Thread = new System.Threading.Thread(() => {
 				try {
-					if (id.Replace(" ", "") == "") { App.ShowToast("Id not found"); return; }
+					if (id.Replace(" ", "") == "") {
+						if (showToast) {
+							App.ShowToast("Id not found");
+						}
+						return;
+					}
 
 					string s = DownloadSubtitle(id, showToast: false);
 					if (s == "") {
-						App.ShowToast("No Subtitles Found");
+						if (showToast) {
+							App.ShowToast("No Subtitles Found");
+						}
 						return;
 					}
 					else {
@@ -1936,7 +1944,9 @@ namespace CloudStreamForms
 							extraPath += "/" + CensorFilename(currentMovie.title.name);
 						}
 						App.DownloadFile(s, episodeResult.GetDownloadTitle(currentSeason, episodeResult.Episode) + ".srt", true, extraPath); // "/Subtitles" +
-						App.ShowToast("Subtitles Downloaded");
+						if (showToast) {
+							App.ShowToast("Subtitles Downloaded");
+						}
 						hasSubtitles.Add(id, true);
 					}
 				}
@@ -1951,6 +1961,7 @@ namespace CloudStreamForms
 		void DeleteFile(string downloadKeyData, EpisodeResult episodeResult)
 		{
 			App.DeleteFile(downloadKeyData);
+			App.DeleteFile(downloadKeyData.Replace(".mp4", ".srt"));
 			App.UpdateDownload(GetCorrectId(episodeResult), 2);
 			Download.RemoveDownloadCookie(GetCorrectId(episodeResult));//.DeleteFileFromFolder(downloadKeyData, "Download", GetId(episodeResult));
 			SetColor(episodeResult);

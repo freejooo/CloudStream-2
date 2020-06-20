@@ -87,7 +87,7 @@ namespace CloudStreamForms
             public int episode; //-1 = null, movie  
             public int season; //-1 = null, movie  
             public bool isSingleMirror;
-            public int startPos; // -2 from progress, -1 = from start
+            public long startPos; // -2 from progress, -1 = from start
             public string episodeId;
         }
 
@@ -715,18 +715,15 @@ namespace CloudStreamForms
                 if (Player != null) {
                     if (Player.State != VLCState.Error && Player.State != VLCState.Opening) {
                         string lastId = currentVideo.episodeId;
-                        if (lastId != null) {
-                            if (!lastId.StartsWith("tt")) {
-                                lastId = "tt" + lastId;
-                            }
+                        if (lastId != null) { 
                             long pos = Player.Time;//Last position in media when player exited
                             if (pos > -1) {
-                                App.SetKey("ViewHistoryTimePos", lastId, pos);
+                                App.SetViewPos(lastId, pos);
                                 print("ViewHistoryTimePos SET TO: " + lastId + "|" + pos);
                             }
                             long dur = Player.Length;//	long	Total duration of the media
                             if (dur > -1) {
-                                App.SetKey("ViewHistoryTimeDur", lastId, dur);
+                                App.SetViewDur(lastId, dur);
                                 print("ViewHistoryTimeDur SET TO: " + lastId + "|" + dur);
                             }
                         }
