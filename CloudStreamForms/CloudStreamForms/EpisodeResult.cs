@@ -71,7 +71,7 @@ namespace CloudStreamForms.Models
         public List<string> subtitlesUrls { set; get; }
         public bool epVis { set; get; }
         // public LoadResult loadResult { set; get; }
-        public bool LoadedLinks { set; get; }
+        public bool LoadedLinks { get { return Mirros.Count > 0; } }
         public string MainTextColor { set; get; } = "#e7e7e7";
         public string MainDarkTextColor { get; set; } = "#a4a4a4"; //"#808080";
         public string ExtraColor { get; set; } = "#a4a4a4"; //"#808080";

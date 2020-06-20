@@ -107,6 +107,10 @@ namespace CloudStreamForms
                                         int id = ConvertStringToInt(v.Id);
 
                                         string filePath = YouTube.DownloadVideo(data, v.Title, data, v, id, header, true);
+                                        
+                                      //  YouTube.client.Videos.ClosedCaptions.GetManifestAsync().Result.Tracks.
+                                       // YouTube.client.Videos.ClosedCaptions.DownloadAsync(v.,)
+
                                         App.ShowToast("YouTube download started");
                                         App.SetKey(nameof(DownloadHeader), "id" + header.RealId, header);
                                         App.SetKey(nameof(DownloadEpisodeInfo), "id" + id, new DownloadEpisodeInfo() { dtype = DownloadType.YouTube, source = v.Url, description = v.Description, downloadHeader = header.RealId, episode = -1, season = -1, fileUrl = filePath, id = id, name = v.Title, hdPosterUrl = v.Thumbnails.HighResUrl });
@@ -575,11 +579,10 @@ namespace CloudStreamForms
     {
         public static async Task<Video> GetYTVideo(string url)
         {
-
             return await client.Videos.GetAsync(url);
         }
 
-        static readonly YoutubeClient client = new YoutubeClient();
+        public static readonly YoutubeClient client = new YoutubeClient();
 
         public static async Task<Channel> GetAuthorFromVideoAsync(Video videoId)
         {
@@ -622,6 +625,7 @@ namespace CloudStreamForms
 
             ImageService.Instance.LoadUrl(v.Thumbnails.HighResUrl, TimeSpan.FromDays(30)); // CASHE IMAGE
             string extraPath = "/" + GetPathFromType(header);
+            
             string fileUrl = platformDep.DownloadHandleIntent(id, new List<string>() { info.VideoQualityLabel }, new List<string>() { info.Url }, v.Title + "." + info.Container.Name, name, true, extraPath, true, true, false, v.Thumbnails.HighResUrl, "{name}\n");//isMovie ? "{name}\n" : ($"S{season}:E{episode} - " + "{name}\n"));
             return fileUrl;
         }
