@@ -147,6 +147,9 @@
     <None Remove="Resource\shareIcon.png" />
     <None Remove="Resource\starBtt.png" />
     <None Remove="Resource\subtitleIcon.png" />
+    <None Remove="Resource\upButton.png" />
+    <None Remove="Resource\upButton2.png" />
+    <None Remove="Resource\upButton3.png" />
     <None Remove="Resource\viewOffIcon.png" />
     <None Remove="Resource\viewOnIcon.png" />
     <None Remove="Resource\wcir.png" />
@@ -270,6 +273,9 @@
     <EmbeddedResource Include="Resource\shareIcon.png" />
     <EmbeddedResource Include="Resource\starBtt.png" />
     <EmbeddedResource Include="Resource\subtitleIcon.png" />
+    <EmbeddedResource Include="Resource\upButton.png" />
+    <EmbeddedResource Include="Resource\upButton2.png" />
+    <EmbeddedResource Include="Resource\upButton3.png" />
     <EmbeddedResource Include="Resource\viewOffIcon.png" />
     <EmbeddedResource Include="Resource\viewOnIcon.png" />
     <EmbeddedResource Include="Resource\wcir.png" />

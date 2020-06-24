@@ -10,6 +10,8 @@ using static CloudStreamForms.App;
 using static CloudStreamForms.CloudStreamCore;
 using static CloudStreamForms.InputPopupPage;
 using static CloudStreamForms.SelectPopup;
+using Xamarin.Forms.PlatformConfiguration.AndroidSpecific;
+using Button = Xamarin.Forms.Button;
 
 namespace CloudStreamForms
 {
@@ -92,8 +94,8 @@ namespace CloudStreamForms
             ItemsSource = __ItemSource;
 
             button.Clicked += async (o, e) => {
-                // await ActionPopup.DisplayEntry(InputPopupResult.decimalNumber, "Delay in ms", "Audio Delay");
-                // await ActionPopup.DisplayEntry(InputPopupResult.url, "https://youtu.be/", "Youtube link");
+              //   await ActionPopup.DisplayEntry(InputPopupResult.decimalNumber, "ms", "Audio Delay",offset:50,setText:"0");
+              //   await ActionPopup.DisplayEntry(InputPopupResult.url, "https://youtu.be/", "Youtube link");
 
                 await PopupNavigation.Instance.PushAsync(new SelectPopup(ItemsSource, SelectedIndex, title));
                 SelectPopup.OnSelectedChanged += (_o, _e) => {
@@ -170,6 +172,9 @@ namespace CloudStreamForms
             //   BackgroundImageSource = null;
             BackgroundColor = new Color(0, 0, 0, 0.9);
             InitializeComponent();
+
+           // On<Xamarin.Forms.PlatformConfiguration.Android>().Element.windo
+
             UpdateScreenRot();
             TheStack.SizeChanged += (o, e) => {
                 UpdateScreenRot();

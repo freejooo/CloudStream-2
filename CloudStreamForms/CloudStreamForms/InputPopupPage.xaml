@@ -6,8 +6,8 @@
     xmlns:animations="clr-namespace:Rg.Plugins.Popup.Animations;assembly=Rg.Plugins.Popup"            xmlns:ff="clr-namespace:FFImageLoading.Forms;assembly=FFImageLoading.Forms"  
 
              x:Class="CloudStreamForms.InputPopupPage">
-    <!--You can set an animation in the xaml file or in the csharp code behind-->
-    <!--
+	<!--You can set an animation in the xaml file or in the csharp code behind-->
+	<!--
     <pages:PopupPage.Animation>
         <animations:ScaleAnimation 
             PositionIn="Center"
@@ -20,43 +20,66 @@
             EasingOut="SpringOut"
             HasBackgroundAnimation="False"/>
     </pages:PopupPage.Animation>-->
-    <!--You can use any elements here which are extended from Xamarin.Forms.View-->
-    <StackLayout BackgroundColor="Transparent">
+	<!--You can use any elements here which are extended from Xamarin.Forms.View-->
+	<StackLayout BackgroundColor="Transparent">
 
-        <AbsoluteLayout x:Name="TheStack" HorizontalOptions="Center" VerticalOptions="CenterAndExpand" BackgroundColor="Transparent">
-            <Grid  RowSpacing="50" VerticalOptions="Center"   BackgroundColor="Transparent" >
-                <Grid.RowDefinitions >
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="*" />
-                </Grid.RowDefinitions>
+		<AbsoluteLayout x:Name="TheStack" HorizontalOptions="Center" VerticalOptions="CenterAndExpand" BackgroundColor="Transparent">
+			<Grid  RowSpacing="50" VerticalOptions="Center"   BackgroundColor="Transparent" >
+				<Grid.RowDefinitions >
+					<RowDefinition Height="Auto" />
+					<RowDefinition Height="Auto" />
+					<RowDefinition Height="Auto" />
+					<RowDefinition Height="Auto" />
+					<RowDefinition Height="*" />
+				</Grid.RowDefinitions>
 
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto"></ColumnDefinition>
-                    <ColumnDefinition Width="Auto"></ColumnDefinition>
-                    <ColumnDefinition Width="Auto"></ColumnDefinition>
-                </Grid.ColumnDefinitions>
+				<Grid.ColumnDefinitions>
+					<ColumnDefinition Width="Auto"></ColumnDefinition>
+					<ColumnDefinition Width="Auto"></ColumnDefinition>
+					<ColumnDefinition Width="Auto"></ColumnDefinition>
+				</Grid.ColumnDefinitions>
 
-                <Label x:Name="HeaderTitle" HorizontalOptions="Center" FontSize="20" FontAttributes="Bold" Text="Episode 1 hello world" TextColor="#e6e6e6" ></Label>
-
-                <Entry x:Name="InputF" Margin="20" WidthRequest="200" FontSize="20" HeightRequest="50" MinimumHeightRequest="50"></Entry>
-
-                <AbsoluteLayout BackgroundColor="Transparent" Grid.Row="1" Grid.Column="1" HorizontalOptions="Center" VerticalOptions="End"   TranslationY="0" x:Name="CrossbttLayout" Margin="40">
-                    <Grid>
-                        <Button   x:Name="CancelButtonBtt" BackgroundColor="Transparent" HeightRequest="80" WidthRequest="80" Padding="0"  VerticalOptions="Center"   HorizontalOptions="Center">
-                        </Button>
-                        <ff:CachedImage x:Name="CancelButton" InputTransparent="True" BackgroundColor="Transparent" HeightRequest="60" WidthRequest="60"   VerticalOptions="Center"  HorizontalOptions="Center">
-
-                        </ff:CachedImage>
-                    </Grid>
-                </AbsoluteLayout>
-                <Label Grid.Row="1" IsEnabled="False" InputTransparent="True"></Label>
-            </Grid>
+				<Label x:Name="HeaderTitle" HorizontalOptions="Center" FontSize="20" FontAttributes="Bold" Text="Episode 1 hello world" TextColor="#e6e6e6" ></Label>
 
 
-        </AbsoluteLayout>
-    </StackLayout>
+				<Grid>
+					<Grid.RowDefinitions >
+						<RowDefinition Height="Auto" />
+						<RowDefinition Height="Auto" />
+						<RowDefinition Height="Auto" />
+						<RowDefinition Height="Auto" />
+					</Grid.RowDefinitions>
+
+					<Grid.ColumnDefinitions>
+						<ColumnDefinition Width="*"></ColumnDefinition>
+						<ColumnDefinition Width="Auto"></ColumnDefinition>
+						<ColumnDefinition Width="Auto"></ColumnDefinition>
+					</Grid.ColumnDefinitions>
+					
+					<Entry x:Name="InputF" Margin="20" WidthRequest="200" FontSize="20" HeightRequest="50" MinimumHeightRequest="50"></Entry>
+					<Grid Grid.Column="1" BackgroundColor="Transparent" x:Name="OffsetButtons">
+						<ImageButton  x:Name="UpButton"  BackgroundColor="Transparent" WidthRequest="30" HeightRequest="30" ></ImageButton>
+						<ImageButton Grid.Row="1" Rotation="180" x:Name="DownButton" BackgroundColor="Transparent" WidthRequest="30" HeightRequest="30" ></ImageButton>
+					</Grid>
+					<!--<Button Grid.Row="1" BackgroundColor="Black" TextColor="Blue"  Text="Downloddddad" HeightRequest="40" WidthRequest="80" HorizontalOptions="Center"></Button>
+-->
+				</Grid>
+
+
+				<AbsoluteLayout BackgroundColor="Transparent" Grid.Row="1" Grid.Column="1" HorizontalOptions="Center" VerticalOptions="End"   TranslationY="0" x:Name="CrossbttLayout" Margin="40">
+					<Grid>
+						<Button   x:Name="CancelButtonBtt" BackgroundColor="Transparent" HeightRequest="80" WidthRequest="80" Padding="0"  VerticalOptions="Center"   HorizontalOptions="Center">
+						</Button>
+						<ff:CachedImage x:Name="CancelButton" InputTransparent="True" BackgroundColor="Transparent" HeightRequest="60" WidthRequest="60"   VerticalOptions="Center"  HorizontalOptions="Center">
+
+						</ff:CachedImage>
+					</Grid>
+				</AbsoluteLayout>
+				<Label Grid.Row="1" IsEnabled="False" InputTransparent="True"></Label>
+			</Grid>
+
+
+		</AbsoluteLayout>
+	</StackLayout>
 
 </pages:PopupPage>

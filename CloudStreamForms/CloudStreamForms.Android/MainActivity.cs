@@ -37,6 +37,7 @@ using static CloudStreamForms.Droid.MainActivity;
 using static CloudStreamForms.Droid.MainHelper;
 using Application = Android.App.Application;
 using AudioTrack = Android.Media.AudioTrack;
+using Stream = System.IO.Stream;
 
 namespace CloudStreamForms.Droid
 {
@@ -526,53 +527,6 @@ namespace CloudStreamForms.Droid
 			}
 		}
 
-
-
-		struct Chunk
-		{
-			public long start;
-			public long end;
-		}
-
-		static void SplitDownload(List<string> mirrorUrls, List<string> mirrorNames, Java.IO.File rFile, bool resumeIntent, int id, string path)
-		{
-			int blockSize = 10240;
-			int parallels = 8;
-
-			int mirror = 0;
-			string url = mirrorUrls[mirror];
-			string urlName = mirrorNames[mirror];
-			URL _url = new URL(url);
-
-			URLConnection connection = _url.OpenConnection();
-			connection.Connect();
-			int _end = connection.ContentLength;
-
-			print("SET CONNECT ::");
-			long _start = 0;
-			if (resumeIntent) {
-				_start = rFile.Length();
-				//connection.SetRequestProperty("Range", "bytes=" + rFile.Length() + "-");
-			}
-			else {
-				rFile.Delete();
-				rFile.CreateNewFile();
-			}
-
-			print("MAIND____:  " + _end + "|" + _start);
-
-			List<Chunk> chunks = new List<Chunk>();
-			for (int i = 0; i < Math.Ceiling((Decimal)(_end - _start) / (Decimal)blockSize); i++) {
-				long start = i * blockSize + _start;
-				long end = Math.Min(start + blockSize, _end);
-				chunks.Add(new Chunk() { start = start, end = end });
-			}
-			for (int i = 0; i < chunks.Count; i++) {
-				print("STARTCSUNK: " + chunks[i].start + "|" + chunks[i].end + ">>>>> " + _start + "|" + _end);
-			}
-
-		}
-
 		/// <summary>
 		/// 
 		/// </summary>
@@ -713,7 +667,6 @@ namespace CloudStreamForms.Droid
 						// string rpath = path + "/" + fileName;
 						//   print("PATH=====" + rpath + "|" + fileName);
 
-						//SplitDownload(mirrorUrls, mirrorNames, rFile, resumeIntent, id, path);
 						print("OPEN URL:L::" + url);
 						URL _url = new URL(url);
 						URLConnection connection = _url.OpenConnection();
@@ -997,7 +950,6 @@ namespace CloudStreamForms.Droid
 			print("ON CREATED:::::!!!!!!!!!");
 
 
-
 			TabLayoutResource = Resource.Layout.Tabbar;
 			ToolbarResource = Resource.Layout.Toolbar;
 
@@ -1093,6 +1045,9 @@ namespace CloudStreamForms.Droid
 
 			ResumeIntentData();
 			StartService(new Intent(BaseContext, typeof(OnKilledService)));
+
+			Window.SetSoftInputMode(Android.Views.SoftInput.AdjustNothing);
+
 			//  Android.Renderscripts.ta
 			// var bar = new Xamarin.Forms.Platform.Android.TabbedRenderer();//.Platform.Android.
 
