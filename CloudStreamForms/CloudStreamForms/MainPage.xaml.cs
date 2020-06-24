@@ -4,6 +4,7 @@ using GoogleCast.Models.Media;
 using Jint;
 using Newtonsoft.Json;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -258,6 +259,68 @@ namespace CloudStreamForms
 		public static bool IsClean(this string s)
 		{
 			return s != null && s != "";
+		}
+
+
+		static readonly List<Type> types = new List<Type>() { typeof(decimal), typeof(int), typeof(string), typeof(bool), typeof(double), typeof(ushort), typeof(ulong), typeof(uint), typeof(short), typeof(short), typeof(char), typeof(long), typeof(float), };
+		public static string FString(this object o, string _s = "")
+		{
+
+#if RELEASE
+			return "";
+#endif
+#if DEBUG
+			if (o == null) {
+				return "Null";
+			}
+			Type valueType = o.GetType();
+
+			if (o is IList) {
+				IList list = (o as IList);
+				string s = valueType.Name + " {";
+				for (int i = 0; i < list.Count; i++) {
+					s += "\n	" + _s + i + ". " + list[i].FString(_s + "	");
+				}
+				return s + "\n" + _s + "}";
+			}
+
+
+			if (!types.Contains(valueType) && !valueType.IsArray && !valueType.IsEnum) {
+				string s = valueType.Name + " {";
+				foreach (var field in valueType.GetFields()) {
+					s += ("\n	" + _s + field.Name + " => " + field.GetValue(o).FString(_s + "	"));
+				}
+				return s + "\n" + _s + "}";
+			}
+			else {
+				if (valueType.IsArray) {
+					int _count = 0;
+					var enu = ((o) as IEnumerable).GetEnumerator();
+					string s = valueType.Name + " {";
+					while (enu.MoveNext()) {
+						s += "\n	" + _count + ". " + enu.Current.FString(_s + "	");
+						_count++;
+					}
+					return s + "\n" + _s + "}";
+				}
+				else if (valueType.IsEnum) {
+					return valueType.GetEnumName(o);
+				}
+				else {
+					return o.ToString();
+				}
+			}
+#endif
+
+		}
+
+		public static string RString(this object o)
+		{
+			string s = "VALUE OF: ";
+			foreach (var field in o.GetType().GetFields()) {
+				s += ("\n" + field.Name + " => " + field.GetValue(o).ToString());
+			}
+			return s;
 		}
 	}
 
@@ -794,7 +857,7 @@ namespace CloudStreamForms
 
 
 		// ========================================================= CONSTS =========================================================
-		#region CONSTS
+#region CONSTS
 		public const bool MOVIES_ENABLED = true;
 		public const bool TVSERIES_ENABLED = true;
 		public const bool ANIME_ENABLED = true;
@@ -822,11 +885,11 @@ namespace CloudStreamForms
 		public const bool REPLACE_IMDBNAME_WITH_POSTERNAME = true;
 		public static double posterRezMulti = 1.0;
 		public const string GOMOURL = "gomo.to";
-		#endregion
+#endregion
 
 		// ========================================================= THREDS =========================================================
 
-		#region Threads
+#region Threads
 		public static List<int> activeThredIds = new List<int>();
 		public static List<TempThred> tempThreds = new List<TempThred>();
 		public static int thredNumber = 0; // UNIQUE THRED NUMBER FOR EATCH THREAD CREATED WHEN TEMPTHREDS THRED IS SET
@@ -925,11 +988,11 @@ namespace CloudStreamForms
 				//  tempThreds = _tempThreds;
 			}
 		}
-		#endregion
+#endregion
 
 		// ========================================================= DATA =========================================================
 
-		#region Data
+#region Data
 
 		[System.Serializable]
 		public struct MirrorInfo
@@ -1264,7 +1327,7 @@ namespace CloudStreamForms
 			public PosterType posterType; // HOW DID YOU GET THE POSTER, IMDB SEARCH OR SOMETHING ELSE
 		}
 
-		#region QuickSearch
+#region QuickSearch
 		[System.Serializable]
 		public struct DubbedAnimeEpisode
 		{
@@ -1423,7 +1486,7 @@ namespace CloudStreamForms
 			public string q;
 			public int v;
 		}
-		#endregion
+#endregion
 
 		[Serializable]
 		public struct Link
@@ -1529,11 +1592,11 @@ namespace CloudStreamForms
 			public string[] licensors;
 			public MoeLink[] links;
 		}
-		#endregion
+#endregion
 
 		// ========================================================= EVENTS =========================================================
 
-		#region Events
+#region Events
 		public static List<Poster> activeSearchResults = new List<Poster>();
 		public static Movie activeMovie = new Movie();
 		public static string activeTrailer = "";
@@ -1566,7 +1629,7 @@ namespace CloudStreamForms
 		//public static event EventHandler<Movie> yesmovieFishingDone;
 
 		private static Random rng = new Random();
-		#endregion
+#endregion
 
 		// ========================================================= ALL METHODS =========================================================
 
@@ -1591,17 +1654,13 @@ namespace CloudStreamForms
 			int GetLinkCount(Movie currentMovie, int currentSeason, bool isDub, TempThred? tempThred);
 		}
 
-		#region =================================================== ANIME PROVIDERS ===================================================
+#region =================================================== ANIME PROVIDERS ===================================================
 
 
 		static class AnimeProviderHelper
 		{
 			public static object _lock = new object();
 
-			public static void ConvertEpisodeToSeasonPart(int episode, int season)
-			{
-
-			}
 		}
 
 		class GogoAnimeProvider : IAnimeProvider
@@ -2922,7 +2981,7 @@ namespace CloudStreamForms
 
 		public class DubbedAnimeNetProvider : IAnimeProvider
 		{
-			#region structs
+#region structs
 			public struct DubbedAnimeNetRelated
 			{
 				public string Alternative_version { get; set; }
@@ -3008,7 +3067,7 @@ namespace CloudStreamForms
 				public string id { get; set; }
 				public string type { get; set; }
 			}
-			#endregion
+#endregion
 			public string Name => "DubbedAnimeNet";
 
 			public void FishMainLink(string year, TempThred tempThred, MALData malData)
@@ -3819,7 +3878,7 @@ namespace CloudStreamForms
 		}
 
 
-		#region AnimeFlixData
+#region AnimeFlixData
 		public struct AnimeFlixSearchItem
 		{
 			public int id { get; set; }
@@ -3926,7 +3985,7 @@ namespace CloudStreamForms
 			public string thumbnail { get; set; }
 			public string resolution { get; set; }
 		}
-		#endregion
+#endregion
 
 		class AnimeFlixProvider : IAnimeProvider
 		{
@@ -3959,13 +4018,7 @@ namespace CloudStreamForms
 								if (names[q].ToLower().Contains(malData.firstName.ToLower()) || names[q].ToLower().Contains(activeMovie.title.name.ToLower())) {
 									print("NAMES:::da" + d.title);
 									alreadyAdded.Add(id);
-									try {
-
-										MALSeason ms;
-										lock (AnimeProviderHelper._lock) {
-											ms = activeMovie.title.MALData.seasonData[season].seasons[part - 1];
-										}
-
+									try { 
 										string url = "https://animeflix.io/api/episodes?anime_id=" + d.id + "&limit=50&sort=DESC";
 										print("DURL:::==" + url);
 										string dres = DownloadString(url, repeats: 2, waitTime: 500);
@@ -3979,8 +4032,7 @@ namespace CloudStreamForms
 											var _seasonData = JsonConvert.DeserializeObject<AnimeFlixAnimeSeason>(dres);
 
 											seasonData.data.AddRange(_seasonData.data);
-										}
-
+										} 
 
 										bool hasDub = false, hasSub = false;
 
@@ -4006,9 +4058,10 @@ namespace CloudStreamForms
 											EpisodesUrls = animeFlixEpisodes,
 										};
 
-										ms.animeFlixData = flixData;
-
+										MALSeason ms;
 										lock (AnimeProviderHelper._lock) {
+											ms = activeMovie.title.MALData.seasonData[season].seasons[part - 1];
+											ms.animeFlixData = flixData;
 											activeMovie.title.MALData.seasonData[season].seasons[part - 1] = ms;
 										}
 									}
@@ -4099,9 +4152,9 @@ namespace CloudStreamForms
 			}
 
 		}
-		#endregion
+#endregion
 
-		#region =================================================== MOVIE PROVIDERS ===================================================
+#region =================================================== MOVIE PROVIDERS ===================================================
 
 		class WatchTVProvider : IMovieProvider
 		{
@@ -5653,6 +5706,7 @@ namespace CloudStreamForms
 								var ms = activeMovie.title.MALData.seasonData[z].seasons[q];
 								ms.watchMovieAnimeData = new WatchMovieAnimeData() { subUrl = subUrl, dubExists = dubExists, dubUrl = dubUrl, maxDubbedEpisodes = maxDubbedEp, maxSubbedEpisodes = maxSubbedEp, subExists = subExists };
 								activeMovie.title.MALData.seasonData[z].seasons[q] = ms;
+								print("FFFFFFFFFFFFFFFFFFF:::" + ms.FString());
 							}
 						}
 						catch (Exception _ex) {
@@ -5660,8 +5714,6 @@ namespace CloudStreamForms
 						}
 					}
 				}
-
-
 			}
 
 			public int GetLinkCount(Movie currentMovie, int currentSeason, bool isDub, TempThred? tempThred)
@@ -5680,27 +5732,35 @@ namespace CloudStreamForms
 
 			public void LoadLinksTSync(int episode, int season, int normalEpisode, bool isDub, TempThred tempThred)
 			{
-				int maxEp = 0;
-				int _maxEp = 0;
-				for (int q = 0; q < activeMovie.title.MALData.seasonData[season].seasons.Count; q++) {
-					var ms = activeMovie.title.MALData.seasonData[season].seasons[q].watchMovieAnimeData;
-					maxEp += isDub ? ms.maxDubbedEpisodes : ms.maxSubbedEpisodes;
-					if (maxEp > normalEpisode) {
-						string url = (isDub ? ms.dubUrl : ms.subUrl) + "-episode-" + (episode - _maxEp);
-						print("FETH MAIN URLLLL::: " + url);
-						string d = DownloadString(url);
+				try {
+					print("LOADLLDLDLDLDLD::");
+					int maxEp = 0;
+					int _maxEp = 0;
+					for (int q = 0; q < activeMovie.title.MALData.seasonData[season].seasons.Count; q++) {
+						var ms = activeMovie.title.MALData.seasonData[season].seasons[q].watchMovieAnimeData;
+						maxEp += isDub ? ms.maxDubbedEpisodes : ms.maxSubbedEpisodes;
+						print("MAXE::" + maxEp + "|======|\n" + ms.FString());
 
-						print("RES FROM URLLLLL:::: " + d);
 
-						if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
-						AddEpisodesFromMirrors(tempThred, d, normalEpisode, "Watch");
-						LookForFembedInString(tempThred, normalEpisode, d);
-						return;
+						if (maxEp > normalEpisode) {
+							string url = ((isDub ? ms.dubUrl : ms.subUrl) + "-episode-" + (episode - _maxEp)).Replace("/anime-info/", "/anime/");
+							print("FETH MAIN URLLLL::: " + url);
+							string d = DownloadString(url);
+
+							print("RES FROM URLLLLL:::: " + d);
+
+							if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
+							AddEpisodesFromMirrors(tempThred, d, normalEpisode, "Watch", "");
+							LookForFembedInString(tempThred, normalEpisode, d);
+							return;
+						}
+						_maxEp = maxEp;
 					}
-					_maxEp = maxEp;
+
 				}
-
-
+				catch (Exception _ex) {
+					print("SSS:S:S::S::S" + _ex);
+				}
 			}
 		}
 
@@ -5753,10 +5813,7 @@ namespace CloudStreamForms
 
 			public void LoadLinksTSync(int episode, int season, int normalEpisode, bool isMovie, TempThred tempThred)
 			{
-
-
 				try {
-
 					void GetFromUrl(string url)
 					{
 						print("GET FROM URLLLLLLL:::: " + url);
@@ -5766,7 +5823,7 @@ namespace CloudStreamForms
 						print("RES FROM URLLLLL:::: " + d);
 
 						if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
-						AddEpisodesFromMirrors(tempThred, d, normalEpisode, "Watch");
+						AddEpisodesFromMirrors(tempThred, d, normalEpisode, "Watch", "");
 						LookForFembedInString(tempThred, normalEpisode, d);
 					}
 
@@ -5783,13 +5840,12 @@ namespace CloudStreamForms
 				}
 				catch (Exception _ex) {
 					print("PROVIDER ERROR: " + _ex);
-
 				}
 			}
 		}
 
 
-		#endregion
+#endregion
 
 		static void GetSeasonAndPartFromName(string name, out int season, out int part)
 		{
@@ -7302,6 +7358,9 @@ namespace CloudStreamForms
 						temp.typeId = 3; // MAKE SURE THIS IS BEFORE YOU CREATE THE THRED
 						temp.Thread = new System.Threading.Thread(() => { });
 						temp.Thread.Name = "Testing";
+
+						print("MAINDATA: \n" + activeMovie.FString());
+
 						Parallel.For(0, animeProviders.Length, (int i) => {
 							try {
 #if DEBUG
@@ -8733,11 +8792,17 @@ namespace CloudStreamForms
 
 		static int GetStopwatchNum()
 		{
-			lock (debuggNumLock) {
-				debuggNum++;
-				stopwatchs[debuggNum] = Stopwatch.StartNew();
+			try {
+				lock (debuggNumLock) {
+					debuggNum++;
+					stopwatchs[debuggNum] = Stopwatch.StartNew();
+				}
+				return debuggNum;
 			}
-			return debuggNum;
+			catch (Exception _ex) {
+				return -1;
+			}
+
 		}
 		static void EndStopwatchNum(int num, string name)
 		{
