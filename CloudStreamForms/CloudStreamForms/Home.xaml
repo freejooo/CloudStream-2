@@ -91,10 +91,7 @@
                     <ListView ItemsSource="{Binding MyEpisodeResultCollection}" 
                              CachingStrategy="RecycleElement" 
                 ItemTapped="episodeView_ItemTapped" RowHeight="100"
-                    x:Name="episodeView"  SeparatorColor="Transparent"  VerticalOptions="Start" VerticalScrollBarVisibility="Never"     >
-
-
-
+                    x:Name="episodeView"  SeparatorColor="Transparent"  VerticalOptions="Start" VerticalScrollBarVisibility="Never"     > 
                         <ListView.ItemTemplate>
                             <DataTemplate     >
                                 <cloudstreamforms:CustomCell Tapped="ViewCell_Tapped"   >
@@ -123,7 +120,7 @@
 
                                                 <Grid Grid.Row="0"  Grid.Column="1"  WidthRequest="67" TranslationY="{Binding TranslateYOffsetVertical}" >
                                                     
-                                                    <ff:CachedImage WidthRequest="67" HeightRequest="98" Source="{Binding PosterUrl}" InputTransparent="True" >
+                                                    <ff:CachedImage WidthRequest="67" HeightRequest="96" Source="{Binding PosterUrl}" InputTransparent="True" >
 
                                                         <ff:CachedImage.Transformations>
                                                             <ffTransformations:RoundedTransformation BorderSize="0" Radius="1" BorderHexColor="#303F9F" CropWidthRatio="0.7" >

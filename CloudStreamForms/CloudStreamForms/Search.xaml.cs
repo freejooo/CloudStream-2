@@ -58,6 +58,7 @@ namespace CloudStreamForms
                 //      each item; it must return a Cell derivative.)
                 ItemTemplate = new DataTemplate(() => {
                     // Create views with bindings for displaying each property.
+
                     Label nameLabel = new Label();
                     Label desLabel = new Label();
                     // Image poster = new Image();
@@ -66,7 +67,7 @@ namespace CloudStreamForms
                     // poster.SetBinding(Image.SourceProperty, "Poster");
                     //  desLabel.FontSize = nameLabel.FontSize / 1.2f;
                     desLabel.FontSize = 12;
-                    desLabel.TextColor = Color.Gray;
+                    desLabel.TextColor = Color.FromHex("#828282"); // 
                     nameLabel.TextColor = Color.FromHex("#e6e6e6");
                     nameLabel.FontSize = 15;
 
@@ -88,10 +89,11 @@ namespace CloudStreamForms
                     // Return an assembled ViewCell.
                     return new ViewCell {
                         View = new StackLayout {
-                            Padding = new Thickness(0, 7),
+                            Padding = new Thickness(0, 9),
                             Orientation = StackOrientation.Horizontal,
                             Children =
-                            {
+                            {                                  
+
                                     //boxView,
                                     new StackLayout
                                     {

@@ -263,6 +263,7 @@ namespace CloudStreamForms
 
 
 		static readonly List<Type> types = new List<Type>() { typeof(decimal), typeof(int), typeof(string), typeof(bool), typeof(double), typeof(ushort), typeof(ulong), typeof(uint), typeof(short), typeof(short), typeof(char), typeof(long), typeof(float), };
+		
 		public static string FString(this object o, string _s = "")
 		{
 
@@ -6110,7 +6111,8 @@ namespace CloudStreamForms
 									print("ID::" + poster.id + "|" + year);
 									string extra = poster.q ?? "";
 									if (extra == "feature") extra = "";
-
+									print("EXTRA: " + extra);
+									if (extra.StartsWith("video game")) continue;
 									AddToActiveSearchResults(new Poster() { extra = extra, name = poster.l ?? "", posterType = PosterType.Imdb, posterUrl = poster.i.imageUrl ?? "", year = year, url = poster.id, rank = poster.rank.ToString() ?? "" });
 								}
 

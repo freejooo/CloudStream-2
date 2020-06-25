@@ -18,6 +18,7 @@ using YoutubeExplode.Videos;
 using YoutubeExplode.Videos.Streams;
 using static CloudStreamForms.App;
 using static CloudStreamForms.CloudStreamCore;
+using static CloudStreamForms.InputPopupPage;
 using static CloudStreamForms.MainPage;
 
 namespace CloudStreamForms
@@ -57,7 +58,7 @@ namespace CloudStreamForms
 		public Download()
 		{
 			InitializeComponent();
-
+			baseImg.Source = App.GetImageSource("NoDownloads.png");
 			/*
             RefreshView refresh = new RefreshView() { BackgroundColor = Color.Black, RefreshColor = Color.Blue, Command = RefreshCommand };
             refresh.SetBinding(RefreshView.IsRefreshingProperty, new Binding(nameof(IsRefreshing)));
@@ -70,8 +71,52 @@ namespace CloudStreamForms
 
 			ytrealBtt.Clicked += async (o, e) => {
 				string txt = await Clipboard.GetTextAsync();
+				string ytUrl = await ActionPopup.DisplayEntry(InputPopupResult.url, "https://youtu.be/", "Youtube link", confirmText: "Download");
+				if (!ytUrl.IsClean() || ytUrl == "Cancel") return;
+				await Device.InvokeOnMainThreadAsync(async () => {
+					//string ytUrl = t.Text;
+					Video v = null;
+					const string errorTxt = "Error Downloading YouTube Video";
+					try {
+						v = await YouTube.GetYTVideo(ytUrl);
+					}
+					catch (Exception) {
+						App.ShowToast(errorTxt);
+					}
+					if (v == null) {
+						App.ShowToast(errorTxt);
+					}
+					else {
+						try {
+							//   string dpath = YouTube.GetYTPath(v.Title);
+							var author = await YouTube.GetAuthorFromVideoAsync(v);
+							var data = await YouTube.GetInfoAsync(v);
 
-				UserDialogs.Instance.Prompt(new PromptConfig() {
+							double mb = App.ConvertBytesToAny(data.Size.TotalBytes, 5, 2);
+
+							ImageService.Instance.LoadUrl(v.Thumbnails.HighResUrl, TimeSpan.FromDays(30)); // CASHE IMAGE
+
+							DownloadHeader header = new DownloadHeader() { movieType = MovieType.YouTube, id = author.Id, name = author.Title, hdPosterUrl = author.LogoUrl, posterUrl = author.LogoUrl, ogName = author.Title }; //description = v.Description,hdPosterUrl=v.Thumbnails.HighResUrl, };//ConvertTitleToHeader(title);
+							int id = ConvertStringToInt(v.Id);
+
+							string filePath = YouTube.DownloadVideo(data, v.Title, data, v, id, header, true);
+
+							//  YouTube.client.Videos.ClosedCaptions.GetManifestAsync().Result.Tracks.
+							// YouTube.client.Videos.ClosedCaptions.DownloadAsync(v.,)
+
+							App.ShowToast("YouTube download started");
+							App.SetKey(nameof(DownloadHeader), "id" + header.RealId, header);
+							App.SetKey(nameof(DownloadEpisodeInfo), "id" + id, new DownloadEpisodeInfo() { dtype = DownloadType.YouTube, source = v.Url, description = v.Description, downloadHeader = header.RealId, episode = -1, season = -1, fileUrl = filePath, id = id, name = v.Title, hdPosterUrl = v.Thumbnails.HighResUrl });
+							App.SetKey("DownloadIds", id.ToString(), id);
+							await YouTube.DownloadSubtitles(v, filePath.Replace(".mp4", ".srt"));
+						}
+						catch (Exception _ex) {
+							print("MAINERROR:: " + _ex);
+							App.ShowToast(errorTxt);
+						}
+					}
+				});
+				/*UserDialogs.Instance.Prompt(new PromptConfig() {
 					Title = "YouTube Download",
 					CancelText = "Cancel",
 					OkText = "Download",
@@ -80,52 +125,10 @@ namespace CloudStreamForms
 					Placeholder = "YouTube Link",
 					OnAction = new Action<PromptResult>(async t => {
 						if (t.Ok) {
-							await Device.InvokeOnMainThreadAsync(async () => {
-								string ytUrl = t.Text;
-								Video v = null;
-								const string errorTxt = "Error Downloading YouTube Video";
-								try {
-									v = await YouTube.GetYTVideo(ytUrl);
-								}
-								catch (Exception) {
-									App.ShowToast(errorTxt);
-								}
-								if (v == null) {
-									App.ShowToast(errorTxt);
-								}
-								else {
-									try {
-										//   string dpath = YouTube.GetYTPath(v.Title);
-										var author = await YouTube.GetAuthorFromVideoAsync(v);
-										var data = await YouTube.GetInfoAsync(v);
-
-										double mb = App.ConvertBytesToAny(data.Size.TotalBytes, 5, 2);
-
-										ImageService.Instance.LoadUrl(v.Thumbnails.HighResUrl, TimeSpan.FromDays(30)); // CASHE IMAGE
-
-										DownloadHeader header = new DownloadHeader() { movieType = MovieType.YouTube, id = author.Id, name = author.Title, hdPosterUrl = author.LogoUrl, posterUrl = author.LogoUrl, ogName = author.Title }; //description = v.Description,hdPosterUrl=v.Thumbnails.HighResUrl, };//ConvertTitleToHeader(title);
-										int id = ConvertStringToInt(v.Id);
-
-										string filePath = YouTube.DownloadVideo(data, v.Title, data, v, id, header, true);
-
-										//  YouTube.client.Videos.ClosedCaptions.GetManifestAsync().Result.Tracks.
-										// YouTube.client.Videos.ClosedCaptions.DownloadAsync(v.,)
-
-										App.ShowToast("YouTube download started");
-										App.SetKey(nameof(DownloadHeader), "id" + header.RealId, header);
-										App.SetKey(nameof(DownloadEpisodeInfo), "id" + id, new DownloadEpisodeInfo() { dtype = DownloadType.YouTube, source = v.Url, description = v.Description, downloadHeader = header.RealId, episode = -1, season = -1, fileUrl = filePath, id = id, name = v.Title, hdPosterUrl = v.Thumbnails.HighResUrl });
-										App.SetKey("DownloadIds", id.ToString(), id);
-										await YouTube.DownloadSubtitles(v, filePath.Replace(".mp4", ".srt"));
-									}
-									catch (Exception _ex) {
-										print("MAINERROR:: " + _ex);
-										App.ShowToast(errorTxt);
-									}
-								}
-							});
+							
 						}
 					})
-				});
+				});*/
 			};
 
 			MyEpisodeResultCollection = new ObservableCollection<EpisodeResult>();
@@ -271,8 +274,7 @@ namespace CloudStreamForms
 						print("ERROR WHILE DOWNLOADLOADING::" + _ex);
 					}
 				});
-
-
+				 
 				for (int i = 0; i < headerRemovers.Count; i++) {
 					if (!validHeaders.ContainsKey(headerRemovers[i])) {
 						print("HEADER:::==" + headerRemovers[i]);
@@ -368,9 +370,15 @@ namespace CloudStreamForms
 					MyEpisodeResultCollection.Add(epres[i]);
 				}
 
+				
+
 				Device.BeginInvokeOnMainThread(() => {
 					// episodeView.Opacity = 0;
 					// episodeView.FadeTo(1, 200);
+
+					bool noDownloads = epres.Length == 0;
+					baseTxt.IsVisible = noDownloads;
+					baseImg.IsVisible = noDownloads;
 					SetHeight();
 				});
 			});

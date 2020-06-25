@@ -21,7 +21,7 @@ namespace CloudStreamForms
 		}
 
 		readonly InputPopupResult InputType;
-		public InputPopupPage(InputPopupResult inputType, string placeHolder = "", string title = "", int offset = -1, bool autoPaste = true, string setText = null)
+		public InputPopupPage(InputPopupResult inputType, string placeHolder = "", string title = "", int offset = -1, bool autoPaste = true, string setText = null, string confirmText = "")
 		{
 			InitializeComponent();
 			BackgroundColor = new Color(0, 0, 0, 0.9);
@@ -51,6 +51,13 @@ namespace CloudStreamForms
 			else {
 				OffsetButtons.IsVisible = false;
 				OffsetButtons.IsEnabled = false;
+			}
+
+			if(confirmText != "") {
+				ConfirmButton.Text = confirmText;
+				ConfirmButton.Clicked += (o, e) => {
+					Done();
+				};
 			}
 
 			UpdateScreenRot();
@@ -123,11 +130,11 @@ namespace CloudStreamForms
 		bool isDone = false;
 		bool cancel = false;
 		bool IsNumber { get { return (InputType == InputPopupResult.decimalNumber || InputType == InputPopupResult.integrerNumber); } }
-		void Done(string txt = null)
+		async void Done(string txt = null)
 		{
 			text = txt ?? InputF.Text;
 			isDone = true;
-			PopupNavigation.PopAsync(true);
+			await PopupNavigation.PopAsync(true);
 		}
 
 		public async Task<string> WaitForResult()
@@ -159,6 +166,8 @@ namespace CloudStreamForms
 				CrossbttLayout.TranslationY = hightOverWidth ? -40 : 20;
 				CrossbttLayout.TranslationX = hightOverWidth ? 0 : 40;
 				TheStack.TranslationX = hightOverWidth ? 0 : 80;
+				CenterStack.VerticalOptions = hightOverWidth ? LayoutOptions.Start : LayoutOptions.Center;
+
 				//TheStack.HorizontalOptions = hightOverWidth ? LayoutOptions.Center : LayoutOptions.CenterAndExpand;
 				TheStack.TranslationY = hightOverWidth ? 100 : 70;
 				Grid.SetRow(CrossbttLayout, hightOverWidth ? 1 : 0);

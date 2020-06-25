@@ -84,6 +84,7 @@
     <None Remove="Resource\netflixSkipBack.png" />
     <None Remove="Resource\netflixSkipForward.png" />
     <None Remove="Resource\nexflixPlayBtt.png" />
+    <None Remove="Resource\NoDownloads.png" />
     <None Remove="Resource\notBookmarkedBtt.png" />
     <None Remove="Resource\outline_aspect_ratio_white_48dp.png" />
     <None Remove="Resource\outline_build_white_48dp.png" />
@@ -210,6 +211,7 @@
     <EmbeddedResource Include="Resource\netflixSkipBack.png" />
     <EmbeddedResource Include="Resource\netflixSkipForward.png" />
     <EmbeddedResource Include="Resource\nexflixPlayBtt.png" />
+    <EmbeddedResource Include="Resource\NoDownloads.png" />
     <EmbeddedResource Include="Resource\notBookmarkedBtt.png" />
     <EmbeddedResource Include="Resource\outline_aspect_ratio_white_48dp.png" />
     <EmbeddedResource Include="Resource\outline_build_white_48dp.png" />

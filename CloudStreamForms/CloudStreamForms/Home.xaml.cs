@@ -15,7 +15,7 @@ namespace CloudStreamForms
     [XamlCompilation(XamlCompilationOptions.Compile)]
     public partial class Home : ContentPage
     {
-        const int POSTER_HIGHT = 98;
+        const int POSTER_HIGHT = 96;
         const int POSTER_WIDTH = 67;
         public MainEpisodeView epView;
         public List<IMDbTopList> iMDbTopList = new List<IMDbTopList>();
@@ -455,7 +455,7 @@ namespace CloudStreamForms
                         var ff = new FFImageLoading.Forms.CachedImage {
                             Source = posterUrl,
                             HeightRequest = height,
-                            WidthRequest = 90,
+                            WidthRequest = 87,
                             BackgroundColor = Color.Transparent,
                             VerticalOptions = LayoutOptions.Start,
                             Transformations = {

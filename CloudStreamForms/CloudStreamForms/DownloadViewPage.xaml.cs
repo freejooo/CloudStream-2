@@ -108,9 +108,10 @@ namespace CloudStreamForms
 							string fileName = info.info.name;
 
 							print(info.state.bytesDownloaded + "|" + info.state.totalBytes);
-
+							int dloaded = (int)info.state.ProcentageDownloaded;
 							// string extra = (info.state.state == App.DownloadState.Downloaded ? "" : App.ConvertBytesToAny(info.state.bytesDownloaded, 0, 2) + " MB of " + App.ConvertBytesToAny(info.state.totalBytes, 0, 2) + " MB"); 
-							string extra = $" {(int)info.state.ProcentageDownloaded }%";
+							string extra = $" {dloaded }%";
+							print("EXTRA: " + extra + "|" + dloaded);
 							//.TapCom = new Command(async (s) => {
 							long pos;
 							long len;
@@ -124,7 +125,7 @@ namespace CloudStreamForms
 
 							activeEpisodes.Add(new EpisodeResult() {
 								OgTitle = info.info.name,
-								ExtraDescription = $"{Download.GetExtraString(info.state.state)}{(info.state.state == App.DownloadState.Downloaded ? "" : extra)}",
+								ExtraDescription = $"{Download.GetExtraString(info.state.state)}{((info.state.state == App.DownloadState.Downloaded || dloaded == -1) ? "" : extra)}",
 								Title = (ep != -1 ? $"S{ss}:E{ep} " : "") + info.info.name,
 								Description = info.info.description,
 								Episode = ep,
