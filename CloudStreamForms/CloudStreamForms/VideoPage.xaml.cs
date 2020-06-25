@@ -16,10 +16,7 @@ namespace CloudStreamForms
 {
     [XamlCompilation(XamlCompilationOptions.Compile)]
     public partial class VideoPage : ContentPage
-    {
-
-
-
+    { 
         const string PLAY_IMAGE = "netflixPlay.png";//"baseline_play_arrow_white_48dp.png";
         const string PAUSE_IMAGE = "pausePlay.png";//"baseline_pause_white_48dp.png";
 

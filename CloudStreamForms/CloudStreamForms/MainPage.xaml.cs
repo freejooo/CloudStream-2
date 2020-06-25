@@ -1634,7 +1634,7 @@ namespace CloudStreamForms
 
 		// ========================================================= ALL METHODS =========================================================
 
-		public static IMovieProvider[] movieProviders = new IMovieProvider[] { new WatchTVProvider(), new FMoviesProvider(), new LiveMovies123Provider(), new TheMovies123Provider(), new YesMoviesProvider(), new WatchSeriesProvider(), new GomoStreamProvider(), new Movies123Provider(), new DubbedAnimeMovieProvider(), new TheMovieMovieProvider(), new KickassMovieProvider() };
+		public static IMovieProvider[] movieProviders = new IMovieProvider[] { new DirectVidsrcProvider(), new WatchTVProvider(), new FMoviesProvider(), new LiveMovies123Provider(), new TheMovies123Provider(), new YesMoviesProvider(), new WatchSeriesProvider(), new GomoStreamProvider(), new Movies123Provider(), new DubbedAnimeMovieProvider(), new TheMovieMovieProvider(), new KickassMovieProvider() };
 
 		public static IAnimeProvider[] animeProviders = new IAnimeProvider[] { new GogoAnimeProvider(), new KickassAnimeProvider(), new DubbedAnimeProvider(), new AnimeFlixProvider(), new DubbedAnimeNetProvider(), new AnimekisaProvider(), new DreamAnimeProvider(), new TheMovieAnimeProvider(), new KissFreeAnimeProvider(), new AnimeSimpleProvider() };
 
@@ -4156,6 +4156,82 @@ namespace CloudStreamForms
 #endregion
 
 #region =================================================== MOVIE PROVIDERS ===================================================
+
+		class DirectVidsrcProvider : IMovieProvider
+		{
+			public static string GetMainUrl(string url, bool en = true, string overrideReferer = null)
+			{
+				try {
+					HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url); 
+					WebHeaderCollection myWebHeaderCollection = request.Headers;
+					if (en) {
+						myWebHeaderCollection.Add("Accept-Language", "en;q=0.8");
+					}
+					request.AutomaticDecompression = DecompressionMethods.GZip;
+					request.UserAgent = USERAGENT;
+					request.Referer = overrideReferer ?? url;
+					//request.AddRange(1212416);
+					try {
+						using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
+							return response.ResponseUri.AbsoluteUri;
+					}
+					catch (Exception _ex) {
+						return "";
+					}
+				
+				}
+				catch (Exception) {
+					return "";
+				}
+			}
+
+
+			public void FishMainLinkTSync() { }
+
+			public void LoadLinksTSync(int episode, int season, int normalEpisode, bool isMovie, TempThred tempThred)
+			{
+				try {
+					if (!isMovie) return;
+
+					string _d = DownloadString("https://v2.vidsrc.me/embed/" + activeMovie.title.id +"/");
+					if (!GetThredActive(tempThred)) { return; };
+
+					if (_d != "") {
+						const string hashS = "data-hash=\"";
+						while (_d.Contains(hashS)) {
+							string hash = FindHTML(_d, hashS, "\"");
+							_d = RemoveOne(_d, hashS);
+
+							string d = GetMainUrl("https://v2.vidsrc.me/src/" + hash);
+							if (!GetThredActive(tempThred)) { return; };
+
+							if (d != "") {
+								string videoSource = FindHTML(d + "|||", "/v/", "|||"); // vidsrc.xyz = gcloud.live
+								if (videoSource != "") {
+									d = PostRequest("https://vidsrc.xyz/api/source/" + videoSource, d, $"r=https%3A%2F%2Fv2.vidsrc.me%2Fsource%2F{hash}&d=vidsrc.xyz").Replace("\\", "");
+									if (!GetThredActive(tempThred)) { return; };
+
+									const string lookFor = "\"file\":\"http";
+									int prio = 3;
+									while (d.Contains(lookFor)) {
+										string link = "http" + FindHTML(d, lookFor, "\"");
+										d = RemoveOne(d, lookFor);
+										string title = FindHTML(d, "label\":\"", "\"");
+										if (link != "http") {
+											prio++;
+											AddPotentialLink(normalEpisode, link, "Vidsrc " + title, prio);
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+				catch (Exception _ex) {
+					print("PROVIDER ERROR: " + _ex);
+				} 
+			}
+		}
 
 		class WatchTVProvider : IMovieProvider
 		{
