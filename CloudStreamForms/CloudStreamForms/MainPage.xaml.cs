@@ -2835,14 +2835,18 @@ namespace CloudStreamForms
 
 								print("MAIND:CC " + d);
 								if (d != "") {
+									string _d = "";
 									if (d.Contains("?url=")) {
-										d = FindHTML(d + "|", "?url=", "|");
+										_d = FindHTML(d + "|", "?url=", "|");
 									}
-									print("MAIND:CC2 " + d);
-									d = DownloadString(d);
-									if (d != "") {
-										print("MAIND:CC3 " + d);
-										AddEpisodesFromMirrors(tempThred, d, normalEpisode);
+									if(!_d.StartsWith("http") || d == "") {
+										_d = "https:" + d;
+									}
+									print("MAIND:CC2 " + _d);
+									_d = DownloadString(_d);
+									if (_d != "") {
+										print("MAIND:CC3 " + _d);
+										AddEpisodesFromMirrors(tempThred, _d, normalEpisode);
 									}
 								}
 							}
