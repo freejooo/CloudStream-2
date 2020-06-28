@@ -6084,7 +6084,7 @@ namespace CloudStreamForms
 
 					string title = FindHTML(d, "class=\"title\" > ", "<", decodeToNonHtml: true).Replace("\n", "");
 
-					string txt = FindHTML(d, lookFor, "</div>", decodeToNonHtml: true).Replace("<br/><br/>", "\n\n");
+					string txt = FindHTML(d, lookFor, "</div>", decodeToNonHtml: true).Replace("<br/>", "\n").Replace("<ul>", "").Replace("<li>", "").Replace("</li>", "").Replace("</ul>", "");
 					string author = FindHTML(d, "/?ref_=tt_urv\"\n>", "<").Replace("\n", ""); ;
 					string date = FindHTML(d, "ew-date\">", "<").Replace("\n", "");
 					baseReview.reviews.Add(new Review() { title = title, text = txt, containsSpoiler = false, rating = int.Parse(rating), author = author, date = date });

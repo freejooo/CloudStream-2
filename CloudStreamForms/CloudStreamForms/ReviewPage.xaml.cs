@@ -90,6 +90,7 @@ namespace CloudStreamForms
 								MainLoading.IsEnabled = false;
 								MainLoading.IsVisible = false;
 							}
+							holder.isSearchingforReviews = false;
 						});
 					}
 					if (holder.reviews == null) {
@@ -165,7 +166,7 @@ namespace CloudStreamForms
 		private void ViewCell_Appearing(object sender, EventArgs e)
 		{
 			ReviewItem episodeResult = (ReviewItem)(((ViewCell)sender).BindingContext);
-			if (episodeResult.index > MyEpisodeResultCollection.Count - 10) {
+			if (episodeResult.index > MyEpisodeResultCollection.Count - 20) {
 				TryGetNewReviews();
 			}
 		}
