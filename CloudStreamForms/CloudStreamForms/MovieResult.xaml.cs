@@ -333,6 +333,12 @@ namespace CloudStreamForms
 			SubtitleBtt.Source = GetImageSource("outline_subtitles_white_48dp.png"); //GetImageSource("round_subtitles_white_48dp.png");
 																					 //  IMDbBlue.Source = GetImageSource("IMDbBlue.png"); //GetImageSource("round_subtitles_white_48dp.png");
 
+			ReviewLabel.Clicked += (o, e) => {
+				if (!ReviewPage.isOpen) {
+					Page _p = new ReviewPage(currentMovie.title.id, mainPoster.name);
+					MainPage.mainPage.Navigation.PushModalAsync(_p);
+				}
+			};
 
 			SeasonPicker = new LabelList(SeasonBtt, new List<string>());
 			DubPicker = new LabelList(DubBtt, new List<string>());
@@ -988,6 +994,8 @@ namespace CloudStreamForms
 			Rectangle bounds = DescriptionLabel.Bounds;
 			// DescriptionLabel.LayoutTo(new Rectangle(bounds.X, bounds.Y, bounds.Width, 0), FATE_TIME_MS);
 			await RatingLabelRating.FadeTo(1, FATE_TIME_MS);
+			ReviewLabel.FadeTo(1, FATE_TIME_MS);
+		
 			await RatingLabel.FadeTo(1, FATE_TIME_MS);
 			await DescriptionLabel.FadeTo(1, FATE_TIME_MS);
 			//    await DescriptionLabel.LayoutTo(bounds, FATE_TIME_MS);
@@ -1691,7 +1699,7 @@ namespace CloudStreamForms
                     _sub = currentMovie.subtitles[0].data;
                 }
             }*/
-			App.RequestVlc(episodeResult.mirrosUrls, episodeResult.Mirros, episodeResult.OgTitle, GetId(episodeResult), episode: episodeResult.Episode, season: currentSeason, subtitleFull: currentMovie.subtitles.Select(t => t.data).FirstOrDefault(), descript: episodeResult.Description, overrideSelectVideo: overrideSelectVideo, startId:(int)episodeResult.ProgressState);// startId: FROM_PROGRESS); //  (int)episodeResult.ProgressState																																																																													  //App.PlayVLCWithSingleUrl(episodeResult.mirrosUrls, episodeResult.Mirros, currentMovie.subtitles.Select(t => t.data).ToList(), currentMovie.subtitles.Select(t => t.name).ToList(), currentMovie.title.name, episodeResult.Episode, currentSeason, overrideSelectVideo);
+			App.RequestVlc(episodeResult.mirrosUrls, episodeResult.Mirros, episodeResult.OgTitle, GetId(episodeResult), episode: episodeResult.Episode, season: currentSeason, subtitleFull: currentMovie.subtitles.Select(t => t.data).FirstOrDefault(), descript: episodeResult.Description, overrideSelectVideo: overrideSelectVideo, startId: (int)episodeResult.ProgressState);// startId: FROM_PROGRESS); //  (int)episodeResult.ProgressState																																																																													  //App.PlayVLCWithSingleUrl(episodeResult.mirrosUrls, episodeResult.Mirros, currentMovie.subtitles.Select(t => t.data).ToList(), currentMovie.subtitles.Select(t => t.name).ToList(), currentMovie.title.name, episodeResult.Episode, currentSeason, overrideSelectVideo);
 		}
 
 		// ============================== FORCE UPDATE ==============================
@@ -1843,7 +1851,7 @@ namespace CloudStreamForms
 					if (episodeResult.Mirros[i] == download) {
 						string mirrorUrl = episodeResult.mirrosUrls[i];
 						string mirrorName = episodeResult.Mirros[i];
-						DownloadSubtitlesToFileLocation(episodeResult, currentMovie, currentSeason,showToast:false);
+						DownloadSubtitlesToFileLocation(episodeResult, currentMovie, currentSeason, showToast: false);
 						TempThred tempThred = new TempThred();
 						tempThred.typeId = 4; // MAKE SURE THIS IS BEFORE YOU CREATE THE THRED
 						tempThred.Thread = new System.Threading.Thread(async () => {

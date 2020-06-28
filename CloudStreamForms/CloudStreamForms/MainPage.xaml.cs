@@ -171,6 +171,9 @@ namespace CloudStreamForms
 			// BarBackgroundColor = Color.Black;
 			//   BarTextColor = Color.OrangeRed;
 
+			//Page _p = new ReviewPage("tt0371746", "Iron Man");
+			//MainPage.mainPage.Navigation.PushModalAsync(_p);
+
 			//PushPageFromUrlAndName("tt4869896", "Overlord");
 			//  PushPageFromUrlAndName("tt0409591", "Naruto");
 			//  PushPageFromUrlAndName("tt10885406", "Ascendance of a Bookworm");
@@ -263,7 +266,7 @@ namespace CloudStreamForms
 
 
 		static readonly List<Type> types = new List<Type>() { typeof(decimal), typeof(int), typeof(string), typeof(bool), typeof(double), typeof(ushort), typeof(ulong), typeof(uint), typeof(short), typeof(short), typeof(char), typeof(long), typeof(float), };
-		
+
 		public static string FString(this object o, string _s = "")
 		{
 
@@ -858,7 +861,7 @@ namespace CloudStreamForms
 
 
 		// ========================================================= CONSTS =========================================================
-#region CONSTS
+		#region CONSTS
 		public const bool MOVIES_ENABLED = true;
 		public const bool TVSERIES_ENABLED = true;
 		public const bool ANIME_ENABLED = true;
@@ -886,11 +889,11 @@ namespace CloudStreamForms
 		public const bool REPLACE_IMDBNAME_WITH_POSTERNAME = true;
 		public static double posterRezMulti = 1.0;
 		public const string GOMOURL = "gomo.to";
-#endregion
+		#endregion
 
 		// ========================================================= THREDS =========================================================
 
-#region Threads
+		#region Threads
 		public static List<int> activeThredIds = new List<int>();
 		public static List<TempThred> tempThreds = new List<TempThred>();
 		public static int thredNumber = 0; // UNIQUE THRED NUMBER FOR EATCH THREAD CREATED WHEN TEMPTHREDS THRED IS SET
@@ -989,11 +992,11 @@ namespace CloudStreamForms
 				//  tempThreds = _tempThreds;
 			}
 		}
-#endregion
+		#endregion
 
 		// ========================================================= DATA =========================================================
 
-#region Data
+		#region Data
 
 		[System.Serializable]
 		public struct MirrorInfo
@@ -1277,13 +1280,15 @@ namespace CloudStreamForms
 			/// -1 = movie, 1-inf is seasons
 			/// </summary>
 			public Dictionary<int, string> watchMovieSeasonsData;
+			// USED FOR ANIMEMOVIES
 			public string kickassSubUrl;
 			public string kickassDubUrl;
 
-
 			public string shortEpView;
 
-			public bool IsMovie { get { return (movieType == MovieType.AnimeMovie || movieType == MovieType.Movie); } }
+			public ReviewHolder reviews;
+
+			public bool IsMovie { get { return movieType.IsMovie(); } }
 		}
 
 		[Serializable]
@@ -1328,7 +1333,7 @@ namespace CloudStreamForms
 			public PosterType posterType; // HOW DID YOU GET THE POSTER, IMDB SEARCH OR SOMETHING ELSE
 		}
 
-#region QuickSearch
+		#region QuickSearch
 		[System.Serializable]
 		public struct DubbedAnimeEpisode
 		{
@@ -1487,7 +1492,7 @@ namespace CloudStreamForms
 			public string q;
 			public int v;
 		}
-#endregion
+		#endregion
 
 		[Serializable]
 		public struct Link
@@ -1527,6 +1532,25 @@ namespace CloudStreamForms
 			public List<Subtitle> subtitles;
 			public List<Episode> episodes;
 			public List<MoeEpisode> moeEpisodes;
+		}
+
+		[Serializable]
+		public struct ReviewHolder
+		{
+			public string ajaxKey;
+			public List<Review> reviews;
+			public bool isSearchingforReviews;
+		}
+
+		[Serializable]
+		public struct Review
+		{
+			public int rating;
+			public string text;
+			public string title;
+			public bool containsSpoiler;
+			public string author;
+			public string date;
 		}
 
 		//  public struct NotificationData
@@ -1593,11 +1617,11 @@ namespace CloudStreamForms
 			public string[] licensors;
 			public MoeLink[] links;
 		}
-#endregion
+		#endregion
 
 		// ========================================================= EVENTS =========================================================
 
-#region Events
+		#region Events
 		public static List<Poster> activeSearchResults = new List<Poster>();
 		public static Movie activeMovie = new Movie();
 		public static string activeTrailer = "";
@@ -1630,7 +1654,7 @@ namespace CloudStreamForms
 		//public static event EventHandler<Movie> yesmovieFishingDone;
 
 		private static Random rng = new Random();
-#endregion
+		#endregion
 
 		// ========================================================= ALL METHODS =========================================================
 
@@ -1655,7 +1679,7 @@ namespace CloudStreamForms
 			int GetLinkCount(Movie currentMovie, int currentSeason, bool isDub, TempThred? tempThred);
 		}
 
-#region =================================================== ANIME PROVIDERS ===================================================
+		#region =================================================== ANIME PROVIDERS ===================================================
 
 
 		static class AnimeProviderHelper
@@ -1993,7 +2017,6 @@ namespace CloudStreamForms
 
 			public void LoadLinksTSync(int episode, int season, int normalEpisode, bool isMovie, TempThred tempThred)
 			{
-
 				if (activeMovie.title.movieType != MovieType.AnimeMovie) return;
 				try {
 					var dubUrl = activeMovie.title.kickassDubUrl;
@@ -2839,7 +2862,7 @@ namespace CloudStreamForms
 									if (d.Contains("?url=")) {
 										_d = FindHTML(d + "|", "?url=", "|");
 									}
-									if(!_d.StartsWith("http") || d == "") {
+									if (!_d.StartsWith("http") || d == "") {
 										_d = "https:" + d;
 									}
 									print("MAIND:CC2 " + _d);
@@ -2986,7 +3009,7 @@ namespace CloudStreamForms
 
 		public class DubbedAnimeNetProvider : IAnimeProvider
 		{
-#region structs
+			#region structs
 			public struct DubbedAnimeNetRelated
 			{
 				public string Alternative_version { get; set; }
@@ -3072,7 +3095,7 @@ namespace CloudStreamForms
 				public string id { get; set; }
 				public string type { get; set; }
 			}
-#endregion
+			#endregion
 			public string Name => "DubbedAnimeNet";
 
 			public void FishMainLink(string year, TempThred tempThred, MALData malData)
@@ -3883,7 +3906,7 @@ namespace CloudStreamForms
 		}
 
 
-#region AnimeFlixData
+		#region AnimeFlixData
 		public struct AnimeFlixSearchItem
 		{
 			public int id { get; set; }
@@ -3990,7 +4013,7 @@ namespace CloudStreamForms
 			public string thumbnail { get; set; }
 			public string resolution { get; set; }
 		}
-#endregion
+		#endregion
 
 		class AnimeFlixProvider : IAnimeProvider
 		{
@@ -4023,7 +4046,7 @@ namespace CloudStreamForms
 								if (names[q].ToLower().Contains(malData.firstName.ToLower()) || names[q].ToLower().Contains(activeMovie.title.name.ToLower())) {
 									print("NAMES:::da" + d.title);
 									alreadyAdded.Add(id);
-									try { 
+									try {
 										string url = "https://animeflix.io/api/episodes?anime_id=" + d.id + "&limit=50&sort=DESC";
 										print("DURL:::==" + url);
 										string dres = DownloadString(url, repeats: 2, waitTime: 500);
@@ -4037,7 +4060,7 @@ namespace CloudStreamForms
 											var _seasonData = JsonConvert.DeserializeObject<AnimeFlixAnimeSeason>(dres);
 
 											seasonData.data.AddRange(_seasonData.data);
-										} 
+										}
 
 										bool hasDub = false, hasSub = false;
 
@@ -4157,16 +4180,16 @@ namespace CloudStreamForms
 			}
 
 		}
-#endregion
+		#endregion
 
-#region =================================================== MOVIE PROVIDERS ===================================================
+		#region =================================================== MOVIE PROVIDERS ===================================================
 
 		class DirectVidsrcProvider : IMovieProvider
 		{
 			public static string GetMainUrl(string url, bool en = true, string overrideReferer = null)
 			{
 				try {
-					HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url); 
+					HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
 					WebHeaderCollection myWebHeaderCollection = request.Headers;
 					if (en) {
 						myWebHeaderCollection.Add("Accept-Language", "en;q=0.8");
@@ -4182,7 +4205,7 @@ namespace CloudStreamForms
 					catch (Exception _ex) {
 						return "";
 					}
-				
+
 				}
 				catch (Exception) {
 					return "";
@@ -4197,7 +4220,7 @@ namespace CloudStreamForms
 				try {
 					if (!isMovie) return;
 
-					string _d = DownloadString("https://v2.vidsrc.me/embed/" + activeMovie.title.id +"/");
+					string _d = DownloadString("https://v2.vidsrc.me/embed/" + activeMovie.title.id + "/");
 					if (!GetThredActive(tempThred)) { return; };
 
 					if (_d != "") {
@@ -4233,7 +4256,7 @@ namespace CloudStreamForms
 				}
 				catch (Exception _ex) {
 					print("PROVIDER ERROR: " + _ex);
-				} 
+				}
 			}
 		}
 
@@ -4523,6 +4546,8 @@ namespace CloudStreamForms
 				tempThred.Thread.Name = "Movies123MetaData";
 				tempThred.Thread.Start();
 			}
+
+
 
 			public void LoadLinksTSync(int episode, int season, int normalEpisode, bool isMovie, TempThred tempThred)
 			{
@@ -5682,9 +5707,6 @@ namespace CloudStreamForms
 			}
 		}
 
-
-
-
 		public static class TheMovieHelper
 		{
 			[System.Serializable]
@@ -5926,7 +5948,7 @@ namespace CloudStreamForms
 		}
 
 
-#endregion
+		#endregion
 
 		static void GetSeasonAndPartFromName(string name, out int season, out int part)
 		{
@@ -6030,6 +6052,52 @@ namespace CloudStreamForms
 				list[n] = value;
 			}
 		}
+
+		public static ReviewHolder? GetReview(ReviewHolder reviewHolder, string id)
+		{
+			try {
+				ReviewHolder baseReview = new ReviewHolder();
+				string url = "";
+				if (reviewHolder.ajaxKey.IsClean()) {
+					url = "https://www.imdb.com/title/" + id + "/reviews/_ajax?sort=helpfulnessScore&dir=desc&spoiler=hide&ratingFilter=0&ref_=undefined&paginationKey=" + reviewHolder.ajaxKey;
+				}
+				else {
+					url = "https://www.imdb.com/title/" + id + "/reviews?spoiler=hide&sort=helpfulnessScore&dir=desc&ratingFilter=0";
+				}
+
+				string d = DownloadString(url);
+				string ajaxKey = FindHTML(d, "d-more-data\" data-key=\"", "\"");
+				baseReview.ajaxKey = ajaxKey;
+				if (reviewHolder.reviews == null) {
+					baseReview.reviews = new List<Review>();
+				}
+				else {
+					baseReview.reviews = reviewHolder.reviews;
+				}
+				baseReview.isSearchingforReviews = false;
+				const string lookFor = "<div class=\"text show-more__control\">";
+				while (d.Contains(lookFor)) {
+					d = RemoveOne(d, "class=\"ipl-icon ipl-star-icon");
+					//print(d.IndexOf("<span class=\"spoiler-warning\">Warning: Spoilers</span>"));
+
+					string rating = FindHTML(d, "<span>", "<").Replace("\n", "");
+
+					string title = FindHTML(d, "class=\"title\" > ", "<", decodeToNonHtml: true).Replace("\n", "");
+
+					string txt = FindHTML(d, lookFor, "</div>", decodeToNonHtml: true).Replace("<br/><br/>", "\n\n");
+					string author = FindHTML(d, "/?ref_=tt_urv\"\n>", "<").Replace("\n", ""); ;
+					string date = FindHTML(d, "ew-date\">", "<").Replace("\n", "");
+					baseReview.reviews.Add(new Review() { title = title, text = txt, containsSpoiler = false, rating = int.Parse(rating), author = author, date = date });
+					d = RemoveOne(d, lookFor);
+				}
+				return baseReview;
+			}
+			catch (Exception _ex) {
+				print("MAIN EX IN GETREVIW" + _ex);
+				return null;
+			}
+		}
+
 
 		public static List<IMDbTopList> FetchRecomended(List<string> inp, bool shuffle = true, int max = 10)
 		{

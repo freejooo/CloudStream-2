@@ -1,0 +1,73 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:d="http://xamarin.com/schemas/2014/forms/design"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:ff="clr-namespace:FFImageLoading.Forms;assembly=FFImageLoading.Forms" xmlns:ffTransformations="clr-namespace:FFImageLoading.Transformations;assembly=FFImageLoading.Transformations"
+			 mc:Ignorable="d"
+             x:Class="CloudStreamForms.ReviewPage">
+	<ContentPage.Content>
+		<StackLayout x:Name="MainStack">
+			<Label x:Name="ReviewTitle" Margin="3" Text="Reviews" HorizontalOptions="Center"  FontSize="25"   TextColor="#ffffff"  ></Label>
+			<ProgressBar ClassId="id" x:Name="MainLoading"></ProgressBar>
+		<!--	<RefreshView BackgroundColor="#1D1D1D" RefreshColor="#4e66ff" Command="{Binding RefreshCommand}" 
+           IsRefreshing="{Binding IsRefreshing}"         >-->
+
+				<!-- <ProgressBar Progress="0.5"></ProgressBar> -->
+				<ListView ItemsSource="{Binding MyEpisodeResultCollection}"
+                             CachingStrategy="RecycleElement" 
+                ItemTapped="episodeView_ItemTapped"  HasUnevenRows="True"
+                    x:Name="episodeView"  SeparatorColor="Gray"  
+         >
+
+
+					<!--  RefreshCommand="{Binding RefreshCommand}"
+           IsRefreshing="{Binding IsRefreshing}"       RefreshControlColor="#303F9F"  -->
+					<ListView.ItemTemplate>
+						<DataTemplate >
+							<ViewCell Tapped="ViewCell_Tapped" Appearing="ViewCell_Appearing">
+								<Grid  RowSpacing="0"  Padding="10" VerticalOptions="Fill">
+									<Grid.RowDefinitions >
+										<RowDefinition Height="Auto" />
+										<RowDefinition Height="Auto" />
+									</Grid.RowDefinitions>
+									<Grid.ColumnDefinitions >
+										<ColumnDefinition Width="Auto" />
+										<ColumnDefinition Width="Auto" />
+										<ColumnDefinition Width="Auto" />
+									</Grid.ColumnDefinitions>
+
+									<Grid Grid.Row="0"  Grid.Column="0" HeightRequest="23">
+										<Grid.ColumnDefinitions >
+											<ColumnDefinition Width="Auto" />
+											<ColumnDefinition Width="Auto" />
+										</Grid.ColumnDefinitions>
+										<Grid.RowDefinitions >
+											<RowDefinition Height="Auto" />
+											<RowDefinition Height="Auto" />
+										</Grid.RowDefinitions>
+										<Grid Grid.Row="0"  Grid.Column="0" >
+										<Button InputTransparent="True" Text="{Binding Rating}" VerticalOptions="Center" TextColor="White" FontAttributes="Bold" FontSize="14" ClassId="CUST" BackgroundColor="#2291ff" CornerRadius="5" WidthRequest="35"></Button>
+							<!--		<Label Text="{Binding Rating}" VerticalOptions="Center" TextColor="#e6e6e6" FontAttributes="Bold" FontSize="16" BackgroundColor="#2291ff"/> -->
+										</Grid>
+										<Grid Grid.Row="0"  Grid.Column="1" >
+											<Label Text="{Binding Title}" VerticalOptions="Center" TextColor="#e6e6e6" FontAttributes="Bold" FontSize="14" TranslationY="0"/>
+										</Grid>
+									</Grid>
+
+
+									<Grid Grid.Row="1"  Grid.Column="0" >
+										<Label Text="{Binding Date}"  TextColor="Gray" MaxLines="3" FontSize="11" />
+									</Grid>
+									<Grid Grid.Row="2"  Grid.Column="0" >
+									<Label Text="{Binding Text}"  TextColor="#e0e0e0" MaxLines="{Binding MaxLines}"   FontSize="12" />
+										<!-- 2291ff-->
+									</Grid>
+								</Grid>
+							</ViewCell>
+						</DataTemplate>
+					</ListView.ItemTemplate>
+				</ListView>
+			<!--</RefreshView>-->
+		</StackLayout>
+	</ContentPage.Content>
+</ContentPage>
