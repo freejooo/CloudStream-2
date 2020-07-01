@@ -27,7 +27,7 @@ namespace CloudStreamForms
             InitializeComponent();
             BackgroundColor = Settings.BlackRBGColor;
 
-            searchLoaded += Search_searchLoaded;
+            mainCore.searchLoaded += Search_searchLoaded;
 
             //BindingContext = new SearchPageViewer();
 
@@ -139,7 +139,7 @@ namespace CloudStreamForms
 
         private void SearchBar_SearchButtonPressed(object sender, EventArgs e)
         {
-            QuickSearch(((SearchBar)sender).Text);
+            mainCore.QuickSearch(((SearchBar)sender).Text);
         }
 
         private void ListView_ItemTapped(object sender, ItemTappedEventArgs e)
@@ -174,7 +174,7 @@ namespace CloudStreamForms
         private void SearchBar_TextChanged(object sender, TextChangedEventArgs e)
         {
             if (Settings.SearchEveryCharEnabled) {
-                QuickSearch(e.NewTextValue);
+                mainCore.QuickSearch(e.NewTextValue);
             }
         }
 
@@ -186,12 +186,12 @@ namespace CloudStreamForms
             MainThread.BeginInvokeOnMainThread(() => {
 
                 mySearchResultCollection.Clear();
-                for (int i = 0; i < activeSearchResults.Count; i++) {
-                    string extra = activeSearchResults[i].extra;
+                for (int i = 0; i < mainCore.activeSearchResults.Count; i++) {
+                    string extra = mainCore.activeSearchResults[i].extra;
                     if (extra != "") {
                         extra = " - " + extra;
                     }
-                    mySearchResultCollection.Add(new SearchResult() { Id = i, Title = activeSearchResults[i].name + extra, Extra = activeSearchResults[i].year, Poster = activeSearchResults[i].posterUrl });
+                    mySearchResultCollection.Add(new SearchResult() { Id = i, Title = mainCore.activeSearchResults[i].name + extra, Extra = mainCore.activeSearchResults[i].year, Poster = mainCore.activeSearchResults[i].posterUrl });
                 }
             });
         }

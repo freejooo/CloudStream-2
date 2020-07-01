@@ -61,11 +61,12 @@ namespace CloudStreamForms
 			if (!firstTime && !holder.ajaxKey.IsClean()) return;
 			holder.isSearchingforReviews = true;
 
-			TempThred tempThred = new TempThred();
-			tempThred.typeId = 9; // MAKE SURE THIS IS BEFORE YOU CREATE THE THRED
-			tempThred.Thread = new System.Threading.Thread(() => {
+
+
+			TempThread tempThred = mainCore.CreateThread(9);
+			mainCore.StartThread("Reviews Thread", () => {
 				try {
-					var h = CloudStreamCore.GetReview(holder, mainId);
+					var h = mainCore.GetReview(holder, mainId);
 					if (h != null) {
 						holder = (ReviewHolder)h;
 					}
@@ -75,7 +76,7 @@ namespace CloudStreamForms
 					//if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
 				}
 				finally {
-					JoinThred(tempThred);
+					mainCore.JoinThred(tempThred);
 					if (holder.reviews != null) {
 						Device.BeginInvokeOnMainThread(() => {
 							MyEpisodeResultCollection.Clear();
@@ -100,9 +101,7 @@ namespace CloudStreamForms
 
 					holder.isSearchingforReviews = false;
 				}
-			});
-			tempThred.Thread.Name = "GetReviews";
-			tempThred.Thread.Start();
+			}); 
 		}
 
 		public static bool isOpen = false;

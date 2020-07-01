@@ -73,7 +73,7 @@ namespace CloudStreamForms
 			Search.mainPoster = new Poster();
 			if (lastMovie != null) {
 				if (lastMovie.Count > 1) {
-					activeMovie = lastMovie[lastMovie.Count - 1];
+					mainCore.activeMovie = lastMovie[lastMovie.Count - 1];
 					lastMovie.RemoveAt(lastMovie.Count - 1);
 				}
 			}
@@ -391,18 +391,18 @@ namespace CloudStreamForms
 			NameLabel.Text = mainPoster.name;
 			RatingLabel.Text = mainPoster.year;
 
-			titleLoaded += MovieResult_titleLoaded;
-			trailerLoaded += MovieResult_trailerLoaded;
-			episodeLoaded += MovieResult_epsiodesLoaded;
+			mainCore.titleLoaded += MovieResult_titleLoaded;
+			mainCore.trailerLoaded += MovieResult_trailerLoaded;
+			mainCore.episodeLoaded += MovieResult_epsiodesLoaded;
 
 
 			// TrailerBtt.Clicked += TrailerBtt_Clicked;
 			Gradient.Clicked += TrailerBtt_Clicked;
-			linkAdded += MovieResult_linkAdded;
+			mainCore.linkAdded += MovieResult_linkAdded;
 
-			fishingDone += MovieFishingDone;
+			mainCore.fishingDone += MovieFishingDone;
 
-			moeDone += MovieResult_moeDone;
+			mainCore.moeDone += MovieResult_moeDone;
 
 			BackgroundColor = Settings.BlackRBGColor;
 			BgColorSet.BackgroundColor = Settings.BlackRBGColor;
@@ -433,7 +433,7 @@ namespace CloudStreamForms
 			};
 			ReloadAllBtt.Source = GetImageSource("round_refresh_white_48dp.png");
 
-			GetImdbTitle(mainPoster);
+			mainCore.GetImdbTitle(mainPoster);
 			currentMovie.title.id = mainPoster.url.Replace("https://imdb.com/title/", "");
 			ChangeStar();
 
@@ -738,12 +738,12 @@ namespace CloudStreamForms
 			}
 
 			if (episodeResult.PosterUrl == "") {
-				if (activeMovie.title.posterUrl != "") {
+				if (mainCore.activeMovie.title.posterUrl != "") {
 					string posterUrl = "";
 					try {
-						if (activeMovie.title.trailers.Count > 0) {
-							if (activeMovie.title.trailers[0].PosterUrl != null) {
-								posterUrl = activeMovie.title.trailers[0].PosterUrl;
+						if (mainCore.activeMovie.title.trailers.Count > 0) {
+							if (mainCore.activeMovie.title.trailers[0].PosterUrl != null) {
+								posterUrl = mainCore.activeMovie.title.trailers[0].PosterUrl;
 							}
 						}
 					}
@@ -819,13 +819,13 @@ namespace CloudStreamForms
 					epView.MyEpisodeResultCollection[_id].downloadState = 4; // SET IS SEARCHING
 					ForceUpdate();
 					currentDownloadSearchesHappening++;
-					GetEpisodeLink(isMovie ? -1 : (episodeResult.Id + 1), currentSeason, isDub: isDub, purgeCurrentLinkThread: currentDownloadSearchesHappening > 0);
+					mainCore.GetEpisodeLink(isMovie ? -1 : (episodeResult.Id + 1), currentSeason, isDub: isDub, purgeCurrentLinkThread: currentDownloadSearchesHappening > 0);
 					print("!!___" + _id);
 					await Task.Delay(10000); // WAIT 10 Sec
 					try {
 						if (!SameAsActiveMovie()) return;
 
-						currentMovie = activeMovie;
+						currentMovie = mainCore.activeMovie;
 						print("!!___" + _id);
 						epRes = epView.MyEpisodeResultCollection[_id];
 
@@ -903,20 +903,20 @@ namespace CloudStreamForms
 
 		bool SameAsActiveMovie()
 		{
-			return currentMovie.title.id == activeMovie.title.id;
+			return currentMovie.title.id == mainCore.activeMovie.title.id;
 		}
 
 		private void MovieResult_linkAdded(object sender, Link e)
 		{
 			if (!SameAsActiveMovie()) return;
-			if (currentMovie.episodes[0].name + currentMovie.episodes[0].description == activeMovie.episodes[0].name + activeMovie.episodes[0].description && epView.MyEpisodeResultCollection.Count > 0) {
+			if (currentMovie.episodes[0].name + currentMovie.episodes[0].description == mainCore.activeMovie.episodes[0].name + mainCore.activeMovie.episodes[0].description && epView.MyEpisodeResultCollection.Count > 0) {
 			}
 			else {
 				return;
 			}
 
 			MainThread.BeginInvokeOnMainThread(() => {
-				currentMovie = activeMovie;
+				currentMovie = mainCore.activeMovie;
 				if (CurrentEpisodes != null) {
 					for (int i = 0; i < CurrentEpisodes.Count; i++) {
 						if (CurrentEpisodes[i].links != null) {
@@ -1073,7 +1073,7 @@ namespace CloudStreamForms
 					}
 					SeasonPicker.ItemsSource = season;
 
-					int selIndex = App.GetKey<int>("SeasonIndex", activeMovie.title.id, 0);
+					int selIndex = App.GetKey<int>("SeasonIndex", mainCore.activeMovie.title.id, 0);
 					try {
 						SeasonPicker.SelectedIndex = Math.Min(selIndex, SeasonPicker.ItemsSource.Count - 1);
 					}
@@ -1085,11 +1085,11 @@ namespace CloudStreamForms
 
 
 					print("GetImdbEpisodes>>>>>>>>>>>>>>><<");
-					GetImdbEpisodes(currentSeason);
+					mainCore.GetImdbEpisodes(currentSeason);
 				}
 				else {
 					currentSeason = 0; // MOVIES
-					GetImdbEpisodes();
+					mainCore.GetImdbEpisodes();
 				}
 				SeasonPicker.SelectedIndexChanged += SeasonPicker_SelectedIndexChanged;
 
@@ -1128,7 +1128,7 @@ namespace CloudStreamForms
 								if (lastMovie == null) {
 									lastMovie = new List<Movie>();
 								}
-								lastMovie.Add(activeMovie);
+								lastMovie.Add(mainCore.activeMovie);
 								Search.mainPoster = RecomendedPosters[z];
 								Page _p = new MovieResult();// { mainPoster = mainPoster };
 								Navigation.PushModalAsync(_p);
@@ -1193,9 +1193,9 @@ namespace CloudStreamForms
 
 			DubPicker.button.FadeTo(0, FATE_TIME_MS);
 			currentSeason = SeasonPicker.SelectedIndex + 1;
-			App.SetKey("SeasonIndex", activeMovie.title.id, SeasonPicker.SelectedIndex);
+			App.SetKey("SeasonIndex", mainCore.activeMovie.title.id, SeasonPicker.SelectedIndex);
 
-			GetImdbEpisodes(currentSeason);
+			mainCore.GetImdbEpisodes(currentSeason);
 		}
 
 		void SetChangeTo(int maxEp = -1)
@@ -1237,7 +1237,7 @@ namespace CloudStreamForms
 				};
 				print("episodes loaded");
 
-				currentMovie = activeMovie;
+				currentMovie = mainCore.activeMovie;
 
 				currentMovie.episodes = e;
 				CurrentEpisodes = e;
@@ -1429,11 +1429,10 @@ namespace CloudStreamForms
 			if (!SameAsActiveMovie()) return;
 			print("SETDUB:::SET");
 
-			TempThred tempThred = new TempThred();
-			tempThred.typeId = 6; // MAKE SURE THIS IS BEFORE YOU CREATE THE THRED
-			tempThred.Thread = new System.Threading.Thread(() => {
+			TempThread tempThred = mainCore.CreateThread(6);
+			mainCore.StartThread("Set SUB/DUB", () => {
 				try {
-					int max = GetMaxEpisodesInAnimeSeason(currentMovie, currentSeason, isDub, tempThred);
+					int max = mainCore.GetMaxEpisodesInAnimeSeason(currentSeason, isDub, tempThred);
 					if (max > 0) {
 						print("CLEAR AND ADD");
 						MainThread.BeginInvokeOnMainThread(() => {
@@ -1475,11 +1474,9 @@ namespace CloudStreamForms
 					}
 				}
 				finally {
-					JoinThred(tempThred);
+					mainCore.JoinThred(tempThred);
 				}
-			});
-			tempThred.Thread.Name = "Set SUB/DUB";
-			tempThred.Thread.Start();
+			}); 
 		}
 
 
@@ -1621,7 +1618,7 @@ namespace CloudStreamForms
 				}
 			}
 			else {
-				GetEpisodeLink(isMovie ? -1 : (episodeResult.Id + 1), currentSeason, isDub: isDub, purgeCurrentLinkThread: currentDownloadSearchesHappening > 0);
+				mainCore.GetEpisodeLink(isMovie ? -1 : (episodeResult.Id + 1), currentSeason, isDub: isDub, purgeCurrentLinkThread: currentDownloadSearchesHappening > 0);
 
 				await Device.InvokeOnMainThreadAsync(async () => {
 					// NormalStack.IsEnabled = false;
@@ -1639,7 +1636,7 @@ namespace CloudStreamForms
 					loadingLinks = false;
 
 					if (SameAsActiveMovie()) {
-						currentMovie = activeMovie;
+						currentMovie = mainCore.activeMovie;
 					}
 				//NormalStack.IsEnabled = true;
 				// NormalStack.Opacity = 1f;
@@ -1852,9 +1849,8 @@ namespace CloudStreamForms
 						string mirrorUrl = episodeResult.mirrosUrls[i];
 						string mirrorName = episodeResult.Mirros[i];
 						DownloadSubtitlesToFileLocation(episodeResult, currentMovie, currentSeason, showToast: false);
-						TempThred tempThred = new TempThred();
-						tempThred.typeId = 4; // MAKE SURE THIS IS BEFORE YOU CREATE THE THRED
-						tempThred.Thread = new System.Threading.Thread(async () => {
+						TempThread tempThred = mainCore.CreateThread(4);
+						mainCore.StartThread("DownloadThread" , async () => {
 							try {
 								//UserDialogs.Instance.ShowLoading("Checking link...", MaskType.Gradient);
 								ActionPopup.StartIndeterminateLoadinbar("Checking link...");
@@ -1882,11 +1878,9 @@ namespace CloudStreamForms
 							}
 							finally {
 								//UserDialogs.Instance.HideLoading();
-								JoinThred(tempThred);
+								mainCore.JoinThred(tempThred);
 							}
-						});
-						tempThred.Thread.Name = "DownloadThread";
-						tempThred.Thread.Start();
+						}); 
 					}
 				}
 			}
@@ -1928,9 +1922,8 @@ namespace CloudStreamForms
 				}
 				return;
 			}
-			TempThred tempThred = new TempThred();
-			tempThred.typeId = 4; // MAKE SURE THIS IS BEFORE YOU CREATE THE THRED
-			tempThred.Thread = new System.Threading.Thread(() => {
+			TempThread tempThred = mainCore.CreateThread(4);
+			mainCore.StartThread("Subtitle Download", () => {
 				try {
 					if (id.Replace(" ", "") == "") {
 						if (showToast) {
@@ -1939,7 +1932,7 @@ namespace CloudStreamForms
 						return;
 					}
 
-					string s = DownloadSubtitle(id, showToast: false);
+					string s = mainCore.DownloadSubtitle(id, showToast: false);
 					if (s == "") {
 						if (showToast) {
 							App.ShowToast("No Subtitles Found");
@@ -1959,11 +1952,10 @@ namespace CloudStreamForms
 					}
 				}
 				finally {
-					JoinThred(tempThred);
+					mainCore.JoinThred(tempThred);
 				}
 			});
-			tempThred.Thread.Name = "Subtitle Download";
-			tempThred.Thread.Start();
+			 
 		}
 
 		void DeleteFile(string downloadKeyData, EpisodeResult episodeResult)

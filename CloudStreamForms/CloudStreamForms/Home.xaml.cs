@@ -87,22 +87,19 @@ namespace CloudStreamForms
 
             if (!Fething) {
                 Fething = true;
-                TempThred tempThred = new TempThred();
-                tempThred.typeId = 21; // MAKE SURE THIS IS BEFORE YOU CREATE THE THRED
-                tempThred.Thread = new System.Threading.Thread(() => {
+                TempThread tempThred = mainCore.CreateThread(21);
+                mainCore.StartThread("GetFetchRecomended", () => {
                     try {
                         var f = FetchRecomended(bookmarkPosters.Select(t => t.id).ToList());
-                        if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
+                        if (!mainCore.GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
                         iMDbTopList.AddRange(f);
                         LoadMoreImages();
                     }
                     finally {
                         Fething = false;
-                        JoinThred(tempThred);
+                        mainCore.JoinThred(tempThred);
                     }
-                });
-                tempThred.Thread.Name = "GetFetchRecomended";
-                tempThred.Thread.Start();
+                }); 
             }
         }
 
@@ -122,12 +119,11 @@ namespace CloudStreamForms
             if (!Settings.Top100Enabled) return;
 
             Fething = true;
-            TempThred tempThred = new TempThred();
-            tempThred.typeId = 21; // MAKE SURE THIS IS BEFORE YOU CREATE THE THRED
-            tempThred.Thread = new System.Threading.Thread(() => {
+            TempThread tempThred = mainCore.CreateThread(21);
+            mainCore.StartThread("FethTop100", () => {
                 try {
                     var f = FetchTop100(new List<string>() { genres[MovieTypePicker.SelectedIndex] }, start, top100: IsTop100);
-                    if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
+                    if (!mainCore.GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
 
                     iMDbTopList.AddRange(f);
                     /*  Device.BeginInvokeOnMainThread(() => {
@@ -149,11 +145,9 @@ namespace CloudStreamForms
                 }
                 finally {
                     Fething = false;
-                    JoinThred(tempThred);
+                    mainCore.JoinThred(tempThred);
                 }
-            });
-            tempThred.Thread.Name = "FethTop100";
-            tempThred.Thread.Start();
+            }); 
         }
 
         private void episodeView_ItemTapped(object sender, ItemTappedEventArgs e)
@@ -230,7 +224,7 @@ namespace CloudStreamForms
 
             ImdbTypePicker.SelectedIndexChanged += (o, e) => {
                 ClearEpisodes();
-                PurgeThreds(21);
+                mainCore.PurgeThreads(21);
                 Fething = false;
                 if (IsRecommended) {
                     GetFetchRecomended();
@@ -247,11 +241,11 @@ namespace CloudStreamForms
             MovieTypePicker.SelectedIndexChanged += (o, e) => {
                 ClearEpisodes(!IsRecommended);
                 if (IsRecommended) {
-                    CloudStreamCore.Shuffle(iMDbTopList);
+                    MovieHelper.Shuffle(iMDbTopList);
                     LoadMoreImages();
                 }
                 else {
-                    PurgeThreds(21);
+                    mainCore.PurgeThreads(21);
                     Fething = false;
                     GetFetch();
                 }
