@@ -8,7 +8,7 @@
              mc:Ignorable="d"                         
              xmlns:xe="clr-namespace:XamEffects;assembly=XamEffects"
              x:Class="CloudStreamForms.Download">
-	<AbsoluteLayout>
+	<Grid>
 		<Image x:Name="baseImg" VerticalOptions="Fill" HorizontalOptions="Fill" Scale="0.8" BackgroundColor="Transparent" AbsoluteLayout.LayoutBounds="0, 0, 1, 1" AbsoluteLayout.LayoutFlags="All"  InputTransparent="True"></Image>
 		<Label x:Name="baseTxt" AbsoluteLayout.LayoutBounds="0, 0, 1, 1" AbsoluteLayout.LayoutFlags="All"  VerticalOptions="Center" HorizontalOptions="Center" TextColor="#434343" ClassId="CUST" FontAttributes="Bold" FontSize="18" TranslationY="120" InputTransparent="True" Text="No Downloads"></Label>
 
@@ -75,13 +75,11 @@
 
 			</Grid>
 
-
-
 			<Grid>
 				<Grid.RowDefinitions >
 					<RowDefinition Height="Auto" />
 				</Grid.RowDefinitions>
-
+				
 				<Grid Grid.Row="1"  Grid.Column="0">
 					<RefreshView BackgroundColor="#1D1D1D" RefreshColor="#4e66ff" Command="{Binding RefreshCommand}" 
            IsRefreshing="{Binding IsRefreshing}"         >
@@ -220,5 +218,5 @@
 			</Grid>
 		</StackLayout>
 
-	</AbsoluteLayout>
+	</Grid>
 </ContentPage>

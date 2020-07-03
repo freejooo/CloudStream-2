@@ -16,7 +16,7 @@ namespace CloudStreamForms
 {
     [XamlCompilation(XamlCompilationOptions.Compile)]
     public partial class VideoPage : ContentPage
-    { 
+    {
         const string PLAY_IMAGE = "netflixPlay.png";//"baseline_play_arrow_white_48dp.png";
         const string PAUSE_IMAGE = "pausePlay.png";//"baseline_pause_white_48dp.png";
 
@@ -712,7 +712,7 @@ namespace CloudStreamForms
                 if (Player != null) {
                     if (Player.State != VLCState.Error && Player.State != VLCState.Opening) {
                         string lastId = currentVideo.episodeId;
-                        if (lastId != null) { 
+                        if (lastId != null) {
                             long pos = Player.Time;//Last position in media when player exited
                             if (pos > -1) {
                                 App.SetViewPos(lastId, pos);
