@@ -99,7 +99,7 @@ namespace CloudStreamForms
                         Fething = false;
                         mainCore.JoinThred(tempThred);
                     }
-                }); 
+                });
             }
         }
 
@@ -147,7 +147,7 @@ namespace CloudStreamForms
                     Fething = false;
                     mainCore.JoinThred(tempThred);
                 }
-            }); 
+            });
         }
 
         private void episodeView_ItemTapped(object sender, ItemTappedEventArgs e)

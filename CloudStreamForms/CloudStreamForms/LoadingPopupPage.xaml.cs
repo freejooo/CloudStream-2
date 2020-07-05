@@ -12,7 +12,7 @@ namespace CloudStreamForms
         public LoadingPopupPage(int loadingMs, string title = "Loading")
         {
             InitializeComponent();
-           // BackgroundColor = new Color(0, 0, 0, 0.9);
+            // BackgroundColor = new Color(0, 0, 0, 0.9);
 
             if (ActionPopup.isOpen) {
                 PopupNavigation.PopAsync(false);

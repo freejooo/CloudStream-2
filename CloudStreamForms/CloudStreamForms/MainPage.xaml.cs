@@ -209,6 +209,7 @@ namespace CloudStreamForms
         {
             string url = FindHTML(intentData, "cloudstreamforms:", "Name=");
             string name = FindHTML(intentData, "Name=", "=EndAll");
+            print("MUSHFROMMMM: " + name + "|" + url);
             //Task.Delay(10000);
             if (name != "" && url != "") {
                 PushPageFromUrlAndName(url, System.Web.HttpUtility.UrlDecode(name));
@@ -284,46 +285,46 @@ namespace CloudStreamForms
             return "";
 #endif
 #if DEBUG
-			if (o == null) {
-				return "Null";
-			}
-			Type valueType = o.GetType();
+            if (o == null) {
+                return "Null";
+            }
+            Type valueType = o.GetType();
 
-			if (o is IList) {
-				IList list = (o as IList);
-				string s = valueType.Name + " {";
-				for (int i = 0; i < list.Count; i++) {
-					s += "\n	" + _s + i + ". " + list[i].FString(_s + "	");
-				}
-				return s + "\n" + _s + "}";
-			}
+            if (o is IList) {
+                IList list = (o as IList);
+                string s = valueType.Name + " {";
+                for (int i = 0; i < list.Count; i++) {
+                    s += "\n	" + _s + i + ". " + list[i].FString(_s + "	");
+                }
+                return s + "\n" + _s + "}";
+            }
 
 
-			if (!types.Contains(valueType) && !valueType.IsArray && !valueType.IsEnum) {
-				string s = valueType.Name + " {";
-				foreach (var field in valueType.GetFields()) {
-					s += ("\n	" + _s + field.Name + " => " + field.GetValue(o).FString(_s + "	"));
-				}
-				return s + "\n" + _s + "}";
-			}
-			else {
-				if (valueType.IsArray) {
-					int _count = 0;
-					var enu = ((o) as IEnumerable).GetEnumerator();
-					string s = valueType.Name + " {";
-					while (enu.MoveNext()) {
-						s += "\n	" + _count + ". " + enu.Current.FString(_s + "	");
-						_count++;
-					}
-					return s + "\n" + _s + "}";
-				}
-				else if (valueType.IsEnum) {
-					return valueType.GetEnumName(o);
-				}
-				else {
-					return o.ToString();
-				}
-			}
+            if (!types.Contains(valueType) && !valueType.IsArray && !valueType.IsEnum) {
+                string s = valueType.Name + " {";
+                foreach (var field in valueType.GetFields()) {
+                    s += ("\n	" + _s + field.Name + " => " + field.GetValue(o).FString(_s + "	"));
+                }
+                return s + "\n" + _s + "}";
+            }
+            else {
+                if (valueType.IsArray) {
+                    int _count = 0;
+                    var enu = ((o) as IEnumerable).GetEnumerator();
+                    string s = valueType.Name + " {";
+                    while (enu.MoveNext()) {
+                        s += "\n	" + _count + ". " + enu.Current.FString(_s + "	");
+                        _count++;
+                    }
+                    return s + "\n" + _s + "}";
+                }
+                else if (valueType.IsEnum) {
+                    return valueType.GetEnumName(o);
+                }
+                else {
+                    return o.ToString();
+                }
+            }
 #endif
 
         }
@@ -5134,7 +5135,7 @@ namespace CloudStreamForms
 
                                                         // activeMovie.episodes[episode] = SetEpisodeProgress(activeMovie.episodes[episode]);
 
-                                                        if (gunURL != "" && gunURL != "https://gounlimited.to/") {
+                                                        if (gunURL != "https://gounlimited.to/.html" && gunURL != "" && gunURL != "https://gounlimited.to/") {
                                                             try {
                                                                 if (!GetThredActive(tempThred)) { return; };
 

@@ -10,7 +10,6 @@ using static CloudStreamForms.App;
 using static CloudStreamForms.CloudStreamCore;
 using static CloudStreamForms.InputPopupPage;
 using static CloudStreamForms.SelectPopup;
-using Xamarin.Forms.PlatformConfiguration.AndroidSpecific;
 using Button = Xamarin.Forms.Button;
 
 namespace CloudStreamForms
@@ -48,19 +47,19 @@ namespace CloudStreamForms
 
         public static async Task<string> DisplayEntry(InputPopupResult result, string placeHolder, string title = "", int offset = -1, bool autoPaste = true, string setText = null, string confirmText = "")
         {
-            var page = new InputPopupPage(result, placeHolder, title, offset, autoPaste, setText,confirmText);
+            var page = new InputPopupPage(result, placeHolder, title, offset, autoPaste, setText, confirmText);
             await PopupNavigation.Instance.PushAsync(page);
             return await page.WaitForResult();
         }
 
-        public static async Task<decimal> DisplayDecimalEntry(string placeHolder, string title = "", int offset = -1, bool autoPaste = true, string setText = null)
+        public static async Task<decimal> DisplayDecimalEntry(string placeHolder, string title = "", int offset = -1, bool autoPaste = true, string setText = null, string confirmText = "")
         {
-            return decimal.Parse((await DisplayEntry(InputPopupResult.decimalNumber, placeHolder, title, offset, autoPaste, setText)).Replace(".", ","));
+            return decimal.Parse((await DisplayEntry(InputPopupResult.decimalNumber, placeHolder, title, offset, autoPaste, setText,confirmText)).Replace(".", ","));
         }
 
-        public static async Task<int> DisplayIntEntry(string placeHolder, string title = "", int offset = -1, bool autoPaste = true, string setText = null)
+        public static async Task<int> DisplayIntEntry(string placeHolder, string title = "", int offset = -1, bool autoPaste = true, string setText = null,string confirmText  = "")
         {
-            return int.Parse(await DisplayEntry(InputPopupResult.integrerNumber, placeHolder, title, offset, autoPaste, setText));
+            return int.Parse(await DisplayEntry(InputPopupResult.integrerNumber, placeHolder, title, offset, autoPaste, setText, confirmText));
         }
     }
 
@@ -95,7 +94,7 @@ namespace CloudStreamForms
 
             button.Clicked += async (o, e) => {
                 //  await ActionPopup.DisplayEntry(InputPopupResult.decimalNumber, "ms", "Audio Delay",offset:50,setText:"0",confirmText:"Set Delay");
-                 // await ActionPopup.DisplayEntry(InputPopupResult.url, "https://youtu.be/", "Youtube link",confirmText:"Download");
+                // await ActionPopup.DisplayEntry(InputPopupResult.url, "https://youtu.be/", "Youtube link",confirmText:"Download");
 
                 await PopupNavigation.Instance.PushAsync(new SelectPopup(ItemsSource, SelectedIndex, title));
                 SelectPopup.OnSelectedChanged += (_o, _e) => {
@@ -173,7 +172,7 @@ namespace CloudStreamForms
             BackgroundColor = new Color(0, 0, 0, 0.9);
             InitializeComponent();
 
-           // On<Xamarin.Forms.PlatformConfiguration.Android>().Element.windo
+            // On<Xamarin.Forms.PlatformConfiguration.Android>().Element.windo
 
             UpdateScreenRot();
             TheStack.SizeChanged += (o, e) => {

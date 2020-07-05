@@ -170,15 +170,16 @@
                     </xe:BorderView>
                     -->
                                 <xe:BorderView x:Name="LockTap" Grid.Column="0" Margin="0,10"
-          HeightRequest="35"
-          WidthRequest="70"
+                                    HeightRequest="35"
+                                    WidthRequest="70"
                                     xe:TouchEffect.Color="White" 
-          HorizontalOptions="Center"
-          VerticalOptions="Center"
-          BackgroundColor="Transparent"
-          CornerRadius="2"
-          BorderColor="Transparent"
-          BorderWidth="0">
+                                    HorizontalOptions="Center"
+                                    VerticalOptions="Center"
+                                    BackgroundColor="Transparent"
+                                    CornerRadius="2"
+                                    BorderColor="Transparent"
+                                    BorderWidth="0">
+                                    
                                     <Grid Grid.Column="0" HorizontalOptions="Center" ColumnSpacing="0" >
                                         <Grid.ColumnDefinitions >
                                             <ColumnDefinition Width="Auto" />
@@ -190,15 +191,16 @@
                                     </Grid>
                                 </xe:BorderView>
                                 <xe:BorderView x:Name="EpisodesTap" Grid.Column="1" Margin="-10,0"
-          HeightRequest="35"
-          WidthRequest="110"
+                                    HeightRequest="35"
+                                    WidthRequest="110"
                                     xe:TouchEffect.Color="White" 
-          HorizontalOptions="Center"
-          VerticalOptions="Center"
-          BackgroundColor="Transparent"
-          CornerRadius="2"
-          BorderColor="Transparent"
-          BorderWidth="0">
+                                    HorizontalOptions="Center"
+                                    VerticalOptions="Center"
+                                    BackgroundColor="Transparent"
+                                    CornerRadius="2"
+                                    BorderColor="Transparent"
+                                    BorderWidth="0">
+
                                     <Grid Grid.Column="0" HorizontalOptions="Center" ColumnSpacing="0" >
                                         <Grid.ColumnDefinitions >
                                             <ColumnDefinition Width="Auto" />
@@ -210,17 +212,17 @@
                                     </Grid>
                                 </xe:BorderView>
 
-
                                 <xe:BorderView x:Name="MirrorsTap" Grid.Column="2"
-          HeightRequest="35"
-          WidthRequest="100"
+                                    HeightRequest="35"
+                                    WidthRequest="100"
                                     xe:TouchEffect.Color="White" 
-          HorizontalOptions="Center"
-          VerticalOptions="Center"
-          BackgroundColor="Transparent"
-          CornerRadius="2"
-          BorderColor="Transparent"
-          BorderWidth="0">
+                                    HorizontalOptions="Center"
+                                    VerticalOptions="Center"
+                                    BackgroundColor="Transparent"
+                                    CornerRadius="2"
+                                    BorderColor="Transparent"
+                                    BorderWidth="0">
+                                    
                                     <Grid Grid.Column="0" HorizontalOptions="Center" ColumnSpacing="0" >
                                         <Grid.ColumnDefinitions >
                                             <ColumnDefinition Width="Auto" />
@@ -232,17 +234,40 @@
 
                                     </Grid>
                                 </xe:BorderView>
-
-                                <xe:BorderView x:Name="SubTap" Grid.Column="3"  Margin="-10,0"
-          HeightRequest="35"
-          WidthRequest="120"
+                                
+                                <xe:BorderView x:Name="DelayTap" Grid.Column="3"
+                                    HeightRequest="35"
+                                    WidthRequest="100"
                                     xe:TouchEffect.Color="White" 
-          HorizontalOptions="Center"
-          VerticalOptions="Center"
-          BackgroundColor="Transparent"
-          CornerRadius="2"
-          BorderColor="Transparent"
-          BorderWidth="0">
+                                    HorizontalOptions="Center"
+                                    VerticalOptions="Center"
+                                    BackgroundColor="Transparent"
+                                    CornerRadius="2"
+                                    BorderColor="Transparent"
+                                    BorderWidth="0">
+
+                                    <Grid Grid.Column="0" HorizontalOptions="Center" ColumnSpacing="0" >
+                                        <Grid.ColumnDefinitions >
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <ff:CachedImage x:Name="AudioImg" Grid.Column="0" VerticalOptions="Center" TranslationX="-5" TranslationY="1.5" InputTransparent="True" BackgroundColor="Transparent" WidthRequest="32" HeightRequest="32" Aspect="AspectFill"></ff:CachedImage>
+                                        <!--  <Button Text="Mirrors"  Grid.Column="1" BackgroundColor="Transparent"></Button>-->
+                                        <Label Text="Audio" Grid.Column="1" VerticalOptions="Center" TextColor="White"></Label>
+                                    </Grid>
+                                </xe:BorderView>
+                                
+                                <xe:BorderView x:Name="SubTap" Grid.Column="3"  Margin="-10,0"
+                                    HeightRequest="35"
+                                    WidthRequest="120"
+                                    xe:TouchEffect.Color="White" 
+                                    HorizontalOptions="Center"
+                                    VerticalOptions="Center"
+                                    BackgroundColor="Transparent"
+                                    CornerRadius="2"
+                                    BorderColor="Transparent"
+                                    BorderWidth="0">
+                                    
                                     <Grid Grid.Column="0" HorizontalOptions="Center" ColumnSpacing="0" >
                                         <Grid.ColumnDefinitions >
                                             <ColumnDefinition Width="Auto" />
@@ -256,15 +281,16 @@
                                 </xe:BorderView>
 
                                 <xe:BorderView x:Name="NextEpisodeTap" Grid.Column="4"  Margin="-10,0"
-          HeightRequest="35"
-          WidthRequest="120"
+                                    HeightRequest="35"
+                                    WidthRequest="120"
                                     xe:TouchEffect.Color="White" 
-          HorizontalOptions="Center"
-          VerticalOptions="Center"
-          BackgroundColor="Transparent"
-          CornerRadius="2"
-          BorderColor="Transparent"
-          BorderWidth="0">
+                                    HorizontalOptions="Center"
+                                    VerticalOptions="Center"
+                                    BackgroundColor="Transparent"
+                                    CornerRadius="2"
+                                    BorderColor="Transparent"
+                                    BorderWidth="0">
+                                    
                                     <Grid Grid.Column="0" HorizontalOptions="Center" ColumnSpacing="0" >
                                         <Grid.ColumnDefinitions >
                                             <ColumnDefinition Width="Auto" />

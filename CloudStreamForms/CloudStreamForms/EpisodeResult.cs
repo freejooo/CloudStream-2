@@ -86,7 +86,7 @@ namespace CloudStreamForms.Models
                 return $"S{season}:E{episode} {OgTitle}";
             }
         }
-         
+
         public double TranslateYOffset {
             get {
                 if (Device.RuntimePlatform == Device.UWP) {
