@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 using Xamarin.Forms;
@@ -88,7 +89,7 @@ namespace CloudStreamForms
             public bool isSingleMirror;
             public long startPos; // -2 from progress, -1 = from start
             public string episodeId;
-            public string headerId;  
+            public string headerId;
         }
 
         /// <summary>
@@ -305,39 +306,65 @@ namespace CloudStreamForms
                     }
                 }
             });
-        } 
+        }
 
-        int currentSubtitleIndexInCurrent = 0; 
+        int currentSubtitleIndexInCurrent = 0;
 
         string subtitleText1; // TOP
         string subtitleText2; // BOTTOM
 
         double currentTime = 0;
 
+        string lastSub = "";
+
         void UpdateSubtitles()
         {
+            string comp = subtitleText1 + "|||" + subtitleText2;
+            if (lastSub == comp) {
+                return;
+            }
+            lastSub = comp;
+
             Device.BeginInvokeOnMainThread(() => {
                 print("TITLL:::: " + subtitleText1 + "|" + subtitleText2);
+
                 SubtitleTxt1.Text = subtitleText1;
+                SubtitleTxt1Back1.Text = subtitleText1;
+                SubtitleTxt1Back2.Text = subtitleText1;
+                SubtitleTxt1Back3.Text = subtitleText1;
+                SubtitleTxt1Back4.Text = subtitleText1;
+                SubtitleTxt1Back5.Text = subtitleText1;
+                SubtitleTxt1Back6.Text = subtitleText1;
+                SubtitleTxt1Back7.Text = subtitleText1;
+                SubtitleTxt1Back8.Text = subtitleText1;
+
                 SubtitleTxt2.Text = subtitleText2;
+                SubtitleTxt2Back1.Text = subtitleText2;
+                SubtitleTxt2Back2.Text = subtitleText2;
+                SubtitleTxt2Back3.Text = subtitleText2;
+                SubtitleTxt2Back4.Text = subtitleText2;
+                SubtitleTxt2Back5.Text = subtitleText2;
+                SubtitleTxt2Back6.Text = subtitleText2;
+                SubtitleTxt2Back7.Text = subtitleText2;
+                SubtitleTxt2Back8.Text = subtitleText2;
             });
         }
 
-        public async void SubtitlesLoop2()
+        int last = 0;
+        bool lastType = false;
+        public void SubtitleLoop()
         {
-            int last = 0;
-            bool lastType = false;
+            if (subtitleIndex == -1 || currentSubtitles[subtitleIndex].subtitles.Length <= 3) {
+                // await Task.Delay(50);
+                subtitleText2 = "";
+                subtitleText1 = "";
+                UpdateSubtitles();
+                return;
+            }
 
-            while (true) {
-                if (subtitleIndex == -1 || currentSubtitles[subtitleIndex].subtitles.Length <= 3) {
-                    await Task.Delay(50);
-                    subtitleText2 = "";
-                    subtitleText1 = "";
-                    UpdateSubtitles();
-                    continue;
-                }
-
-                var Subtrack = currentSubtitles[subtitleIndex].subtitles;
+            bool done = false;
+            var Subtrack = currentSubtitles[subtitleIndex].subtitles;
+            while (!done) {
                 try {
                     var track = Subtrack[currentSubtitleIndexInCurrent];
                     // SET CORRECT TIME
@@ -369,7 +396,7 @@ namespace CloudStreamForms
                     }
 
 
-                    if (currentTime < track.EndTime + subtitleDelay  && currentTime > track.StartTime + subtitleDelay) {
+                    if (currentTime < track.EndTime + subtitleDelay && currentTime > track.StartTime + subtitleDelay) {
                         if (last != currentSubtitleIndexInCurrent) {
                             var lines = track.Lines;
                             if (lines.Count > 0) {
@@ -395,20 +422,29 @@ namespace CloudStreamForms
                             lastType = true;
                         }
                     }
+                    done = true;
 
                     last = currentSubtitleIndexInCurrent;
                     print("DELAY!::: " + currentSubtitleIndexInCurrent);
-                    await Task.Delay(30);
+                    //  await Task.Delay(30);
                 }
                 catch (Exception _ex) {
+                    done = true;
                     print("EX::X:X::X:X: " + _ex);
                 }
-
             }
         }
+         
 
         public void PlayerTimeChanged(long time)
         {
+            try {
+                SubtitleLoop();
+            }
+            catch (Exception _ex) {
+                print("SUBLOOP FAILED:D" + _ex);
+            }
+
             Device.BeginInvokeOnMainThread(() => {
                 try {
                     double val = ((double)(time / 1000) / (double)(Player.Length / 1000));
@@ -454,6 +490,57 @@ namespace CloudStreamForms
             IsSingleMirror = video.isSingleMirror;
 
             InitializeComponent();
+
+            Vector2[] offsets = new Vector2[]  {
+                new Vector2(0,1),
+                new Vector2(1,1),
+                new Vector2(1,0),
+                new Vector2(1,-1),
+                new Vector2(0,-1),
+                new Vector2(-1,-1),
+                new Vector2(-1,0),
+                new Vector2(-1,1),
+            };
+
+            Label[] font1 = new Label[] {
+                 SubtitleTxt1Back1,
+                 SubtitleTxt1Back2,
+                 SubtitleTxt1Back3,
+                 SubtitleTxt1Back4,
+                 SubtitleTxt1Back5,
+                 SubtitleTxt1Back6,
+                 SubtitleTxt1Back7,
+                 SubtitleTxt1Back8,
+            };
+
+            Label[] font2 = new Label[] {
+                SubtitleTxt2Back1,
+                SubtitleTxt2Back2,
+                SubtitleTxt2Back3,
+                SubtitleTxt2Back4,
+                SubtitleTxt2Back5,
+                SubtitleTxt2Back6,
+                SubtitleTxt2Back7,
+                SubtitleTxt2Back8,
+            };
+
+            float multi = 1f;
+
+            double base1X = SubtitleTxt1.TranslationX;
+            double base1Y = SubtitleTxt1.TranslationY;
+            double base2X = SubtitleTxt2.TranslationX;
+            double base2Y = SubtitleTxt2.TranslationY;
+
+            for (int i = 0; i < font1.Length; i++) {
+                font1[i].FontFamily = Settings.GlobalSubtitleFont;
+                font1[i].TranslationX = base1X + offsets[i].X * multi;
+                font1[i].TranslationY = base1Y + offsets[i].Y * multi;
+            }
+            for (int i = 0; i < font2.Length; i++) {
+                font2[i].FontFamily = Settings.GlobalSubtitleFont;
+                font2[i].TranslationX = base2X + offsets[i].X * multi;
+                font2[i].TranslationY = base2Y + offsets[i].Y * multi;
+            }
 
             SubtitleTxt1.FontFamily = Settings.GlobalSubtitleFont;
             SubtitleTxt2.FontFamily = Settings.GlobalSubtitleFont;
@@ -529,8 +616,7 @@ namespace CloudStreamForms
                 }
                 catch (Exception _ex) {
                     print("A_A__A__A:: " + _ex);
-                }
-                SubtitlesLoop2();
+                } 
             }
 
             SubTap.IsVisible = HasSupportForSubtitles() && Settings.SUBTITLES_INVIDEO_ENABELD;
@@ -663,13 +749,13 @@ namespace CloudStreamForms
                 Device.BeginInvokeOnMainThread(() => {
                     if (e.Cache == 100) {
                         try {
-                            if(Player != null) {
-                            SetIsPaused(!Player.IsPlaying);
-                            UpdateAudioDelay(App.GetDelayAudio());
+                            if (Player != null) {
+                                SetIsPaused(!Player.IsPlaying);
+                                UpdateAudioDelay(App.GetDelayAudio());
                             }
                         }
                         catch (Exception) {
-                             
+
                         }
                     }
                     else {

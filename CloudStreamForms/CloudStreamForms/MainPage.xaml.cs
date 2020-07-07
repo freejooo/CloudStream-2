@@ -133,7 +133,7 @@ namespace CloudStreamForms
             InitializeComponent(); mainPage = this; CloudStreamCore.mainPage = mainPage;
 
             if (IS_TEST_VIDEO) {
-                Page p = new VideoPage(new VideoPage.PlayVideo() { descript = "", name = "Black Bunny", episode = -1, season = -1, MirrorNames = new List<string>() { "Googlevid" }, MirrorUrls = new List<string>() { "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" }});//new List<string>() { "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" }, new List<string>() { "Black" }, new List<string>() { });// { mainPoster = mainPoster };
+                Page p = new VideoPage(new VideoPage.PlayVideo() { descript = "", name = "Black Bunny", episode = -1, season = -1, MirrorNames = new List<string>() { "Googlevid" }, MirrorUrls = new List<string>() { "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" } });//new List<string>() { "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" }, new List<string>() { "Black" }, new List<string>() { });// { mainPoster = mainPoster };
                 Navigation.PushModalAsync(p, false);
             }
             // Page _p = new ChromeCastPage();// { mainPoster = mainPoster };
@@ -517,8 +517,7 @@ namespace CloudStreamForms
 
         public static double CurrentTime {
             get {
-                try {
-                    // double test = CurrentChannel.Status.First().CurrentTime; // WILL CAUSE CRASH IF STOPPED BY EXTRARNAL
+                try { 
                     if (RequestNextTime != -1 && IsBuffering) {
                         return RequestNextTime;
                     }
@@ -533,7 +532,7 @@ namespace CloudStreamForms
                         TimeSpan t = DateTime.Now.Subtract(castUpdatedNow);
                         double currentTime = castLastUpdate + t.TotalSeconds;
                         return currentTime;
-                    }
+                    } 
                 }
                 catch (System.Exception) {
                     return CurrentCastingDuration; // CAST STOPPED FROM EXTERNAL
@@ -639,7 +638,7 @@ namespace CloudStreamForms
         private static void ChromeChannel_StatusChanged(object sender, EventArgs e)
         {
             MediaStatus mm = CurrentChannel.Status.FirstOrDefault();
-
+            
             IsPlaying = (mm.PlayerState == "PLAYING");
             IsBuffering = (mm.PlayerState == "BUFFERING");
             IsIdle = (mm.PlayerState == "IDLE");
@@ -801,6 +800,11 @@ namespace CloudStreamForms
                     setTime = CurrentTime;
                 }
 
+                //CurrentChannel.;
+                //CurrentChromeMedia.CurrentTime;
+                //chromeSender.;
+                //chromeRecivever.;
+
                 currentUrl = url;
                 currentMirrorName = mirrorName;
                 currentPosterUrl = posterUrl;
@@ -813,17 +817,17 @@ namespace CloudStreamForms
                 var mediaInfo = new MediaInformation() { ContentId = url, Metadata = mediaMetadata };
                 print("REALLSLSLLS:: " + subtitleUrl);
 
-                string realSub = GenerateSubUrl(subtitleUrl,subtitleDelay);
+                string realSub = GenerateSubUrl(subtitleUrl, subtitleDelay);
                 //   subtitleUrl = "https://commondatastorage.googleapis.com/gtv-videos-bucket/CastVideos/tracks/DesigningForGoogleCast-en.vtt";
 
 
                 // SUBTITLES
                 if (realSub != "") {
                     validSubtitle = true;
-                     mediaInfo.Tracks = new Track[]
-                                {
+                    mediaInfo.Tracks = new Track[]
+                               {
                                  new Track() {  TrackId = 1, Language = "en-US" , Name = subtitleName, TrackContentId = realSub,SubType=TextTrackType.Subtitles,Type=TrackType.Text}
-                                };
+                               };
                     mediaInfo.TextTrackStyle = new TextTrackStyle() {
                         FontFamily = Settings.GlobalSubtitleFont,
                         BackgroundColor = System.Drawing.Color.Transparent,//.Color.Transparent,
@@ -831,14 +835,14 @@ namespace CloudStreamForms
                         EdgeType = TextTrackEdgeType.Outline,
                         ForegroundColor = System.Drawing.Color.White,
                         //WindowColor = System.Drawing.Color.Red,
-                      //  WindowType = TextTrackWindowType.RoundedCorners,
-                       // WindowRoundedCornerRadius = 5,
+                        //  WindowType = TextTrackWindowType.RoundedCorners,
+                        // WindowRoundedCornerRadius = 5,
                         FontScale = 1.05f,
                     };
                 }
-                
+
                 mediaMetadata.Title = mirrorName;
-                mediaMetadata.Images = new GoogleCast.Models.Image[] { new GoogleCast.Models.Image() { Url = posterUrl,Height=200,Width=200} } ;
+                mediaMetadata.Images = new GoogleCast.Models.Image[] { new GoogleCast.Models.Image() { Url = posterUrl, Height = 200, Width = 200 } };
 
                 if (validSubtitle) {
                     CurrentChromeMedia = await CurrentChannel.LoadAsync(mediaInfo, true, 1);
@@ -917,6 +921,9 @@ namespace CloudStreamForms
 
         public static async void JustStopVideo()
         {
+            ShowLogo();
+
+            /*
             try {
                 await CurrentChannel.StopAsync();
             }
@@ -928,11 +935,10 @@ namespace CloudStreamForms
             }
             catch (Exception) {
                 await Task.CompletedTask;
-            }
+            }*/
 
 
             IsCastingVideo = false;
-            ShowLogo();
             print("STOP CASTING! VIDEO");
         }
 
@@ -960,7 +966,7 @@ namespace CloudStreamForms
 
         public static async void ShowLogo()
         {
-            CurrentChromeMedia = await CurrentChannel.LoadAsync(new MediaInformation() { ContentId = "https://cdn.discordapp.com/attachments/551382684560261121/730151252012564560/ChromecastLogo5.png", StreamType = StreamType.None, ContentType = "image/jpeg" });
+            CurrentChromeMedia = await CurrentChannel.LoadAsync(new MediaInformation() { ContentId = "https://cdn.discordapp.com/attachments/551382684560261121/730169809408622702/ChromecastLogo6.png", StreamType = StreamType.None, ContentType = "image/jpeg" });
         }
 
         public static async void ConnectToChromeDevice(string name)
@@ -983,10 +989,11 @@ namespace CloudStreamForms
                         Console.WriteLine("CONNECTED");
                         CurrentChannel = chromeSender.GetChannel<IMediaChannel>();
                         await chromeSender.LaunchAsync(CurrentChannel);
+
                         ShowLogo();
 
                         IsConnectedToChromeDevice = true;
-                        
+
                         Device.BeginInvokeOnMainThread(() => {
                             OnConnected?.Invoke(null, null);
                         });
@@ -7460,7 +7467,7 @@ namespace CloudStreamForms
         public void DownloadSubtitlesAndAdd(string lang = "", bool isEpisode = false, int episodeCounter = 0)
         {
             if (!globalSubtitlesEnabled) { return; }
-            if(lang == "") { lang = Settings.NativeSubShortName; }
+            if (lang == "") { lang = Settings.NativeSubShortName; }
 
             TempThread tempThred = CreateThread(3);
             StartThread("SubtitleThread", () => {

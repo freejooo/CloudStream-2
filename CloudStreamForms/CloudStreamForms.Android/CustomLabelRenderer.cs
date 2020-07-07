@@ -21,8 +21,8 @@ public class CustomLabelRenderer : LabelRenderer
         tv.VerticalScrollBarEnabled = false;
         if(e.NewElement.ClassId == "OUTLINE") {
             
-            tv.SetOutlineSpotShadowColor(Android.Graphics.Color.Black);
-             //tv.SetShadowLayer(0f, 10, 10, Android.Graphics.Color.Black);
+            //tv.SetOutlineSpotShadowColor(Android.Graphics.Color.Black);
+             tv.SetShadowLayer(5f, 5, 5, Android.Graphics.Color.Black);
         }
     }
 }
