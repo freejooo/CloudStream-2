@@ -731,56 +731,80 @@ namespace CloudStreamForms
         /// <returns></returns>
         public static string GenerateSubUrl(string data, int offset = 0)
         {
-            if (!data.IsClean()) return "";
+            if (data == null) return "";
 
             string realSubText = "";
-            try {
-                var _sub = ParseSubtitles(data).ToArray();
-                print("SUBLENNN::: " + _sub);
-                realSubText += "WEBVTT\n\n";
-                string ToSubTime(int tick)
-                {
-                    if(tick < 0) {
-                        tick = 0;
+            if (data != "") {
+                try {
+                    var _sub = ParseSubtitles(data).ToArray();
+                    print("SUBLENNN::: " + _sub);
+                    realSubText += "WEBVTT\n\n";
+                    string ToSubTime(int tick)
+                    {
+                        if (tick < 0) {
+                            tick = 0;
+                        }
+
+                        var str = TimeSpan.FromMilliseconds(tick).ToString();
+                        if (str.Length == 8) {
+                            str += ".";
+                        }
+                        int reqLen = Math.Max(0, 12 - str.Length);
+                        if (reqLen > 0) {
+                            str += MultiplyString("0", reqLen);
+                        }
+                        return str.Substring(0, 12);
                     }
 
-                    var str = TimeSpan.FromMilliseconds(tick).ToString();
-                    if (str.Length == 8) {
-                        str += ".";
+                    for (int i = 0; i < _sub.Length; i++) {
+                        realSubText += (i + 1).ToString() + "\n";
+                        realSubText += ToSubTime(_sub[i].StartTime + offset) + " --> " + ToSubTime(_sub[i].EndTime + offset) + "\n";
+                        foreach (var line in _sub[i].Lines) {
+                            realSubText += line + "\n";
+                        }
+                        realSubText += "\n";
                     }
-                    int reqLen = Math.Max(0, 12 - str.Length);
-                    if (reqLen > 0) {
-                        str += MultiplyString("0", reqLen);
-                    }
-                    return str.Substring(0, 12);
+                    print("DDADADAA");
                 }
-
-                for (int i = 0; i < _sub.Length; i++) {
-                    realSubText += (i + 1).ToString() + "\n";
-                    realSubText += ToSubTime(_sub[i].StartTime + offset) + " --> " + ToSubTime(_sub[i].EndTime + offset) + "\n";
-                    foreach (var line in _sub[i].Lines) {
-                        realSubText += line + "\n";
-                    }
-                    realSubText += "\n";
+                catch (Exception _ex) {
+                    print("MINNNNN EX: " + _ex);
+                    return "";
                 }
-                print("DDADADAA");
             }
-            catch (Exception _ex) {
-                print("MINNNNN EX: " + _ex);
-                return "";
-            }
-
             return CreateSubListiner(realSubText);
         }
 
+        /*
+        public static async Task ToggleSubtitles(bool isEnabled, string lang = null)
+        { 
+        }*/
+
+        public static async Task<bool> ChangeSubtitles(string subFile, string name, int delay = 0)
+        {
+            bool suc = await CastVideo(currentUrl, currentMirrorName, -2, subFile, name, currentPosterUrl, currentMovieName, delay);
+            /*if (suc) {
+                await ToggleSubtitles(true);
+            }*/
+            return suc;
+        }
+
+        static string currentUrl = "";
+        static string currentMirrorName = "";
+        static string currentPosterUrl = "";
+        static string currentMovieName = "";
 
         // Subtitle Url https://static.movies123.pro/files/tracks/JhUzWRukqeuUdRrPCe0R3lUJ1SmknAVSv670Ep0cXipm1JfMgNWa379VKKAz8nvFMq2ksu7bN5tCY5tXXKS4Lrr1tLkkipdLJNArNzVSu2g.srt
-        public static async Task<bool> CastVideo(string url, string mirrorName, double setTime = -1, string subtitleUrl = "", string subtitleName = "", string posterUrl = "", string movieTitle = "")
+        public static async Task<bool> CastVideo(string url, string mirrorName, double setTime = -1, string subtitleUrl = "", string subtitleName = "", string posterUrl = "", string movieTitle = "", int subtitleDelay = 0)
         {
             try {
                 if (setTime == -2) {
                     setTime = CurrentTime;
                 }
+
+                currentUrl = url;
+                currentMirrorName = mirrorName;
+                currentPosterUrl = posterUrl;
+                currentMovieName = movieTitle;
 
                 GenericMediaMetadata mediaMetadata = new GenericMediaMetadata();
                 RequestNextTime = setTime;
@@ -789,9 +813,9 @@ namespace CloudStreamForms
                 var mediaInfo = new MediaInformation() { ContentId = url, Metadata = mediaMetadata };
                 print("REALLSLSLLS:: " + subtitleUrl);
 
-                string realSub = GenerateSubUrl(subtitleUrl); 
+                string realSub = GenerateSubUrl(subtitleUrl,subtitleDelay);
                 //   subtitleUrl = "https://commondatastorage.googleapis.com/gtv-videos-bucket/CastVideos/tracks/DesigningForGoogleCast-en.vtt";
-              
+
 
                 // SUBTITLES
                 if (realSub != "") {
@@ -801,9 +825,11 @@ namespace CloudStreamForms
                                  new Track() {  TrackId = 1, Language = "en-US" , Name = subtitleName, TrackContentId = realSub,SubType=TextTrackType.Subtitles,Type=TrackType.Text}
                                 };
                     mediaInfo.TextTrackStyle = new TextTrackStyle() {
+                        FontFamily = "Open Sans",
                         BackgroundColor = System.Drawing.Color.Transparent,//.Color.Transparent,
                         EdgeColor = System.Drawing.Color.Black,
-                        EdgeType = TextTrackEdgeType.DropShadow
+                        EdgeType = TextTrackEdgeType.Outline,
+                        FontScale = 1.05f,
                     };
                 }
                 mediaMetadata.Title = mirrorName;
@@ -822,7 +848,6 @@ namespace CloudStreamForms
                     SetChromeTime(setTime);
                 }
                 CurrentChannel.StatusChanged += ChromeChannel_StatusChanged;
-                print("!3");
 
                 castUpdatedNow = DateTime.Now;
                 castLastUpdate = 0;
@@ -7339,15 +7364,31 @@ namespace CloudStreamForms
         }
 
 
+        public static readonly string[] subtitleNames = new string[] {
+            "Svenska","Abkhazian","Afrikaans","Albanian","Arabic","Aragonese","Armenian","Assamese","Asturian","Azerbaijani","Basque","Belarusian","Bengali","Bosnian","Breton","Bulgarian","Burmese","Catalan","Chinese (simplified)","Chinese (traditional)","Chinese bilingual","Croatian","Czech","Danish","Dutch","English","Esperanto","Estonian","Extremaduran","Finnish","French","Gaelic","Galician","Georgian","German","Greek","Hebrew","Hindi","Hungarian","Icelandic","Igbo","Indonesian","Interlingua","Irish","Italian","Japanese","Kannada","Kazakh","Khmer","Korean","Kurdish","Latvian","Lithuanian","Luxembourgish","Macedonian","Malay","Malayalam","Manipuri","Mongolian","Montenegrin","Navajo","Northern Sami","Norwegian","Occitan","Odia","Persian","Polish","Portuguese","Portuguese (BR)","Portuguese (MZ)","Romanian","Russian","Serbian","Sindhi","Sinhalese","Slovak","Slovenian","Somali","Spanish","Spanish (EU)","Spanish (LA)","Swahili","Syriac","Tagalog","Tamil","Tatar","Telugu","Thai","Turkish","Turkmen","Ukrainian","Urdu","Vietnamese",
+        };
+
+        public static readonly string[] subtitleShortNames = new string[] {
+            "swe","abk","afr","alb","ara","arg","arm","asm","ast","aze","baq","bel","ben","bos","bre","bul","bur","cat","chi","zht","zhe","hrv","cze","dan","dut","eng","epo","est","ext","fin","fre","gla","glg","geo","ger","ell","heb","hin","hun","ice","ibo","ind","ina","gle","ita","jpn","kan","kaz","khm","kor","kur","lav","lit","ltz","mac","may","mal","mni","mon","mne","nav","sme","nor","oci","ori","per","pol","por","pob","pom","rum","rus","scc","snd","sin","slo","slv","som","spa","spn","spl","swa","syr","tgl","tam","tat","tel","tha","tur","tuk","ukr","urd","vie",
+        };
+
+        public static Dictionary<string, string> cachedSubtitles = new Dictionary<string, string>();
 
         /// <summary>
-        /// RETURN SUBTITLE STRING
+        /// RETURN SUBTITLE STRING, BLOCKING ACTION, see subtitleNames and subtitleShortNames
         /// </summary>
         /// <param name="imdbTitleId"></param>
         /// <param name="lang"></param>
         /// <returns></returns>
-        public string DownloadSubtitle(string imdbTitleId, string lang = "eng", bool showToast = true)
+        public string DownloadSubtitle(string imdbTitleId, string lang = "eng", bool showToast = true, bool cacheSubtitles = true)
         {
+            string cacheKey = imdbTitleId + lang;
+            if (cacheSubtitles) {
+                if (cachedSubtitles.ContainsKey(cacheKey)) {
+                    return cachedSubtitles[cacheKey];
+                }
+            }
+
             try {
                 string rUrl = "https://www.opensubtitles.org/en/search/sublanguageid-" + lang + "/imdbid-" + imdbTitleId + "/sort-7/asc-0"; // best match first
                                                                                                                                             //print(rUrl);
@@ -7371,11 +7412,11 @@ namespace CloudStreamForms
                         }
                     }
                     s = s.Replace("\n\n", "");
-                    /*if (!s.StartsWith("WEBVTT")) {
-                        s = "WEBVTT\n\n" + s; // s.Insert(0, "WEBVTT\n");
-                    }*/
                     if (showToast) {
                         App.ShowToast("Subtitles Downloaded");
+                    }
+                    if (s.Length > 100) { // MUST BE CORRECT
+                        cachedSubtitles[cacheKey] = s;
                     }
                     return s;
                 }

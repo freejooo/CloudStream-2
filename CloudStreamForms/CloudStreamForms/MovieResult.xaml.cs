@@ -1683,14 +1683,15 @@ namespace CloudStreamForms
                         succ = true;
                     }
                     else {
+                        /*
                         string _sub = "";
                         if (currentMovie.subtitles != null) {
                             if (currentMovie.subtitles.Count > 0) {
                                 _sub = currentMovie.subtitles[0].data;
                             }
-                        }
+                        }*/
 
-                        succ = await MainChrome.CastVideo(episodeResult.mirrosUrls[count], episodeResult.Mirros[count], subtitleUrl: _sub, posterUrl: currentMovie.title.hdPosterUrl, movieTitle: currentMovie.title.name);
+                        succ = await MainChrome.CastVideo(episodeResult.mirrosUrls[count], episodeResult.Mirros[count], subtitleUrl: "", posterUrl: currentMovie.title.hdPosterUrl, movieTitle: currentMovie.title.name, subtitleDelay:0);
                     }
                 }
                 ChromeCastPage.currentSelected = count;
