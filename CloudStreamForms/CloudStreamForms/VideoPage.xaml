@@ -29,8 +29,10 @@
                         </vlc:VideoView>
                         <!-- <vlc:MediaPlayerElement MediaPlayer="{Binding Player}" LibVLC="{Binding VLC}" EnableRendererDiscovery="True" />-->
                         <!--  <Label x:Name="SeekTxt" Text="Hello" AbsoluteLayout.LayoutBounds=".5,1,1,.1" AbsoluteLayout.LayoutFlags="All" FontSize="20" LineBreakMode="WordWrap" TextColor="White" />-->
-                        <Label x:Name="SubtitleTxt1" Text="" AbsoluteLayout.LayoutBounds="0,0,1,1" VerticalOptions="End" TranslationY="-80" HorizontalOptions="Center" AbsoluteLayout.LayoutFlags="All" FontSize="20" LineBreakMode="WordWrap" TextColor="White" />
-                        <Label x:Name="SubtitleTxt2" Text="" AbsoluteLayout.LayoutBounds="0,0,1,1" VerticalOptions="End" HorizontalOptions="Center" TranslationY="-40" AbsoluteLayout.LayoutFlags="All" FontSize="20" LineBreakMode="WordWrap" TextColor="White" />
+                        <Label x:Name="SubtitleTxt1" Text="" AbsoluteLayout.LayoutBounds="0,0,1,1" VerticalOptions="End" TranslationY="-80" HorizontalOptions="Center" AbsoluteLayout.LayoutFlags="All" FontSize="20" LineBreakMode="WordWrap" TextColor="White" ClassId="OUTLINE"   />
+
+                        <Label x:Name="SubtitleTxt2" Text="" AbsoluteLayout.LayoutBounds="0,0,1,1" VerticalOptions="End" HorizontalOptions="Center" TranslationY="-40" AbsoluteLayout.LayoutFlags="All" FontSize="20" LineBreakMode="WordWrap" TextColor="White"  ClassId="OUTLINE" />
+ 
                     </AbsoluteLayout>
 
                     <Grid x:Name="AllButtons">
@@ -257,7 +259,7 @@
                                     </Grid>
                                 </xe:BorderView>
                                 
-                                <xe:BorderView x:Name="SubTap" Grid.Column="3"  Margin="-10,0"
+                                <xe:BorderView x:Name="SubTap" Grid.Column="4"  Margin="-10,0"
                                     HeightRequest="35"
                                     WidthRequest="120"
                                     xe:TouchEffect.Color="White" 

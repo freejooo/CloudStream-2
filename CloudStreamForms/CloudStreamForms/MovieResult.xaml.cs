@@ -1267,7 +1267,7 @@ namespace CloudStreamForms
                 DubPicker.ItemsSource.Clear();
 
                 // SET DUB SUB
-                if (isAnime) { 
+                if (isAnime) {
                     mainCore.GetSubDub(currentSeason, out bool subExists, out bool dubExists);
 
                     isDub = dubExists;
@@ -1327,7 +1327,7 @@ namespace CloudStreamForms
                     int max = mainCore.GetMaxEpisodesInAnimeSeason(currentSeason, isDub, tempThred);
                     if (max > 0) {
                         print("CLEAR AND ADD");
-                        MainThread.BeginInvokeOnMainThread(() => { 
+                        MainThread.BeginInvokeOnMainThread(() => {
                             // CLEAR EPISODES SO SWITCHING SUB DUB 
                             try {
                                 for (int i = 0; i < epView.MyEpisodeResultCollection.Count; i++) {
@@ -1578,7 +1578,7 @@ namespace CloudStreamForms
                     _sub = currentMovie.subtitles[0].data;
                 }
             }*/
-            App.RequestVlc(episodeResult.mirrosUrls, episodeResult.Mirros, episodeResult.OgTitle, GetId(episodeResult), episode: episodeResult.Episode, season: currentSeason, subtitleFull: currentMovie.subtitles.Select(t => t.data).FirstOrDefault(), descript: episodeResult.Description, overrideSelectVideo: overrideSelectVideo, startId: (int)episodeResult.ProgressState);// startId: FROM_PROGRESS); //  (int)episodeResult.ProgressState																																																																													  //App.PlayVLCWithSingleUrl(episodeResult.mirrosUrls, episodeResult.Mirros, currentMovie.subtitles.Select(t => t.data).ToList(), currentMovie.subtitles.Select(t => t.name).ToList(), currentMovie.title.name, episodeResult.Episode, currentSeason, overrideSelectVideo);
+            App.RequestVlc(episodeResult.mirrosUrls, episodeResult.Mirros, episodeResult.OgTitle, GetId(episodeResult), episode: episodeResult.Episode, season: currentSeason, subtitleFull: currentMovie.subtitles.Select(t => t.data).FirstOrDefault(), descript: episodeResult.Description, overrideSelectVideo: overrideSelectVideo, startId: (int)episodeResult.ProgressState, headerId: currentMovie.title.id);// startId: FROM_PROGRESS); //  (int)episodeResult.ProgressState																																																																													  //App.PlayVLCWithSingleUrl(episodeResult.mirrosUrls, episodeResult.Mirros, currentMovie.subtitles.Select(t => t.data).ToList(), currentMovie.subtitles.Select(t => t.name).ToList(), currentMovie.title.name, episodeResult.Episode, currentSeason, overrideSelectVideo);
         }
 
         // ============================== FORCE UPDATE ==============================
@@ -1635,7 +1635,7 @@ namespace CloudStreamForms
             bool hasDownloadedFile = App.KeyExists("dlength", "id" + GetCorrectId(episodeResult));
             string downloadKeyData = "";
 
-            List<string> actions = new List<string>() { "Play in App", "Play External App", "Play in Browser", "Download", "Download Subtitles", "Copy Link", "Remove Link", "Reload" }; // 
+            List<string> actions = new List<string>() { "Play in App", "Play External App", "Play in Browser", "Download", "Download Subtitles", "Copy Link", "Reload" }; // "Remove Link",
 
             if (hasDownloadedFile) {
                 downloadKeyData = App.GetDownloadInfo(GetCorrectId(episodeResult), false).info.fileUrl;//.GetKey("Download", GetId(episodeResult), "");
@@ -1644,9 +1644,33 @@ namespace CloudStreamForms
             }
             if (MainChrome.IsConnectedToChromeDevice) {
                 actions.Insert(0, "Chromecast");
+                actions.Insert(1, "Chromecast mirror");
             }
 
             action = await ActionPopup.DisplayActionSheet(episodeResult.Title, actions.ToArray());//await DisplayActionSheet(episodeResult.Title, "Cancel", null, actions.ToArray());
+
+
+            async void ChromecastAt(int count)
+            {
+                chromeResult = episodeResult;
+                chromeMovieResult = currentMovie;
+                bool succ = false;
+                count--;
+                episodeView.SelectedItem = null;
+
+                while (!succ) {
+                    count++;
+
+                    if (count >= episodeResult.Mirros.Count) {
+                        succ = true;
+                    }
+                    else {
+                        succ = await MainChrome.CastVideo(episodeResult.mirrosUrls[count], episodeResult.Mirros[count], subtitleUrl: "", posterUrl: currentMovie.title.hdPosterUrl, movieTitle: currentMovie.title.name, subtitleDelay: 0);
+                    }
+                }
+                ChromeCastPage.currentSelected = count;
+
+            }
 
 
             if (action == "Play in Browser") {
@@ -1670,43 +1694,14 @@ namespace CloudStreamForms
                 }
             }
             else if (action == "Chromecast") { // ============================== CHROMECAST ==============================
-                chromeResult = episodeResult;
-                chromeMovieResult = currentMovie;
-                bool succ = false;
-                int count = -1;
-                episodeView.SelectedItem = null;
-
-                while (!succ) {
-                    count++;
-
-                    if (count >= episodeResult.Mirros.Count) {
-                        succ = true;
-                    }
-                    else {
-                        /*
-                        string _sub = "";
-                        if (currentMovie.subtitles != null) {
-                            if (currentMovie.subtitles.Count > 0) {
-                                _sub = currentMovie.subtitles[0].data;
-                            }
-                        }*/
-
-                        succ = await MainChrome.CastVideo(episodeResult.mirrosUrls[count], episodeResult.Mirros[count], subtitleUrl: "", posterUrl: currentMovie.title.hdPosterUrl, movieTitle: currentMovie.title.name, subtitleDelay:0);
-                    }
-                }
-                ChromeCastPage.currentSelected = count;
-
+                ChromecastAt(0);
                 print("CASTOS");
-                /*
-                string download = await DisplayActionSheet("Download", "Cancel", null, episodeResult.Mirros.ToArray());
-                for (int i = 0; i < episodeResult.Mirros.Count; i++) {
-                    if (episodeResult.Mirros[i] == download) {
-                        MainChrome.CastVideo(episodeResult.mirrosUrls[i], episodeResult.Mirros[i]);
-                    }
-                }*/
             }
-
-            if (action == "Play") { // ============================== PLAY ==============================
+            else if (action == "Chromecast mirror") {
+                string subMirror = await ActionPopup.DisplayActionSheet("Cast Mirror", episodeResult.Mirros.ToArray());//await DisplayActionSheet("Copy Link", "Cancel", null, episodeResult.Mirros.ToArray());
+                ChromecastAt(episodeResult.Mirros.IndexOf(subMirror));
+            }
+            else if (action == "Play") { // ============================== PLAY ==============================
                 PlayEpisode(episodeResult);
             }
             else if (action == "Play External App") {
@@ -1815,7 +1810,7 @@ namespace CloudStreamForms
                         return;
                     }
 
-                    string s = mainCore.DownloadSubtitle(id, showToast: false);
+                    string s = mainCore.DownloadSubtitle(id, Settings.NativeSubShortName, false);
                     if (s == "") {
                         if (showToast) {
                             App.ShowToast("No Subtitles Found");

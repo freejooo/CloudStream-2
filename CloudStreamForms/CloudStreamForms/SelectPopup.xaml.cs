@@ -17,11 +17,17 @@ namespace CloudStreamForms
     public static class ActionPopup
     {
         public static bool isOpen = false;
-        public static async Task<string> DisplayActionSheet(string title, params string[] buttons)
+
+        public static async Task<string> DisplayActionSheet(string title, int sel, params string[] buttons)
         {
-            var page = new SelectPopup(buttons.ToList(), -1, title, true);
+            var page = new SelectPopup(buttons.ToList(), sel, title, true);
             await PopupNavigation.Instance.PushAsync(page);
             return await page.WaitForResult();
+        }
+
+        public static async Task<string> DisplayActionSheet(string title, params string[] buttons)
+        { 
+            return await DisplayActionSheet(title, -1, buttons);
         }
 
         public static async Task DisplayLoadingBar(int loadingTime, string title = "Loading")

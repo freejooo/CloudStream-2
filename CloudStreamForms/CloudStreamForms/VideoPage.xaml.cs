@@ -9,6 +9,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Xamarin.Forms;
+using Xamarin.Forms.Internals;
 using Xamarin.Forms.Xaml;
 using XamEffects;
 using static CloudStreamForms.CloudStreamCore;
@@ -78,8 +79,8 @@ namespace CloudStreamForms
         {
             public List<string> MirrorUrls;
             public List<string> MirrorNames;
-            public List<string> Subtitles;
-            public List<string> SubtitlesNames;
+            //public List<string> Subtitles;
+            //public List<string> SubtitlesNames; // Requested subtitled to download
             public string name;
             public string descript;
             public int episode; //-1 = null, movie  
@@ -87,6 +88,7 @@ namespace CloudStreamForms
             public bool isSingleMirror;
             public long startPos; // -2 from progress, -1 = from start
             public string episodeId;
+            public string headerId;  
         }
 
         /// <summary>
@@ -94,7 +96,7 @@ namespace CloudStreamForms
         /// </summary>
         public static int maxEpisodes = 0;
         public static int currentMirrorId = 0;
-        public static int currentSubtitlesId = -2; // -2 = null, -1 = none, 0 = def
+        //public static int currentSubtitlesId = -2; // -2 = null, -1 = none, 0 = def
         public static PlayVideo currentVideo;
 
         const string NONE_SUBTITLES = "None";
@@ -106,14 +108,14 @@ namespace CloudStreamForms
         public static string CurrentDisplayName { get { return BeforeAddToName + (IsSeries ? ADD_BEFORE_EPISODE : "") + currentVideo.name + (IsSeries ? ADD_AFTER_EPISODE : "") + (IsSingleMirror ? "" : (" · " + CurrentMirrorName)); } }
         public static string CurrentMirrorName { get { return currentVideo.MirrorNames[currentMirrorId]; } }
         public static string CurrentMirrorUrl { get { return currentVideo.MirrorUrls[currentMirrorId]; } }
-        public static string CurrentSubtitles { get { if (currentSubtitlesId == -1) { return ""; } else { return currentVideo.Subtitles[currentSubtitlesId]; } } }
+        //public static string CurrentSubtitles { get { if (currentSubtitlesId == -1) { return ""; } else { return currentVideo.Subtitles[currentSubtitlesId]; } } }
 
-        public static string CurrentSubtitlesNames { get { if (currentSubtitlesId == -1) { return NONE_SUBTITLES; } else { return currentVideo.SubtitlesNames[currentSubtitlesId]; } } }
-        public static List<string> AllSubtitlesNames { get { var f = new List<string>() { NONE_SUBTITLES }; f.AddRange(currentVideo.SubtitlesNames); return f; } }
-        public static List<string> AllSubtitlesUrls { get { var f = new List<string>() { "" }; f.AddRange(currentVideo.Subtitles); return f; } }
+        //public static string CurrentSubtitlesNames { get { if (currentSubtitlesId == -1) { return NONE_SUBTITLES; } else { return currentVideo.SubtitlesNames[currentSubtitlesId]; } } }
+        //public static List<string> AllSubtitlesNames { get { var f = new List<string>() { NONE_SUBTITLES }; f.AddRange(currentVideo.SubtitlesNames); return f; } }
+        //public static List<string> AllSubtitlesUrls { get { var f = new List<string>() { "" }; f.AddRange(currentVideo.Subtitles); return f; } }
 
-        public static List<SubtitleItem[]> ParsedSubtitles = new List<SubtitleItem[]>();
-        public static SubtitleItem[] Subtrack { get { return ParsedSubtitles[currentSubtitlesId]; } }
+        // public static List<SubtitleItem[]> ParsedSubtitles = new List<SubtitleItem[]>();
+        //   public static SubtitleItem[] Subtrack { get { if (currentSubtitlesId == -1) { return null; } else { return ParsedSubtitles[currentSubtitlesId]; } } }
         public static List<string> AllMirrorsNames { get { return currentVideo.MirrorNames; } }
         public static List<string> AllMirrorsUrls { get { return currentVideo.MirrorUrls; } }
 
@@ -149,11 +151,6 @@ namespace CloudStreamForms
             }
         }
 
-        public void OnSubtitlesAdded(string _inp)
-        {
-            ParsedSubtitles.Add(MainChrome.ParseSubtitles(_inp).ToArray());
-        }
-       
         public void SelectMirror(int mirror)
         {
             if (lastUrl == AllMirrorsUrls[mirror]) return;
@@ -192,42 +189,128 @@ namespace CloudStreamForms
                 });
                 print("COMPLEATED::: " + Completed);
             }
-
         }
 
-        /// <summary>
-        /// -1 = none
-        /// </summary>
-        /// <param name="subtitles"></param>
-        public void SelectSubtitles(int subtitles = -1)
+        public List<VideoSubtitle> currentSubtitles = new List<VideoSubtitle>();
+        public int subtitleIndex = -1;
+        object subtitleMutex = new object();
+        Dictionary<string, bool> searchingForLang = new Dictionary<string, bool>();
+        int subtitleDelay = 0;
+
+        public struct VideoSubtitle
         {
-            currentSubtitlesId = subtitles;
+            public SubtitleItem[] subtitles;
+            public string name;
         }
 
-        void SeekSubtitles(double milisec)
+        public async Task SubtitleOptions()
         {
-            return;
-            for (int i = 0; i < Subtrack.Length - 1; i++) {
-                // print("FFFF:::" + i + "|" + milisec + "|" + Subtrack[i].toMilisec);
-                if (milisec > Subtrack[i].EndTime && milisec < Subtrack[i + 1].EndTime) {
-                    print("SEEK::: " + currentSubtitleIndexInCurrent);
-                    currentSubtitleIndexInCurrent = i;
-                    timeToNextSubtitle = Subtrack[i + 1].StartTime - milisec;
-                    nextSubtitle = true;
-                    if (timeToNextSubtitle < 0) timeToNextSubtitle = 0;
-                    return;
+            List<string> options = new List<string>();
+            if (currentSubtitles.Count > 0) {
+                if (subtitleIndex != -1) {
+                    options.Add($"Change Delay ({subtitleDelay} ms)");
+                }
+                options.Add("Select Subtitles");
+            }
+            else {
+                options.Add($"Download Subtitles ({Settings.NativeSubLongName})");
+            }
+            options.Add("Download Subtitles");
+
+            string action = await ActionPopup.DisplayActionSheet("Subtitles", options.ToArray());
+
+            if (action == "Download Subtitles") {
+                string subAction = await ActionPopup.DisplayActionSheet("Download Subtitles", subtitleNames);
+                if (subAction != "Cancel") {
+                    int index = subtitleNames.IndexOf(subAction);
+                    PopulateSubtitle(subtitleShortNames[index], subAction);
                 }
             }
-            currentSubtitleIndexInCurrent = -1;
+            else if (action == "Select Subtitles") {
+                List<string> subtitlesList = currentSubtitles.Select(t => t.name).ToList();
+                subtitlesList.Insert(0, "None");
+
+                string subAction = await ActionPopup.DisplayActionSheet("Select Subtitles", subtitleIndex + 1, subtitlesList.ToArray());
+
+                if (subAction != "Cancel") {
+                    int setTo = subtitlesList.IndexOf(subAction) - 1;
+                    if (setTo != subtitleIndex) {
+                        subtitleIndex = setTo;
+                    }
+                }
+            }
+            else if (action.StartsWith("Change Delay")) {
+                int del = await ActionPopup.DisplayIntEntry("ms", "Subtitle Delay", 50, false, subtitleDelay.ToString(), "Set Delay");
+                if (del != -1) {
+                    subtitleDelay = del;
+                }
+            }
+            else if (action == $"Download Subtitles ({Settings.NativeSubLongName})") {
+                PopulateSubtitle();
+            }
+
         }
-        static int currentSubtitleIndexInCurrent = 0;
-        static bool nextSubtitle = false;
-        static double timeToNextSubtitle = 0;
 
-        static string subtitleText1; // TOP
-        static string subtitleText2; // BOTTOM
+        public bool HasSupportForSubtitles() => currentVideo.episodeId.IsClean() && currentVideo.episodeId.StartsWith("tt");
 
+        public void PopulateSubtitle(string lang = "", string name = "")
+        {
+            if (!HasSupportForSubtitles()) return;
 
+            if (lang == "") {
+                lang = Settings.NativeSubShortName;
+                name = Settings.NativeSubLongName;
+            }
+
+            bool ContainsLang()
+            {
+                lock (subtitleMutex) {
+                    return currentSubtitles.Where(t => t.name == name).Count() != 0;
+                }
+            }
+
+            if (ContainsLang()) {
+                App.ShowToast("Subtitles already downloaded"); // THIS SHOULD NEVER HAPPEND
+                return;
+            }
+
+            if (searchingForLang.ContainsKey(lang)) {
+                App.ShowToast("Searching for subtitles");
+                return;
+            }
+            searchingForLang[lang] = true;
+
+            var thread = mainCore.CreateThread(6);
+            mainCore.StartThread("PopulateSubtitles", () => {
+                try {
+                    string data = mainCore.DownloadSubtitle(currentVideo.headerId, lang, false, true);
+                    if (data.IsClean()) {
+                        if (!ContainsLang()) {
+                            lock (subtitleMutex) {
+                                VideoSubtitle s = new VideoSubtitle();
+                                s.name = name;
+                                s.subtitles = MainChrome.ParseSubtitles(data).ToArray();
+                                currentSubtitles.Add(s);
+                            }
+                            App.ShowToast(name + " subtitles added");
+                        }
+                    }
+                    else {
+                        App.ShowToast("Error Downloading Subtitles");
+                    }
+                }
+                finally {
+                    if (searchingForLang.ContainsKey(lang)) {
+                        searchingForLang.Remove(lang);
+                    }
+                }
+            });
+        } 
+
+        int currentSubtitleIndexInCurrent = 0; 
+
+        string subtitleText1; // TOP
+        string subtitleText2; // BOTTOM
 
         double currentTime = 0;
 
@@ -246,73 +329,81 @@ namespace CloudStreamForms
             bool lastType = false;
 
             while (true) {
-                if (currentSubtitlesId != -1 && currentSubtitleIndexInCurrent != -1 && Subtrack.Length > 0) {
-                    try {
-                        var track = Subtrack[currentSubtitleIndexInCurrent];
-                        // SET CORRECT TIME
-                        bool IsTooHigh()
-                        {
-                            //  print("::::::>>>>>" + currentSubtitleIndexInCurrent + "|" + currentTime + "<>" + track.fromMilisec);
-                            return currentTime < Subtrack[currentSubtitleIndexInCurrent].StartTime && currentSubtitleIndexInCurrent > 0;
-                        }
-
-                        bool IsTooLow()
-                        {
-                            return currentTime > Subtrack[currentSubtitleIndexInCurrent + 1].StartTime && currentSubtitleIndexInCurrent < Subtrack.Length - 1;
-                        }
-
-                        if (IsTooHigh()) {
-                            while (IsTooHigh()) {
-                                currentSubtitleIndexInCurrent--;
-                            }
-                            print("SKIPP::1");
-                            continue;
-                        }
-
-                        if (IsTooLow()) {
-                            while (IsTooLow()) {
-                                currentSubtitleIndexInCurrent++;
-                            }
-                            print("SKIPP::2");
-                            continue;
-                        }
-
-
-                        if (currentTime < track.EndTime && currentTime > track.StartTime) {
-                            if (last != currentSubtitleIndexInCurrent) {
-                                var lines = track.Lines;
-                                if (lines.Count > 0) {
-                                    if (lines.Count == 1) {
-                                        subtitleText1 = "";//lines[1].line;
-                                        subtitleText2 = lines[0];
-                                    }
-                                    else {
-                                        subtitleText1 = lines[0];
-                                        subtitleText2 = lines[1];
-                                    }
-                                }
-                                UpdateSubtitles();
-                                print("SETSUB:" + track.StartTime + "|" + currentTime);
-                                lastType = false;
-                            }
-                        }
-                        else {
-                            if (!lastType) {
-                                subtitleText1 = "";
-                                subtitleText2 = "";
-                                UpdateSubtitles();
-                                lastType = true;
-                            }
-                        }
-
-                        last = currentSubtitleIndexInCurrent;
-                        print("DELAY!::: " + currentSubtitleIndexInCurrent);
-                        await Task.Delay(10);
-                    }
-                    catch (Exception _ex) {
-                        print("EX::X:X::X:X: " + _ex);
-                    }
+                if (subtitleIndex == -1 || currentSubtitles[subtitleIndex].subtitles.Length <= 3) {
+                    await Task.Delay(50);
+                    subtitleText2 = "";
+                    subtitleText1 = "";
+                    UpdateSubtitles();
+                    continue;
                 }
+
+                var Subtrack = currentSubtitles[subtitleIndex].subtitles;
+                try {
+                    var track = Subtrack[currentSubtitleIndexInCurrent];
+                    // SET CORRECT TIME
+                    bool IsTooHigh()
+                    {
+                        //  print("::::::>>>>>" + currentSubtitleIndexInCurrent + "|" + currentTime + "<>" + track.fromMilisec);
+                        return currentTime < Subtrack[currentSubtitleIndexInCurrent].StartTime + subtitleDelay && currentSubtitleIndexInCurrent > 0;
+                    }
+
+                    bool IsTooLow()
+                    {
+                        return currentTime > Subtrack[currentSubtitleIndexInCurrent + 1].StartTime + subtitleDelay && currentSubtitleIndexInCurrent < Subtrack.Length - 1;
+                    }
+
+                    if (IsTooHigh()) {
+                        while (IsTooHigh()) {
+                            currentSubtitleIndexInCurrent--;
+                        }
+                        print("SKIPP::1");
+                        continue;
+                    }
+
+                    if (IsTooLow()) {
+                        while (IsTooLow()) {
+                            currentSubtitleIndexInCurrent++;
+                        }
+                        print("SKIPP::2");
+                        continue;
+                    }
+
+
+                    if (currentTime < track.EndTime + subtitleDelay  && currentTime > track.StartTime + subtitleDelay) {
+                        if (last != currentSubtitleIndexInCurrent) {
+                            var lines = track.Lines;
+                            if (lines.Count > 0) {
+                                if (lines.Count == 1) {
+                                    subtitleText1 = "";//lines[1].line;
+                                    subtitleText2 = lines[0];
+                                }
+                                else {
+                                    subtitleText1 = lines[0];
+                                    subtitleText2 = lines[1];
+                                }
+                            }
+                            UpdateSubtitles();
+                            print("SETSUB:" + track.StartTime + "|" + currentTime + "|" + subtitleDelay);
+                            lastType = false;
+                        }
+                    }
+                    else {
+                        if (!lastType) {
+                            subtitleText1 = "";
+                            subtitleText2 = "";
+                            UpdateSubtitles();
+                            lastType = true;
+                        }
+                    }
+
+                    last = currentSubtitleIndexInCurrent;
+                    print("DELAY!::: " + currentSubtitleIndexInCurrent);
+                    await Task.Delay(30);
+                }
+                catch (Exception _ex) {
+                    print("EX::X:X::X:X: " + _ex);
+                }
+
             }
         }
 
@@ -363,6 +454,10 @@ namespace CloudStreamForms
             IsSingleMirror = video.isSingleMirror;
 
             InitializeComponent();
+
+            SubtitleTxt1.FontFamily = Settings.GlobalSubtitleFont;
+            SubtitleTxt2.FontFamily = Settings.GlobalSubtitleFont;
+
             Core.Initialize();
             lockElements = new VisualElement[] { NextMirror, NextMirrorBtt, BacktoMain, GoBackBtt, EpisodeLabel, PausePlayClickBtt, PausePlayBtt, SkipForward, SkipForwardBtt, SkipForwardImg, SkipForwardSmall, SkipBack, SkipBackBtt, SkipBackImg, SkipBackSmall };
             settingsElements = new VisualElement[] { EpisodesTap, MirrorsTap, DelayTap, SubTap, NextEpisodeTap, };
@@ -428,26 +523,17 @@ namespace CloudStreamForms
 
             if (Settings.SUBTITLES_INVIDEO_ENABELD) {
                 try {
-
-                    ParsedSubtitles = new List<SubtitleItem[]>();
-                    for (int i = 0; i < currentVideo.Subtitles.Count; i++) {
-                        OnSubtitlesAdded(currentVideo.Subtitles[i]);
+                    if (globalSubtitlesEnabled && HasSupportForSubtitles()) {
+                        PopulateSubtitle();
                     }
-
-                    currentSubtitlesId = 0;
-                    print("--->>>>>>> " + ParsedSubtitles.Count + "|" + currentSubtitlesId);
-                    currentSubtitleIndexInCurrent = 0;
-                    SubtitlesLoop2();
-
-                    SubTap.IsVisible = CurrentSubtitles.IsClean(); // TODO: ADD SUBTITLES
-
                 }
                 catch (Exception _ex) {
                     print("A_A__A__A:: " + _ex);
                 }
+                SubtitlesLoop2();
             }
 
-            SubTap.IsVisible = false;
+            SubTap.IsVisible = HasSupportForSubtitles() && Settings.SUBTITLES_INVIDEO_ENABELD;
             EpisodesTap.IsVisible = false; // TODO: ADD EPISODES SWITCH
             NextEpisodeTap.IsVisible = false; // TODO: ADD NEXT EPISODE
 
@@ -466,6 +552,10 @@ namespace CloudStreamForms
                         }
                     }
                 }
+            }));
+
+            Commands.SetTap(SubTap, new Command(async () => {
+                await SubtitleOptions();
             }));
 
             Commands.SetTap(DelayTap, new Command(async () => {
@@ -572,8 +662,15 @@ namespace CloudStreamForms
             Player.Buffering += (o, e) => {
                 Device.BeginInvokeOnMainThread(() => {
                     if (e.Cache == 100) {
-                        SetIsPaused(!Player.IsPlaying);
-                        UpdateAudioDelay(App.GetDelayAudio());
+                        try {
+                            if(Player != null) {
+                            SetIsPaused(!Player.IsPlaying);
+                            UpdateAudioDelay(App.GetDelayAudio());
+                            }
+                        }
+                        catch (Exception) {
+                             
+                        }
                     }
                     else {
                         //BufferBar.ProgressTo(e.Cache / 100.0, 50, Easing.Linear);
@@ -610,7 +707,6 @@ namespace CloudStreamForms
             print("ERROR UCCURED");
             App.ShowToast("Error loading media");
             SelectNextMirror();
-
         }
 
         void SelectNextMirror()
@@ -802,7 +898,7 @@ namespace CloudStreamForms
 
                 long len = (long)(VideoSlider.Value * Player.Length);
                 Player.Time = len;
-                SeekSubtitles(len);
+                //SeekSubtitles(len);
 
                 if (App.GainAudioFocus()) {
                     Player.SetPause(false);
@@ -1137,7 +1233,7 @@ namespace CloudStreamForms
             var newTime = Player.Time + ms;
             Player.Time = newTime;
 
-            SeekSubtitles(newTime);
+            // SeekSubtitles(newTime);
             PlayerTimeChanged(newTime);
 
 

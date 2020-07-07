@@ -133,7 +133,7 @@ namespace CloudStreamForms
             InitializeComponent(); mainPage = this; CloudStreamCore.mainPage = mainPage;
 
             if (IS_TEST_VIDEO) {
-                Page p = new VideoPage(new VideoPage.PlayVideo() { descript = "", name = "Black Bunny", episode = -1, season = -1, MirrorNames = new List<string>() { "Googlevid" }, MirrorUrls = new List<string>() { "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" }, Subtitles = new List<string>(), SubtitlesNames = new List<string>() });//new List<string>() { "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" }, new List<string>() { "Black" }, new List<string>() { });// { mainPoster = mainPoster };
+                Page p = new VideoPage(new VideoPage.PlayVideo() { descript = "", name = "Black Bunny", episode = -1, season = -1, MirrorNames = new List<string>() { "Googlevid" }, MirrorUrls = new List<string>() { "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" }});//new List<string>() { "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" }, new List<string>() { "Black" }, new List<string>() { });// { mainPoster = mainPoster };
                 Navigation.PushModalAsync(p, false);
             }
             // Page _p = new ChromeCastPage();// { mainPoster = mainPoster };
@@ -820,19 +820,25 @@ namespace CloudStreamForms
                 // SUBTITLES
                 if (realSub != "") {
                     validSubtitle = true;
-                    mediaInfo.Tracks = new Track[]
+                     mediaInfo.Tracks = new Track[]
                                 {
                                  new Track() {  TrackId = 1, Language = "en-US" , Name = subtitleName, TrackContentId = realSub,SubType=TextTrackType.Subtitles,Type=TrackType.Text}
                                 };
                     mediaInfo.TextTrackStyle = new TextTrackStyle() {
-                        FontFamily = "Open Sans",
+                        FontFamily = Settings.GlobalSubtitleFont,
                         BackgroundColor = System.Drawing.Color.Transparent,//.Color.Transparent,
                         EdgeColor = System.Drawing.Color.Black,
                         EdgeType = TextTrackEdgeType.Outline,
+                        ForegroundColor = System.Drawing.Color.White,
+                        //WindowColor = System.Drawing.Color.Red,
+                      //  WindowType = TextTrackWindowType.RoundedCorners,
+                       // WindowRoundedCornerRadius = 5,
                         FontScale = 1.05f,
                     };
                 }
+                
                 mediaMetadata.Title = mirrorName;
+                mediaMetadata.Images = new GoogleCast.Models.Image[] { new GoogleCast.Models.Image() { Url = posterUrl,Height=200,Width=200} } ;
 
                 if (validSubtitle) {
                     CurrentChromeMedia = await CurrentChannel.LoadAsync(mediaInfo, true, 1);
@@ -926,6 +932,7 @@ namespace CloudStreamForms
 
 
             IsCastingVideo = false;
+            ShowLogo();
             print("STOP CASTING! VIDEO");
         }
 
@@ -951,6 +958,11 @@ namespace CloudStreamForms
             print("STOP CASTING!");
         }
 
+        public static async void ShowLogo()
+        {
+            CurrentChromeMedia = await CurrentChannel.LoadAsync(new MediaInformation() { ContentId = "https://cdn.discordapp.com/attachments/551382684560261121/730151252012564560/ChromecastLogo5.png", StreamType = StreamType.None, ContentType = "image/jpeg" });
+        }
+
         public static async void ConnectToChromeDevice(string name)
         {
             if (name == "Disconnect") {
@@ -971,7 +983,10 @@ namespace CloudStreamForms
                         Console.WriteLine("CONNECTED");
                         CurrentChannel = chromeSender.GetChannel<IMediaChannel>();
                         await chromeSender.LaunchAsync(CurrentChannel);
+                        ShowLogo();
+
                         IsConnectedToChromeDevice = true;
+                        
                         Device.BeginInvokeOnMainThread(() => {
                             OnConnected?.Invoke(null, null);
                         });
@@ -7363,13 +7378,12 @@ namespace CloudStreamForms
             }
         }
 
-
         public static readonly string[] subtitleNames = new string[] {
-            "Svenska","Abkhazian","Afrikaans","Albanian","Arabic","Aragonese","Armenian","Assamese","Asturian","Azerbaijani","Basque","Belarusian","Bengali","Bosnian","Breton","Bulgarian","Burmese","Catalan","Chinese (simplified)","Chinese (traditional)","Chinese bilingual","Croatian","Czech","Danish","Dutch","English","Esperanto","Estonian","Extremaduran","Finnish","French","Gaelic","Galician","Georgian","German","Greek","Hebrew","Hindi","Hungarian","Icelandic","Igbo","Indonesian","Interlingua","Irish","Italian","Japanese","Kannada","Kazakh","Khmer","Korean","Kurdish","Latvian","Lithuanian","Luxembourgish","Macedonian","Malay","Malayalam","Manipuri","Mongolian","Montenegrin","Navajo","Northern Sami","Norwegian","Occitan","Odia","Persian","Polish","Portuguese","Portuguese (BR)","Portuguese (MZ)","Romanian","Russian","Serbian","Sindhi","Sinhalese","Slovak","Slovenian","Somali","Spanish","Spanish (EU)","Spanish (LA)","Swahili","Syriac","Tagalog","Tamil","Tatar","Telugu","Thai","Turkish","Turkmen","Ukrainian","Urdu","Vietnamese",
+            "Abkhazian","Afrikaans","Albanian","Arabic","Aragonese","Armenian","Assamese","Asturian","Azerbaijani","Basque","Belarusian","Bengali","Bosnian","Breton","Bulgarian","Burmese","Catalan","Chinese (simplified)","Chinese (traditional)","Chinese bilingual","Croatian","Czech","Danish","Dutch","English","Esperanto","Estonian","Extremaduran","Finnish","French","Gaelic","Galician","Georgian","German","Greek","Hebrew","Hindi","Hungarian","Icelandic","Igbo","Indonesian","Interlingua","Irish","Italian","Japanese","Kannada","Kazakh","Khmer","Korean","Kurdish","Latvian","Lithuanian","Luxembourgish","Macedonian","Malay","Malayalam","Manipuri","Mongolian","Montenegrin","Navajo","Northern Sami","Norwegian","Occitan","Odia","Persian","Polish","Portuguese","Portuguese (BR)","Portuguese (MZ)","Romanian","Russian","Serbian","Sindhi","Sinhalese","Slovak","Slovenian","Somali","Spanish","Spanish (EU)","Spanish (LA)","Swahili","Swedish","Syriac","Tagalog","Tamil","Tatar","Telugu","Thai","Turkish","Turkmen","Ukrainian","Urdu","Vietnamese",
         };
 
         public static readonly string[] subtitleShortNames = new string[] {
-            "swe","abk","afr","alb","ara","arg","arm","asm","ast","aze","baq","bel","ben","bos","bre","bul","bur","cat","chi","zht","zhe","hrv","cze","dan","dut","eng","epo","est","ext","fin","fre","gla","glg","geo","ger","ell","heb","hin","hun","ice","ibo","ind","ina","gle","ita","jpn","kan","kaz","khm","kor","kur","lav","lit","ltz","mac","may","mal","mni","mon","mne","nav","sme","nor","oci","ori","per","pol","por","pob","pom","rum","rus","scc","snd","sin","slo","slv","som","spa","spn","spl","swa","syr","tgl","tam","tat","tel","tha","tur","tuk","ukr","urd","vie",
+           "abk","afr","alb","ara","arg","arm","asm","ast","aze","baq","bel","ben","bos","bre","bul","bur","cat","chi","zht","zhe","hrv","cze","dan","dut","eng","epo","est","ext","fin","fre","gla","glg","geo","ger","ell","heb","hin","hun","ice","ibo","ind","ina","gle","ita","jpn","kan","kaz","khm","kor","kur","lav","lit","ltz","mac","may","mal","mni","mon","mne","nav","sme","nor","oci","ori","per","pol","por","pob","pom","rum","rus","scc","snd","sin","slo","slv","som","spa","spn","spl","swa","swe","syr","tgl","tam","tat","tel","tha","tur","tuk","ukr","urd","vie",
         };
 
         public static Dictionary<string, string> cachedSubtitles = new Dictionary<string, string>();
@@ -7443,9 +7457,10 @@ namespace CloudStreamForms
 
 
 
-        public void DownloadSubtitlesAndAdd(string lang = "eng", bool isEpisode = false, int episodeCounter = 0)
+        public void DownloadSubtitlesAndAdd(string lang = "", bool isEpisode = false, int episodeCounter = 0)
         {
             if (!globalSubtitlesEnabled) { return; }
+            if(lang == "") { lang = Settings.NativeSubShortName; }
 
             TempThread tempThred = CreateThread(3);
             StartThread("SubtitleThread", () => {

@@ -207,9 +207,9 @@ namespace CloudStreamForms
         public const int FROM_START = -1;
         public const int FROM_PROGRESS = -2;
 
-        public static void RequestVlc(string url, string name, string episodeName = null, string episodeId = "", int startId = FROM_PROGRESS, string subtitleFull = "", int episode = -1, int season = -1, string descript = "", bool? overrideSelectVideo = null)
+        public static void RequestVlc(string url, string name, string episodeName = null, string episodeId = "", int startId = FROM_PROGRESS, string subtitleFull = "", int episode = -1, int season = -1, string descript = "", bool? overrideSelectVideo = null, string headerId = "")
         {
-            RequestVlc(new List<string>() { url }, new List<string>() { name }, episodeName ?? name, episodeId, startId, subtitleFull, episode, season, descript, overrideSelectVideo);
+            RequestVlc(new List<string>() { url }, new List<string>() { name }, episodeName ?? name, episodeId, startId, subtitleFull, episode, season, descript, overrideSelectVideo,headerId);
         }
 
         public static EventHandler ForceUpdateVideo;
@@ -224,7 +224,7 @@ namespace CloudStreamForms
         /// <param name="episodeId">id for key of lenght seen</param>
         /// <param name="startId">FROM_START, FROM_PROGRESS or time in ms</param>
         /// <param name="subtitleFull">Leave emty for no subtitles, full subtitle text as seen in a regular .srt</param>
-        public static void RequestVlc(List<string> urls, List<string> names, string episodeName, string episodeId, long startId = FROM_PROGRESS, string subtitleFull = "", int episode = -1, int season = -1, string descript = "", bool? overrideSelectVideo = null)
+        public static void RequestVlc(List<string> urls, List<string> names, string episodeName, string episodeId, long startId = FROM_PROGRESS, string subtitleFull = "", int episode = -1, int season = -1, string descript = "", bool? overrideSelectVideo = null, string headerId = "")
         {
             bool useVideo = overrideSelectVideo ?? Settings.UseVideoPlayer;
             bool subtitlesEnabled = subtitleFull != "";
@@ -237,10 +237,11 @@ namespace CloudStreamForms
                     season = season,
                     MirrorNames = names,
                     MirrorUrls = urls,
-                    Subtitles = subtitlesEnabled ? new List<string>() { subtitleFull } : new List<string>(),
-                    SubtitlesNames = subtitlesEnabled ? new List<string>() { "English" } : new List<string>(),
+                    //Subtitles = subtitlesEnabled ? new List<string>() { subtitleFull } : new List<string>(),
+                    //SubtitlesNames = subtitlesEnabled ? new List<string>() { "English" } : new List<string>(),
                     startPos = startId,
                     episodeId = episodeId,
+                    headerId = headerId,
                 });//new List<string>() { "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" }, new List<string>() { "Black" }, new List<string>() { });// { mainPoster = mainPoster };
                 ((MainPage)CloudStreamCore.mainPage).Navigation.PushModalAsync(p, false);
             }
@@ -468,7 +469,7 @@ namespace CloudStreamForms
             bool useVideo = overrideSelectVideo ?? Settings.UseVideoPlayer;
 
             if (useVideo) {
-                Page p = new VideoPage(new VideoPage.PlayVideo() { descript = "", name = "", isSingleMirror = true, episode = -1, season = -1, MirrorNames = new List<string>() { name }, MirrorUrls = new List<string>() { url }, Subtitles = new List<string>(), SubtitlesNames = new List<string>() });//new List<string>() { "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" }, new List<string>() { "Black" }, new List<string>() { });// { mainPoster = mainPoster };
+                Page p = new VideoPage(new VideoPage.PlayVideo() { descript = "", name = "", isSingleMirror = true, episode = -1, season = -1, MirrorNames = new List<string>() { name }, MirrorUrls = new List<string>() { url }, });//SubtitlesNames = new List<string>()  new List<string>() { "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" }, new List<string>() { "Black" }, new List<string>() { });// { mainPoster = mainPoster };
                 ((MainPage)CloudStreamCore.mainPage).Navigation.PushModalAsync(p, false);
             }
             else {
@@ -503,11 +504,9 @@ namespace CloudStreamForms
         public static void PlayVLCWithSingleUrl(List<string> url, List<string> name, List<string> subtitleData, List<string> subtitleNames, string publicName = "", int episode = -1, int season = -1, bool? overrideSelectVideo = null)
         {
             bool useVideo = overrideSelectVideo ?? Settings.UseVideoPlayer;
-
-
-
+             
             if (useVideo) {
-                Page p = new VideoPage(new VideoPage.PlayVideo() { descript = "", name = publicName, isSingleMirror = false, episode = episode, season = season, MirrorNames = name, MirrorUrls = url, Subtitles = subtitleData, SubtitlesNames = subtitleNames });//new List<string>() { "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" }, new List<string>() { "Black" }, new List<string>() { });// { mainPoster = mainPoster };
+                Page p = new VideoPage(new VideoPage.PlayVideo() { descript = "", name = publicName, isSingleMirror = false, episode = episode, season = season, MirrorNames = name, MirrorUrls = url, });// SubtitlesNames = subtitleNames  new List<string>() { "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" }, new List<string>() { "Black" }, new List<string>() { });// { mainPoster = mainPoster };
                 ((MainPage)CloudStreamCore.mainPage).Navigation.PushModalAsync(p, false);
             }
             else {

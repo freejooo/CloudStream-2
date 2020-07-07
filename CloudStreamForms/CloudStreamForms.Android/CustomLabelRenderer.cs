@@ -1,4 +1,5 @@
 ﻿using Android.Content;
+using Android.Graphics;
 using Xamarin.Forms;
 using Xamarin.Forms.Platform.Android;
 
@@ -18,6 +19,10 @@ public class CustomLabelRenderer : LabelRenderer
             return;
         var tv = Control as global::Android.Widget.TextView;
         tv.VerticalScrollBarEnabled = false;
-
+        if(e.NewElement.ClassId == "OUTLINE") {
+            
+            tv.SetOutlineSpotShadowColor(Android.Graphics.Color.Black);
+             //tv.SetShadowLayer(0f, 10, 10, Android.Graphics.Color.Black);
+        }
     }
 }

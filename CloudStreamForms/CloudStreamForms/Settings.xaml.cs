@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Xamarin.Forms;
+using Xamarin.Forms.Internals;
 using Xamarin.Forms.Xaml;
 using XamEffects;
 using static CloudStreamForms.MainPage;
@@ -10,7 +11,7 @@ namespace CloudStreamForms
     [XamlCompilation(XamlCompilationOptions.Compile)]
     public partial class Settings : ContentPage
     {
-        public const bool SUBTITLES_INVIDEO_ENABELD = false;
+        public const bool SUBTITLES_INVIDEO_ENABELD = true;
 
         LabelList ColorPicker;
 
@@ -26,6 +27,37 @@ namespace CloudStreamForms
                 return App.GetKey("Settings", nameof(LoadingMiliSec), 5000);
             }
         }
+
+        public static string GlobalSubtitleFont {
+            set {
+                App.SetKey("Settings", nameof(GlobalSubtitleFont), value);
+            }
+            get {
+                return App.GetKey("Settings", nameof(GlobalSubtitleFont), "Trebuchet MS"); // Trebuchet MS, Open Sans, Google Sans
+            }
+        }
+
+        public static string NativeSubShortName {
+            get {
+                return CloudStreamCore.subtitleShortNames[NativeSubtitles];
+            }
+        }
+        
+        public static string NativeSubLongName {
+            get {
+                return CloudStreamCore.subtitleNames[NativeSubtitles];
+            }
+        }
+
+        public static int NativeSubtitles {
+            set {
+                App.SetKey("Settings", nameof(NativeSubtitles), value);
+            }
+            get {
+                return App.GetKey("Settings", nameof(NativeSubtitles), CloudStreamCore.subtitleNames.IndexOf("English"));
+            }
+        }
+
         public static int LoadingChromeSec {
             set {
                 App.SetKey("Settings", nameof(LoadingChromeSec), value);

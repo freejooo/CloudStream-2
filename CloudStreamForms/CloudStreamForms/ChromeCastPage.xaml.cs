@@ -53,19 +53,19 @@ namespace CloudStreamForms
         {
             List<string> options = new List<string>();
             if (subtitles.Count == 0) {
-                options.Add("Download Subtitles (English)");
+                options.Add($"Download Subtitles ({Settings.NativeSubLongName})");
             }
             else {
                 // if (subtitleIndex != -1) {
                 // options.Add($"Turn {(HasSubtitlesOn ? "Off" : $"On ({subtitles[subtitleIndex].name})")}");
                 //}
                 if (HasSubtitlesOn) {
-                    if (subtitleIndex != -1) {
-                        options.Add($"Turn off");
-                    }
+                    //if (subtitleIndex != -1) {
+                    //  options.Add($"Turn off");
+                    //}
                     options.Add($"Change Delay ({subtitleDelay} ms)");
                 }
-                options.Add("Select Subtitle");
+                options.Add("Select Subtitles");
             }
             options.Add("Download Subtitles");
 
@@ -89,21 +89,23 @@ namespace CloudStreamForms
                     PopulateSubtitle(subtitleShortNames[index], subAction);
                 }
             }
-            else if (action == "Select Subtitle") {
-                string subAction = await ActionPopup.DisplayActionSheet("Select Subtitle", subtitles.Select(t => t.name).ToArray());
+            else if (action == "Select Subtitles") {
+                List<string> subtitlesList = subtitles.Select(t => t.name).ToList();
+                subtitlesList.Insert(0, "None");
+
+                string subAction = await ActionPopup.DisplayActionSheet("Select Subtitles", subtitleIndex + 1, subtitlesList.ToArray());
 
                 if (subAction != "Cancel") {
-                    for (int i = 0; i < subtitles.Count; i++) {
-                        if (subtitles[i].name == subAction) {
-                            subtitleIndex = i;
-                            HasSubtitlesOn = true;
-                            await Task.Delay(100);
-                            await UpdateSubtitles();
-                        }
+                    int setTo = subtitlesList.IndexOf(subAction) - 1;
+                    if (setTo != subtitleIndex) {
+                        subtitleIndex = setTo;
+                        HasSubtitlesOn = subtitleIndex != -1;
+                        await Task.Delay(100);
+                        await UpdateSubtitles();
                     }
                 }
             }
-            else if (action == "Download Subtitles (English)") {
+            else if (action == $"Download Subtitles ({Settings.NativeSubLongName})") {
                 PopulateSubtitle();
             }
             else if (action.StartsWith("Turn off")) {
@@ -124,8 +126,13 @@ namespace CloudStreamForms
 
         Dictionary<string, bool> searchingForLang = new Dictionary<string, bool>();
 
-        public void PopulateSubtitle(string lang = "eng", string name = "English")
+        public void PopulateSubtitle(string lang = "", string name = "")
         {
+            if(lang == "") {
+                lang = Settings.NativeSubShortName;
+                name = Settings.NativeSubLongName;
+            }
+
             bool ContainsLang()
             {
                 lock (subtitleMutex) {
@@ -250,6 +257,7 @@ namespace CloudStreamForms
         }
 
         static string lastId = "";
+        static List<Subtitle> lastSubtitles = new List<Subtitle>();
 
         public ChromeCastPage()
         {
@@ -261,9 +269,13 @@ namespace CloudStreamForms
 
             if (lastId != chromeMovieResult.title.id) {
                 lastId = chromeMovieResult.title.id;
+                print("NOT THE SAME AT LAST ONE");
                 if (globalSubtitlesEnabled) {
                     PopulateSubtitle();
                 }
+            }
+            else {
+                subtitles = lastSubtitles;
             }
 
             Subbutton.Source = App.GetImageSource("outline_subtitles_white_48dp.png");
@@ -436,6 +448,8 @@ namespace CloudStreamForms
             App.SetViewPos(lastId, (long)(MainChrome.CurrentTime * 1000));
             App.SetViewDur(lastId, (long)(MainChrome.CurrentCastingDuration * 1000));
             App.ForceUpdateVideo?.Invoke(null, EventArgs.Empty);
+
+            lastSubtitles = subtitles;
 
             App.UpdateBackground();
             OnDisconnected -= OnDisconnectedHandle;
