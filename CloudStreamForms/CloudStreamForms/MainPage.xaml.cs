@@ -7426,7 +7426,7 @@ namespace CloudStreamForms
                 string subtitleUrl = subAdd + FindHTML(d, "download/file/", "\"");
                 if (subtitleUrl != subAdd) {
                     print("HTMLGETSUB: " + subtitleUrl + "|" + _url);
-                    string s = HTMLGet(subtitleUrl, "https://www.opensubtitles.org");
+                    string s = DownloadStringWithCert(subtitleUrl,referer:"https://www.opensubtitles.org",encoding:Encoding.UTF7);
                     if (BAN_SUBTITLE_ADS) {
                         List<string> bannedLines = new List<string>() { "Support us and become VIP member", "to remove all ads from www.OpenSubtitles.org", "to remove all ads from OpenSubtitles.org", "Advertise your product or brand here", "contact www.OpenSubtitles.org today" }; // No advertisement
                         foreach (var banned in bannedLines) {
@@ -9054,7 +9054,7 @@ namespace CloudStreamForms
         }
 
 
-        public string DownloadStringWithCert(string url, TempThread? tempThred = null, int waitTime = 1000, string requestBody = "")
+        public string DownloadStringWithCert(string url, TempThread? tempThred = null, int waitTime = 1000, string requestBody = "",string referer = "", Encoding encoding = null)
         {
             if (!url.IsClean()) return "";
 
@@ -9065,14 +9065,17 @@ namespace CloudStreamForms
                 webRequest.Timeout = waitTime * 10;
                 webRequest.ReadWriteTimeout = waitTime * 10;
                 webRequest.ContinueTimeout = waitTime * 10;
-
+                webRequest.Referer = referer;
+                if(encoding == null) {
+                    encoding = Encoding.UTF8;
+                }
                 //    string _s = "";
                 //  bool done = false;
                 print("REQUEST::: " + url);
 
                 using (var webResponse = webRequest.GetResponse()) {
                     try {
-                        using (StreamReader httpWebStreamReader = new StreamReader(webResponse.GetResponseStream(), Encoding.UTF8)) {
+                        using (StreamReader httpWebStreamReader = new StreamReader(webResponse.GetResponseStream(), encoding)) {
                             try {
                                 if (tempThred != null) { if (!GetThredActive((TempThread)tempThred)) { return ""; }; } //  done = true; 
                                 return httpWebStreamReader.ReadToEnd();
@@ -9151,13 +9154,13 @@ namespace CloudStreamForms
         }
 
 
-        public string DownloadStringOnce(string url, TempThread? tempThred = null, bool UTF8Encoding = true, int waitTime = 1000)
+        public string DownloadStringOnce(string url, TempThread? tempThred = null, bool UTF8Encoding = true, int waitTime = 1000, string referer = "", Encoding encoding = null)
         {
             try {
                 WebClient client = new WebClient();
 
                 if (UTF8Encoding) {
-                    client.Encoding = Encoding.UTF8; // TO GET SPECIAL CHARACTERS ECT
+                    client.Encoding = encoding; // TO GET SPECIAL CHARACTERS ECT
                 }
                 // ANDROID DOWNLOADSTRING
 

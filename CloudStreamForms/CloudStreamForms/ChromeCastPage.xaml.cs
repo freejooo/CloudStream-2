@@ -44,10 +44,10 @@ namespace CloudStreamForms
         public static double changeTime = -1;
 
         object subtitleMutex = new object();
-        public List<Subtitle> subtitles = new List<Subtitle>();
-        public int subtitleIndex = -1;
-        public bool HasSubtitlesOn = false;
-        public int subtitleDelay = 0;
+        public static List<Subtitle> subtitles = new List<Subtitle>();
+        public static int subtitleIndex = -1;
+        public static bool HasSubtitlesOn = false;
+        public static int subtitleDelay = 0;
 
         public async void SelectSubtitleOption()
         {
@@ -269,13 +269,17 @@ namespace CloudStreamForms
 
             if (lastId != chromeMovieResult.title.id) {
                 lastId = chromeMovieResult.title.id;
+                subtitles = new List<Subtitle>();
+                subtitleDelay =0;
+                subtitleIndex = -1;
+                HasSubtitlesOn = false;
                 print("NOT THE SAME AT LAST ONE");
                 if (globalSubtitlesEnabled) {
                     PopulateSubtitle();
                 }
             }
             else {
-                subtitles = lastSubtitles;
+                //subtitles = lastSubtitles;
             }
 
             Subbutton.Source = App.GetImageSource("outline_subtitles_white_48dp.png");

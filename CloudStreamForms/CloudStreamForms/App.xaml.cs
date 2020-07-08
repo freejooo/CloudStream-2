@@ -44,6 +44,9 @@ namespace CloudStreamForms
 
         public static string GetFont(string f)
         {
+            if(f == "App default") {
+                return "";
+            }
             return f.Replace(" ", "-") + ".ttf#" + f;
         }
 

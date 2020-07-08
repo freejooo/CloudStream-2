@@ -53,11 +53,11 @@ namespace CloudStreamForms
                 App.SetKey("Settings", nameof(SubtitleType), value);
             }
             get {
-                return App.GetKey("Settings", nameof(SubtitleType), 3);
+                return App.GetKey("Settings", nameof(SubtitleType), 1);
             }
         }
 
-        public static readonly List<string> GlobalFonts = new List<string>() { "Trebuchet MS", "Open Sans", "Google Sans", "Arial", "Lucida Grande", "Verdana", "Futura", "STIXGeneral", "Times New Roman" };
+        public static readonly List<string> GlobalFonts = new List<string>() { "Trebuchet MS", "Open Sans", "Google Sans", "Arial", "Lucida Grande", "Verdana", "Futura", "STIXGeneral", "Times New Roman", "App default" };
 
         public static string GlobalSubtitleFont {
             set {
@@ -326,7 +326,7 @@ namespace CloudStreamForms
 
 
             ColorPicker = new LabelList(SetTheme, new List<string> { "Black", "Dark", "Netflix", "YouTube" }, "Select Theme");
-            SubLangPicker = new LabelList(SubtitleLang, CloudStreamCore.subtitleNames.ToList(), "Default Subtitle");
+            SubLangPicker = new LabelList(SubtitleLang, CloudStreamCore.subtitleNames.ToList(), "Default Subtitle Language");
             SubStylePicker = new LabelList(SubtitleStyle, new List<string>() { "None", "Dropshadow", "Outline", "Outline + dropshadow" }, "Subtitle Style");
             SubFontPicker = new LabelList(SubtitleFont, GlobalFonts, "Subtitle Font",true);
             //outline_reorder_white_48dp.png
@@ -426,7 +426,7 @@ namespace CloudStreamForms
             SubLangPicker.SelectedIndexChanged += (o, e) => {
                 if (SubLangPicker.SelectedIndex != -1) {
                     NativeSubtitles = SubLangPicker.SelectedIndex;
-                    SubLangPicker.button.Text = "Default Lang: " + SubLangPicker.button.Text;
+                    SubLangPicker.button.Text = "Default subtitle language: " + SubLangPicker.button.Text;
                 }
             };
 
