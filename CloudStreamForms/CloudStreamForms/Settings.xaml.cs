@@ -57,7 +57,7 @@ namespace CloudStreamForms
             }
         }
 
-        public static readonly List<string> GlobalFonts = new List<string>() { "Trebuchet MS", "Open Sans", "Google Sans", "Arial", "Lucida Grande", "Verdana", "Futura", "STIXGeneral", "Times New Roman", "App default" };
+        public static readonly List<string> GlobalFonts = new List<string>() { "Trebuchet MS", "Open Sans", "Google Sans", "Lucida Grande", "Verdana", "Futura", "STIXGeneral", "Times New Roman", "App default" }; //ARIAL IS TO BIG
 
         public static string GlobalSubtitleFont {
             set {

@@ -107,7 +107,6 @@
     <AndroidAsset Include="Assets\Futura.ttf" />
     <AndroidAsset Include="Assets\Verdana.ttf" />
     <AndroidAsset Include="Assets\Lucida-Grande.ttf" />
-    <AndroidAsset Include="Assets\Arial.ttf" />
     <AndroidAsset Include="Assets\Google-Sans.ttf" />
     <AndroidAsset Include="Assets\Open-Sans.ttf" />
     <None Include="Resources\AboutResources.txt" />
