@@ -26,7 +26,7 @@ namespace CloudStreamForms
         }
 
         public static async Task<string> DisplayActionSheet(string title, params string[] buttons)
-        { 
+        {
             return await DisplayActionSheet(title, -1, buttons);
         }
 
@@ -60,10 +60,10 @@ namespace CloudStreamForms
 
         public static async Task<decimal> DisplayDecimalEntry(string placeHolder, string title = "", int offset = -1, bool autoPaste = true, string setText = null, string confirmText = "")
         {
-            return decimal.Parse((await DisplayEntry(InputPopupResult.decimalNumber, placeHolder, title, offset, autoPaste, setText,confirmText)).Replace(".", ","));
+            return decimal.Parse((await DisplayEntry(InputPopupResult.decimalNumber, placeHolder, title, offset, autoPaste, setText, confirmText)).Replace(".", ","));
         }
 
-        public static async Task<int> DisplayIntEntry(string placeHolder, string title = "", int offset = -1, bool autoPaste = true, string setText = null,string confirmText  = "")
+        public static async Task<int> DisplayIntEntry(string placeHolder, string title = "", int offset = -1, bool autoPaste = true, string setText = null, string confirmText = "")
         {
             return int.Parse(await DisplayEntry(InputPopupResult.integrerNumber, placeHolder, title, offset, autoPaste, setText, confirmText));
         }
@@ -92,17 +92,19 @@ namespace CloudStreamForms
             button.InputTransparent = isEmty;
         }
 
-        public LabelList(Button _Button, List<string> __ItemSource, string title = "")
+
+        public LabelList(Button _Button, List<string> __ItemSource, string title = "", bool fontTest = false)
         {
             button = _Button;
             bgColor = button.BackgroundColor;
             ItemsSource = __ItemSource;
+            print("fontTes1111t: " + _Button.Text + "|" + fontTest);
 
             button.Clicked += async (o, e) => {
                 //  await ActionPopup.DisplayEntry(InputPopupResult.decimalNumber, "ms", "Audio Delay",offset:50,setText:"0",confirmText:"Set Delay");
-                // await ActionPopup.DisplayEntry(InputPopupResult.url, "https://youtu.be/", "Youtube link",confirmText:"Download");
-
-                await PopupNavigation.Instance.PushAsync(new SelectPopup(ItemsSource, SelectedIndex, title));
+                // await ActionPopup.DisplayEntry(InputPopupResult.url, "https://youtu.be/", "Youtube link",confirmText:"Download")
+                print("fontTest: " + _Button.Text + "|" + fontTest);
+                await PopupNavigation.Instance.PushAsync(new SelectPopup(ItemsSource, SelectedIndex, title, fontTest: fontTest));
                 SelectPopup.OnSelectedChanged += (_o, _e) => {
                     SelectedIndex = _e;
                 };
@@ -165,7 +167,7 @@ namespace CloudStreamForms
 
         string optionSelected = "";
 
-        public SelectPopup(List<string> options, int selected, string header = "", bool isCenter = true)
+        public SelectPopup(List<string> options, int selected, string header = "", bool isCenter = true, bool fontTest = false)
         {
             currentOptions = options;
 
@@ -214,8 +216,8 @@ namespace CloudStreamForms
             BindingContext = selectBinding;
 
             for (int i = 0; i < currentOptions.Count; i++) {
-                bool isSel = i == selected;
-                selectBinding.MyNameCollection.Add(new PopupName() { IsSelected = isSel, Name = currentOptions[i].Replace("(Mirror ", "("), LayoutCenter = isCenter ? LayoutOptions.Center : LayoutOptions.Start });
+                bool isSel = i == selected; 
+                selectBinding.MyNameCollection.Add(new PopupName() { IsSelected = isSel, Name = currentOptions[i].Replace("(Mirror ", "("), LayoutCenter = isCenter ? LayoutOptions.Center : LayoutOptions.Start, FontFam = fontTest ? GetFont(currentOptions[i]) : "" });
             }
 
             if (selected != -1) {
@@ -231,6 +233,7 @@ namespace CloudStreamForms
             public FontAttributes FontAtt { get { return IsSelected ? FontAttributes.Bold : FontAttributes.None; } }
             public int FontSize { get { return IsSelected ? 21 : 19; } }
             public LayoutOptions LayoutCenter { get; set; }
+            public string FontFam { get; set; }
         }
 
         protected override void OnAppearing()

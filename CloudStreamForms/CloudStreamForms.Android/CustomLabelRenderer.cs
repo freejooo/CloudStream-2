@@ -3,6 +3,7 @@ using Android.Graphics;
 using Xamarin.Forms;
 using Xamarin.Forms.Platform.Android;
 
+//[assembly: ExportFont("Lobster-Regular.ttf", Alias = "Lobster")]
 [assembly: ExportRenderer(typeof(Label), typeof(CustomLabelRenderer))]
 public class CustomLabelRenderer : LabelRenderer
 {

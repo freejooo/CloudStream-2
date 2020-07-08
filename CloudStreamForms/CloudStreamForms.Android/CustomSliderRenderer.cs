@@ -4,6 +4,7 @@ using Android.Graphics.Drawables.Shapes;
 using Xamarin.Forms;
 using Xamarin.Forms.Platform.Android;
 
+//[assembly: ExportFont("Lobster-Regular.ttf", Alias = "Lobster")]
 [assembly: ExportRenderer(typeof(Slider), typeof(CustomSliderRenderer))]
 public class CustomSliderRenderer : SliderRenderer
 {

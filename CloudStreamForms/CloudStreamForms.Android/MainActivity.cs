@@ -986,6 +986,9 @@ namespace CloudStreamForms.Droid
             mainDroid = new MainDroid();
             mainDroid.Awake();
 
+              //Typeface.CreateFromAsset(Application.Context.Assets, "Times-New-Roman.ttf");
+
+
             if (Intent.DataString != null) {
                 print("GOT NON NULL DATA");
                 if (Intent.DataString != "") {

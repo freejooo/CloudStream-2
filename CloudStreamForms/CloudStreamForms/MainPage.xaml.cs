@@ -7425,6 +7425,7 @@ namespace CloudStreamForms
                 const string subAdd = "https://dl.opensubtitles.org/en/download/file/";
                 string subtitleUrl = subAdd + FindHTML(d, "download/file/", "\"");
                 if (subtitleUrl != subAdd) {
+                    print("HTMLGETSUB: " + subtitleUrl + "|" + _url);
                     string s = HTMLGet(subtitleUrl, "https://www.opensubtitles.org");
                     if (BAN_SUBTITLE_ADS) {
                         List<string> bannedLines = new List<string>() { "Support us and become VIP member", "to remove all ads from www.OpenSubtitles.org", "to remove all ads from OpenSubtitles.org", "Advertise your product or brand here", "contact www.OpenSubtitles.org today" }; // No advertisement
@@ -8383,8 +8384,9 @@ namespace CloudStreamForms
                                 // print("Head: " + e);
                             }
                             // print("LINK:" + response.GetResponseHeader("Set-Cookie"));
-                            using (StreamReader reader = new StreamReader(stream)) {
+                            using (StreamReader reader = new StreamReader(stream, Encoding.UTF8)) {
                                 string result = reader.ReadToEnd();
+                                print("RESSSS::: :" + result);
                                 return result;
                             }
                         }

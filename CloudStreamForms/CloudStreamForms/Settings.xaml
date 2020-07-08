@@ -270,6 +270,12 @@
 
                     <Label x:Name="G_BuildTxt"  Text="Build" FontSize="Body" FontAttributes="Bold" TranslationX="10" Margin="10" TextColor="#ffffff"></Label>
 
+                    <Button x:Name="SubtitleStyle" Text="Style" BackgroundColor="#212121"  HeightRequest="50"></Button>
+                    <Button x:Name="SubtitleFont" Text="Style" BackgroundColor="#212121"  HeightRequest="50"></Button>
+
+                    <Button x:Name="SubtitleLang" Text="Eng" BackgroundColor="#212121"  HeightRequest="50"></Button>
+                    
+                    
                     <Label Text="Build Version: "  x:Name="BuildNumber" TranslationX="10"  ></Label>
                     <Label Text="Github: https://github.com/LagradOst/CloudStream-2"  x:Name="G_GithubTxt" TranslationX="10"    ></Label>
                     <Button x:Name="StarMe" Text="Open Github" BackgroundColor="#212121"  HeightRequest="50"></Button>

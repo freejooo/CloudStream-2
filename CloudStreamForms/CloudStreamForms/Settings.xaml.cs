@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Xamarin.Forms;
 using Xamarin.Forms.Internals;
 using Xamarin.Forms.Xaml;
@@ -14,11 +15,15 @@ namespace CloudStreamForms
         public const bool SUBTITLES_INVIDEO_ENABELD = true;
 
         LabelList ColorPicker;
+        LabelList SubLangPicker;
+        LabelList SubStylePicker;
+        LabelList SubFontPicker;
 
         public string MainTxtColor { set; get; } = "#e1e1e1";
 
 
         public const string errorEpisodeToast = "No Links Found";
+
         public static int LoadingMiliSec {
             set {
                 App.SetKey("Settings", nameof(LoadingMiliSec), value);
@@ -28,12 +33,38 @@ namespace CloudStreamForms
             }
         }
 
+        public static bool SubtitlesHasDropShadow {
+            get {
+                return SubtitleType == 1 || SubtitleType == 3;
+            }
+        }
+
+        public static bool SubtitlesHasOutline {
+            get {
+                return SubtitleType >= 2;
+            }
+        }
+
+        /// <summary>
+        /// 0 = None, 1 = Dropshadow, 2 = Outline, 3 = Outline + dropshadow 
+        /// </summary>
+        public static int SubtitleType {
+            set {
+                App.SetKey("Settings", nameof(SubtitleType), value);
+            }
+            get {
+                return App.GetKey("Settings", nameof(SubtitleType), 3);
+            }
+        }
+
+        public static readonly List<string> GlobalFonts = new List<string>() { "Trebuchet MS", "Open Sans", "Google Sans", "Arial", "Lucida Grande", "Verdana", "Futura", "STIXGeneral", "Times New Roman" };
+
         public static string GlobalSubtitleFont {
             set {
                 App.SetKey("Settings", nameof(GlobalSubtitleFont), value);
             }
             get {
-                return App.GetKey("Settings", nameof(GlobalSubtitleFont), "Trebuchet MS"); // Trebuchet MS, Open Sans, Google Sans
+                return App.GetKey("Settings", nameof(GlobalSubtitleFont), GlobalFonts[0]); // Trebuchet MS, Open Sans, Google Sans
             }
         }
 
@@ -42,7 +73,7 @@ namespace CloudStreamForms
                 return CloudStreamCore.subtitleShortNames[NativeSubtitles];
             }
         }
-        
+
         public static string NativeSubLongName {
             get {
                 return CloudStreamCore.subtitleNames[NativeSubtitles];
@@ -240,6 +271,11 @@ namespace CloudStreamForms
                 G_CacheData,
                 G_Dubbed,
                 G_PauseHistory,
+
+                SubtitleStyle,
+                SubtitleLang,
+                SubtitleFont,
+
                 G_UITxt,
                 G_Statusbar,
                 G_Top100,
@@ -290,6 +326,9 @@ namespace CloudStreamForms
 
 
             ColorPicker = new LabelList(SetTheme, new List<string> { "Black", "Dark", "Netflix", "YouTube" }, "Select Theme");
+            SubLangPicker = new LabelList(SubtitleLang, CloudStreamCore.subtitleNames.ToList(), "Default Subtitle");
+            SubStylePicker = new LabelList(SubtitleStyle, new List<string>() { "None", "Dropshadow", "Outline", "Outline + dropshadow" }, "Subtitle Style");
+            SubFontPicker = new LabelList(SubtitleFont, GlobalFonts, "Subtitle Font",true);
             //outline_reorder_white_48dp.png
 
 
@@ -369,7 +408,27 @@ namespace CloudStreamForms
                 ResetToDef();
             }));
 
+            SubStylePicker.SelectedIndexChanged += (o, e) => {
+                if (SubStylePicker.SelectedIndex != -1) {
+                    SubtitleType = SubStylePicker.SelectedIndex;
+                    SubStylePicker.button.Text = "Subtitle Style: " + SubStylePicker.button.Text;
+                }
+            };
 
+            SubFontPicker.SelectedIndexChanged += (o, e) => {
+                if (SubFontPicker.SelectedIndex != -1) {
+                    GlobalSubtitleFont = SubFontPicker.ItemsSource[SubFontPicker.SelectedIndex];
+                    SubFontPicker.button.Text = "Subtitle Font: " + SubFontPicker.button.Text;
+                }
+            };
+
+
+            SubLangPicker.SelectedIndexChanged += (o, e) => {
+                if (SubLangPicker.SelectedIndex != -1) {
+                    NativeSubtitles = SubLangPicker.SelectedIndex;
+                    SubLangPicker.button.Text = "Default Lang: " + SubLangPicker.button.Text;
+                }
+            };
 
             ColorPicker.SelectedIndexChanged += (o, e) => {
                 if (ColorPicker.SelectedIndex != -1) {
@@ -423,6 +482,10 @@ namespace CloudStreamForms
                 StatusbarToggle.IsToggled = HasStatusBar;
                 TopToggle.IsToggled = Top100Enabled;
                 ColorPicker.SelectedIndex = BlackBgType;
+                SubLangPicker.SelectedIndex = NativeSubtitles;
+                SubStylePicker.SelectedIndex = SubtitleType;
+                SubFontPicker.SelectedIndex = GlobalFonts.IndexOf(GlobalSubtitleFont);
+
                 ListAniToggle.IsToggled = ListViewPopupAnimation;
                 FastListViewPopupAnimation = ListViewPopupAnimation;
 

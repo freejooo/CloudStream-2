@@ -46,7 +46,7 @@
                         <DataTemplate >
                             <ViewCell >
                                 <StackLayout HorizontalOptions="{Binding LayoutCenter}" VerticalOptions="Center" >
-                                    <Label Text="{Binding Name}"  TextColor="#e6e6e6" HorizontalOptions="{Binding LayoutCenter}" VerticalOptions="Center"  FontAttributes="{Binding FontAtt}" FontSize="{Binding FontSize}"></Label>
+                                    <Label Text="{Binding Name}"  TextColor="#e6e6e6" HorizontalOptions="{Binding LayoutCenter}" VerticalOptions="Center"  FontAttributes="{Binding FontAtt}" FontSize="{Binding FontSize}" FontFamily="{Binding FontFam}" ></Label>
                                 </StackLayout> 
                             </ViewCell>
                         </DataTemplate>

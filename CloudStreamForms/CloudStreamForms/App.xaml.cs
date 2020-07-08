@@ -15,6 +15,7 @@ using Xamarin.Essentials;
 using Xamarin.Forms;
 using static CloudStreamForms.CloudStreamCore;
 
+//[assembly: ExportFont("Times-New-Roman.ttf", Alias = "Times New Roman")]
 namespace CloudStreamForms
 {
     public partial class App : Application
@@ -41,6 +42,10 @@ namespace CloudStreamForms
             }
         }
 
+        public static string GetFont(string f)
+        {
+            return f.Replace(" ", "-") + ".ttf#" + f;
+        }
 
         public struct BluetoothDeviceID
         {

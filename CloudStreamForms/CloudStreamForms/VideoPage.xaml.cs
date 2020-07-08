@@ -434,7 +434,7 @@ namespace CloudStreamForms
                 }
             }
         }
-         
+
 
         public void PlayerTimeChanged(long time)
         {
@@ -491,6 +491,9 @@ namespace CloudStreamForms
 
             InitializeComponent();
 
+
+            // ======================= SUBTITLE SETUP =======================
+
             Vector2[] offsets = new Vector2[]  {
                 new Vector2(0,1),
                 new Vector2(1,1),
@@ -531,19 +534,44 @@ namespace CloudStreamForms
             double base2X = SubtitleTxt2.TranslationX;
             double base2Y = SubtitleTxt2.TranslationY;
 
+            bool hasDropshadow = Settings.SubtitlesHasDropShadow;
+            bool hasOutline = Settings.SubtitlesHasOutline;
+
+            string fontFam = App.GetFont(Settings.GlobalSubtitleFont);
+
+            string classId = hasDropshadow ? "OUTLINE" : "";
             for (int i = 0; i < font1.Length; i++) {
-                font1[i].FontFamily = Settings.GlobalSubtitleFont;
-                font1[i].TranslationX = base1X + offsets[i].X * multi;
-                font1[i].TranslationY = base1Y + offsets[i].Y * multi;
+                if (hasOutline) {
+                    font1[i].FontFamily = fontFam;
+                    font1[i].TranslationX = base1X + offsets[i].X * multi;
+                    font1[i].TranslationY = base1Y + offsets[i].Y * multi;
+                    font1[i].ClassId = classId;
+                }
+                else {
+                    font1[i].IsVisible = false;
+                    font1[i].IsEnabled = false;
+                }
             }
             for (int i = 0; i < font2.Length; i++) {
-                font2[i].FontFamily = Settings.GlobalSubtitleFont;
-                font2[i].TranslationX = base2X + offsets[i].X * multi;
-                font2[i].TranslationY = base2Y + offsets[i].Y * multi;
+                if (hasOutline) {
+                    font2[i].FontFamily = fontFam;
+                    font2[i].TranslationX = base2X + offsets[i].X * multi;
+                    font2[i].TranslationY = base2Y + offsets[i].Y * multi;
+                    font2[i].ClassId = classId;
+                }
+                else {
+                    font2[i].IsVisible = false;
+                    font2[i].IsEnabled = false;
+                }
             }
 
-            SubtitleTxt1.FontFamily = Settings.GlobalSubtitleFont;
-            SubtitleTxt2.FontFamily = Settings.GlobalSubtitleFont;
+            SubtitleTxt1.FontFamily = fontFam;
+            SubtitleTxt2.FontFamily = fontFam;
+
+            SubtitleTxt1.ClassId = classId;
+            SubtitleTxt2.ClassId = classId;
+
+            // ======================= END =======================
 
             Core.Initialize();
             lockElements = new VisualElement[] { NextMirror, NextMirrorBtt, BacktoMain, GoBackBtt, EpisodeLabel, PausePlayClickBtt, PausePlayBtt, SkipForward, SkipForwardBtt, SkipForwardImg, SkipForwardSmall, SkipBack, SkipBackBtt, SkipBackImg, SkipBackSmall };
@@ -616,7 +644,7 @@ namespace CloudStreamForms
                 }
                 catch (Exception _ex) {
                     print("A_A__A__A:: " + _ex);
-                } 
+                }
             }
 
             SubTap.IsVisible = HasSupportForSubtitles() && Settings.SUBTITLES_INVIDEO_ENABELD;
