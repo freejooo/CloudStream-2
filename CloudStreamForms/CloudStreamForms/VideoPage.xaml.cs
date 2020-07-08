@@ -284,7 +284,7 @@ namespace CloudStreamForms
             var thread = mainCore.CreateThread(6);
             mainCore.StartThread("PopulateSubtitles", () => {
                 try {
-                    string data = mainCore.DownloadSubtitle(currentVideo.headerId, lang, false, true);
+                    string data = mainCore.DownloadSubtitle(currentVideo.episodeId, lang, false, true);
                     if (data.IsClean()) {
                         if (!ContainsLang()) {
                             lock (subtitleMutex) {

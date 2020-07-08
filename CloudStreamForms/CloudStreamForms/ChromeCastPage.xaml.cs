@@ -128,7 +128,7 @@ namespace CloudStreamForms
 
         public void PopulateSubtitle(string lang = "", string name = "")
         {
-            if(lang == "") {
+            if (lang == "") {
                 lang = Settings.NativeSubShortName;
                 name = Settings.NativeSubLongName;
             }
@@ -154,7 +154,7 @@ namespace CloudStreamForms
             var thread = mainCore.CreateThread(6);
             mainCore.StartThread("PopulateSubtitles", () => {
                 try {
-                    string data = mainCore.DownloadSubtitle(chromeMovieResult.title.id, lang, false, true);
+                    string data = mainCore.DownloadSubtitle(MovieResult.GetId(episodeResult, chromeMovieResult), lang, false, true);
                     if (data.IsClean()) {
                         if (!ContainsLang()) {
                             lock (subtitleMutex) {
@@ -270,7 +270,7 @@ namespace CloudStreamForms
             if (lastId != chromeMovieResult.title.id) {
                 lastId = chromeMovieResult.title.id;
                 subtitles = new List<Subtitle>();
-                subtitleDelay =0;
+                subtitleDelay = 0;
                 subtitleIndex = -1;
                 HasSubtitlesOn = false;
                 print("NOT THE SAME AT LAST ONE");
