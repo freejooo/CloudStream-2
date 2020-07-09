@@ -517,7 +517,7 @@ namespace CloudStreamForms
 
         public static double CurrentTime {
             get {
-                try { 
+                try {
                     if (RequestNextTime != -1 && IsBuffering) {
                         return RequestNextTime;
                     }
@@ -532,7 +532,7 @@ namespace CloudStreamForms
                         TimeSpan t = DateTime.Now.Subtract(castUpdatedNow);
                         double currentTime = castLastUpdate + t.TotalSeconds;
                         return currentTime;
-                    } 
+                    }
                 }
                 catch (System.Exception) {
                     return CurrentCastingDuration; // CAST STOPPED FROM EXTERNAL
@@ -638,7 +638,7 @@ namespace CloudStreamForms
         private static void ChromeChannel_StatusChanged(object sender, EventArgs e)
         {
             MediaStatus mm = CurrentChannel.Status.FirstOrDefault();
-            
+
             IsPlaying = (mm.PlayerState == "PLAYING");
             IsBuffering = (mm.PlayerState == "BUFFERING");
             IsIdle = (mm.PlayerState == "IDLE");
@@ -1305,6 +1305,26 @@ namespace CloudStreamForms
             public WatchMovieAnimeData watchMovieAnimeData;
             public KissanimefreeData kissanimefreeData;
             public AnimeSimpleData animeSimpleData;
+            public VidStreamingData vidStreamingData;
+        }
+
+        [Serializable]
+        public struct VidStreamingData
+        {
+            public bool dubExists;
+            public bool subExists;
+            public VidStreamingSearchAjax dubbedEpData;
+            public VidStreamingSearchAjax subbedEpData;
+        }
+
+        [Serializable]
+        public struct VidStreamingSearchAjax
+        {
+            public string title;
+            public string shortUrl;
+            public int maxEp;
+            public string cleanTitle;
+            public bool isDub;
         }
 
         [Serializable]
@@ -1851,7 +1871,7 @@ namespace CloudStreamForms
 
         public CloudStreamCore() // INIT
         {
-            animeProviders = new IAnimeProvider[] { new GogoAnimeProvider(this), new KickassAnimeProvider(this), new DubbedAnimeProvider(this), new AnimeFlixProvider(this), new DubbedAnimeNetProvider(this), new AnimekisaProvider(this), new DreamAnimeProvider(this), new TheMovieAnimeProvider(this), new KissFreeAnimeProvider(this), new AnimeSimpleProvider(this) };
+            animeProviders = new IAnimeProvider[] { new GogoAnimeProvider(this), new KickassAnimeProvider(this), new DubbedAnimeProvider(this), new AnimeFlixProvider(this), new DubbedAnimeNetProvider(this), new AnimekisaProvider(this), new DreamAnimeProvider(this), new TheMovieAnimeProvider(this), new KissFreeAnimeProvider(this), new AnimeSimpleProvider(this), new VidstreamingAnimeProvider(this) };
             movieProviders = new IMovieProvider[] { new DirectVidsrcProvider(this), new WatchTVProvider(this), new FMoviesProvider(this), new LiveMovies123Provider(this), new TheMovies123Provider(this), new YesMoviesProvider(this), new WatchSeriesProvider(this), new GomoStreamProvider(this), new Movies123Provider(this), new DubbedAnimeMovieProvider(this), new TheMovieMovieProvider(this), new KickassMovieProvider(this) };
         }
 
@@ -3291,11 +3311,198 @@ namespace CloudStreamForms
             AddPotentialLink(normalEpisode, FindHTML(d, "<source src=\"", "\""), "Trollvid" + extra, 7);
         }
 
+        public class VidstreamingAnimeProvider : BaseAnimeProvider
+        {
+            public override string Name => "Vidstreaming";
+
+            public override int GetLinkCount(int currentSeason, bool isDub, TempThread? tempThred)
+            {
+                int count = 0;
+                for (int z = 0; z < activeMovie.title.MALData.seasonData.Count; z++) {
+                    for (int q = 0; q < activeMovie.title.MALData.seasonData[z].seasons.Count; q++) {
+                        MALSeason ms;
+                        lock (_lock) {
+                            ms = activeMovie.title.MALData.seasonData[z].seasons[q];
+                        }
+                        var data = ms.vidStreamingData;
+                        if ((data.dubExists && isDub) || (data.subExists && !isDub)) {
+                            count += isDub ? data.dubbedEpData.maxEp : data.subbedEpData.maxEp;
+                        }
+                    }
+                }
+                return count;
+            }
+
+            static string GetReq(string url)
+            {
+                HttpWebRequest request = (HttpWebRequest)HttpWebRequest.Create(url);
+
+                request.ServerCertificateValidationCallback = delegate { return true; };
+
+                // Set the Method property of the request to POST.
+                request.Method = "GET";
+
+                request.ContentType = "text/html; charset=utf-8";
+                request.Referer = "https://vidstreaming.io/";
+                request.Headers.Add("x-requested-with", "XMLHttpRequest");
+                WebResponse response = request.GetResponse();
+                var dataStream = response.GetResponseStream();
+                StreamReader reader = new StreamReader(dataStream);
+                string responseFromServer = reader.ReadToEnd();
+                reader.Close();
+                dataStream.Close();
+                response.Close();
+                return responseFromServer;
+            }
+
+            public List<VidStreamingSearchAjax> SlowSearchVidStreaming(string search)
+            {
+                List<VidStreamingSearchAjax> list = new List<VidStreamingSearchAjax>();
+                try {
+                    string d = DownloadString($"https://vidstreaming.io/search.html?keyword={search}").Replace("\\", "");
+                    print(d);
+                    const string lookFor = " <li class=\"video-block \">";
+                    while (d.Contains(lookFor)) {
+                        d = RemoveOne(d, lookFor);
+                        string link = FindHTML(d, "<a href=\"", "\"");
+                        string title = FindHTML(d, "<div class=\"name\">", "<").Replace("\n", "").Replace("\r", "").Replace("  ", "");
+                        title = title.Substring(0, title.IndexOf("Episode "));
+                        const string episodeIndex = "episode-";
+                        bool success = int.TryParse(FindHTML(link + "|||", episodeIndex, "|||"), out int ep);
+                        link = link.Substring(0, link.IndexOf(episodeIndex) + episodeIndex.Length);
+
+                        if (success) {
+                            list.Add(new VidStreamingSearchAjax() { shortUrl = link, maxEp = ep, title = title, cleanTitle = title.Replace(" (Dub)", "").Replace(" (OVA)", ""), isDub = title.Contains("(Dub)") });
+                        }
+
+                        print("LINK: " + link + "|||" + title);
+
+                    }
+                }
+                catch (Exception _ex) {
+                    print("MAIN EX IN :::: " + _ex);
+                }
+                return list;
+            }
+
+            public static List<VidStreamingSearchAjax> QuickSearchVidStreaming(string search)
+            {
+                List<VidStreamingSearchAjax> list = new List<VidStreamingSearchAjax>();
+                try {
+                    string d = GetReq($"https://vidstreaming.io/ajax-search.html?keyword={search}&id=-1").Replace("\\", "");
+                    const string lookFor = "<a href=\"";
+                    while (d.Contains(lookFor)) {
+                        string link = FindHTML(d, lookFor, "\"");
+                        d = RemoveOne(d, lookFor);
+                        string title = FindHTML(d, "class=\"ss-title\">", "<");
+                        const string episodeIndex = "episode-";
+                        bool success = int.TryParse(FindHTML(link + "|||", episodeIndex, "|||"), out int ep);
+                        link = link.Substring(0, link.IndexOf(episodeIndex) + episodeIndex.Length);
+
+                        if (success) {
+                            list.Add(new VidStreamingSearchAjax() { shortUrl = link, maxEp = ep, title = title, cleanTitle = title.Replace(" (Dub)", "").Replace(" (OVA)", ""), isDub = title.Contains("(Dub)") });
+                        }
+                    }
+                }
+                catch (Exception _ex) {
+                    print("MAIN EX IN :::: " + _ex);
+                }
+                return list;
+            }
+
+
+            public VidstreamingAnimeProvider(CloudStreamCore _core) : base(_core) { }
+
+            public override void GetHasDubSub(MALSeason data, out bool dub, out bool sub)
+            {
+                dub = data.vidStreamingData.dubExists;
+                sub = data.vidStreamingData.subExists;
+            }
+
+            public override void FishMainLink(string year, TempThread tempThred, MALData malData)
+            {
+                try {
+                    print("DADADDA");
+                    var quickSearch = SlowSearchVidStreaming(malData.engName); //QuickSearchVidStreaming(activeMovie.title.name);
+                    if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
+
+                    for (int z = 0; z < activeMovie.title.MALData.seasonData.Count; z++) {
+                        for (int q = 0; q < activeMovie.title.MALData.seasonData[z].seasons.Count; q++) {
+                            MALSeason ms;
+                            lock (_lock) {
+                                ms = activeMovie.title.MALData.seasonData[z].seasons[q];
+                            }
+
+                            VidStreamingData data = ms.vidStreamingData;
+
+                            foreach (var item in quickSearch) {
+                                print("COMAPPDPAPDAPDPAP: " + ms.engName + "|" + item.cleanTitle);
+                                if (ToDown(item.cleanTitle, replaceSpace: "") == ToDown(ms.engName, replaceSpace: "")) {
+                                    print("COMAPPDPAPDAPDPAPFOUND::::: " + ms.engName + "|" + item.cleanTitle);
+
+                                    if (item.isDub) {
+                                        data.dubExists = true;
+                                        data.dubbedEpData = item;
+                                    }
+                                    else {
+                                        data.subExists = true;
+                                        data.subbedEpData = item;
+                                    }
+                                }
+                            }
+
+                            lock (_lock) {
+                                ms = activeMovie.title.MALData.seasonData[z].seasons[q];
+                                ms.vidStreamingData = data;
+                                activeMovie.title.MALData.seasonData[z].seasons[q] = ms;
+                            }
+                        }
+                    }
+                }
+                catch (Exception) {
+
+                    throw;
+                }
+            }
+
+            public void ExtractVidstreaming(string link, int normalEpisode, TempThread tempThread)
+            {
+                string d = DownloadString(link);
+                string source = FindHTML(d, "<iframe src=\"", "\"");
+                d = DownloadString("https:" + source);
+                AddEpisodesFromMirrors(tempThread, d, normalEpisode);
+            }
+
+            public override void LoadLinksTSync(int episode, int season, int normalEpisode, bool isDub, TempThread tempThred)
+            {
+                try {
+                    int currentEp = 0;
+                    for (int q = 0; q < activeMovie.title.MALData.seasonData[season].seasons.Count; q++) {
+                        var data = activeMovie.title.MALData.seasonData[season].seasons[q].vidStreamingData;
+                        if ((data.dubExists && isDub) || (data.subExists && !isDub)) {
+                            var epData = isDub ? data.dubbedEpData : data.subbedEpData;
+                            int _ep = episode - currentEp;
+                            currentEp += epData.maxEp;
+                            if (currentEp >= episode) {
+                                ExtractVidstreaming("https://vidstreaming.io" + epData.shortUrl + _ep.ToString(), normalEpisode, tempThred);
+                                return;
+                            }
+                        }
+                        else {
+                            return;
+                        }
+                    }
+                }
+                catch (Exception) {
+
+                }
+
+            }
+        }
+
         public class DubbedAnimeNetProvider : BaseAnimeProvider
         {
-            public DubbedAnimeNetProvider(CloudStreamCore _core) : base(_core)
-            {
-            }
+            public DubbedAnimeNetProvider(CloudStreamCore _core) : base(_core) { }
 
             public override void GetHasDubSub(MALSeason data, out bool dub, out bool sub)
             {
@@ -7426,7 +7633,7 @@ namespace CloudStreamForms
                 string subtitleUrl = subAdd + FindHTML(d, "download/file/", "\"");
                 if (subtitleUrl != subAdd) {
                     print("HTMLGETSUB: " + subtitleUrl + "|" + _url);
-                    string s = DownloadStringWithCert(subtitleUrl,referer:"https://www.opensubtitles.org",encoding:Encoding.UTF7);
+                    string s = DownloadStringWithCert(subtitleUrl, referer: "https://www.opensubtitles.org", encoding: Encoding.UTF7);
                     if (BAN_SUBTITLE_ADS) {
                         List<string> bannedLines = new List<string>() { "Support us and become VIP member", "to remove all ads from www.OpenSubtitles.org", "to remove all ads from OpenSubtitles.org", "Advertise your product or brand here", "contact www.OpenSubtitles.org today" }; // No advertisement
                         foreach (var banned in bannedLines) {
@@ -9054,7 +9261,7 @@ namespace CloudStreamForms
         }
 
 
-        public string DownloadStringWithCert(string url, TempThread? tempThred = null, int waitTime = 1000, string requestBody = "",string referer = "", Encoding encoding = null)
+        public string DownloadStringWithCert(string url, TempThread? tempThred = null, int waitTime = 1000, string requestBody = "", string referer = "", Encoding encoding = null)
         {
             if (!url.IsClean()) return "";
 
@@ -9066,7 +9273,7 @@ namespace CloudStreamForms
                 webRequest.ReadWriteTimeout = waitTime * 10;
                 webRequest.ContinueTimeout = waitTime * 10;
                 webRequest.Referer = referer;
-                if(encoding == null) {
+                if (encoding == null) {
                     encoding = Encoding.UTF8;
                 }
                 //    string _s = "";
