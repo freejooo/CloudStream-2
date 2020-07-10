@@ -1985,6 +1985,7 @@ namespace CloudStreamForms
             public string dubLink;
             public string subLink;
         }
+
         class AnimeVibeProvider : BaseAnimeProvider
         {
             public override string Name => "Animevibe";
@@ -2103,13 +2104,11 @@ namespace CloudStreamForms
                 string iframe = FindHTML(page, "<iframe src=\"", "\"");
                 if (iframe != "") {
                     string d = DownloadString("https://animevibe.tv" + iframe);
-                    AddEpisodesFromMirrors(tempThread, d, normalEpisode, "HELLO", "HELLO");
+                    AddEpisodesFromMirrors(tempThread, d, normalEpisode);
                 }
             }
 
-            public AnimeVibeProvider(CloudStreamCore _core) : base(_core)
-            {
-            }
+            public AnimeVibeProvider(CloudStreamCore _core) : base(_core) { }
         }
 
         class GogoAnimeProvider : BaseAnimeProvider
