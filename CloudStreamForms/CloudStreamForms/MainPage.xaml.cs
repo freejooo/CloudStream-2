@@ -1078,8 +1078,8 @@ namespace CloudStreamForms
     // -------------------------------- END CHROMECAST --------------------------------
 
     [Serializable]
-    public class CloudStreamCore
-    {
+    public class CloudStreamCore : ICloneable
+    { 
         public static object mainPage;
         public static CloudStreamCore mainCore = new CloudStreamCore();
 
@@ -9918,6 +9918,11 @@ namespace CloudStreamForms
 
             outScore = score;
             return patternIdx == patternLength;
+        }
+
+        public object Clone()
+        {
+            return this.MemberwiseClone();
         }
     }
 }

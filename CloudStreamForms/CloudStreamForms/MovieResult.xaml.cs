@@ -819,14 +819,17 @@ namespace CloudStreamForms
                     epView.MyEpisodeResultCollection[_id].downloadState = 4; // SET IS SEARCHING
                     ForceUpdate();
                     currentDownloadSearchesHappening++;
-                    mainCore.GetEpisodeLink(isMovie ? -1 : (episodeResult.Id + 1), currentSeason, isDub: isDub, purgeCurrentLinkThread: currentDownloadSearchesHappening > 0);
+                    CloudStreamCore coreCopy = (CloudStreamCore)mainCore.Clone();
+
+                    coreCopy.GetEpisodeLink(isMovie ? -1 : (episodeResult.Id + 1), currentSeason, isDub: isDub, purgeCurrentLinkThread: currentDownloadSearchesHappening > 0);
                     print("!!___" + _id);
                     await Task.Delay(10000); // WAIT 10 Sec
                     try {
-                        if (!SameAsActiveMovie()) return;
+                       // if (!SameAsActiveMovie()) return;
 
-                        currentMovie = mainCore.activeMovie;
+                        Movie _currentMovie = coreCopy.activeMovie;
                         print("!!___" + _id);
+
                         epRes = epView.MyEpisodeResultCollection[_id];
 
                         bool hasMirrors = false;
@@ -853,7 +856,7 @@ namespace CloudStreamForms
                                 }
 
                                 App.UpdateDownload(GetCorrectId(episodeResult), -1);
-                                string dpath = App.RequestDownload(GetCorrectId(episodeResult), episodeResult.OgTitle, episodeResult.Description, episodeResult.Episode, currentSeason, mirrorUrls, mirrorNames, episodeResult.GetDownloadTitle(currentSeason, episodeResult.Episode) + ".mp4", episodeResult.PosterUrl, currentMovie.title);
+                                string dpath = App.RequestDownload(GetCorrectId(episodeResult), episodeResult.OgTitle, episodeResult.Description, episodeResult.Episode, currentSeason, mirrorUrls, mirrorNames, episodeResult.GetDownloadTitle(currentSeason, episodeResult.Episode) + ".mp4", episodeResult.PosterUrl, _currentMovie.title);
                                 print("SETCOLOR:::");
                                 //  SetColor(epView.MyEpisodeResultCollection[_id]);
 
@@ -861,14 +864,13 @@ namespace CloudStreamForms
                             print("SET COLOOOROOROROR" + epRes.OgTitle);
                             //await Task.Delay(1000);
                             ForceUpdate();
-
                         }
                         if (!hasMirrors) {
                             App.ShowToast("Download Failed");
                         }
                     }
                     catch (Exception _ex) {
-                        print("EX DLOAD::: " + _ex);
+                        print("EX DLOAD::: DOWNLOAD:::: " + _ex);
                     }
                     currentDownloadSearchesHappening--;
                 }
