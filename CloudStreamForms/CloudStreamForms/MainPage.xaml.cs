@@ -1182,6 +1182,7 @@ namespace CloudStreamForms
         ///  THRED ID IS THE THREDS POURPOSE
         ///  0=Normal, 1=SEARCHTHRED, 2=GETTITLETHREAD, 3=LINKTHRED, 4=DOWNLOADTHRED, 5=TRAILERTHREAD, 6=EPISODETHREAD
         /// </summary>
+        [Serializable]
         public struct TempThread
         {
             public int id;
@@ -1404,6 +1405,7 @@ namespace CloudStreamForms
             public AnimeFlixEpisode[] EpisodesUrls;
         }
 
+        [Serializable]
         public struct AnimeFlixEpisode
         {
             public int id;
@@ -1469,7 +1471,9 @@ namespace CloudStreamForms
             //public string altName;
             public string id;
             public string year;
-            public string ogYear => year.Substring(0, 4);
+
+            //public string ogYear => year.Substring(0, Math.Min( year.Length,4));
+
             public string rating;
             public string runtime;
             public string posterUrl;
@@ -1492,10 +1496,11 @@ namespace CloudStreamForms
             /// <summary>
             /// -1 = movie, 1-inf is seasons
             /// </summary>
+            [NonSerialized]
             public Dictionary<int, string> watchMovieSeasonsData;
             // USED FOR ANIMEMOVIES
             public string kickassSubUrl;
-            public string kickassDubUrl;
+            public string kickassDubUrl { set; get; }
 
             public string shortEpView;
 
@@ -1855,6 +1860,7 @@ namespace CloudStreamForms
         public event EventHandler<Movie> fishingDone;
         public event EventHandler<List<MoeEpisode>> moeDone;
 
+        [Serializable]
         public struct FishLoaded
         {
             public string name;
@@ -2764,6 +2770,7 @@ namespace CloudStreamForms
                 sub = data.animeSimpleData.subbedEpisodes > 0;
             }
 
+            [Serializable]
             struct AnimeSimpleTitle
             {
                 public string malId;
@@ -2771,7 +2778,7 @@ namespace CloudStreamForms
                 public string japName;
                 public string id;
             }
-
+            [Serializable]
             struct AnimeSimpleEpisodes
             {
                 public int dubbedEpisodes;
@@ -3183,7 +3190,7 @@ namespace CloudStreamForms
 
                 }
                 catch (Exception _ex) {
-                    print("FATAL EX IN freeanime: " + _ex);
+                    error("FATAL EX IN freeanime: " + _ex);
                 }
 
             }
@@ -3248,7 +3255,7 @@ namespace CloudStreamForms
                         }), _webRequest);
                     }
                     catch (Exception _ex) {
-                        print("FATAL EX IN POST: " + _ex);
+                        error("FATAL EX IN POST: " + _ex);
                     }
                 }), webRequest);
 
@@ -3511,6 +3518,7 @@ namespace CloudStreamForms
             }
 
             #region structs
+            [Serializable]
             public struct DubbedAnimeNetRelated
             {
                 public string Alternative_version { get; set; }
@@ -3521,7 +3529,7 @@ namespace CloudStreamForms
                 public string Sequel { get; set; }
                 public string Character { get; set; }
             }
-
+            [Serializable]
             public struct DubbedAnimeNetSearchResult
             {
                 public string id { get; set; }
@@ -3550,7 +3558,7 @@ namespace CloudStreamForms
                 public string mal_id { get; set; }
                 public string url { get; set; }
             }
-
+            [Serializable]
             public struct DubbedAnimeNetQuickSearch
             {
                 public List<DubbedAnimeNetSearchResult> results { get; set; }
@@ -3559,12 +3567,14 @@ namespace CloudStreamForms
                 public int total { get; set; }
             }
 
+            [Serializable]
             public struct DubbedAnimeNetName
             {
                 public string @default { get; set; }
                 public string english { get; set; }
             }
 
+            [Serializable]
             public struct DubbedAnimeNetVideo
             {
                 public string host { get; set; }
@@ -3573,6 +3583,7 @@ namespace CloudStreamForms
                 public string date { get; set; }
             }
 
+            [Serializable]
             public struct DubbedAnimeNetAPIEpisode
             {
                 public string id { get; set; }
@@ -3590,6 +3601,8 @@ namespace CloudStreamForms
                 public string url { get; set; }
                 public string lang { get; set; }
             }
+
+            [Serializable]
             public struct DubbedAnimeNetEpisodeExternalAPI
             {
                 public string host { get; set; }
@@ -3941,13 +3954,14 @@ namespace CloudStreamForms
                 return len;
             }
 
-
+            [Serializable]
             public struct DreamApiName
             {
                 public string @default { get; set; }
                 public string english { get; set; }
             }
 
+            [Serializable]
             public struct DreamApiVideo
             {
                 public string host { get; set; }
@@ -3956,6 +3970,7 @@ namespace CloudStreamForms
                 public string date { get; set; }
             }
 
+            [Serializable]
             public struct DreamAnimeLinkApi
             {
                 public string id { get; set; }
@@ -4437,6 +4452,7 @@ namespace CloudStreamForms
 
 
         #region AnimeFlixData
+        [Serializable]
         public struct AnimeFlixSearchItem
         {
             public int id { get; set; }
@@ -4868,7 +4884,7 @@ namespace CloudStreamForms
                 if (!GetThredActive(tempThred)) { return; };
                 string release = FindHTML(d, "Release:</strong> ", "<");
                 bool succ = true;
-                if (release != activeMovie.title.ogYear) {
+                if (release != activeMovie.title.year.Substring(0, 4)) {
                     succ = false;
                     if (isMovie) {
                         d = DownloadString(_url + "-1");
@@ -5233,7 +5249,7 @@ namespace CloudStreamForms
                     tempThred.typeId = 3; // MAKE SURE THIS IS BEFORE YOU CREATE THE THRED
                     tempThred.Thread = new System.Threading.Thread(() => {
                         try {*/
-                    string extra = ToDown(activeMovie.title.name, true, "-") + (isMovie ? ("-" + activeMovie.title.ogYear) : ("-" + season + "x" + episode));
+                    string extra = ToDown(activeMovie.title.name, true, "-") + (isMovie ? ("-" + activeMovie.title.year.Substring(0, 4)) : ("-" + season + "x" + episode));
                     string d = DownloadString("https://on.the123movies.eu/" + extra);
                     if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
                     string ts = FindHTML(d, "data-vs=\"", "\"");
@@ -5671,12 +5687,12 @@ namespace CloudStreamForms
                                             }
                                         }
                                         catch (Exception _ex) {
-                                            print("FATAL EX IN TOKENPOST2:" + _ex);
+                                            error("FATAL EX IN TOKENPOST2:" + _ex);
                                         }
                                     }), _webRequest);
                                 }
                                 catch (Exception _ex) {
-                                    print("FATAL EX IN TOKENPOST:" + _ex);
+                                    error("FATAL EX IN TOKENPOST:" + _ex);
                                 }
 
                             }), webRequest);
@@ -5759,7 +5775,7 @@ namespace CloudStreamForms
                     bool canShow = GetSettings(MovieType.TVSeries);
 
                     string rinput = ToDown(activeMovie.title.name, replaceSpace: "+");
-                    string url = "http://watchserieshd.tv/search.html?keyword=" + rinput.Replace("+", "%20");
+                    string url = "https://www3.watchserieshd.tv/search.html?keyword=" + rinput.Replace("+", "%20");
 
                     string d = DownloadString(url);
                     if (!GetThredActive(tempThread)) { return; }; // COPY UPDATE PROGRESS
@@ -5772,7 +5788,7 @@ namespace CloudStreamForms
                         string href = FindHTML(d, "<a href=\"", "\"");
                         if (href.Contains("/drama-info")) continue;
                         string title = FindHTML(d, "title=\"", "\"");
-                        string _d = DownloadString("http://watchserieshd.tv" + href);
+                        string _d = DownloadString("https://www3.watchserieshd.tv" + href);
                         if (!GetThredActive(tempThread)) { return; }; // COPY UPDATE PROGRESS
                         try {
                             string imdbScore = FindHTML(_d, "IMDB: ", " ");
@@ -5841,7 +5857,7 @@ namespace CloudStreamForms
                         print(i1 + "||" + i2 + "START:::" + ToDown(other[i].removedTitle.Replace("-", "").Replace(":", ""), replaceSpace: "") + "<<>>" + ToDown(activeMovie.title.name.Replace("-", "").Replace(":", ""), replaceSpace: "") + ":::");
                         if ((i1 == i2 || i1 == i2 - 1 || i1 == i2 + 1) && ToDown(other[i].removedTitle.Replace("-", "").Replace(":", ""), replaceSpace: "") == ToDown(activeMovie.title.name.Replace("-", "").Replace(":", ""), replaceSpace: "")) {
 
-                            if (other[i].released == activeMovie.title.ogYear || activeMovie.title.movieType != MovieType.Movie) {
+                            if (other[i].released == activeMovie.title.year.Substring(0, 4) || activeMovie.title.movieType != MovieType.Movie) {
                                 print("TRUE:::::" + other[i].imdbScore + "|" + other[i].released + "|" + other[i].href + "|" + other[i].title + "|" + other[i].removedTitle);
                                 if (other[i].href != "") {
                                     activeMovie.title.watchSeriesHdMetaData.Add(new WatchSeriesHdMetaData() { season = other[i].season, url = other[i].href });
@@ -5874,12 +5890,12 @@ namespace CloudStreamForms
                     for (int i = 0; i < activeMovie.title.watchSeriesHdMetaData.Count; i++) {
                         var meta = activeMovie.title.watchSeriesHdMetaData[i];
                         if (meta.season == season) {
-                            string href = "http://watchserieshd.tv" + meta.url + "-episode-" + (normalEpisode + 1);
+                            string href = "https://www3.watchserieshd.tv" + meta.url + "-episode-" + (normalEpisode + 1);
                             string d = DownloadString(href, tempThred);
                             if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
                             string dError = "<h1 class=\"entry-title\">Page not found</h1>";
                             if (d.Contains(dError) && activeMovie.title.movieType == MovieType.Movie) {
-                                href = "http://watchserieshd.tv" + meta.url + "-episode-0";
+                                href = "https://www3.watchserieshd.tv" + meta.url + "-episode-0";
                                 d = DownloadString(href, tempThred);
                                 if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
                             }
@@ -6265,11 +6281,11 @@ namespace CloudStreamForms
             {
                 List<TheMovieTitle> titles = new List<TheMovieTitle>();
 
-                string d = core.DownloadString("https://www4.watchmovie.movie/search.html?keyword=" + search);
+                string d = core.DownloadString("https://www8.watchmovie.movie/search.html?keyword=" + search);
                 string lookFor = "<div class=\"video_image_container sdimg\">";
                 while (d.Contains(lookFor)) {
                     d = RemoveOne(d, lookFor);
-                    string href = "https://www4.watchmovie.movie" + FindHTML(d, "<a href=\"", "\""); // as /series/castaways-season-1
+                    string href = "https://www8.watchmovie.movie" + FindHTML(d, "<a href=\"", "\""); // as /series/castaways-season-1
                     string name = FindHTML(d, "title=\"", "\"");
 
                     int season = -1;
@@ -7057,6 +7073,7 @@ namespace CloudStreamForms
                         japName = md.japName,
                         done = true,
                     };
+                    malDataLoaded?.Invoke(null, activeMovie.title.MALData);
 
                     //print(sequel + "|" + realSquel + "|" + sqlLink);
 
@@ -7068,20 +7085,21 @@ namespace CloudStreamForms
             });
         }
         public static bool shouldSkipAnimeLoading = false;
+        [Serializable]
         public struct AnimeNotTitle
         {
             public string romaji { get; set; }
             public string english { get; set; }
             public string japanese { get; set; }
         }
-
+        [Serializable]
         public struct AiringDate
         {
             public DateTime start { get; set; }
             public DateTime end { get; set; }
         }
 
-
+        [Serializable]
         public struct AnimeNotEpisode
         {
             public string animeId { get; set; }
@@ -8928,7 +8946,7 @@ namespace CloudStreamForms
 
             }
             catch (Exception _ex) {
-                print("FATAL EX IN GETMP4\n====================\n" + _ex + "\n================\n" + result + "\n=============END==========");
+                error("FATAL EX IN GETMP4\n====================\n" + _ex + "\n================\n" + result + "\n=============END==========");
                 return "";
             }
         }
@@ -9036,13 +9054,13 @@ namespace CloudStreamForms
                                 }
                             }
                             catch (Exception _ex) {
-                                print("FATAL EX IN : " + _ex);
+                                error("FATAL EX IN : " + _ex);
                             }
 
                         }
                     }
                     catch (Exception _ex) {
-                        print("FATAL EX IN : " + _ex);
+                        error("FATAL EX IN : " + _ex);
                     }
                 }
             }
@@ -9117,13 +9135,13 @@ namespace CloudStreamForms
 
                             }
                             catch (Exception _ex) {
-                                print("FATAL EX IN POST2: " + _ex);
+                                error("FATAL EX IN POST2: " + _ex);
                             }
                         }), _webRequest);
 
                     }
                     catch (Exception _ex) {
-                        print("FATAL EX IN POSTREQUEST");
+                        error("FATAL EX IN POSTREQUEST");
                     }
                 }), webRequest);
 
@@ -9137,7 +9155,7 @@ namespace CloudStreamForms
                 return _res;
             }
             catch (Exception _ex) {
-                print("FATAL EX IN POST: " + _ex);
+                error("FATAL EX IN POST: " + _ex);
                 return "";
             }
         }
@@ -9355,7 +9373,7 @@ namespace CloudStreamForms
                 return "";*/
             }
             catch (Exception _ex) {
-                print("FATAL ERROR DLOAD: \n" + url + "\n============================================\n" + _ex + "\n============================================");
+                error("FATAL ERROR DLOAD: \n" + url + "\n============================================\n" + _ex + "\n============================================");
                 return "";
             }
         }
@@ -9574,6 +9592,21 @@ namespace CloudStreamForms
                 }
             }
             return mirrorInfos.ToArray();//<MirrorInfo>();
+        }
+
+        public static void error(object o)
+        {
+#if DEBUG
+            print(o);
+
+            if (o != null) {
+                Console.WriteLine(o.ToString());
+            }
+            else {
+                Console.WriteLine("Null");
+            }
+#endif
+
         }
 
         public static void print(object o)
