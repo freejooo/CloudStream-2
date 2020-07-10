@@ -1,6 +1,7 @@
 ﻿using GoogleCast;
 using GoogleCast.Channels;
 using GoogleCast.Models.Media;
+using HtmlAgilityPack.CssSelectors.NetCore;
 using Jint;
 using Newtonsoft.Json;
 using SubtitlesParser.Classes;
@@ -16,9 +17,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading;
-//using Android.Util;
-//using Android.Content;
+using System.Threading; 
 using System.Threading.Tasks;
 using Xamarin.Forms;
 using Xamarin.Forms.PlatformConfiguration.AndroidSpecific;
@@ -1307,6 +1306,7 @@ namespace CloudStreamForms
             public KissanimefreeData kissanimefreeData;
             public AnimeSimpleData animeSimpleData;
             public VidStreamingData vidStreamingData;
+            public AnimeVibeData animeVibeData;
         }
 
         [Serializable]
@@ -1877,7 +1877,7 @@ namespace CloudStreamForms
 
         public CloudStreamCore() // INIT
         {
-            animeProviders = new IAnimeProvider[] { new GogoAnimeProvider(this), new KickassAnimeProvider(this), new DubbedAnimeProvider(this), new AnimeFlixProvider(this), new DubbedAnimeNetProvider(this), new AnimekisaProvider(this), new DreamAnimeProvider(this), new TheMovieAnimeProvider(this), new KissFreeAnimeProvider(this), new AnimeSimpleProvider(this), new VidstreamingAnimeProvider(this) };
+            animeProviders = new IAnimeProvider[] { new GogoAnimeProvider(this), new KickassAnimeProvider(this), new DubbedAnimeProvider(this), new AnimeFlixProvider(this), new DubbedAnimeNetProvider(this), new AnimekisaProvider(this), new DreamAnimeProvider(this), new TheMovieAnimeProvider(this), new KissFreeAnimeProvider(this), new AnimeSimpleProvider(this), new VidstreamingAnimeProvider(this), new AnimeVibeProvider(this) };
             movieProviders = new IMovieProvider[] { new DirectVidsrcProvider(this), new WatchTVProvider(this), new FMoviesProvider(this), new LiveMovies123Provider(this), new TheMovies123Provider(this), new YesMoviesProvider(this), new WatchSeriesProvider(this), new GomoStreamProvider(this), new Movies123Provider(this), new DubbedAnimeMovieProvider(this), new TheMovieMovieProvider(this), new KickassMovieProvider(this) };
         }
 
@@ -1931,6 +1931,10 @@ namespace CloudStreamForms
         {
             public BaseAnimeProvider(CloudStreamCore _core) : base(_core) { }
 
+            public virtual bool HasSub => true;
+            public virtual bool HasDub => true;
+
+
             public virtual string Name => throw new NotImplementedException();
 
             public virtual void FishMainLink(string year, TempThread tempThred, MALData malData)
@@ -1957,6 +1961,9 @@ namespace CloudStreamForms
         public interface IAnimeProvider
         {
             string Name { get; }
+            bool HasDub { get; }
+            bool HasSub { get; }
+
             void FishMainLink(string year, TempThread tempThred, MALData malData);
             void LoadLinksTSync(int episode, int season, int normalEpisode, bool isDub, TempThread tempThred);
             int GetLinkCount(int currentSeason, bool isDub, TempThread? tempThred);
@@ -1967,6 +1974,143 @@ namespace CloudStreamForms
 
 
         public static object _lock = new object();
+
+        [Serializable]
+        public struct AnimeVibeData
+        {
+            public bool subExists;
+            public bool dubExists;
+            public int dubbedEps;
+            public int subbedEps;
+            public string dubLink;
+            public string subLink;
+        }
+        class AnimeVibeProvider : BaseAnimeProvider
+        {
+            public override string Name => "Animevibe";
+            public override void FishMainLink(string year, TempThread tempThred, MALData malData)
+            {
+                var data = Search(malData.engName);
+
+                for (int i = 0; i < activeMovie.title.MALData.seasonData.Count; i++) {
+                    for (int q = 0; q < activeMovie.title.MALData.seasonData[i].seasons.Count; q++) {
+                        MALSeason ms;
+                        lock (_lock) {
+                            ms = activeMovie.title.MALData.seasonData[i].seasons[q];
+                        }
+
+                        CloudStreamCore.AnimeVibeData mainData = new CloudStreamCore.AnimeVibeData();
+                        foreach (var subData in data) {
+                            if (subData.title.Contains(ms.japName)) {
+                                bool isDub = subData.isDub;
+                                if (isDub) {
+                                    mainData.dubExists = true;
+                                    mainData.dubbedEps = subData.maxEp;
+                                    mainData.dubLink = subData.href;
+                                }
+                                else {
+                                    mainData.subExists = true;
+                                    mainData.subbedEps = subData.maxEp;
+                                    mainData.subLink = subData.href;
+                                }
+                            }
+                        }
+
+                        lock (_lock) {
+                            ms = activeMovie.title.MALData.seasonData[i].seasons[q];
+                            ms.animeVibeData = mainData;
+                            activeMovie.title.MALData.seasonData[i].seasons[q] = ms;
+                        }
+
+                    }
+                }
+            }
+
+            public override void GetHasDubSub(MALSeason data, out bool dub, out bool sub)
+            {
+                dub = data.animeVibeData.dubExists;
+                sub = data.animeVibeData.subExists;
+            }
+
+            public override int GetLinkCount(int currentSeason, bool isDub, TempThread? tempThred)
+            {
+                int count = 0;
+                try {
+                    for (int q = 0; q < activeMovie.title.MALData.seasonData[currentSeason].seasons.Count; q++) {
+                        var ms = activeMovie.title.MALData.seasonData[currentSeason].seasons[q].animeVibeData;
+                        if ((ms.dubExists && isDub) || (ms.subExists && !isDub)) {
+                            count += (isDub ? ms.dubbedEps : ms.subbedEps);
+                        }
+                    }
+                }
+                catch (Exception) {
+                }
+                return count;
+            }
+
+            public override void LoadLinksTSync(int episode, int season, int normalEpisode, bool isDub, TempThread tempThred)
+            {
+                int currentep = 0;
+                for (int q = 0; q < activeMovie.title.MALData.seasonData[season].seasons.Count; q++) {
+                    var ms = activeMovie.title.MALData.seasonData[season].seasons[q].animeVibeData;
+                    int subEp = episode - currentep;
+                    currentep += isDub ? ms.dubbedEps : ms.subbedEps;
+                    if (currentep > episode) {
+                        AddLink(isDub ? ms.dubLink : ms.subLink, subEp, normalEpisode, tempThred);
+                    }
+                }
+            }
+
+            [Serializable]
+            public struct AnimeVibeData
+            {
+                public string href;
+                public string title;
+                public bool isDub;
+                public int maxEp;
+            }
+
+            private List<AnimeVibeData> Search(string search)
+            {
+                string searchResults = DownloadString($"https://animevibe.tv/?s={search}");
+                //print(search_results);
+                var doc = new HtmlAgilityPack.HtmlDocument();
+                doc.LoadHtml(searchResults);
+                var data = doc.QuerySelectorAll("div.blogShort");
+                var list = new List<AnimeVibeData>();
+                for (int i = 0; i < data.Count; i++) {
+                    var realName = data[i].QuerySelectorAll("div.search-ex > h6");
+                    var link = data[i].QuerySelectorAll("a");
+
+                    bool isDub = (link[0].InnerText.Contains("(Dub)"));
+                    string href = (link[0].GetAttributeValue("href", ""));
+                    string title = (realName[0].InnerText);
+                    int maxEp = (int.Parse(FindHTML(realName[3].InnerText, ":", "Episode(s)")));
+                    list.Add(new AnimeVibeData() {
+                        isDub = isDub,
+                        href = href,
+                        title = title,
+                        maxEp = maxEp
+                    });
+                }
+                return list;
+            }
+
+            public void AddLink(string href, int episode, int normalEpisode, TempThread tempThread)
+            {
+                string url = href + episode;
+                string page = DownloadString(url);
+                string iframe = FindHTML(page, "<iframe src=\"", "\"");
+                if (iframe != "") {
+                    string d = DownloadString("https://animevibe.tv" + iframe);
+                    AddEpisodesFromMirrors(tempThread, d, normalEpisode, "HELLO", "HELLO");
+                }
+            }
+
+            public AnimeVibeProvider(CloudStreamCore _core) : base(_core)
+            {
+            }
+        }
 
         class GogoAnimeProvider : BaseAnimeProvider
         {
@@ -2330,10 +2474,12 @@ namespace CloudStreamForms
                 sub = data.kickassAnimeData.subExists;
             }
 
+            const string mainUrl = "https://www1.kickassanime.rs";
+
             public override void FishMainLink(string year, TempThread tempThred, MALData malData)
             {
                 string query = malData.firstName;
-                string url = "https://www.kickassanime.rs/search?q=" + query;//activeMovie.title.name.Replace(" ", "%20");
+                string url = mainUrl + "/search?q=" + query;//activeMovie.title.name.Replace(" ", "%20");
                 print("COMPAREURL:" + url);
                 string d = DownloadString(url);
                 if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
@@ -2349,7 +2495,7 @@ namespace CloudStreamForms
                     animeTitle = animeTitle.Replace(cenTxt, "").Replace(dubTxt, "").Replace(" ", "");
 
                     d = RemoveOne(d, lookfor);
-                    string slug = "https://www.kickassanime.rs" + FindHTML(d, "\"slug\":\"", "\"").Replace("\\/", "/");
+                    string slug = mainUrl + FindHTML(d, "\"slug\":\"", "\"").Replace("\\/", "/");
 
                     for (int i = 0; i < activeMovie.title.MALData.seasonData.Count; i++) {
                         for (int q = 0; q < activeMovie.title.MALData.seasonData[i].seasons.Count; q++) {
@@ -2391,7 +2537,7 @@ namespace CloudStreamForms
                                         string epNum = FindHTML(_d, _lookfor, "\"");
                                         _d = RemoveOne(_d, _lookfor);
 
-                                        string _slug = "https://www.kickassanime.rs" + FindHTML(_d, "\"slug\":\"", "\"").Replace("\\/", "/");
+                                        string _slug = mainUrl + FindHTML(_d, "\"slug\":\"", "\"").Replace("\\/", "/");
                                         //print("SLUGOS:" + _slug + "|" + epNum);
                                         string createDate = FindHTML(_d, "\"createddate\":\"", "\"");
                                         // string name = FindHTML(d, lookfor, "\"");
@@ -2460,11 +2606,12 @@ namespace CloudStreamForms
                         if ((ms.dubExists && isDub) || (ms.subExists && !isDub)) {
                             //  dstring = ms.baseUrl;
                             baseUrls.AddRange(isDub ? ms.dubEpisodesUrls : ms.subEpisodesUrls);
-                            print("BASEURL dada.:::" + (isDub ? ms.dubEpisodesUrls : ms.subEpisodesUrls));
+                            print("BASEURL dada.:::" + baseUrls.Count);
                         }
                     }
                 }
-                catch (Exception) {
+                catch (Exception _ex) {
+                    error(Name + " | GETALLLLINKS: " + _ex);
                 }
                 return baseUrls;
             }
@@ -3097,14 +3244,14 @@ namespace CloudStreamForms
                                         baseData.kissanimefreeData.subExists = true;
                                         baseData.kissanimefreeData.subUrl = slug;
                                         baseData.kissanimefreeData.maxSubbedEpisodes = episodes;
-                                        print("MAXSYBBB::" + episodes);
+                                        print("SUB::" + episodes + "|" + i + "|" + q);
                                         baseData.kissanimefreeData.subReferer = re.url;
                                     }
                                     else {
                                         baseData.kissanimefreeData.dubExists = true;
                                         baseData.kissanimefreeData.dubUrl = slug;
                                         baseData.kissanimefreeData.maxDubbedEpisodes = episodes;
-                                        print("MAXSYdddBBB::" + episodes);
+                                        print("DUB::" + episodes + "|" + i + "|" + q);
                                         baseData.kissanimefreeData.dubReferer = re.url;
                                     }
                                     activeMovie.title.MALData.seasonData[i].seasons[q] = baseData;
@@ -3120,7 +3267,7 @@ namespace CloudStreamForms
             int GetLinkCount(int currentSeason, bool isDub)
             {
                 int count = 0;
-                print("CURRENfSTSfEASON:::" + currentSeason + "|" + isDub + "|" + activeMovie.title.MALData.seasonData.Count);
+                error("CURRENfSTSfEASON:::" + currentSeason + "|" + isDub + "|" + activeMovie.title.MALData.seasonData.Count);
                 try {
                     for (int q = 0; q < activeMovie.title.MALData.seasonData[currentSeason].seasons.Count; q++) {
                         var ms = activeMovie.title.MALData.seasonData[currentSeason].seasons[q].kissanimefreeData;
@@ -3128,7 +3275,7 @@ namespace CloudStreamForms
                         if ((ms.dubExists && isDub) || (ms.subExists && !isDub)) {
                             //  dstring = ms.baseUrl;
                             count += (isDub ? ms.maxDubbedEpisodes : ms.maxSubbedEpisodes);
-                            print("ADDEDCOUNT: " + count);
+                            error("ADDEDCOUNT: " + count);
                         }
                     }
                 }
@@ -3325,16 +3472,14 @@ namespace CloudStreamForms
             public override int GetLinkCount(int currentSeason, bool isDub, TempThread? tempThred)
             {
                 int count = 0;
-                for (int z = 0; z < activeMovie.title.MALData.seasonData.Count; z++) {
-                    for (int q = 0; q < activeMovie.title.MALData.seasonData[z].seasons.Count; q++) {
-                        MALSeason ms;
-                        lock (_lock) {
-                            ms = activeMovie.title.MALData.seasonData[z].seasons[q];
-                        }
-                        var data = ms.vidStreamingData;
-                        if ((data.dubExists && isDub) || (data.subExists && !isDub)) {
-                            count += isDub ? data.dubbedEpData.maxEp : data.subbedEpData.maxEp;
-                        }
+                for (int q = 0; q < activeMovie.title.MALData.seasonData[currentSeason].seasons.Count; q++) {
+                    MALSeason ms;
+                    lock (_lock) {
+                        ms = activeMovie.title.MALData.seasonData[currentSeason].seasons[q];
+                    }
+                    var data = ms.vidStreamingData;
+                    if ((data.dubExists && isDub) || (data.subExists && !isDub)) {
+                        count += isDub ? data.dubbedEpData.maxEp : data.subbedEpData.maxEp;
                     }
                 }
                 return count;
@@ -3445,7 +3590,7 @@ namespace CloudStreamForms
                             foreach (var item in quickSearch) {
                                 print("COMAPPDPAPDAPDPAP: " + ms.engName + "|" + item.cleanTitle);
                                 if (ToDown(item.cleanTitle, replaceSpace: "") == ToDown(ms.engName, replaceSpace: "")) {
-                                    print("COMAPPDPAPDAPDPAPFOUND::::: " + ms.engName + "|" + item.cleanTitle);
+                                    print("COMAPPDPAPDAPDPAPFOUND::::: " + ms.engName + "|" + item.cleanTitle + "|" + item.title + "|" + item.maxEp);
 
                                     if (item.isDub) {
                                         data.dubExists = true;
@@ -3616,9 +3761,11 @@ namespace CloudStreamForms
             public override void FishMainLink(string year, TempThread tempThred, MALData malData)
             {
                 print("GET MAIN LINK FROM " + Name);
-                string search = malData.engName;//"neverland";
-                string postReq = core.PostRequest("https://ww5.dubbedanime.net/ajax/paginate", "https://ww5.dubbedanime.net/browse-anime?search=" + search, $"query%5Bsearch%5D={search}&what=query&model=Anime&size=30&letter=all");
-                print("DUBBEDANIMEPOST: " + postReq);
+                string search = malData.engName;//"neverland"; 
+                string url = "https://ww5.dubbedanime.net/browse-anime?search=" + search;
+                print(url);
+                string postReq = core.PostRequest("https://ww5.dubbedanime.net/ajax/paginate", url, $"query%5Bsearch%5D={search}&what=query&model=Anime&size=30&letter=all");
+                print("DUBBEDANIMEPOST: " + search + "|" + postReq);
 
                 if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
                 try {
@@ -3665,8 +3812,13 @@ namespace CloudStreamForms
                                     for (int f = 0; f < maxEp; f++) {
                                         data.EpisodesUrls[f] = dubbedKeys[f + 1];
                                     }
+                                    if (data.EpisodesUrls != null && data.EpisodesUrls.Length > 0) {
+                                        data.subExists = data.EpisodesUrls.Select(t => t.subExists).Contains(true);
+                                        data.dubExists = data.EpisodesUrls.Select(t => t.dubExists).Contains(true);
+                                    }
 
                                     lock (_lock) {
+                                        //error(data.FString());
                                         var _data = activeMovie.title.MALData.seasonData[q].seasons[z];
                                         _data.dubbedAnimeNetData = data;
                                         activeMovie.title.MALData.seasonData[q].seasons[z] = _data;
@@ -3679,9 +3831,8 @@ namespace CloudStreamForms
                     }
                 }
                 catch (Exception _ex) {
-                    print(Name + " ERROROROOROROOR!! " + _ex);
+                    error(Name + " ERROROROOROROOR!! " + _ex);
                 }
-
             }
 
             public override int GetLinkCount(int currentSeason, bool isDub, TempThread? tempThred)
@@ -3924,7 +4075,7 @@ namespace CloudStreamForms
                                             }
                                         }
                                         catch (Exception _ex) {
-                                            print("MAIN EX::::::::" + _ex);
+                                            error("MAIN EX IN DREAM" + _ex);
                                         }
                                     }
                                 }
@@ -4233,6 +4384,7 @@ namespace CloudStreamForms
             public DubbedAnimeProvider(CloudStreamCore _core) : base(_core) { }
 
             public override string Name => "DubbedAnime";
+            public override bool HasSub => false;
 
             public override void GetHasDubSub(MALSeason data, out bool dub, out bool sub)
             {
@@ -4335,7 +4487,8 @@ namespace CloudStreamForms
                         }
                     }
                 }
-                catch (Exception) {
+                catch (Exception _ex) {
+                    error(Name + "|" + nameof(GetAllLinks) + "|" + _ex);
                     //  throw;
                 }
                 return baseUrls;
@@ -6961,6 +7114,9 @@ namespace CloudStreamForms
                                 _synos.Add(_current);
                                 _syno = RemoveOne(_syno, ",");
                             }
+                            if (_eng == "") {
+                                _eng = firstName;
+                            }
                             print("CURRENTNAME: " + currentName + "|" + _eng + "|" + _jap);
 
                             if (currentName.Contains("Part ") && !currentName.Contains("Part 1")) // WILL ONLY WORK UNTIL PART 10, BUT JUST HOPE THAT THAT DOSENT HAPPEND :)
@@ -6992,6 +7148,12 @@ namespace CloudStreamForms
                                 print("SEASON: " + (i + 1) + "  -  " + e.name + "|" + e.engName + "|" + e.japName + "| SYNO: " + _s);
                             }
                         }
+
+                        error("FIRSTNAME: " + firstName);
+                        if (!firstName.IsClean()) {
+                            firstName = eng;
+                        }
+
                         activeMovie.title.MALData = new MALData() {
                             seasonData = data,
                             japName = jap,
@@ -7068,11 +7230,8 @@ namespace CloudStreamForms
                     print("DONE FISHING DATA");
                     MALData md = activeMovie.title.MALData;
 
-                    activeMovie.title.MALData = new MALData() {
-                        seasonData = md.seasonData,
-                        japName = md.japName,
-                        done = true,
-                    };
+                    activeMovie.title.MALData.done = true;
+
                     malDataLoaded?.Invoke(null, activeMovie.title.MALData);
 
                     //print(sequel + "|" + realSquel + "|" + sqlLink);
@@ -8853,6 +9012,16 @@ namespace CloudStreamForms
                 && (uriResult.Scheme == Uri.UriSchemeHttp || uriResult.Scheme == Uri.UriSchemeHttps);
         }
 
+
+
+        public static string Reverse(string s)
+        {
+            char[] charArray = s.ToCharArray();
+            Array.Reverse(charArray);
+            return new string(charArray);
+        }
+
+
         /// <summary>
         /// RETURNS THE TRUE MX URL OF A MP4 UPLOAD
         /// </summary>
@@ -8865,9 +9034,6 @@ namespace CloudStreamForms
             }
 
             try {
-
-                // int iDex = result.IndexOf("|");
-                // result = result.Substring(iDex, result.Length - iDex);
 
                 while (result.Contains("||")) {
                     result = result.Replace("||", "|");
@@ -8885,50 +9051,21 @@ namespace CloudStreamForms
                         server = "www" + i;
                     }
                 }
-
-                /*
-                int pos = result.IndexOf("vid|mp4|download");
-                int offset = 18;
-
-                if (pos == -1) {
-                    offset = 9;
-                    pos = result.IndexOf("vid|mp4");
-                }
-                if (pos == -1) {
-                    pos = result.IndexOf("mp4|video");
-                    offset = 11;
-                }  
-                if (pos == -1) {
-                    pos = result.IndexOf("getElementById|");
-                    offset = "getElementById".Length+3;
-                }
-
-                if (pos == -1) {
-                    return "";
-
-                    if (_episode.Contains("This video is no longer available due to a copyright claim")) {
-                        break;
-                    }
-
-                }
-
-                string allEp = result.Substring(pos + offset - 1, result.Length - pos - offset + 1);*/
                 string r = "-1";
 
-                string urlLink = result.Split('|').OrderBy(t => -t.Length).ToArray()[2];
-                /*print("ALLREP: " + allEp);
-                if ((allEp.Substring(0, 30).Contains("|"))) {
-                    string rez = allEp.Substring(0, allEp.IndexOf("p")) + "p";
-                    r = rez;
-                    allEp = allEp.Substring(allEp.IndexOf("p") + 2, allEp.Length - allEp.IndexOf("p") - 2);
+                print("RESULdsadsadsaTS: " + result);
+                string urlLink = "";
+                try {
+                    urlLink = result.Split('|').OrderBy(t => -t.Length).ToArray()[2];
                 }
-                string urlLink = allEp.Substring(0, allEp.IndexOf("|"));*/
+                catch (Exception) { }
+                if (!urlLink.IsClean() || urlLink.Length > 80) {
+                    int _i = result.IndexOf("|282|");
+                    string _result = result.Substring(0, _i);
 
-                //  allEp = allEp.Substring(urlLink.Length + 1, allEp.Length - urlLink.Length - 1);
-                // string typeID = allEp.Substring(0, allEp.IndexOf("|"));
-                //string typeID = FindHTML(result, urlLink, "|");
-                // string _urlLink = FindReverseHTML(result, "|" + typeID + "|", "|");
-                // print(server + "|" + typeID + "|" + urlLink);
+                    urlLink = Reverse(FindHTML("First=" + Reverse(_result), "First=", "|"));
+                    print("DADADD:A:DA:D:A:D " + urlLink);
+                }
                 string mxLink = "https://" + server + ".mp4upload.com:282/d/" + urlLink + "/video.mp4"; //  282 /d/qoxtvtduz3b4quuorgvegykwirnmt3wm3mrzjwqhae3zsw3fl7ajhcdj/video.mp4
 
                 string addRez = "";
