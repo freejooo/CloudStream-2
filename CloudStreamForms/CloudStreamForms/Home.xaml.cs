@@ -1,4 +1,5 @@
-﻿using CloudStreamForms.Models;
+﻿using CloudStreamForms.Core;
+using CloudStreamForms.Models;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -7,7 +8,7 @@ using System.Threading.Tasks;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 using XamEffects;
-using static CloudStreamForms.CloudStreamCore;
+using static CloudStreamForms.Core.CloudStreamCore;
 using static CloudStreamForms.MainPage;
 
 namespace CloudStreamForms
@@ -241,7 +242,7 @@ namespace CloudStreamForms
             MovieTypePicker.SelectedIndexChanged += (o, e) => {
                 ClearEpisodes(!IsRecommended);
                 if (IsRecommended) {
-                    MovieHelper.Shuffle(iMDbTopList);
+                    CoreHelpers.Shuffle(iMDbTopList);
                     LoadMoreImages();
                 }
                 else {

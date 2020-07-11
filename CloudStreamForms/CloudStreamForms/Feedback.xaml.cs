@@ -16,7 +16,7 @@ namespace CloudStreamForms
         {
             string entry = $"entry.1053489500={headers[headerId]}&entry.307565363={title}&entry.1502962940={feedback}&fvv=1&draftResponse=%5Bnull%2Cnull%2C%221883422455443503652%22%5D%0D%0A&pageHistory=0&fbzx=1883422455443503652";
             const string resp = "https://docs.google.com/forms/d/e/1FAIpQLSeWxFCeR7jm2iP-I8BOxa5saATb4jOPBbl3OU-oBUwBXE4G7Q/formResponse";
-            string d = CloudStreamForms.CloudStreamCore.mainCore.PostRequest(resp, resp, entry);
+            string d = CloudStreamForms.Core.CloudStreamCore.mainCore.PostRequest(resp, resp, entry);
             return d != "";
         }
         LabelList requestType;

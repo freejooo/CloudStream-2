@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 using static CloudStreamForms.App;
-using static CloudStreamForms.CloudStreamCore;
+using static CloudStreamForms.Core.CloudStreamCore;
 using static CloudStreamForms.InputPopupPage;
 using static CloudStreamForms.SelectPopup;
 using Button = Xamarin.Forms.Button;

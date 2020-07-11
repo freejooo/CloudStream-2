@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using Xamarin.Forms;
 using Xamarin.Forms.Platform.Android;
-using static CloudStreamForms.CloudStreamCore;
+using static CloudStreamForms.Core.CloudStreamCore;
 
 [assembly: ExportRenderer(typeof(TextCell), typeof(CustomTextCellRenderer))]
 public class CustomTextCellRenderer : TextCellRenderer

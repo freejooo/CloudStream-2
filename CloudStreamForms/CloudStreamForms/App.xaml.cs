@@ -1,4 +1,5 @@
-﻿using Plugin.LocalNotifications;
+﻿using CloudStreamForms.Core;
+using Plugin.LocalNotifications;
 using Plugin.Settings;
 using Plugin.Settings.Abstractions;
 using System;
@@ -13,7 +14,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using Xamarin.Essentials;
 using Xamarin.Forms;
-using static CloudStreamForms.CloudStreamCore;
+using static CloudStreamForms.Core.CloudStreamCore;
 
 //[assembly: ExportFont("Times-New-Roman.ttf", Alias = "Times New Roman")]
 namespace CloudStreamForms

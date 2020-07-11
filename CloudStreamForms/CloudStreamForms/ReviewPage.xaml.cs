@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CloudStreamForms.Core;
+using System;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reactive.Linq;
@@ -6,7 +7,7 @@ using System.Threading.Tasks;
 using System.Windows.Input;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
-using static CloudStreamForms.CloudStreamCore;
+using static CloudStreamForms.Core.CloudStreamCore;
 using static CloudStreamForms.ReviewPage;
 
 namespace CloudStreamForms

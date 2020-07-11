@@ -1,4 +1,5 @@
-﻿using CloudStreamForms.Models;
+﻿using CloudStreamForms.Core;
+using CloudStreamForms.Models;
 using FFImageLoading;
 using System;
 using System.Collections.Generic;
@@ -16,7 +17,7 @@ using YoutubeExplode.Channels;
 using YoutubeExplode.Videos;
 using YoutubeExplode.Videos.Streams;
 using static CloudStreamForms.App;
-using static CloudStreamForms.CloudStreamCore;
+using static CloudStreamForms.Core.CloudStreamCore;
 using static CloudStreamForms.InputPopupPage;
 using static CloudStreamForms.MainPage;
 

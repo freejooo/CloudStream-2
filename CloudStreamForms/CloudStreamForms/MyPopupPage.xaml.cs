@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using CloudStreamForms.Core;
+using System.Threading.Tasks;
 using Xamarin.Forms.Xaml;
 
 namespace CloudStreamForms

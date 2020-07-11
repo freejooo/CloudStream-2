@@ -15,6 +15,7 @@ using Android.Text;
 using Android.Views;
 using Android.Webkit;
 using Android.Widget;
+using CloudStreamForms.Core;
 using Java.IO;
 using Java.Net;
 using LibVLCSharp.Forms.Shared;
@@ -30,7 +31,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Xamarin.Forms;
 using static CloudStreamForms.App;
-using static CloudStreamForms.CloudStreamCore;
+using static CloudStreamForms.Core.CloudStreamCore;
 using static CloudStreamForms.Droid.LocalNot;
 using static CloudStreamForms.Droid.MainActivity;
 using static CloudStreamForms.Droid.MainHelper;
@@ -462,19 +463,24 @@ namespace CloudStreamForms.Droid
 
         public static void ResumeIntents()
         {
-            int downloadResumes = 0;
-            foreach (var path in App.GetKeysPath(DOWNLOAD_KEY_INTENT)) {
-                //  App.GetKey<long>(DOWNLOAD_KEY, path, 0);
-                downloadResumes++;
-                string data = App.GetKey<string>(path, null);
-                HandleIntent(data);
-            }
+            try {
+                int downloadResumes = 0;
+                foreach (var path in App.GetKeysPath(DOWNLOAD_KEY_INTENT)) {
+                    //  App.GetKey<long>(DOWNLOAD_KEY, path, 0);
+                    downloadResumes++;
+                    string data = App.GetKey<string>(path, null);
+                    HandleIntent(data);
+                }
 
-            if (downloadResumes == 1) {
-                App.ShowToast("Resumed Download");
+                if (downloadResumes == 1) {
+                    App.ShowToast("Resumed Download");
+                }
+                else if (downloadResumes != 0) {
+                    App.ShowToast($"Resumed {downloadResumes} downloads");
+                }
             }
-            else if (downloadResumes != 0) {
-                App.ShowToast($"Resumed {downloadResumes} downloads");
+            catch (Exception _ex) {
+                App.ShowToast("Error resuming download");
             }
         }
 
@@ -986,7 +992,7 @@ namespace CloudStreamForms.Droid
             mainDroid = new MainDroid();
             mainDroid.Awake();
 
-              //Typeface.CreateFromAsset(Application.Context.Assets, "Times-New-Roman.ttf");
+            //Typeface.CreateFromAsset(Application.Context.Assets, "Times-New-Roman.ttf");
 
 
             if (Intent.DataString != null) {
@@ -1046,7 +1052,7 @@ namespace CloudStreamForms.Droid
             StartService(new Intent(BaseContext, typeof(OnKilledService)));
 
             Window.SetSoftInputMode(Android.Views.SoftInput.AdjustNothing);
-
+            TaskScheduler.UnobservedTaskException += TaskSchedulerOnUnobservedTaskException;
             //  Android.Renderscripts.ta
             // var bar = new Xamarin.Forms.Platform.Android.TabbedRenderer();//.Platform.Android.
 
@@ -1063,6 +1069,12 @@ namespace CloudStreamForms.Droid
             await Task.Delay(1000);
             print("STARTINTENT");
             DownloadHandle.ResumeIntents();
+        }
+
+        private static void TaskSchedulerOnUnobservedTaskException(object sender, UnobservedTaskExceptionEventArgs unobservedTaskExceptionEventArgs)
+        {
+            var newExc = new Exception("TaskSchedulerOnUnobservedTaskException", unobservedTaskExceptionEventArgs.Exception);
+            App.ShowNotification("Error", newExc.Message);
         }
 
         public void Killed()

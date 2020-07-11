@@ -1,4 +1,5 @@
-﻿using CloudStreamForms.Models;
+﻿using CloudStreamForms.Core;
+using CloudStreamForms.Models;
 using Rg.Plugins.Popup.Services;
 using System;
 using System.Collections.Generic;
@@ -9,8 +10,8 @@ using Xamarin.Forms.Internals;
 using Xamarin.Forms.Xaml;
 using XamEffects;
 using static CloudStreamForms.App;
-using static CloudStreamForms.CloudStreamCore;
-using static CloudStreamForms.MainChrome;
+using static CloudStreamForms.Core.CloudStreamCore;
+using static CloudStreamForms.Core.MainChrome;
 
 namespace CloudStreamForms
 {

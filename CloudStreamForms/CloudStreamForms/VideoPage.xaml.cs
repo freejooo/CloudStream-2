@@ -1,4 +1,5 @@
-﻿using FFImageLoading;
+﻿using CloudStreamForms.Core;
+using FFImageLoading;
 using LibVLCSharp.Shared;
 using SubtitlesParser.Classes;
 using SubtitlesParser.Classes.Parsers;
@@ -13,7 +14,7 @@ using Xamarin.Forms;
 using Xamarin.Forms.Internals;
 using Xamarin.Forms.Xaml;
 using XamEffects;
-using static CloudStreamForms.CloudStreamCore;
+using static CloudStreamForms.Core.CloudStreamCore;
 
 namespace CloudStreamForms
 {
@@ -573,7 +574,7 @@ namespace CloudStreamForms
 
             // ======================= END =======================
 
-            Core.Initialize();
+            LibVLCSharp.Shared.Core.Initialize();
             lockElements = new VisualElement[] { NextMirror, NextMirrorBtt, BacktoMain, GoBackBtt, EpisodeLabel, PausePlayClickBtt, PausePlayBtt, SkipForward, SkipForwardBtt, SkipForwardImg, SkipForwardSmall, SkipBack, SkipBackBtt, SkipBackImg, SkipBackSmall };
             settingsElements = new VisualElement[] { EpisodesTap, MirrorsTap, DelayTap, SubTap, NextEpisodeTap, };
 

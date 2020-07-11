@@ -1,4 +1,5 @@
-﻿using Rg.Plugins.Popup.Pages;
+﻿using CloudStreamForms.Core;
+using Rg.Plugins.Popup.Pages;
 using Rg.Plugins.Popup.Services;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
