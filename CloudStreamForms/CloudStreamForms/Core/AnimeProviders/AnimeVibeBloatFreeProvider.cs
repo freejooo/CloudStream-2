@@ -1,5 +1,6 @@
 ﻿using HtmlAgilityPack.CssSelectors.NetCore;
 using System;
+using System.Linq;
 using System.Collections.Generic;
 using static CloudStreamForms.Core.BlotFreeProvider;
 using static CloudStreamForms.Core.CloudStreamCore;
@@ -12,9 +13,10 @@ namespace CloudStreamForms.Core.AnimeProviders
 
         public override string Name => "AnimeVibe";
 
-        public override void LoadLink(string episodeLink, int normalEpisode, TempThread tempThred)
+        public override void LoadLink(string episodeLink, int episode, int normalEpisode, TempThread tempThred, object extraData)
         {
-            string page = DownloadString(episodeLink);
+            string page = DownloadString(episodeLink,tempThred);
+            if (!page.IsClean()) return;
             string iframe = FindHTML(page, "<iframe src=\"", "\"");
             if (iframe != "") {
                 string d = DownloadString("https://animevibe.tv" + iframe);

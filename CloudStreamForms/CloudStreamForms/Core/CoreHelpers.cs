@@ -6,7 +6,7 @@ using System.Text;
 using static CloudStreamForms.Core.CloudStreamCore;
 
 namespace CloudStreamForms.Core
-{ 
+{
     public class BlotFreeProvider
     {
         public struct NonBloatSeasonData
@@ -16,6 +16,7 @@ namespace CloudStreamForms.Core
             public bool dubExists => dubEpisodes.ContainsStuff();
             public List<string> subEpisodes;
             public List<string> dubEpisodes;
+            public object extraData;
         }
 
         public class BloatFreeBaseAnimeProvider : BaseAnimeProvider
@@ -101,7 +102,7 @@ namespace CloudStreamForms.Core
                 }
             }
 
-            public virtual void LoadLink(string episodeLink, int normalEpisode, TempThread tempThred)
+            public virtual void LoadLink(string episodeLink, int episode, int normalEpisode, TempThread tempThred, object extraData)
             {
                 throw new NotImplementedException();
             }
@@ -116,7 +117,8 @@ namespace CloudStreamForms.Core
                         currentep += isDub ? ms.dubEpisodes.Count : ms.subEpisodes.Count;
                         if (currentep > episode) {
                             try {
-                                LoadLink(isDub ? ms.dubEpisodes[subEp] : ms.subEpisodes[subEp], normalEpisode, tempThred);
+                                print("LOADING LINK FOR: " + Name);
+                                LoadLink(isDub ? ms.dubEpisodes[subEp] : ms.subEpisodes[subEp], subEp, normalEpisode, tempThred, ms.extraData);
                             }
                             catch (Exception _ex) { print("FATAL EX IN Load: " + Name + " | " + _ex); }
                         }
@@ -127,7 +129,7 @@ namespace CloudStreamForms.Core
     }
 
     public static class CoreHelpers
-    { 
+    {
         public static bool ContainsStuff<T>(this IList<T> list)
         {
             if (list == null) return false;
