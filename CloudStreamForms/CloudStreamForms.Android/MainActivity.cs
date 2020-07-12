@@ -1052,7 +1052,7 @@ namespace CloudStreamForms.Droid
             StartService(new Intent(BaseContext, typeof(OnKilledService)));
 
             Window.SetSoftInputMode(Android.Views.SoftInput.AdjustNothing);
-            TaskScheduler.UnobservedTaskException += TaskSchedulerOnUnobservedTaskException;
+           // TaskScheduler.UnobservedTaskException += TaskSchedulerOnUnobservedTaskException;
             //  Android.Renderscripts.ta
             // var bar = new Xamarin.Forms.Platform.Android.TabbedRenderer();//.Platform.Android.
 
@@ -1071,11 +1071,12 @@ namespace CloudStreamForms.Droid
             DownloadHandle.ResumeIntents();
         }
 
+        /*
         private static void TaskSchedulerOnUnobservedTaskException(object sender, UnobservedTaskExceptionEventArgs unobservedTaskExceptionEventArgs)
         {
             var newExc = new Exception("TaskSchedulerOnUnobservedTaskException", unobservedTaskExceptionEventArgs.Exception);
             App.ShowNotification("Error", newExc.Message);
-        }
+        }*/
 
         public void Killed()
         {

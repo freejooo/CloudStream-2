@@ -835,7 +835,7 @@ namespace CloudStreamForms.Core
         {
             public readonly CloudStreamCore core;
             public Movie activeMovie { set { core.activeMovie = value; } get { return core.activeMovie; } }
-            public string DownloadString(string url, TempThread? tempThred = null, int repeats = 2, int waitTime = 1000, string referer = "", Encoding encoding = null) => core.DownloadString(url, tempThred, repeats, waitTime,referer,encoding);
+            public string DownloadString(string url, TempThread? tempThred = null, int repeats = 2, int waitTime = 1000, string referer = "", Encoding encoding = null) => core.DownloadString(url, tempThred, repeats, waitTime, referer, encoding);
             public bool GetThredActive(TempThread temp) => core.GetThredActive(temp);
             public void AddEpisodesFromMirrors(TempThread tempThred, string d, int normalEpisode, string extraId = "", string extra = "") => core.AddEpisodesFromMirrors(tempThred, d, normalEpisode, extraId, extra);
             public bool LookForFembedInString(TempThread tempThred, int normalEpisode, string d, string extra = "") => core.LookForFembedInString(tempThred, normalEpisode, d, extra);
@@ -5604,37 +5604,44 @@ namespace CloudStreamForms.Core
                 string _d = GetHTML(url);
                 const string lookFor = "<div class=\"rec_item\"";
                 while (_d.Contains(lookFor)) {
-                    _d = RemoveOne(_d, lookFor);
-                    string tt = FindHTML(_d, " data-tconst=\"", "\"");
-                    string name = FindHTML(_d, "alt=\"", "\"", decodeToNonHtml: true);
-                    string img = FindHTML(_d, "loadlate=\"", "\"");
-                    string d = RemoveOne(_d, "<a href=\"/title/" + tt + "/vote?v=X;k", -200);
-                    string __d = FindHTML(_d, "<div class=\"rec-title\">\n       <a href=\"/title/" + tt, "<div class=\"rec-rating\">");
-                    List<string> genresNames = new List<string>() { "Action", "Adventure", "Animation", "Biography", "Comedy", "Crime", "Drama", "Family", "Fantasy", "Film-Noir", "History", "Horror", "Music", "Musical", "Mystery", "Romance", "Sci-Fi", "Sport", "Thriller", "War", "Western" };
-                    List<int> contansGenres = new List<int>();
-                    for (int i = 0; i < genresNames.Count; i++) {
-                        if (__d.Contains(genresNames[i])) {
-                            contansGenres.Add(i);
+                    try {
+                        _d = RemoveOne(_d, lookFor);
+                        string tt = FindHTML(_d, " data-tconst=\"", "\"");
+                        string name = FindHTML(_d, "alt=\"", "\"", decodeToNonHtml: true);
+                        string img = FindHTML(_d, "loadlate=\"", "\"");
+                        print("DATA::::::::" + tt + "|" + _d);
+                        string d = RemoveOne(_d, "<a href=\"/title/" + tt + "/vote?v=X;k", -200);
+                        string __d = FindHTML(_d, "<div class=\"rec-title\">\n       <a href=\"/title/" + tt, "<div class=\"rec-rating\">");
+                        List<string> genresNames = new List<string>() { "Action", "Adventure", "Animation", "Biography", "Comedy", "Crime", "Drama", "Family", "Fantasy", "Film-Noir", "History", "Horror", "Music", "Musical", "Mystery", "Romance", "Sci-Fi", "Sport", "Thriller", "War", "Western" };
+                        List<int> contansGenres = new List<int>();
+                        for (int i = 0; i < genresNames.Count; i++) {
+                            if (__d.Contains(genresNames[i])) {
+                                contansGenres.Add(i);
+                            }
                         }
-                    }
-                    string value = FindHTML(d, "<span class=\"value\">", "<");
-                    string descript = FindHTML(d, "<div class=\"rec-outline\">\n    <p>\n    ", "<");
-                    if (!value.Contains(".")) {
-                        value += ".0";
-                    }
+                        string value = FindHTML(d, "<span class=\"value\">", "<");
+                        string descript = FindHTML(d, "<div class=\"rec-outline\">\n    <p>\n    ", "<");
+                        if (!value.Contains(".")) {
+                            value += ".0";
+                        }
 
-                    bool add = true;
-                    for (int z = 0; z < topLists.Count; z++) {
-                        if (topLists[z].id == tt) {
+                        bool add = true;
+                        for (int z = 0; z < topLists.Count; z++) {
+                            if (topLists[z].id == tt) {
 
-                            add = false;
-                        };
-                    }
+                                add = false;
+                            };
+                        }
 
-                    if (add) {
-                        topLists.Add(new IMDbTopList() { name = name, descript = descript, contansGenres = contansGenres, id = tt, img = img, place = -1, rating = value, runtime = "", genres = "" });
+                        if (add) {
+                            topLists.Add(new IMDbTopList() { name = name, descript = descript, contansGenres = contansGenres, id = tt, img = img, place = -1, rating = value, runtime = "", genres = "" });
+                        }
+                        else {
+                        }
+
                     }
-                    else {
+                    catch (Exception _ex) {
+                        print("FATAL EX REC: " + _ex); // SOLVES CRASHING
                     }
                 }
             }
@@ -5670,10 +5677,7 @@ namespace CloudStreamForms.Core
             int counter = 0;
             Stopwatch s = new Stopwatch();
             s.Start();
-
-
-
-
+             
             while (d.Contains(lookFor)) {
                 place++;
                 d = RemoveOne(d, lookFor);
@@ -8197,7 +8201,7 @@ namespace CloudStreamForms.Core
         /// <param name="url"></param>
         /// <param name="UTF8Encoding"></param>
         /// <returns></returns>
-        public string DownloadString(string url, TempThread? tempThred = null, int repeats = 2, int waitTime = 1000,string referer = "", Encoding encoding = null)
+        public string DownloadString(string url, TempThread? tempThred = null, int repeats = 2, int waitTime = 1000, string referer = "", Encoding encoding = null)
         {
 #if DEBUG
             int _s = GetStopwatchNum();
@@ -8206,7 +8210,7 @@ namespace CloudStreamForms.Core
             for (int i = 0; i < repeats; i++) {
                 if (s == "") {
                     //s = DownloadStringOnce(url, tempThred, UTF8Encoding, waitTime);
-                    s = DownloadStringWithCert(url, tempThred, waitTime, "",referer,encoding);
+                    s = DownloadStringWithCert(url, tempThred, waitTime, "", referer, encoding);
                 }
             }
 #if DEBUG
