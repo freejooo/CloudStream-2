@@ -1211,12 +1211,19 @@ namespace CloudStreamForms.Core
 
                     string ConvertUrlToEpisode(string u)
                     {
-                        string _d = DownloadString(u);
-                        if (_d == "") return "";
-                        _d = RemoveOne(_d, "epnum\":\"Episode 01");
-                        string slug = FindHTML(_d, "slug\":\"", "\"").Replace("\\/", "/");
-                        if (slug == "") return "";
-                        return "https://www.kickassanime.rs" + slug;
+                        try {
+                            string _d = DownloadString(u);
+                            if (_d == "") return "";
+                            _d = RemoveOne(_d, "epnum\":\"Episode 01");
+                            string slug = FindHTML(_d, "slug\":\"", "\"").Replace("\\/", "/");
+                            if (slug == "") return "";
+                            return "https://www.kickassanime.rs" + slug;
+
+                        }
+                        catch (Exception _ex) {
+                            error(_ex);
+                            return "";
+                        }
                     }
                     print("SUBURLL:: " + subUrl + "|dubrrrll::" + dubUrl);
 
@@ -3362,6 +3369,7 @@ namespace CloudStreamForms.Core
                     }
                     string lookFor = "<source src=" + enlink;
                     while (_d.Contains(lookFor)) {
+
                         string vUrl = FindHTML(_d, lookFor, enlink);
                         if (vUrl != "") {
                             vUrl = "https:" + vUrl;
@@ -3373,7 +3381,12 @@ namespace CloudStreamForms.Core
                         //}
 
                         _d = RemoveOne(_d, lookFor);
-                        _d = RemoveOne(_d, "label=" + enlink);
+                        try { 
+                            _d = RemoveOne(_d, "label=" + enlink);
+                        }
+                        catch (Exception _ex) {
+                            error(_ex);
+                        }
                     }
                     serverUrls = RemoveOne(serverUrls, sLookFor);
                 }
@@ -5567,18 +5580,25 @@ namespace CloudStreamForms.Core
                 baseReview.isSearchingforReviews = false;
                 const string lookFor = "<div class=\"text show-more__control\">";
                 while (d.Contains(lookFor)) {
-                    d = RemoveOne(d, "class=\"ipl-icon ipl-star-icon");
-                    //print(d.IndexOf("<span class=\"spoiler-warning\">Warning: Spoilers</span>"));
+                    try {
+                        d = RemoveOne(d, "class=\"ipl-icon ipl-star-icon");
+                        //print(d.IndexOf("<span class=\"spoiler-warning\">Warning: Spoilers</span>"));
 
-                    string rating = FindHTML(d, "<span>", "<").Replace("\n", "");
+                        string rating = FindHTML(d, "<span>", "<").Replace("\n", "");
 
-                    string title = FindHTML(d, "class=\"title\" > ", "<", decodeToNonHtml: true).Replace("\n", "");
+                        string title = FindHTML(d, "class=\"title\" > ", "<", decodeToNonHtml: true).Replace("\n", "");
 
-                    string txt = FindHTML(d, lookFor, "</div>", decodeToNonHtml: true).Replace("<br/>", "\n").Replace("<ul>", "").Replace("<li>", "").Replace("</li>", "").Replace("</ul>", "");
-                    string author = FindHTML(d, "/?ref_=tt_urv\"\n>", "<").Replace("\n", ""); ;
-                    string date = FindHTML(d, "ew-date\">", "<").Replace("\n", "");
-                    baseReview.reviews.Add(new Review() { title = title, text = txt, containsSpoiler = false, rating = int.Parse(rating), author = author, date = date });
-                    d = RemoveOne(d, lookFor);
+                        string txt = FindHTML(d, lookFor, "</div>", decodeToNonHtml: true).Replace("<br/>", "\n").Replace("<ul>", "").Replace("<li>", "").Replace("</li>", "").Replace("</ul>", "");
+                        string author = FindHTML(d, "/?ref_=tt_urv\"\n>", "<").Replace("\n", ""); ;
+                        string date = FindHTML(d, "ew-date\">", "<").Replace("\n", "");
+                        baseReview.reviews.Add(new Review() { title = title, text = txt, containsSpoiler = false, rating = int.Parse(rating), author = author, date = date });
+                    }
+                    catch (Exception _ex) {
+                        error(_ex);
+                    }
+                    finally {
+                        d = RemoveOne(d, lookFor);
+                    }
                 }
                 return baseReview;
             }
@@ -5677,7 +5697,7 @@ namespace CloudStreamForms.Core
             int counter = 0;
             Stopwatch s = new Stopwatch();
             s.Start();
-             
+
             while (d.Contains(lookFor)) {
                 place++;
                 d = RemoveOne(d, lookFor);

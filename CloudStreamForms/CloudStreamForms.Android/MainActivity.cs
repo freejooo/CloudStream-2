@@ -468,8 +468,13 @@ namespace CloudStreamForms.Droid
                 foreach (var path in App.GetKeysPath(DOWNLOAD_KEY_INTENT)) {
                     //  App.GetKey<long>(DOWNLOAD_KEY, path, 0);
                     downloadResumes++;
-                    string data = App.GetKey<string>(path, null);
-                    HandleIntent(data);
+                    try {
+                        string data = App.GetKey<string>(path, null);
+                        HandleIntent(data);
+                    }
+                    catch (Exception) {
+
+                    }
                 }
 
                 if (downloadResumes == 1) {
@@ -516,8 +521,14 @@ namespace CloudStreamForms.Droid
 
         public static void HandleIntent(string data)
         {
-            DownloadHandleNot d = JsonConvert.DeserializeObject<DownloadHandleNot>(data);
-            HandleIntent(d.id, d.mirrorNames, d.mirrorUrls, d.mirror, d.title, d.path, d.poster, d.fileName, d.beforeTxt, d.openWhenDone, d.showNotificaion, d.showDoneNotificaion, d.showDoneAsToast, true);
+            try {
+                DownloadHandleNot d = JsonConvert.DeserializeObject<DownloadHandleNot>(data);
+                HandleIntent(d.id, d.mirrorNames, d.mirrorUrls, d.mirror, d.title, d.path, d.poster, d.fileName, d.beforeTxt, d.openWhenDone, d.showNotificaion, d.showDoneNotificaion, d.showDoneAsToast, true);
+
+            }
+            catch (Exception) {
+
+            }
         }
         public static bool ExecuteWithTimeLimit(TimeSpan timeSpan, Action codeBlock)
         {
@@ -550,343 +561,351 @@ namespace CloudStreamForms.Droid
         /// <param name="resumeIntent"></param>
         public static void HandleIntent(int id, List<string> mirrorNames, List<string> mirrorUrls, int mirror, string title, string path, string poster, string fileName, string beforeTxt, bool openWhenDone, bool showNotificaion, bool showDoneNotificaion, bool showDoneAsToast, bool resumeIntent)
         {
-            fileName = CensorFilename(fileName);
+            try {
+                fileName = CensorFilename(fileName);
 
-            isStartProgress[id] = true;
-            print("START DLOAD::: " + id);
-            if (isPaused.ContainsKey(id)) {
-                //if (isPaused[id] == 2) {
-                //  isPaused.Remove(id);
-                //    print("YEET DELETED KEEEE");
-                return;
-                //  }
-            }
-            var context = Application.Context;
-
-            //$"{nameof(id)}={id}|||{nameof(title)}={title}|||{nameof(path)}={path}|||{nameof(poster)}={poster}|||{nameof(fileName)}={fileName}|||{nameof(beforeTxt)}={beforeTxt}|||{nameof(openWhenDone)}={openWhenDone}|||{nameof(showDoneNotificaion)}={showDoneNotificaion}|||{nameof(showDoneAsToast)}={showDoneAsToast}|||");
-
-            int progress = 0;
-
-            void UpdateDloadNot(string progressTxt)
-            {
-                //poster != ""
-                if (!isPaused.ContainsKey(id)) {
-                    isPaused[id] = 0;
-                }
-                try {
-                    int isPause = isPaused[id];
-                    bool canPause = isPause == 0;
-                    if (isPause != 2) {
-                        ShowLocalNot(new LocalNot() { actions = new List<LocalAction>() { new LocalAction() { action = $"handleDownload|||id={id}|||dType={(canPause ? 1 : 0)}|||", name = canPause ? "Pause" : "Resume" }, new LocalAction() { action = $"handleDownload|||id={id}|||dType=2|||", name = "Stop" } }, mediaStyle = false, bigIcon = poster, title = title, autoCancel = false, showWhen = false, onGoing = canPause, id = id, smallIcon = Resource.Drawable.bicon, progress = progress, body = progressTxt }, context); //canPause
-                    }
-                }
-                catch (Exception _ex) {
-                    print("ERRORLOADING PROGRESS:::" + _ex);
-                }
-
-            }
-
-            void ShowDone(bool succ, string? overrideText = null)
-            {
-                print("DAAAAAAAAAASHOW DONE" + succ);
-                if (showDoneNotificaion) {
-                    print("DAAAAAAAAAASHOW DONE!!!!");
-
-                    Device.BeginInvokeOnMainThread(() => {
-                        try {
-                            print("DAAAAAAAAAASHOW DONE222");
-                            ShowLocalNot(new LocalNot() { mediaStyle = poster != "", bigIcon = poster, title = title, autoCancel = true, onGoing = false, id = id, smallIcon = Resource.Drawable.bicon, body = overrideText ?? (succ ? "Download done!" : "Download Failed") }, context); // ((e.Cancelled || e.Error != null) ? "Download Failed!"
-                        }
-                        catch (Exception _ex) {
-                            print("SUPERFATALEX: " + _ex);
-                        }
-                    });
-                }
-                else {
-                    print("DONT SHOW WHEN DONE");
-                }
-                // Toast.MakeText(context, "PG DONE!!!", ToastLength.Long).Show(); 
-            }
-
-
-
-            print("START DLOADING");
-            void StartT()
-            {
                 isStartProgress[id] = true;
+                print("START DLOAD::: " + id);
                 if (isPaused.ContainsKey(id)) {
                     //if (isPaused[id] == 2) {
-                    //    isPaused.Remove(id);
+                    //  isPaused.Remove(id);
+                    //    print("YEET DELETED KEEEE");
                     return;
                     //  }
                 }
+                var context = Application.Context;
 
-                Thread t = new Thread(() => {
-                    print("START:::");
-                    string json = JsonConvert.SerializeObject(new DownloadHandleNot() { id = id, mirrorNames = mirrorNames, mirrorUrls = mirrorUrls, fileName = fileName, showDoneAsToast = showDoneAsToast, openWhenDone = openWhenDone, showDoneNotificaion = showDoneNotificaion, beforeTxt = beforeTxt, mirror = mirror, path = path, poster = poster, showNotificaion = showNotificaion, title = title });
+                //$"{nameof(id)}={id}|||{nameof(title)}={title}|||{nameof(path)}={path}|||{nameof(poster)}={poster}|||{nameof(fileName)}={fileName}|||{nameof(beforeTxt)}={beforeTxt}|||{nameof(openWhenDone)}={openWhenDone}|||{nameof(showDoneNotificaion)}={showDoneNotificaion}|||{nameof(showDoneAsToast)}={showDoneAsToast}|||");
 
-                    App.SetKey(DOWNLOAD_KEY_INTENT, id.ToString(), json);
+                int progress = 0;
 
-                    string url = mirrorUrls[mirror];
-                    string urlName = mirrorNames[mirror];
-
-                    if ((int)Android.OS.Build.VERSION.SdkInt > 9) {
-                        StrictMode.ThreadPolicy policy = new
-                        StrictMode.ThreadPolicy.Builder().PermitAll().Build();
-                        StrictMode.SetThreadPolicy(policy);
+                void UpdateDloadNot(string progressTxt)
+                {
+                    //poster != ""
+                    if (!isPaused.ContainsKey(id)) {
+                        isPaused[id] = 0;
                     }
-                    long total = 0;
-                    int fileLength = 0;
-                    print("START:::2");
-
-                    void UpdateProgress()
-                    {
-                        UpdateDloadNot($"{beforeTxt.Replace("{name}", urlName)}{progress} % ({ConvertBytesToAny(total, 1, 2)} MB/{ConvertBytesToAny(fileLength, 1, 2)} MB)");
-                    }
-
-                    void UpdateFromId(object sender, int _id)
-                    {
-                        if (_id == id) {
-                            UpdateProgress();
-                        }
-                    }
-
-                    print("START:::3" + path);
-                    bool removeKeys = true;
-                    var rFile = new Java.IO.File(path, fileName);
-                    print("START:::4");
-
                     try {
-                        // CREATED DIRECTORY IF NEEDED
-                        try {
-                            Java.IO.File __file = new Java.IO.File(path);
-                            __file.Mkdirs();
+                        int isPause = isPaused[id];
+                        bool canPause = isPause == 0;
+                        if (isPause != 2) {
+                            ShowLocalNot(new LocalNot() { actions = new List<LocalAction>() { new LocalAction() { action = $"handleDownload|||id={id}|||dType={(canPause ? 1 : 0)}|||", name = canPause ? "Pause" : "Resume" }, new LocalAction() { action = $"handleDownload|||id={id}|||dType=2|||", name = "Stop" } }, mediaStyle = false, bigIcon = poster, title = title, autoCancel = false, showWhen = false, onGoing = canPause, id = id, smallIcon = Resource.Drawable.bicon, progress = progress, body = progressTxt }, context); //canPause
                         }
-                        catch (Exception _ex) {
-                            print("FAILED:::" + _ex);
-                        }
-                        print("START:::5");
+                    }
+                    catch (Exception _ex) {
+                        print("ERRORLOADING PROGRESS:::" + _ex);
+                    }
 
-                        //  fileName = CensorFilename(fileName);
-                        // string rpath = path + "/" + fileName;
-                        //   print("PATH=====" + rpath + "|" + fileName);
+                }
 
-                        print("OPEN URL:L::" + url);
-                        URL _url = new URL(url);
-                        URLConnection connection = _url.OpenConnection();
-                        print("SET CONNECT ::");
-                        if (!rFile.Exists()) {
-                            print("FILE DOSENT EXITS");
-                            rFile.CreateNewFile();
-                        }
-                        else {
-                            if (resumeIntent) {
-                                total = rFile.Length();
-                                connection.SetRequestProperty("Range", "bytes=" + rFile.Length() + "-");
+                void ShowDone(bool succ, string? overrideText = null)
+                {
+                    print("DAAAAAAAAAASHOW DONE" + succ);
+                    if (showDoneNotificaion) {
+                        print("DAAAAAAAAAASHOW DONE!!!!");
+
+                        Device.BeginInvokeOnMainThread(() => {
+                            try {
+                                print("DAAAAAAAAAASHOW DONE222");
+                                ShowLocalNot(new LocalNot() { mediaStyle = poster != "", bigIcon = poster, title = title, autoCancel = true, onGoing = false, id = id, smallIcon = Resource.Drawable.bicon, body = overrideText ?? (succ ? "Download done!" : "Download Failed") }, context); // ((e.Cancelled || e.Error != null) ? "Download Failed!"
                             }
-                            else {
-                                rFile.Delete();
+                            catch (Exception _ex) {
+                                print("SUPERFATALEX: " + _ex);
+                            }
+                        });
+                    }
+                    else {
+                        print("DONT SHOW WHEN DONE");
+                    }
+                    // Toast.MakeText(context, "PG DONE!!!", ToastLength.Long).Show(); 
+                }
+
+
+
+                print("START DLOADING");
+                void StartT()
+                {
+                    isStartProgress[id] = true;
+                    if (isPaused.ContainsKey(id)) {
+                        //if (isPaused[id] == 2) {
+                        //    isPaused.Remove(id);
+                        return;
+                        //  }
+                    }
+
+                    Thread t = new Thread(() => {
+                        print("START:::");
+                        string json = JsonConvert.SerializeObject(new DownloadHandleNot() { id = id, mirrorNames = mirrorNames, mirrorUrls = mirrorUrls, fileName = fileName, showDoneAsToast = showDoneAsToast, openWhenDone = openWhenDone, showDoneNotificaion = showDoneNotificaion, beforeTxt = beforeTxt, mirror = mirror, path = path, poster = poster, showNotificaion = showNotificaion, title = title });
+
+                        App.SetKey(DOWNLOAD_KEY_INTENT, id.ToString(), json);
+
+                        string url = mirrorUrls[mirror];
+                        string urlName = mirrorNames[mirror];
+
+                        if ((int)Android.OS.Build.VERSION.SdkInt > 9) {
+                            StrictMode.ThreadPolicy policy = new
+                            StrictMode.ThreadPolicy.Builder().PermitAll().Build();
+                            StrictMode.SetThreadPolicy(policy);
+                        }
+                        long total = 0;
+                        int fileLength = 0;
+                        print("START:::2");
+
+                        void UpdateProgress()
+                        {
+                            UpdateDloadNot($"{beforeTxt.Replace("{name}", urlName)}{progress} % ({ConvertBytesToAny(total, 1, 2)} MB/{ConvertBytesToAny(fileLength, 1, 2)} MB)");
+                        }
+
+                        void UpdateFromId(object sender, int _id)
+                        {
+                            if (_id == id) {
+                                UpdateProgress();
+                            }
+                        }
+
+                        print("START:::3" + path);
+                        bool removeKeys = true;
+                        var rFile = new Java.IO.File(path, fileName);
+                        print("START:::4");
+
+                        try {
+                            // CREATED DIRECTORY IF NEEDED
+                            try {
+                                Java.IO.File __file = new Java.IO.File(path);
+                                __file.Mkdirs();
+                            }
+                            catch (Exception _ex) {
+                                print("FAILED:::" + _ex);
+                            }
+                            print("START:::5");
+
+                            //  fileName = CensorFilename(fileName);
+                            // string rpath = path + "/" + fileName;
+                            //   print("PATH=====" + rpath + "|" + fileName);
+
+                            print("OPEN URL:L::" + url);
+                            URL _url = new URL(url);
+                            URLConnection connection = _url.OpenConnection();
+                            print("SET CONNECT ::");
+                            if (!rFile.Exists()) {
+                                print("FILE DOSENT EXITS");
                                 rFile.CreateNewFile();
                             }
-                        }
-                        print("SET CONNECT ::2");
-                        connection.SetRequestProperty("Accept-Encoding", "identity");
-                        int clen = 0;
-                        bool Completed = ExecuteWithTimeLimit(TimeSpan.FromMilliseconds(10000), () => {
-                            connection.Connect();
-                            clen = connection.ContentLength;
-                            if (clen < 5000000 && !path.Contains("/YouTube/")) { // min of 5 MB 
+                            else {
+                                if (resumeIntent) {
+                                    total = rFile.Length();
+                                    connection.SetRequestProperty("Range", "bytes=" + rFile.Length() + "-");
+                                }
+                                else {
+                                    rFile.Delete();
+                                    rFile.CreateNewFile();
+                                }
+                            }
+                            print("SET CONNECT ::2");
+                            connection.SetRequestProperty("Accept-Encoding", "identity");
+                            int clen = 0;
+                            bool Completed = ExecuteWithTimeLimit(TimeSpan.FromMilliseconds(10000), () => {
+                                connection.Connect();
+                                clen = connection.ContentLength;
+                                if (clen < 5000000 && !path.Contains("/YouTube/")) { // min of 5 MB 
+                                    clen = 0;
+                                }
+                                //
+                                // Write your time bounded code here
+                                // 
+                            });
+                            if (!Completed) {
+                                print("FAILED MASS");
                                 clen = 0;
                             }
-                            //
-                            // Write your time bounded code here
-                            // 
-                        });
-                        if (!Completed) {
-                            print("FAILED MASS");
-                            clen = 0;
-                        }
-                        print("SET CONNECT ::3");
+                            print("SET CONNECT ::3");
 
 
-                        print("TOTALLLLL::: " + clen);
+                            print("TOTALLLLL::: " + clen);
 
-                        if (clen == 0) {
-                            if (isStartProgress.ContainsKey(id)) {
-                                isStartProgress.Remove(id);
+                            if (clen == 0) {
+                                if (isStartProgress.ContainsKey(id)) {
+                                    isStartProgress.Remove(id);
+                                }
+                                if (mirror < mirrorUrls.Count - 1 && progress < 2 && rFile.Length() < 1000000) { // HAVE MIRRORS LEFT
+                                    mirror++;
+                                    removeKeys = false;
+                                    resumeIntent = false;
+                                    rFile.Delete();
+
+                                    print("DELETE;;;");
+                                }
+                                else {
+                                    ShowDone(false);
+                                }
                             }
-                            if (mirror < mirrorUrls.Count - 1 && progress < 2 && rFile.Length() < 1000000) { // HAVE MIRRORS LEFT
+                            else {
+                                fileLength = clen + (int)total;
+                                print("FILELEN:::: " + fileLength);
+                                App.SetKey("dlength", "id" + id, fileLength);
+                                String fileExtension = MimeTypeMap.GetFileExtensionFromUrl(url);
+                                InputStream input = new BufferedInputStream(connection.InputStream);
+
+                                //long skip = App.GetKey<long>(DOWNLOAD_KEY, id.ToString(), 0);
+
+                                OutputStream output = new FileOutputStream(rFile, true);
+
+                                outputStreams[id] = output;
+                                inputStreams[id] = input;
+
+                                if (isPaused.ContainsKey(id)) {
+                                    //if (isPaused[id] == 2) {
+                                    //    isPaused.Remove(id);
+                                    return;
+                                    //  }
+                                }
+
+                                isPaused[id] = 0;
+                                activeIds.Add(id);
+
+                                int cProgress()
+                                {
+                                    return (int)(total * 100 / fileLength);
+                                }
+                                progress = cProgress();
+
+                                byte[] data = new byte[1024];
+                                // skip;
+                                int count;
+                                int previousProgress = 0;
+                                UpdateDloadNot(total == 0 ? "Download starting" : "Download resuming");
+
+                                System.DateTime lastUpdateTime = System.DateTime.Now;
+                                long lastTotal = total;
+                                const int UPDATE_TIME = 1;
+
+                                changedPause += UpdateFromId;
+
+                                if (isStartProgress.ContainsKey(id)) {
+                                    isStartProgress.Remove(id);
+                                }
+
+                                bool showDone = true;
+                                while ((count = input.Read(data)) != -1) {
+                                    total += count;
+
+                                    output.Write(data, 0, count);
+                                    progressDownloads[id] = total;
+                                    progress = cProgress();
+
+
+                                    if (isPaused[id] == 1) {
+                                        print("PAUSEDOWNLOAD");
+                                        UpdateProgress();
+                                        while (isPaused[id] == 1) {
+                                            Thread.Sleep(100);
+                                        }
+                                        if (isPaused[id] != 2) {
+                                            UpdateProgress();
+                                        }
+                                    }
+                                    if (isPaused[id] == 2) { // DELETE FILE
+                                        print("DOWNLOAD STOPPED");
+                                        ShowDone(false, "Download Stopped");
+                                        //  Thread.Sleep(100);
+                                        output.Flush();
+                                        output.Close();
+                                        input.Close();
+                                        outputStreams.Remove(id);
+                                        inputStreams.Remove(id);
+                                        isPaused.Remove(id);
+                                        // Thread.Sleep(100);
+                                        rFile.Delete();
+                                        App.RemoveKey(DOWNLOAD_KEY, id.ToString());
+                                        App.RemoveKey(DOWNLOAD_KEY_INTENT, id.ToString());
+                                        App.RemoveKey(App.hasDownloadedFolder, id.ToString());
+                                        changedPause -= UpdateFromId;
+                                        activeIds.Remove(id);
+                                        removeKeys = true;
+                                        Thread.Sleep(100);
+                                        return;
+                                    }
+
+                                    if (DateTime.Now.Subtract(lastUpdateTime).TotalSeconds > UPDATE_TIME) {
+                                        lastUpdateTime = DateTime.Now;
+                                        long diff = total - lastTotal;
+                                        //  UpdateDloadNot($"{ConvertBytesToAny(diff/UPDATE_TIME, 2,2)}MB/s | {progress}%");
+                                        //{ConvertBytesToAny(diff / UPDATE_TIME, 2, 2)}MB/s | 
+                                        if (progress >= 100) {
+                                            print("DLOADPG DONE!");
+                                            ShowDone(true);
+                                        }
+                                        else {
+                                            UpdateProgress();
+                                            // UpdateDloadNot(progress + "%");
+                                        }
+                                        lastTotal = total;
+                                    }
+
+                                    if (progress >= 100 || progress > previousProgress) {
+                                        // Only post progress event if we've made progress.
+                                        previousProgress = progress;
+                                        if (progress >= 100) {
+                                            print("DLOADPG DONE!");
+                                            ShowDone(true);
+                                            showDone = false;
+                                        }
+                                        else {
+                                            // UpdateProgress();
+                                            // UpdateDloadNot(progress + "%");
+                                        }
+                                    }
+                                }
+
+                                if (showDone) {
+                                    ShowDone(true);
+                                }
+                                output.Flush();
+                                output.Close();
+                                input.Close();
+                                outputStreams.Remove(id);
+                                inputStreams.Remove(id);
+                                activeIds.Remove(id);
+                            }
+                        }
+                        catch (Exception _ex) {
+                            print("DOWNLOADURL: " + url);
+                            print("DOWNLOAD FAILED BC: " + _ex);
+                            if (mirror < mirrorUrls.Count - 1 && progress < 2) { // HAVE MIRRORS LEFT
                                 mirror++;
                                 removeKeys = false;
                                 resumeIntent = false;
                                 rFile.Delete();
-
-                                print("DELETE;;;");
                             }
                             else {
                                 ShowDone(false);
                             }
                         }
-                        else {
-                            fileLength = clen + (int)total;
-                            print("FILELEN:::: " + fileLength);
-                            App.SetKey("dlength", "id" + id, fileLength);
-                            String fileExtension = MimeTypeMap.GetFileExtensionFromUrl(url);
-                            InputStream input = new BufferedInputStream(connection.InputStream);
-
-                            //long skip = App.GetKey<long>(DOWNLOAD_KEY, id.ToString(), 0);
-
-                            OutputStream output = new FileOutputStream(rFile, true);
-
-                            outputStreams[id] = output;
-                            inputStreams[id] = input;
-
-                            if (isPaused.ContainsKey(id)) {
-                                //if (isPaused[id] == 2) {
-                                //    isPaused.Remove(id);
-                                return;
-                                //  }
-                            }
-
-                            isPaused[id] = 0;
-                            activeIds.Add(id);
-
-                            int cProgress()
-                            {
-                                return (int)(total * 100 / fileLength);
-                            }
-                            progress = cProgress();
-
-                            byte[] data = new byte[1024];
-                            // skip;
-                            int count;
-                            int previousProgress = 0;
-                            UpdateDloadNot(total == 0 ? "Download starting" : "Download resuming");
-
-                            System.DateTime lastUpdateTime = System.DateTime.Now;
-                            long lastTotal = total;
-                            const int UPDATE_TIME = 1;
-
-                            changedPause += UpdateFromId;
-
+                        finally {
+                            changedPause -= UpdateFromId;
+                            isPaused.Remove(id);
                             if (isStartProgress.ContainsKey(id)) {
                                 isStartProgress.Remove(id);
                             }
-
-                            bool showDone = true;
-                            while ((count = input.Read(data)) != -1) {
-                                total += count;
-
-                                output.Write(data, 0, count);
-                                progressDownloads[id] = total;
-                                progress = cProgress();
-
-
-                                if (isPaused[id] == 1) {
-                                    print("PAUSEDOWNLOAD");
-                                    UpdateProgress();
-                                    while (isPaused[id] == 1) {
-                                        Thread.Sleep(100);
-                                    }
-                                    if (isPaused[id] != 2) {
-                                        UpdateProgress();
-                                    }
-                                }
-                                if (isPaused[id] == 2) { // DELETE FILE
-                                    print("DOWNLOAD STOPPED");
-                                    ShowDone(false, "Download Stopped");
-                                    //  Thread.Sleep(100);
-                                    output.Flush();
-                                    output.Close();
-                                    input.Close();
-                                    outputStreams.Remove(id);
-                                    inputStreams.Remove(id);
-                                    isPaused.Remove(id);
-                                    // Thread.Sleep(100);
-                                    rFile.Delete();
-                                    App.RemoveKey(DOWNLOAD_KEY, id.ToString());
-                                    App.RemoveKey(DOWNLOAD_KEY_INTENT, id.ToString());
-                                    App.RemoveKey(App.hasDownloadedFolder, id.ToString());
-                                    changedPause -= UpdateFromId;
-                                    activeIds.Remove(id);
-                                    removeKeys = true;
-                                    Thread.Sleep(100);
-                                    return;
-                                }
-
-                                if (DateTime.Now.Subtract(lastUpdateTime).TotalSeconds > UPDATE_TIME) {
-                                    lastUpdateTime = DateTime.Now;
-                                    long diff = total - lastTotal;
-                                    //  UpdateDloadNot($"{ConvertBytesToAny(diff/UPDATE_TIME, 2,2)}MB/s | {progress}%");
-                                    //{ConvertBytesToAny(diff / UPDATE_TIME, 2, 2)}MB/s | 
-                                    if (progress >= 100) {
-                                        print("DLOADPG DONE!");
-                                        ShowDone(true);
-                                    }
-                                    else {
-                                        UpdateProgress();
-                                        // UpdateDloadNot(progress + "%");
-                                    }
-                                    lastTotal = total;
-                                }
-
-                                if (progress >= 100 || progress > previousProgress) {
-                                    // Only post progress event if we've made progress.
-                                    previousProgress = progress;
-                                    if (progress >= 100) {
-                                        print("DLOADPG DONE!");
-                                        ShowDone(true);
-                                        showDone = false;
-                                    }
-                                    else {
-                                        // UpdateProgress();
-                                        // UpdateDloadNot(progress + "%");
-                                    }
-                                }
+                            if (removeKeys) {
+                                App.RemoveKey(DOWNLOAD_KEY, id.ToString());
+                                App.RemoveKey(DOWNLOAD_KEY_INTENT, id.ToString());
                             }
-
-                            if (showDone) {
-                                ShowDone(true);
+                            else {
+                                StartT();
                             }
-                            output.Flush();
-                            output.Close();
-                            input.Close();
-                            outputStreams.Remove(id);
-                            inputStreams.Remove(id);
-                            activeIds.Remove(id);
                         }
-                    }
-                    catch (Exception _ex) {
-                        print("DOWNLOADURL: " + url);
-                        print("DOWNLOAD FAILED BC: " + _ex);
-                        if (mirror < mirrorUrls.Count - 1 && progress < 2) { // HAVE MIRRORS LEFT
-                            mirror++;
-                            removeKeys = false;
-                            resumeIntent = false;
-                            rFile.Delete();
-                        }
-                        else {
-                            ShowDone(false);
-                        }
-                    }
-                    finally {
-                        changedPause -= UpdateFromId;
-                        isPaused.Remove(id);
-                        if (isStartProgress.ContainsKey(id)) {
-                            isStartProgress.Remove(id);
-                        }
-                        if (removeKeys) {
-                            App.RemoveKey(DOWNLOAD_KEY, id.ToString());
-                            App.RemoveKey(DOWNLOAD_KEY_INTENT, id.ToString());
-                        }
-                        else {
-                            StartT();
-                        }
-                    }
-                });
-                t.Start();
+                    });
+                    t.Start();
+                }
+                StartT();
+
+
             }
-            StartT();
+            catch (Exception) {
+
+                throw;
+            }
         }
     }
 
@@ -1052,7 +1071,7 @@ namespace CloudStreamForms.Droid
             StartService(new Intent(BaseContext, typeof(OnKilledService)));
 
             Window.SetSoftInputMode(Android.Views.SoftInput.AdjustNothing);
-           // TaskScheduler.UnobservedTaskException += TaskSchedulerOnUnobservedTaskException;
+            // TaskScheduler.UnobservedTaskException += TaskSchedulerOnUnobservedTaskException;
             //  Android.Renderscripts.ta
             // var bar = new Xamarin.Forms.Platform.Android.TabbedRenderer();//.Platform.Android.
 
@@ -2025,47 +2044,55 @@ namespace CloudStreamForms.Droid
         }
         public StorageInfo GetStorageInformation(string path = "")
         {
-            StorageInfo storageInfo = new StorageInfo();
+            try {
+                StorageInfo storageInfo = new StorageInfo();
 
-            long totalSpaceBytes = 0;
-            long freeSpaceBytes = 0;
-            long availableSpaceBytes = 0;
+                long totalSpaceBytes = 0;
+                long freeSpaceBytes = 0;
+                long availableSpaceBytes = 0;
 
-            /*
-              We have to do the check for the Android version, because the OS calls being made have been deprecated for older versions. 
-              The ‘old style’, pre Android level 18 didn’t use the Long suffixes, so if you try and call use those on 
-              anything below Android 4.3, it’ll crash on you, telling you that that those methods are unavailable. 
-              http://blog.wislon.io/posts/2014/09/28/xamarin-and-android-how-to-use-your-external-removable-sd-card/
-             */
-            if (path == "") {
-                totalSpaceBytes = Android.OS.Environment.ExternalStorageDirectory.TotalSpace;
-                freeSpaceBytes = Android.OS.Environment.ExternalStorageDirectory.FreeSpace;
-                availableSpaceBytes = Android.OS.Environment.ExternalStorageDirectory.UsableSpace;
-            }
-            else {
-                StatFs stat = new StatFs(path); //"/storage/sdcard1"
-
-                if (Build.VERSION.SdkInt >= BuildVersionCodes.JellyBeanMr2) {
-
-
-                    long blockSize = stat.BlockSizeLong;
-                    totalSpaceBytes = stat.BlockCountLong * stat.BlockSizeLong;
-                    availableSpaceBytes = stat.AvailableBlocksLong * stat.BlockSizeLong;
-                    freeSpaceBytes = stat.FreeBlocksLong * stat.BlockSizeLong;
-
+                /*
+                  We have to do the check for the Android version, because the OS calls being made have been deprecated for older versions. 
+                  The ‘old style’, pre Android level 18 didn’t use the Long suffixes, so if you try and call use those on 
+                  anything below Android 4.3, it’ll crash on you, telling you that that those methods are unavailable. 
+                  http://blog.wislon.io/posts/2014/09/28/xamarin-and-android-how-to-use-your-external-removable-sd-card/
+                 */
+                if (path == "") {
+                    totalSpaceBytes = Android.OS.Environment.ExternalStorageDirectory.TotalSpace;
+                    freeSpaceBytes = Android.OS.Environment.ExternalStorageDirectory.FreeSpace;
+                    availableSpaceBytes = Android.OS.Environment.ExternalStorageDirectory.UsableSpace;
                 }
                 else {
-                    totalSpaceBytes = (long)stat.BlockCount * (long)stat.BlockSize;
-                    availableSpaceBytes = (long)stat.AvailableBlocks * (long)stat.BlockSize;
-                    freeSpaceBytes = (long)stat.FreeBlocks * (long)stat.BlockSize;
+                    StatFs stat = new StatFs(path); //"/storage/sdcard1"
+
+                    if (Build.VERSION.SdkInt >= BuildVersionCodes.JellyBeanMr2) {
+
+
+                        long blockSize = stat.BlockSizeLong;
+                        totalSpaceBytes = stat.BlockCountLong * stat.BlockSizeLong;
+                        availableSpaceBytes = stat.AvailableBlocksLong * stat.BlockSizeLong;
+                        freeSpaceBytes = stat.FreeBlocksLong * stat.BlockSizeLong;
+
+                    }
+                    else {
+                        totalSpaceBytes = (long)stat.BlockCount * (long)stat.BlockSize;
+                        availableSpaceBytes = (long)stat.AvailableBlocks * (long)stat.BlockSize;
+                        freeSpaceBytes = (long)stat.FreeBlocks * (long)stat.BlockSize;
+                    }
                 }
+
+                storageInfo.TotalSpace = totalSpaceBytes;
+                storageInfo.AvailableSpace = availableSpaceBytes;
+                storageInfo.FreeSpace = freeSpaceBytes;
+                return storageInfo; 
             }
-
-            storageInfo.TotalSpace = totalSpaceBytes;
-            storageInfo.AvailableSpace = availableSpaceBytes;
-            storageInfo.FreeSpace = freeSpaceBytes;
-            return storageInfo;
-
+            catch (Exception _ex) {
+                return new StorageInfo() {
+                    AvailableSpace = 0,
+                    FreeSpace = 0,
+                    TotalSpace = 0,
+                };
+            }
         }
 
         public static void OpenPathAsVideo(string path, string name, string subtitleLoc)

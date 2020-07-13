@@ -45,7 +45,7 @@ namespace CloudStreamForms
 
         public static string GetFont(string f)
         {
-            if(f == "App default") {
+            if (f == "App default") {
                 return "";
             }
             return f.Replace(" ", "-") + ".ttf#" + f;
@@ -89,10 +89,8 @@ namespace CloudStreamForms
             void CancelNot(int id);
             string DownloadHandleIntent(int id, List<string> mirrorNames, List<string> mirrorUrls, string fileName, string titleName, bool mainPath, string extraPath, bool showNotification = true, bool showNotificationWhenDone = true, bool openWhenDone = false, string poster = "", string beforeTxt = "");
             DownloadProgressInfo GetDownloadProgressInfo(int id, string fileUrl);
-
             void UpdateDownload(int id, int state);
             BluetoothDeviceID[] GetBluetoothDevices();
-
             void SearchBluetoothDevices();
             void RequestVlc(List<string> urls, List<string> names, string episodeName, string episodeId, long startId = FROM_PROGRESS, string subtitleFull = "");
         }
@@ -218,7 +216,7 @@ namespace CloudStreamForms
 
         public static void RequestVlc(string url, string name, string episodeName = null, string episodeId = "", int startId = FROM_PROGRESS, string subtitleFull = "", int episode = -1, int season = -1, string descript = "", bool? overrideSelectVideo = null, string headerId = "")
         {
-            RequestVlc(new List<string>() { url }, new List<string>() { name }, episodeName ?? name, episodeId, startId, subtitleFull, episode, season, descript, overrideSelectVideo,headerId);
+            RequestVlc(new List<string>() { url }, new List<string>() { name }, episodeName ?? name, episodeId, startId, subtitleFull, episode, season, descript, overrideSelectVideo, headerId);
         }
 
         public static EventHandler ForceUpdateVideo;
@@ -389,6 +387,7 @@ namespace CloudStreamForms
         {
             return platformDep.GetBrightness();
         }
+
         public static void SetBrightness(double brightness)
         {
             platformDep.SetBrightness(brightness);
@@ -400,6 +399,7 @@ namespace CloudStreamForms
         }
 
         public static bool isOnMainPage = true;
+
         public static void UpdateBackground(int color = -1)
         {
             if (color == -1) {
@@ -419,6 +419,7 @@ namespace CloudStreamForms
         {
             platformDep.HideStatusBar();
         }
+
         public static void ShowStatusBar()
         {
             platformDep.ShowStatusBar();
@@ -495,8 +496,14 @@ namespace CloudStreamForms
 
         public static string GetBuildNumber()
         {
-            var v = Assembly.GetExecutingAssembly().GetName().Version;
-            return v.Major + "." + v.Minor + "." + v.Build;
+            try {
+                var v = Assembly.GetExecutingAssembly().GetName().Version;
+                return v.Major + "." + v.Minor + "." + v.Build;
+            }
+            catch (Exception _ex) {
+                error(_ex);
+                return "";
+            }
         }
 
         public static void DownloadNewGithubUpdate(string update)
@@ -513,7 +520,7 @@ namespace CloudStreamForms
         public static void PlayVLCWithSingleUrl(List<string> url, List<string> name, List<string> subtitleData, List<string> subtitleNames, string publicName = "", int episode = -1, int season = -1, bool? overrideSelectVideo = null)
         {
             bool useVideo = overrideSelectVideo ?? Settings.UseVideoPlayer;
-             
+
             if (useVideo) {
                 Page p = new VideoPage(new VideoPage.PlayVideo() { descript = "", name = publicName, isSingleMirror = false, episode = episode, season = season, MirrorNames = name, MirrorUrls = url, });// SubtitlesNames = subtitleNames  new List<string>() { "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" }, new List<string>() { "Black" }, new List<string>() { });// { mainPoster = mainPoster };
                 ((MainPage)CloudStreamCore.mainPage).Navigation.PushModalAsync(p, false);
@@ -521,8 +528,7 @@ namespace CloudStreamForms
             else {
                 platformDep.PlayVlc(url, name, subtitleData.Count > 0 ? subtitleData[0] : "");
             }
-            //PlayVlc?.Invoke(null, url);
-
+            //PlayVlc?.Invoke(null, url); 
         }
 
         static string GetKeyPath(string folder, string name = "")
@@ -536,9 +542,9 @@ namespace CloudStreamForms
 
         public static void SetKey(string folder, string name, object value)
         {
-            string path = GetKeyPath(folder, name);
-            string _set = ConvertToString(value);
             try {
+                string path = GetKeyPath(folder, name);
+                string _set = ConvertToString(value);
                 if (myApp.Properties.ContainsKey(path)) {
                     CloudStreamCore.print("CONTAINS KEY");
                     myApp.Properties[path] = _set;
@@ -551,7 +557,6 @@ namespace CloudStreamForms
             catch (Exception _ex) {
                 print("EX SET KEY:" + _ex);
             }
-
         }
 
         static long GetLongRegex(string id)
@@ -563,6 +568,7 @@ namespace CloudStreamForms
         {
             SetKey(VIEW_TIME_POS, GetLongRegex(id).ToString(), res);
         }
+
         public static void SetViewDur(string id, long res)
         {
             SetKey(VIEW_TIME_DUR, GetLongRegex(id).ToString(), res);
@@ -573,6 +579,7 @@ namespace CloudStreamForms
             long _parse = GetLongRegex(id);
             return GetKey(VIEW_TIME_POS, _parse.ToString(), -1L);
         }
+
         public static long GetViewPos(long _parse)
         {
             return GetKey(VIEW_TIME_POS, _parse.ToString(), -1L);
@@ -583,14 +590,22 @@ namespace CloudStreamForms
             long _parse = GetLongRegex(id);
             return GetViewDur(_parse);
         }
+
         public static long GetViewDur(long _parse)
         {
             return GetKey(VIEW_TIME_DUR, _parse.ToString(), -1L);
         }
+
         public static T GetKey<T>(string folder, string name, T defVal)
         {
-            string path = GetKeyPath(folder, name);
-            return GetKey<T>(path, defVal);
+            try {
+                string path = GetKeyPath(folder, name);
+                return GetKey<T>(path, defVal);
+            }
+            catch (Exception) {
+                return defVal;
+            }
+
         }
 
         public static void RemoveFolder(string folder)
@@ -621,14 +636,20 @@ namespace CloudStreamForms
 
         public static List<T> GetKeys<T>(string folder)
         {
-            List<string> keyNames = GetKeysPath(folder);
+            try {
+                List<string> keyNames = GetKeysPath(folder);
 
-            List<T> allKeys = new List<T>();
-            foreach (var key in keyNames) {
-                allKeys.Add((T)myApp.Properties[key]);
+                List<T> allKeys = new List<T>();
+                foreach (var key in keyNames) {
+                    allKeys.Add((T)myApp.Properties[key]);
+                }
+
+                return allKeys;
+            }
+            catch (Exception) {
+                return new List<T>();
             }
 
-            return allKeys;
         }
 
         public static int GetKeyCount(string folder)
@@ -672,8 +693,13 @@ namespace CloudStreamForms
         }
         public static void RemoveKey(string path)
         {
-            if (myApp.Properties.ContainsKey(path)) {
-                myApp.Properties.Remove(path);
+            try {
+                if (myApp.Properties.ContainsKey(path)) {
+                    myApp.Properties.Remove(path);
+                }
+            }
+            catch (Exception _ex) {
+                error(_ex);
             }
         }
         static Application myApp { get { return Application.Current; } }

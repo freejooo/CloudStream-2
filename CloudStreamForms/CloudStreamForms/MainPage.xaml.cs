@@ -29,8 +29,7 @@ namespace CloudStreamForms
 {
     // Learn more about making custom code visible in the Xamarin.Forms previewer
     // by visiting https://aka.ms/xamarinforms-previewer
-
-
+     
     [DesignTimeVisible(false)]
     public partial class MainPage : Xamarin.Forms.TabbedPage
     {
@@ -61,7 +60,6 @@ namespace CloudStreamForms
             get {
                 if (githubUpdateTag == "") { return false; }
                 else { return ("v" + App.GetBuildNumber() != githubUpdateTag); }
-
             }
         }
 
@@ -161,12 +159,17 @@ namespace CloudStreamForms
 
             int oldPage = 0;
             CurrentPageChanged += (o, e) => {
-                OnIconEnd(oldPage);
-                for (int i = 0; i < pages.Count; i++) {
-                    if ((pages[i].GetType()) == CurrentPage.GetType()) {
-                        OnIconStart(i);
-                        oldPage = i;
+                try {
+                    OnIconEnd(oldPage);
+                    for (int i = 0; i < pages.Count; i++) {
+                        if ((pages[i].GetType()) == CurrentPage.GetType()) {
+                            OnIconStart(i);
+                            oldPage = i;
+                        }
                     }
+                }
+                catch (Exception _ex) {
+                    error(_ex);
                 }
             };
 
@@ -247,7 +250,6 @@ namespace CloudStreamForms
 
             return Color.FromRgba((int)red, (int)green, (int)blue, color.A);
         }
-        // -------------------------------- END --------------------------------
     }
 
 

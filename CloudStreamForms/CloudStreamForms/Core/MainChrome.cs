@@ -253,6 +253,7 @@ namespace CloudStreamForms.Core
 
         public static async Task StartImageChanger()
         {
+            try {
             while (true) {
                 int lastImage = int.Parse(CurrentImage.ToString());
                 if (IsPendingConnection) {
@@ -276,6 +277,12 @@ namespace CloudStreamForms.Core
                 }
                 await Task.Delay(500);
             }
+
+
+            }
+            catch (Exception _ex) {
+                error(_ex);
+            }
         }
 
         public static async void GetAllChromeDevices()
@@ -287,12 +294,17 @@ namespace CloudStreamForms.Core
                 print("FOUND " + allChromeDevices.ToList().Count + " CHROME DEVICES");
                 if (IsChromeDevicesOnNetwork) {
                     Device.BeginInvokeOnMainThread(() => {
-                        OnChromeDevicesFound?.Invoke(null, null);
+                        try {
+                            OnChromeDevicesFound?.Invoke(null, null);
+                        }
+                        catch (Exception _ex) {
+                            error(_ex);
+                        }
                     });
                 }
             }
             catch (Exception _ex) {
-                print("ERROR LOADING CHROME::" + _ex);
+                error("ERROR LOADING CHROME::" + _ex);
             }
 
         }
