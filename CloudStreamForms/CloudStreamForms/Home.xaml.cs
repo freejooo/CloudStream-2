@@ -206,76 +206,85 @@ namespace CloudStreamForms
         {
 
             InitializeComponent();
-            epView = new MainEpisodeView();
-            BindingContext = epView;
+            if (Settings.IS_TEST_BUILD) {
+                return;
+            }
+            try {
+                epView = new MainEpisodeView();
+                BindingContext = epView;
 
-            BackgroundColor = Settings.BlackRBGColor;
+                BackgroundColor = Settings.BlackRBGColor;
 
-            MovieTypePicker = new LabelList(MovieTypePickerBtt, genresNames);
-            ImdbTypePicker = new LabelList(ImdbTypePickerBtt, recomendationTypes);
+                MovieTypePicker = new LabelList(MovieTypePickerBtt, genresNames);
+                ImdbTypePicker = new LabelList(ImdbTypePickerBtt, recomendationTypes);
 
-            // MovieTypePicker.ItemsSource = genresNames;
-            // ImdbTypePicker.ItemsSource = recomendationTypes;
-            //   UpdateBookmarks();
+                // MovieTypePicker.ItemsSource = genresNames;
+                // ImdbTypePicker.ItemsSource = recomendationTypes;
+                //   UpdateBookmarks();
 
-            MovieTypePicker.SelectedIndex = 0;
-            ImdbTypePicker.SelectedIndex = -1;
+                MovieTypePicker.SelectedIndex = 0;
+                ImdbTypePicker.SelectedIndex = -1;
 
 
 
-            ImdbTypePicker.SelectedIndexChanged += (o, e) => {
-                ClearEpisodes();
-                mainCore.PurgeThreads(21);
-                Fething = false;
-                if (IsRecommended) {
-                    GetFetchRecomended();
-                }
-                else {
-                    GetFetch();
-                }
-                //    ImdbTypePickerBtt.Text = ImdbTypePicker.Items[ImdbTypePicker.SelectedIndex];
-
-            };
-
-            // MovieTypePickerBtt.Text = MovieTypePicker.Items[MovieTypePicker.SelectedIndex];
-
-            MovieTypePicker.SelectedIndexChanged += (o, e) => {
-                ClearEpisodes(!IsRecommended);
-                if (IsRecommended) {
-                    CoreHelpers.Shuffle(iMDbTopList);
-                    LoadMoreImages();
-                }
-                else {
+                ImdbTypePicker.SelectedIndexChanged += (o, e) => {
+                    ClearEpisodes();
                     mainCore.PurgeThreads(21);
                     Fething = false;
-                    GetFetch();
+                    if (IsRecommended) {
+                        GetFetchRecomended();
+                    }
+                    else {
+                        GetFetch();
+                    }
+                    //    ImdbTypePickerBtt.Text = ImdbTypePicker.Items[ImdbTypePicker.SelectedIndex];
+
+                };
+
+                // MovieTypePickerBtt.Text = MovieTypePicker.Items[MovieTypePicker.SelectedIndex];
+
+                MovieTypePicker.SelectedIndexChanged += (o, e) => {
+                    ClearEpisodes(!IsRecommended);
+                    if (IsRecommended) {
+                        CoreHelpers.Shuffle(iMDbTopList);
+                        LoadMoreImages();
+                    }
+                    else {
+                        mainCore.PurgeThreads(21);
+                        Fething = false;
+                        GetFetch();
+                    }
+                    //    MovieTypePickerBtt.Text = MovieTypePicker.Items[MovieTypePicker.SelectedIndex];
+                    //GetFetchRecomended
+                    //  print(MovieTypePicker.SelectedIndex + "<<Selected");
+                };
+
+                episodeView.Scrolled += (o, e) => {
+                    double maxY = episodeView.HeightRequest - episodeView.Height;
+                    //print(maxY);
+                    if (e.ScrollY >= maxY - 200) {
+                        LoadMoreImages();
+                    }
+                };
+
+
+                if (Device.RuntimePlatform == Device.UWP) {
+                    // BlueSeperator.IsVisible = false;
+                    // BlueSeperator.IsEnabled = false;
+                    OffBar.IsVisible = false;
+                    OffBar.IsEnabled = false;
                 }
-                //    MovieTypePickerBtt.Text = MovieTypePicker.Items[MovieTypePicker.SelectedIndex];
-                //GetFetchRecomended
-                //  print(MovieTypePicker.SelectedIndex + "<<Selected");
-            };
-
-            episodeView.Scrolled += (o, e) => {
-                double maxY = episodeView.HeightRequest - episodeView.Height;
-                //print(maxY);
-                if (e.ScrollY >= maxY - 200) {
-                    LoadMoreImages();
+                else {
+                    OffBar.Source = App.GetImageSource("gradient.png"); OffBar.HeightRequest = 3; OffBar.HorizontalOptions = LayoutOptions.Fill; OffBar.ScaleX = 100; OffBar.Opacity = 0.3; OffBar.TranslationY = 9;
                 }
-            };
+
+                episodeView.VerticalScrollBarVisibility = Settings.ScrollBarVisibility;
 
 
-            if (Device.RuntimePlatform == Device.UWP) {
-                // BlueSeperator.IsVisible = false;
-                // BlueSeperator.IsEnabled = false;
-                OffBar.IsVisible = false;
-                OffBar.IsEnabled = false;
             }
-            else {
-                OffBar.Source = App.GetImageSource("gradient.png"); OffBar.HeightRequest = 3; OffBar.HorizontalOptions = LayoutOptions.Fill; OffBar.ScaleX = 100; OffBar.Opacity = 0.3; OffBar.TranslationY = 9;
+            catch (Exception _ex) {
+                error(_ex);
             }
-
-            episodeView.VerticalScrollBarVisibility = Settings.ScrollBarVisibility;
-
             /*
             ImageScroller.Scrolled += (o, e) => {
                 double maxY = ImageScroller.ContentSize.Height - ImageScroller.Height;
@@ -380,7 +389,12 @@ namespace CloudStreamForms
         async void SaveData()
         {
             print("SAVING DATA");
-            await Application.Current.SavePropertiesAsync();
+            try {
+                await Application.Current.SavePropertiesAsync();
+            }
+            catch (Exception _ex) {
+                error(_ex);
+            }
             print("SAVING DATA DONE!!");
 
         }
@@ -395,25 +409,34 @@ namespace CloudStreamForms
 
         protected override void OnAppearing()
         {
-            // OnIconStart(0);
-            SaveData();
-            base.OnAppearing();
-            if (!hasAppered) {
-                App.UpdateStatusBar();
-                App.UpdateBackground();
-
-                /*
-                Application.Current.MainPage.SizeChanged += (o, e) => {
-                    SetHeight();
-                };*/
+            if (Settings.IS_TEST_BUILD) {
+                base.OnAppearing();
+                return;
             }
-            UpdateBookmarks();
-            Top100Stack.IsEnabled = Settings.Top100Enabled;
-            Top100Stack.IsVisible = Settings.Top100Enabled;
-            BackgroundColor = Settings.BlackRBGColor;
-            //Color.FromHex(Settings.MainBackgroundColor);
-            hasAppered = true;
 
+            try {
+                // OnIconStart(0);
+                base.OnAppearing();
+                SaveData();
+                if (!hasAppered) {
+                    App.UpdateStatusBar();
+                    App.UpdateBackground();
+
+                    /*
+                    Application.Current.MainPage.SizeChanged += (o, e) => {
+                        SetHeight();
+                    };*/
+                }
+                UpdateBookmarks();
+                Top100Stack.IsEnabled = Settings.Top100Enabled;
+                Top100Stack.IsVisible = Settings.Top100Enabled;
+                BackgroundColor = Settings.BlackRBGColor;
+                //Color.FromHex(Settings.MainBackgroundColor);
+                hasAppered = true;
+            }
+            catch (Exception _ex) {
+                error(_ex);
+            }
 
         }
 
@@ -423,77 +446,82 @@ namespace CloudStreamForms
         List<BookmarkPoster> bookmarkPosters = new List<BookmarkPoster>();
         void UpdateBookmarks()
         {
-            int height = 150;
-            Bookmarks.HeightRequest = height;
-            List<string> keys = App.GetKeys<string>("BookmarkData");
-            List<string> data = new List<string>();
-            bookmarkPosters = new List<BookmarkPoster>();
-            Bookmarks.Children.Clear();
-            for (int i = 0; i < keys.Count; i++) {
-                string __key = App.ConvertToObject<string>(keys[i], "");
-                if (__key == "") {
-                    continue;
-                }
-                string name = FindHTML(__key, "Name=", "|||");
-                print("BOOKMARK:" + name);
-                string posterUrl = FindHTML(__key, "PosterUrl=", "|||");
-                posterUrl = ConvertIMDbImagesToHD(posterUrl, 182, 268);
-                print("POSTERURL:::" + posterUrl);
+            try {
+                int height = 150;
+                Bookmarks.HeightRequest = height;
+                List<string> keys = App.GetKeys<string>("BookmarkData");
+                List<string> data = new List<string>();
+                bookmarkPosters = new List<BookmarkPoster>();
+                Bookmarks.Children.Clear();
+                for (int i = 0; i < keys.Count; i++) {
+                    string __key = App.ConvertToObject<string>(keys[i], "");
+                    if (__key == "") {
+                        continue;
+                    }
+                    string name = FindHTML(__key, "Name=", "|||");
+                    print("BOOKMARK:" + name);
+                    string posterUrl = FindHTML(__key, "PosterUrl=", "|||");
+                    posterUrl = ConvertIMDbImagesToHD(posterUrl, 182, 268);
+                    print("POSTERURL:::" + posterUrl);
 
-                string id = FindHTML(__key, "Id=", "|||");
-                if (name != "" && posterUrl != "" && id != "") {
-                    if (CheckIfURLIsValid(posterUrl)) {
-                        Grid stackLayout = new Grid();
+                    string id = FindHTML(__key, "Id=", "|||");
+                    if (name != "" && posterUrl != "" && id != "") {
+                        if (CheckIfURLIsValid(posterUrl)) {
+                            Grid stackLayout = new Grid();
 
 
-                        //  Button imageButton = new Button() { HeightRequest = 150, WidthRequest = 90, BackgroundColor = Color.Transparent, VerticalOptions = LayoutOptions.Start };
-                        var ff = new FFImageLoading.Forms.CachedImage {
-                            Source = posterUrl,
-                            HeightRequest = height,
-                            WidthRequest = 87,
-                            BackgroundColor = Color.Transparent,
-                            VerticalOptions = LayoutOptions.Start,
-                            Transformations = {
+                            //  Button imageButton = new Button() { HeightRequest = 150, WidthRequest = 90, BackgroundColor = Color.Transparent, VerticalOptions = LayoutOptions.Start };
+                            var ff = new FFImageLoading.Forms.CachedImage {
+                                Source = posterUrl,
+                                HeightRequest = height,
+                                WidthRequest = 87,
+                                BackgroundColor = Color.Transparent,
+                                VerticalOptions = LayoutOptions.Start,
+                                Transformations = {
                                 new FFImageLoading.Transformations.RoundedTransformation(1,1,1.5,0,"#303F9F")
                             },
-                            InputTransparent = true,
-                        };
+                                InputTransparent = true,
+                            };
 
-                        //Source = p.posterUrl
+                            //Source = p.posterUrl
 
-                        stackLayout.Children.Add(ff);
-                        // stackLayout.Children.Add(imageButton);
-                        bookmarkPosters.Add(new BookmarkPoster() { id = id, name = name, posterUrl = posterUrl });
-                        Grid.SetColumn(stackLayout, Bookmarks.Children.Count);
-                        Bookmarks.Children.Add(stackLayout);
+                            stackLayout.Children.Add(ff);
+                            // stackLayout.Children.Add(imageButton);
+                            bookmarkPosters.Add(new BookmarkPoster() { id = id, name = name, posterUrl = posterUrl });
+                            Grid.SetColumn(stackLayout, Bookmarks.Children.Count);
+                            Bookmarks.Children.Add(stackLayout);
 
-                        // --- RECOMMENDATIONS CLICKED -----
-                        stackLayout.SetValue(XamEffects.TouchEffect.ColorProperty, Color.White);
-                        Commands.SetTap(stackLayout, new Command((o) => {
-                            int z = (int)o;
-                            PushPageFromUrlAndName(bookmarkPosters[z].id, bookmarkPosters[z].name);
-                            //do something
-                        }));
-                        Commands.SetTapParameter(stackLayout, i);
-                        /*
-                        imageButton.Clicked += (o, _e) => {
-                            for (int z = 0; z < bookmarkPosters.Count; z++) {
-                                if (((Button)o).Id == bookmarkPosters[z].button.Id) {
-                                    PushPageFromUrlAndName(bookmarkPosters[z].id, bookmarkPosters[z].name);
+                            // --- RECOMMENDATIONS CLICKED -----
+                            stackLayout.SetValue(XamEffects.TouchEffect.ColorProperty, Color.White);
+                            Commands.SetTap(stackLayout, new Command((o) => {
+                                int z = (int)o;
+                                PushPageFromUrlAndName(bookmarkPosters[z].id, bookmarkPosters[z].name);
+                                //do something
+                            }));
+                            Commands.SetTapParameter(stackLayout, i);
+                            /*
+                            imageButton.Clicked += (o, _e) => {
+                                for (int z = 0; z < bookmarkPosters.Count; z++) {
+                                    if (((Button)o).Id == bookmarkPosters[z].button.Id) {
+                                        PushPageFromUrlAndName(bookmarkPosters[z].id, bookmarkPosters[z].name);
+                                    }
                                 }
-                            }
-                        };*/
+                            };*/
+                        }
                     }
+                    // data.Add(App.GetKey("BookmarkData"))
                 }
-                // data.Add(App.GetKey("BookmarkData"))
+
+                MScroll.HeightRequest = keys.Count > 0 ? 130 : 0;
+                if (ImdbTypePicker.SelectedIndex == -1) {
+
+                    ImdbTypePicker.SelectedIndex = bookmarkPosters.Count > 0 ? 0 : 2; // SET TO POPULAR BY DEAFULT
+                }
             }
+            catch (Exception _ex) {
 
-            MScroll.HeightRequest = keys.Count > 0 ? 130 : 0;
-            if (ImdbTypePicker.SelectedIndex == -1) {
-
-                ImdbTypePicker.SelectedIndex = bookmarkPosters.Count > 0 ? 0 : 2; // SET TO POPULAR BY DEAFULT
+                error(_ex);
             }
-
 
         }
         public double currentWidth { get { return Application.Current.MainPage.Width; } }

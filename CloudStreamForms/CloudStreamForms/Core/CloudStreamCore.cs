@@ -3381,7 +3381,7 @@ namespace CloudStreamForms.Core
                         //}
 
                         _d = RemoveOne(_d, lookFor);
-                        try { 
+                        try {
                             _d = RemoveOne(_d, "label=" + enlink);
                         }
                         catch (Exception _ex) {
@@ -8567,7 +8567,9 @@ namespace CloudStreamForms.Core
                 Console.WriteLine("Null");
             }
 #endif
-
+            if (o != null) {
+                App.ShowToast(o.ToString());
+            }
         }
 
         public static void print(object o)

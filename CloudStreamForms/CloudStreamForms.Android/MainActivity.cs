@@ -945,6 +945,10 @@ namespace CloudStreamForms.Droid
 
         protected override void OnNewIntent(Intent intent)
         {
+            if (Settings.IS_TEST_BUILD) {
+                return;
+            }
+
             //App.ShowToast("ON NEW INTENT");
             //print("DA:::.2132131");
             if (intent.DataString != null) {
@@ -980,6 +984,7 @@ namespace CloudStreamForms.Droid
             ToolbarResource = Resource.Layout.Toolbar;
 
             base.OnCreate(savedInstanceState);
+
             string data = Intent?.Data?.EncodedAuthority;
 
             try {
@@ -1006,71 +1011,81 @@ namespace CloudStreamForms.Droid
             MainDroid.NotificationIconId = Resource.Drawable.bicon;
 
             LoadApplication(new App());
-            activity = this;
-
-            mainDroid = new MainDroid();
-            mainDroid.Awake();
-
-            //Typeface.CreateFromAsset(Application.Context.Assets, "Times-New-Roman.ttf");
-
-
-            if (Intent.DataString != null) {
-                print("GOT NON NULL DATA");
-                if (Intent.DataString != "") {
-                    print("INTENTDATA::::" + Intent.DataString);
-                    MainPage.PushPageFromUrlAndName(Intent.DataString);
-                }
+            if (Settings.IS_TEST_BUILD) {
+                platformDep = new NullPlatfrom();
+                return;
             }
-            RequestPermission(this);
+            try {
+                activity = this;
 
-            //App.ShowToast("ON CREATE");
+                mainDroid = new MainDroid();
+                mainDroid.Awake();
 
-            //mainDroid.Test();
-            /*
-            MessagingCenter.Subscribe<VideoPage>(this, "allowLandScapePortrait", sender =>
-            {
-                RequestedOrientation = ScreenOrientation.Unspecified;
-            });
-            MessagingCenter.Subscribe<VideoPage>(this, "preventLandScape", sender =>
-            {
-                RequestedOrientation = ScreenOrientation.Portrait;
-            });*/
-            // Window.DecorView.SetBackgroundResource(Resource.Drawable.splash_background_remove);//Resources.GetDrawable(Resource.Drawable.splash_background_remove);
+                //Typeface.CreateFromAsset(Application.Context.Assets, "Times-New-Roman.ttf");
 
 
-            /*
-            var alarm = Application.Context.GetSystemService(Context.AlarmService) as AlarmManager;
-            var context = ApplicationContext;
-            var _testIntent = new Intent(context, typeof(AlertReceiver));
-
-            var pending = PendingIntent.GetBroadcast(context, 1337, _testIntent, 0);
-
-            alarm.SetExactAndAllowWhileIdle(AlarmType.RtcWakeup, MainDroid.CurrentTimeMillis(DateTime.UtcNow.AddSeconds(5)), pending);*/
-
-            MainChrome.OnDisconnected += (o, e) => {
-                MainDroid.CancelChromecast();
-            };
-
-            MainChrome.OnNotificationChanged += (o, e) => {
-                try {
-                    print("CHROMECAST CHANGED::: ");
-                    print("ID=====================" + e.isCasting + "|" + e.isPlaying + "|" + e.isPaused);
-                    if (!e.isCasting) {// || !e.isPlaying) {
-                        MainDroid.CancelChromecast();
-                    }
-                    else {
-                        MainDroid.UpdateChromecastNotification(e.title, e.body, e.isPaused, e.posterUrl);
+                if (Intent.DataString != null) {
+                    print("GOT NON NULL DATA");
+                    if (Intent.DataString != "") {
+                        print("INTENTDATA::::" + Intent.DataString);
+                        MainPage.PushPageFromUrlAndName(Intent.DataString);
                     }
                 }
-                catch (Exception _ex) {
-                    print("EX NOT CHANGED::: " + _ex);
-                }
-            };
+                RequestPermission(this);
 
-            ResumeIntentData();
-            StartService(new Intent(BaseContext, typeof(OnKilledService)));
+                //App.ShowToast("ON CREATE");
 
-            Window.SetSoftInputMode(Android.Views.SoftInput.AdjustNothing);
+                //mainDroid.Test();
+                /*
+                MessagingCenter.Subscribe<VideoPage>(this, "allowLandScapePortrait", sender =>
+                {
+                    RequestedOrientation = ScreenOrientation.Unspecified;
+                });
+                MessagingCenter.Subscribe<VideoPage>(this, "preventLandScape", sender =>
+                {
+                    RequestedOrientation = ScreenOrientation.Portrait;
+                });*/
+                // Window.DecorView.SetBackgroundResource(Resource.Drawable.splash_background_remove);//Resources.GetDrawable(Resource.Drawable.splash_background_remove);
+
+
+                /*
+                var alarm = Application.Context.GetSystemService(Context.AlarmService) as AlarmManager;
+                var context = ApplicationContext;
+                var _testIntent = new Intent(context, typeof(AlertReceiver));
+
+                var pending = PendingIntent.GetBroadcast(context, 1337, _testIntent, 0);
+
+                alarm.SetExactAndAllowWhileIdle(AlarmType.RtcWakeup, MainDroid.CurrentTimeMillis(DateTime.UtcNow.AddSeconds(5)), pending);*/
+
+                MainChrome.OnDisconnected += (o, e) => {
+                    MainDroid.CancelChromecast();
+                };
+
+                MainChrome.OnNotificationChanged += (o, e) => {
+                    try {
+                        print("CHROMECAST CHANGED::: ");
+                        print("ID=====================" + e.isCasting + "|" + e.isPlaying + "|" + e.isPaused);
+                        if (!e.isCasting) {// || !e.isPlaying) {
+                            MainDroid.CancelChromecast();
+                        }
+                        else {
+                            MainDroid.UpdateChromecastNotification(e.title, e.body, e.isPaused, e.posterUrl);
+                        }
+                    }
+                    catch (Exception _ex) {
+                        print("EX NOT CHANGED::: " + _ex);
+                    }
+                };
+
+                ResumeIntentData();
+                StartService(new Intent(BaseContext, typeof(OnKilledService)));
+
+                Window.SetSoftInputMode(Android.Views.SoftInput.AdjustNothing);
+            }
+            catch (Exception _ex) {
+                error(_ex);
+            }
+
             // TaskScheduler.UnobservedTaskException += TaskSchedulerOnUnobservedTaskException;
             //  Android.Renderscripts.ta
             // var bar = new Xamarin.Forms.Platform.Android.TabbedRenderer();//.Platform.Android.
@@ -1124,20 +1139,23 @@ namespace CloudStreamForms.Droid
         public static int REQUEST_START = 112;
         private static void RequestPermission(Activity context)
         {
-
-            List<string> requests = new List<string>() {
+            try {
+                List<string> requests = new List<string>() {
                 Manifest.Permission.WriteExternalStorage, Manifest.Permission.RequestInstallPackages,Manifest.Permission.InstallPackages,Manifest.Permission.WriteSettings, Manifest.Permission.Bluetooth
             };
 
-            for (int i = 0; i < requests.Count; i++) {
-                bool hasPermission = (ContextCompat.CheckSelfPermission(context, requests[i]) == Permission.Granted);
-                if (!hasPermission) {
-                    ActivityCompat.RequestPermissions(context,
-                       new string[] { requests[i] },
-                     REQUEST_START + i);
+                for (int i = 0; i < requests.Count; i++) {
+                    bool hasPermission = (ContextCompat.CheckSelfPermission(context, requests[i]) == Permission.Granted);
+                    if (!hasPermission) {
+                        ActivityCompat.RequestPermissions(context,
+                           new string[] { requests[i] },
+                         REQUEST_START + i);
+                    }
                 }
             }
-
+            catch (Exception _ex) {
+                error(_ex);
+            }
         }
     }
 
@@ -1180,7 +1198,7 @@ namespace CloudStreamForms.Droid
         public void Dispose()
         {
             print("TRYIGNT O DISPOSE");
-            throw new NotImplementedException();
+            //  throw new NotImplementedException();
         }
 
         public void OnServiceConnected(ProfileType profile, IBluetoothProfile proxy)
@@ -1237,7 +1255,12 @@ namespace CloudStreamForms.Droid
                 }
             }
             else {
-                DownloadHandle.isPaused[id] = state;
+                try {
+                    DownloadHandle.isPaused[id] = state;
+                }
+                catch (Exception _ex) {
+                    error(_ex);
+                }
             }
         }
         /**
@@ -1267,8 +1290,6 @@ namespace CloudStreamForms.Droid
         {
             long estimatedAudioLatency = AUDIO_LATENCY_NOT_ESTIMATED;
             long audioFramesWritten = 0;
-
-
             var outputBufferSize = AudioTrack.GetMinBufferSize(16000, ChannelOut.Stereo, Encoding.Pcm16bit);
 
             AudioTrack track = new AudioTrack(Android.Media.Stream.Music, 16000, ChannelOut.Mono, Encoding.Pcm16bit, outputBufferSize, AudioTrackMode.Stream);//AudioManager.USE_DEFAULT_STREAM_TYPE, 16000, AudioFormat.CHANNEL_OUT_MONO, AudioFormat.ENCODING_PCM_16BIT, outputBufferSize, AudioTrack.MODE_STREAM);
@@ -1331,56 +1352,63 @@ namespace CloudStreamForms.Droid
         {
             //  return new DownloadProgressInfo() { bytesDownloaded = 10, totalBytes = 100, state = DownloadState.Downloading };
             //  Stopwatch s = new Stopwatch();
+            try {
+                DownloadProgressInfo progressInfo = new DownloadProgressInfo();
 
-            DownloadProgressInfo progressInfo = new DownloadProgressInfo();
+                bool downloadingOrPaused = DownloadHandle.isPaused.ContainsKey(id);
 
-            bool downloadingOrPaused = DownloadHandle.isPaused.ContainsKey(id);
+                var file = new Java.IO.File(fileUrl);
 
-            var file = new Java.IO.File(fileUrl);
+                //  s.Start();
+                bool exists = file.Exists();
 
-            //  s.Start();
-            bool exists = file.Exists();
+                if (downloadingOrPaused) {
+                    int paused = DownloadHandle.isPaused[id];
+                    progressInfo.state = paused == 1 ? DownloadState.Paused : DownloadState.Downloading;
+                }
+                else {
+                    //file.Length()
+                    progressInfo.state = exists ? DownloadState.Downloaded : DownloadState.NotDownloaded;
+                }
 
-            if (downloadingOrPaused) {
-                int paused = DownloadHandle.isPaused[id];
-                progressInfo.state = paused == 1 ? DownloadState.Paused : DownloadState.Downloading;
-            }
-            else {
-                //file.Length()
-                progressInfo.state = exists ? DownloadState.Downloaded : DownloadState.NotDownloaded;
-            }
+                if (progressInfo.bytesDownloaded < progressInfo.totalBytes - 10 && progressInfo.state == DownloadState.Downloaded) {
+                    progressInfo.state = DownloadState.NotDownloaded;
+                }
+                print("CONTAINS ::>>" + DownloadHandle.isStartProgress.ContainsKey(id));
+                progressInfo.bytesDownloaded = (exists ? (file.Length()) : 0) + (DownloadHandle.isStartProgress.ContainsKey(id) ? 1 : 0);
 
-            if (progressInfo.bytesDownloaded < progressInfo.totalBytes - 10 && progressInfo.state == DownloadState.Downloaded) {
-                progressInfo.state = DownloadState.NotDownloaded;
-            }
-            print("CONTAINS ::>>" + DownloadHandle.isStartProgress.ContainsKey(id));
-            progressInfo.bytesDownloaded = (exists ? (file.Length()) : 0) + (DownloadHandle.isStartProgress.ContainsKey(id) ? 1 : 0);
+                //                        App.SetKey("dlength", "id" + id, fileLength);
 
-            //                        App.SetKey("dlength", "id" + id, fileLength);
+                progressInfo.totalBytes = exists ? App.GetKey<int>("dlength", "id" + id, 0) : 0;
+                print("STATE:::::==" + progressInfo.totalBytes + "|" + progressInfo.bytesDownloaded);
 
-            progressInfo.totalBytes = exists ? App.GetKey<int>("dlength", "id" + id, 0) : 0;
-            print("STATE:::::==" + progressInfo.totalBytes + "|" + progressInfo.bytesDownloaded);
+                //  s.Stop();
+                //  print("STIME: " + s.ElapsedMilliseconds);
 
-            //  s.Stop();
-            //  print("STIME: " + s.ElapsedMilliseconds);
+                if (!exists) {
+                    return progressInfo;
+                }
 
-            if (!exists) {
+                if (progressInfo.bytesDownloaded >= progressInfo.totalBytes - 10) {
+                    progressInfo.state = DownloadState.Downloaded;
+                }
+                else if (progressInfo.state == DownloadState.Downloaded) {
+                    progressInfo.state = DownloadState.NotDownloaded;
+                }
+
+                if (progressInfo.bytesDownloaded < 0 || progressInfo.totalBytes < 0) {
+                    progressInfo.state = DownloadState.NotDownloaded;
+                    progressInfo.totalBytes = 0;
+                }
+
                 return progressInfo;
-            }
 
-            if (progressInfo.bytesDownloaded >= progressInfo.totalBytes - 10) {
-                progressInfo.state = DownloadState.Downloaded;
-            }
-            else if (progressInfo.state == DownloadState.Downloaded) {
-                progressInfo.state = DownloadState.NotDownloaded;
-            }
 
-            if (progressInfo.bytesDownloaded < 0 || progressInfo.totalBytes < 0) {
-                progressInfo.state = DownloadState.NotDownloaded;
-                progressInfo.totalBytes = 0;
             }
-
-            return progressInfo;
+            catch (Exception _ex) {
+                error(_ex);
+                return new DownloadProgressInfo();
+            }
         }
 
         public void SetBrightness(double opacity)
@@ -1598,90 +1626,62 @@ namespace CloudStreamForms.Droid
 
         public static async void UpdateChromecastNotification(string title, string body, bool isPaused, string poster)
         {
-            var builder = new Notification.Builder(Application.Context);
-            builder.SetContentTitle(title);
-            builder.SetContentText(body);
-            builder.SetAutoCancel(false);
-
-            builder.SetSmallIcon(Resource.Drawable.biconWhite);//LocalNotificationIconId);
-            builder.SetOngoing(true);
-
-
-            var context = MainActivity.activity.ApplicationContext;
-            if (Build.VERSION.SdkInt >= BuildVersionCodes.O) {
-                var channelId = $"{_packageName}.general";
-                var channel = new NotificationChannel(channelId, "General", NotificationImportance.Default);
-
-                _manager.CreateNotificationChannel(channel);
-
-                builder.SetChannelId(channelId);
-                //https://m.media-amazon.com/images/M/MV5BMTczNTI2ODUwOF5BMl5BanBnXkFtZTcwMTU0NTIzMw@@._V1_UX182_CR0,0,182,268_AL_.jpg
-                var bitmap = await GetImageBitmapFromUrl(poster);//"https://m.media-amazon.com/images/M/MV5BMTczNTI2ODUwOF5BMl5BanBnXkFtZTcwMTU0NTIzMw@@._V1_UX182_CR0,0,182,268_AL_.jpg");
-                if (bitmap != null) {
-                    builder.SetLargeIcon(bitmap);
-                }
-
-                builder.SetStyle(new Notification.MediaStyle().SetMediaSession(mediaSession.SessionToken).SetShowActionsInCompactView(0, 1, 2)); // NICER IMAGE
-
-                List<string> actionNames = new List<string>() { "-30s", isPaused ? "Play" : "Pause", "+30s", "Stop" };
-                List<int> sprites = new List<int>() { Resource.Drawable.netflixGoBack128, isPaused ? Resource.Drawable.netflixPlay128v2 : Resource.Drawable.netflixPause128v2, Resource.Drawable.netflixGoForward128, Resource.Drawable.netflixStop128v2 };
-                List<string> actionIntent = new List<string>() { "goback", isPaused ? "play" : "pause", "goforward", "stop" }; // next
-
-                List<Notification.Action> actions = new List<Notification.Action>();
-
-                for (int i = 0; i < sprites.Count; i++) {
-                    var _resultIntent = new Intent(context, typeof(ChromeCastIntentService));
-                    _resultIntent.PutExtra("data", actionIntent[i]);
-                    var _pending = PendingIntent.GetService(context, 2337 + i,
-                     _resultIntent,
-                    PendingIntentFlags.UpdateCurrent
-                     );
-
-                    actions.Add(new Notification.Action(sprites[i], actionNames[i], _pending));
-                }
-                builder.SetActions(actions.ToArray());
-            }
-            //TrampolineActivity
-
-
-
-
-            /*     var _da = Android.Net.Uri.Parse("cloudstreamforms:tt0371746Name=Iron man=EndAll");
-                 resultIntent.SetData(_da);
-
-                 var stackBuilder = Android.Support.V4.App.TaskStackBuilder.Create(Application.Context);
-                 stackBuilder.AddNextIntent(resultIntent);
-                 var resultPendingIntent =
-                     stackBuilder.GetPendingIntent(0, (int)PendingIntentFlags.UpdateCurrent);
-
-
-                 builder.SetContentIntent(resultPendingIntent);
-
-                 var resultPendingIntent = new PendingIntent() { }*/
-            //  stackBuilder.GetPendingIntent(not.id, (int)PendingIntentFlags.UpdateCurrent);
-            builder.SetContentIntent(GetCurrentPending("openchrome"));
-
-            /*
-           var resultIntent = GetLauncherActivity();
-          // resultIntent.SetFlags(ActivityFlags.NewTask | ActivityFlags.ClearTask);
-
-           //var _da = Android.Net.Uri.Parse("cloudstreamforms:tt0371746Name=Iron man=EndAll");
-           // resultIntent.SetData(_da);
-
-           var stackBuilder = Android.Support.V4.App.TaskStackBuilder.Create(Application.Context);
-          stackBuilder.AddNextIntent(resultIntent);
-           var resultPendingIntent =
-               stackBuilder.GetPendingIntent(0, (int)PendingIntentFlags.UpdateCurrent);
-
-
-           builder.SetContentIntent(resultPendingIntent);
-           */
             try {
-                _manager.Notify(CHROME_CAST_NOTIFICATION_ID, builder.Build());
+                var builder = new Notification.Builder(Application.Context);
+                builder.SetContentTitle(title);
+                builder.SetContentText(body);
+                builder.SetAutoCancel(false);
 
+                builder.SetSmallIcon(Resource.Drawable.biconWhite);//LocalNotificationIconId);
+                builder.SetOngoing(true);
+
+
+                var context = MainActivity.activity.ApplicationContext;
+                if (Build.VERSION.SdkInt >= BuildVersionCodes.O) {
+                    var channelId = $"{_packageName}.general";
+                    var channel = new NotificationChannel(channelId, "General", NotificationImportance.Default);
+
+                    _manager.CreateNotificationChannel(channel);
+
+                    builder.SetChannelId(channelId);
+                    //https://m.media-amazon.com/images/M/MV5BMTczNTI2ODUwOF5BMl5BanBnXkFtZTcwMTU0NTIzMw@@._V1_UX182_CR0,0,182,268_AL_.jpg
+                    var bitmap = await GetImageBitmapFromUrl(poster);//"https://m.media-amazon.com/images/M/MV5BMTczNTI2ODUwOF5BMl5BanBnXkFtZTcwMTU0NTIzMw@@._V1_UX182_CR0,0,182,268_AL_.jpg");
+                    if (bitmap != null) {
+                        builder.SetLargeIcon(bitmap);
+                    }
+
+                    builder.SetStyle(new Notification.MediaStyle().SetMediaSession(mediaSession.SessionToken).SetShowActionsInCompactView(0, 1, 2)); // NICER IMAGE
+
+                    List<string> actionNames = new List<string>() { "-30s", isPaused ? "Play" : "Pause", "+30s", "Stop" };
+                    List<int> sprites = new List<int>() { Resource.Drawable.netflixGoBack128, isPaused ? Resource.Drawable.netflixPlay128v2 : Resource.Drawable.netflixPause128v2, Resource.Drawable.netflixGoForward128, Resource.Drawable.netflixStop128v2 };
+                    List<string> actionIntent = new List<string>() { "goback", isPaused ? "play" : "pause", "goforward", "stop" }; // next
+
+                    List<Notification.Action> actions = new List<Notification.Action>();
+
+                    for (int i = 0; i < sprites.Count; i++) {
+                        var _resultIntent = new Intent(context, typeof(ChromeCastIntentService));
+                        _resultIntent.PutExtra("data", actionIntent[i]);
+                        var _pending = PendingIntent.GetService(context, 2337 + i,
+                         _resultIntent,
+                        PendingIntentFlags.UpdateCurrent
+                         );
+
+                        actions.Add(new Notification.Action(sprites[i], actionNames[i], _pending));
+                    }
+                    builder.SetActions(actions.ToArray());
+                }
+
+                builder.SetContentIntent(GetCurrentPending("openchrome"));
+                try {
+                    _manager.Notify(CHROME_CAST_NOTIFICATION_ID, builder.Build());
+
+                }
+                catch (Exception _ex) {
+                    print("EX NOTTIFY;; " + _ex);
+                }
             }
             catch (Exception _ex) {
-                print("EX NOTTIFY;; " + _ex);
+                error(_ex);
             }
         }
 
@@ -1818,10 +1818,6 @@ namespace CloudStreamForms.Droid
             return Application.Context.PackageManager.GetLaunchIntentForPackage(packageName);
         }
 
-
-
-
-
         private long NotifyTimeInMilliseconds(DateTime notifyTime)
         {
             var utcTime = TimeZoneInfo.ConvertTimeToUtc(notifyTime);
@@ -1831,25 +1827,25 @@ namespace CloudStreamForms.Droid
             return utcAlarmTimeInMillis;
         }
 
-
-
-
-
         static bool hidden = false;
         // static int baseShow = 0;
 
         public void UpdateBackground(int color)
         {
             print("SET NON TRANSPARENT!");
+            try {
+                Window window = MainActivity.activity.Window;
 
-            Window window = MainActivity.activity.Window;
+                int uiOptions = (int)window.DecorView.SystemUiVisibility;
+                uiOptions &= ~(int)SystemUiFlags.LayoutHideNavigation;
+                window.DecorView.SystemUiVisibility = (StatusBarVisibility)uiOptions;
+                // window.NavigationBarDividerColor
+                window.SetNavigationBarColor(Android.Graphics.Color.Rgb(color, color, color));
 
-            int uiOptions = (int)window.DecorView.SystemUiVisibility;
-            uiOptions &= ~(int)SystemUiFlags.LayoutHideNavigation;
-            window.DecorView.SystemUiVisibility = (StatusBarVisibility)uiOptions;
-            // window.NavigationBarDividerColor
-            window.SetNavigationBarColor(Android.Graphics.Color.Rgb(color, color, color));
-
+            }
+            catch (Exception _ex) {
+                error(_ex);
+            }
             /*
             Window window = MainActivity.activity.Window;
             int color = Settings.BlackColor - 5;
@@ -1860,26 +1856,37 @@ namespace CloudStreamForms.Droid
 
         public void UpdateBackground()
         {
-            Window window = MainActivity.activity.Window;
-            print("SET TRANSPARENT!");
+            try {
+                Window window = MainActivity.activity.Window;
+                print("SET TRANSPARENT!");
 
-            int uiOptions = (int)window.DecorView.SystemUiVisibility;
-            uiOptions |= (int)SystemUiFlags.LayoutHideNavigation;
-            window.DecorView.SystemUiVisibility = (StatusBarVisibility)uiOptions;
+                int uiOptions = (int)window.DecorView.SystemUiVisibility;
+                uiOptions |= (int)SystemUiFlags.LayoutHideNavigation;
+                window.DecorView.SystemUiVisibility = (StatusBarVisibility)uiOptions;
 
-            window.SetNavigationBarColor(Android.Graphics.Color.Transparent);
+                window.SetNavigationBarColor(Android.Graphics.Color.Transparent);
+            }
+            catch (Exception _ex) {
+                error(_ex);
+            }
         }
 
         public void UpdateStatusBar()
         {
             // Window window = MainActivity.activity.Window;
-            ToggleFullscreen(!Settings.HasStatusBar);
-            if (Settings.HasStatusBar) {
-                ShowStatusBar();
+            try {
+                ToggleFullscreen(!Settings.HasStatusBar);
+                if (Settings.HasStatusBar) {
+                    ShowStatusBar();
+                }
+                else {
+                    HideStatusBar();
+                }
             }
-            else {
-                HideStatusBar();
+            catch (Exception _ex) {
+                error(_ex);
             }
+
             /*
             if (!Settings.HasStatusBar) {
                 print("REMOVE STATUS BAR::::");
@@ -1892,155 +1899,185 @@ namespace CloudStreamForms.Droid
 
         public void ToggleFullscreen(bool fullscreen)
         {
-            Window window = MainActivity.activity.Window;
+            try {
+                Window window = MainActivity.activity.Window;
 
-            if (fullscreen) {
-                window.AddFlags(WindowManagerFlags.Fullscreen); // REMOVES STATUS BAR
+                if (fullscreen) {
+                    window.AddFlags(WindowManagerFlags.Fullscreen); // REMOVES STATUS BAR
+                }
+                else {
+                    window.ClearFlags(WindowManagerFlags.Fullscreen);
+                }
             }
-            else {
-                window.ClearFlags(WindowManagerFlags.Fullscreen);
+            catch (Exception _ex) {
+                error(_ex);
             }
+
         }
 
         public void ToggleRealFullScreen(bool fullscreen)
         {
-            Window window = MainActivity.activity.Window;
-            print("TOGGLE" + fullscreen);
+            try {
+                Window window = MainActivity.activity.Window;
+                print("TOGGLE" + fullscreen);
 
-            var uiOptions = (int)window.DecorView.SystemUiVisibility;
-            // uiOptions |= (int)SystemUiFlags.LowProfile;
-            // uiOptions |= (int)SystemUiFlags.Fullscreen;
+                var uiOptions = (int)window.DecorView.SystemUiVisibility;
+                // uiOptions |= (int)SystemUiFlags.LowProfile;
+                // uiOptions |= (int)SystemUiFlags.Fullscreen;
 
 
-            //var attrs = window.Attributes;
+                //var attrs = window.Attributes;
 
-            if (fullscreen) {
-                uiOptions |= (int)SystemUiFlags.HideNavigation;
-                //uiOptions |= (int)SystemUiFlags.ImmersiveSticky;
-                uiOptions |= (int)SystemUiFlags.Fullscreen;
-                //uiOptions |= (int)SystemUiFlags.LayoutStable;
-                //uiOptions |= (int)SystemUiFlags.LayoutHideNavigation;
-                //uiOptions |= (int)SystemUiFlags.LayoutFullscreen;
-                //    uiOptions |= (int)SystemUiFlags.LowProfile;
+                if (fullscreen) {
+                    uiOptions |= (int)SystemUiFlags.HideNavigation;
+                    //uiOptions |= (int)SystemUiFlags.ImmersiveSticky;
+                    uiOptions |= (int)SystemUiFlags.Fullscreen;
+                    //uiOptions |= (int)SystemUiFlags.LayoutStable;
+                    //uiOptions |= (int)SystemUiFlags.LayoutHideNavigation;
+                    //uiOptions |= (int)SystemUiFlags.LayoutFullscreen;
+                    //    uiOptions |= (int)SystemUiFlags.LowProfile;
 
-                window.AddFlags(WindowManagerFlags.TurnScreenOn);
-                window.AddFlags(WindowManagerFlags.KeepScreenOn);
-                window.AddFlags(WindowManagerFlags.Fullscreen); // REMOVES STATUS BAR
+                    window.AddFlags(WindowManagerFlags.TurnScreenOn);
+                    window.AddFlags(WindowManagerFlags.KeepScreenOn);
+                    window.AddFlags(WindowManagerFlags.Fullscreen); // REMOVES STATUS BAR
 
-                //   attrs.Flags |= Android.Views.WindowManagerFlags.Fullscreen;
+                    //   attrs.Flags |= Android.Views.WindowManagerFlags.Fullscreen;
 
-                //   window.AddFlags(WindowManagerFlags.Fullscreen);
-                // window.ClearFlags(WindowManagerFlags.ForceNotFullscreen);
+                    //   window.AddFlags(WindowManagerFlags.Fullscreen);
+                    // window.ClearFlags(WindowManagerFlags.ForceNotFullscreen);
+                }
+                else {
+                    uiOptions &= ~(int)SystemUiFlags.HideNavigation;
+                    //     uiOptions &= ~(int)SystemUiFlags.ImmersiveSticky;
+                    uiOptions &= ~(int)SystemUiFlags.Fullscreen;
+                    //   uiOptions &= ~(int)SystemUiFlags.LayoutStable;
+                    //   uiOptions &= ~(int)SystemUiFlags.LayoutHideNavigation;
+                    //  uiOptions &= ~(int)SystemUiFlags.LayoutFullscreen;
+                    //   uiOptions &= ~(int)SystemUiFlags.LowProfile;
+
+                    window.ClearFlags(WindowManagerFlags.TurnScreenOn);
+                    window.ClearFlags(WindowManagerFlags.KeepScreenOn);
+                    window.ClearFlags(WindowManagerFlags.Fullscreen);
+
+                    // window.AddFlags(WindowManagerFlags.ForceNotFullscreen);
+                    // window.ClearFlags(WindowManagerFlags.Fullscreen);
+
+                    //  attrs.Flags &= ~Android.Views.WindowManagerFlags.Fullscreen;
+                }
+
+                //   window.Attributes = attrs;
+
+                window.DecorView.SystemUiVisibility = (StatusBarVisibility)uiOptions;
+
+                if (!fullscreen) {
+                    UpdateStatusBar();
+                }
             }
-            else {
-                uiOptions &= ~(int)SystemUiFlags.HideNavigation;
-                //     uiOptions &= ~(int)SystemUiFlags.ImmersiveSticky;
-                uiOptions &= ~(int)SystemUiFlags.Fullscreen;
-                //   uiOptions &= ~(int)SystemUiFlags.LayoutStable;
-                //   uiOptions &= ~(int)SystemUiFlags.LayoutHideNavigation;
-                //  uiOptions &= ~(int)SystemUiFlags.LayoutFullscreen;
-                //   uiOptions &= ~(int)SystemUiFlags.LowProfile;
-
-                window.ClearFlags(WindowManagerFlags.TurnScreenOn);
-                window.ClearFlags(WindowManagerFlags.KeepScreenOn);
-                window.ClearFlags(WindowManagerFlags.Fullscreen);
-
-                // window.AddFlags(WindowManagerFlags.ForceNotFullscreen);
-                // window.ClearFlags(WindowManagerFlags.Fullscreen);
-
-                //  attrs.Flags &= ~Android.Views.WindowManagerFlags.Fullscreen;
+            catch (Exception _ex) {
+                error(_ex);
             }
-
-            //   window.Attributes = attrs;
-
-            window.DecorView.SystemUiVisibility = (StatusBarVisibility)uiOptions;
-
-            if (!fullscreen) {
-                UpdateStatusBar();
-            }
-
         }
 
         public void LandscapeOrientation()
         {
-            MainActivity.activity.RequestedOrientation = ScreenOrientation.Landscape;
+            try {
+                MainActivity.activity.RequestedOrientation = ScreenOrientation.Landscape;
+            }
+            catch (Exception _ex) {
+                error(_ex);
+            }
         }
 
         public void NormalOrientation()
         {
-            MainActivity.activity.RequestedOrientation = ScreenOrientation.Unspecified;
+            try {
+                MainActivity.activity.RequestedOrientation = ScreenOrientation.Unspecified;
+            }
+            catch (Exception _ex) {
+                error(_ex);
+            }
         }
 
         public void ShowStatusBar()
         {
             //  if (!hidden) return;
+            try {
+                Window window = MainActivity.activity.Window;
+                // window.ClearFlags(WindowManagerFlags.TurnScreenOn);
+                //window.ClearFlags(WindowManagerFlags.KeepScreenOn);
+                //ToggleFullscreen(!Settings.HasStatusBar);
 
-            Window window = MainActivity.activity.Window;
-            // window.ClearFlags(WindowManagerFlags.TurnScreenOn);
-            //window.ClearFlags(WindowManagerFlags.KeepScreenOn);
-            //ToggleFullscreen(!Settings.HasStatusBar);
+                //if (Settings.HasStatusBar) {
+                window.ClearFlags(WindowManagerFlags.Fullscreen);
+                //}
 
-            //if (Settings.HasStatusBar) {
-            window.ClearFlags(WindowManagerFlags.Fullscreen);
-            //}
+                int uiOptions = (int)window.DecorView.SystemUiVisibility;
+                //  baseShow = uiOptions;
 
-            int uiOptions = (int)window.DecorView.SystemUiVisibility;
-            //  baseShow = uiOptions;
+                //  uiOptions &= ~(int)SystemUiFlags.LowProfile;
+                uiOptions &= ~(int)SystemUiFlags.Fullscreen;
+                //   uiOptions &= ~(int)SystemUiFlags.HideNavigation;
+                uiOptions &= ~(int)SystemUiFlags.ImmersiveSticky;
 
-            //  uiOptions &= ~(int)SystemUiFlags.LowProfile;
-            uiOptions &= ~(int)SystemUiFlags.Fullscreen;
-            //   uiOptions &= ~(int)SystemUiFlags.HideNavigation;
-            uiOptions &= ~(int)SystemUiFlags.ImmersiveSticky;
-
-            window.DecorView.SystemUiVisibility = (StatusBarVisibility)uiOptions;
+                window.DecorView.SystemUiVisibility = (StatusBarVisibility)uiOptions;
+            }
+            catch (Exception _ex) {
+                error(_ex);
+            }
         }
 
         public void HideStatusBar()
         {
+            try {
+                //if (hidden) return;
+                hidden = true;
 
-            //if (hidden) return;
-            hidden = true;
+                Window window = MainActivity.activity.Window;
+                //  window.AddFlags(WindowManagerFlags.TurnScreenOn);
+                // window.AddFlags(WindowManagerFlags.KeepScreenOn);
 
-            Window window = MainActivity.activity.Window;
-            //  window.AddFlags(WindowManagerFlags.TurnScreenOn);
-            // window.AddFlags(WindowManagerFlags.KeepScreenOn);
+                if (Settings.HasStatusBar) {
+                    window.AddFlags(WindowManagerFlags.Fullscreen);
+                }
 
-            if (Settings.HasStatusBar) {
+                int uiOptions = (int)window.DecorView.SystemUiVisibility;
+                //  baseShow = uiOptions;
+
+                // uiOptions |= (int)SystemUiFlags.LowProfile;
+                uiOptions |= (int)SystemUiFlags.Fullscreen;
+                // uiOptions |= (int)SystemUiFlags.HideNavigation;
+                uiOptions |= (int)SystemUiFlags.ImmersiveSticky;
+
+                window.DecorView.SystemUiVisibility = (StatusBarVisibility)uiOptions;
+                /*
+                var activity = (Activity)Forms.Context;
+                var window = activity.Window;
+                var attrs = window.Attributes;
+                attrs.Flags |= Android.Views.WindowManagerFlags.Fullscreen;
+                window.Attributes = attrs;
+
+                window.ClearFlags(WindowManagerFlags.ForceNotFullscreen);
                 window.AddFlags(WindowManagerFlags.Fullscreen);
+
+                var decorView = window.DecorView;
+
+                var uiOptions =
+                    (int)Android.Views.SystemUiFlags.LayoutStable |
+                    (int)Android.Views.SystemUiFlags.LayoutHideNavigation |
+                    (int)Android.Views.SystemUiFlags.LayoutFullscreen |
+                    (int)Android.Views.SystemUiFlags.HideNavigation |
+                    (int)Android.Views.SystemUiFlags.Fullscreen |
+                    (int)Android.Views.SystemUiFlags.Immersive;
+
+                decorView.SystemUiVisibility = (Android.Views.StatusBarVisibility)uiOptions;
+
+                window.DecorView.SystemUiVisibility = StatusBarVisibility.Hidden;*/
+
+
             }
-
-            int uiOptions = (int)window.DecorView.SystemUiVisibility;
-            //  baseShow = uiOptions;
-
-            // uiOptions |= (int)SystemUiFlags.LowProfile;
-            uiOptions |= (int)SystemUiFlags.Fullscreen;
-            // uiOptions |= (int)SystemUiFlags.HideNavigation;
-            uiOptions |= (int)SystemUiFlags.ImmersiveSticky;
-
-            window.DecorView.SystemUiVisibility = (StatusBarVisibility)uiOptions;
-            /*
-            var activity = (Activity)Forms.Context;
-            var window = activity.Window;
-            var attrs = window.Attributes;
-            attrs.Flags |= Android.Views.WindowManagerFlags.Fullscreen;
-            window.Attributes = attrs;
-
-            window.ClearFlags(WindowManagerFlags.ForceNotFullscreen);
-            window.AddFlags(WindowManagerFlags.Fullscreen);
-
-            var decorView = window.DecorView;
-
-            var uiOptions =
-                (int)Android.Views.SystemUiFlags.LayoutStable |
-                (int)Android.Views.SystemUiFlags.LayoutHideNavigation |
-                (int)Android.Views.SystemUiFlags.LayoutFullscreen |
-                (int)Android.Views.SystemUiFlags.HideNavigation |
-                (int)Android.Views.SystemUiFlags.Fullscreen |
-                (int)Android.Views.SystemUiFlags.Immersive;
-
-            decorView.SystemUiVisibility = (Android.Views.StatusBarVisibility)uiOptions;
-
-            window.DecorView.SystemUiVisibility = StatusBarVisibility.Hidden;*/
+            catch (Exception _ex) {
+                error(_ex);
+            }
         }
         public StorageInfo GetStorageInformation(string path = "")
         {
@@ -2084,9 +2121,10 @@ namespace CloudStreamForms.Droid
                 storageInfo.TotalSpace = totalSpaceBytes;
                 storageInfo.AvailableSpace = availableSpaceBytes;
                 storageInfo.FreeSpace = freeSpaceBytes;
-                return storageInfo; 
+                return storageInfo;
             }
             catch (Exception _ex) {
+                error(_ex);
                 return new StorageInfo() {
                     AvailableSpace = 0,
                     FreeSpace = 0,
@@ -2097,7 +2135,12 @@ namespace CloudStreamForms.Droid
 
         public static void OpenPathAsVideo(string path, string name, string subtitleLoc)
         {
-            OpenPathsAsVideo(new List<string>() { path }, new List<string>() { name }, subtitleLoc);
+            try {
+                OpenPathsAsVideo(new List<string>() { path }, new List<string>() { name }, subtitleLoc);
+            }
+            catch (Exception _ex) {
+                error(_ex);
+            }
         }
 
         public bool DeleteFile(string path)
@@ -2110,8 +2153,6 @@ namespace CloudStreamForms.Droid
                 }
                 return true;
             }
-
-
             catch (Exception) {
                 return false;
             }
@@ -2132,7 +2173,7 @@ namespace CloudStreamForms.Droid
         internal static readonly string COUNT_KEY = "count";
         public void Test()
         {
-
+            return;
             Show("Test", "test");
             print("HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH");
 
@@ -2141,77 +2182,87 @@ namespace CloudStreamForms.Droid
         static Java.Lang.Thread downloadThread;
         public static void DownloadFromLink(string url, string title, string toast = "", string ending = "", bool openFile = false, string descripts = "")
         {
-            print("DOWNLOADING: " + url);
+            try {
+                print("DOWNLOADING: " + url);
 
-            DownloadManager.Request request = new DownloadManager.Request(Android.Net.Uri.Parse(url));
-            request.SetTitle(title);
-            request.SetDescription(descripts);
-            string mainPath = Android.OS.Environment.DirectoryDownloads;
-            string subPath = title + ending;
-            string fullPath = mainPath + "/" + subPath;
+                DownloadManager.Request request = new DownloadManager.Request(Android.Net.Uri.Parse(url));
+                request.SetTitle(title);
+                request.SetDescription(descripts);
+                string mainPath = Android.OS.Environment.DirectoryDownloads;
+                string subPath = title + ending;
+                string fullPath = mainPath + "/" + subPath;
 
-            print("PATH: " + fullPath);
+                print("PATH: " + fullPath);
 
-            request.SetDestinationInExternalPublicDir(mainPath, subPath);
-            request.SetVisibleInDownloadsUi(true);
-            request.SetNotificationVisibility(DownloadVisibility.VisibleNotifyCompleted);
+                request.SetDestinationInExternalPublicDir(mainPath, subPath);
+                request.SetVisibleInDownloadsUi(true);
+                request.SetNotificationVisibility(DownloadVisibility.VisibleNotifyCompleted);
 
-            DownloadManager manager;
-            manager = (DownloadManager)MainActivity.activity.GetSystemService(Context.DownloadService);
+                DownloadManager manager;
+                manager = (DownloadManager)MainActivity.activity.GetSystemService(Context.DownloadService);
 
-            long downloadId = manager.Enqueue(request);
-
-
+                long downloadId = manager.Enqueue(request);
 
 
-            // AUTO OPENS FILE WHEN DONE DOWNLOADING
-            if (openFile || toast != "") {
-                downloadThread = new Java.Lang.Thread(() => {
-                    try {
-                        bool exists = false;
-                        while (!exists) {
-                            try {
-                                string p = manager.GetUriForDownloadedFile(downloadId).Path;
-                                exists = true;
+
+
+                // AUTO OPENS FILE WHEN DONE DOWNLOADING
+                if (openFile || toast != "") {
+                    downloadThread = new Java.Lang.Thread(() => {
+                        try {
+                            bool exists = false;
+                            while (!exists) {
+                                try {
+                                    string p = manager.GetUriForDownloadedFile(downloadId).Path;
+                                    exists = true;
+                                }
+                                catch (System.Exception) {
+                                    Java.Lang.Thread.Sleep(100);
+                                }
+
                             }
-                            catch (System.Exception) {
-                                Java.Lang.Thread.Sleep(100);
+                            Java.Lang.Thread.Sleep(1000);
+                            if (toast != "") {
+                                App.ShowToast(toast);
                             }
+                            if (openFile) {
 
-                        }
-                        Java.Lang.Thread.Sleep(1000);
-                        if (toast != "") {
-                            App.ShowToast(toast);
-                        }
-                        if (openFile) {
+                                print("OPEN FILE");
+                                //            
+                                string truePath = ("file://" + Android.OS.Environment.ExternalStorageDirectory + "/" + fullPath);
 
-                            print("OPEN FILE");
-                            //            
-                            string truePath = ("file://" + Android.OS.Environment.ExternalStorageDirectory + "/" + fullPath);
-
-                            OpenFile(truePath);
+                                OpenFile(truePath);
+                            }
                         }
-                    }
-                    finally {
-                        downloadThread.Join();
-                    }
-                });
-                downloadThread.Start();
+                        finally {
+                            downloadThread.Join();
+                        }
+                    });
+                    downloadThread.Start();
+                }
+            }
+            catch (Exception _ex) {
+                error(_ex);
             }
         }
         public static void OpenFile(string link)
         {
             //  Android.Net.Uri uri = Android.Net.Uri.Parse(link);//link);
-            Java.IO.File file = new Java.IO.File(Java.Net.URI.Create(link));
-            print("Path:" + file.Path);
+            try {
+                Java.IO.File file = new Java.IO.File(Java.Net.URI.Create(link));
+                print("Path:" + file.Path);
 
-            Android.Net.Uri photoURI = FileProvider.GetUriForFile(MainActivity.activity.ApplicationContext, (MainActivity.activity.ApplicationContext.PackageName + ".provider.FileProvider"), file);
-            Intent promptInstall = new Intent(Intent.ActionView).SetDataAndType(photoURI, "application/vnd.android.package-archive"); //vnd.android.package-archive
-            promptInstall.AddFlags(ActivityFlags.NewTask);
-            promptInstall.AddFlags(ActivityFlags.GrantReadUriPermission);
-            promptInstall.AddFlags(ActivityFlags.NoHistory);
-            promptInstall.AddFlags(ActivityFlags.ClearWhenTaskReset | ActivityFlags.NewTask);
-            Android.App.Application.Context.StartActivity(promptInstall);
+                Android.Net.Uri photoURI = FileProvider.GetUriForFile(MainActivity.activity.ApplicationContext, (MainActivity.activity.ApplicationContext.PackageName + ".provider.FileProvider"), file);
+                Intent promptInstall = new Intent(Intent.ActionView).SetDataAndType(photoURI, "application/vnd.android.package-archive"); //vnd.android.package-archive
+                promptInstall.AddFlags(ActivityFlags.NewTask);
+                promptInstall.AddFlags(ActivityFlags.GrantReadUriPermission);
+                promptInstall.AddFlags(ActivityFlags.NoHistory);
+                promptInstall.AddFlags(ActivityFlags.ClearWhenTaskReset | ActivityFlags.NewTask);
+                Android.App.Application.Context.StartActivity(promptInstall);
+            }
+            catch (Exception _ex) {
+                error(_ex);
+            }
             /*
             Intent promptInstall = new Intent(Intent.ActionView).SetData(uri);//.SetDataAndType(uri, "application/vnd.android.package-archive");
             //   promptInstall.AddFlags(ActivityFlags.NewTask);
@@ -2255,43 +2306,48 @@ namespace CloudStreamForms.Droid
 
             }
             catch (Exception _ex) {
-                print("MAIN EX IN WriteFile: " + _ex);
-                throw;
+                error("MAIN EX IN WriteFile: " + _ex);
+                return null;
             }
         }
 
 
         public static async Task OpenPathsAsVideo(List<string> path, List<string> name, string subtitleLoc)
         {
-            string absolutePath = Android.OS.Environment.ExternalStorageDirectory + "/" + Android.OS.Environment.DirectoryDownloads;
+            try {
+                string absolutePath = Android.OS.Environment.ExternalStorageDirectory + "/" + Android.OS.Environment.DirectoryDownloads;
 
-            if (path.Count == 1 && path[0].StartsWith(absolutePath)) { // DOWNLOADED FILES
-                Device.BeginInvokeOnMainThread(() => {
-                    // OpenPathAsVideo(path.First(), name.First(), "");
-                    OpenVlcIntent(path[0], absolutePath + "/" + baseSubtitleName, name[0]);
-                });
+                if (path.Count == 1 && path[0].StartsWith(absolutePath)) { // DOWNLOADED FILES
+                    Device.BeginInvokeOnMainThread(() => {
+                        // OpenPathAsVideo(path.First(), name.First(), "");
+                        OpenVlcIntent(path[0], absolutePath + "/" + baseSubtitleName, name[0]);
+                    });
+                }
+                else {
+                    CloudStreamCore.print("AVS: " + absolutePath);
+
+                    foreach (var p in path) {
+                        print("PATHTO: " + p);
+                    }
+
+                    bool subtitlesEnabled = subtitleLoc != "";
+                    string writeData = CloudStreamForms.App.ConvertPathAndNameToM3U8(path, name, subtitlesEnabled, "content://" + absolutePath + "/");
+                    Java.IO.File subFile = null;
+                    WriteFile(CloudStreamForms.App.baseM3u8Name, absolutePath, writeData);
+                    if (subtitlesEnabled) {
+                        subFile = WriteFile(CloudStreamForms.App.baseSubtitleName, absolutePath, subtitleLoc);
+                    }
+
+                    // await Task.Delay(5000);
+
+                    Device.BeginInvokeOnMainThread(() => {
+                        // OpenPathAsVideo(path.First(), name.First(), "");
+                        OpenVlcIntent(absolutePath + "/" + CloudStreamForms.App.baseM3u8Name, absolutePath + "/" + App.baseSubtitleName);
+                    });
+                }
             }
-            else {
-                CloudStreamCore.print("AVS: " + absolutePath);
-
-                foreach (var p in path) {
-                    print("PATHTO: " + p);
-                }
-
-                bool subtitlesEnabled = subtitleLoc != "";
-                string writeData = CloudStreamForms.App.ConvertPathAndNameToM3U8(path, name, subtitlesEnabled, "content://" + absolutePath + "/");
-                Java.IO.File subFile = null;
-                WriteFile(CloudStreamForms.App.baseM3u8Name, absolutePath, writeData);
-                if (subtitlesEnabled) {
-                    subFile = WriteFile(CloudStreamForms.App.baseSubtitleName, absolutePath, subtitleLoc);
-                }
-
-                // await Task.Delay(5000);
-
-                Device.BeginInvokeOnMainThread(() => {
-                    // OpenPathAsVideo(path.First(), name.First(), "");
-                    OpenVlcIntent(absolutePath + "/" + CloudStreamForms.App.baseM3u8Name, absolutePath + "/" + App.baseSubtitleName);
-                });
+            catch (Exception _ex) {
+                error(_ex);
             }
         }
 
@@ -2312,8 +2368,8 @@ namespace CloudStreamForms.Droid
 
         public static bool IsAppInstalled(string packageName)
         {
-            PackageManager pm = activity.PackageManager;
             try {
+                PackageManager pm = activity.PackageManager;
                 pm.GetPackageInfo(packageName, PackageInfoFlags.Activities);
                 return true;
             }
@@ -2416,8 +2472,7 @@ namespace CloudStreamForms.Droid
 
             }
             catch (Exception _ex) {
-                print("MAIN EX IN REQUEST VLC: " + _ex);
-                throw;
+                error("MAIN EX IN REQUEST VLC: " + _ex);
             }
         }
 
@@ -2425,46 +2480,50 @@ namespace CloudStreamForms.Droid
         public static void OpenVlcIntent(string path, string subfile = "", string overrideName = null) //Java.IO.File subFile)
         {
             //   OpenStore("org.videolan.vlc");
+            try {
+                Android.Net.Uri uri = Android.Net.Uri.Parse(path);
 
-            Android.Net.Uri uri = Android.Net.Uri.Parse(path);
+                Intent intent = new Intent(Intent.ActionView); //
+                intent.SetPackage("org.videolan.vlc");
 
-            Intent intent = new Intent(Intent.ActionView); //
-            intent.SetPackage("org.videolan.vlc");
+                intent.SetDataAndTypeAndNormalize(uri, "video/*");
+                //intent.SetPackage("org.videolan.vlc");
+                // Main.print("Da_ " + Android.Net.Uri.Parse(subfile));
 
-            intent.SetDataAndTypeAndNormalize(uri, "video/*");
-            //intent.SetPackage("org.videolan.vlc");
-            // Main.print("Da_ " + Android.Net.Uri.Parse(subfile));
+                if (subfile != "") {
+                    var sfile = Android.Net.Uri.FromFile(new Java.IO.File(subfile));  //"content://" + Android.Net.Uri.Parse(subfile);
+                    print("SUBFILE::::" + subfile + "|" + sfile.Path);
+                    //  print(sfile.Path);
+                    intent.PutExtra("subtitles_location", subfile);//"/sdcard/Download/subtitles.srt");//sfile);//Android.Net.Uri.FromFile(subFile));
+                                                                   // intent.PutExtra("subtitles_location", );//Android.Net.Uri.FromFile(subFile));
+                }
 
-            if (subfile != "") {
-                var sfile = Android.Net.Uri.FromFile(new Java.IO.File(subfile));  //"content://" + Android.Net.Uri.Parse(subfile);
-                print("SUBFILE::::" + subfile + "|" + sfile.Path);
-                //  print(sfile.Path);
-                intent.PutExtra("subtitles_location", subfile);//"/sdcard/Download/subtitles.srt");//sfile);//Android.Net.Uri.FromFile(subFile));
-                                                               // intent.PutExtra("subtitles_location", );//Android.Net.Uri.FromFile(subFile));
+
+
+                intent.AddFlags(ActivityFlags.GrantReadUriPermission);
+                intent.AddFlags(ActivityFlags.GrantWriteUriPermission);
+                intent.AddFlags(ActivityFlags.GrantPrefixUriPermission);
+                intent.AddFlags(ActivityFlags.GrantPersistableUriPermission);
+
+                intent.AddFlags(ActivityFlags.NewTask);
+
+                /*
+                intent.PutExtra("position", 50000);//"/sdcard/Download/subtitles.srt");//sfile);//Android.Net.Uri.FromFile(subFile));
+                intent.PutExtra("from_start", false);
+                intent.PutExtra("title", "Hello world");*/
+
+                // Android.App.Application.Context.ApplicationContext.start
+                //var comp = Android.App.Application.Context.StartService(intent);
+
+                // Android.App.Application.Context.StartActivity(intent);
+                intent.SetComponent(new ComponentName("org.videolan.vlc", "org.videolan.vlc.gui.video.VideoPlayerActivity"));
+                var _activity = Forms.Context as Activity;
+
+                _activity.StartActivityForResult(intent, 42);
             }
-
-
-
-            intent.AddFlags(ActivityFlags.GrantReadUriPermission);
-            intent.AddFlags(ActivityFlags.GrantWriteUriPermission);
-            intent.AddFlags(ActivityFlags.GrantPrefixUriPermission);
-            intent.AddFlags(ActivityFlags.GrantPersistableUriPermission);
-
-            intent.AddFlags(ActivityFlags.NewTask);
-
-            /*
-            intent.PutExtra("position", 50000);//"/sdcard/Download/subtitles.srt");//sfile);//Android.Net.Uri.FromFile(subFile));
-            intent.PutExtra("from_start", false);
-            intent.PutExtra("title", "Hello world");*/
-
-            // Android.App.Application.Context.ApplicationContext.start
-            //var comp = Android.App.Application.Context.StartService(intent);
-
-            // Android.App.Application.Context.StartActivity(intent);
-            intent.SetComponent(new ComponentName("org.videolan.vlc", "org.videolan.vlc.gui.video.VideoPlayerActivity"));
-            var _activity = Forms.Context as Activity;
-
-            _activity.StartActivityForResult(intent, 42);
+            catch (Exception _ex) {
+                error(_ex);
+            }
         }
 
         public void PlayVlc(string url, string name, string subtitleLoc)
@@ -2491,30 +2550,34 @@ namespace CloudStreamForms.Droid
 
         public void Awake()
         {
-            System.Net.ServicePointManager.DefaultConnectionLimit = 999;
+            try {
+                System.Net.ServicePointManager.DefaultConnectionLimit = 999;
 
-            App.platformDep = this;
-            myAudioFocusListener = new MyAudioFocusListener();
-            myAudioFocusListener.FocusChanged += ((sender, b) => {
-                OnAudioFocusChanged?.Invoke(this, b);
-                if (b) {
-                    // play stuff
-                }
-                else {
-                    // stop playing stuff
-                }
-            });
-            var playbackAttributes = new AudioAttributes.Builder()
-                  .SetUsage(AudioUsageKind.Media)
-                  .SetContentType(AudioContentType.Movie)
-                  .Build();
+                App.platformDep = this;
+                myAudioFocusListener = new MyAudioFocusListener();
+                myAudioFocusListener.FocusChanged += ((sender, b) => {
+                    OnAudioFocusChanged?.Invoke(this, b);
+                    if (b) {
+                        // play stuff
+                    }
+                    else {
+                        // stop playing stuff
+                    }
+                });
+                var playbackAttributes = new AudioAttributes.Builder()
+                      .SetUsage(AudioUsageKind.Media)
+                      .SetContentType(AudioContentType.Movie)
+                      .Build();
 
-            CurrentAudioFocusRequest = new AudioFocusRequestClass.Builder(AudioFocus.Gain)
-                .SetAudioAttributes(playbackAttributes)
-                .SetAcceptsDelayedFocusGain(true)
-                .SetOnAudioFocusChangeListener(myAudioFocusListener, handler)
-                .Build();
-
+                CurrentAudioFocusRequest = new AudioFocusRequestClass.Builder(AudioFocus.Gain)
+                    .SetAudioAttributes(playbackAttributes)
+                    .SetAcceptsDelayedFocusGain(true)
+                    .SetOnAudioFocusChangeListener(myAudioFocusListener, handler)
+                    .Build();
+            }
+            catch (Exception _ex) {
+                error(_ex);
+            }
 
             // long delay = getDelay();
 
@@ -2568,25 +2631,40 @@ namespace CloudStreamForms.Droid
         {
             // AudioManager.IOnAudioFocusChangeListener afChangeListener;
             // AudioFocusRequestClass.Builder audioBuilder = new AudioFocusRequestClass.Builder();
-            AudioFocusRequest audio = AudioManager.RequestAudioFocus(CurrentAudioFocusRequest);
-            return audio == AudioFocusRequest.Granted;
+            try {
+                AudioFocusRequest audio = AudioManager.RequestAudioFocus(CurrentAudioFocusRequest);
+                return audio == AudioFocusRequest.Granted;
+            }
+            catch (Exception) {
+                return false;
+            }
         }
 
 
         public void ReleaseAudioFocus()
         {
-            AudioFocusRequest audio = AudioManager.AbandonAudioFocusRequest(CurrentAudioFocusRequest);
+            try {
+                AudioFocusRequest audio = AudioManager.AbandonAudioFocusRequest(CurrentAudioFocusRequest);
+            }
+            catch (Exception _ex) {
+                error(_ex);
+            }
         }
 
 
         public void ShowToast(string message, double duration)
         {
             Device.BeginInvokeOnMainThread(() => {
-                ToastLength toastLength = ToastLength.Short;
-                if (duration >= 3) {
-                    toastLength = ToastLength.Long;
+                try { 
+                    ToastLength toastLength = ToastLength.Short;
+                    if (duration >= 3) {
+                        toastLength = ToastLength.Long;
+                    }
+                    Toast.MakeText(Android.App.Application.Context, message, toastLength).Show();
                 }
-                Toast.MakeText(Android.App.Application.Context, message, toastLength).Show();
+                catch (Exception _ex) {
+                    error(_ex);
+                }
             });
         }
 
@@ -2594,15 +2672,27 @@ namespace CloudStreamForms.Droid
 
         public string DownloadFile(string file, string fileName, bool mainPath, string extraPath)
         {
-            return WriteFile(CensorFilename(fileName), GetPath(mainPath, extraPath), file).Path;
+            try {
+                return WriteFile(CensorFilename(fileName), GetPath(mainPath, extraPath), file).Path;
+            }
+            catch (Exception _ex) {
+                error(_ex);
+                return "";
+            }
         }
 
         public string DownloadHandleIntent(int id, List<string> mirrorNames, List<string> mirrorUrls, string fileName, string titleName, bool mainPath, string extraPath, bool showNotification = true, bool showNotificationWhenDone = true, bool openWhenDone = false, string poster = "", string beforeTxt = "")//, int mirror, string title, string path, string poster, string fileName, string beforeTxt, bool openWhenDone, bool showNotificaion, bool showDoneNotificaion, bool showDoneAsToast, bool resumeIntent)
         {
-            string path = GetPath(mainPath, extraPath);
-            string full = path + "/" + CensorFilename(fileName);
-            DownloadHandle.HandleIntent(id, mirrorNames, mirrorUrls, 0, titleName, path, poster, fileName, beforeTxt, openWhenDone, showNotification, showNotification, false, false);
-            return full;
+            try {
+                string path = GetPath(mainPath, extraPath);
+                string full = path + "/" + CensorFilename(fileName);
+                DownloadHandle.HandleIntent(id, mirrorNames, mirrorUrls, 0, titleName, path, poster, fileName, beforeTxt, openWhenDone, showNotification, showNotification, false, false);
+                return full;
+            }
+            catch (Exception _ex) {
+                error(_ex);
+                return "";
+            }
         }
 
         public string DownloadUrl(string url, string fileName, bool mainPath, string extraPath, string toast = "", bool isNotification = false, string body = "")
@@ -2656,9 +2746,6 @@ namespace CloudStreamForms.Droid
             return GetPath(mainPath, extraPath) + "/" + CensorFilename(fileName);
         }
 
-
-
-
         public string GetBuildNumber()
         {
             var context = Android.App.Application.Context;
@@ -2669,33 +2756,212 @@ namespace CloudStreamForms.Droid
 
         public void DownloadUpdate(string update)
         {
-            string downloadLink = "https://github.com/LagradOst/CloudStream-2/releases/download/" + update + "/com.CloudStreamForms.CloudStreamForms.apk";
-            App.ShowToast("Download started!");
-            //  DownloadUrl(downloadLink, "com.CloudStreamForms.CloudStreamForms.apk", true, "", "Download complete!");
-            DownloadFromLink(downloadLink, "com.CloudStreamForms.CloudStreamForms.apk", "Download complete!", "", false, "");
-
+            try {
+                string downloadLink = "https://github.com/LagradOst/CloudStream-2/releases/download/" + update + "/com.CloudStreamForms.CloudStreamForms.apk";
+                App.ShowToast("Download started!");
+                //  DownloadUrl(downloadLink, "com.CloudStreamForms.CloudStreamForms.apk", true, "", "Download complete!");
+                DownloadFromLink(downloadLink, "com.CloudStreamForms.CloudStreamForms.apk", "Download complete!", "", false, "");
+            }
+            catch (Exception _ex) {
+                error(_ex);
+            }
         }
 
         public string GetDownloadPath(string path, string extraFolder)
         {
-            return GetPath(true, extraFolder + "/" + CensorFilename(path, false));
+            try {
+                return GetPath(true, extraFolder + "/" + CensorFilename(path, false));
+            }
+            catch (Exception _ex) {
+                error(_ex);
+                return "";
+            }
         }
 
         public string GetExternalStoragePath()
         {
-            return Android.OS.Environment.ExternalStorageDirectory.Path;
+            try {
+
+                return Android.OS.Environment.ExternalStorageDirectory.Path;
+            }
+            catch (Exception _ex) {
+                return "";
+                error(_ex);
+            }
         }
 
         public int ConvertDPtoPx(int dp)
         {
-            return (int)(dp * MainActivity.activity.ApplicationContext.Resources.DisplayMetrics.Density);
+            try {
+                return (int)(dp * MainActivity.activity.ApplicationContext.Resources.DisplayMetrics.Density);
+
+            }
+            catch (Exception _ex) {
+                error(_ex);
+                return 1;
+            }
         }
 
         public void CancelNot(int id)
         {
-            CancelFutureNotification(id);
+            try {
+                CancelFutureNotification(id);
+            }
+            catch (Exception _ex) {
+                error(_ex);
+            }
         }
 
 
+    }
+
+    public class NullPlatfrom : App.IPlatformDep
+    {
+        public EventHandler<bool> OnAudioFocusChanged { get; set; }
+
+        public void CancelNot(int id)
+        {
+        }
+
+        public int ConvertDPtoPx(int dp)
+        {
+            return 1;
+        }
+
+        public bool DeleteFile(string path)
+        {
+            return true;
+        }
+
+        public string DownloadFile(string file, string fileName, bool mainPath, string extraPath)
+        {
+            return "";
+        }
+
+        public string DownloadHandleIntent(int id, List<string> mirrorNames, List<string> mirrorUrls, string fileName, string titleName, bool mainPath, string extraPath, bool showNotification = true, bool showNotificationWhenDone = true, bool openWhenDone = false, string poster = "", string beforeTxt = "")
+        {
+            return "";
+
+        }
+
+        public void DownloadUpdate(string update)
+        {
+        }
+
+        public string DownloadUrl(string url, string fileName, bool mainPath, string extraPath, string toast = "", bool isNotification = false, string body = "")
+        {
+            return "";
+        }
+
+        public bool GainAudioFocus()
+        {
+            return true;
+        }
+
+        public BluetoothDeviceID[] GetBluetoothDevices()
+        {
+            return null;
+        }
+
+        public double GetBrightness()
+        {
+            return 1;
+        }
+
+        public string GetDownloadPath(string path, string extraFolder)
+        {
+            return "";
+        }
+
+        public DownloadProgressInfo GetDownloadProgressInfo(int id, string fileUrl)
+        {
+            return null;
+        }
+
+        public string GetExternalStoragePath()
+        {
+            return "";
+        }
+
+        public StorageInfo GetStorageInformation(string path = "")
+        {
+            return null;
+        }
+
+        public void HideStatusBar()
+        {
+        }
+
+        public void LandscapeOrientation()
+        {
+        }
+
+        public void NormalOrientation()
+        {
+        }
+
+        public void PlayVlc(string url, string name, string subtitleLoc)
+        {
+        }
+
+        public void PlayVlc(List<string> url, List<string> name, string subtitleLoc)
+        {
+        }
+
+        public void ReleaseAudioFocus()
+        {
+        }
+
+        public void RequestVlc(List<string> urls, List<string> names, string episodeName, string episodeId, long startId = -2, string subtitleFull = "")
+        {
+        }
+
+        public void SearchBluetoothDevices()
+        {
+        }
+
+        public void SetBrightness(double opacity)
+        {
+        }
+
+        public void ShowNotIntent(string title, string body, int id, string titleId, string titleName, DateTime? time = null, string bigIconUrl = "")
+        {
+        }
+
+        public void ShowStatusBar()
+        {
+        }
+
+        public void ShowToast(string message, double duration)
+        {
+        }
+
+        public void Test()
+        {
+        }
+
+        public void ToggleFullscreen(bool fullscreen)
+        {
+        }
+
+        public void ToggleRealFullScreen(bool fullscreen)
+        {
+        }
+
+        public void UpdateBackground(int color)
+        {
+        }
+
+        public void UpdateBackground()
+        {
+        }
+
+        public void UpdateDownload(int id, int state)
+        {
+        }
+
+        public void UpdateStatusBar()
+        {
+        }
     }
 }

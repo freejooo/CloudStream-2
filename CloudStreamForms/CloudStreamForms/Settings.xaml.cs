@@ -15,6 +15,8 @@ namespace CloudStreamForms
     {
         public const bool SUBTITLES_INVIDEO_ENABELD = true;
 
+        public const bool IS_TEST_BUILD = false;
+
         LabelList ColorPicker;
         LabelList SubLangPicker;
         LabelList SubStylePicker;
