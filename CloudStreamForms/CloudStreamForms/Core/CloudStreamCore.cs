@@ -8567,9 +8567,10 @@ namespace CloudStreamForms.Core
                 Console.WriteLine("Null");
             }
 #endif
-            if (o != null) {
-                App.ShowToast(o.ToString());
-            }
+            /*
+            if (o != null) { // TODO TEMOVE THIS
+                App.ShowToast(o.ToString(),5);
+            }*/
         }
 
         public static void print(object o)
