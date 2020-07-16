@@ -67,6 +67,7 @@ namespace CloudStreamForms
                 App.SetKey("Settings", nameof(GlobalSubtitleFont), value);
             }
             get {
+                // return "Trebuchet MS";
                 return App.GetKey("Settings", nameof(GlobalSubtitleFont), GlobalFonts[0]); // Trebuchet MS, Open Sans, Google Sans
             }
         }
@@ -299,6 +300,7 @@ namespace CloudStreamForms
                 G_GithubTxt,
                 StarMe,
                 FeedbackBtt,
+                ManageAccount,
                 SetTheme,
                // UpdateBtt,
             };
@@ -331,7 +333,7 @@ namespace CloudStreamForms
             ColorPicker = new LabelList(SetTheme, new List<string> { "Black", "Dark", "Netflix", "YouTube" }, "Select Theme");
             SubLangPicker = new LabelList(SubtitleLang, CloudStreamCore.subtitleNames.ToList(), "Default Subtitle Language");
             SubStylePicker = new LabelList(SubtitleStyle, new List<string>() { "None", "Dropshadow", "Outline", "Outline + dropshadow" }, "Subtitle Style");
-            SubFontPicker = new LabelList(SubtitleFont, GlobalFonts, "Subtitle Font",true);
+            SubFontPicker = new LabelList(SubtitleFont, GlobalFonts, "Subtitle Font", true);
             //outline_reorder_white_48dp.png
 
 
@@ -444,6 +446,61 @@ namespace CloudStreamForms
             UpdateBtt.Clicked += (o, e) => {
                 if (NewGithubUpdate) {
                     App.DownloadNewGithubUpdate(githubUpdateTag);
+                }
+            };
+
+            ManageAccount.Clicked += async (o, e) => {
+                string action = await ActionPopup.DisplayActionSheet("Manage account", "Export data", "Import data");
+                if (action == "Export data") {
+                    string subaction = await ActionPopup.DisplayEntry(InputPopupPage.InputPopupResult.password, "Password", "Encrypt data", autoPaste: false, confirmText: "Encrypt");
+                    if (subaction != "Cancel") {
+                        string text = Script.SyncWrapper.GenerateTextFile();
+                        if (subaction != "") {
+                            text = CloudStreamForms.Cryptography.StringCipher.Encrypt(text, subaction);
+                        }
+                        string fileloc = App.DownloadFile(text, App.DATA_FILENAME, true);
+                        if (fileloc != "") {
+                            App.ShowToast($"Saved data to {fileloc}");
+                        }
+                    }
+                }
+                else if (action == "Import data") {
+                    string file = App.ReadFile(App.DATA_FILENAME, true, "");
+                    if (file == "") {
+                        App.ShowToast("No file found");
+                    }
+                    else {
+                        if (file.StartsWith(Script.SyncWrapper.header)) {
+                            Script.SyncWrapper.SetKeysFromTextFile(file);
+                            App.ShowToast("File loaded");
+                            Apper();
+                        }
+                        else {
+                            bool success = false;
+                            while (!success) { 
+                                string password = await ActionPopup.DisplayEntry(InputPopupPage.InputPopupResult.password, "Password", "Decrypt data", autoPaste: false, confirmText: "Decrypt");
+                                CloudStreamCore.print("PASSWORDD:D::: " + password);
+                                if (password != "Cancel") {
+                                    string subFile = CloudStreamForms.Cryptography.StringCipher.Decrypt(file, password);
+                                    CloudStreamCore.print("SUBFILE::: " + subFile);
+                                    success = subFile.StartsWith(Script.SyncWrapper.header);
+                                    if(success) {
+                                        Script.SyncWrapper.SetKeysFromTextFile(subFile);
+                                        App.ShowToast("File dectypted and loaded");
+                                        Apper();
+                                    }
+                                    else {
+                                        App.ShowToast("Failed to dectypted file");
+                                        await System.Threading.Tasks.Task.Delay(200);
+                                    }
+                                }
+                                else {
+                                    success = true;
+                                }
+                            }
+
+                        }
+                    }
                 }
             };
 
@@ -566,7 +623,7 @@ namespace CloudStreamForms
         {
             bool action = await DisplayAlert("Clear bookmarks", "Are you sure that you want to remove all bookmarks" + " (" + App.GetKeyCount("BookmarkData") + " items)", "Yes", "Cancel");
             if (action) {
-                App.RemoveFolder("BookmarkData");
+                App.RemoveFolder(App.BOOKMARK_DATA);
             }
         }
 
@@ -574,7 +631,7 @@ namespace CloudStreamForms
         {
             bool action = await DisplayAlert("Clear watch history", "Are you sure that you want to clear all watch history" + " (" + App.GetKeyCount("ViewHistory") + " items)", "Yes", "Cancel");
             if (action) {
-                App.RemoveFolder("ViewHistory");
+                App.RemoveFolder(App.VIEW_HISTORY);
             }
         }
 
@@ -588,7 +645,7 @@ namespace CloudStreamForms
         }
         async void ResetToDef()
         {
-            bool action = await DisplayAlert("Reset settings to default", "Are you sure that you want to reset settings to default", "Yes", "Cancel");
+            bool action = await DisplayAlert("Reset settings to default", "Are you sure that you want to reset settings to default", "Yes", "Cancel");//await ActionPopup.DisplayActionSheet("Reset settings to default", "Clear settings") == "Clear settings"; //
             if (action) {
                 App.RemoveFolder("Settings");
                 Apper();

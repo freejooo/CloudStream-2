@@ -79,7 +79,7 @@ namespace CloudStreamForms
                 }
             }
             if (setKey) {
-                App.RemoveKey("BookmarkData", currentMovie.title.id);
+                App.RemoveKey(App.BOOKMARK_DATA, currentMovie.title.id);
             }
             return base.OnBackButtonPressed();
 
@@ -92,19 +92,19 @@ namespace CloudStreamForms
         bool setKey = false;
         void SetKey()
         {
-            App.SetKey("BookmarkData", currentMovie.title.id, "Name=" + currentMovie.title.name + "|||PosterUrl=" + currentMovie.title.hdPosterUrl + "|||Id=" + currentMovie.title.id + "|||TypeId=" + ((int)currentMovie.title.movieType) + "|||ShortEpView=" + currentMovie.title.shortEpView + "|||=EndAll");
+            App.SetKey(App.BOOKMARK_DATA, currentMovie.title.id, "Name=" + currentMovie.title.name + "|||PosterUrl=" + currentMovie.title.hdPosterUrl + "|||Id=" + currentMovie.title.id + "|||TypeId=" + ((int)currentMovie.title.movieType) + "|||ShortEpView=" + currentMovie.title.shortEpView + "|||=EndAll");
             setKey = false;
         }
 
         private void StarBttClicked(object sender, EventArgs e)
         {
-            bool keyExists = App.KeyExists("BookmarkData", currentMovie.title.id);
+            bool keyExists = App.KeyExists(App.BOOKMARK_DATA, currentMovie.title.id);
             if (keyExists) {
-                App.RemoveKey("BookmarkData", currentMovie.title.id);
+                App.RemoveKey(App.BOOKMARK_DATA, currentMovie.title.id);
             }
             else {
                 if (currentMovie.title.name == null) {
-                    App.SetKey("BookmarkData", currentMovie.title.id, "Name=" + currentMovie.title.name + "|||Id=" + currentMovie.title.id + "|||");
+                    App.SetKey(App.BOOKMARK_DATA, currentMovie.title.id, "Name=" + currentMovie.title.name + "|||Id=" + currentMovie.title.id + "|||");
 
                     setKey = true;
                 }
@@ -193,7 +193,7 @@ namespace CloudStreamForms
                 key = currentMovie.title.id;
             }
             if (overrideBool == null) {
-                keyExists = App.KeyExists("BookmarkData", key);
+                keyExists = App.KeyExists(App.BOOKMARK_DATA, key);
                 print("KEYEXISTS:" + keyExists + "|" + currentMovie.title.id);
             }
             else {
@@ -612,7 +612,7 @@ namespace CloudStreamForms
                 List<string> hexColors = new List<string>() { "#ffffff", LIGHT_BLUE_COLOR, "#e5e598" };
                 List<string> darkHexColors = new List<string>() { "#909090", DARK_BLUE_COLOR, "#d3c450" };
                 int color = 0;
-                if (App.KeyExists("ViewHistory", id)) {
+                if (App.KeyExists(App.VIEW_HISTORY, id)) {
                     color = 1;
                 }
 
@@ -1567,7 +1567,7 @@ namespace CloudStreamForms
             string id = GetId(episodeResult);
             if (id != "") {
                 if (ViewHistory) {
-                    App.SetKey("ViewHistory", id, true);
+                    App.SetKey(App.VIEW_HISTORY, id, true);
                     SetColor(episodeResult);
                     // FORCE UPDATE
                     ForceUpdate(episodeResult.Id);
@@ -1899,7 +1899,7 @@ namespace CloudStreamForms
 
         public static void SetEpisode(string id)
         {
-            App.SetKey("ViewHistory", id, true);
+            App.SetKey(App.VIEW_HISTORY, id, true);
         }
 
         void ToggleEpisode(EpisodeResult episodeResult)
@@ -1913,8 +1913,8 @@ namespace CloudStreamForms
         public static void ToggleEpisode(string id)
         {
             if (id != "") {
-                if (App.KeyExists("ViewHistory", id)) {
-                    App.RemoveKey("ViewHistory", id);
+                if (App.KeyExists(App.VIEW_HISTORY, id)) {
+                    App.RemoveKey(App.VIEW_HISTORY, id);
                 }
                 else {
                     SetEpisode(id);

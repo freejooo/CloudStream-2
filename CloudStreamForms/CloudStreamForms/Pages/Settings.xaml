@@ -281,6 +281,7 @@
                     <Button x:Name="StarMe" Text="Open Github" BackgroundColor="#212121"  HeightRequest="50"></Button>
                     <Button x:Name="FeedbackBtt" Text="Leave Feedback" BackgroundColor="#212121" Clicked="FeedbackBtt_Clicked"  HeightRequest="50"></Button>
                     <Button x:Name="SetTheme" Text="Theme" BackgroundColor="#212121"  HeightRequest="50"></Button>
+                    <Button x:Name="ManageAccount" Text="Manage Account" BackgroundColor="#212121"  HeightRequest="50"></Button>
                     <Button Text="Update To..."  x:Name="UpdateBtt" IsEnabled="False" IsVisible="False" BackgroundColor="#212121" HeightRequest="50"></Button>
                     <Image x:Name="OffBar" InputTransparent="True" VerticalOptions="Start"></Image>
 
@@ -365,8 +366,6 @@
 
 
                 <!--  =================== BUTTONS =================== -->
-
-
 
             </StackLayout>
         </ScrollView>

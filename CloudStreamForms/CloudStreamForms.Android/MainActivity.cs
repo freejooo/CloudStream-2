@@ -27,6 +27,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Xamarin.Forms;
@@ -1290,9 +1291,9 @@ namespace CloudStreamForms.Droid
         {
             long estimatedAudioLatency = AUDIO_LATENCY_NOT_ESTIMATED;
             long audioFramesWritten = 0;
-            var outputBufferSize = AudioTrack.GetMinBufferSize(16000, ChannelOut.Stereo, Encoding.Pcm16bit);
+            var outputBufferSize = AudioTrack.GetMinBufferSize(16000, ChannelOut.Stereo, Android.Media.Encoding.Pcm16bit);
 
-            AudioTrack track = new AudioTrack(Android.Media.Stream.Music, 16000, ChannelOut.Mono, Encoding.Pcm16bit, outputBufferSize, AudioTrackMode.Stream);//AudioManager.USE_DEFAULT_STREAM_TYPE, 16000, AudioFormat.CHANNEL_OUT_MONO, AudioFormat.ENCODING_PCM_16BIT, outputBufferSize, AudioTrack.MODE_STREAM);
+            AudioTrack track = new AudioTrack(Android.Media.Stream.Music, 16000, ChannelOut.Mono, Android.Media.Encoding.Pcm16bit, outputBufferSize, AudioTrackMode.Stream);//AudioManager.USE_DEFAULT_STREAM_TYPE, 16000, AudioFormat.CHANNEL_OUT_MONO, AudioFormat.ENCODING_PCM_16BIT, outputBufferSize, AudioTrack.MODE_STREAM);
 
             // First method. SDK >= 19.
             if ((int)Build.VERSION.SdkInt >= 19 && track != null) {
@@ -2655,7 +2656,7 @@ namespace CloudStreamForms.Droid
         public void ShowToast(string message, double duration)
         {
             Device.BeginInvokeOnMainThread(() => {
-                try { 
+                try {
                     ToastLength toastLength = ToastLength.Short;
                     if (duration >= 3) {
                         toastLength = ToastLength.Long;
@@ -2812,7 +2813,27 @@ namespace CloudStreamForms.Droid
             }
         }
 
+        public string ReadFile(string fileName, bool mainPath, string extraPath)
+        {
+            try {
+                string basePath = GetPath(mainPath, extraPath);
+                Java.IO.File _file = new Java.IO.File(basePath, fileName);
+                Java.IO.FileReader reader = new Java.IO.FileReader(_file);
+                char[] data = new char[1024];
+                int count = 0;
+                StringBuilder builder = new StringBuilder();
+                while ((count = reader.Read(data, 0, data.Length)) != -1) {
+                    for (int i = 0; i < count; i++) {
+                        builder.Append(data[i]);
+                    }
+                }
 
+                return builder.ToString();
+            }
+            catch (Exception) {
+                return "";
+            }
+        }
     }
 
     public class NullPlatfrom : App.IPlatformDep
@@ -2906,6 +2927,11 @@ namespace CloudStreamForms.Droid
 
         public void PlayVlc(List<string> url, List<string> name, string subtitleLoc)
         {
+        }
+
+        public string ReadFile(string fileName, bool mainPath, string extraPath)
+        {
+            throw new NotImplementedException();
         }
 
         public void ReleaseAudioFocus()

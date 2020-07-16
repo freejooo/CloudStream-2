@@ -6,7 +6,5 @@
         public string Title { set; get; }
         public string Extra { set; get; }
         public string Poster { set; get; }
-    }
-
-
+    } 
 }

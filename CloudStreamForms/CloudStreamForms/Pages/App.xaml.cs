@@ -27,6 +27,10 @@ namespace CloudStreamForms
 
         public const string VIEW_TIME_POS = "ViewHistoryTimePos";
         public const string VIEW_TIME_DUR = "ViewHistoryTimeDur";
+        public const string BOOKMARK_DATA = "BookmarkData";
+        public const string VIEW_HISTORY = "ViewHistory";
+        public const string DATA_FILENAME = "CloudStreamData.txt";
+
         public static DownloadState GetDstate(int epId)
         {
             bool isDownloaded = App.GetKey(hasDownloadedFolder, epId.ToString(), false);
@@ -45,6 +49,7 @@ namespace CloudStreamForms
 
         public static string GetFont(string f)
         {
+            print("FONT::::" + f); 
             if (f == "App default") {
                 return "";
             }
@@ -64,6 +69,7 @@ namespace CloudStreamForms
             void PlayVlc(List<string> url, List<string> name, string subtitleLoc);
             void ShowToast(string message, double duration);
             string DownloadFile(string file, string fileName, bool mainPath, string extraPath);
+            string ReadFile(string fileName, bool mainPath, string extraPath);
             string DownloadUrl(string url, string fileName, bool mainPath, string extraPath, string toast = "", bool isNotification = false, string body = "");
             bool DeleteFile(string path);
             void DownloadUpdate(string update);
@@ -93,6 +99,7 @@ namespace CloudStreamForms
             BluetoothDeviceID[] GetBluetoothDevices();
             void SearchBluetoothDevices();
             void RequestVlc(List<string> urls, List<string> names, string episodeName, string episodeId, long startId = FROM_PROGRESS, string subtitleFull = "");
+            
         }
 
         public enum DownloadState { Downloading, Downloaded, NotDownloaded, Paused }
@@ -171,6 +178,11 @@ namespace CloudStreamForms
                 default:
                     return "Error";
             }
+        }
+
+        public static string ReadFile(string fileName, bool mainPath, string extraPath)
+        {
+            return platformDep.ReadFile(fileName, mainPath, extraPath);
         }
 
         public static string GetPathFromType(DownloadHeader header)
@@ -540,19 +552,30 @@ namespace CloudStreamForms
             return _s;
         }
 
+        public static void SetKey(string path, object value)
+        {
+            try {
+                string _set = ConvertToString(value);
+                if (myApp.Properties.ContainsKey(path)) {
+                    CloudStreamCore.print("CONTAINS KEY" + path);
+                    myApp.Properties[path] = _set;
+                }
+                else {
+                    CloudStreamCore.print("ADD KEY" + path);
+                    myApp.Properties.Add(path, _set);
+                }
+            }
+            catch (Exception _ex) {
+                print("ERROR SETTING KEYU" + _ex);
+            }
+
+        }
+
         public static void SetKey(string folder, string name, object value)
         {
             try {
                 string path = GetKeyPath(folder, name);
-                string _set = ConvertToString(value);
-                if (myApp.Properties.ContainsKey(path)) {
-                    CloudStreamCore.print("CONTAINS KEY");
-                    myApp.Properties[path] = _set;
-                }
-                else {
-                    CloudStreamCore.print("ADD KEY");
-                    myApp.Properties.Add(path, _set);
-                }
+                SetKey(path, value);
             }
             catch (Exception _ex) {
                 print("EX SET KEY:" + _ex);
@@ -600,12 +623,12 @@ namespace CloudStreamForms
         {
             try {
                 string path = GetKeyPath(folder, name);
+                //1print("GEKEY::: " + folder + "|" + name + "|" + defVal + "|" + path);
                 return GetKey<T>(path, defVal);
             }
             catch (Exception) {
                 return defVal;
             }
-
         }
 
         public static void RemoveFolder(string folder)
@@ -613,6 +636,25 @@ namespace CloudStreamForms
             List<string> keys = App.GetKeysPath(folder);
             for (int i = 0; i < keys.Count; i++) {
                 RemoveKey(keys[i]);
+            }
+        }
+
+        public static string GetRawKey(string path, string defVal = "")
+        {
+            try {
+                return myApp.Properties[path] as string;
+            }
+            catch (Exception) {
+                return defVal;
+            }
+        }
+
+        public static void SetRawKey(string path, string data)
+        {
+            try {
+                 myApp.Properties[path]  = data;
+            }
+            catch (Exception) { 
             }
         }
 
@@ -702,6 +744,7 @@ namespace CloudStreamForms
                 error(_ex);
             }
         }
+
         static Application myApp { get { return Application.Current; } }
 
         public static T ConvertToObject<T>(string str, T defValue)

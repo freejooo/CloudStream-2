@@ -8,11 +8,7 @@
              xmlns:tt="clr-namespace:TouchTracking.Forms;assembly=TouchTracking.Forms"
              x:Class="CloudStreamForms.VideoPage">
     <ContentPage.Content >
-
-
-
         <AbsoluteLayout>
-
             <StackLayout x:Name="overLay" AbsoluteLayout.LayoutBounds="0, 0, 1, 1" AbsoluteLayout.LayoutFlags="All" >
                 <Grid HorizontalOptions="FillAndExpand" VerticalOptions="FillAndExpand"  x:Name="TapRec" >
                     <Grid.Effects>

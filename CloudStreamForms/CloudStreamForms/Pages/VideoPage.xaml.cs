@@ -483,7 +483,8 @@ namespace CloudStreamForms
         /// <param name="name"></param>
         /// <param name="subtitles"></param>
         public VideoPage(PlayVideo video, int _maxEpisodes = 1)
-        {
+        { 
+            print("DADAD LOADED VIDEO A");
             isShown = true;
 
             currentVideo = video;
@@ -599,8 +600,7 @@ namespace CloudStreamForms
 
                 if (!isLocked) {
                     ShowNextMirror();
-                }
-
+                } 
             }
 
 
@@ -836,8 +836,8 @@ namespace CloudStreamForms
         protected override void OnAppearing()
         {
             base.OnAppearing();
+            print("ON APPEARING VIDEOPAGE");
             isShown = true;
-            print("ON APPEARING");
             App.OnAudioFocusChanged += HandleAudioFocus;
 
             try { // SETTINGS NOW ALLOWED 

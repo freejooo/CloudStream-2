@@ -449,7 +449,7 @@ namespace CloudStreamForms
             try {
                 int height = 150;
                 Bookmarks.HeightRequest = height;
-                List<string> keys = App.GetKeys<string>("BookmarkData");
+                List<string> keys = App.GetKeys<string>(App.BOOKMARK_DATA);
                 List<string> data = new List<string>();
                 bookmarkPosters = new List<BookmarkPoster>();
                 Bookmarks.Children.Clear();
