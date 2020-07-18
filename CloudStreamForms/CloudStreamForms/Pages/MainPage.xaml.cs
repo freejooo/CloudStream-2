@@ -1,35 +1,17 @@
-﻿using GoogleCast;
-using GoogleCast.Channels;
-using GoogleCast.Models.Media;
-using HtmlAgilityPack.CssSelectors.NetCore;
-using Jint;
-using Newtonsoft.Json;
-using SubtitlesParser.Classes;
-using SubtitlesParser.Classes.Parsers;
-using System;
-using System.Collections;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Net;
-using System.Net.Sockets;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading;
 using System.Threading.Tasks;
 using Xamarin.Forms;
 using Xamarin.Forms.PlatformConfiguration.AndroidSpecific;
 using static CloudStreamForms.Core.CloudStreamCore;
-using static CloudStreamForms.Core.BlotFreeProvider;
 using CloudStreamForms.Core;
 
 namespace CloudStreamForms
 {
     // Learn more about making custom code visible in the Xamarin.Forms previewer
     // by visiting https://aka.ms/xamarinforms-previewer
-     
+
     [DesignTimeVisible(false)]
     public partial class MainPage : Xamarin.Forms.TabbedPage
     {

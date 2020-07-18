@@ -65,12 +65,12 @@ xmlns:ffTransformations="clr-namespace:FFImageLoading.Transformations;assembly=F
 								<Button Grid.Column="2" x:Name="ReviewLabel"  BackgroundColor="Transparent" HorizontalOptions="End" TranslationX="10" VerticalOptions="Center" Text="Reviews" HeightRequest="30" WidthRequest="70" Margin="25,0" ClassId="CUST" TextColor="White" BorderWidth="2" CornerRadius="5" BorderColor="#303F9F" Opacity="0"></Button>
 							</Grid>
                         </Grid>
-						<Grid Grid.Row="1"  Grid.Column="0" TranslationX="-5">
-							<ff:CachedImage x:Name="ImgChromeCastBtt" BackgroundColor="Transparent" WidthRequest="40" HeightRequest="40" TranslationY="-6" VerticalOptions="Start" HorizontalOptions="Start" Scale="0.7" TranslationX="10" >
+						<Grid Grid.Row="1"  Grid.Column="0" VerticalOptions="Center" >
+							<ff:CachedImage x:Name="ImgChromeCastBtt" BackgroundColor="Transparent" WidthRequest="40" HeightRequest="40" VerticalOptions="Center" HorizontalOptions="Start" Scale="0.7" TranslationX="4.6" >
 
 							</ff:CachedImage>
-							<ImageButton x:Name="ChromeCastBtt" BackgroundColor="Transparent" Clicked="ChromeCastBtt_Clicked"  WidthRequest="40" HeightRequest="40" TranslationY="-6" VerticalOptions="Start" HorizontalOptions="Start"></ImageButton>
-							<Label x:Name="NameLabel" FontSize="Title" Text="Iron Man" FontAttributes="Bold" HorizontalOptions="Start" Margin="10,10,10,10" TranslationY="-10" TextColor="#e7e7e7" InputTransparent="True"></Label>
+							<ImageButton x:Name="ChromeCastBtt" BackgroundColor="Transparent" Clicked="ChromeCastBtt_Clicked"  WidthRequest="40" HeightRequest="40"  VerticalOptions="Center" HorizontalOptions="Start"></ImageButton>
+                            <Label x:Name="NameLabel" FontSize="Title" Text="Iron Man" FontAttributes="Bold" HorizontalOptions="Start" Margin="0,5,5,5"  TranslationX="-5.5" TranslationY="0" TextColor="#e7e7e7" InputTransparent="True"></Label>
 						</Grid>
 
 						<Grid Grid.Row="3"  Grid.Column="0" InputTransparent="True">

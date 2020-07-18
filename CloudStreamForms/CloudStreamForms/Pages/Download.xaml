@@ -23,18 +23,18 @@
 					<ColumnDefinition Width="Auto"></ColumnDefinition>
 				</Grid.ColumnDefinitions>
 
-				<Grid  Grid.Row="0" Grid.Column="0"  >
-					<BoxView Color="#303F9F" HeightRequest="10" WidthRequest="10" VerticalOptions="Start" HorizontalOptions="Center" TranslationY="3"></BoxView>
+				<Grid  Grid.Row="0" Grid.Column="0" VerticalOptions="Center" >
+					<BoxView Color="#303F9F" HeightRequest="10" WidthRequest="10" VerticalOptions="Center" HorizontalOptions="Center" TranslationY="0"></BoxView>
 				</Grid>
-				<Grid  Grid.Row="0" Grid.Column="1" >
+				<Grid  Grid.Row="0" Grid.Column="1" VerticalOptions="Center">
 					<Label x:Name="UsedSpace"></Label>
 
 				</Grid>
-				<Grid  Grid.Row="0" Grid.Column="2"  >
-					<BoxView Color="#535353" HeightRequest="10" WidthRequest="10" VerticalOptions="Start" HorizontalOptions="Center" TranslationY="3"></BoxView>
+				<Grid  Grid.Row="0" Grid.Column="2"  VerticalOptions="Center">
+					<BoxView Color="#535353" HeightRequest="10" WidthRequest="10" VerticalOptions="Center" HorizontalOptions="Center" TranslationY="0"></BoxView>
 
 				</Grid>
-				<Grid  Grid.Row="0" Grid.Column="3" >
+				<Grid  Grid.Row="0" Grid.Column="3" VerticalOptions="Center">
 					<Label x:Name="FreeSpace"></Label>
 
 				</Grid>
