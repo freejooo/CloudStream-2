@@ -694,6 +694,7 @@ namespace CloudStreamForms
             if (_mediaPlayer == null) {
                 _mediaPlayer = new MediaPlayer(_libVLC) { EnableHardwareDecoding = true, };
             }
+            
             vvideo.MediaPlayer = _mediaPlayer; // = new VideoView() { MediaPlayer = _mediaPlayer };
 
             // ========== IMGS ==========

@@ -35,7 +35,7 @@ namespace CloudStreamForms.Core
         public static string CreateSubListiner(string sub)
         {
             if (!sub.IsClean()) return "";
-            string url = $"http://{GetLocalIPAddress()}:1234/sub.vtt/";
+            string url = $"http://{GetLocalIPAddress()}:51337/sub.vtt/"; // 1234
             SubData = sub;
             if (isSubActive) return url;
             isSubActive = true;

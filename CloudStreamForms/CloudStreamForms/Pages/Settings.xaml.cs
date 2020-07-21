@@ -1,7 +1,11 @@
 ﻿using CloudStreamForms.Core;
+using CloudStreamForms.Cryptography;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Net;
+using System.Text;
 using Xamarin.Forms;
 using Xamarin.Forms.Internals;
 using Xamarin.Forms.Xaml;
@@ -71,6 +75,47 @@ namespace CloudStreamForms
                 return App.GetKey("Settings", nameof(GlobalSubtitleFont), GlobalFonts[0]); // Trebuchet MS, Open Sans, Google Sans
             }
         }
+
+
+        public static bool HasAccountLogin {
+            set {
+                App.SetKey("Account", nameof(HasAccountLogin), value);
+            }
+            get {
+                return App.GetKey("Account", nameof(HasAccountLogin), false);
+            }
+        }
+
+        public static string AccountUsername {
+            set {
+                App.SetKey("Account", nameof(AccountUsername), value);
+            }
+            get {
+                return App.GetKey("Account", nameof(AccountUsername), "");
+            }
+        }
+
+        public static string AccountSite {
+            set {
+                App.SetKey("Account", nameof(AccountSite), value);
+            }
+            get {
+                return App.GetKey("Account", nameof(AccountSite), "");
+            }
+        }
+
+        public static string AccountPassword {
+            set {
+                App.SetKey("Account", nameof(AccountPassword), value);
+            }
+            get {
+                return App.GetKey("Account", nameof(AccountPassword), "");
+            }
+        }
+
+
+
+
 
         public static string NativeSubShortName {
             get {
@@ -450,7 +495,18 @@ namespace CloudStreamForms
             };
 
             ManageAccount.Clicked += async (o, e) => {
-                string action = await ActionPopup.DisplayActionSheet("Manage account", "Export data", "Import data");
+                List<string> actions = new List<string>() { };
+
+                if (HasAccountLogin) {
+                    actions.Add("Logout from " + AccountUsername);
+                }
+                else {
+                    actions.Add("Create account");
+                    actions.Add("Login");
+                }
+                actions.AddRange(new string[] { "Export data", "Import data", });
+
+                string action = await ActionPopup.DisplayActionSheet("Manage account", actions.ToArray());
                 if (action == "Export data") {
                     string subaction = await ActionPopup.DisplayEntry(InputPopupPage.InputPopupResult.password, "Password", "Encrypt data", autoPaste: false, confirmText: "Encrypt");
                     if (subaction != "Cancel") {
@@ -477,14 +533,14 @@ namespace CloudStreamForms
                         }
                         else {
                             bool success = false;
-                            while (!success) { 
+                            while (!success) {
                                 string password = await ActionPopup.DisplayEntry(InputPopupPage.InputPopupResult.password, "Password", "Decrypt data", autoPaste: false, confirmText: "Decrypt");
                                 CloudStreamCore.print("PASSWORDD:D::: " + password);
                                 if (password != "Cancel") {
                                     string subFile = CloudStreamForms.Cryptography.StringCipher.Decrypt(file, password);
                                     CloudStreamCore.print("SUBFILE::: " + subFile);
                                     success = subFile.StartsWith(Script.SyncWrapper.header);
-                                    if(success) {
+                                    if (success) {
                                         Script.SyncWrapper.SetKeysFromTextFile(subFile);
                                         App.ShowToast("File dectypted and loaded");
                                         Apper();
@@ -501,6 +557,36 @@ namespace CloudStreamForms
 
                         }
                     }
+                }
+                else if (action.StartsWith("Logout from")) {
+
+                }
+                else if (action == "Login") {
+                    bool tryLogin = true;
+                    string password = "";
+                    string username = "";
+                    string site = "";
+                    while (tryLogin) {
+                        List<string> data = await ActionPopup.DisplayLogin("Login", "Cancel", "Login to account", new LoginPopupPage.PopupFeildsDatas() { placeholder = "Server Url", setText = site }, new LoginPopupPage.PopupFeildsDatas() { placeholder = "Username", setText = username }, new LoginPopupPage.PopupFeildsDatas() { placeholder = "Password", isPassword = true, setText = password });
+                        if (data.Count == 3) {
+                            site = data[0];
+                            username = data[1];
+                            password = data[2];
+                            await ActionPopup.StartIndeterminateLoadinbar("Tryig to login...");
+                            string logindata = GetAccountResponse(site, username, password, Logintype.LoginAccount, out LoginErrorType error);
+                            await ActionPopup.StopIndeterminateLoadinbar();
+
+                            App.ShowToast(error.ToString());
+                        }
+                        else {
+                            tryLogin = false;
+                        }
+                    }
+
+
+                }
+                else if (action == "Create account") {
+
                 }
             };
 
@@ -656,5 +742,88 @@ namespace CloudStreamForms
         {
             Navigation.PushModalAsync(new Feedback());
         }
+
+
+        public enum Logintype
+        {
+            CreateAccount = 0,
+            LoginAccount = 1,
+            EditAccount = 2,
+        }
+
+        public enum LoginErrorType
+        {
+            Ok = 0,
+            InternetError = 1,
+            WrongPassword = 2,
+            UsernameTaken = 3,
+        }
+
+        static Random rng = new Random();
+        public static string GetAccountResponse(string url, string name, string password, Logintype logintype, out LoginErrorType result, string data = "")
+        {
+            result = LoginErrorType.InternetError;
+            try {
+                int waitTime = 400;
+                HttpWebRequest webRequest = (HttpWebRequest)HttpWebRequest.Create(url);
+                webRequest.ServerCertificateValidationCallback = delegate { return true; };
+                webRequest.Method = "GET";
+                webRequest.Timeout = waitTime * 10;
+                webRequest.ReadWriteTimeout = waitTime * 10;
+                webRequest.ContinueTimeout = waitTime * 10;
+                webRequest.Headers.Add("LOGINTYPE", ((int)logintype).ToString());
+
+                webRequest.Headers.Add("NAME", StringCipher.HashData(name));
+                if (logintype == Logintype.CreateAccount) {
+                    webRequest.Headers.Add("HASHPASSWORD", StringCipher.HashData(password));
+                }
+                else {
+                    webRequest.Headers.Add("ONETIMEPASSWORD", StringCipher.Encrypt(rng.Next(0, int.MaxValue) + "CORRECTPASS[" + DateTime.Now.ToBinary() + "]", StringCipher.HashData(password)));
+                }
+                if (logintype != Logintype.LoginAccount) {
+                    webRequest.Headers.Add("DATA", StringCipher.Encrypt(data, password));
+                }
+
+                using (var webResponse = webRequest.GetResponse()) {
+                    try {
+                        using (StreamReader httpWebStreamReader = new StreamReader(webResponse.GetResponseStream(), Encoding.UTF8)) {
+                            try {
+                                string s = httpWebStreamReader.ReadToEnd();
+                                if (s.StartsWith("OKDATA")) {
+                                    result = LoginErrorType.Ok;
+                                    if (logintype == Logintype.LoginAccount) {
+                                        return StringCipher.Decrypt(s.Split('\n')[1], password);
+                                    }
+                                    else {
+                                        return "";
+                                    }
+                                }
+                                else {
+                                    result = (LoginErrorType)int.Parse(CloudStreamCore.FindHTML(s, "ERRORCODE[", "]"));
+                                    return "";
+                                }
+                                //   _s = httpWebStreamReader.ReadToEnd();
+                                //  done = true;
+                            }
+                            catch (Exception _ex) {
+                                CloudStreamCore.error(_ex);
+                            }
+
+                        }
+                    }
+                    catch (Exception) {
+                        return "";
+                    }
+
+                }
+                return "";
+            }
+            catch (Exception _ex) {
+                CloudStreamCore.error(_ex);
+                return "";
+            }
+
+        }
+
     }
 }

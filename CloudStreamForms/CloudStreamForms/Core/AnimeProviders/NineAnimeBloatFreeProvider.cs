@@ -23,10 +23,10 @@ namespace CloudStreamForms.Core.AnimeProviders
 
         public override void LoadLink(string episodeLink, int episode, int normalEpisode, TempThread tempThred, object extraData)
         {
-            string request = episodeLink.Replace("https://9anime.to/watch/","") + "/"; // /xrrj358";
+            string request = episodeLink.Replace("https://9anime.to/watch/", "") + "/"; // /xrrj358";
             string url = "https://9anime.to/watch/" + request;
             string d = DownloadString(url);
-            string key = FindHTML(DownloadString("https://mcloud.to/key", referer: url), "mcloudKey=\'", "\'");
+            string key = core.GetMcloudKey(url);
 
             string dataTs = FindHTML(d, "data-ts=\"", "\"");
             string _id = FindHTML(request, ".", "/");
@@ -80,38 +80,27 @@ namespace CloudStreamForms.Core.AnimeProviders
                     }
 
                 }
-            } 
-
-            string GetTarget(string id)
-            {
-                string under = rng.Next(100, 999).ToString();
-                int server = rng.Next(1, 99);
-
-                string ajaxData = DownloadString($"https://9anime.to/ajax/episode/info?id={id}&server={server}&mcloud={key}&ts={dataTs}&_={under}").Replace("\\", "");
-                return FindHTML(ajaxData, "target\":\"", "\"").Replace("\\","");
             }
 
             try {
-                string target = GetTarget(Mp4upload[normalEpisode].id);
-                AddMp4(FindHTML(target, "embed-", "."),normalEpisode,tempThred);
+                string target = core.GetTarget(Mp4upload[normalEpisode].id, key, dataTs, "https://9anime.to", url);
+                AddMp4(FindHTML(target, "embed-", "."), normalEpisode, tempThred);
             }
             catch (Exception) {
-                 
+
             }
-             
-            try {
-                string streamResponse = DownloadString(GetTarget(Streamtape[normalEpisode].id));
-                string streamId = FindHTML(streamResponse, "//streamtape.com/get_video?id=", "<");
-                if(streamId !="") {
-                    AddPotentialLink(normalEpisode, "https://streamtape.com/get_video?id=" + streamId, "Streamtape", 6);
-                }  
-            }
-            catch (Exception) {
-                 
-            } 
 
             try {
-                string target = GetTarget(MyCloud[normalEpisode].id);
+                core.AddStreamTape(Streamtape[normalEpisode].id, key, dataTs, "https://9anime.to", normalEpisode, url);
+            }
+            catch (Exception) {
+
+            }
+
+            try {
+                core.AddMCloud(MyCloud[normalEpisode].id, key, dataTs, "https://9anime.to", normalEpisode, url);
+                /*
+                string target = core.GetTarget(MyCloud[normalEpisode].id, key, dataTs, "https://9anime.to");
 
                 string mresonse = DownloadString(target + "&autostart=true", referer: url);
                 const string lookFor = "file\":\"";
@@ -119,12 +108,12 @@ namespace CloudStreamForms.Core.AnimeProviders
                     string resUrl = FindHTML(mresonse, lookFor, "\"");
                     mresonse = RemoveOne(mresonse, lookFor);
                     AddPotentialLink(normalEpisode, resUrl, "Mcloud", 5);
-                }
+                }*/
             }
             catch (Exception) {
-                 
-            }    
-            
+
+            }
+
         }
 
         public override object StoreData(string year, TempThread tempThred, MALData malData)
@@ -153,7 +142,7 @@ namespace CloudStreamForms.Core.AnimeProviders
                 }
             }
             return setData;
-        } 
+        }
 
         [Serializable]
 
@@ -189,7 +178,7 @@ namespace CloudStreamForms.Core.AnimeProviders
                         string title = FindHTML(_d, "data-jtitle=\"", "\"");
                         print(maxEp + "|" + title + "|" + otherNames.FString());
                         bool isDub = title.Contains("(Dub)");
-                        searchData.Add(new NineAnimeDataSearch() { isDub = isDub, maxEp = maxEp,href=href, names = otherNames, title = title.Replace(" (Dub)", "").Replace("  ", "") });
+                        searchData.Add(new NineAnimeDataSearch() { isDub = isDub, maxEp = maxEp, href = href, names = otherNames, title = title.Replace(" (Dub)", "").Replace("  ", "") });
                     }
                 }
             }

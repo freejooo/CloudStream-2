@@ -49,7 +49,7 @@ namespace CloudStreamForms
 
         public static string GetFont(string f)
         {
-            print("FONT::::" + f); 
+            print("FONT::::" + f);
             if (f == "App default") {
                 return "";
             }
@@ -99,7 +99,7 @@ namespace CloudStreamForms
             BluetoothDeviceID[] GetBluetoothDevices();
             void SearchBluetoothDevices();
             void RequestVlc(List<string> urls, List<string> names, string episodeName, string episodeId, long startId = FROM_PROGRESS, string subtitleFull = "");
-            
+
         }
 
         public enum DownloadState { Downloading, Downloaded, NotDownloaded, Paused }
@@ -584,7 +584,12 @@ namespace CloudStreamForms
 
         static long GetLongRegex(string id)
         {
-            return long.Parse(Regex.Replace(id, @"[^0-9]", ""));
+            try {
+                return long.Parse(Regex.Replace(id, @"[^0-9]", ""));
+            }
+            catch (Exception) {
+                return 0;
+            }
         }
 
         public static void SetViewPos(string id, long res)
@@ -652,9 +657,9 @@ namespace CloudStreamForms
         public static void SetRawKey(string path, string data)
         {
             try {
-                 myApp.Properties[path]  = data;
+                myApp.Properties[path] = data;
             }
-            catch (Exception) { 
+            catch (Exception) {
             }
         }
 

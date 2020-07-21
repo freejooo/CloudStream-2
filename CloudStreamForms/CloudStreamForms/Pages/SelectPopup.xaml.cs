@@ -45,10 +45,10 @@ namespace CloudStreamForms
         }
 
         static LoadingPopupPage currentLoading;
-        public static void StartIndeterminateLoadinbar(string title)
+        public static async Task StartIndeterminateLoadinbar(string title)
         {
             currentLoading = new LoadingPopupPage(-1, title);
-            PopupNavigation.Instance.PushAsync(currentLoading);
+            await PopupNavigation.Instance.PushAsync(currentLoading);
         }
 
         public static async Task StopIndeterminateLoadinbar()
