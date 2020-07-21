@@ -9,6 +9,7 @@ using Xamarin.Forms.Xaml;
 using static CloudStreamForms.App;
 using static CloudStreamForms.Core.CloudStreamCore;
 using static CloudStreamForms.InputPopupPage;
+using static CloudStreamForms.LoginPopupPage;
 using static CloudStreamForms.SelectPopup;
 using Button = Xamarin.Forms.Button;
 
@@ -21,6 +22,13 @@ namespace CloudStreamForms
         public static async Task<string> DisplayActionSheet(string title, int sel, params string[] buttons)
         {
             var page = new SelectPopup(buttons.ToList(), sel, title, true);
+            await PopupNavigation.Instance.PushAsync(page);
+            return await page.WaitForResult();
+        }
+
+        public static async Task<List<string>> DisplayLogin(string okButton, string cancelButton, string header, params PopupFeildsDatas[] loginData)
+        {
+            var page = new LoginPopupPage(okButton, cancelButton, header, loginData);
             await PopupNavigation.Instance.PushAsync(page);
             return await page.WaitForResult();
         }
@@ -216,7 +224,7 @@ namespace CloudStreamForms
             BindingContext = selectBinding;
 
             for (int i = 0; i < currentOptions.Count; i++) {
-                bool isSel = i == selected; 
+                bool isSel = i == selected;
                 selectBinding.MyNameCollection.Add(new PopupName() { IsSelected = isSel, Name = currentOptions[i].Replace("(Mirror ", "("), LayoutCenter = isCenter ? LayoutOptions.Center : LayoutOptions.Start, FontFam = fontTest ? GetFont(currentOptions[i]) : "" });
             }
 

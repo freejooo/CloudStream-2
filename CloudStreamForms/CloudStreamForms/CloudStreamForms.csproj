@@ -340,6 +340,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Update="Pages\LoginPopupPage.xaml.cs">
+      <DependentUpon>LoginPopupPage.xaml</DependentUpon>
+    </Compile>
     <Compile Update="Pages\LoadingPopupPage.xaml.cs">
       <DependentUpon>LoadingPopupPage.xaml</DependentUpon>
     </Compile>
