@@ -519,7 +519,6 @@ namespace CloudStreamForms
             UpdateDownloaded();
         }
 
-
         public static async Task HandleEpisode(EpisodeResult episodeResult, Page p)
         {
             int key = episodeResult.Id;
@@ -536,7 +535,12 @@ namespace CloudStreamForms
 
         public static void PlayDownloadedFile(DownloadInfo _info, bool? vlc = null)
         {
-            Download.PlayDownloadedFile(_info.info.fileUrl, _info.info.name, _info.info.episode, _info.info.season, _info.info.episodeIMDBId, _info.info.source, true, vlc ?? !Settings.UseVideoPlayer);
+            PlayDownloadedFile(_info.info, vlc);
+            //Download.PlayDownloadedFile(_info.info.fileUrl, _info.info.name, _info.info.episode, _info.info.season, _info.info.episodeIMDBId, _info.info.source, true, vlc ?? !Settings.UseVideoPlayer);
+        }
+        public static void PlayDownloadedFile(DownloadEpisodeInfo _info, bool? vlc = null)
+        {
+            Download.PlayDownloadedFile(_info.fileUrl, _info.name, _info.episode, _info.season, _info.episodeIMDBId, _info.source, true, vlc ?? !Settings.UseVideoPlayer);
         }
 
         public static void PlayDownloadedFile(string file, string name, int episode, int season, string episodeId, string headerId, bool startFromSaved = true, bool vlc = false)

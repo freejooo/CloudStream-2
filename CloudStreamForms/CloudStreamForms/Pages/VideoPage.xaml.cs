@@ -610,6 +610,7 @@ namespace CloudStreamForms
             LibVLCSharp.Shared.Core.Initialize();
             lockElements = new VisualElement[] { NextMirror, NextMirrorBtt, BacktoMain, GoBackBtt, EpisodeLabel, PausePlayClickBtt, PausePlayBtt, SkipForward, SkipForwardBtt, SkipForwardImg, SkipForwardSmall, SkipBack, SkipBackBtt, SkipBackImg, SkipBackSmall };
             settingsElements = new VisualElement[] { EpisodesTap, MirrorsTap, DelayTap, SubTap, NextEpisodeTap, };
+            VisualElement[] pressIcons = new VisualElement[] { LockTap, EpisodesTap, MirrorsTap, DelayTap, SubTap, NextEpisodeTap };
 
             void SetIsLocked()
             {
@@ -683,6 +684,24 @@ namespace CloudStreamForms
             SubTap.IsVisible = HasSupportForSubtitles() && Settings.SUBTITLES_INVIDEO_ENABELD;
             EpisodesTap.IsVisible = false; // TODO: ADD EPISODES SWITCH
             NextEpisodeTap.IsVisible = false; // TODO: ADD NEXT EPISODE
+
+            if (currentVideo.isDownloadFile) {
+                var keys = Download.downloads.Keys;
+                foreach (var key in keys) {
+                    var info = Download.downloads[key].info;
+                    if (info.source == currentVideo.headerId) {
+                        if (info.episode == currentVideo.episode + 1 && info.season == currentVideo.season) {
+                            NextEpisodeTap.IsVisible = true;
+
+                            Commands.SetTap(NextEpisodeTap, new Command(async () => {
+                                await Navigation.PopModalAsync();
+                                Download.PlayDownloadedFile(info, false);
+                            }));
+                            break;
+                        }
+                    }
+                }
+            }
 
 
             Commands.SetTap(MirrorsTap, new Command(async () => {
@@ -839,6 +858,17 @@ namespace CloudStreamForms
             SelectMirror(0);
             ShowNextMirror();
 
+
+            int columCount = 0;
+            for (int i = 0; i < pressIcons.Length; i++) {
+                if (pressIcons[i].IsVisible) {
+                    Grid.SetColumn(pressIcons[i], columCount);
+                    columCount++;
+                }
+            }
+
+
+
             //  Player.AddSlave(MediaSlaveType.Subtitle,"") // ADD SUBTITLEs
         }
 
@@ -992,7 +1022,7 @@ namespace CloudStreamForms
             }
 
             try {
-                if (currentVideo.isDownloadFile) { 
+                if (currentVideo.isDownloadFile) {
                     if (disMedia != null) {
                         disMedia.Dispose();
                     }
@@ -1000,7 +1030,7 @@ namespace CloudStreamForms
                 }
                 else {
                     //Thread t = new Thread(() => {
-                        _mediaPlayer.Stop();
+                    _mediaPlayer.Stop();
                     //});
                     //t.Start();
                     Dispose();
@@ -1016,7 +1046,7 @@ namespace CloudStreamForms
 
             }
 
- 
+
             base.OnDisappearing();
         }
 
