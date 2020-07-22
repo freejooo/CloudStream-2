@@ -534,6 +534,45 @@ namespace CloudStreamForms
             }
         }
 
+        public static void PlayDownloadedFile(DownloadInfo _info, bool? vlc = null)
+        {
+            Download.PlayDownloadedFile(_info.info.fileUrl, _info.info.name, _info.info.episode, _info.info.season, _info.info.episodeIMDBId, _info.info.source, true, vlc ?? !Settings.UseVideoPlayer);
+        }
+
+        public static void PlayDownloadedFile(string file, string name, int episode, int season, string episodeId, string headerId, bool startFromSaved = true, bool vlc = false)
+        {
+            long pos = startFromSaved ? GetViewPos(episodeId) : -1L;//App.GetKey(VIEW_TIME_POS, _episodeId, -1L);
+            if (vlc) {
+                //long dur = App.GetKey(VIEW_TIME_DUR, episodeId, -1L);
+                print("MAINPOS: " + pos + "|" + episodeId);
+                if (pos != -1L) {// && dur != -1L) {
+                    RequestVlc(new List<string>() { file }, new List<string>() { name }, name, episodeId, startId: pos);
+                }
+                else {
+                    RequestVlc(new List<string>() { file }, new List<string>() { name }, name, episodeId);
+                }
+                return;
+            }
+
+
+            Page p = new VideoPage(new VideoPage.PlayVideo() {
+                descript = "",
+                name = name,
+                isSingleMirror = true,
+                episode = episode,
+                isDownloadFile = true,
+                season = season,
+
+                downloadFileUrl = file,
+                //Subtitles = subtitlesEnabled ? new List<string>() { subtitleFull } : new List<string>(),
+                //SubtitlesNames = subtitlesEnabled ? new List<string>() { "English" } : new List<string>(),
+                startPos = pos,
+                episodeId = episodeId,
+                headerId = headerId,
+            });//new List<string>() { "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" }, new List<string>() { "Black" }, new List<string>() { });// { mainPoster = mainPoster };
+            ((MainPage)CloudStreamCore.mainPage).Navigation.PushModalAsync(p, false);
+        }
+
         public static void PlayVLCFile(string file, string name, string episodeId, bool startFromSaved = true)
         {
             long pos = startFromSaved ? GetViewPos(episodeId) : -1L;//App.GetKey(VIEW_TIME_POS, _episodeId, -1L);
@@ -555,7 +594,8 @@ namespace CloudStreamForms
             string action = await ActionPopup.DisplayActionSheet(info.info.name, "Play", "Delete File", "Open Source");//await p.DisplayActionSheet(info.info.name, "Cancel", null, "Play", "Delete File", "Open Source");
 
             if (action == "Play") {
-                PlayVLCFile(info.info.fileUrl, info.info.name, info.info.id.ToString());
+                PlayDownloadedFile(info);
+                // PlayVLCFile(info.info.fileUrl, info.info.name, info.info.id.ToString());
                 //App.PlayVLCWithSingleUrl(, overrideSelectVideo: false);
             }
             else if (action == "Delete File") {

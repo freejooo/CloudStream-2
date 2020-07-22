@@ -2279,6 +2279,7 @@ namespace CloudStreamForms.Droid
             //Android.App.Application.Context.StartService(intent);
             // Android.App.Application.Context.StartActivity(promptInstall);
         }
+         
 
         public static Java.IO.File WriteFile(string name, string basePath, string write)
         {

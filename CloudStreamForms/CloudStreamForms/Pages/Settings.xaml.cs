@@ -265,7 +265,7 @@ namespace CloudStreamForms
                 App.SetKey("Settings", nameof(UseVideoPlayer), value);
             }
             get {
-                return App.GetKey("Settings", nameof(UseVideoPlayer), false);
+                return App.GetKey("Settings", nameof(UseVideoPlayer), true);
             }
         }
 

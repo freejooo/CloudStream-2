@@ -133,7 +133,11 @@ namespace CloudStreamForms
                                 Id = info.info.id,
                                 PosterUrl = info.info.hdPosterUrl,
                                 Progress = _progress,
-                                TapCom = new Command((s) => { if (info.info.dtype == App.DownloadType.Normal) MovieResult.SetEpisode("tt" + info.info.id); Download.PlayVLCFile(fileUrl, fileName, info.info.id.ToString()); }),
+                                TapCom = new Command((s) => { if (info.info.dtype == App.DownloadType.Normal) MovieResult.SetEpisode("tt" + info.info.id);
+                                    Download.PlayDownloadedFile(info);
+                                    //Download.PlayDownloadedFile(fileUrl, fileName, info.info.episode, info.info.season, info.info.episodeIMDBId, info.info.source);
+                                   // Download.PlayVLCFile(fileUrl, fileName, info.info.id.ToString()); 
+                                }),
                                 DownloadPlayBttSource = App.GetImageSource("nexflixPlayBtt.png")
                             });
                         }

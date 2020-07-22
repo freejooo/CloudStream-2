@@ -9,6 +9,7 @@ using System.IO;
 using System.Linq;
 using System.Numerics;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Xamarin.Forms;
 using Xamarin.Forms.Internals;
@@ -81,6 +82,9 @@ namespace CloudStreamForms
         {
             public List<string> MirrorUrls;
             public List<string> MirrorNames;
+            public bool isDownloadFile;
+            public string downloadFileUrl;
+
             //public List<string> Subtitles;
             //public List<string> SubtitlesNames; // Requested subtitled to download
             public string name;
@@ -106,7 +110,7 @@ namespace CloudStreamForms
         const string ADD_AFTER_EPISODE = "\"";
 
         public static bool IsSeries { get { return !(currentVideo.season == -1 || currentVideo.episode == -1); } }
-        public static string BeforeAddToName { get { return IsSingleMirror ? AllMirrorsNames[0] : (IsSeries ? ("S" + currentVideo.season + ":E" + currentVideo.episode + " ") : ""); } }
+        public static string BeforeAddToName { get { return IsSingleMirror && !currentVideo.isDownloadFile ? AllMirrorsNames[0] : (IsSeries ? ("S" + currentVideo.season + ":E" + currentVideo.episode + " ") : ""); } }
         public static string CurrentDisplayName { get { return BeforeAddToName + (IsSeries ? ADD_BEFORE_EPISODE : "") + currentVideo.name + (IsSeries ? ADD_AFTER_EPISODE : "") + (IsSingleMirror ? "" : (" · " + CurrentMirrorName)); } }
         public static string CurrentMirrorName { get { return currentVideo.MirrorNames[currentMirrorId]; } }
         public static string CurrentMirrorUrl { get { return currentVideo.MirrorUrls[currentMirrorId]; } }
@@ -153,10 +157,25 @@ namespace CloudStreamForms
             }
         }
 
+
+        Media disMedia;
         public void SelectMirror(int mirror)
         {
-            if (lastUrl == AllMirrorsUrls[mirror]) return;
             if (!isShown) return;
+
+            if (currentVideo.isDownloadFile) {
+                EpisodeLabel.Text = CurrentDisplayName;
+                //  System.IO.File.Open(currentVideo.downloadFileUrl, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite);
+
+
+                disMedia = new Media(_libVLC, currentVideo.downloadFileUrl, FromType.FromPath);//new Uri(currentVideo.downloadFileUrl, UriKind.Absolute)); // currentVideo.downloadFileUrl, FromType.FromPath,);
+
+                bool succ = vvideo.MediaPlayer.Play(disMedia);
+                return;
+            }
+            if (lastUrl == AllMirrorsUrls[mirror]) return;
+
+
             currentMirrorId = mirror;
 
             print("MIRROR SELECTED : " + CurrentMirrorUrl);
@@ -173,9 +192,9 @@ namespace CloudStreamForms
                 bool Completed = ExecuteWithTimeLimit(TimeSpan.FromMilliseconds(1000), () => {
                     try {
                         print("PLAY MEDIA " + CurrentMirrorUrl);
-                        var media = new Media(_libVLC, CurrentMirrorUrl, FromType.FromLocation);
+                        disMedia = new Media(_libVLC, CurrentMirrorUrl, FromType.FromLocation);
                         lastUrl = CurrentMirrorUrl;
-                        bool succ = vvideo.MediaPlayer.Play(media);
+                        bool succ = vvideo.MediaPlayer.Play(disMedia);
                         print("SUCC:::: " + succ);
 
                         if (!succ) {
@@ -439,6 +458,13 @@ namespace CloudStreamForms
 
         public void PlayerTimeChanged(long time)
         {
+            if (!isShown) return;
+
+            if (Player == null) {
+                return;
+            }
+
+
             try {
                 SubtitleLoop();
             }
@@ -448,11 +474,17 @@ namespace CloudStreamForms
 
             Device.BeginInvokeOnMainThread(() => {
                 try {
-                    double val = ((double)(time / 1000) / (double)(Player.Length / 1000));
+                    if (Player == null) {
+                        return;
+                    }
+                    if (!isShown) return;
+                    var len = Player.Length;
+
+                    double val = ((double)(time / 1000) / (double)(len / 1000));
                     ChangeTime(val);
                     currentTime = time;
                     VideoSlider.Value = val;
-                    if (Player.Length != -1 && Player.Length > 10000 && Player.Length <= Player.Time + 1000) {
+                    if (len != -1 && len > 10000 && len <= time + 1000) {
                         //TODO: NEXT EPISODE
                         Navigation.PopModalAsync();
                     }
@@ -483,7 +515,7 @@ namespace CloudStreamForms
         /// <param name="name"></param>
         /// <param name="subtitles"></param>
         public VideoPage(PlayVideo video, int _maxEpisodes = 1)
-        { 
+        {
             print("DADAD LOADED VIDEO A");
             isShown = true;
 
@@ -600,7 +632,7 @@ namespace CloudStreamForms
 
                 if (!isLocked) {
                     ShowNextMirror();
-                } 
+                }
             }
 
 
@@ -634,7 +666,7 @@ namespace CloudStreamForms
                 SetIsLocked();
             }));
 
-            MirrorsTap.IsVisible = AllMirrorsUrls.Count > 1;
+            MirrorsTap.IsVisible = currentVideo.isDownloadFile ? false : AllMirrorsUrls.Count > 1;
 
 
             if (Settings.SUBTITLES_INVIDEO_ENABELD) {
@@ -692,9 +724,9 @@ namespace CloudStreamForms
                 _libVLC = new LibVLC();
             }
             if (_mediaPlayer == null) {
-                _mediaPlayer = new MediaPlayer(_libVLC) { EnableHardwareDecoding = true, };
+                _mediaPlayer = new MediaPlayer(_libVLC) { EnableHardwareDecoding = false, };
             }
-            
+
             vvideo.MediaPlayer = _mediaPlayer; // = new VideoView() { MediaPlayer = _mediaPlayer };
 
             // ========== IMGS ==========
@@ -822,7 +854,12 @@ namespace CloudStreamForms
         {
             print("ERROR UCCURED");
             App.ShowToast("Error loading media");
-            SelectNextMirror();
+            if (currentVideo.isDownloadFile) {
+                Navigation.PopModalAsync();
+            }
+            else {
+                SelectNextMirror();
+            }
         }
 
         void SelectNextMirror()
@@ -921,10 +958,19 @@ namespace CloudStreamForms
                                     print("ViewHistoryTimeDur SET TO: " + lastId + "|" + dur);
                                 }
                             }
+
                         }
 
                     }
-                    Player.Stop();
+                    /*
+                    try {
+                        Device.BeginInvokeOnMainThread(() => {
+                            Player.Stop();
+                        });
+                    }
+                    catch (Exception _ex) {
+                        error("EDDDD::: " + _ex);
+                    }*/
                 }
                 // App.ShowStatusBar();
                 App.NormalOrientation();
@@ -943,12 +989,49 @@ namespace CloudStreamForms
             }
             catch (Exception _ex) {
                 print("ERROR IN DISAPEERING" + _ex);
-                throw;
             }
+
+            try {
+                if (currentVideo.isDownloadFile) { 
+                    if (disMedia != null) {
+                        disMedia.Dispose();
+                    }
+                    Dispose();
+                }
+                else {
+                    //Thread t = new Thread(() => {
+                        _mediaPlayer.Stop();
+                    //});
+                    //t.Start();
+                    Dispose();
+
+                }
+
+                /*
+                _libVLC.Dispose();
+                _mediaPlayer.Dispose();*/
+                //Player.Dispose();
+            }
+            catch (Exception) {
+
+            }
+
+ 
             base.OnDisappearing();
         }
 
-
+        public void Dispose()
+        {
+            Thread t = new Thread(() => {
+                var mediaPlayer = _mediaPlayer;
+                _mediaPlayer = null;
+                mediaPlayer?.Dispose();
+                _libVLC?.Dispose();
+                _libVLC = null;
+            });
+            t.Name = "DISPOSETHREAD";
+            t.Start();
+        }
         async void Hide()
         {
             await Task.Delay(100);

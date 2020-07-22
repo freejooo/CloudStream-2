@@ -134,6 +134,8 @@ namespace CloudStreamForms
             public int id;
             public int episode;
             public int season;
+            public string episodeIMDBId;
+
             public string hdPosterUrl;
 
             public string fileUrl;
@@ -279,7 +281,7 @@ namespace CloudStreamForms
             return name;
         }
 
-        public static string RequestDownload(int id, string name, string description, int episode, int season, List<string> mirrorUrls, List<string> mirrorNames, string downloadTitle, string poster, CloudStreamCore.Title title)
+        public static string RequestDownload(int id, string name, string description, int episode, int season, List<string> mirrorUrls, List<string> mirrorNames, string downloadTitle, string poster, CloudStreamCore.Title title, string episodeIMDBId)
         {
             App.SetKey(hasDownloadedFolder, id.ToString(), true);
 
@@ -296,7 +298,7 @@ namespace CloudStreamForms
 
             App.SetKey("DownloadIds", id.ToString(), id);
             string fileUrl = platformDep.DownloadHandleIntent(id, mirrorNames, mirrorUrls, downloadTitle, name, true, extraPath, true, true, false, poster, isMovie ? "{name}\n" : ($"S{season}:E{episode} - " + "{name}\n"));
-            App.SetKey(nameof(DownloadEpisodeInfo), "id" + id, new DownloadEpisodeInfo() { dtype = DownloadType.Normal, source = header.id, description = description, downloadHeader = header.RealId, episode = episode, season = season, fileUrl = fileUrl, id = id, name = name, hdPosterUrl = poster });
+            App.SetKey(nameof(DownloadEpisodeInfo), "id" + id, new DownloadEpisodeInfo() { dtype = DownloadType.Normal, source = header.id, description = description, downloadHeader = header.RealId, episode = episode, season = season, fileUrl = fileUrl, id = id, name = name, hdPosterUrl = poster, episodeIMDBId = episodeIMDBId });
 
             return fileUrl;
             // (isMovie) ? $"{mirrorName}\n" : $"S{currentSeason}:E{episodeResult.Episode} - {mirrorName}\n
@@ -528,7 +530,7 @@ namespace CloudStreamForms
             return platformDep.GetDownloadPath(path, extraFolder);
         }
 
-
+        /*
         public static void PlayVLCWithSingleUrl(List<string> url, List<string> name, List<string> subtitleData, List<string> subtitleNames, string publicName = "", int episode = -1, int season = -1, bool? overrideSelectVideo = null)
         {
             bool useVideo = overrideSelectVideo ?? Settings.UseVideoPlayer;
@@ -541,7 +543,7 @@ namespace CloudStreamForms
                 platformDep.PlayVlc(url, name, subtitleData.Count > 0 ? subtitleData[0] : "");
             }
             //PlayVlc?.Invoke(null, url); 
-        }
+        }*/
 
         static string GetKeyPath(string folder, string name = "")
         {
