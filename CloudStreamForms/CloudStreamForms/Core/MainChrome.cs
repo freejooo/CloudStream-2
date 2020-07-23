@@ -472,21 +472,34 @@ namespace CloudStreamForms.Core
                 string filename = Path.GetFileName(path);
                 //response is HttpListenerContext.Response...
                 response.ContentLength64 = fs.Length;
-                response.SendChunked = false;
+                response.SendChunked = true;
                 response.ContentType = System.Net.Mime.MediaTypeNames.Application.Octet;
                 //response.AddHeader("Content-disposition", "attachment; filename=" + filename);
 
                 byte[] buffer = new byte[64 * 1024];
                 int read;
+                int countos = 0;
+                fs.CopyTo(response.OutputStream);
+                /*
                 using (BinaryWriter bw = new BinaryWriter(response.OutputStream)) {
                     
                     while ((read = fs.Read(buffer, 0, buffer.Length)) > 0) {
+                        countos += read;
+                        try {
+
+                        print("COUNNTNTNT: " + countos + "|" + );
+                        }
+                        catch (Exception _ex) {
+
+                            print("MAIN EX:: :: : :: : " + _ex);
+
+                        }
                         bw.Write(buffer, 0, read);
                         bw.Flush(); //seems to have no effect
                     }
 
                     bw.Close();
-                }
+                }*/
 
                 response.StatusCode = (int)HttpStatusCode.OK;
                 response.StatusDescription = "OK";
