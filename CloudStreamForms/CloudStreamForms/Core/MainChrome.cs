@@ -462,6 +462,38 @@ namespace CloudStreamForms.Core
 
 
         static string videoStreamPath;
+
+
+        static void ListWriteFile(HttpListenerContext ctx, string path)
+        {
+            var response = ctx.Response;
+            
+            using (FileStream fs = File.OpenRead(path)) {
+                string filename = Path.GetFileName(path);
+                //response is HttpListenerContext.Response...
+                response.ContentLength64 = fs.Length;
+                response.SendChunked = false;
+                response.ContentType = System.Net.Mime.MediaTypeNames.Application.Octet;
+                //response.AddHeader("Content-disposition", "attachment; filename=" + filename);
+
+                byte[] buffer = new byte[64 * 1024];
+                int read;
+                using (BinaryWriter bw = new BinaryWriter(response.OutputStream)) {
+                    
+                    while ((read = fs.Read(buffer, 0, buffer.Length)) > 0) {
+                        bw.Write(buffer, 0, read);
+                        bw.Flush(); //seems to have no effect
+                    }
+
+                    bw.Close();
+                }
+
+                response.StatusCode = (int)HttpStatusCode.OK;
+                response.StatusDescription = "OK";
+                response.OutputStream.Close();
+            }
+        }
+
         public static void ListenerCallback(IAsyncResult result)
         {
             var listenerClosure = (HttpListener)result.AsyncState;
@@ -476,7 +508,6 @@ namespace CloudStreamForms.Core
                     using (var stream = File.OpenRead(videoStreamPath)) {
                         try {
                             stream.CopyTo(response.OutputStream);
-
                         }
                         catch (Exception) {
 
@@ -487,12 +518,13 @@ namespace CloudStreamForms.Core
         }
 
         static bool videoFileThreadCreated = false;
+
         public static string GenerateVideoUrlFromFile(string filepath)
         {
             videoStreamPath = filepath;
             string url = $"http://{GetLocalIPAddress()}:51336/video.mp4/";
-            
-            if(videoFileThreadCreated) {
+
+            if (videoFileThreadCreated) {
                 return url;
             }
 
@@ -504,16 +536,30 @@ namespace CloudStreamForms.Core
                         listener.Prefixes.Add(url);
 
                         listener.Start();
+                        // Task.Factory.StartNew(() =>
+                        // {
+                        while (true) {
+                            HttpListenerContext context = listener.GetContext();
+                            Task.Factory.StartNew((ctx) => {
+                                ListWriteFile((HttpListenerContext)ctx, videoStreamPath);
+                            }, context, TaskCreationOptions.LongRunning);
+                        }
+                        // }, TaskCreationOptions.LongRunning);
 
+                        /*
                         while (true) {
                             if (!mainCore.GetThredActive(thread)) {
                                 print("ABORT!!!!!!!!!!!!");
                                 return;
                             }
                             print("Listening VIDEO...");
+
+                        
+
+                            /*
                             var result = listener.BeginGetContext(ListenerCallback, listener);
                             result.AsyncWaitHandle.WaitOne(); 
-                        }
+                        }*/
                     }
                 }
                 catch (Exception _ex) {

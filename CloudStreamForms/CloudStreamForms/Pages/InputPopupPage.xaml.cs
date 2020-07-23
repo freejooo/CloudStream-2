@@ -80,8 +80,10 @@ namespace CloudStreamForms
 
             // FORCE CORRENT TYPE
             InputF.TextChanged += (o, e) => {
-                if (e.NewTextValue.Contains("-") && !e.NewTextValue.StartsWith("-")) {
-                    InputF.Text = e.OldTextValue;
+                if (inputType == InputPopupResult.integrerNumber || inputType == InputPopupResult.decimalNumber) {
+                    if (e.NewTextValue.Contains("-") && !e.NewTextValue.StartsWith("-")) {
+                        InputF.Text = e.OldTextValue;
+                    }
                 }
 
                 if (inputType == InputPopupResult.integrerNumber) {
@@ -118,7 +120,10 @@ namespace CloudStreamForms
                 InputF.Keyboard = Keyboard.Url;
                 InputF.IsSpellCheckEnabled = false;
                 if (autoPaste && Xamarin.Essentials.Clipboard.HasText) {
-                    InputF.Text = Xamarin.Essentials.Clipboard.GetTextAsync().Result;
+                    CloudStreamCore.print("AUTOPLAS:E ");
+                    var paste = Xamarin.Essentials.Clipboard.GetTextAsync().Result;
+                    CloudStreamCore.print("AUTOPLAS:E222: " + paste);
+                    InputF.Text = paste;
                 }
             }
             InputF.ClearButtonVisibility = ClearButtonVisibility.WhileEditing;

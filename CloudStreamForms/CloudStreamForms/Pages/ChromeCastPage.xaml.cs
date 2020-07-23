@@ -157,6 +157,7 @@ namespace CloudStreamForms
             var thread = mainCore.CreateThread(6);
             mainCore.StartThread("PopulateSubtitles", () => {
                 try {
+
                     string data = mainCore.DownloadSubtitle(currentChromeData.episodeId, lang, false, true); // MovieResult.GetId(episodeResult, chromeMovieResult)
                     if (data.IsClean()) {
                         if (!ContainsLang()) {
@@ -300,7 +301,7 @@ namespace CloudStreamForms
                 MirrorsUrls = episodeResult.mirrosUrls,
                 titleName = movie.title.name,
                 movieType = movie.title.movieType
-            })  ;
+            });
         }
 
         public static ChromeCastPage CreateChromePage(DownloadEpisodeInfo info)
@@ -313,7 +314,7 @@ namespace CloudStreamForms
                 episodeId = info.episodeIMDBId,
                 episodePosterUrl = info.hdPosterUrl,
                 episodeTitleName = info.name,
-                hdPosterUrl = header.hdPosterUrl,
+                hdPosterUrl = header.movieType == MovieType.YouTube ? info.hdPosterUrl : header.hdPosterUrl,
                 headerId = info.source,
                 season = info.season,
                 isFromFile = true,
@@ -434,6 +435,12 @@ namespace CloudStreamForms
                 Grid.SetColumn(Subbutton, 0);
                 Grid.SetColumn(StopAll, 1);
                 Grid.SetColumn(Audio, 2);
+
+                if (currentChromeData.movieType == MovieType.YouTube) {
+                    Subbutton.IsEnabled = false;
+                    Subbutton.Opacity = 0;
+                    //TODO Add youtube subtitles download
+                }
             }
             else {
                 PlayList.Clicked += async (o, e) => {

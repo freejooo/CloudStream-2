@@ -66,7 +66,7 @@
 					</Grid.ColumnDefinitions>
 
 
-					<Entry Grid.Row="1" x:Name="InputF" Margin="20" WidthRequest="200" FontSize="20" HeightRequest="50" MinimumHeightRequest="50"></Entry>
+					<Entry Grid.Row="1" x:Name="InputF" Margin="20" WidthRequest="200" FontSize="20" HeightRequest="50" MinimumHeightRequest="50" ></Entry>
 					<Grid Grid.Column="1" Grid.Row="1" BackgroundColor="Transparent" x:Name="OffsetButtons">
 						<ImageButton  x:Name="UpButton"  BackgroundColor="Transparent" WidthRequest="30" HeightRequest="30" ></ImageButton>
 						<ImageButton Grid.Row="1" Rotation="180" x:Name="DownButton" BackgroundColor="Transparent" WidthRequest="30" HeightRequest="30" ></ImageButton>
