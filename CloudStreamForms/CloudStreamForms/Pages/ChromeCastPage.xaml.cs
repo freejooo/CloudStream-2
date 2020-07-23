@@ -18,14 +18,16 @@ namespace CloudStreamForms
     [XamlCompilation(XamlCompilationOptions.Compile)]
     public partial class ChromeCastPage : ContentPage
     {
-        public EpisodeResult episodeResult;
-        public Movie chromeMovieResult;
+        //   public EpisodeResult episodeResult;
+        //     public Movie chromeMovieResult;
 
         public string TitleName { set { NameLabel.Text = value; } }
         public string DescriptName { set { EpsodeName.Text = value; } }
         public string EpisodeTitleName { set { EpTitleLabel.Text = value; } }
         public string EpisodePosterUrl { set {/* EpisodePoster.Source = value; */} }
         public string EpisodeDescription { set { EpTitleDescript.Text = value; /* EpisodePoster.Source = value; */} }
+
+        public string DescriptSetName { get { return currentChromeData.isFromFile ? (currentChromeData.movieType.IsMovie() ? $"{currentChromeData.episodeTitleName}" : $"S{currentChromeData.season}:E{currentChromeData.episode} - {currentChromeData.episodeTitleName}") : currentChromeData.MirrorsNames[currentSelected]; } }
 
         public string PosterUrl { set { Poster.Source = value; } }
         public int IconSize { set; get; } = 48;
@@ -155,7 +157,7 @@ namespace CloudStreamForms
             var thread = mainCore.CreateThread(6);
             mainCore.StartThread("PopulateSubtitles", () => {
                 try {
-                    string data = mainCore.DownloadSubtitle(MovieResult.GetId(episodeResult, chromeMovieResult), lang, false, true);
+                    string data = mainCore.DownloadSubtitle(currentChromeData.episodeId, lang, false, true); // MovieResult.GetId(episodeResult, chromeMovieResult)
                     if (data.IsClean()) {
                         if (!ContainsLang()) {
                             lock (subtitleMutex) {
@@ -186,24 +188,25 @@ namespace CloudStreamForms
             while (!succ) {
                 currentSelected++;
 
-                if (currentSelected >= episodeResult.Mirros.Count) {
+                if (currentSelected >= currentChromeData.MirrorsNames.Count) {
                     succ = true;
                 }
                 else {
                     try {
-                        DescriptName = episodeResult.Mirros[currentSelected];
+                        DescriptName = DescriptSetName;//currentChromeData.MirrorsNames[currentSelected];
                     }
                     catch (Exception) {
 
                     }
 
+                    /*
                     string _sub = "";
                     if (chromeMovieResult.subtitles != null) {
                         if (chromeMovieResult.subtitles.Count > 0) {
                             _sub = chromeMovieResult.subtitles[0].data;
                         }
                     }
-
+                    */
                     if (MainChrome.CurrentTime > 120) {
                         changeTime = MainChrome.CurrentTime;
                         print("CHANGE TIME TO " + changeTime);
@@ -213,12 +216,13 @@ namespace CloudStreamForms
                     if (subtitleIndex != -1 && HasSubtitlesOn) {
                         subTxt = subtitles[subtitleIndex].data;
                     }
-                    succ = await MainChrome.CastVideo(episodeResult.mirrosUrls[currentSelected], episodeResult.Mirros[currentSelected], subtitleUrl: subTxt, posterUrl: chromeMovieResult.title.hdPosterUrl, movieTitle: chromeMovieResult.title.name, setTime: changeTime, subtitleDelay: subtitleDelay);
+                    //   succ = await MainChrome.CastVideo(episodeResult.mirrosUrls[currentSelected], episodeResult.Mirros[currentSelected], subtitleUrl: subTxt, posterUrl: chromeMovieResult.title.hdPosterUrl, movieTitle: chromeMovieResult.title.name, setTime: changeTime, subtitleDelay: subtitleDelay);
+                    succ = await MainChrome.CastVideo(currentChromeData.MirrorsUrls[currentSelected], currentChromeData.MirrorsNames[currentSelected], subtitleUrl: subTxt, posterUrl: currentChromeData.hdPosterUrl, movieTitle: currentChromeData.titleName, setTime: changeTime, subtitleDelay: subtitleDelay);
 
                 }
             }
             try {
-                DescriptName = episodeResult.Mirros[currentSelected];
+                DescriptName = DescriptSetName;// currentChromeData.MirrorsNames[currentSelected];//episodeResult.Mirros[currentSelected];
             }
             catch (Exception) {
 
@@ -260,16 +264,77 @@ namespace CloudStreamForms
         static string lastId = "";
         static List<Subtitle> lastSubtitles = new List<Subtitle>();
 
-        public ChromeCastPage()
+        public struct ChromecastData
         {
+            public string episodeId;
+            public string headerId;
+            public int episode;
+            public int season;
+            public bool isFromFile;
+            public List<string> MirrorsUrls;
+            public List<string> MirrorsNames;
+
+            public string titleName;
+            public string episodeTitleName;
+            public string descript;
+            public string hdPosterUrl;
+            public string episodePosterUrl;
+            public MovieType movieType;
+        }
+
+        public static ChromecastData currentChromeData;
+
+        public static ChromeCastPage CreateChromePage(EpisodeResult episodeResult, Movie movie)
+        {
+            return new ChromeCastPage(new ChromecastData() {
+                descript = episodeResult.Description,
+                episode = episodeResult.Episode,
+                episodeId = MovieResult.GetId(episodeResult, movie),
+                episodePosterUrl = episodeResult.PosterUrl,
+                episodeTitleName = episodeResult.OgTitle,
+                hdPosterUrl = movie.title.hdPosterUrl,
+                headerId = movie.title.id,
+                season = episodeResult.Season,
+                isFromFile = false,
+                MirrorsNames = episodeResult.Mirros,
+                MirrorsUrls = episodeResult.mirrosUrls,
+                titleName = movie.title.name,
+                movieType = movie.title.movieType
+            })  ;
+        }
+
+        public static ChromeCastPage CreateChromePage(DownloadEpisodeInfo info)
+        {
+            var header = Download.downloadHeaders[info.downloadHeader];
+
+            return new ChromeCastPage(new ChromecastData() {
+                descript = info.description,
+                episode = info.episode,
+                episodeId = info.episodeIMDBId,
+                episodePosterUrl = info.hdPosterUrl,
+                episodeTitleName = info.name,
+                hdPosterUrl = header.hdPosterUrl,
+                headerId = info.source,
+                season = info.season,
+                isFromFile = true,
+                MirrorsNames = null,
+                MirrorsUrls = null,
+                titleName = header.name,
+                movieType = header.movieType,
+            });
+        }
+
+        public ChromeCastPage(ChromecastData data)
+        {
+            currentChromeData = data;
             isActive = true;
-            episodeResult = MovieResult.chromeResult;
-            chromeMovieResult = MovieResult.chromeMovieResult;
+            //episodeResult = MovieResult.chromeResult;
+            //  chromeMovieResult = MovieResult.chromeMovieResult;
 
             InitializeComponent();
 
-            if (lastId != chromeMovieResult.title.id) {
-                lastId = chromeMovieResult.title.id;
+            if (lastId != currentChromeData.episodeId) {//chromeMovieResult.title.id) {
+                lastId = currentChromeData.episodeId;//chromeMovieResult.title.id;
                 subtitles = new List<Subtitle>();
                 subtitleDelay = 0;
                 subtitleIndex = -1;
@@ -285,17 +350,17 @@ namespace CloudStreamForms
 
             Subbutton.Source = App.GetImageSource("outline_subtitles_white_48dp.png");
             BindingContext = this;
-            TitleName = chromeMovieResult.title.name;
-            EpisodeTitleName = episodeResult.Title;
-            PosterUrl = CloudStreamCore.ConvertIMDbImagesToHD(chromeMovieResult.title.hdPosterUrl, 150, 225);
-            EpisodePosterUrl = episodeResult.PosterUrl;
-            EpisodeDescription = episodeResult.Description;
+            TitleName = currentChromeData.titleName;//chromeMovieResult.title.name;
+            EpisodeTitleName = currentChromeData.episodeTitleName;//episodeResult.Title;
+            PosterUrl = CloudStreamCore.ConvertIMDbImagesToHD(currentChromeData.hdPosterUrl, 150, 225);//chromeMovieResult.title.hdPosterUrl, 150, 225);
+            EpisodePosterUrl = currentChromeData.episodePosterUrl;//episodeResult.PosterUrl;
+            EpisodeDescription = currentChromeData.descript;//episodeResult.Description;
             BackgroundColor = Settings.BlackRBGColor;
             //  CloudStreamForms.MainPage.mainPage.BarBackgroundColor = Color.Transparent;
             ChromeLabel.Text = "Connected to " + MainChrome.chromeRecivever.FriendlyName;
 
             try {
-                DescriptName = episodeResult.Mirros[currentSelected];
+                DescriptName = DescriptSetName;// currentChromeData.MirrorsNames[currentSelected];//episodeResult.Mirros[currentSelected];
             }
             catch (Exception _ex) {
                 print("ERROR LOADING MIRROR " + _ex);
@@ -353,35 +418,53 @@ namespace CloudStreamForms
                 OnStop();
             };
 
-            SkipForward.Clicked += async (o, e) => {
-                currentSelected++;
-                if (currentSelected > episodeResult.Mirros.Count) { currentSelected = 0; }
-                SelectMirror();
-                await SkipForward.TranslateTo(6, 0, 50, Easing.SinOut);
-                await SkipForward.TranslateTo(0, 0, 50, Easing.SinOut);
-            };
+            if (currentChromeData.isFromFile) {
+                UpperIconHolder.TranslationX = 15;
+                LowerIconHolder.ColumnSpacing = 40;
 
-            SkipBack.Clicked += async (o, e) => {
-                currentSelected--;
-                if (currentSelected < 0) { currentSelected = episodeResult.Mirros.Count - 1; }
-                SelectMirror();
-                await SkipBack.TranslateTo(-6, 0, 50, Easing.SinOut);
-                await SkipBack.TranslateTo(0, 0, 50, Easing.SinOut);
-            };
+                PlayList.IsEnabled = false;
+                PlayList.IsVisible = false;
 
-            PlayList.Clicked += async (o, e) => {
-                //ListScale();
-                string a = await ActionPopup.DisplayActionSheet("Select Mirror", episodeResult.Mirros.ToArray()); //await DisplayActionSheet("Select Mirror", "Cancel", null, episodeResult.Mirros.ToArray());
-                                                                                                                  //ListScale();
+                SkipForward.IsEnabled = false;
+                SkipForward.IsVisible = false;
 
-                for (int i = 0; i < episodeResult.Mirros.Count; i++) {
-                    if (a == episodeResult.Mirros[i]) {
-                        currentSelected = i;
-                        SelectMirror();
-                        return;
+                SkipBack.IsEnabled = false;
+                SkipBack.IsVisible = false;
+
+                Grid.SetColumn(Subbutton, 0);
+                Grid.SetColumn(StopAll, 1);
+                Grid.SetColumn(Audio, 2);
+            }
+            else {
+                PlayList.Clicked += async (o, e) => {
+                    //ListScale();
+                    string a = await ActionPopup.DisplayActionSheet("Select Mirror", currentChromeData.MirrorsNames.ToArray()); //await DisplayActionSheet("Select Mirror", "Cancel", null, episodeResult.Mirros.ToArray());
+                                                                                                                                //ListScale();
+                    for (int i = 0; i < currentChromeData.MirrorsNames.Count; i++) {
+                        if (a == currentChromeData.MirrorsNames[i]) {
+                            currentSelected = i;
+                            SelectMirror();
+                            return;
+                        }
                     }
-                }
-            };
+                };
+
+                SkipForward.Clicked += async (o, e) => {
+                    currentSelected++;
+                    if (currentSelected > currentChromeData.MirrorsNames.Count) { currentSelected = 0; }
+                    SelectMirror();
+                    await SkipForward.TranslateTo(6, 0, 50, Easing.SinOut);
+                    await SkipForward.TranslateTo(0, 0, 50, Easing.SinOut);
+                };
+
+                SkipBack.Clicked += async (o, e) => {
+                    currentSelected--;
+                    if (currentSelected < 0) { currentSelected = currentChromeData.MirrorsNames.Count - 1; }
+                    SelectMirror();
+                    await SkipBack.TranslateTo(-6, 0, 50, Easing.SinOut);
+                    await SkipBack.TranslateTo(0, 0, 50, Easing.SinOut);
+                };
+            }
             ConstUpdate();
 
             MainChrome.Volume = (MainChrome.Volume);
@@ -447,7 +530,7 @@ namespace CloudStreamForms
 
         protected override void OnDisappearing()
         {
-            string lastId = MovieResult.GetId(episodeResult, chromeMovieResult);
+            string lastId = currentChromeData.episodeId;//MovieResult.GetId(episodeResult, chromeMovieResult);
 
             print("SETTITME::: : " + lastId + "|" + (long)(MainChrome.CurrentTime * 1000) + "|" + (long)(MainChrome.CurrentCastingDuration * 1000));
             App.SetViewPos(lastId, (long)(MainChrome.CurrentTime * 1000));

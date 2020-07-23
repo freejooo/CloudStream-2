@@ -550,10 +550,10 @@ namespace CloudStreamForms
                 //long dur = App.GetKey(VIEW_TIME_DUR, episodeId, -1L);
                 print("MAINPOS: " + pos + "|" + episodeId);
                 if (pos != -1L) {// && dur != -1L) {
-                    RequestVlc(new List<string>() { file }, new List<string>() { name }, name, episodeId, startId: pos);
+                    RequestVlc(new List<string>() { file }, new List<string>() { name }, name, episodeId, startId: pos,overrideSelectVideo:false);
                 }
                 else {
-                    RequestVlc(new List<string>() { file }, new List<string>() { name }, name, episodeId);
+                    RequestVlc(new List<string>() { file }, new List<string>() { name }, name, episodeId,overrideSelectVideo:false);
                 }
                 return;
             }
@@ -595,10 +595,44 @@ namespace CloudStreamForms
         public static async Task HandleEpisodeTapped(int key, Page p)
         {
             DownloadInfo info = downloads[key];
-            string action = await ActionPopup.DisplayActionSheet(info.info.name, "Play", "Delete File", "Open Source");//await p.DisplayActionSheet(info.info.name, "Cancel", null, "Play", "Delete File", "Open Source");
+            List<string> actions = new List<string>() {
+                 "Play in App","Play External App", "Delete File", "Open Source"
+            };
 
-            if (action == "Play") {
-                PlayDownloadedFile(info);
+            if (!MainChrome.IsConnectedToChromeDevice && MainChrome.allChromeDevices.Count() > 0) {
+                actions.Insert(0, "Connect to Chromecast");
+            }
+            else if (MainChrome.IsConnectedToChromeDevice) {
+                actions.Insert(0, "Disconnect");
+                actions.Insert(0, "Chromecast");
+            }
+
+            string action = await ActionPopup.DisplayActionSheet(info.info.name, actions.ToArray());//await p.DisplayActionSheet(info.info.name, "Cancel", null, "Play", "Delete File", "Open Source");
+
+            if (action == "Connect to Chromecast") {
+                List<string> names = MainChrome.GetChromeDevicesNames();
+                //   if (MainChrome.IsConnectedToChromeDevice) { names.Add("Disconnect"); }
+                string a = await ActionPopup.DisplayActionSheet("Cast to", names.ToArray());//await DisplayActionSheet("Cast to", "Cancel", MainChrome.IsConnectedToChromeDevice ? "Disconnect" : null, names.ToArray());
+                if (a != "Cancel") {
+                    MainChrome.ConnectToChromeDevice(a);
+                }
+            }
+            else if (action == "Disconnect") {
+                MainChrome.ConnectToChromeDevice("Disconnect");
+            }
+            else if (action == "Chromecast") {
+                var header = downloadHeaders[info.info.downloadHeader];
+                 
+                await MainChrome.CastVideo(info.info.fileUrl, info.info.name, posterUrl: header.posterUrl, movieTitle: header.name, fromFile: true);
+
+                Page _p = ChromeCastPage.CreateChromePage(info.info); //{ episodeResult = new EpisodeResult() { }, chromeMovieResult = new Movie() { } };
+                MainPage.mainPage.Navigation.PushModalAsync(_p, false);
+            }
+            else if (action == "Play External App") {
+                PlayDownloadedFile(info, true);
+            }
+            else if (action == "Play in App") {
+                PlayDownloadedFile(info, false);
                 // PlayVLCFile(info.info.fileUrl, info.info.name, info.info.id.ToString());
                 //App.PlayVLCWithSingleUrl(, overrideSelectVideo: false);
             }

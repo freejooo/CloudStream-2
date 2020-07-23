@@ -151,7 +151,7 @@ namespace CloudStreamForms.Core
 
         public static bool IsMovie(this MovieType mtype)
         {
-            return mtype == MovieType.AnimeMovie || mtype == MovieType.Movie;
+            return mtype == MovieType.AnimeMovie || mtype == MovieType.Movie || mtype == MovieType.YouTube;
         }
 
         /// <summary>

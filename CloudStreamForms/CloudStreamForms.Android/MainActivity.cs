@@ -562,6 +562,8 @@ namespace CloudStreamForms.Droid
         /// <param name="resumeIntent"></param>
         public static void HandleIntent(int id, List<string> mirrorNames, List<string> mirrorUrls, int mirror, string title, string path, string poster, string fileName, string beforeTxt, bool openWhenDone, bool showNotificaion, bool showDoneNotificaion, bool showDoneAsToast, bool resumeIntent)
         {
+            const int UPDATE_TIME = 1;
+
             try {
                 fileName = CensorFilename(fileName);
 
@@ -580,6 +582,8 @@ namespace CloudStreamForms.Droid
 
                 int progress = 0;
 
+                int bytesPerSec = 0;
+
                 void UpdateDloadNot(string progressTxt)
                 {
                     //poster != ""
@@ -590,7 +594,7 @@ namespace CloudStreamForms.Droid
                         int isPause = isPaused[id];
                         bool canPause = isPause == 0;
                         if (isPause != 2) {
-                            ShowLocalNot(new LocalNot() { actions = new List<LocalAction>() { new LocalAction() { action = $"handleDownload|||id={id}|||dType={(canPause ? 1 : 0)}|||", name = canPause ? "Pause" : "Resume" }, new LocalAction() { action = $"handleDownload|||id={id}|||dType=2|||", name = "Stop" } }, mediaStyle = false, bigIcon = poster, title = title, autoCancel = false, showWhen = false, onGoing = canPause, id = id, smallIcon = Resource.Drawable.bicon, progress = progress, body = progressTxt }, context); //canPause
+                            ShowLocalNot(new LocalNot() { actions = new List<LocalAction>() { new LocalAction() { action = $"handleDownload|||id={id}|||dType={(canPause ? 1 : 0)}|||", name = canPause ? "Pause" : "Resume" }, new LocalAction() { action = $"handleDownload|||id={id}|||dType=2|||", name = "Stop" } }, mediaStyle = false, bigIcon = poster, title = $"{title} - {ConvertBytesToAny(bytesPerSec/UPDATE_TIME,2,2)} MB/s", autoCancel = false, showWhen = false, onGoing = canPause, id = id, smallIcon = Resource.Drawable.bicon, progress = progress, body = progressTxt }, context); //canPause
                         }
                     }
                     catch (Exception _ex) {
@@ -778,7 +782,6 @@ namespace CloudStreamForms.Droid
 
                                 System.DateTime lastUpdateTime = System.DateTime.Now;
                                 long lastTotal = total;
-                                const int UPDATE_TIME = 1;
 
                                 changedPause += UpdateFromId;
 
@@ -789,6 +792,7 @@ namespace CloudStreamForms.Droid
                                 bool showDone = true;
                                 while ((count = input.Read(data)) != -1) {
                                     total += count;
+                                    bytesPerSec += count;
 
                                     output.Write(data, 0, count);
                                     progressDownloads[id] = total;
@@ -840,6 +844,8 @@ namespace CloudStreamForms.Droid
                                             UpdateProgress();
                                             // UpdateDloadNot(progress + "%");
                                         }
+                                        bytesPerSec = 0;
+
                                         lastTotal = total;
                                     }
 

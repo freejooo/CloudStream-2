@@ -10,6 +10,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Xamarin.Forms;
 using static CloudStreamForms.Core.CloudStreamCore;
@@ -254,29 +255,29 @@ namespace CloudStreamForms.Core
         public static async Task StartImageChanger()
         {
             try {
-            while (true) {
-                int lastImage = int.Parse(CurrentImage.ToString());
-                if (IsPendingConnection) {
-                    CurrentImage++;
-                    if (CurrentImage > 3) {
-                        CurrentImage = 1;
+                while (true) {
+                    int lastImage = int.Parse(CurrentImage.ToString());
+                    if (IsPendingConnection) {
+                        CurrentImage++;
+                        if (CurrentImage > 3) {
+                            CurrentImage = 1;
+                        }
                     }
+                    else {
+                        CurrentImage += IsConnectedToChromeDevice ? 1 : -1;
+                    }
+                    if (CurrentImage < 0) CurrentImage = 0;
+                    if (CurrentImage > 4) CurrentImage = 4;
+                    if (!IsChromeDevicesOnNetwork) {
+                        CurrentImage = 0;
+                    }
+                    if (lastImage != CurrentImage) {
+                        Device.BeginInvokeOnMainThread(() => {
+                            OnChromeImageChanged?.Invoke(null, CurrentImageSource);
+                        });
+                    }
+                    await Task.Delay(500);
                 }
-                else {
-                    CurrentImage += IsConnectedToChromeDevice ? 1 : -1;
-                }
-                if (CurrentImage < 0) CurrentImage = 0;
-                if (CurrentImage > 4) CurrentImage = 4;
-                if (!IsChromeDevicesOnNetwork) {
-                    CurrentImage = 0;
-                }
-                if (lastImage != CurrentImage) {
-                    Device.BeginInvokeOnMainThread(() => {
-                        OnChromeImageChanged.Invoke(null, CurrentImageSource);
-                    });
-                }
-                await Task.Delay(500);
-            }
 
 
             }
@@ -459,6 +460,69 @@ namespace CloudStreamForms.Core
             return CreateSubListiner(realSubText);
         }
 
+
+        static string videoStreamPath;
+        public static void ListenerCallback(IAsyncResult result)
+        {
+            var listenerClosure = (HttpListener)result.AsyncState;
+            var contextClosure = listenerClosure.EndGetContext(result);
+
+            // do not process request on the dispatcher thread, schedule it on ThreadPool
+            // otherwise you will prevent other incoming requests from being dispatched
+            ThreadPool.QueueUserWorkItem(
+                ctx => {
+                    var response = (HttpListenerResponse)ctx;
+
+                    using (var stream = File.OpenRead(videoStreamPath)) {
+                        try {
+                            stream.CopyTo(response.OutputStream);
+
+                        }
+                        catch (Exception) {
+
+                        }
+                    }
+                    response.Close();
+                }, contextClosure.Response);
+        }
+
+        static bool videoFileThreadCreated = false;
+        public static string GenerateVideoUrlFromFile(string filepath)
+        {
+            videoStreamPath = filepath;
+            string url = $"http://{GetLocalIPAddress()}:51336/video.mp4/";
+            
+            if(videoFileThreadCreated) {
+                return url;
+            }
+
+            videoFileThreadCreated = true;
+            var thread = CloudStreamCore.mainCore.CreateThread(76);
+            mainCore.StartThread("VideoThread", () => {
+                try {
+                    using (var listener = new HttpListener()) {
+                        listener.Prefixes.Add(url);
+
+                        listener.Start();
+
+                        while (true) {
+                            if (!mainCore.GetThredActive(thread)) {
+                                print("ABORT!!!!!!!!!!!!");
+                                return;
+                            }
+                            print("Listening VIDEO...");
+                            var result = listener.BeginGetContext(ListenerCallback, listener);
+                            result.AsyncWaitHandle.WaitOne(); 
+                        }
+                    }
+                }
+                catch (Exception _ex) {
+                    print("MAMAMMAMAMMAMAMMAMA: " + _ex);
+                }
+            });
+            return url;
+        }
+
         /*
         public static async Task ToggleSubtitles(bool isEnabled, string lang = null)
         { 
@@ -479,7 +543,7 @@ namespace CloudStreamForms.Core
         static string currentMovieName = "";
 
         // Subtitle Url https://static.movies123.pro/files/tracks/JhUzWRukqeuUdRrPCe0R3lUJ1SmknAVSv670Ep0cXipm1JfMgNWa379VKKAz8nvFMq2ksu7bN5tCY5tXXKS4Lrr1tLkkipdLJNArNzVSu2g.srt
-        public static async Task<bool> CastVideo(string url, string mirrorName, double setTime = -1, string subtitleUrl = "", string subtitleName = "", string posterUrl = "", string movieTitle = "", int subtitleDelay = 0)
+        public static async Task<bool> CastVideo(string url, string mirrorName, double setTime = -1, string subtitleUrl = "", string subtitleName = "", string posterUrl = "", string movieTitle = "", int subtitleDelay = 0, bool fromFile = false)
         {
             try {
                 if (setTime == -2) {
@@ -491,16 +555,23 @@ namespace CloudStreamForms.Core
                 //chromeSender.;
                 //chromeRecivever.;
 
+                if (fromFile) {
+                    url = GenerateVideoUrlFromFile(url);
+                }
+
                 currentUrl = url;
                 currentMirrorName = mirrorName;
                 currentPosterUrl = posterUrl;
                 currentMovieName = movieTitle;
 
                 GenericMediaMetadata mediaMetadata = new GenericMediaMetadata();
+
                 RequestNextTime = setTime;
 
                 bool validSubtitle = false;
                 var mediaInfo = new MediaInformation() { ContentId = url, Metadata = mediaMetadata };
+                // mediaInfo.StreamType = fromFile ? StreamType.Live : StreamType.Buffered;
+
                 print("REALLSLSLLS:: " + subtitleUrl);
 
                 string realSub = GenerateSubUrl(subtitleUrl, subtitleDelay);

@@ -270,7 +270,8 @@ namespace CloudStreamForms
         public static void OpenChrome(bool validate = true)
         {
             if (!ChromeCastPage.isActive) {
-                Page p = new ChromeCastPage() { episodeResult = chromeResult, chromeMovieResult = chromeMovieResult };
+                 
+                Page p = ChromeCastPage.CreateChromePage(chromeResult, chromeMovieResult);// new (chromeResult, chromeMovieResult); //{ episodeResult = chromeResult, chromeMovieResult = chromeMovieResult };
                 MainPage.mainPage.Navigation.PushModalAsync(p, false);
             }
         }
@@ -726,6 +727,8 @@ namespace CloudStreamForms
         {
             episodeResult.OgTitle = episodeResult.Title;
             SetColor(episodeResult);
+            episodeResult.Season = currentSeason;
+
             /*if (episodeResult.Rating != "") {
                 episodeResult.Title += " | ★ " + episodeResult.Rating;
             }*/
@@ -857,7 +860,7 @@ namespace CloudStreamForms
                                 }
 
                                 App.UpdateDownload(GetCorrectId(episodeResult), -1);
-                                string dpath = App.RequestDownload(GetCorrectId(episodeResult), episodeResult.OgTitle, episodeResult.Description, episodeResult.Episode, currentSeason, mirrorUrls, mirrorNames, episodeResult.GetDownloadTitle(currentSeason, episodeResult.Episode) + ".mp4", episodeResult.PosterUrl, _currentMovie.title,GetId(episodeResult,_currentMovie));
+                                string dpath = App.RequestDownload(GetCorrectId(episodeResult), episodeResult.OgTitle, episodeResult.Description, episodeResult.Episode, currentSeason, mirrorUrls, mirrorNames, episodeResult.GetDownloadTitle(currentSeason, episodeResult.Episode) + ".mp4", episodeResult.PosterUrl, _currentMovie.title, GetId(episodeResult, _currentMovie));
                                 print("SETCOLOR:::");
                                 //  SetColor(epView.MyEpisodeResultCollection[_id]);
 
@@ -1457,10 +1460,10 @@ namespace CloudStreamForms
         void PlayDownloadedEp(EpisodeResult episodeResult, string data = null)
         {
             var _info = App.GetDownloadInfo(GetCorrectId(episodeResult), false);
-         //   var downloadKeyData = data ?? _info.info.fileUrl;
+            //   var downloadKeyData = data ?? _info.info.fileUrl;
             SetEpisode(episodeResult);
             Download.PlayDownloadedFile(_info);
-          //  Download.PlayVLCFile(downloadKeyData, episodeResult.Title, GetCorrectId(episodeResult).ToString());
+            //  Download.PlayVLCFile(downloadKeyData, episodeResult.Title, GetCorrectId(episodeResult).ToString());
         }
 
         /*
@@ -1747,7 +1750,7 @@ namespace CloudStreamForms
                                     App.UpdateDownload(GetCorrectId(episodeResult), -1);
                                     print("CURRENTSESON: " + currentSeason);
 
-                                    string dpath = App.RequestDownload(GetCorrectId(episodeResult), episodeResult.OgTitle, episodeResult.Description, episodeResult.Episode, currentSeason, new List<string>() { mirrorUrl }, new List<string>() { mirrorName }, episodeResult.GetDownloadTitle(currentSeason, episodeResult.Episode) + ".mp4", episodeResult.PosterUrl, currentMovie.title, GetId(episodeResult,currentMovie));
+                                    string dpath = App.RequestDownload(GetCorrectId(episodeResult), episodeResult.OgTitle, episodeResult.Description, episodeResult.Episode, currentSeason, new List<string>() { mirrorUrl }, new List<string>() { mirrorName }, episodeResult.GetDownloadTitle(currentSeason, episodeResult.Episode) + ".mp4", episodeResult.PosterUrl, currentMovie.title, GetId(episodeResult, currentMovie));
 
                                     App.ShowToast("Download Started - " + fileSize + "MB");
                                     episodeResult.downloadState = 2;
@@ -1855,7 +1858,7 @@ namespace CloudStreamForms
         {
             return int.Parse(((currentMovie.title.movieType == MovieType.TVSeries || currentMovie.title.movieType == MovieType.Anime) ? currentMovie.episodes[episodeResult.Id].id : currentMovie.title.id).Replace("tt", ""));
         }
-         
+
 
         // ============================== ID OF EPISODE ==============================
         public string GetId(EpisodeResult episodeResult)

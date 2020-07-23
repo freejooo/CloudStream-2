@@ -55,7 +55,7 @@
              
                 <BoxView VerticalOptions="FillAndExpand" ></BoxView>
                 <StackLayout Margin="0,0,0,50" >
-                    <Grid HorizontalOptions="Center" ColumnSpacing="30" Margin="10" TranslationY="-10">
+                    <Grid HorizontalOptions="Center" x:Name="UpperIconHolder" ColumnSpacing="30" Margin="10" TranslationY="-10">
                         <Grid.ColumnDefinitions >
                             <ColumnDefinition Width="Auto" />
                             <ColumnDefinition Width="Auto" />
@@ -67,7 +67,7 @@
                         <ImageButton x:Name="StopAll" Grid.Column="2" BackgroundColor="Transparent" Scale="{Binding ScaleAllBig}"  Margin="10"  ></ImageButton>
                         <ImageButton x:Name="Audio" Grid.Column="3" BackgroundColor="Transparent"  Scale="1.3"  Clicked="AudioClicked"></ImageButton>
                     </Grid>
-                    <Grid HorizontalOptions="Center" ColumnSpacing="20" >
+                    <Grid HorizontalOptions="Center" ColumnSpacing="20" x:Name="LowerIconHolder">
                         <Grid.ColumnDefinitions >
                             <ColumnDefinition Width="Auto" />
                             <ColumnDefinition Width="Auto" />
@@ -100,8 +100,8 @@
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
-                        <Label Grid.Row="0" Grid.Column="0" x:Name="StartTxt" Text="11:13" HorizontalOptions="Start"></Label>
-                        <Label Grid.Row="0" Grid.Column="2" x:Name="EndTxt" Text="54:27" HorizontalOptions="End"></Label>
+                        <Label Grid.Row="0" Grid.Column="0" x:Name="StartTxt" Text="" HorizontalOptions="Start"></Label>
+                        <Label Grid.Row="0" Grid.Column="2" x:Name="EndTxt" Text="" HorizontalOptions="End"></Label>
                     </Grid>
                     <Slider x:Name="VideoSlider" Grid.Column="1" MinimumTrackColor="#303F9F" ThumbColor="#303F9F" HorizontalOptions="Fill" Margin="0,0,0,10"></Slider>
                         <Grid HorizontalOptions="Center">
