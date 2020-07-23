@@ -13,9 +13,26 @@
         <Grid>
             <Grid.RowDefinitions >
                 <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
 
-            <Grid Grid.Row="1"  Grid.Column="0">
+            <Grid Grid.Row="1" x:Name="ChromeHolder" HeightRequest="30">
+                <Grid.ColumnDefinitions >
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                
+                <ff:CachedImage x:Name="ImgChromeCastBtt" BackgroundColor="Transparent" WidthRequest="40" HeightRequest="40" VerticalOptions="Center" HorizontalOptions="Start" Scale="0.7" TranslationX="4.6" >
+
+                </ff:CachedImage>
+                <ImageButton x:Name="ChromeCastBtt" BackgroundColor="Transparent" Clicked="ChromeCastBtt_Clicked"  WidthRequest="40" HeightRequest="40"  VerticalOptions="Center" HorizontalOptions="Start"></ImageButton>
+                <Label VerticalOptions="Center" x:Name="ChromeName" Grid.Column="1" TextColor="#e6e6e6" Text="Not connected" TranslationX="-3"></Label>
+
+            </Grid>
+            
+            <Grid Grid.Row="2"  Grid.Column="0">
 
                 <RefreshView BackgroundColor="#1D1D1D" RefreshColor="#4e66ff" Command="{Binding RefreshCommand}" 
            IsRefreshing="{Binding IsRefreshing}"         > 
@@ -141,8 +158,8 @@
                 </RefreshView>
             </Grid>
 
-            <Grid Grid.Row="0"  Grid.Column="0">
-                <Image x:Name="OffBar" InputTransparent="True" VerticalOptions="Start"></Image>
+            <Grid Grid.Row="2"  Grid.Column="0" InputTransparent="True" TranslationY="-10">
+                <Image x:Name="OffBar" InputTransparent="True" VerticalOptions="Start" ></Image>
             </Grid>
 
         </Grid>

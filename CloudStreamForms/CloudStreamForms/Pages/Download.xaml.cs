@@ -592,6 +592,8 @@ namespace CloudStreamForms
             //App.PlayVLCWithSingleUrl(file, name, overrideSelectVideo: false);
         }
 
+
+        public static DownloadEpisodeInfo chromeDownload;
         public static async Task HandleEpisodeTapped(int key, Page p)
         {
             DownloadInfo info = downloads[key];
@@ -599,11 +601,12 @@ namespace CloudStreamForms
                  "Play in App","Play External App", "Delete File", "Open Source"
             };
 
+            /*
             if (!MainChrome.IsConnectedToChromeDevice && MainChrome.allChromeDevices.Count() > 0) {
                 actions.Insert(0, "Connect to Chromecast");
             }
-            else if (MainChrome.IsConnectedToChromeDevice) {
-                actions.Insert(0, "Disconnect");
+            else*/ if (MainChrome.IsConnectedToChromeDevice) {
+               // actions.Insert(0, "Disconnect");
                 actions.Insert(0, "Chromecast");
             }
 
@@ -624,7 +627,7 @@ namespace CloudStreamForms
                 var header = downloadHeaders[info.info.downloadHeader];
                  
                 await MainChrome.CastVideo(info.info.fileUrl, info.info.name, posterUrl: header.posterUrl, movieTitle: header.name, fromFile: true);
-
+                chromeDownload = info.info;
                 Page _p = ChromeCastPage.CreateChromePage(info.info); //{ episodeResult = new EpisodeResult() { }, chromeMovieResult = new Movie() { } };
                 MainPage.mainPage.Navigation.PushModalAsync(_p, false);
             }

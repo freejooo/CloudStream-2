@@ -225,7 +225,7 @@ namespace CloudStreamForms.Core
             }
         }
 
-        static int CurrentImage = 0;
+        public static int CurrentImage = 0;
 
         public static string MultiplyString(string s, int times)
         {
@@ -360,6 +360,7 @@ namespace CloudStreamForms.Core
         {
             return inp.Contains("<font color=");
         }
+
         public static List<SubtitleItem> ParseSubtitles(string _inp)
         {
             var parser = GetSubtiteParser(_inp);
@@ -460,119 +461,56 @@ namespace CloudStreamForms.Core
             return CreateSubListiner(realSubText);
         }
 
-
         static string videoStreamPath;
-
+        static bool videoFileThreadCreated = false;
 
         static void ListWriteFile(HttpListenerContext ctx, string path)
         {
-            var p = ctx.Response;
-            var req = ctx.Request;
-            p.SendChunked = false;
-
-            using (FileStream fs = new FileStream(videoStreamPath, FileMode.Open)) {
-                 
-
-                int startByte = -1;
-                int endByte = -1;
-                if (req.Headers.AllKeys.Contains("Range")) {
-                    string rangeHeader = req.Headers["Range"].ToString().Replace("bytes=", "");
-                    string[] range = rangeHeader.Split('-');
-                    startByte = int.Parse(range[0]);
-                    if (range[1].Trim().Length > 0) int.TryParse(range[1], out endByte);
-                    if (endByte == -1) endByte = (int)fs.Length;//<startByte + 1024;//
-                }
-                else {
-                    startByte = 0;
-                    endByte = (int)fs.Length;
-                }
-                byte[] buffer = new byte[endByte - startByte];
-                fs.Position = startByte;
-                //fs.Seek(startByte, SeekOrigin.Begin);
-                int read = fs.Read(buffer, 0, endByte - startByte);
-                //fs.Flush();
-                fs.Close();
-                p.StatusCode = 206;
-                p.StatusDescription = ("Partial Content");
-                
-                p.ContentType = "video/mp4";
-                p.AddHeader("Accept-Ranges", "bytes");
-                int totalCount = startByte + buffer.Length;
-                p.AddHeader("Content-Range", string.Format("bytes {0}-{1}/{2}", startByte, totalCount - 1, totalCount));
-                p.ContentLength64 = (buffer.Length);
-                print("BUFFERSEND: " + startByte + "|" + endByte + "|" + buffer.Length);
-                p.KeepAlive = true;
-                // p.Close(buffer, true); 
-                p.OutputStream.Write(buffer, 0, buffer.Length);
-                p.OutputStream.Flush();
-            }
-            /*
-using (FileStream fs = File.OpenRead(path)) {
-    string filename = Path.GetFileName(path);
-    //response is HttpListenerContext.Response...
-    response.ContentLength64 = fs.Length;
-    response.SendChunked = true;
-    response.ContentType = System.Net.Mime.MediaTypeNames.Application.Octet;
-    //response.AddHeader("Content-disposition", "attachment; filename=" + filename);
-
-    byte[] buffer = new byte[64 * 1024];
-    int read;
-    int countos = 0;
-  //  fs.CopyTo(response.OutputStream);
-
-
-
-    using (BinaryWriter bw = new BinaryWriter(response.OutputStream)) {
-
-        while ((read = fs.Read(buffer, 0, buffer.Length)) > 0) {
-            countos += read;
             try {
+                var p = ctx.Response;
+                var req = ctx.Request;
+                p.SendChunked = false;
 
-            print("COUNNTNTNT: " + countos + "|" + );
-            }
-            catch (Exception _ex) {
-
-                print("MAIN EX:: :: : :: : " + _ex);
-
-            }
-
-            bw.Write(buffer, 0, read);
-            bw.Flush(); //seems to have no effect
-        }
-
-        bw.Close();
-    }
-
-    response.StatusCode = (int)HttpStatusCode.OK;
-    response.StatusDescription = "OK";
-    response.OutputStream.Close();
-}*/
-        }
-
-        public static void ListenerCallback(IAsyncResult result)
-        {
-            var listenerClosure = (HttpListener)result.AsyncState;
-            var contextClosure = listenerClosure.EndGetContext(result);
-
-            // do not process request on the dispatcher thread, schedule it on ThreadPool
-            // otherwise you will prevent other incoming requests from being dispatched
-            ThreadPool.QueueUserWorkItem(
-                ctx => {
-                    var response = (HttpListenerResponse)ctx;
-
-                    using (var stream = File.OpenRead(videoStreamPath)) {
-                        try {
-                            stream.CopyTo(response.OutputStream);
-                        }
-                        catch (Exception) {
-
-                        }
+                using (FileStream fs = new FileStream(videoStreamPath, FileMode.Open)) {
+                    int startByte = -1;
+                    int endByte = -1;
+                    if (req.Headers.AllKeys.Contains("Range")) {
+                        string rangeHeader = req.Headers["Range"].ToString().Replace("bytes=", "");
+                        string[] range = rangeHeader.Split('-');
+                        startByte = int.Parse(range[0]);
+                        if (range[1].Trim().Length > 0) int.TryParse(range[1], out endByte);
+                        if (endByte == -1) endByte = (int)fs.Length;//<startByte + 1024;//
                     }
-                    response.Close();
-                }, contextClosure.Response);
-        }
+                    else {
+                        startByte = 0;
+                        endByte = (int)fs.Length;
+                    }
+                    byte[] buffer = new byte[endByte - startByte];
+                    fs.Position = startByte;
+                    //fs.Seek(startByte, SeekOrigin.Begin);
+                    int read = fs.Read(buffer, 0, endByte - startByte);
+                    fs.Flush();
+                    fs.Close();
+                    p.StatusCode = 206;
+                    p.StatusDescription = ("Partial Content");
 
-        static bool videoFileThreadCreated = false;
+                    p.ContentType = "video/mp4";
+                    p.AddHeader("Accept-Ranges", "bytes");
+                    int totalCount = startByte + buffer.Length;
+                    p.AddHeader("Content-Range", string.Format("bytes {0}-{1}/{2}", startByte, totalCount - 1, totalCount));
+                    p.ContentLength64 = (buffer.Length);
+                    print("BUFFERSEND: " + startByte + "|" + endByte + "|" + buffer.Length);
+                    p.KeepAlive = true;
+                    // p.Close(buffer, true); 
+                    p.OutputStream.Write(buffer, 0, buffer.Length);
+                    p.OutputStream.Flush();
+                }
+
+            }
+            catch (Exception _ex) { 
+                error(_ex);
+            }
+        }
 
         public static string GenerateVideoUrlFromFile(string filepath)
         {
@@ -595,10 +533,17 @@ using (FileStream fs = File.OpenRead(path)) {
                         // Task.Factory.StartNew(() =>
                         // {
                         while (true) {
-                            HttpListenerContext context = listener.GetContext();
-                            Task.Factory.StartNew((ctx) => {
-                                ListWriteFile((HttpListenerContext)ctx, videoStreamPath);
-                            }, context, TaskCreationOptions.LongRunning);
+                            try {
+
+                                HttpListenerContext context = listener.GetContext();
+                                Task.Factory.StartNew((ctx) => {
+                                    ListWriteFile((HttpListenerContext)ctx, videoStreamPath);
+                                }, context, TaskCreationOptions.LongRunning);
+
+                            }
+                            catch (Exception _ex) {
+                                error(_ex);
+                            }
                         }
                         // }, TaskCreationOptions.LongRunning);
 
@@ -632,7 +577,17 @@ using (FileStream fs = File.OpenRead(path)) {
 
         public static async Task<bool> ChangeSubtitles(string subFile, string name, int delay = 0)
         {
-            bool suc = await CastVideo(currentUrl, currentMirrorName, -2, subFile, name, currentPosterUrl, currentMovieName, delay);
+            bool done = false;
+            bool suc = false;
+            Thread t = new Thread(async () => {
+                suc = await CastVideo(currentUrl, currentMirrorName, -2, subFile, name, currentPosterUrl, currentMovieName, delay);
+                done = true;
+            });
+            t.Start();
+            while (!done) {
+                await Task.Delay(100);
+            }
+
             /*if (suc) {
                 await ToggleSubtitles(true);
             }*/

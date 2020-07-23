@@ -1,4 +1,5 @@
-﻿using CloudStreamForms.Models;
+﻿using CloudStreamForms.Core;
+using CloudStreamForms.Models;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -82,6 +83,47 @@ namespace CloudStreamForms
             //PlayEpisode(episodeResult);
         }*/
 
+        private void ChromeCastBtt_Clicked(object sender, EventArgs e)
+        {
+            WaitChangeChromeCast();
+        }
+
+        async void WaitChangeChromeCast()
+        {
+            if (MainChrome.IsCastingVideo) {
+                Device.BeginInvokeOnMainThread(() => {
+                    OpenChromecastView(1, EventArgs.Empty);
+                });
+            }
+            else {
+                List<string> names = MainChrome.GetChromeDevicesNames();
+                if (MainChrome.IsConnectedToChromeDevice) { names.Add("Disconnect"); }
+                string a = await ActionPopup.DisplayActionSheet("Cast to", names.ToArray());//await DisplayActionSheet("Cast to", "Cancel", MainChrome.IsConnectedToChromeDevice ? "Disconnect" : null, names.ToArray());
+                if (a != "Cancel") {
+                    MainChrome.ConnectToChromeDevice(a);
+                }
+            }
+        }
+
+        private void OpenChromecastView(object sender, EventArgs e)
+        {
+            if (sender != null) {
+                ChromeCastPage.isActive = false;
+            }
+            if (!ChromeCastPage.isActive) {
+                OpenChrome(false);
+            }
+        }
+
+        public static void OpenChrome(bool validate = true)
+        {
+            if (!ChromeCastPage.isActive && Download.chromeDownload != null) {
+                Page p = ChromeCastPage.CreateChromePage(Download.chromeDownload);// new (chromeResult, chromeMovieResult); //{ episodeResult = chromeResult, chromeMovieResult = chromeMovieResult };
+                MainPage.mainPage.Navigation.PushModalAsync(p, false);
+            }
+        }
+
+
 
         void UpdateEpisodes()
         {
@@ -133,10 +175,11 @@ namespace CloudStreamForms
                                 Id = info.info.id,
                                 PosterUrl = info.info.hdPosterUrl,
                                 Progress = _progress,
-                                TapCom = new Command((s) => { if (info.info.dtype == App.DownloadType.Normal) MovieResult.SetEpisode("tt" + info.info.id);
+                                TapCom = new Command((s) => {
+                                    if (info.info.dtype == App.DownloadType.Normal) MovieResult.SetEpisode("tt" + info.info.id);
                                     Download.PlayDownloadedFile(info);
                                     //Download.PlayDownloadedFile(fileUrl, fileName, info.info.episode, info.info.season, info.info.episodeIMDBId, info.info.source);
-                                   // Download.PlayVLCFile(fileUrl, fileName, info.info.id.ToString()); 
+                                    // Download.PlayVLCFile(fileUrl, fileName, info.info.id.ToString()); 
                                 }),
                                 DownloadPlayBttSource = App.GetImageSource("nexflixPlayBtt.png")
                             });
@@ -174,6 +217,39 @@ namespace CloudStreamForms
         {
             base.OnAppearing();
             UpdateEpisodes();
+
+            ImgChromeCastBtt.Source = App.GetImageSource(MainChrome.CurrentImageSource);
+            void UpdateVisual()
+            {
+                if (MainChrome.IsConnectedToChromeDevice) {
+                    ChromeName.Text = "Connected to " + MainChrome.chromeRecivever.FriendlyName;
+                }
+                else {
+                    ChromeName.Text = "Not connected";
+                }
+                ChromeName.TextColor = MainChrome.CurrentImage > 0 ? Color.FromHex(MainPage.LIGHT_BLUE_COLOR) : Color.FromHex("#e6e6e6");
+            }
+            UpdateVisual();
+            MainChrome.OnChromeImageChanged += (o, e) => {
+                ImgChromeCastBtt.Source = App.GetImageSource(e);
+                UpdateVisual();
+            };
+
+
+            print("CONTAINS::: " + MainChrome.IsChromeDevicesOnNetwork);
+            void ChromeUpdate()
+            {
+                ChromeHolder.IsVisible = MainChrome.IsChromeDevicesOnNetwork;
+                ChromeHolder.IsEnabled = ChromeHolder.IsVisible;
+            }
+
+            ChromeUpdate();
+            MainChrome.OnChromeDevicesFound += (o, e) => {
+                ChromeUpdate();
+            };
+
+           // MainChrome.GetAllChromeDevices();
+
             App.ForceUpdateVideo += ForceUpdateAppearing;
 
             if (Device.RuntimePlatform == Device.UWP) {
