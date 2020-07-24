@@ -1,4 +1,6 @@
-﻿using CloudStreamForms.Core.AnimeProviders;
+﻿using AniListAPI;
+using AniListAPI.Model;
+using CloudStreamForms.Core.AnimeProviders;
 using HtmlAgilityPack.CssSelectors.NetCore;
 using Jint;
 using Newtonsoft.Json;
@@ -5248,7 +5250,7 @@ namespace CloudStreamForms.Core
                     real = RemoveOne(real, lookFor);
                     string name = FindHTML(real, "\">", "<");
                     string href = "https://fmovies.to" + FindHTML(real, "href=\"", "\"");
-                    if(mkey == "") {
+                    if (mkey == "") {
                         mkey = core.GetMcloudKey(href);
                     }
 
@@ -6053,6 +6055,21 @@ namespace CloudStreamForms.Core
             return $"https://{slug}.{FindHTML(d, "\"url\":\"", "\"")}";
         }
 
+        static string[] shortdates = new string[] {
+                                "Jan",
+                                "Feb",
+                                "Mar",
+                                "Apr",
+                                "May",
+                                "Jun",
+                                "Jul",
+                                "Aug",
+                                "Sep",
+                                "Oct",
+                                "Nov",
+                                "Dec",
+                            };
+
         public void GetMALData(bool cacheData = true)
         {
             bool fetchData = true;
@@ -6060,167 +6077,256 @@ namespace CloudStreamForms.Core
                 if (App.KeyExists("CacheMAL", activeMovie.title.id)) {
                     fetchData = false;
                     activeMovie.title.MALData = App.GetKey<MALData>("CacheMAL", activeMovie.title.id, new MALData());
-                    if (activeMovie.title.MALData.currentActiveGoGoMaxEpsPerSeason == null) {
-                        fetchData = true;
-                    }
                 }
             }
+
             TempThread tempThred = CreateThread(2);
-            StartThread("MALDATA", () => {
+            StartThread("MALDATA", async () => {
                 try {
                     string currentSelectedYear = "";
-
-                    if (fetchData) {
-                        string year = activeMovie.title.year.Substring(0, 4); // this will not work in 8000 years time :)
-                        string _d = DownloadString("https://myanimelist.net/search/prefix.json?type=anime&keyword=" + activeMovie.title.name, tempThred);
-                        string url = "";
-                        if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
-
-                        //string lookFor = "\"name\":\"";
-                        //bool done = false;
-                        var f = JsonConvert.DeserializeObject<MALQuickSearch>(_d);
-
+ 
+                    async Task FetchMal()
+                    {
                         try {
-                            var items = f.categories[0].items;
-                            for (int i = 0; i < items.Length; i++) {
-                                var item = items[i];
-                                string _year = item.payload.start_year.ToString();
-                                if (!item.name.Contains(" Season") && !item.name.EndsWith("Specials") && _year == year && item.payload.score != "N/A") {
-                                    url = item.url;
-                                    currentSelectedYear = _year;
-                                    break;
+                            string year = activeMovie.title.year.Substring(0, 4); // this will not work in 8000 years time :)
+                            string _d = DownloadString("https://myanimelist.net/search/prefix.json?type=anime&keyword=" + activeMovie.title.name, tempThred);
+                            string url = "";
+                            if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
+
+                            //string lookFor = "\"name\":\"";
+                            //bool done = false;
+                            var f = JsonConvert.DeserializeObject<MALQuickSearch>(_d);
+
+                            try {
+                                var items = f.categories[0].items;
+                                for (int i = 0; i < items.Length; i++) {
+                                    var item = items[i];
+                                    string _year = item.payload.start_year.ToString();
+                                    if (!item.name.Contains(" Season") && !item.name.EndsWith("Specials") && _year == year && item.payload.score != "N/A") {
+                                        url = item.url;
+                                        currentSelectedYear = _year;
+                                        break;
+                                    }
                                 }
+                            }
+                            catch (Exception _ex) {
+                                print("EROROOROROROOR::" + _ex);
+                            }
+
+
+                            /*
+                            while (_d.Contains(lookFor) && !done) { // TO FIX MY HERO ACADIMEA CHOOSING THE SECOND SEASON BECAUSE IT WAS FIRST SEARCHRESULT
+                                string name = FindHTML(_d, lookFor, "\"");
+                                print("NAME FOUND: " + name);
+                                if (!name.EndsWith("Specials")) {
+                                    string _url = FindHTML(_d, "url\":\"", "\"").Replace("\\/", "/");
+                                    string startYear = FindHTML(_d, "start_year\":", ",");
+                                    string aired = FindHTML(_d, "aired\":\"", "\"");
+                                    string _aired = FindHTML(aired, ", ", " ", readToEndOfFile: true);
+                                    string score = FindHTML(_d, "score\":\"", "\"");
+                                    print("SCORE:" + score);
+                                    if (!name.Contains(" Season") && year == _aired && score != "N\\/A") {
+                                        print("URL FOUND: " + _url);
+                                        print(_d);
+                                        url = _url;
+                                        done = true;
+                                        currentSelectedYear = _aired;
+                                    }
+
+                                }
+                                _d = RemoveOne(_d, lookFor);
+                                _d = RemoveOne(_d, "\"id\":");
+                            }*/
+
+                            /*
+
+                            string d = DownloadString("https://myanimelist.net/search/all?q=" + activeMovie.title.name);
+
+                            if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
+                            d = RemoveOne(d, " <div class=\"picSurround di-tc thumb\">"); // DONT DO THIS USE https://myanimelist.net/search/prefix.json?type=anime&keyword=my%20hero%20acadimea
+                            string url = "";//"https://myanimelist.net/anime/" + FindHTML(d, "<a href=\"https://myanimelist.net/anime/", "\"");
+                            */
+
+                            if (url == "") return;
+                            /*
+                            WebClient webClient = new WebClient();
+                            webClient.Encoding = Encoding.UTF8;*/
+
+                            string d = DownloadString(url);
+                            if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
+
+                            string jap = FindHTML(d, "Japanese:</span> ", "<").Replace("  ", "").Replace("\n", ""); // JAP NAME IS FOR SEARCHING, BECAUSE ALL SEASONS USE THE SAME NAME
+                            string eng = FindHTML(d, "English:</span> ", "<").Replace("  ", "").Replace("\n", "");
+                            string firstName = FindHTML(d, " itemprop=\"name\">", "<").Replace("  ", "").Replace("\n", "");
+
+                            string currentName = FindHTML(d, "<span itemprop=\"name\">", "<");
+                            List<MALSeasonData> data = new List<MALSeasonData>() { new MALSeasonData() { malUrl = url, seasons = new List<MALSeason>() } };
+
+                            string sqlLink = "-1";
+
+                            // ----- GETS ALL THE SEASONS OF A SHOW WITH MY ANIME LIST AND ORDERS THEM IN THE CORRECT SEASON (BOTH Shingeki no Kyojin Season 3 Part 2 and Shingeki no Kyojin Season 3 is season 3) -----
+                            while (sqlLink != "") {
+                                string _malLink = (sqlLink == "-1" ? url.Replace("https://myanimelist.net", "") : sqlLink);
+                                currentName = FindHTML(d, "<span itemprop=\"name\">", "<", decodeToNonHtml: true);
+                                string sequel = FindHTML(d, "Sequel:", "</a></td>") + "<";
+                                sqlLink = FindHTML(sequel, "<a href=\"", "\"");
+                                string _jap = FindHTML(d, "Japanese:</span> ", "<", decodeToNonHtml: true).Replace("  ", "").Replace("\n", "");
+                                string _eng = FindHTML(d, "English:</span> ", "<", decodeToNonHtml: true).Replace("  ", "").Replace("\n", "");
+
+                                string _date = FindHTML(d, "<span class=\"dark_text\">Aired:</span>", "</div>").Replace("  ", "").Replace("\n", "");
+                                string _startDate = FindHTML("|" + _date + "|", "|", "to");
+                                string _endDate = FindHTML("|" + _date + "|", "to", "|");
+
+                                if (_eng == "") {
+                                    _eng = FindHTML(d, "og:title\" content=\"", "\"", decodeToNonHtml: true);
+                                }
+                                string _syno = FindHTML(d, "Synonyms:</span> ", "<", decodeToNonHtml: true).Replace("  ", "").Replace("\n", "") + ",";
+                                List<string> _synos = new List<string>();
+                                while (_syno.Contains(",")) {
+                                    string _current = _syno.Substring(0, _syno.IndexOf(",")).Replace("  ", "");
+                                    if (_current.StartsWith(" ")) {
+                                        _current = _current.Substring(1, _current.Length - 1);
+                                    }
+                                    _synos.Add(_current);
+                                    _syno = RemoveOne(_syno, ",");
+                                }
+                                if (_eng == "") {
+                                    _eng = firstName;
+                                }
+                                print("CURRENTNAME: " + currentName + "|" + _eng + "|" + _jap);
+                                //tt2359704 = jojo
+                                if (currentName.Contains("Part ") && !currentName.Contains("Part 1")) // WILL ONLY WORK UNTIL PART 10, BUT JUST HOPE THAT THAT DOSENT HAPPEND :) (Not on jojo)
+                                {
+                                    data[data.Count - 1].seasons.Add(new MALSeason() { name = currentName, engName = _eng, japName = _jap, synonyms = _synos, malUrl = _malLink, startDate = _startDate, endDate = _endDate });
+                                }
+                                else {
+                                    data.Add(new MALSeasonData() {
+                                        seasons = new List<MALSeason>() { new MALSeason() { name = currentName, engName = _eng, japName = _jap, synonyms = _synos, malUrl = _malLink, startDate = _startDate, endDate = _endDate } },
+                                        malUrl = "https://myanimelist.net" + _malLink
+                                    });
+                                }
+                                if (sqlLink != "") {
+                                    try {
+                                        d = DownloadString("https://myanimelist.net" + sqlLink);
+                                    }
+                                    catch (Exception) {
+                                        d = "";
+                                    }
+                                }
+                            }
+                            for (int i = 0; i < data.Count; i++) {
+                                for (int q = 0; q < data[i].seasons.Count; q++) {
+                                    var e = data[i].seasons[q];
+                                    string _s = "";
+                                    for (int z = 0; z < e.synonyms.Count; z++) {
+                                        _s += e.synonyms[z] + "|";
+                                    }
+                                    print("SEASON: " + (i + 1) + "  -  " + e.name + "|" + e.engName + "|" + e.japName + "| SYNO: " + _s);
+                                }
+                            }
+
+                            error("FIRSTNAME: " + firstName);
+                            if (!firstName.IsClean()) {
+                                firstName = eng;
+                            }
+
+                            activeMovie.title.MALData = new MALData() {
+                                seasonData = data,
+                                japName = jap,
+                                engName = eng,
+                                firstName = firstName,
+                                done = false,
+                                currentSelectedYear = currentSelectedYear,
+                            }; 
+                        }
+                        catch (Exception _ex) {
+                            await FetchAniList();
+                        }
+                    }
+
+                    async Task FetchAniList()
+                    {
+                        try {
+                            Api api = new Api();
+                            System.Diagnostics.Stopwatch s = new System.Diagnostics.Stopwatch();
+                            s.Start();
+                            CancellationTokenSource cancelSource = new CancellationTokenSource();
+                            var media = await api.GetMedia(activeMovie.title.name, cancelSource.Token);
+
+                            if (media.Count > 0) {
+                                print("ANILIST::: " + s.ElapsedMilliseconds);
+
+                                static string ToMalUrl(int? id)
+                                {
+                                    return $"https://myanimelist.net/anime/{id}/";
+                                }
+
+
+                                static string ToDate(int? year, int? month, int? day)
+                                {
+                                    return $"{shortdates[(int)(month) - 1]} {day}, {year}";
+                                }
+
+                                List<MALSeasonData> data = new List<MALSeasonData>() { new MALSeasonData() { malUrl = ToMalUrl(media[0].idMal), seasons = new List<MALSeason>() } };
+                                string jap = media[0].title.native;
+                                string eng = media[0].title.english;
+                                string firstName = eng;
+                                if (!firstName.IsClean()) {
+                                    firstName = media[0].title.romaji;
+                                }
+
+
+                                foreach (var title in media) {
+                                    try {
+                                        string currentName = title.title.english;
+                                        string _eng = title.title.english;
+                                        string _jap = title.title.native;
+                                        List<string> _synos = title.synonyms == null ? new List<string>() : title.synonyms.Where(t => t != null).Select(t => t.ToString()).ToList();
+                                        string _malLink = ToMalUrl(title.idMal);
+                                        var _startDate = ToDate(title.startDate.year, title.startDate.month, title.startDate.day);
+                                        var _endDate = ToDate(title.endDate.year, title.endDate.month, title.endDate.day);
+                                        if (currentName.Contains("Part ") && !currentName.Contains("Part 1")) // WILL ONLY WORK UNTIL PART 10, BUT JUST HOPE THAT THAT DOSENT HAPPEND :) (Not on jojo)
+                                                                  {
+                                            data[data.Count - 1].seasons.Add(new MALSeason() { name = currentName, engName = _eng, japName = _jap, synonyms = _synos, malUrl = _malLink, startDate = _startDate, endDate = _endDate });
+                                        }
+                                        else {
+                                            data.Add(new MALSeasonData() {
+                                                seasons = new List<MALSeason>() { new MALSeason() { name = currentName, engName = _eng, japName = _jap, synonyms = _synos, malUrl = _malLink, startDate = _startDate, endDate = _endDate } },
+                                                malUrl = ToMalUrl(title.idMal)
+                                            });
+                                        }
+                                    }
+                                    catch (Exception _ex) {
+                                        error("ANILIST ERRRLR: " + _ex);
+                                    }
+                                }
+
+                                activeMovie.title.MALData = new MALData() {
+                                    seasonData = data.ToList(),
+                                    japName = jap,
+                                    engName = eng,
+                                    firstName = firstName,
+                                    done = false,
+                                    currentSelectedYear = currentSelectedYear,
+                                };
+                            }
+                            else {
+                                await FetchMal();
                             }
                         }
                         catch (Exception _ex) {
-                            print("EROROOROROROOR::" + _ex);
+                            error("MAIN EX IN FETCHANILIST::: " + _ex);
+                            await FetchMal();
                         }
+                    }
 
-
-                        /*
-                        while (_d.Contains(lookFor) && !done) { // TO FIX MY HERO ACADIMEA CHOOSING THE SECOND SEASON BECAUSE IT WAS FIRST SEARCHRESULT
-                            string name = FindHTML(_d, lookFor, "\"");
-                            print("NAME FOUND: " + name);
-                            if (!name.EndsWith("Specials")) {
-                                string _url = FindHTML(_d, "url\":\"", "\"").Replace("\\/", "/");
-                                string startYear = FindHTML(_d, "start_year\":", ",");
-                                string aired = FindHTML(_d, "aired\":\"", "\"");
-                                string _aired = FindHTML(aired, ", ", " ", readToEndOfFile: true);
-                                string score = FindHTML(_d, "score\":\"", "\"");
-                                print("SCORE:" + score);
-                                if (!name.Contains(" Season") && year == _aired && score != "N\\/A") {
-                                    print("URL FOUND: " + _url);
-                                    print(_d);
-                                    url = _url;
-                                    done = true;
-                                    currentSelectedYear = _aired;
-                                }
-
-                            }
-                            _d = RemoveOne(_d, lookFor);
-                            _d = RemoveOne(_d, "\"id\":");
-                        }*/
-
-                        /*
-
-                        string d = DownloadString("https://myanimelist.net/search/all?q=" + activeMovie.title.name);
-
-                        if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
-                        d = RemoveOne(d, " <div class=\"picSurround di-tc thumb\">"); // DONT DO THIS USE https://myanimelist.net/search/prefix.json?type=anime&keyword=my%20hero%20acadimea
-                        string url = "";//"https://myanimelist.net/anime/" + FindHTML(d, "<a href=\"https://myanimelist.net/anime/", "\"");
-                        */
-
-                        if (url == "") return;
-                        /*
-                        WebClient webClient = new WebClient();
-                        webClient.Encoding = Encoding.UTF8;*/
-
-                        string d = DownloadString(url);
-                        if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
-
-                        string jap = FindHTML(d, "Japanese:</span> ", "<").Replace("  ", "").Replace("\n", ""); // JAP NAME IS FOR SEARCHING, BECAUSE ALL SEASONS USE THE SAME NAME
-                        string eng = FindHTML(d, "English:</span> ", "<").Replace("  ", "").Replace("\n", "");
-                        string firstName = FindHTML(d, " itemprop=\"name\">", "<").Replace("  ", "").Replace("\n", "");
-
-                        string currentName = FindHTML(d, "<span itemprop=\"name\">", "<");
-                        List<MALSeasonData> data = new List<MALSeasonData>() { new MALSeasonData() { malUrl = url, seasons = new List<MALSeason>() } };
-
-                        string sqlLink = "-1";
-
-                        // ----- GETS ALL THE SEASONS OF A SHOW WITH MY ANIME LIST AND ORDERS THEM IN THE CORRECT SEASON (BOTH Shingeki no Kyojin Season 3 Part 2 and Shingeki no Kyojin Season 3 is season 3) -----
-                        while (sqlLink != "") {
-                            string _malLink = (sqlLink == "-1" ? url.Replace("https://myanimelist.net", "") : sqlLink);
-                            currentName = FindHTML(d, "<span itemprop=\"name\">", "<", decodeToNonHtml: true);
-                            string sequel = FindHTML(d, "Sequel:", "</a></td>") + "<";
-                            sqlLink = FindHTML(sequel, "<a href=\"", "\"");
-                            string _jap = FindHTML(d, "Japanese:</span> ", "<", decodeToNonHtml: true).Replace("  ", "").Replace("\n", "");
-                            string _eng = FindHTML(d, "English:</span> ", "<", decodeToNonHtml: true).Replace("  ", "").Replace("\n", "");
-
-                            string _date = FindHTML(d, "<span class=\"dark_text\">Aired:</span>", "</div>").Replace("  ", "").Replace("\n", "");
-                            string _startDate = FindHTML("|" + _date + "|", "|", "to");
-                            string _endDate = FindHTML("|" + _date + "|", "to", "|");
-
-                            if (_eng == "") {
-                                _eng = FindHTML(d, "og:title\" content=\"", "\"", decodeToNonHtml: true);
-                            }
-                            string _syno = FindHTML(d, "Synonyms:</span> ", "<", decodeToNonHtml: true).Replace("  ", "").Replace("\n", "") + ",";
-                            List<string> _synos = new List<string>();
-                            while (_syno.Contains(",")) {
-                                string _current = _syno.Substring(0, _syno.IndexOf(",")).Replace("  ", "");
-                                if (_current.StartsWith(" ")) {
-                                    _current = _current.Substring(1, _current.Length - 1);
-                                }
-                                _synos.Add(_current);
-                                _syno = RemoveOne(_syno, ",");
-                            }
-                            if (_eng == "") {
-                                _eng = firstName;
-                            }
-                            print("CURRENTNAME: " + currentName + "|" + _eng + "|" + _jap);
-                            //tt2359704 = jojo
-                            if (currentName.Contains("Part ") && !currentName.Contains("Part 1")) // WILL ONLY WORK UNTIL PART 10, BUT JUST HOPE THAT THAT DOSENT HAPPEND :) (Not on jojo)
-                            {
-                                data[data.Count - 1].seasons.Add(new MALSeason() { name = currentName, engName = _eng, japName = _jap, synonyms = _synos, malUrl = _malLink, startDate = _startDate, endDate = _endDate });
-                            }
-                            else {
-                                data.Add(new MALSeasonData() {
-                                    seasons = new List<MALSeason>() { new MALSeason() { name = currentName, engName = _eng, japName = _jap, synonyms = _synos, malUrl = _malLink, startDate = _startDate, endDate = _endDate } },
-                                    malUrl = "https://myanimelist.net" + _malLink
-                                });
-                            }
-                            if (sqlLink != "") {
-                                try {
-                                    d = DownloadString("https://myanimelist.net" + sqlLink);
-                                }
-                                catch (Exception) {
-                                    d = "";
-                                }
-                            }
+                    if (fetchData) {
+                        if (Settings.UseAniList) {
+                            await FetchAniList();
                         }
-                        for (int i = 0; i < data.Count; i++) {
-                            for (int q = 0; q < data[i].seasons.Count; q++) {
-                                var e = data[i].seasons[q];
-                                string _s = "";
-                                for (int z = 0; z < e.synonyms.Count; z++) {
-                                    _s += e.synonyms[z] + "|";
-                                }
-                                print("SEASON: " + (i + 1) + "  -  " + e.name + "|" + e.engName + "|" + e.japName + "| SYNO: " + _s);
-                            }
+                        else {
+                            await FetchMal();
                         }
-
-                        error("FIRSTNAME: " + firstName);
-                        if (!firstName.IsClean()) {
-                            firstName = eng;
-                        }
-
-                        activeMovie.title.MALData = new MALData() {
-                            seasonData = data,
-                            japName = jap,
-                            engName = eng,
-                            firstName = firstName,
-                            done = false,
-                            currentSelectedYear = currentSelectedYear,
-                        };
                         if (fetchData && cacheData && Settings.CacheMAL) {
                             App.SetKey("CacheMAL", activeMovie.title.id, activeMovie.title.MALData);
                         }
@@ -8177,7 +8283,7 @@ namespace CloudStreamForms.Core
         /// <returns></returns>
         public static string ToDown(string text, bool toLower = true, string replaceSpace = " ")
         {
-            print("TODOWND SIZE: " + text.Length);
+            //   print("TODOWND SIZE: " + text.Length);
 #if DEBUG
             int _s = GetStopwatchNum();
 #endif
@@ -8990,3 +9096,926 @@ namespace CloudStreamForms.Core
     }
 }
 
+#region =============================================================== ANILIST API ===============================================================
+// ALL THANKS TO https://github.com/MediaBrowser/Emby.Plugins.Anime
+
+namespace AniListAPI
+{
+    /// <summary>
+    /// Based on the new API from AniList
+    /// 🛈 This code works with the API Interface (v2) from AniList
+    /// 🛈 https://anilist.gitbooks.io/anilist-apiv2-docs
+    /// 🛈 THIS IS AN UNOFFICAL API INTERFACE FOR EMBY
+    /// </summary>
+    public class Api
+    {
+        private const string SearchLink = @"https://graphql.anilist.co/api/v2?query=
+query ($query: String, $type: MediaType) {
+  Page {
+    media(search: $query, type: $type) {
+      id
+      title {
+        romaji
+        english
+        native
+      }
+      coverImage {
+        medium
+        large
+      }
+      format
+      type
+      averageScore
+      popularity
+      episodes
+      season
+      hashtag
+      isAdult
+      startDate {
+        year
+        month
+        day
+      }
+      endDate {
+        year
+        month
+        day
+      }
+relations {
+        edges {
+        id 
+        relationType(version:2)
+      node { id }
+        }
+    }
+idMal
+    }
+  }
+}&variables={ ""query"":""{0}"",""type"":""ANIME""}";
+        public string AniList_anime_link = @"https://graphql.anilist.co/api/v2?query=query($id: Int!, $type: MediaType) {
+  Media(id: $id, type: $type)
+        {
+            id
+            title {
+                romaji
+                english
+              native
+      userPreferred
+            }
+            startDate {
+                year
+                month
+              day
+            }
+            endDate {
+                year
+                month
+              day
+            }
+            coverImage {
+                large
+                medium
+            }
+            bannerImage
+            format
+    type
+    status
+    episodes
+    chapters
+    volumes
+    season
+    description
+    averageScore
+    meanScore
+    genres
+    synonyms
+    nextAiringEpisode {
+                airingAt
+                timeUntilAiring
+      episode
+    }
+    relations {
+        edges {
+        id 
+        relationType(version:2)
+        node { id }
+        }
+    }
+    idMal
+    }
+    }&variables={ ""id"":""{0}"",""type"":""ANIME""}";
+
+        /*  node {
+            id 
+            title {
+                userPreferred
+            }
+            format 
+            type 
+            status 
+            bannerImage 
+            coverImage { 
+                large 
+            }
+        }*/
+        private const string AniList_anime_char_link = @"https://graphql.anilist.co/api/v2?query=query($id: Int!, $type: MediaType, $page: Int = 1) {
+  Media(id: $id, type: $type) {
+    id
+    characters(page: $page, sort: [ROLE]) {
+      pageInfo {
+        total
+        perPage
+        hasNextPage
+        currentPage
+        lastPage
+      }
+      edges {
+        node {
+          id
+          name {
+            first
+            last
+          }
+          image {
+            medium
+            large
+          }
+        }
+        role
+        voiceActors {
+          id
+          name {
+            first
+            last
+            native
+          }
+          image {
+            medium
+            large
+          }
+          language
+        }
+      }
+    }
+  }
+}&variables={ ""id"":""{0}"",""type"":""ANIME""}";
+        public Api()
+        {
+        }
+        /// <summary>
+        /// API call to get the anime with the id
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        /*
+        public async Task<RemoteSearchResult> GetAnime(string id)
+        {
+            RootObject WebContent = await WebRequestAPI(AniList_anime_link.Replace("{0}", id));
+
+            var result = new RemoteSearchResult {
+                Name = ""
+            };
+
+            result.SearchProviderName = WebContent.data.Media.title.romaji;
+            result.ImageUrl = WebContent.data.Media.coverImage.large;
+            result.SetProviderId(ProviderNames.AniList, id);
+            result.Overview = WebContent.data.Media.description;
+
+            return result;
+        }*/
+
+        /// <summary>
+        /// API call to select the lang
+        /// </summary>
+        /// <param name="WebContent"></param>
+        /// <param name="preference"></param>
+        /// <param name="language"></param>
+        /// <returns></returns>
+        /*private string SelectName(RootObject WebContent, TitlePreferenceType preference, string language)
+        {
+            if (preference == TitlePreferenceType.Localized && language == "en")
+                return WebContent.data.Media.title.english;
+            if (preference == TitlePreferenceType.Japanese)
+                return WebContent.data.Media.title.native;
+
+            return WebContent.data.Media.title.romaji;
+        }
+        */
+        /// <summary>
+        /// API call to get the title with the right lang
+        /// </summary>
+        /// <param name="lang"></param>
+        /// <param name="WebContent"></param>
+        /// <returns></returns>
+        public string Get_title(string lang, RootObject WebContent)
+        {
+            switch (lang) {
+                case "en":
+                    return WebContent.data.Media.title.english;
+
+                case "jap":
+                    return WebContent.data.Media.title.native;
+
+                //Default is jap_r
+                default:
+                    return WebContent.data.Media.title.romaji;
+            }
+        }
+        /*
+        public async Task<List<PersonInfo>> GetPersonInfo(int id, CancellationToken cancellationToken)
+        {
+            List<PersonInfo> lpi = new List<PersonInfo>();
+            RootObject WebContent = await WebRequestAPI(AniList_anime_char_link.Replace("{0}", id.ToString()));
+            foreach (Edge edge in WebContent.data.Media.characters.edges) {
+                PersonInfo pi = new PersonInfo();
+                pi.Name = edge.node.name.first + " " + edge.node.name.last;
+                pi.ImageUrl = edge.node.image.large;
+                pi.Role = edge.role;
+            }
+            return lpi;
+        }*/
+        /// <summary>
+        /// Convert int to Guid
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public async static Task<Guid> ToGuid(int value, CancellationToken cancellationToken)
+        {
+            byte[] bytes = new byte[16];
+            await Task.Run(() => BitConverter.GetBytes(value).CopyTo(bytes, 0), cancellationToken);
+            return new Guid(bytes);
+        }
+        /// <summary>
+        /// API call to get the genre of the anime
+        /// </summary>
+        /// <param name="WebContent"></param>
+        /// <returns></returns>
+        public List<string> Get_Genre(RootObject WebContent)
+        {
+            return WebContent.data.Media.genres;
+        }
+
+        /// <summary>
+        /// API call to get the img url
+        /// </summary>
+        /// <param name="WebContent"></param>
+        /// <returns></returns>
+        public string Get_ImageUrl(RootObject WebContent)
+        {
+            return WebContent.data.Media.coverImage.large;
+        }
+
+        /// <summary>
+        /// API call too get the rating
+        /// </summary>
+        /// <param name="WebContent"></param>
+        /// <returns></returns>
+        /*public string Get_Rating(RootObject WebContent)
+        {
+            return (WebContent.data.Media.averageScore / 10).ToString();
+        }*/
+
+        /// <summary>
+        /// API call to get the description
+        /// </summary>
+        /// <param name="WebContent"></param>
+        /// <returns></returns>
+        public string Get_Overview(RootObject WebContent)
+        {
+            return WebContent.data.Media.description;
+        }
+
+        public async Task<List<Medium>> GetMedia(string title, CancellationToken cancellationToken)
+        {
+            List<Medium> medias = new List<Medium>();
+
+            RootObject WebContent = await WebRequestAPI(SearchLink.Replace("{0}", title));
+            foreach (Medium media in WebContent.data.Page.media) {
+                //get id
+
+                try {
+                    /*
+                    foreach (var item in media.relations.edges) {
+                        Console.WriteLine(item.relationType + "|" + item.node.id);
+                    }
+                    */
+
+                    async Task Add(Medium m)
+                    {
+                        medias.Add(m);
+                        foreach (var item in m.relations.edges) {
+                            //     Console.WriteLine(item.relationType + "|" + item.node.id);
+                            if (item.relationType == "SEQUEL") {
+                                RootObject _WebContent = await WebRequestAPI(AniList_anime_link.Replace("{0}", item.node.id.ToString()));
+                                var f = _WebContent.data.Media;
+                                await Add(
+                                    new Medium() {
+                                        // description = f.description,
+                                        endDate = f.endDate,
+                                        startDate = f.startDate,
+                                        // averageScore = f.averageScore,
+                                        // isAdult = f.isAdult,
+                                        nextAiringEpisode = f.nextAiringEpisode,
+                                        //    bannerImage = f.bannerImage,
+                                        //chapters = f.chapters,
+                                        //coverImage = f.coverImage,
+                                        //   episodes = f.episodes,
+                                        // format = f.format,
+                                        //   genres = f.genres,
+                                        // hashtag = f.hashtag?.ToString(),
+                                        id = f.id,
+                                        //meanScore = f.meanScore,
+                                        //  popularity = f.popularity,
+                                        relations = f.relations,
+                                        season = f.season,
+                                        //status = f.status,
+                                        synonyms = f.synonyms,
+                                        title = f.title,
+                                        idMal = f.idMal,
+                                        //type = f.type,
+                                        //volumes = f.volumes,
+                                    }
+
+
+                                    );
+                                //AniList_anime_link
+                                break;
+                            }
+                        }
+
+                    }
+                    bool toAdd = false;
+                    System.Diagnostics.Stopwatch _s = new System.Diagnostics.Stopwatch();
+                    _s.Start();
+                    if (await Equals_check.Compare_strings(media.title.romaji, title, cancellationToken)) {
+                        toAdd = true;
+                    }
+                    else if (await Equals_check.Compare_strings(media.title.english, title, cancellationToken)) {
+                        toAdd = true;
+
+                    }
+                    Console.WriteLine(">>>>> " + _s.ElapsedMilliseconds);
+                    if (toAdd) {
+                        await Add(media);
+                    }
+                    break;
+                    //Disabled due to false result.
+                    /*if (await Task.Run(() => Equals_check.Compare_strings(media.title.native, title)))
+                    {
+                        return media.id.ToString();
+                    }*/
+                }
+
+                catch (Exception) { }
+            }
+            return medias;
+        }
+
+
+        /// <summary>
+        /// API call to search a title and return the right one back
+        /// </summary>
+        /// <param name="title"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        public async Task<string> Search_GetSeries(string title, CancellationToken cancellationToken)
+        {
+            string result = null;
+            RootObject WebContent = await WebRequestAPI(SearchLink.Replace("{0}", title));
+            foreach (Medium media in WebContent.data.Page.media) {
+                //get id
+
+                try {
+                    foreach (var item in media.relations.edges) {
+                        Console.WriteLine(item.relationType + "|" + item.node.id);
+                    }
+
+                    if (await Equals_check.Compare_strings(media.title.romaji, title, cancellationToken)) {
+                        return media.id.ToString();
+                    }
+                    if (await Equals_check.Compare_strings(media.title.english, title, cancellationToken)) {
+                        return media.id.ToString();
+                    }
+                    //Disabled due to false result.
+                    /*if (await Task.Run(() => Equals_check.Compare_strings(media.title.native, title)))
+                    {
+                        return media.id.ToString();
+                    }*/
+                }
+
+                catch (Exception) { }
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// API call to search a title and return a list back
+        /// </summary>
+        /// <param name="title"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        public async Task<List<string>> Search_GetSeries_list(string title, CancellationToken cancellationToken)
+        {
+            List<string> result = new List<string>();
+            RootObject WebContent = await WebRequestAPI(SearchLink.Replace("{0}", title));
+            Console.WriteLine("dd");
+            foreach (Medium media in WebContent.data.Page.media) {
+                //get id
+
+                try {
+                    Console.WriteLine(media.title.english);
+                    if (await Equals_check.Compare_strings(media.title.romaji, title, cancellationToken)) {
+                        result.Add(media.id.ToString());
+                    }
+                    if (await Equals_check.Compare_strings(media.title.english, title, cancellationToken)) {
+                        result.Add(media.id.ToString());
+                    }
+                    //Disabled due to false result.
+                    /*if (await Task.Run(() => Equals_check.Compare_strings(media.title.native, title)))
+                    {
+                        result.Add(media.id.ToString());
+                    }*/
+                }
+
+                catch (Exception) { }
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// SEARCH Title
+        /// </summary>
+        /*public async Task<string> FindSeries(string title, CancellationToken cancellationToken)
+        {
+            string aid = await Search_GetSeries(title, cancellationToken);
+            if (!string.IsNullOrEmpty(aid)) {
+                return aid;
+            }
+            aid = await Search_GetSeries(await Equals_check.Clear_name(title, cancellationToken), cancellationToken);
+            if (!string.IsNullOrEmpty(aid)) {
+                return aid;
+            }
+            return null;
+        }*/
+
+        /// <summary>
+        /// GET website content from the link
+        /// </summary>
+        public async Task<RootObject> WebRequestAPI(string link)
+        {
+            string _strContent = "";
+            using (WebClient client = new WebClient()) {
+
+                var values = new System.Collections.Specialized.NameValueCollection();
+
+                var response = await Task.Run(() => client.UploadValues(new Uri(link), values));
+                _strContent = System.Text.Encoding.Default.GetString(response);
+            }
+            Console.WriteLine(_strContent);
+
+            RootObject data = JsonConvert.DeserializeObject<RootObject>(_strContent);
+
+            return data;
+        }
+    }
+}
+namespace AniListAPI
+{
+    using System.Collections.Generic;
+
+    namespace Model
+    {
+        public class Title
+        {
+            public string romaji { get; set; }
+            public string english { get; set; }
+            public string native { get; set; }
+        }
+
+        public class Edges
+        {
+            public int id { set; get; }
+            public string relationType { set; get; }
+            public Node node { set; get; }
+        }
+
+        public class CoverImage
+        {
+            public string medium { get; set; }
+            public string large { get; set; }
+        }
+
+        public class StartDate
+        {
+            public int? year { get; set; }
+            public int? month { get; set; }
+            public int? day { get; set; }
+        }
+
+        public class EndDate
+        {
+            public int? year { get; set; }
+            public int? month { get; set; }
+            public int? day { get; set; }
+        }
+
+        public class Medium
+        {
+            public int id { get; set; }
+            public Title title { get; set; }
+            public CoverImage coverImage { get; set; }
+            public string format { get; set; }
+            public string type { get; set; }
+            //    public int averageScore { get; set; }
+            public int popularity { get; set; }
+            //  public int episodes { get; set; }
+            public string season { get; set; }
+            public string hashtag { get; set; }
+            public bool isAdult { get; set; }
+            public StartDate? startDate { get; set; }
+            public EndDate? endDate { get; set; }
+            public object bannerImage { get; set; }
+            public string status { get; set; }
+            public object chapters { get; set; }
+            public object volumes { get; set; }
+            public string description { get; set; }
+            public int meanScore { get; set; }
+            public List<string> genres { get; set; }
+            public List<object> synonyms { get; set; }
+            public object nextAiringEpisode { get; set; }
+            public Relations relations { set; get; }
+            public int? idMal { set; get; }
+        }
+
+        public class Relations
+        {
+            public Edges[] edges { set; get; }
+        }
+
+        public class Page
+        {
+            public List<Medium> media { get; set; }
+        }
+
+        public class Data
+        {
+            public Page Page { get; set; }
+            public Media Media { get; set; }
+        }
+
+        public class Media
+        {
+            public Characters characters { get; set; }
+            public int popularity { get; set; }
+            public object hashtag { get; set; }
+            public bool isAdult { get; set; }
+            public int id { get; set; }
+            public Title title { get; set; }
+            public StartDate? startDate { get; set; }
+            public EndDate? endDate { get; set; }
+            public CoverImage coverImage { get; set; }
+            public object bannerImage { get; set; }
+            public string format { get; set; }
+            public string type { get; set; }
+            public string status { get; set; }
+            //       public int episodes { get; set; }
+            public object chapters { get; set; }
+            public object volumes { get; set; }
+            public string season { get; set; }
+            public string description { get; set; }
+            //   public int averageScore { get; set; }
+            public int meanScore { get; set; }
+            public List<string> genres { get; set; }
+            public List<object> synonyms { get; set; }
+            public object nextAiringEpisode { get; set; }
+            public Relations relations { set; get; }
+            public int? idMal { set; get; }
+
+
+        }
+        public class PageInfo
+        {
+            public int total { get; set; }
+            public int perPage { get; set; }
+            public bool hasNextPage { get; set; }
+            public int currentPage { get; set; }
+            public int lastPage { get; set; }
+        }
+
+        public class Name
+        {
+            public string first { get; set; }
+            public string last { get; set; }
+        }
+
+        public class Image
+        {
+            public string medium { get; set; }
+            public string large { get; set; }
+        }
+
+        public class Node
+        {
+            public int id { get; set; }
+            public Name name { get; set; }
+            public Image image { get; set; }
+        }
+
+        public class Name2
+        {
+            public string first { get; set; }
+            public string last { get; set; }
+            public string native { get; set; }
+        }
+
+        public class Image2
+        {
+            public string medium { get; set; }
+            public string large { get; set; }
+        }
+
+        public class VoiceActor
+        {
+            public int id { get; set; }
+            public Name2 name { get; set; }
+            public Image2 image { get; set; }
+            public string language { get; set; }
+        }
+
+        public class Edge
+        {
+            public Node node { get; set; }
+            public string role { get; set; }
+            public List<VoiceActor> voiceActors { get; set; }
+        }
+
+        public class Characters
+        {
+            public PageInfo pageInfo { get; set; }
+            public List<Edge> edges { get; set; }
+        }
+
+
+        public class RootObject
+        {
+            public Data data { get; set; }
+        }
+    }
+}
+namespace AniListAPI
+{
+    public static class Equals_check
+    {
+        /// <summary>
+        /// If a and b match it return true
+        /// </summary>
+        /// <param name="a"></param>
+        /// <param name="b"></param>
+        /// <returns></returns>
+        public async static Task<bool> Compare_strings(string a, string b, CancellationToken cancellationToken)
+        {
+            if (!string.IsNullOrEmpty(a) && !string.IsNullOrEmpty(b)) {
+                if (await Simple_compare(a, b, cancellationToken))
+                    return true;
+                /*if (await Fast_xml_search(a, b, cancellationToken))
+                    return true;*/
+
+                return false;
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// Compare 2 Strings, and it just works
+        /// SeriesA S2 == SeriesA Second Season | True;
+        /// </summary>
+        private async static Task<bool> Simple_compare(string a, string b, CancellationToken cancellationToken, bool fastmode = false)
+        {
+            if (fastmode) {
+                if (a[0] == b[0]) {
+                }
+                else {
+                    return false;
+                }
+            }
+
+            if (await Core_compare(a, b, cancellationToken))
+                return true;
+            if (await Core_compare(b, a, cancellationToken))
+                return true;
+
+            return false;
+        }
+
+        /// <summary>
+        /// simple regex
+        /// </summary>
+        /// <param name="regex"></param>
+        /// <param name="match"></param>
+        /// <param name="group"></param>
+        /// <param name="match_int"></param>
+        /// <returns></returns>
+        public async static Task<string> One_line_regex(Regex regex, string match, CancellationToken cancellationToken, int group = 1, int match_int = 0)
+        {
+            Regex _regex = regex;
+            int x = 0;
+            foreach (Match _match in regex.Matches(match)) {
+                if (x == match_int) {
+                    return await Task.Run(() => _match.Groups[group].Value.ToString(), cancellationToken);
+                }
+                x++;
+            }
+            return "";
+        }
+
+        /// <summary>
+        /// Clear name
+        /// </summary>
+        /// <param name="a"></param>
+        /// <returns></returns>
+        public async static Task<string> Clear_name(string a, CancellationToken cancellationToken)
+        {
+            try {
+                a = a.Trim().Replace(await One_line_regex(new Regex(@"(?s) \(.*?\)"), a.Trim(), cancellationToken, 0), "");
+            }
+            catch (Exception) { }
+            a = a.Replace(".", " ");
+            a = a.Replace("-", " ");
+            a = a.Replace("`", "");
+            a = a.Replace("'", "");
+            a = a.Replace("&", "and");
+            a = a.Replace("(", "");
+            a = a.Replace(")", "");
+            try {
+                a = a.Replace(await One_line_regex(new Regex(@"(?s)(S[0-9]+)"), a.Trim(), cancellationToken), await One_line_regex(new Regex(@"(?s)S([0-9]+)"), a.Trim(), cancellationToken));
+            }
+            catch (Exception) {
+            }
+            return a;
+        }
+
+        /// <summary>
+        /// Clear name heavy.
+        /// Example: Text & Text to Text and Text
+        /// </summary>
+        /// <param name="a"></param>
+        /// <returns></returns>
+        public async static Task<string> Clear_name_step2(string a, CancellationToken cancellationToken)
+        {
+            if (a.Contains("Gekijyouban"))
+                a = (a.Replace("Gekijyouban", "") + " Movie").Trim();
+            if (a.Contains("gekijyouban"))
+                a = (a.Replace("gekijyouban", "") + " Movie").Trim();
+            try {
+                a = a.Trim().Replace(await One_line_regex(new Regex(@"(?s) \(.*?\)"), a.Trim(), cancellationToken, 0), "");
+            }
+            catch (Exception) { }
+            a = a.Replace(".", " ");
+            a = a.Replace("-", " ");
+            a = a.Replace("`", "");
+            a = a.Replace("'", "");
+            a = a.Replace("&", "and");
+            a = a.Replace(":", "");
+            a = a.Replace("␣", "");
+            a = a.Replace("2wei", "zwei");
+            a = a.Replace("3rei", "drei");
+            a = a.Replace("4ier", "vier");
+            return a;
+        }
+
+
+        /// <summary>
+        /// Example: Convert II to 2
+        /// </summary>
+        /// <param name="input"></param>
+        /// <param name="symbol"></param>
+        /// <returns></returns>
+        private async static Task<string> Convert_symbols_too_numbers(string input, string symbol, CancellationToken cancellationToken)
+        {
+            try {
+                string regex_c = "_";
+                int x = 0;
+                int highest_number = 0;
+                while (!string.IsNullOrEmpty(regex_c)) {
+                    regex_c = (await One_line_regex(new Regex(@"(" + symbol + @"+)"), input.ToLower().Trim(), cancellationToken, 1, x)).Trim();
+                    if (highest_number < regex_c.Count())
+                        highest_number = regex_c.Count();
+                    x++;
+                }
+                x = 0;
+                string output = "";
+                while (x != highest_number) {
+                    output = output + symbol;
+                    x++;
+                }
+                output = input.Replace(output, highest_number.ToString());
+                if (string.IsNullOrEmpty(output)) {
+                    output = input;
+                }
+                return output;
+            }
+            catch (Exception) {
+                return input;
+            }
+        }
+
+        /// <summary>
+        /// Compare 2 Strings, and it just works
+        /// </summary>
+        private async static Task<bool> Core_compare(string a, string b, CancellationToken cancellationToken)
+        {
+            if (a == b)
+                return true;
+
+            a = a.ToLower().Replace(" ", "").Trim().Replace(".", "");
+            b = b.ToLower().Replace(" ", "").Trim().Replace(".", "");
+
+            if (await Clear_name(a, cancellationToken) == await Clear_name(b, cancellationToken))
+                return true;
+            if (await Clear_name_step2(a, cancellationToken) == await Clear_name_step2(b, cancellationToken))
+                return true;
+            if (a.Replace("-", " ") == b.Replace("-", " "))
+                return true;
+            if (a.Replace(" 2", ":secondseason") == b.Replace(" 2", ":secondseason"))
+                return true;
+            if (a.Replace("2", "secondseason") == b.Replace("2", "secondseason"))
+                return true;
+            if (await Convert_symbols_too_numbers(a, "I", cancellationToken) == await Convert_symbols_too_numbers(b, "I", cancellationToken))
+                return true;
+            if (await Convert_symbols_too_numbers(a, "!", cancellationToken) == await Convert_symbols_too_numbers(b, "!", cancellationToken))
+                return true;
+            if (a.Replace("ndseason", "") == b.Replace("ndseason", ""))
+                return true;
+            if (a.Replace("ndseason", "") == b)
+                return true;
+            if (await One_line_regex(new Regex(@"((.*)s([0 - 9]))"), a, cancellationToken, 2) + await One_line_regex(new Regex(@"((.*)s([0 - 9]))"), a, cancellationToken, 3) == await One_line_regex(new Regex(@"((.*)s([0 - 9]))"), b, cancellationToken, 2) + await One_line_regex(new Regex(@"((.*)s([0 - 9]))"), b, cancellationToken, 3))
+                if (!string.IsNullOrEmpty(await One_line_regex(new Regex(@"((.*)s([0 - 9]))"), a, cancellationToken, 2) + await One_line_regex(new Regex(@"((.*)s([0 - 9]))"), a, cancellationToken, 3)))
+                    return true;
+            if (await One_line_regex(new Regex(@"((.*)s([0 - 9]))"), a, cancellationToken, 2) + await One_line_regex(new Regex(@"((.*)s([0 - 9]))"), a, cancellationToken, 3) == b)
+                if (!string.IsNullOrEmpty(await One_line_regex(new Regex(@"((.*)s([0 - 9]))"), a, cancellationToken, 2) + await One_line_regex(new Regex(@"((.*)s([0 - 9]))"), a, cancellationToken, 3)))
+                    return true;
+            if (a.Replace("rdseason", "") == b.Replace("rdseason", ""))
+                return true;
+            if (a.Replace("rdseason", "") == b)
+                return true;
+            try {
+                if (a.Replace("2", "secondseason").Replace(await One_line_regex(new Regex(@"(?s)\(.*?\)"), a, cancellationToken, 0), "") == b.Replace("2", "secondseason").Replace(await One_line_regex(new Regex(@"(?s)\(.*?\)"), b, cancellationToken, 0), ""))
+                    return true;
+            }
+            catch (Exception) {
+            }
+            try {
+                if (a.Replace("2", "secondseason").Replace(await One_line_regex(new Regex(@"(?s)\(.*?\)"), a, cancellationToken, 0), "") == b)
+                    return true;
+            }
+            catch (Exception) {
+            }
+            try {
+                if (a.Replace(" 2", ":secondseason").Replace(await One_line_regex(new Regex(@"(?s)\(.*?\)"), a, cancellationToken, 0), "") == b.Replace(" 2", ":secondseason").Replace(await One_line_regex(new Regex(@"(?s)\(.*?\)"), b, cancellationToken, 0), ""))
+                    return true;
+            }
+            catch (Exception) {
+            }
+            try {
+                if (a.Replace(" 2", ":secondseason").Replace(await One_line_regex(new Regex(@"(?s)\(.*?\)"), a, cancellationToken, 0), "") == b)
+                    return true;
+            }
+            catch (Exception) {
+            }
+            try {
+                if (a.Replace(await One_line_regex(new Regex(@"(?s)\(.*?\)"), a, cancellationToken, 0), "") == b.Replace(await One_line_regex(new Regex(@"(?s)\(.*?\)"), b, cancellationToken, 0), ""))
+                    return true;
+            }
+            catch (Exception) {
+            }
+            try {
+                if (a.Replace(await One_line_regex(new Regex(@"(?s)\(.*?\)"), a, cancellationToken, 0), "") == b)
+                    return true;
+            }
+            catch (Exception) {
+            }
+            try {
+                if (b.Replace(await One_line_regex(new Regex(@"(?s)\(.*?\)"), b, cancellationToken, 0), "").Replace("  2", ": second Season") == a)
+                    return true;
+            }
+            catch (Exception) {
+            }
+            try {
+                if (a.Replace(" 2ndseason", ":secondseason") + " vs " + b == a)
+                    return true;
+            }
+            catch (Exception) {
+            }
+            try {
+                if (a.Replace(await One_line_regex(new Regex(@"(?s)\(.*?\)"), a, cancellationToken, 0), "").Replace("  2", ":secondseason") == b)
+                    return true;
+            }
+            catch (Exception) {
+            }
+            return false;
+        }
+    }
+}
+
+#endregion

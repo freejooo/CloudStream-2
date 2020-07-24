@@ -88,6 +88,20 @@
                         <Label Grid.Column="1" Text="Cache data" HorizontalOptions="Start" VerticalOptions="Center"  FontSize="Body" TextColor="{Binding MainTxtColor}"></Label>
                         <Switch Grid.Column="2" x:Name="CacheDataToggle" HorizontalOptions="End" VerticalOptions="Center"></Switch>
                     </Grid>
+                    
+                    <!-- Anilist -->
+                    <Grid  x:Name="G_AniList"  BackgroundColor="#212121" ColumnSpacing="10" HeightRequest="50">
+                        <Grid.ColumnDefinitions >
+                            <ColumnDefinition Width="Auto"></ColumnDefinition>
+                        </Grid.ColumnDefinitions>
+                        <ff:CachedImage Grid.Column="0" x:Name="AniListImg" HorizontalOptions="Start" WidthRequest="25" HeightRequest="25" Margin="5" TranslationX="5"  VerticalOptions="Center" BackgroundColor="Transparent" >
+                            <ff:CachedImage.Transformations >
+                                <ffTransformations:TintTransformation HexColor="#707070" ></ffTransformations:TintTransformation>
+                            </ff:CachedImage.Transformations>
+                        </ff:CachedImage>
+                        <Label Grid.Column="1" Text="Use AniList Instead of MAL" HorizontalOptions="Start" VerticalOptions="Center"  FontSize="Body" TextColor="{Binding MainTxtColor}"></Label>
+                        <Switch Grid.Column="2" x:Name="AniListToggle" HorizontalOptions="End" VerticalOptions="Center"></Switch>
+                    </Grid>
 
                     <!-- Dubbed -->
                     <Grid  x:Name="G_Dubbed"  BackgroundColor="#212121" ColumnSpacing="10" HeightRequest="50">
@@ -102,6 +116,7 @@
                         <Label Grid.Column="1" Text="Default dub" HorizontalOptions="Start" VerticalOptions="Center"  FontSize="Body" TextColor="{Binding MainTxtColor}"></Label>
                         <Switch Grid.Column="2" x:Name="DubbedToggle" HorizontalOptions="End" VerticalOptions="Center"></Switch>
                     </Grid>
+                 
 
                     <!-- Pause History -->
                     <Grid  x:Name="G_PauseHistory"  BackgroundColor="#212121" ColumnSpacing="10" HeightRequest="50">

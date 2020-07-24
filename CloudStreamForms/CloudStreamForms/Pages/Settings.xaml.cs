@@ -260,6 +260,15 @@ namespace CloudStreamForms
             }
         }
 
+        public static bool UseAniList {
+            set {
+                App.SetKey("Settings", nameof(UseAniList), value);
+            }
+            get {
+                return App.GetKey("Settings", nameof(UseAniList), true);
+            }
+        }
+
         public static bool UseVideoPlayer {
             set {
                 App.SetKey("Settings", nameof(UseVideoPlayer), value);
@@ -318,6 +327,7 @@ namespace CloudStreamForms
                 G_InstatSearch,
                 G_Subtitles,
                 G_CacheData,
+                G_AniList,
                 G_Dubbed,
                 G_PauseHistory,
 
@@ -357,6 +367,7 @@ namespace CloudStreamForms
             InstantSearchImg.Source = App.GetImageSource("searchIcon.png");
             SubtitlesImg.Source = App.GetImageSource("outline_subtitles_white_48dp.png");
             CacheImg.Source = App.GetImageSource("outline_cached_white_48dp.png");
+            AniListImg.Source = App.GetImageSource("outline_cached_white_48dp.png");
             DubbedImg.Source = App.GetImageSource("outline_record_voice_over_white_48dp.png");
             HistoryImg.Source = App.GetImageSource("outline_history_white_48dp.png");
 
@@ -442,6 +453,9 @@ namespace CloudStreamForms
             };
             ListAniToggle.Toggled += (o, e) => {
                 ListViewPopupAnimation = e.Value;
+            };
+            AniListToggle.Toggled += (o, e) => {
+                UseAniList = e.Value;
             };
 
             Commands.SetTap(ClearHistoryTap, new Command((o) => {
@@ -627,6 +641,7 @@ namespace CloudStreamForms
                 CacheDataToggle.IsToggled = CacheData;
                 StatusbarToggle.IsToggled = HasStatusBar;
                 TopToggle.IsToggled = Top100Enabled;
+                AniListToggle.IsToggled = UseAniList;
                 ColorPicker.SelectedIndex = BlackBgType;
                 SubLangPicker.SelectedIndex = NativeSubtitles;
                 SubStylePicker.SelectedIndex = SubtitleType;
