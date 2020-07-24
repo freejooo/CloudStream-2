@@ -4,7 +4,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:pages="clr-namespace:Rg.Plugins.Popup.Pages;assembly=Rg.Plugins.Popup"
     xmlns:animations="clr-namespace:Rg.Plugins.Popup.Animations;assembly=Rg.Plugins.Popup"
-    x:Class="CloudStreamForms.MyPopupPage">
+    x:Class="CloudStreamForms.AudioPopupPage">
     <!--You can set an animation in the xaml file or in the csharp code behind-->
     <!--
     <pages:PopupPage.Animation>
@@ -24,7 +24,7 @@
         VerticalOptions="Center" 
         HorizontalOptions="End" 
         Padding="20">
-        <Label Text="Volume" HorizontalOptions="End" FontAttributes="Bold" FontSize="Body" TranslationX="10"></Label>
+        <Label Text="Volume" TextColor="White" HorizontalOptions="End" FontAttributes="Bold" FontSize="Body" TranslationX="10"></Label>
         <ImageButton  x:Name="MaxVol"  HorizontalOptions="End" BackgroundColor="Transparent" TranslationX="15"  HeightRequest="{Binding IconSize}" WidthRequest="{Binding IconSize}"></ImageButton>
         <Slider  x:Name="VolSolider" MinimumTrackColor="#303F9F" ThumbColor="#303F9F" HeightRequest="300" WidthRequest="300" Margin="0,-13" TranslationX="150" Rotation="-90"   ></Slider>
         <ImageButton  HorizontalOptions="End" x:Name="LowVol" BackgroundColor="Transparent"  TranslationX="15"  HeightRequest="{Binding IconSize}" WidthRequest="{Binding IconSize}"></ImageButton>

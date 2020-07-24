@@ -42,6 +42,14 @@
 
   <ItemGroup>
     <None Remove="Resource\animation.png" />
+    <None Remove="Resource\AudioVol0.png" />
+    <None Remove="Resource\AudioVol1.png" />
+    <None Remove="Resource\AudioVol2.png" />
+    <None Remove="Resource\AudioVol3.png" />
+    <None Remove="Resource\AudioVolLow0.png" />
+    <None Remove="Resource\AudioVolLow1.png" />
+    <None Remove="Resource\AudioVolLow2.png" />
+    <None Remove="Resource\AudioVolLow3.png" />
     <None Remove="Resource\baseline_get_app_white_48dp.png" />
     <None Remove="Resource\baseline_keyboard_arrow_down_white_48dp.png" />
     <None Remove="Resource\baseline_keyboard_arrow_left_white_48dp.png" />
@@ -80,6 +88,8 @@
     <None Remove="Resource\IMDbBlue.png" />
     <None Remove="Resource\imdbIcon.png" />
     <None Remove="Resource\IMDbWhite.png" />
+    <None Remove="Resource\LockLocked1.png" />
+    <None Remove="Resource\LockUnlocked1.png" />
     <None Remove="Resource\MALBlue.png" />
     <None Remove="Resource\MALIcon.png" />
     <None Remove="Resource\MALWhite.png" />
@@ -169,6 +179,14 @@
 
   <ItemGroup>
     <EmbeddedResource Include="Resource\animation.png" />
+    <EmbeddedResource Include="Resource\AudioVol0.png" />
+    <EmbeddedResource Include="Resource\AudioVol1.png" />
+    <EmbeddedResource Include="Resource\AudioVol2.png" />
+    <EmbeddedResource Include="Resource\AudioVol3.png" />
+    <EmbeddedResource Include="Resource\AudioVolLow0.png" />
+    <EmbeddedResource Include="Resource\AudioVolLow1.png" />
+    <EmbeddedResource Include="Resource\AudioVolLow2.png" />
+    <EmbeddedResource Include="Resource\AudioVolLow3.png" />
     <EmbeddedResource Include="Resource\baseline_get_app_white_48dp.png" />
     <EmbeddedResource Include="Resource\baseline_keyboard_arrow_down_white_48dp.png" />
     <EmbeddedResource Include="Resource\baseline_keyboard_arrow_left_white_48dp.png" />
@@ -207,6 +225,8 @@
     <EmbeddedResource Include="Resource\IMDbBlue.png" />
     <EmbeddedResource Include="Resource\imdbIcon.png" />
     <EmbeddedResource Include="Resource\IMDbWhite.png" />
+    <EmbeddedResource Include="Resource\LockLocked1.png" />
+    <EmbeddedResource Include="Resource\LockUnlocked1.png" />
     <EmbeddedResource Include="Resource\MALBlue.png" />
     <EmbeddedResource Include="Resource\MALIcon.png" />
     <EmbeddedResource Include="Resource\MALWhite.png" />
@@ -346,8 +366,8 @@
     <Compile Update="Pages\LoadingPopupPage.xaml.cs">
       <DependentUpon>LoadingPopupPage.xaml</DependentUpon>
     </Compile>
-    <Compile Update="Pages\MyPopupPage.xaml.cs">
-      <DependentUpon>MyPopupPage.xaml</DependentUpon>
+    <Compile Update="Pages\AudioPopupPage.xaml.cs">
+      <DependentUpon>AudioPopupPage.xaml</DependentUpon>
     </Compile>
     <Compile Update="Properties\Resources.Designer.cs">
       <DesignTime>True</DesignTime>
@@ -375,7 +395,7 @@
     <EmbeddedResource Update="Pages\LoadingPopupPage.xaml">
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
     </EmbeddedResource>
-    <EmbeddedResource Update="Pages\MyPopupPage.xaml">
+    <EmbeddedResource Update="Pages\AudioPopupPage.xaml">
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
     </EmbeddedResource>
     <EmbeddedResource Update="Pages\Download.xaml">

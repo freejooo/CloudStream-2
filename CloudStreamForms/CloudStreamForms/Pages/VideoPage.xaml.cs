@@ -25,8 +25,8 @@ namespace CloudStreamForms
         const string PLAY_IMAGE = "netflixPlay.png";//"baseline_play_arrow_white_48dp.png";
         const string PAUSE_IMAGE = "pausePlay.png";//"baseline_pause_white_48dp.png";
 
-        const string LOCKED_IMAGE = "wlockLocked.png";
-        const string UN_LOCKED_IMAGE = "wlockUnLocked.png";
+        const string LOCKED_IMAGE = "LockLocked1.png";// "wlockLocked.png";
+        const string UN_LOCKED_IMAGE = "LockUnlocked1.png";//"wlockUnLocked.png";
 
         bool isPaused = false;
 
@@ -346,17 +346,21 @@ namespace CloudStreamForms
             lastSub = comp;
 
             Device.BeginInvokeOnMainThread(() => {
+                string subTxt = subtitleText1 + "\n" + subtitleText2;
                 print("TITLL:::: " + subtitleText1 + "|" + subtitleText2);
 
-                SubtitleTxt1.Text = subtitleText1;
-                SubtitleTxt1Back1.Text = subtitleText1;
-                SubtitleTxt1Back2.Text = subtitleText1;
-                SubtitleTxt1Back3.Text = subtitleText1;
-                SubtitleTxt1Back4.Text = subtitleText1;
-                SubtitleTxt1Back5.Text = subtitleText1;
-                SubtitleTxt1Back6.Text = subtitleText1;
-                SubtitleTxt1Back7.Text = subtitleText1;
-                SubtitleTxt1Back8.Text = subtitleText1;
+                SubtitleTxt1.Text = subtitleText1;//"HELLO WORLD\ndadada YEeett";//
+                if (hasOutline) {
+                    SubtitleTxt1Back1.Text = subtitleText1;
+                    SubtitleTxt1Back2.Text = subtitleText1;
+                    SubtitleTxt1Back3.Text = subtitleText1;
+                    SubtitleTxt1Back4.Text = subtitleText1;
+                    SubtitleTxt1Back5.Text = subtitleText1;
+                    SubtitleTxt1Back6.Text = subtitleText1;
+                    SubtitleTxt1Back7.Text = subtitleText1;
+                    SubtitleTxt1Back8.Text = subtitleText1;
+                }
+
 
                 SubtitleTxt2.Text = subtitleText2;
                 SubtitleTxt2Back1.Text = subtitleText2;
@@ -508,6 +512,11 @@ namespace CloudStreamForms
             Player.SetAudioDelay(delay * 1000); // MS TO NS
         }
 
+        static bool hasOutline = false;
+
+        Label[] font1;
+        Label[] font2;
+
         /// <summary>
         /// Subtitles are in full
         /// </summary>
@@ -539,7 +548,7 @@ namespace CloudStreamForms
                 new Vector2(-1,1),
             };
 
-            Label[] font1 = new Label[] {
+            font1 = new Label[] {
                  SubtitleTxt1Back1,
                  SubtitleTxt1Back2,
                  SubtitleTxt1Back3,
@@ -550,7 +559,8 @@ namespace CloudStreamForms
                  SubtitleTxt1Back8,
             };
 
-            Label[] font2 = new Label[] {
+
+            font2 = new Label[] {
                 SubtitleTxt2Back1,
                 SubtitleTxt2Back2,
                 SubtitleTxt2Back3,
@@ -563,13 +573,21 @@ namespace CloudStreamForms
 
             float multi = 1f;
 
-            double base1X = SubtitleTxt1.TranslationX;
-            double base1Y = SubtitleTxt1.TranslationY;
-            double base2X = SubtitleTxt2.TranslationX;
-            double base2Y = SubtitleTxt2.TranslationY;
+ 
+            //double base1X = SubtitleTxt1.TranslationX;
+            double base1Y = -5;
+            double base2Y = 20;
+            SubtitleTxt1.TranslationY = base1Y;
+            SubtitleTxt2.TranslationY = base2Y;
 
+            double hreq = SubtitleTxt1.HeightRequest;
+
+
+            double base1X = SubtitleTxt1.TranslationX;
+            double base2X = SubtitleTxt2.TranslationX;
+ 
             bool hasDropshadow = Settings.SubtitlesHasDropShadow;
-            bool hasOutline = Settings.SubtitlesHasOutline;
+            hasOutline = Settings.SubtitlesHasOutline;
 
             string fontFam = App.GetFont(Settings.GlobalSubtitleFont);
 
@@ -580,18 +598,22 @@ namespace CloudStreamForms
                     font1[i].TranslationX = base1X + offsets[i].X * multi;
                     font1[i].TranslationY = base1Y + offsets[i].Y * multi;
                     font1[i].ClassId = classId;
+                    font1[i].HeightRequest = hreq;
                 }
                 else {
                     font1[i].IsVisible = false;
                     font1[i].IsEnabled = false;
                 }
             }
+
             for (int i = 0; i < font2.Length; i++) {
                 if (hasOutline) {
                     font2[i].FontFamily = fontFam;
                     font2[i].TranslationX = base2X + offsets[i].X * multi;
                     font2[i].TranslationY = base2Y + offsets[i].Y * multi;
                     font2[i].ClassId = classId;
+                    font1[i].HeightRequest = hreq;
+
                 }
                 else {
                     font2[i].IsVisible = false;
@@ -615,9 +637,10 @@ namespace CloudStreamForms
             void SetIsLocked()
             {
                 LockImg.Source = App.GetImageSource(isLocked ? LOCKED_IMAGE : UN_LOCKED_IMAGE);
-                LockTxt.TextColor = Color.FromHex(isLocked ? "#617EFF" : "#FFFFFF");
+                LockTxt.TextColor = Color.FromHex(isLocked ? "#516bde" : "#FFFFFF"); // 516bde 617EFF
                 // LockTap.SetValue(XamEffects.TouchEffect.ColorProperty, Color.FromHex(isLocked ? "#617EFF" : "#FFFFFF"));
                 LockTap.SetValue(XamEffects.TouchEffect.ColorProperty, Color.FromHex(isLocked ? "#99acff" : "#FFFFFF"));
+                //LockTap.BackgroundColor = isLocked ? new Color(0.6, 0.67, 1, 0.1) : Color.Transparent;
                 LockImg.Transformations = new List<FFImageLoading.Work.ITransformation>() { (new FFImageLoading.Transformations.TintTransformation(isLocked ? MainPage.DARK_BLUE_COLOR : "#FFFFFF")) };
                 VideoSlider.InputTransparent = isLocked;
 
@@ -751,7 +774,7 @@ namespace CloudStreamForms
             // ========== IMGS ==========
             // SubtitlesImg.Source = App.GetImageSource("netflixSubtitlesCut.png"); //App.GetImageSource("baseline_subtitles_white_48dp.png");
             MirrosImg.Source = App.GetImageSource("baseline_playlist_play_white_48dp.png");
-            AudioImg.Source = App.GetImageSource("baseline_volume_up_white_48dp.png");
+            AudioImg.Source = App.GetImageSource("AudioVolLow3.png"); // App.GetImageSource("baseline_volume_up_white_48dp.png");
             EpisodesImg.Source = App.GetImageSource("netflixEpisodesCut.png");
             NextImg.Source = App.GetImageSource("baseline_skip_next_white_48dp.png");
             BacktoMain.Source = App.GetImageSource("baseline_keyboard_arrow_left_white_48dp.png");
@@ -1273,6 +1296,19 @@ namespace CloudStreamForms
             VideoSliderAndSettings.TranslateTo(VideoSliderAndSettings.TranslationX, disable ? 80 : 0, fadeTime, Easing.Linear);
             EpisodeLabel.AbortAnimation("TranslateTo");
             EpisodeLabel.TranslateTo(EpisodeLabel.TranslationX, disable ? -60 : 20, fadeTime, Easing.Linear);
+
+
+            List<Label> subHolders = new List<Label>();
+            /*subHolders.AddRange(font1);
+            subHolders.AddRange(font2);
+            subHolders.Add(SubtitleTxt1);
+            subHolders.Add(SubtitleTxt2);
+
+            for (int i = 0; i < subHolders.; i++) {
+
+            }*/
+            SubHolder.AbortAnimation("TranslateTo");
+            SubHolder.TranslateTo(EpisodeLabel.TranslationX, disable ? 0 : -90, fadeTime, Easing.Linear);
 
             AllButtons.AbortAnimation("FadeTo");
             AllButtons.IsEnabled = !disable;

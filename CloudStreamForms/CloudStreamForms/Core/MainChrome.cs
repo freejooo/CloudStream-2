@@ -837,7 +837,7 @@ namespace CloudStreamForms.Core
         private static async Task InvokeAsync<TChannel>(Func<TChannel, Task> action) where TChannel : IChannel
         {
             if (action != null) {
-                await action.Invoke(chromeSender.GetChannel<TChannel>());
+                await action?.Invoke(chromeSender.GetChannel<TChannel>());
             }
         }
 

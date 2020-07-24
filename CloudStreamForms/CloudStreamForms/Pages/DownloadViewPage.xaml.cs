@@ -210,6 +210,7 @@ namespace CloudStreamForms
         protected override void OnDisappearing()
         {
             base.OnDisappearing();
+            MainChrome.OnChromeImageChanged -= MainChrome_OnChromeImageChanged;
             App.ForceUpdateVideo -= ForceUpdateAppearing;
         }
 
@@ -219,23 +220,10 @@ namespace CloudStreamForms
             UpdateEpisodes();
 
             ImgChromeCastBtt.Source = App.GetImageSource(MainChrome.CurrentImageSource);
-            void UpdateVisual()
-            {
-                if (MainChrome.IsConnectedToChromeDevice) {
-                    ChromeName.Text = "Connected to " + MainChrome.chromeRecivever.FriendlyName;
-                }
-                else {
-                    ChromeName.Text = "Not connected";
-                }
-                ChromeName.TextColor = MainChrome.CurrentImage > 0 ? Color.FromHex(MainPage.LIGHT_BLUE_COLOR) : Color.FromHex("#e6e6e6");
-            }
+          
             UpdateVisual();
-            MainChrome.OnChromeImageChanged += (o, e) => {
-                ImgChromeCastBtt.Source = App.GetImageSource(e);
-                UpdateVisual();
-            };
-
-
+            MainChrome.OnChromeImageChanged += MainChrome_OnChromeImageChanged;
+             
             print("CONTAINS::: " + MainChrome.IsChromeDevicesOnNetwork);
             void ChromeUpdate()
             {
@@ -260,6 +248,21 @@ namespace CloudStreamForms
             else {
                 OffBar.Source = App.GetImageSource("gradient.png"); OffBar.HeightRequest = 3; OffBar.HorizontalOptions = LayoutOptions.Fill; OffBar.ScaleX = 100; OffBar.Opacity = 0.3; OffBar.TranslationY = 9;
             }
+        }
+        void UpdateVisual()
+        {
+            if (MainChrome.IsConnectedToChromeDevice) {
+                ChromeName.Text = "Connected to " + MainChrome.chromeRecivever.FriendlyName;
+            }
+            else {
+                ChromeName.Text = "Not connected";
+            }
+            ChromeName.TextColor = MainChrome.CurrentImage > 0 ? Color.FromHex(MainPage.LIGHT_BLUE_COLOR) : Color.FromHex("#e6e6e6");
+        }
+        private void MainChrome_OnChromeImageChanged(object sender, string e)
+        {
+            ImgChromeCastBtt.Source = App.GetImageSource(e);
+            UpdateVisual();
         }
     }
 

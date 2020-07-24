@@ -25,26 +25,53 @@
                         </vlc:VideoView>
                         <!-- <vlc:MediaPlayerElement MediaPlayer="{Binding Player}" LibVLC="{Binding VLC}" EnableRendererDiscovery="True" />-->
                         <!--  <Label x:Name="SeekTxt" Text="Hello" AbsoluteLayout.LayoutBounds=".5,1,1,.1" AbsoluteLayout.LayoutFlags="All" FontSize="20" LineBreakMode="WordWrap" TextColor="White" />-->
-                        <Label x:Name="SubtitleTxt1Back1" Text="" AbsoluteLayout.LayoutBounds="0,0,1,1" VerticalOptions="End" HorizontalOptions="Center" AbsoluteLayout.LayoutFlags="All" FontSize="20" LineBreakMode="WordWrap" TextColor="Black" ClassId="OUTLINE"   />
-                        <Label x:Name="SubtitleTxt1Back2" Text="" AbsoluteLayout.LayoutBounds="0,0,1,1" VerticalOptions="End"  HorizontalOptions="Center" AbsoluteLayout.LayoutFlags="All" FontSize="20" LineBreakMode="WordWrap" TextColor="Black" ClassId="OUTLINE"   />
-                        <Label x:Name="SubtitleTxt1Back3" Text="" AbsoluteLayout.LayoutBounds="0,0,1,1" VerticalOptions="End"  HorizontalOptions="Center" AbsoluteLayout.LayoutFlags="All" FontSize="20" LineBreakMode="WordWrap" TextColor="Black" ClassId="OUTLINE"   />
-                        <Label x:Name="SubtitleTxt1Back4" Text="" AbsoluteLayout.LayoutBounds="0,0,1,1" VerticalOptions="End" HorizontalOptions="Center" AbsoluteLayout.LayoutFlags="All" FontSize="20" LineBreakMode="WordWrap" TextColor="Black" ClassId="OUTLINE"   />
-                        <Label x:Name="SubtitleTxt1Back5" Text="" AbsoluteLayout.LayoutBounds="0,0,1,1" VerticalOptions="End" HorizontalOptions="Center" AbsoluteLayout.LayoutFlags="All" FontSize="20" LineBreakMode="WordWrap" TextColor="Black" ClassId="OUTLINE"   />
-                        <Label x:Name="SubtitleTxt1Back6" Text="" AbsoluteLayout.LayoutBounds="0,0,1,1" VerticalOptions="End" HorizontalOptions="Center" AbsoluteLayout.LayoutFlags="All" FontSize="20" LineBreakMode="WordWrap" TextColor="Black" ClassId="OUTLINE"   />
-                        <Label x:Name="SubtitleTxt1Back7" Text="" AbsoluteLayout.LayoutBounds="0,0,1,1" VerticalOptions="End" HorizontalOptions="Center" AbsoluteLayout.LayoutFlags="All" FontSize="20" LineBreakMode="WordWrap" TextColor="Black" ClassId="OUTLINE"   />
-                        <Label x:Name="SubtitleTxt1Back8" Text="" AbsoluteLayout.LayoutBounds="0,0,1,1" VerticalOptions="End" HorizontalOptions="Center" AbsoluteLayout.LayoutFlags="All" FontSize="20" LineBreakMode="WordWrap" TextColor="Black" ClassId="OUTLINE"   />
-                        <Label x:Name="SubtitleTxt1" Text="" AbsoluteLayout.LayoutBounds="0,0,1,1" VerticalOptions="End" TranslationY="-65" HorizontalOptions="Center" AbsoluteLayout.LayoutFlags="All" FontSize="20" LineBreakMode="WordWrap" TextColor="White" ClassId="OUTLINE"   />
 
-                        <Label x:Name="SubtitleTxt2Back1" Text="" AbsoluteLayout.LayoutBounds="0,0,1,1" VerticalOptions="End" HorizontalOptions="Center" AbsoluteLayout.LayoutFlags="All" FontSize="20" LineBreakMode="WordWrap" TextColor="Black"  ClassId="OUTLINE" />
-                        <Label x:Name="SubtitleTxt2Back2" Text="" AbsoluteLayout.LayoutBounds="0,0,1,1" VerticalOptions="End" HorizontalOptions="Center"  AbsoluteLayout.LayoutFlags="All" FontSize="20" LineBreakMode="WordWrap" TextColor="Black"  ClassId="OUTLINE" />
-                        <Label x:Name="SubtitleTxt2Back3" Text="" AbsoluteLayout.LayoutBounds="0,0,1,1" VerticalOptions="End" HorizontalOptions="Center"  AbsoluteLayout.LayoutFlags="All" FontSize="20" LineBreakMode="WordWrap" TextColor="Black"  ClassId="OUTLINE" />
-                        <Label x:Name="SubtitleTxt2Back4" Text="" AbsoluteLayout.LayoutBounds="0,0,1,1" VerticalOptions="End" HorizontalOptions="Center" AbsoluteLayout.LayoutFlags="All" FontSize="20" LineBreakMode="WordWrap" TextColor="Black"  ClassId="OUTLINE" />
-                        <Label x:Name="SubtitleTxt2Back5" Text="" AbsoluteLayout.LayoutBounds="0,0,1,1" VerticalOptions="End" HorizontalOptions="Center" AbsoluteLayout.LayoutFlags="All" FontSize="20" LineBreakMode="WordWrap" TextColor="Black"  ClassId="OUTLINE" />
-                        <Label x:Name="SubtitleTxt2Back6" Text="" AbsoluteLayout.LayoutBounds="0,0,1,1" VerticalOptions="End" HorizontalOptions="Center" AbsoluteLayout.LayoutFlags="All" FontSize="20" LineBreakMode="WordWrap" TextColor="Black"  ClassId="OUTLINE" />
-                        <Label x:Name="SubtitleTxt2Back7" Text="" AbsoluteLayout.LayoutBounds="0,0,1,1" VerticalOptions="End" HorizontalOptions="Center" AbsoluteLayout.LayoutFlags="All" FontSize="20" LineBreakMode="WordWrap" TextColor="Black"  ClassId="OUTLINE" />
-                        <Label x:Name="SubtitleTxt2Back8" Text="" AbsoluteLayout.LayoutBounds="0,0,1,1" VerticalOptions="End" HorizontalOptions="Center" AbsoluteLayout.LayoutFlags="All" FontSize="20" LineBreakMode="WordWrap" TextColor="Black"  ClassId="OUTLINE" />
-                        <Label x:Name="SubtitleTxt2" Text="" AbsoluteLayout.LayoutBounds="0,0,1,1" VerticalOptions="End" HorizontalOptions="Center" TranslationY="-40" AbsoluteLayout.LayoutFlags="All" FontSize="20" LineBreakMode="WordWrap" TextColor="White"  ClassId="OUTLINE" />
- 
+                        <!--    <RelativeLayout x:Name="SubHolder" AbsoluteLayout.LayoutBounds="0,0,1,1">-->
+                        <AbsoluteLayout x:Name="SubHolder" AbsoluteLayout.LayoutBounds="0,0,1,1" VerticalOptions="End" HorizontalOptions="Center" AbsoluteLayout.LayoutFlags="All" InputTransparent="True">
+
+                            <!--  <Label x:Name="SubtitleTxt1Back1" Text="" HorizontalTextAlignment="Center" AbsoluteLayout.LayoutBounds="0,0,1,1" VerticalOptions="End" HorizontalOptions="Center" TranslationY="-5" AbsoluteLayout.LayoutFlags="All" FontSize="20" LineBreakMode="WordWrap" TextColor="Black" ClassId="OUTLINE" WidthRequest="1000" BackgroundColor="Transparent" HeightRequest="100" />
+                        <Label x:Name="SubtitleTxt1Back2" Text="" HorizontalTextAlignment="Center" AbsoluteLayout.LayoutBounds="0,0,1,1" VerticalOptions="End" HorizontalOptions="Center" TranslationY="-5" AbsoluteLayout.LayoutFlags="All" FontSize="20" LineBreakMode="WordWrap" TextColor="Black" ClassId="OUTLINE" WidthRequest="1000" BackgroundColor="Transparent" HeightRequest="100" />
+                        <Label x:Name="SubtitleTxt1Back3" Text="" HorizontalTextAlignment="Center" AbsoluteLayout.LayoutBounds="0,0,1,1" VerticalOptions="End" HorizontalOptions="Center" TranslationY="-5" AbsoluteLayout.LayoutFlags="All" FontSize="20" LineBreakMode="WordWrap" TextColor="Black" ClassId="OUTLINE" WidthRequest="1000" BackgroundColor="Transparent" HeightRequest="100" />
+                        <Label x:Name="SubtitleTxt1Back4" Text="" HorizontalTextAlignment="Center" AbsoluteLayout.LayoutBounds="0,0,1,1" VerticalOptions="End" HorizontalOptions="Center" TranslationY="-5" AbsoluteLayout.LayoutFlags="All" FontSize="20" LineBreakMode="WordWrap" TextColor="Black" ClassId="OUTLINE" WidthRequest="1000" BackgroundColor="Transparent" HeightRequest="100" />
+                        <Label x:Name="SubtitleTxt1Back5" Text="" HorizontalTextAlignment="Center" AbsoluteLayout.LayoutBounds="0,0,1,1" VerticalOptions="End" HorizontalOptions="Center" TranslationY="-5" AbsoluteLayout.LayoutFlags="All" FontSize="20" LineBreakMode="WordWrap" TextColor="Black" ClassId="OUTLINE" WidthRequest="1000" BackgroundColor="Transparent" HeightRequest="100" />
+                        <Label x:Name="SubtitleTxt1Back6" Text="" HorizontalTextAlignment="Center" AbsoluteLayout.LayoutBounds="0,0,1,1" VerticalOptions="End" HorizontalOptions="Center" TranslationY="-5" AbsoluteLayout.LayoutFlags="All" FontSize="20" LineBreakMode="WordWrap" TextColor="Black" ClassId="OUTLINE" WidthRequest="1000" BackgroundColor="Transparent" HeightRequest="100" />
+                        <Label x:Name="SubtitleTxt1Back7" Text="" HorizontalTextAlignment="Center" AbsoluteLayout.LayoutBounds="0,0,1,1" VerticalOptions="End" HorizontalOptions="Center" TranslationY="-5" AbsoluteLayout.LayoutFlags="All" FontSize="20" LineBreakMode="WordWrap" TextColor="Black" ClassId="OUTLINE" WidthRequest="1000" BackgroundColor="Transparent" HeightRequest="100" />
+                        <Label x:Name="SubtitleTxt1Back8" Text="" HorizontalTextAlignment="Center" AbsoluteLayout.LayoutBounds="0,0,1,1" VerticalOptions="End" HorizontalOptions="Center" TranslationY="-5" AbsoluteLayout.LayoutFlags="All" FontSize="20" LineBreakMode="WordWrap" TextColor="Black" ClassId="OUTLINE" WidthRequest="1000" BackgroundColor="Transparent" HeightRequest="100" />-->
+
+                            <Label x:Name="SubtitleTxt1Back1" Text="" HorizontalTextAlignment="Center" VerticalTextAlignment="Center"  AbsoluteLayout.LayoutBounds="0,0,1,1" VerticalOptions="End" TranslationY="-5" HorizontalOptions="Center" AbsoluteLayout.LayoutFlags="All" FontSize="20" LineBreakMode="WordWrap" TextColor="Black" WidthRequest="1000" HeightRequest="100" ClassId="OUTLINE"   />
+                            <Label x:Name="SubtitleTxt1Back2" Text="" HorizontalTextAlignment="Center" VerticalTextAlignment="Center"  AbsoluteLayout.LayoutBounds="0,0,1,1" VerticalOptions="End" TranslationY="-5" HorizontalOptions="Center" AbsoluteLayout.LayoutFlags="All" FontSize="20" LineBreakMode="WordWrap" TextColor="Black" WidthRequest="1000" HeightRequest="100" ClassId="OUTLINE"   />
+                            <Label x:Name="SubtitleTxt1Back3" Text="" HorizontalTextAlignment="Center" VerticalTextAlignment="Center"  AbsoluteLayout.LayoutBounds="0,0,1,1" VerticalOptions="End" TranslationY="-5" HorizontalOptions="Center" AbsoluteLayout.LayoutFlags="All" FontSize="20" LineBreakMode="WordWrap" TextColor="Black" WidthRequest="1000" HeightRequest="100" ClassId="OUTLINE"   />
+                            <Label x:Name="SubtitleTxt1Back4" Text="" HorizontalTextAlignment="Center" VerticalTextAlignment="Center"  AbsoluteLayout.LayoutBounds="0,0,1,1" VerticalOptions="End" TranslationY="-5" HorizontalOptions="Center" AbsoluteLayout.LayoutFlags="All" FontSize="20" LineBreakMode="WordWrap" TextColor="Black" WidthRequest="1000" HeightRequest="100" ClassId="OUTLINE"   />
+                            <Label x:Name="SubtitleTxt1Back5" Text="" HorizontalTextAlignment="Center" VerticalTextAlignment="Center"  AbsoluteLayout.LayoutBounds="0,0,1,1" VerticalOptions="End" TranslationY="-5" HorizontalOptions="Center" AbsoluteLayout.LayoutFlags="All" FontSize="20" LineBreakMode="WordWrap" TextColor="Black" WidthRequest="1000" HeightRequest="100" ClassId="OUTLINE"   />
+                            <Label x:Name="SubtitleTxt1Back6" Text="" HorizontalTextAlignment="Center" VerticalTextAlignment="Center"  AbsoluteLayout.LayoutBounds="0,0,1,1" VerticalOptions="End" TranslationY="-5" HorizontalOptions="Center" AbsoluteLayout.LayoutFlags="All" FontSize="20" LineBreakMode="WordWrap" TextColor="Black" WidthRequest="1000" HeightRequest="100" ClassId="OUTLINE"   />
+                            <Label x:Name="SubtitleTxt1Back7" Text="" HorizontalTextAlignment="Center" VerticalTextAlignment="Center"  AbsoluteLayout.LayoutBounds="0,0,1,1" VerticalOptions="End" TranslationY="-5" HorizontalOptions="Center" AbsoluteLayout.LayoutFlags="All" FontSize="20" LineBreakMode="WordWrap" TextColor="Black" WidthRequest="1000" HeightRequest="100" ClassId="OUTLINE"   />
+                            <Label x:Name="SubtitleTxt1Back8" Text="" HorizontalTextAlignment="Center" VerticalTextAlignment="Center"  AbsoluteLayout.LayoutBounds="0,0,1,1" VerticalOptions="End" TranslationY="-5" HorizontalOptions="Center" AbsoluteLayout.LayoutFlags="All" FontSize="20" LineBreakMode="WordWrap" TextColor="Black" WidthRequest="1000" HeightRequest="100" ClassId="OUTLINE"   />
+                            <Label x:Name="SubtitleTxt1" Text="" HorizontalTextAlignment="Center" VerticalTextAlignment="Center"  AbsoluteLayout.LayoutBounds="0,0,1,1" VerticalOptions="End" TranslationY="-5" HorizontalOptions="Center" AbsoluteLayout.LayoutFlags="All" FontSize="20" LineBreakMode="WordWrap" TextColor="White" WidthRequest="1000" HeightRequest="100" ClassId="OUTLINE"   />
+
+                            <!--
+                        <Label x:Name="SubtitleTxt2Back1" Text="" HorizontalTextAlignment="Center" AbsoluteLayout.LayoutBounds="0,0,1,1" VerticalOptions="End" HorizontalOptions="Center" TranslationY="15" AbsoluteLayout.LayoutFlags="All" FontSize="20" LineBreakMode="WordWrap" TextColor="Black"  ClassId="OUTLINE" WidthRequest="1000" BackgroundColor="Transparent" HeightRequest="100" />
+                        <Label x:Name="SubtitleTxt2Back2" Text="" HorizontalTextAlignment="Center" AbsoluteLayout.LayoutBounds="0,0,1,1" VerticalOptions="End" HorizontalOptions="Center" TranslationY="15" AbsoluteLayout.LayoutFlags="All" FontSize="20" LineBreakMode="WordWrap" TextColor="Black"  ClassId="OUTLINE" WidthRequest="1000" BackgroundColor="Transparent" HeightRequest="100" />
+                        <Label x:Name="SubtitleTxt2Back3" Text="" HorizontalTextAlignment="Center" AbsoluteLayout.LayoutBounds="0,0,1,1" VerticalOptions="End" HorizontalOptions="Center" TranslationY="15" AbsoluteLayout.LayoutFlags="All" FontSize="20" LineBreakMode="WordWrap" TextColor="Black"  ClassId="OUTLINE" WidthRequest="1000" BackgroundColor="Transparent" HeightRequest="100" />
+                        <Label x:Name="SubtitleTxt2Back4" Text="" HorizontalTextAlignment="Center" AbsoluteLayout.LayoutBounds="0,0,1,1" VerticalOptions="End" HorizontalOptions="Center" TranslationY="15" AbsoluteLayout.LayoutFlags="All" FontSize="20" LineBreakMode="WordWrap" TextColor="Black"  ClassId="OUTLINE" WidthRequest="1000" BackgroundColor="Transparent" HeightRequest="100" />
+                        <Label x:Name="SubtitleTxt2Back5" Text="" HorizontalTextAlignment="Center" AbsoluteLayout.LayoutBounds="0,0,1,1" VerticalOptions="End" HorizontalOptions="Center" TranslationY="15" AbsoluteLayout.LayoutFlags="All" FontSize="20" LineBreakMode="WordWrap" TextColor="Black"  ClassId="OUTLINE" WidthRequest="1000" BackgroundColor="Transparent" HeightRequest="100" />
+                        <Label x:Name="SubtitleTxt2Back6" Text="" HorizontalTextAlignment="Center" AbsoluteLayout.LayoutBounds="0,0,1,1" VerticalOptions="End" HorizontalOptions="Center" TranslationY="15" AbsoluteLayout.LayoutFlags="All" FontSize="20" LineBreakMode="WordWrap" TextColor="Black"  ClassId="OUTLINE" WidthRequest="1000" BackgroundColor="Transparent" HeightRequest="100" />
+                        <Label x:Name="SubtitleTxt2Back7" Text="" HorizontalTextAlignment="Center" AbsoluteLayout.LayoutBounds="0,0,1,1" VerticalOptions="End" HorizontalOptions="Center" TranslationY="15" AbsoluteLayout.LayoutFlags="All" FontSize="20" LineBreakMode="WordWrap" TextColor="Black"  ClassId="OUTLINE" WidthRequest="1000" BackgroundColor="Transparent" HeightRequest="100" />
+                            <Label x:Name="SubtitleTxt2Back8" Text="" HorizontalTextAlignment="Center" AbsoluteLayout.LayoutBounds="0,0,1,1" VerticalOptions="End" HorizontalOptions="Center" TranslationY="15" AbsoluteLayout.LayoutFlags="All" FontSize="20" LineBreakMode="WordWrap" TextColor="Black"  ClassId="OUTLINE" WidthRequest="1000" BackgroundColor="Transparent" HeightRequest="100" />-->
+                            <Label x:Name="SubtitleTxt2Back1" Text="" HorizontalTextAlignment="Center" VerticalTextAlignment="Center"  AbsoluteLayout.LayoutBounds="0,0,1,1" VerticalOptions="End" TranslationY="15" HorizontalOptions="Center" AbsoluteLayout.LayoutFlags="All" FontSize="20" LineBreakMode="WordWrap" TextColor="Black" WidthRequest="1000"  HeightRequest="100" ClassId="OUTLINE"   />
+                            <Label x:Name="SubtitleTxt2Back2" Text="" HorizontalTextAlignment="Center" VerticalTextAlignment="Center"  AbsoluteLayout.LayoutBounds="0,0,1,1" VerticalOptions="End" TranslationY="15" HorizontalOptions="Center" AbsoluteLayout.LayoutFlags="All" FontSize="20" LineBreakMode="WordWrap" TextColor="Black" WidthRequest="1000"  HeightRequest="100" ClassId="OUTLINE"   />
+                            <Label x:Name="SubtitleTxt2Back3" Text="" HorizontalTextAlignment="Center" VerticalTextAlignment="Center"  AbsoluteLayout.LayoutBounds="0,0,1,1" VerticalOptions="End" TranslationY="15" HorizontalOptions="Center" AbsoluteLayout.LayoutFlags="All" FontSize="20" LineBreakMode="WordWrap" TextColor="Black" WidthRequest="1000"  HeightRequest="100" ClassId="OUTLINE"   />
+                            <Label x:Name="SubtitleTxt2Back4" Text="" HorizontalTextAlignment="Center" VerticalTextAlignment="Center"  AbsoluteLayout.LayoutBounds="0,0,1,1" VerticalOptions="End" TranslationY="15" HorizontalOptions="Center" AbsoluteLayout.LayoutFlags="All" FontSize="20" LineBreakMode="WordWrap" TextColor="Black" WidthRequest="1000"  HeightRequest="100" ClassId="OUTLINE"   />
+                            <Label x:Name="SubtitleTxt2Back5" Text="" HorizontalTextAlignment="Center" VerticalTextAlignment="Center"  AbsoluteLayout.LayoutBounds="0,0,1,1" VerticalOptions="End" TranslationY="15" HorizontalOptions="Center" AbsoluteLayout.LayoutFlags="All" FontSize="20" LineBreakMode="WordWrap" TextColor="Black" WidthRequest="1000"  HeightRequest="100" ClassId="OUTLINE"   />
+                            <Label x:Name="SubtitleTxt2Back6" Text="" HorizontalTextAlignment="Center" VerticalTextAlignment="Center"  AbsoluteLayout.LayoutBounds="0,0,1,1" VerticalOptions="End" TranslationY="15" HorizontalOptions="Center" AbsoluteLayout.LayoutFlags="All" FontSize="20" LineBreakMode="WordWrap" TextColor="Black" WidthRequest="1000"  HeightRequest="100" ClassId="OUTLINE"   />
+                            <Label x:Name="SubtitleTxt2Back7" Text="" HorizontalTextAlignment="Center" VerticalTextAlignment="Center"  AbsoluteLayout.LayoutBounds="0,0,1,1" VerticalOptions="End" TranslationY="15" HorizontalOptions="Center" AbsoluteLayout.LayoutFlags="All" FontSize="20" LineBreakMode="WordWrap" TextColor="Black" WidthRequest="1000"  HeightRequest="100" ClassId="OUTLINE"   />
+                            <Label x:Name="SubtitleTxt2Back8" Text="" HorizontalTextAlignment="Center" VerticalTextAlignment="Center"  AbsoluteLayout.LayoutBounds="0,0,1,1" VerticalOptions="End" TranslationY="15" HorizontalOptions="Center" AbsoluteLayout.LayoutFlags="All" FontSize="20" LineBreakMode="WordWrap" TextColor="Black" WidthRequest="1000"  HeightRequest="100" ClassId="OUTLINE"   />
+                            <Label x:Name="SubtitleTxt2" Text="" HorizontalTextAlignment="Center" VerticalTextAlignment="Center"  AbsoluteLayout.LayoutBounds="0,0,1,1" VerticalOptions="End" TranslationY="15" HorizontalOptions="Center" AbsoluteLayout.LayoutFlags="All" FontSize="20" LineBreakMode="WordWrap" TextColor="White" WidthRequest="1000" HeightRequest="100" ClassId="OUTLINE"   />
+
+                        </AbsoluteLayout>
+
+
+                        <!--    </RelativeLayout> -->
+
                     </AbsoluteLayout>
 
                     <Grid x:Name="AllButtons">
@@ -87,7 +114,7 @@
 
                         <Label x:Name="SkiptimeLabel" Text="" TextColor="White" FontSize="25" VerticalOptions="Center" HorizontalOptions="Center" TranslationY="-60"></Label>
                         <Label x:Name="EpisodeLabel"  Text="" VerticalOptions="Start" HorizontalOptions="Center" FontSize="14" TextColor="#e7e7e7" TranslationY="20"></Label>
-                        <Grid x:Name="VideoSliderAndSettings"  VerticalOptions="End" >
+                        <Grid x:Name="VideoSliderAndSettings"  VerticalOptions="End" ColumnSpacing="30">
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto" />
                                 <RowDefinition Height="Auto" />
@@ -193,13 +220,13 @@
                                     CornerRadius="2"
                                     BorderColor="Transparent"
                                     BorderWidth="0">
-                                    
+
                                     <Grid Grid.Column="0" HorizontalOptions="Center" ColumnSpacing="0" >
                                         <Grid.ColumnDefinitions >
                                             <ColumnDefinition Width="Auto" />
                                             <ColumnDefinition Width="Auto" />
                                         </Grid.ColumnDefinitions>
-                                        <ff:CachedImage x:Name="LockImg" Grid.Column="0" VerticalOptions="Center"  TranslationX="-7"  InputTransparent="True" BackgroundColor="Transparent" WidthRequest="23" HeightRequest="23" Aspect="AspectFill"></ff:CachedImage>
+                                        <ff:CachedImage x:Name="LockImg" Grid.Column="0" VerticalOptions="Center"  TranslationX="-7"  InputTransparent="True" WidthRequest="33" HeightRequest="33" Scale="1" Aspect="AspectFill" BackgroundColor="Transparent"></ff:CachedImage>
                                         <!--<Button Text="Episodes"  Grid.Column="1" BackgroundColor="Transparent"></Button>-->
                                         <Label Text="Lock" x:Name="LockTxt" Grid.Column="1" VerticalOptions="Center" TextColor="White"></Label>
                                     </Grid>
@@ -236,7 +263,7 @@
                                     CornerRadius="2"
                                     BorderColor="Transparent"
                                     BorderWidth="0">
-                                    
+
                                     <Grid Grid.Column="0" HorizontalOptions="Center" ColumnSpacing="0" >
                                         <Grid.ColumnDefinitions >
                                             <ColumnDefinition Width="Auto" />
@@ -248,10 +275,10 @@
 
                                     </Grid>
                                 </xe:BorderView>
-                                
+
                                 <xe:BorderView x:Name="DelayTap" Grid.Column="3"
                                     HeightRequest="35"
-                                    WidthRequest="100"
+                                    WidthRequest="80"
                                     xe:TouchEffect.Color="White" 
                                     HorizontalOptions="Center"
                                     VerticalOptions="Center"
@@ -270,10 +297,10 @@
                                         <Label Text="Audio" Grid.Column="1" VerticalOptions="Center" TextColor="White"></Label>
                                     </Grid>
                                 </xe:BorderView>
-                                
+
                                 <xe:BorderView x:Name="SubTap" Grid.Column="4"  Margin="-10,0"
                                     HeightRequest="35"
-                                    WidthRequest="120"
+                                    WidthRequest="100"
                                     xe:TouchEffect.Color="White" 
                                     HorizontalOptions="Center"
                                     VerticalOptions="Center"
@@ -281,7 +308,7 @@
                                     CornerRadius="2"
                                     BorderColor="Transparent"
                                     BorderWidth="0">
-                                    
+
                                     <Grid Grid.Column="0" HorizontalOptions="Center" ColumnSpacing="0" >
                                         <Grid.ColumnDefinitions >
                                             <ColumnDefinition Width="Auto" />
@@ -304,7 +331,7 @@
                                     CornerRadius="2"
                                     BorderColor="Transparent"
                                     BorderWidth="0">
-                                    
+
                                     <Grid Grid.Column="0" HorizontalOptions="Center" ColumnSpacing="0" >
                                         <Grid.ColumnDefinitions >
                                             <ColumnDefinition Width="Auto" />

@@ -420,7 +420,7 @@ namespace CloudStreamForms
             };
 
             if (currentChromeData.isFromFile) {
-                UpperIconHolder.TranslationX = 15;
+                UpperIconHolder.TranslationX = 20;
                 LowerIconHolder.ColumnSpacing = 40;
 
                 PlayList.IsEnabled = false;
@@ -525,7 +525,7 @@ namespace CloudStreamForms
             FastForward.Source = GetImageSource("netflixSkipForward.png"); // GetImageSource(RoundedPrefix + "_replay_white_48dp_mirror.png");
             SkipBack.Source = GetImageSource(RoundedPrefix + "_skip_previous_white_48dp.png");
             SkipForward.Source = GetImageSource(RoundedPrefix + "_skip_next_white_48dp.png");
-            Audio.Source = GetImageSource(RoundedPrefix + "_volume_up_white_48dp.png");
+            Audio.Source = App.GetImageSource("AudioVol3.png");//GetImageSource(RoundedPrefix + "_volume_up_white_48dp.png");
             SetPause(IsPaused);
             UpdateTxt();
 
@@ -555,7 +555,7 @@ namespace CloudStreamForms
 
         private void AudioClicked(object sender, EventArgs e)
         {
-            PopupNavigation.Instance.PushAsync(new CloudStreamForms.MyPopupPage());
+            PopupNavigation.Instance.PushAsync(new CloudStreamForms.AudioPopupPage());
             ScaleAudio();
         }
 
@@ -575,8 +575,8 @@ namespace CloudStreamForms
         async void ScaleAudio()
         {
             Audio.AbortAnimation("ScaleTo");
-            await Audio.ScaleTo(1.4, 100, Easing.SinOut);
-            await Audio.ScaleTo(1.3, 100, Easing.SinOut);
+            await Audio.ScaleTo(1.1, 100, Easing.SinOut);
+            await Audio.ScaleTo(1.0, 100, Easing.SinOut);
         }
 
         private void Pause_Clicked(object sender, EventArgs e)
