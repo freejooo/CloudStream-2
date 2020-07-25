@@ -469,7 +469,7 @@ namespace CloudStreamForms.Core
             try {
                 var p = ctx.Response;
                 var req = ctx.Request;
-                p.SendChunked = false;
+                p.SendChunked = true;
 
                 using (FileStream fs = new FileStream(videoStreamPath, FileMode.Open)) {
                     int startByte = -1;
@@ -485,30 +485,38 @@ namespace CloudStreamForms.Core
                         startByte = 0;
                         endByte = (int)fs.Length;
                     }
-                    byte[] buffer = new byte[endByte - startByte];
+                    //  byte[] buffer = new byte[endByte - startByte];
                     fs.Position = startByte;
                     //fs.Seek(startByte, SeekOrigin.Begin);
-                    int read = fs.Read(buffer, 0, endByte - startByte);
-                    fs.Flush();
-                    fs.Close();
+
                     p.StatusCode = 206;
                     p.StatusDescription = ("Partial Content");
-
+                    int len = endByte - startByte;
                     p.ContentType = "video/mp4";
                     p.AddHeader("Accept-Ranges", "bytes");
-                    int totalCount = startByte + buffer.Length;
+                    int totalCount = startByte + len;
                     p.AddHeader("Content-Range", string.Format("bytes {0}-{1}/{2}", startByte, totalCount - 1, totalCount));
-                    p.ContentLength64 = (buffer.Length);
-                    print("BUFFERSEND: " + startByte + "|" + endByte + "|" + buffer.Length);
+                    p.ContentLength64 = (len);
+                    print("BUFFERSEND: " + startByte + "|" + endByte + "|" + len);
                     p.KeepAlive = true;
+
+                    byte[] temp = new byte[1024];
+                    int count = 0;
+                    while ((count = fs.Read(temp, 0, 1024)) > 0) {
+                        p.OutputStream.Write(temp, 0, count);
+                    }
+
+                    //int read = fs.Read(buffer, 0, endByte - startByte);
+                    //  fs.Flush();
+                    fs.Close();
+
                     // p.Close(buffer, true); 
-                    p.OutputStream.Write(buffer, 0, buffer.Length);
                     p.OutputStream.Flush();
                 }
 
             }
-            catch (Exception _ex) { 
-                error(_ex);
+            catch (Exception _ex) {
+                error("Socceterror: " + _ex);
             }
         }
 
