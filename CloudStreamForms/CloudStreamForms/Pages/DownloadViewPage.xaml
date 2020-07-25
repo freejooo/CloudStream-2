@@ -8,8 +8,7 @@
              mc:Ignorable="d"                         
              xmlns:xe="clr-namespace:XamEffects;assembly=XamEffects"
              x:Class="CloudStreamForms.DownloadViewPage">
-    <StackLayout>
-
+    <ScrollView x:Name="Holder" > 
         <Grid>
             <Grid.RowDefinitions >
                 <RowDefinition Height="Auto" />
@@ -31,11 +30,11 @@
                 <Label VerticalOptions="Center" x:Name="ChromeName" Grid.Column="1" TextColor="#e6e6e6" Text="Not connected" TranslationX="-3"></Label>
 
             </Grid>
-            
-            <Grid Grid.Row="2"  Grid.Column="0">
+
+            <Grid Grid.Row="2"  Grid.Column="0" VerticalOptions="Start" >
 
                 <RefreshView BackgroundColor="#1D1D1D" RefreshColor="#4e66ff" Command="{Binding RefreshCommand}" 
-           IsRefreshing="{Binding IsRefreshing}"         > 
+           IsRefreshing="{Binding IsRefreshing}"          > 
                 
                 <!-- <ProgressBar Progress="0.5"></ProgressBar>  ItemTapped="episodeView_ItemTapped" Tapped="ViewCell_Tapped"-->
                 <ListView ItemsSource="{Binding MyEpisodeResultCollection}"
@@ -164,5 +163,5 @@
 
         </Grid>
 
-    </StackLayout>
+    </ScrollView>
 </ContentPage>

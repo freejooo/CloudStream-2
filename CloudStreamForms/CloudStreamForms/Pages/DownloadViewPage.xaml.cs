@@ -59,7 +59,7 @@ namespace CloudStreamForms
 
         void SetHeight()
         {
-            Device.BeginInvokeOnMainThread(() => episodeView.HeightRequest = 10000);//episodeView.HeightRequest = MyEpisodeResultCollection.Count * episodeView.RowHeight + 20);
+            Device.BeginInvokeOnMainThread(() => episodeView.HeightRequest = MyEpisodeResultCollection.Count * episodeView.RowHeight + 20);//episodeView.HeightRequest = MyEpisodeResultCollection.Count * episodeView.RowHeight + 20);
         }
 
         private void ViewCell_Tapped(object sender, EventArgs e)
