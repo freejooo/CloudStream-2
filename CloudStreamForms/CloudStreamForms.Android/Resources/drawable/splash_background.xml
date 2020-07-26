@@ -1,15 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
-     
  <item>
  <color android:color="#111111"/>
  </item>
- <item android:width="100dp" android:height="100dp" android:gravity="center">
- 
- <bitmap      android:src="@drawable/bicon"
->
- 
+ <item android:width="120dp" android:height="120dp" android:gravity="center">
+ <bitmap android:src="@drawable/bicon9" >
  </bitmap>
  </item>
 </layer-list>

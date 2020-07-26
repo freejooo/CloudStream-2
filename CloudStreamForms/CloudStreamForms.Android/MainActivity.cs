@@ -176,7 +176,7 @@ namespace CloudStreamForms.Droid
         public int id;
         public bool autoCancel = true;
         public bool showWhen = true;
-        public int smallIcon = Resource.Drawable.bicon;
+        public int smallIcon = PublicNot;
         public string bigIcon = "";
         public bool mediaStyle = true;
         public string data = "";
@@ -247,7 +247,7 @@ namespace CloudStreamForms.Droid
             if (Build.VERSION.SdkInt < BuildVersionCodes.O || !containsMultiLine) {
                 builder.SetContentText(not.body);
             }
-            builder.SetSmallIcon(not.smallIcon);
+            builder.SetSmallIcon( not.smallIcon);
             builder.SetAutoCancel(not.autoCancel);
             builder.SetOngoing(not.onGoing);
 
@@ -594,7 +594,7 @@ namespace CloudStreamForms.Droid
                         int isPause = isPaused[id];
                         bool canPause = isPause == 0;
                         if (isPause != 2) {
-                            ShowLocalNot(new LocalNot() { actions = new List<LocalAction>() { new LocalAction() { action = $"handleDownload|||id={id}|||dType={(canPause ? 1 : 0)}|||", name = canPause ? "Pause" : "Resume" }, new LocalAction() { action = $"handleDownload|||id={id}|||dType=2|||", name = "Stop" } }, mediaStyle = false, bigIcon = poster, title = $"{title} - {ConvertBytesToAny(bytesPerSec/UPDATE_TIME,2,2)} MB/s", autoCancel = false, showWhen = false, onGoing = canPause, id = id, smallIcon = Resource.Drawable.bicon, progress = progress, body = progressTxt }, context); //canPause
+                            ShowLocalNot(new LocalNot() { actions = new List<LocalAction>() { new LocalAction() { action = $"handleDownload|||id={id}|||dType={(canPause ? 1 : 0)}|||", name = canPause ? "Pause" : "Resume" }, new LocalAction() { action = $"handleDownload|||id={id}|||dType=2|||", name = "Stop" } }, mediaStyle = false, bigIcon = poster, title = $"{title} - {ConvertBytesToAny(bytesPerSec/UPDATE_TIME,2,2)} MB/s", autoCancel = false, showWhen = false, onGoing = canPause, id = id, smallIcon = PublicNot, progress = progress, body = progressTxt }, context); //canPause
                         }
                     }
                     catch (Exception _ex) {
@@ -612,7 +612,7 @@ namespace CloudStreamForms.Droid
                         Device.BeginInvokeOnMainThread(() => {
                             try {
                                 print("DAAAAAAAAAASHOW DONE222");
-                                ShowLocalNot(new LocalNot() { mediaStyle = poster != "", bigIcon = poster, title = title, autoCancel = true, onGoing = false, id = id, smallIcon = Resource.Drawable.bicon, body = overrideText ?? (succ ? "Download done!" : "Download Failed") }, context); // ((e.Cancelled || e.Error != null) ? "Download Failed!"
+                                ShowLocalNot(new LocalNot() { mediaStyle = poster != "", bigIcon = poster, title = title, autoCancel = true, onGoing = false, id = id, smallIcon = PublicNot, body = overrideText ?? (succ ? "Download done!" : "Download Failed") }, context); // ((e.Cancelled || e.Error != null) ? "Download Failed!"
                             }
                             catch (Exception _ex) {
                                 print("SUPERFATALEX: " + _ex);
@@ -918,7 +918,7 @@ namespace CloudStreamForms.Droid
 
 
 
-    [Activity(Label = "CloudStream 2", Icon = "@drawable/bicon", Theme = "@style/MainTheme.Splash", MainLauncher = true, LaunchMode = LaunchMode.SingleTop, ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation), IntentFilter(new[] { Intent.ActionView }, DataScheme = "cloudstreamforms", Categories = new[] { Intent.CategoryDefault, Intent.CategoryBrowsable })]
+    [Activity(Label = "CloudStream 2", Icon = "@drawable/bicon9", Theme = "@style/MainTheme.Splash", MainLauncher = true, LaunchMode = LaunchMode.SingleTop, ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation), IntentFilter(new[] { Intent.ActionView }, DataScheme = "cloudstreamforms", Categories = new[] { Intent.CategoryDefault, Intent.CategoryBrowsable })]
     public class MainActivity : global::Xamarin.Forms.Platform.Android.FormsAppCompatActivity
     {
         public static MainDroid mainDroid;
@@ -983,9 +983,12 @@ namespace CloudStreamForms.Droid
             base.OnNewIntent(intent);
         }
 
+        public static int PublicNot;
         protected override void OnCreate(Bundle savedInstanceState)
         {
             print("ON CREATED:::::!!!!!!!!!");
+
+            PublicNot = Resource.Drawable.bicon;
 
             TabLayoutResource = Resource.Layout.Tabbar;
             ToolbarResource = Resource.Layout.Toolbar;
@@ -1013,9 +1016,8 @@ namespace CloudStreamForms.Droid
 
             Xamarin.Essentials.Platform.Init(this, savedInstanceState);
             global::Xamarin.Forms.Forms.Init(this, savedInstanceState);
-
-            LocalNotificationsImplementation.NotificationIconId = Resource.Drawable.bicon;
-            MainDroid.NotificationIconId = Resource.Drawable.bicon;
+            LocalNotificationsImplementation.NotificationIconId = PublicNot;
+            MainDroid.NotificationIconId = PublicNot;
 
             LoadApplication(new App());
             if (Settings.IS_TEST_BUILD) {
@@ -1474,7 +1476,7 @@ namespace CloudStreamForms.Droid
         public async void ShowNotIntentAsync(string title, string body, int id, string titleId, string titleName, DateTime? time = null, string bigIconUrl = "")
         {
 
-            var localNot = new LocalNot() { title = title, body = body, id = id, data = titleId == "-1" ? ("cloudstreamforms:" + titleId + "Name=" + titleName + "=EndAll") : null, bigIcon = bigIconUrl, autoCancel = true, mediaStyle = true, notificationImportance = (int)NotificationImportance.Default, showWhen = true, when = time, smallIcon = LocalNotificationIconId };
+            var localNot = new LocalNot() { title = title, body = body, id = id, data = titleId == "-1" ? ("cloudstreamforms:" + titleId + "Name=" + titleName + "=EndAll") : null, bigIcon = bigIconUrl, autoCancel = true, mediaStyle = true, notificationImportance = (int)NotificationImportance.Default, showWhen = true, when = time, smallIcon = PublicNot };
 
 
             if (time == null) {
@@ -1639,7 +1641,7 @@ namespace CloudStreamForms.Droid
                 builder.SetContentText(body);
                 builder.SetAutoCancel(false);
 
-                builder.SetSmallIcon(Resource.Drawable.biconWhite);//LocalNotificationIconId);
+                builder.SetSmallIcon(Resource.Drawable.biconWhite2);//LocalNotificationIconId);
                 builder.SetOngoing(true);
 
 
