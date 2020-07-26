@@ -26,14 +26,25 @@ namespace CloudStreamForms.Script
             return AddFolder<T>(folder, viewTimePosKeys);
         }
 
-        public static string GenerateTextFile()
+        public static string GenerateTextFile(bool everything)
         {
             string text = header + "\n";
-
-            text += AddFolder<long>(App.VIEW_TIME_POS);
-            text += AddFolder<long>(App.VIEW_TIME_DUR);
-            text += AddFolder<string>(App.BOOKMARK_DATA);
-            text += AddFolder<bool>(App.VIEW_HISTORY);
+            if (everything) {
+                text += "CLEAREVERYTHING\n";
+                var keys = App.GetAllKeys();
+                foreach (var key in keys) {
+                    var _k = App.GetRawKey(key, null);
+                    if (_k != null) {
+                        text += $"KEY[{key}]DATA[{_k}]\n";
+                    }
+                }
+            }
+            else {
+                text += AddFolder<long>(App.VIEW_TIME_POS);
+                text += AddFolder<long>(App.VIEW_TIME_DUR);
+                text += AddFolder<string>(App.BOOKMARK_DATA);
+                text += AddFolder<bool>(App.VIEW_HISTORY);
+            }
 
             return text;
         }
@@ -53,12 +64,18 @@ namespace CloudStreamForms.Script
                         count++;
                         var line = lines[count];
                         if (line.StartsWith("#")) continue; // METADATA
+                        if (line.StartsWith("CLEAREVERYTHING")) {
+                            App.ClearEveryKey();
+                        }
+                        if(line.StartsWith("KEY")) {
+                            App.SetRawKey(FindString(line, "KEY"), FindString(line, "DATA"));
+                        }
                         if (line.StartsWith("FOLDER")) {
                             App.RemoveFolder(FindString(line, "FOLDER"));
 
                             int results = int.Parse(FindString(line, "RESULTS"));
                             //string dataType = FindString(line, "TYPE");
-                          //  var dt = types.Where(t => t.Name == dataType).ToList()[0];
+                            //  var dt = types.Where(t => t.Name == dataType).ToList()[0];
                             for (int i = 0; i < results; i++) {
                                 count++;
                                 var subline = lines[count];
@@ -67,7 +84,7 @@ namespace CloudStreamForms.Script
                         }
                     }
 
-                    return true; 
+                    return true;
                 }
                 else {
                     return false; // FAILED TO PARSE THE FILE

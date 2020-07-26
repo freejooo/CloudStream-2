@@ -665,6 +665,16 @@ namespace CloudStreamForms
             }
         }
 
+        public static void ClearEveryKey()
+        {
+            myApp.Properties.Clear();
+        }
+
+        public static List<string> GetAllKeys()
+        {
+            return myApp.Properties.Keys.ToList();
+        }
+
         public static T GetKey<T>(string path, T defVal)
         {
             try {

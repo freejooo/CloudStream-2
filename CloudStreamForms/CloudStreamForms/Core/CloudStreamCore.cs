@@ -6055,6 +6055,8 @@ namespace CloudStreamForms.Core
             return $"https://{slug}.{FindHTML(d, "\"url\":\"", "\"")}";
         }
 
+        // DONT USE www2.himovies.to they have google recaptcha
+
         static string[] shortdates = new string[] {
                                 "Jan",
                                 "Feb",
@@ -6076,7 +6078,10 @@ namespace CloudStreamForms.Core
             if (Settings.CacheMAL) {
                 if (App.KeyExists("CacheMAL", activeMovie.title.id)) {
                     fetchData = false;
-                    activeMovie.title.MALData = App.GetKey<MALData>("CacheMAL", activeMovie.title.id, new MALData());
+                    activeMovie.title.MALData = App.GetKey<MALData>("CacheMAL", activeMovie.title.id, new MALData() { engName = "ERROR"});
+                    if(activeMovie.title.MALData.engName == "ERROR") {
+                        fetchData = true;
+                    }
                 }
             }
 

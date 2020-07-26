@@ -153,7 +153,7 @@ namespace CloudStreamForms
                 FastListViewPopupAnimation = value;
             }
             get {
-                return App.GetKey("Settings", nameof(ListViewPopupAnimation), true);
+                return App.GetKey("Settings", nameof(ListViewPopupAnimation), false);
             }
         }
 
@@ -265,7 +265,7 @@ namespace CloudStreamForms
                 App.SetKey("Settings", nameof(UseAniList), value);
             }
             get {
-                return App.GetKey("Settings", nameof(UseAniList), true);
+                return App.GetKey("Settings", nameof(UseAniList), false);
             }
         }
 
@@ -510,21 +510,22 @@ namespace CloudStreamForms
 
             ManageAccount.Clicked += async (o, e) => {
                 List<string> actions = new List<string>() { };
-
+                // TODO ADD LOGIN
+                /*
                 if (HasAccountLogin) {
                     actions.Add("Logout from " + AccountUsername);
                 }
                 else {
                     actions.Add("Create account");
                     actions.Add("Login");
-                }
-                actions.AddRange(new string[] { "Export data", "Import data", });
+                }*/
+                actions.AddRange(new string[] { "Export data", "Export Everything", "Import data", });
 
                 string action = await ActionPopup.DisplayActionSheet("Manage account", actions.ToArray());
-                if (action == "Export data") {
+                if (action == "Export data" || action == "Export Everything") {
                     string subaction = await ActionPopup.DisplayEntry(InputPopupPage.InputPopupResult.password, "Password", "Encrypt data", autoPaste: false, confirmText: "Encrypt");
                     if (subaction != "Cancel") {
-                        string text = Script.SyncWrapper.GenerateTextFile();
+                        string text = Script.SyncWrapper.GenerateTextFile(action == "Export Everything");
                         if (subaction != "") {
                             text = CloudStreamForms.Cryptography.StringCipher.Encrypt(text, subaction);
                         }
@@ -541,9 +542,12 @@ namespace CloudStreamForms
                     }
                     else {
                         if (file.StartsWith(Script.SyncWrapper.header)) {
-                            Script.SyncWrapper.SetKeysFromTextFile(file);
-                            App.ShowToast("File loaded");
-                            Apper();
+                            string import = await ActionPopup.DisplayActionSheet("Override Current Data", "Yes, import data and override current", "No, dont override current data");
+                            if (import.StartsWith("Y")) {
+                                Script.SyncWrapper.SetKeysFromTextFile(file);
+                                App.ShowToast("File loaded");
+                                Apper();
+                            }
                         }
                         else {
                             bool success = false;
@@ -555,9 +559,12 @@ namespace CloudStreamForms
                                     CloudStreamCore.print("SUBFILE::: " + subFile);
                                     success = subFile.StartsWith(Script.SyncWrapper.header);
                                     if (success) {
-                                        Script.SyncWrapper.SetKeysFromTextFile(subFile);
-                                        App.ShowToast("File dectypted and loaded");
-                                        Apper();
+                                        string import = await ActionPopup.DisplayActionSheet("Override Current Data", "Yes, import data and override current", "No, dont override current data");
+                                        if (import.StartsWith("Y")) {
+                                            Script.SyncWrapper.SetKeysFromTextFile(subFile);
+                                            App.ShowToast("File dectypted and loaded");
+                                            Apper();
+                                        } 
                                     }
                                     else {
                                         App.ShowToast("Failed to dectypted file");

@@ -466,12 +466,13 @@ namespace CloudStreamForms.Core
 
         static void ListWriteFile(HttpListenerContext ctx, string path)
         {
+            FileStream fs = null;
             try {
                 var p = ctx.Response;
                 var req = ctx.Request;
                 p.SendChunked = true;
 
-                using (FileStream fs = new FileStream(videoStreamPath, FileMode.Open)) {
+                using (fs = new FileStream(videoStreamPath, FileMode.Open)) {
                     int startByte = -1;
                     int endByte = -1;
                     if (req.Headers.AllKeys.Contains("Range")) {
@@ -517,6 +518,16 @@ namespace CloudStreamForms.Core
             }
             catch (Exception _ex) {
                 error("Socceterror: " + _ex);
+            }
+            finally {
+                try {
+                    if(fs != null) {
+                        fs.Close();
+                    }
+                }
+                catch (Exception _ex) {
+                    error(_ex);
+                }
             }
         }
 

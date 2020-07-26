@@ -93,6 +93,8 @@
                     <Grid  x:Name="G_AniList"  BackgroundColor="#212121" ColumnSpacing="10" HeightRequest="50">
                         <Grid.ColumnDefinitions >
                             <ColumnDefinition Width="Auto"></ColumnDefinition>
+                            <ColumnDefinition Width="*"></ColumnDefinition>
+                            <ColumnDefinition Width="Auto"></ColumnDefinition>
                         </Grid.ColumnDefinitions>
                         <ff:CachedImage Grid.Column="0" x:Name="AniListImg" HorizontalOptions="Start" WidthRequest="25" HeightRequest="25" Margin="5" TranslationX="5"  VerticalOptions="Center" BackgroundColor="Transparent" >
                             <ff:CachedImage.Transformations >
@@ -168,13 +170,15 @@
                     <Grid  x:Name="G_VideoPlayer" BackgroundColor="#212121" ColumnSpacing="10" HeightRequest="50">
                         <Grid.ColumnDefinitions >
                             <ColumnDefinition Width="Auto"></ColumnDefinition>
+                            <ColumnDefinition Width="*"></ColumnDefinition>
+                            <ColumnDefinition Width="Auto"></ColumnDefinition>
                         </Grid.ColumnDefinitions>
                         <ff:CachedImage Grid.Column="0" x:Name="VideoImg" HorizontalOptions="Start" WidthRequest="25" HeightRequest="25" Margin="5" TranslationX="5"  VerticalOptions="Center" BackgroundColor="Transparent" >
                             <ff:CachedImage.Transformations >
                                 <ffTransformations:TintTransformation HexColor="#707070" ></ffTransformations:TintTransformation>
                             </ff:CachedImage.Transformations>
                         </ff:CachedImage>
-                        <Label Grid.Column="1" Text="Use experimental videoplayer" HorizontalOptions="Start" VerticalOptions="Center"  FontSize="Body" TextColor="{Binding MainTxtColor}"></Label>
+                        <Label Grid.Column="1" Text="Use in app videoplayer" HorizontalOptions="Start" VerticalOptions="Center"  FontSize="Body" TextColor="{Binding MainTxtColor}"></Label>
                         <Switch Grid.Column="2" x:Name="VideoToggle" HorizontalOptions="End" VerticalOptions="Center"></Switch>
                     </Grid>
 
