@@ -256,6 +256,7 @@ namespace CloudStreamForms.Droid
             }
 
             builder.SetVisibility(NotificationVisibility.Public);
+            builder.SetOnlyAlertOnce(true);
 
             if (Build.VERSION.SdkInt >= BuildVersionCodes.O) {
                 var channelId = $"{cc.PackageName}.general";
@@ -984,10 +985,13 @@ namespace CloudStreamForms.Droid
         }
 
         public static int PublicNot;
+         
         protected override void OnCreate(Bundle savedInstanceState)
         {
             print("ON CREATED:::::!!!!!!!!!");
 
+            SetTheme(Resource.Style.MainTheme_NonSplash);
+ 
             PublicNot = Resource.Drawable.bicon;
 
             TabLayoutResource = Resource.Layout.Tabbar;

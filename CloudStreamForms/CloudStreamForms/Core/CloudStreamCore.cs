@@ -6078,8 +6078,8 @@ namespace CloudStreamForms.Core
             if (Settings.CacheMAL) {
                 if (App.KeyExists("CacheMAL", activeMovie.title.id)) {
                     fetchData = false;
-                    activeMovie.title.MALData = App.GetKey<MALData>("CacheMAL", activeMovie.title.id, new MALData() { engName = "ERROR"});
-                    if(activeMovie.title.MALData.engName == "ERROR") {
+                    activeMovie.title.MALData = App.GetKey<MALData>("CacheMAL", activeMovie.title.id, new MALData() { engName = "ERROR" });
+                    if (activeMovie.title.MALData.engName == "ERROR") {
                         fetchData = true;
                     }
                 }
@@ -6089,7 +6089,7 @@ namespace CloudStreamForms.Core
             StartThread("MALDATA", async () => {
                 try {
                     string currentSelectedYear = "";
- 
+
                     async Task FetchMal()
                     {
                         try {
@@ -6242,7 +6242,7 @@ namespace CloudStreamForms.Core
                                 firstName = firstName,
                                 done = false,
                                 currentSelectedYear = currentSelectedYear,
-                            }; 
+                            };
                         }
                         catch (Exception _ex) {
                             await FetchAniList();
@@ -6269,7 +6269,14 @@ namespace CloudStreamForms.Core
 
                                 static string ToDate(int? year, int? month, int? day)
                                 {
+                                    try {
+
                                     return $"{shortdates[(int)(month) - 1]} {day}, {year}";
+
+                                    }
+                                    catch (Exception) {
+                                        return $"{shortdates[0]} {0}, {0}";
+                                    }
                                 }
 
                                 List<MALSeasonData> data = new List<MALSeasonData>() { new MALSeasonData() { malUrl = ToMalUrl(media[0].idMal), seasons = new List<MALSeason>() } };
@@ -6446,6 +6453,7 @@ namespace CloudStreamForms.Core
                 try {
                     var malSeason = activeMovie.title.MALData.seasonData;
                     var season = malSeason[malSeason.Count - 1].seasons;
+                    if (season.Count == 0) return;
                     string downloadString = "https://notify.moe/search/" + season[season.Count - 1].engName;
                     print("DOWNLOADINGMOE::" + downloadString);
                     string d = DownloadString(downloadString);
@@ -7007,14 +7015,20 @@ namespace CloudStreamForms.Core
 
         public int GetMaxEpisodesInAnimeSeason(int currentSeason, bool isDub, TempThread? tempThred = null)
         {
-            int currentMax = 0;
-            for (int i = 0; i < animeProviders.Length; i++) {
-                int cmax = animeProviders[i].GetLinkCount(currentSeason, isDub, tempThred);
-                if (cmax > currentMax) {
-                    currentMax = cmax;
+            if (activeMovie.title.MALData.seasonData.Count > currentSeason) {
+                int currentMax = 0;
+                for (int i = 0; i < animeProviders.Length; i++) {
+                    int cmax = animeProviders[i].GetLinkCount(currentSeason, isDub, tempThred);
+                    if (cmax > currentMax) {
+                        currentMax = cmax;
+                    }
                 }
+                return currentMax;
             }
-            return currentMax;
+            else {
+                App.ShowToast("No episodes found");
+                return 0;
+            }
         }
 
 

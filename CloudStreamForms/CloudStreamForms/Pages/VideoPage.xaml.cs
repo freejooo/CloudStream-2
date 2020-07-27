@@ -927,6 +927,8 @@ namespace CloudStreamForms
         protected override void OnAppearing()
         {
             base.OnAppearing();
+            LibVLCSharp.Shared.Core.Initialize();
+
             print("ON APPEARING VIDEOPAGE");
             isShown = true;
             App.OnAudioFocusChanged += HandleAudioFocus;

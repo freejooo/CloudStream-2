@@ -17,7 +17,6 @@ xmlns:ffTransformations="clr-namespace:FFImageLoading.Transformations;assembly=F
 
     <ScrollView  VerticalScrollBarVisibility="Never">
         <AbsoluteLayout HorizontalOptions="Fill" x:Name="BgColorSet" >
-
             <StackLayout  >
                 <StackLayout x:Name="NormalStack"> 
                     <Grid x:Name="XGRID" HorizontalOptions="Center" 

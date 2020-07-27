@@ -11,10 +11,10 @@
     <DelaySign>false</DelaySign>
     <Win32Resource />
     <AssemblyName>CloudStreamForms</AssemblyName>
-    <Version>1.8.0</Version>
+    <Version>1.8.1</Version>
     <RepositoryUrl>https://github.com/LagradOst/CloudStream-2</RepositoryUrl>
     <UserSecretsId>2980cddb-5c29-45b1-b206-b78bcaf71e44</UserSecretsId>
-    <AssemblyVersion>1.8.0.0</AssemblyVersion>
+    <AssemblyVersion>1.8.1.0</AssemblyVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
