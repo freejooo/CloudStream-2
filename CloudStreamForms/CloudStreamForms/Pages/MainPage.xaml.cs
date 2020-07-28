@@ -117,13 +117,13 @@ namespace CloudStreamForms
             if (IS_TEST_VIDEO) {
                 Page p = new VideoPage(new VideoPage.PlayVideo() { descript = "", name = "Black Bunny", episode = -1, season = -1, MirrorNames = new List<string>() { "Googlevid" }, MirrorUrls = new List<string>() { "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" } });//new List<string>() { "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" }, new List<string>() { "Black" }, new List<string>() { });// { mainPoster = mainPoster };
                 mainPage.Navigation.PushModalAsync(p, false);
-                print("PUST: ::: :" );
+                print("PUST: ::: :");
             }
 
             // Page _p = new ChromeCastPage();// { mainPoster = mainPoster };
             // Navigation.PushModalAsync(_p, false);
-           // print("TEXTFILE:\n" + CloudStreamForms.Script.SyncWrapper.GenerateTextFile());
-           // Script.SyncWrapper.SetKeysFromTextFile(Script.SyncWrapper.GenerateTextFile());
+            // print("TEXTFILE:\n" + CloudStreamForms.Script.SyncWrapper.GenerateTextFile());
+            // Script.SyncWrapper.SetKeysFromTextFile(Script.SyncWrapper.GenerateTextFile());
 
             if (IS_EMTY_BUILD) return;
 
@@ -143,24 +143,24 @@ namespace CloudStreamForms
                 return;
             }
             try {
-            OnIconStart(0);
+                OnIconStart(0);
 
-            LateCheck(); 
-            int oldPage = 0;
-            CurrentPageChanged += (o, e) => {
-                try {
-                    OnIconEnd(oldPage);
-                    for (int i = 0; i < pages.Count; i++) {
-                        if ((pages[i].GetType()) == CurrentPage.GetType()) {
-                            OnIconStart(i);
-                            oldPage = i;
+                LateCheck();
+                int oldPage = 0;
+                CurrentPageChanged += (o, e) => {
+                    try {
+                        OnIconEnd(oldPage);
+                        for (int i = 0; i < pages.Count; i++) {
+                            if ((pages[i].GetType()) == CurrentPage.GetType()) {
+                                OnIconStart(i);
+                                oldPage = i;
+                            }
                         }
                     }
-                }
-                catch (Exception _ex) {
-                    error(_ex);
-                }
-            }; 
+                    catch (Exception _ex) {
+                        error(_ex);
+                    }
+                };
             }
             catch (Exception _ex) {
                 error(_ex);
@@ -176,7 +176,7 @@ namespace CloudStreamForms
             //  PushPageFromUrlAndName("tt0409591", "Naruto");
             //  PushPageFromUrlAndName("tt10885406", "Ascendance of a Bookworm");
             // PushPageFromUrlAndName("tt9054364", "That Time I Got Reincarnated as a Slime");
-             // PushPageFromUrlAndName("tt0371746", "Iron Man");
+            // PushPageFromUrlAndName("tt0371746", "Iron Man");
             // PushPageFromUrlAndName("tt10954274", "ID: Invaded");
         }
 
