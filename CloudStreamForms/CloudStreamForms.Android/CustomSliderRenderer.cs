@@ -21,7 +21,7 @@ public class CustomSliderRenderer : SliderRenderer
         if (Control == null)
             return;
         var seek = Control as global::Android.Widget.SeekBar;
-        //seek.Thumb.SetBounds(100, 100, 100, 100);
+        seek.FilterTouchesWhenObscured = true;
 
         int size = e.NewElement.ClassId == "big" ? 70 : 40;
 
@@ -29,8 +29,7 @@ public class CustomSliderRenderer : SliderRenderer
         th.SetIntrinsicWidth(size);
         th.SetIntrinsicHeight(size);
         th.SetColorFilter(e.NewElement.ThumbColor.ToAndroid(), Android.Graphics.PorterDuff.Mode.SrcOver);
-        seek.SetThumb(th);
-        //print("SEEK;::::::" + seek);
+        seek.SetThumb(th); 
     }
 }
 

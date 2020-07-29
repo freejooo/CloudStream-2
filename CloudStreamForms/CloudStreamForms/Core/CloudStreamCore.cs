@@ -24,7 +24,7 @@ namespace CloudStreamForms.Core
         public CloudStreamCore() // INIT
         {
             // INACTIVE // new DubbedAnimeNetProvider(this)
-            animeProviders = new IAnimeProvider[] { new GogoAnimeProvider(this), new KickassAnimeProvider(this), new DubbedAnimeProvider(this), new AnimeFlixProvider(this), new AnimekisaProvider(this), new DreamAnimeProvider(this), new TheMovieAnimeProvider(this), new KissFreeAnimeProvider(this), new AnimeSimpleProvider(this), new VidstreamingAnimeProvider(this), new AnimeVibeBloatFreeProvider(this), new NineAnimeBloatFreeProvider(this) };
+            animeProviders = new IAnimeProvider[] { new GogoAnimeProvider(this), new KickassAnimeProvider(this), new DubbedAnimeProvider(this), new AnimeFlixProvider(this), new AnimekisaProvider(this), new TheMovieAnimeProvider(this), new KissFreeAnimeProvider(this), new AnimeSimpleProvider(this), new VidstreamingAnimeProvider(this), new AnimeVibeBloatFreeProvider(this), new NineAnimeBloatFreeProvider(this) };
             movieProviders = new IMovieProvider[] { new DirectVidsrcProvider(this), new WatchTVProvider(this), new FMoviesProvider(this), new LiveMovies123Provider(this), new TheMovies123Provider(this), new YesMoviesProvider(this), new WatchSeriesProvider(this), new GomoStreamProvider(this), new Movies123Provider(this), new DubbedAnimeMovieProvider(this), new TheMovieMovieProvider(this), new KickassMovieProvider(this) };
         }
 
@@ -690,12 +690,17 @@ namespace CloudStreamForms.Core
         }
 
         [Serializable]
-        public struct Movie
+        public struct Movie : ICloneable
         {
             public Title title;
             public List<Subtitle> subtitles;
             public List<Episode> episodes;
             public List<MoeEpisode> moeEpisodes;
+
+            public object Clone()
+            {
+                return this.MemberwiseClone();
+            }
         }
 
         [Serializable]
@@ -3556,7 +3561,7 @@ namespace CloudStreamForms.Core
 
                     for (int i = 0; i < data.Count; i++) {
                         var d = data[i];
-                        List<string> names = new List<string>() { d.english_title, d.title };
+                        List<string> names = new List<string>() { d.english_title ?? "", d.title ?? "" };
                         if (d.alternate_titles != null) {
                             names.AddRange(d.alternate_titles);
                         }
@@ -5474,7 +5479,7 @@ namespace CloudStreamForms.Core
                 return int.Parse(FindHTML(d, ending.Replace("-info", "") + "-episode-", "\""));
             }
 
-
+            const string watchMovieSite = "https://www10.watchmovie.movie";
             /// <summary>
             /// BLOCKING SEARCH QRY, NOT SORTED OR FILTERED
             /// </summary>
@@ -5484,11 +5489,11 @@ namespace CloudStreamForms.Core
             {
                 List<TheMovieTitle> titles = new List<TheMovieTitle>();
 
-                string d = core.DownloadString("https://www8.watchmovie.movie/search.html?keyword=" + search);
+                string d = core.DownloadString(watchMovieSite + "/search.html?keyword=" + search);
                 string lookFor = "<div class=\"video_image_container sdimg\">";
                 while (d.Contains(lookFor)) {
                     d = RemoveOne(d, lookFor);
-                    string href = "https://www8.watchmovie.movie" + FindHTML(d, "<a href=\"", "\""); // as /series/castaways-season-1
+                    string href = watchMovieSite + FindHTML(d, "<a href=\"", "\""); // as /series/castaways-season-1
                     string name = FindHTML(d, "title=\"", "\"");
 
                     int season = -1;
@@ -6271,7 +6276,7 @@ namespace CloudStreamForms.Core
                                 {
                                     try {
 
-                                    return $"{shortdates[(int)(month) - 1]} {day}, {year}";
+                                        return $"{shortdates[(int)(month) - 1]} {day}, {year}";
 
                                     }
                                     catch (Exception) {
@@ -6338,6 +6343,14 @@ namespace CloudStreamForms.Core
                         }
                         else {
                             await FetchMal();
+                        }
+                        if (!activeMovie.title.MALData.currentSelectedYear.IsClean()) {
+                            try {
+                                activeMovie.title.MALData.currentSelectedYear = activeMovie.title.year.Substring(0, 4);
+                            }
+                            catch (Exception) {
+                                activeMovie.title.MALData.currentSelectedYear = "";
+                            }
                         }
                         if (fetchData && cacheData && Settings.CacheMAL) {
                             App.SetKey("CacheMAL", activeMovie.title.id, activeMovie.title.MALData);

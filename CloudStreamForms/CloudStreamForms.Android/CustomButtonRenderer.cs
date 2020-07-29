@@ -1,6 +1,8 @@
 ﻿using Android.Content;
+using Android.Widget;
 using Xamarin.Forms;
 using Xamarin.Forms.Platform.Android;
+using Button = Xamarin.Forms.Button;
 
 [assembly: ExportRenderer(typeof(Button), typeof(CustomButtonRenderer))]
 public class CustomButtonRenderer : ButtonRenderer
@@ -17,5 +19,6 @@ public class CustomButtonRenderer : ButtonRenderer
         if (e.NewElement.ClassId != "CUST") {
             e.NewElement.TextColor = Color.FromHex("e6e6e6");
         }
+        Control.FilterTouchesWhenObscured = true;
     }
 }

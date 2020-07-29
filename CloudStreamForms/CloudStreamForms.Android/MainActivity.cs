@@ -1154,7 +1154,7 @@ namespace CloudStreamForms.Droid
         {
             try {
                 List<string> requests = new List<string>() {
-                Manifest.Permission.WriteExternalStorage, Manifest.Permission.RequestInstallPackages,Manifest.Permission.InstallPackages,Manifest.Permission.WriteSettings, Manifest.Permission.Bluetooth
+                Manifest.Permission.WriteExternalStorage, Manifest.Permission.RequestInstallPackages,Manifest.Permission.InstallPackages,Manifest.Permission.WriteSettings, //Manifest.Permission.Bluetooth
             };
 
                 for (int i = 0; i < requests.Count; i++) {
@@ -1233,6 +1233,7 @@ namespace CloudStreamForms.Droid
 
     public class MainDroid : App.IPlatformDep
     {
+        /*
         BluetoothAdapter bluetoothAdapter = BluetoothAdapter.DefaultAdapter;
         BluetoothServiceListener bluetoothServiceListener = new BluetoothServiceListener();
 
@@ -1257,7 +1258,7 @@ namespace CloudStreamForms.Droid
             catch (Exception e) {
                 print("MAIN EX IN >>>>>><" + nameof(SearchBluetoothDevices) + "<<<<");
             }
-        }
+        }*/
 
 
         public void UpdateDownload(int id, int state)
@@ -2891,11 +2892,12 @@ namespace CloudStreamForms.Droid
         {
             return true;
         }
-
+        
+        /*
         public BluetoothDeviceID[] GetBluetoothDevices()
         {
             return null;
-        }
+        }*/
 
         public double GetBrightness()
         {

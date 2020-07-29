@@ -96,8 +96,8 @@ namespace CloudStreamForms
             string DownloadHandleIntent(int id, List<string> mirrorNames, List<string> mirrorUrls, string fileName, string titleName, bool mainPath, string extraPath, bool showNotification = true, bool showNotificationWhenDone = true, bool openWhenDone = false, string poster = "", string beforeTxt = "");
             DownloadProgressInfo GetDownloadProgressInfo(int id, string fileUrl);
             void UpdateDownload(int id, int state);
-            BluetoothDeviceID[] GetBluetoothDevices();
-            void SearchBluetoothDevices();
+            /*  BluetoothDeviceID[] GetBluetoothDevices();
+              void SearchBluetoothDevices();*/
             void RequestVlc(List<string> urls, List<string> names, string episodeName, string episodeId, long startId = FROM_PROGRESS, string subtitleFull = "");
 
         }
@@ -200,29 +200,32 @@ namespace CloudStreamForms
             platformDep.UpdateDownload(id, state);
         }
 
+        /*
         public static BluetoothDeviceID[] GetBluetoothDevices()
         {
             return platformDep.GetBluetoothDevices();
-        }
+        }*/
 
         private static int _AudioDelay = 0;
         public static int AudioDelay { set { _AudioDelay = value; SetAudioDelay(value); } get { return _AudioDelay; } }
         //  public static string AudioDeviceId = "";
-        public static BluetoothDeviceID current;
-        public void UpdateDevice()
-        {
-            var devices = GetBluetoothDevices();
-            current = devices.FirstOrDefault();
-        }
+        /*  public static BluetoothDeviceID current;
+          public void UpdateDevice()
+          {
+              var devices = GetBluetoothDevices();
+              current = devices.FirstOrDefault();
+          }*/
+
+        static string outputId = "none";
 
         public static int GetDelayAudio()
         {
-            return App.GetKey("audiodelay", current.id, 0);
+            return App.GetKey("audiodelay", outputId, 0);
         }
 
         public static void SetAudioDelay(int delay)
         {
-            App.SetKey("audiodelay", current.id, delay);
+            App.SetKey("audiodelay", outputId, delay);
         }
 
         public const int FROM_START = -1;

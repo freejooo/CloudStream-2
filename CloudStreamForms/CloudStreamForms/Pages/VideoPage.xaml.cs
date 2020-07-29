@@ -779,14 +779,20 @@ namespace CloudStreamForms
             NextImg.Source = App.GetImageSource("baseline_skip_next_white_48dp.png");
             BacktoMain.Source = App.GetImageSource("baseline_keyboard_arrow_left_white_48dp.png");
             NextMirror.Source = App.GetImageSource("baseline_skip_next_white_48dp.png");
-
-            //  GradientBottom.Source = App.GetImageSource("gradient.png");
-            // DownloadImg.Source = App.GetImageSource("netflixEpisodesCut.png");//App.GetImageSource("round_more_vert_white_48dp.png");
-
             SetIsLocked();
             // LockImg.Source = App.GetImageSource("wlockUnLocked.png");
             SubtitleImg.Source = App.GetImageSource("outline_subtitles_white_48dp.png");
 
+
+            //  GradientBottom.Source = App.GetImageSource("gradient.png");
+            // DownloadImg.Source = App.GetImageSource("netflixEpisodesCut.png");//App.GetImageSource("round_more_vert_white_48dp.png");
+
+
+
+            Player.AudioDevice += (o, e) => {
+                SetIsPaused(true);
+            };
+            
 
             Commands.SetTap(EpisodesTap, new Command(() => {
                 //do something

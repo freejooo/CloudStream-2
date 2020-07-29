@@ -2,24 +2,18 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android" android:versionCode="24" android:versionName="1.8.1" package="com.CloudStreamForms.CloudStreamForms" android:installLocation="auto">
 	<uses-sdk android:minSdkVersion="21" android:targetSdkVersion="28" />
 	<application android:label="CloudStream 2" android:icon="@drawable/bicon"></application>
-	<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 	<uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 	<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 	<uses-permission android:name="android.permission.INTERNET" />
-	<uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
 	<uses-permission android:name="android.permission.INSTALL_PACKAGES" />
 	<uses-permission android:name="android.permission.WRITE_SETTINGS" />
-	<uses-permission android:name="android.permission.BLUETOOTH" />
+	<uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
 	<application>
-		<provider android:name="android.support.v4.content.FileProvider" android:authorities="${applicationId}.provider" android:exported="false" android:grantUriPermissions="true">
+		<!--<provider android:name="android.support.v4.content.FileProvider" android:authorities="${applicationId}.provider" android:exported="false" android:grantUriPermissions="true">
 			<meta-data android:name="android.support.FILE_PROVIDER_PATHS" android:resource="@xml/provider_paths" />
-		</provider>
+		</provider>-->
 		<receiver android:process=":remote" android:name=".AlertReceiver" />
-		<receiver android:process=":remote" android:name=".DownloadUrlReceiver" />
 		<!-- <receiver android:process=":remote" android:name=".DownloadReceiver" />-->
-		<service android:name=".DownloadUrlService"></service>
 		<service android:name=".OnKilledService" android:stopWithTask="false"></service>
-		<service android:name=".EverService" android:stopWithTask="false"></service>
-		<activity android:name=".TrampolineActivity" android:taskAffinity=""></activity>
 	</application>
 </manifest>
