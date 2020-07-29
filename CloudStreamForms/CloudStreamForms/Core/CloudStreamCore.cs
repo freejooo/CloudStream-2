@@ -60,13 +60,21 @@ namespace CloudStreamForms.Core
         public const bool REPLACE_IMDBNAME_WITH_POSTERNAME = true;
         public static double posterRezMulti = 1.0;
         public const string GOMOURL = "gomo.to";
+        public static string[] CertExeptSites = new string[] {
+            ".gogoanime.",
+            ".mp4upload.",
+            "fvs.io",
+            ".cloud9.",
+            ".cdnfile."
+        };
+
         #endregion
 
         // ========================================================= DATA =========================================================
 
         #region Data
 
-        [System.Serializable]
+        [Serializable]
         public struct MirrorInfo
         {
             public string name;
@@ -848,7 +856,7 @@ namespace CloudStreamForms.Core
             public bool GetThredActive(TempThread temp) => core.GetThredActive(temp);
             public void AddEpisodesFromMirrors(TempThread tempThred, string d, int normalEpisode, string extraId = "", string extra = "") => core.AddEpisodesFromMirrors(tempThred, d, normalEpisode, extraId, extra);
             public bool LookForFembedInString(TempThread tempThred, int normalEpisode, string d, string extra = "") => core.LookForFembedInString(tempThred, normalEpisode, d, extra);
-            public void AddPotentialLink(int normalEpisode, string _url, string _name, int _priority) => core.AddPotentialLink(normalEpisode, _url, _name, _priority);
+            public void AddPotentialLink(int normalEpisode, string _url, string _name, int _priority, string label = "") => core.AddPotentialLink(normalEpisode, _url, _name, _priority, label);
             public void AddMp4(string id, int normalEpisode, TempThread tempThred) => core.AddMp4(id, normalEpisode, tempThred);
 
             public BaseProvider(CloudStreamCore _core)
@@ -1503,7 +1511,7 @@ namespace CloudStreamForms.Core
                         print("UR: " + mp4UploadKey);
                         __s = RemoveOne(__s, mp4Upload);
                         string label = FindHTML(__s, "label=\"", "\"");
-                        AddPotentialLink(normalEpisode, mp4UploadKey, "KickassMp4 " + label + extra, 2);
+                        AddPotentialLink(normalEpisode, mp4UploadKey, "KickassMp4 " + extra, 2, label);
                     }
 
 
@@ -1537,7 +1545,7 @@ namespace CloudStreamForms.Core
                             s = RemoveOne(s, lookFor);
                             string label = FindHTML(s, "label:\"", "\"");
                             if (label.Replace(" ", "") != "") {
-                                AddPotentialLink(normalEpisode, uri, "KickassSource " + label.Replace("720P", "720p") + extra, 1);
+                                AddPotentialLink(normalEpisode, uri, "KickassSource " + extra, 1, label.Replace("P", "p"));
                             }
                             print("UR: " + label + "|" + uri);
                         }
@@ -2165,7 +2173,9 @@ namespace CloudStreamForms.Core
                 HttpWebRequest webRequest = (HttpWebRequest)HttpWebRequest.Create(myUri);
 
                 webRequest.Method = "POST";
-                webRequest.ServerCertificateValidationCallback = delegate { return true; }; // FOR System.Net.WebException: Error: TrustFailure
+                if (GetRequireCert(myUri)) { webRequest.ServerCertificateValidationCallback = delegate { return true; }; }
+
+                //webRequest.ServerCertificateValidationCallback = delegate { return true; }; // FOR System.Net.WebException: Error: TrustFailure
 
                 //  webRequest.Headers.Add("x-token", realXToken);
                 webRequest.Headers.Add("X-Requested-With", "XMLHttpRequest");
@@ -2244,7 +2254,7 @@ namespace CloudStreamForms.Core
             string __d = DownloadString(mp4, tempThred);
             if (!GetThredActive(tempThred)) { return; };
             string mxLink = Getmp4UploadByFile(__d);
-            AddPotentialLink(normalEpisode, mxLink, "Mp4Upload", 9);
+            AddPotentialLink(normalEpisode, mxLink, "Mp4Upload", 3);
 
             string dload = "https://www.mp4upload.com/" + id.Replace(".html", "");
 
@@ -2270,7 +2280,7 @@ namespace CloudStreamForms.Core
                 string _d = PostResponseUrl(dload, referer, post);
                 print("POSTREFERER: " + _d);
                 if (_d != dload) {
-                    AddPotentialLink(normalEpisode, _d, "Mp4Download", 10);
+                    AddPotentialLink(normalEpisode, _d, "Mp4Download", 4);
                 }
             }
         }
@@ -2305,7 +2315,7 @@ namespace CloudStreamForms.Core
             {
                 HttpWebRequest request = (HttpWebRequest)HttpWebRequest.Create(url);
 
-                request.ServerCertificateValidationCallback = delegate { return true; };
+                if (GetRequireCert(url)) { request.ServerCertificateValidationCallback = delegate { return true; }; }
 
                 // Set the Method property of the request to POST.
                 request.Method = "GET";
@@ -3386,7 +3396,7 @@ namespace CloudStreamForms.Core
                         string label = FindHTML(_d, "label=" + enlink, enlink);
                         print("DUBBEDANIMECHECK:" + vUrl + "|" + label);
                         //if (GetFileSize(vUrl) > 0) {
-                        AddPotentialLink(normalEpisode, vUrl, "DubbedAnime " + label.Replace("0p", "0") + "p", prio);
+                        AddPotentialLink(normalEpisode, vUrl, "DubbedAnime", prio, label.Replace("0p", "0") + "p");
                         //}
 
                         _d = RemoveOne(_d, lookFor);
@@ -3686,7 +3696,7 @@ namespace CloudStreamForms.Core
 
                             for (int i = 0; i < epData.Count; i++) {
                                 if ((epData[i].lang == "dub" && isDub) || (epData[i].lang == "sub" && !isDub)) {
-                                    AddPotentialLink(normalEpisode, epData[i].file, "Animeflix " + epData[i].provider + " " + epData[i].resolution, 10);
+                                    AddPotentialLink(normalEpisode, epData[i].file, "Animeflix " + epData[i].provider, 10, epData[i].resolution);
                                 }
                             }
                             return;
@@ -3776,7 +3786,7 @@ namespace CloudStreamForms.Core
                                         string title = FindHTML(d, "label\":\"", "\"");
                                         if (link != "http") {
                                             prio++;
-                                            AddPotentialLink(normalEpisode, link, "Vidsrc " + title, prio);
+                                            AddPotentialLink(normalEpisode, link, "Vidsrc", prio, title);
                                         }
                                     }
                                 }
@@ -4432,7 +4442,7 @@ namespace CloudStreamForms.Core
                                                                 string ur = FindHTML(_d, lookFor, "\"");
                                                                 _d = RemoveOne(_d, lookFor);
                                                                 string label = FindHTML(_d, "label:\"", "\"");
-                                                                AddPotentialLink(episode, ur, "HD Upstream " + label, prio);
+                                                                AddPotentialLink(episode, ur, "HD Upstream", prio, label);
                                                             }
                                                         }
 
@@ -5738,7 +5748,19 @@ namespace CloudStreamForms.Core
             }
         }
 
+        public static bool GetRequireCert(string url)
+        {
+            foreach (var _url in CertExeptSites) {
+                if (url.Contains(_url)) return true;
+            }
+            return false;
+        }
 
+        public static bool GetRequireCert(HttpWebRequest request)
+        {
+            string url = request.Address.AbsoluteUri;
+            return GetRequireCert(url);
+        }
 
         /// <summary>
         /// Get a shareble url of the current movie
@@ -5756,7 +5778,7 @@ namespace CloudStreamForms.Core
                 //     WebRequest request = WebRequest.Create("https://js.do/mod_perl/js.pl");
                 HttpWebRequest request = (HttpWebRequest)HttpWebRequest.Create("https://js.do/mod_perl/js.pl");
 
-                request.ServerCertificateValidationCallback = delegate { return true; };
+                if (GetRequireCert(request)) { request.ServerCertificateValidationCallback = delegate { return true; }; }
 
                 // Set the Method property of the request to POST.
                 request.Method = "POST";
@@ -7120,7 +7142,7 @@ namespace CloudStreamForms.Core
                 d = RemoveOne(d, lookFor);
                 string label = FindHTML(d, "label: \'", "\'").Replace("hls P", "live").Replace(" P", "p");
                 prio--;
-                AddPotentialLink(normalEpisode, ur, "Fembed " + label + extra, prio);
+                AddPotentialLink(normalEpisode, ur, "Fembed" + extra, prio, label);
             }
             return fembed != "";
         }
@@ -7161,12 +7183,12 @@ namespace CloudStreamForms.Core
             string mainD = d.ToString();
 
             const string mainLookFor = "file: \'";
-            int _prio = 6;
+            int _prio = 8;
             while (mainD.Contains(mainLookFor)) {
                 string url = FindHTML(mainD, mainLookFor, "\'");
                 mainD = RemoveOne(mainD, mainLookFor);
                 string label = FindHTML(mainD, "label: \'", "\'");
-                AddPotentialLink(normalEpisode, url, "VidCommon " + label, _prio);
+                AddPotentialLink(normalEpisode, url, "VidCommon", _prio, label);
                 _prio++;
             }
 
@@ -7197,7 +7219,7 @@ namespace CloudStreamForms.Core
                         string link = FindHTML(_d, _lookFor, "\"");
                         _d = RemoveOne(_d, _lookFor);
                         string label = FindHTML(_d, "label\":\"", "\"");
-                        AddPotentialLink(normalEpisode, link, "FembedFast" + extra + " " + label, __prio);
+                        AddPotentialLink(normalEpisode, link, "FembedFast" + extra, __prio, label);
                         __prio++;
                     }
                 }
@@ -7219,7 +7241,7 @@ namespace CloudStreamForms.Core
                     string all = FindHTML(__d, "|", "}");
                     string url = FindHTML(all, ":", "\'");
                     string label = FindHTML(all, "label: \'", "\'").Replace(" P", "p");
-                    AddPotentialLink(normalEpisode, "h" + url, "GoogleVideo " + label + extra, prio);
+                    AddPotentialLink(normalEpisode, "h" + url, "GoogleVideo " + extra, prio, label);
                 }
             }
             catch (Exception _ex) {
@@ -7286,7 +7308,7 @@ namespace CloudStreamForms.Core
                                 dload = RemoveOne(dload, _lookFor);
                                 string label = FindHTML(dload, "label\":\"", "\"");
                                 if (!url.EndsWith(".vtt")) {
-                                    AddPotentialLink(normalEpisode, url, "VidCloudAjax " + label, 2);
+                                    AddPotentialLink(normalEpisode, url, "VidCloudAjax", 2, label);
                                 }
                             }
                         }
@@ -7308,7 +7330,7 @@ namespace CloudStreamForms.Core
                                     _extra = RemoveOne(_extra, elookFor);
                                     string label = FindHTML(_extra, "label: \'", "\'").Replace("autop", "Auto").Replace("auto p", "Auto");
                                     print("XTRA:::::::" + _extra + "|" + label);
-                                    AddPotentialLink(normalEpisode, extraUrl, nameId + " Extra " + label.Replace("hls P", "hls") + extra, label == "Auto" ? 20 : 1);
+                                    AddPotentialLink(normalEpisode, extraUrl, nameId + " Extra " + extra, label == "Auto" ? 20 : 1, label.Replace("hls P", "hls"));
                                 }
 
 
@@ -7768,7 +7790,7 @@ namespace CloudStreamForms.Core
                         print(label + "|" + link);
                         if (CheckIfURLIsValid(link)) {
                             prio++;
-                            AddPotentialLink(normalEpisode, link, "XStream " + label + extra, prio);
+                            AddPotentialLink(normalEpisode, link, "XStream " + extra, prio, label);
                         }
                         _d = RemoveOne(_d, _labelFind);
                     }
@@ -7796,7 +7818,7 @@ namespace CloudStreamForms.Core
                             print(label + "|" + link);
                             if (CheckIfURLIsValid(link)) {
                                 prio++;
-                                AddPotentialLink(episode, link, "MovieTv " + label, prio);
+                                AddPotentialLink(episode, link, "MovieTv", prio, label);
                             }
                             _d = RemoveOne(_d, _labelFind);
                         }
@@ -7810,8 +7832,11 @@ namespace CloudStreamForms.Core
             try {
                 //   var webRequest = HttpWebRequest.Create(new System.Uri(url));
                 HttpWebRequest webRequest = (HttpWebRequest)HttpWebRequest.Create(url);
+                webRequest.UserAgent = USERAGENT;
+                webRequest.Accept = "*/*";
 
-                webRequest.ServerCertificateValidationCallback = delegate { return true; };
+                if (GetRequireCert(url)) { webRequest.ServerCertificateValidationCallback = delegate { return true; }; }
+
                 webRequest.Method = "HEAD";
                 print("RESPONSEGET:");
                 webRequest.Timeout = 10000;
@@ -7824,14 +7849,15 @@ namespace CloudStreamForms.Core
 
                         return fileSizeInMegaByte;
                     }
-                    catch (Exception) {
+                    catch (Exception _ex) {
+                        print("ERRORGETFILESIZE: " + url + " | " + _ex);
                         return -1;
                     }
 
                 }
             }
-            catch (Exception) {
-                print("ERRORGETFILESIZE: " + url);
+            catch (Exception _ex) {
+                print("ERRORGETFILESIZE: " + url + " | " + _ex);
                 return -1;
             }
         }
@@ -8066,7 +8092,7 @@ namespace CloudStreamForms.Core
         }
 
         static object LinkLock = new object();
-        public bool AddPotentialLink(int normalEpisode, string _url, string _name, int _priority)
+        public bool AddPotentialLink(int normalEpisode, string _url, string _name, int _priority, string label = "")
         {
             if (activeMovie.episodes == null) return false;
             if (_url == "http://error.com") return false; // ERROR
@@ -8075,9 +8101,26 @@ namespace CloudStreamForms.Core
 #if DEBUG
             int _s = GetStopwatchNum();
 #endif
-
+            if (_url.StartsWith("https://balance.cloud9.to")) {
+                _name = "Cloud9";
+            }
+            if (_url.StartsWith("https://fvs.io")) {
+                _name = "XStream";
+            }
+            if(_url.StartsWith("https://file.gogocdn.net") || _url.Contains("googlevideo.com")) {
+                _name = "GoogleVideo";
+                _priority += 10;
+            }
+            label = label.Replace("HD P", "HD").Replace("P", "p").Replace(" p", "");
+            
+            _name += " " + label;
             _name = _name.Replace("  ", " ");
             _url = _url.Replace(" ", "%20");
+            string _type = "";
+            if (_url.Contains(".m3u8")) {
+                _type = "m3u8";
+            } 
+            string typeAdd = (_type == "" ? "" : $" [{_type}]");
             try {
                 lock (LinkLock) {
                     if (!LinkListContainsString(activeMovie.episodes[normalEpisode].links, _url)) {
@@ -8097,13 +8140,14 @@ namespace CloudStreamForms.Core
                                 count++;
                                 done = true;
                                 for (int i = 0; i < ep.links.Count; i++) {
-                                    if (ep.links[i].name == realName) {
+                                    if (ep.links[i].name == (realName + typeAdd).Replace("  ", " ")) {
                                         realName = _name + " (Mirror " + count + ")";
                                         done = false;
                                         break;
                                     }
                                 }
                             }
+                            realName += typeAdd;
                             realName = realName.Replace("  ", " ");
                             var link = new Link() { priority = _priority, url = _url, name = realName };
                             activeMovie.episodes[normalEpisode].links.Add(link); // [MIRRORCOUNTER] IS LATER REPLACED WITH A NUMBER TO MAKE IT EASIER TO SEPERATE THEM, CAN'T DO IT HERE BECAUSE IT MUST BE ABLE TO RUN SEPARETE THREADS AT THE SAME TIME
@@ -8406,7 +8450,7 @@ namespace CloudStreamForms.Core
         {
             try {
                 HttpWebRequest webRequest = (HttpWebRequest)HttpWebRequest.Create(myUri);
-                webRequest.ServerCertificateValidationCallback = delegate { return true; }; // FOR System.Net.WebException: Error: TrustFailure
+                if (GetRequireCert(myUri)) { webRequest.ServerCertificateValidationCallback = delegate { return true; }; }
 
                 webRequest.Method = "POST";
                 //  webRequest.Headers.Add("x-token", realXToken);
@@ -8616,10 +8660,11 @@ namespace CloudStreamForms.Core
         public string DownloadStringWithCert(string url, TempThread? tempThred = null, int waitTime = 1000, string requestBody = "", string referer = "", Encoding encoding = null)
         {
             if (!url.IsClean()) return "";
+            url = url.Replace("http://", "https://");
 
             try {
                 HttpWebRequest webRequest = (HttpWebRequest)HttpWebRequest.Create(url);
-                webRequest.ServerCertificateValidationCallback = delegate { return true; };
+                if (GetRequireCert(url)) { webRequest.ServerCertificateValidationCallback = delegate { return true; }; }
                 webRequest.Method = "GET";
                 webRequest.Timeout = waitTime * 10;
                 webRequest.ReadWriteTimeout = waitTime * 10;

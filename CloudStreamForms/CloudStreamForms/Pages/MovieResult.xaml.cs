@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reflection;
+using System.Threading;
 using System.Threading.Tasks;
 using Xamarin.Essentials;
 using Xamarin.Forms;
@@ -139,10 +140,32 @@ namespace CloudStreamForms
             }
             string a = await ActionPopup.DisplayActionSheet("Copy", actions.ToArray());//await DisplayActionSheet("Copy", "Cancel", null, actions.ToArray());
             string copyTxt = "";
-            if (a == "CloudStream Link") {
-                ActionPopup.StartIndeterminateLoadinbar("Loading...");
-                string _s = CloudStreamCore.ShareMovieCode(currentMovie.title.id + "Name=" + currentMovie.title.name + "=EndAll");
+
+            async Task<string> GetMovieCode()
+            {
+                await ActionPopup.StartIndeterminateLoadinbar("Loading...");
+                bool done = false;
+                string _s = "";
+                Thread t = new Thread(() => {
+                    try {
+                        _s = CloudStreamCore.ShareMovieCode(currentMovie.title.id + "Name=" + currentMovie.title.name + "=EndAll");
+                    }
+                    catch (System.Exception) {
+                    }
+                    finally {
+                        done = true;
+                    }
+                });
+                t.Start();
+                while (!done) {
+                    await Task.Delay(10);
+                }
                 await ActionPopup.StopIndeterminateLoadinbar();
+                return _s;
+            }
+
+            if (a == "CloudStream Link") {
+                string _s = await GetMovieCode();
                 if (_s != "") {
                     copyTxt = _s;
                 }
@@ -164,9 +187,7 @@ namespace CloudStreamForms
             }
             else if (a == "Everything") {
                 copyTxt = currentMovie.title.name + " | " + RatingLabel.Text + "\n" + currentMovie.title.description;
-                ActionPopup.StartIndeterminateLoadinbar("Loading...");
-                string _s = CloudStreamCore.ShareMovieCode(currentMovie.title.id + "Name=" + currentMovie.title.name + "=EndAll");
-                await ActionPopup.StopIndeterminateLoadinbar();
+                string _s = await GetMovieCode();
 
                 if (_s != "") {
                     copyTxt = copyTxt + "\nCloudStream: " + _s;
@@ -270,7 +291,7 @@ namespace CloudStreamForms
         public static void OpenChrome(bool validate = true)
         {
             if (!ChromeCastPage.isActive) {
-                 
+
                 Page p = ChromeCastPage.CreateChromePage(chromeResult, chromeMovieResult);// new (chromeResult, chromeMovieResult); //{ episodeResult = chromeResult, chromeMovieResult = chromeMovieResult };
                 MainPage.mainPage.Navigation.PushModalAsync(p, false);
             }

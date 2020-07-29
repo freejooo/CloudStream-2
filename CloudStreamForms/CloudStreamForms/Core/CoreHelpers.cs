@@ -169,7 +169,7 @@ namespace CloudStreamForms.Core
 
         public static string FString(this object o, string _s = "")
         {
-
+            return "";
 #if RELEASE
             return "";
 #endif

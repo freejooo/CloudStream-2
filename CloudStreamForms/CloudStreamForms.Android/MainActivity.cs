@@ -18,6 +18,7 @@ using Android.Widget;
 using CloudStreamForms.Core;
 using Java.IO;
 using Java.Net;
+using Javax.Net.Ssl;
 using LibVLCSharp.Forms.Shared;
 using Newtonsoft.Json;
 using Plugin.LocalNotifications;
@@ -691,7 +692,9 @@ namespace CloudStreamForms.Droid
 
                             print("OPEN URL:L::" + url);
                             URL _url = new URL(url);
+                            
                             URLConnection connection = _url.OpenConnection();
+                            
                             print("SET CONNECT ::");
                             if (!rFile.Exists()) {
                                 print("FILE DOSENT EXITS");
@@ -710,6 +713,7 @@ namespace CloudStreamForms.Droid
                             print("SET CONNECT ::2");
                             connection.SetRequestProperty("Accept-Encoding", "identity");
                             int clen = 0;
+                            
                             bool Completed = ExecuteWithTimeLimit(TimeSpan.FromMilliseconds(10000), () => {
                                 connection.Connect();
                                 clen = connection.ContentLength;
@@ -1023,6 +1027,7 @@ namespace CloudStreamForms.Droid
             LocalNotificationsImplementation.NotificationIconId = PublicNot;
             MainDroid.NotificationIconId = PublicNot;
 
+            trustEveryone();
             LoadApplication(new App());
             if (Settings.IS_TEST_BUILD) {
                 platformDep = new NullPlatfrom();
@@ -1110,6 +1115,15 @@ namespace CloudStreamForms.Droid
             // ShowLocalNot(new LocalNot() { mediaStyle = false, title = "yeet", autoCancel = true, onGoing = false, id = 123545, smallIcon = Resource.Drawable.bicon, body = "Download Failed!",showWhen=false }); // ((e.Cancelled || e.Error != null) ? "Download Failed!"
         }
 
+
+
+        private static void trustEveryone()
+        {
+            /*
+            HttpsURLConnection.DefaultHostnameVerifier =
+                    new Org.Apache.Http.Conn.Ssl.AllowAllHostnameVerifier();
+            */
+        }
 
         async void ResumeIntentData()
         {
