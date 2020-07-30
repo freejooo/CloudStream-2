@@ -211,6 +211,8 @@ namespace CloudStreamForms
 
         void ChangeStar(bool? overrideBool = null, string key = null)
         {
+            if (core == null) return;
+
             bool keyExists = false;
             if (key == null) {
                 key = currentMovie.title.id;
@@ -230,6 +232,8 @@ namespace CloudStreamForms
 
         void ChangeSubtitle(bool? overrideBool = null)
         {
+            if (core == null) return;
+
             bool res = false;
             if (overrideBool == null) {
 
@@ -247,6 +251,8 @@ namespace CloudStreamForms
 
         public void SetChromeCast(bool enabled)
         {
+            if (core == null) return;
+
             ChromeCastBtt.IsVisible = enabled;
             ChromeCastBtt.IsEnabled = enabled;
             ImgChromeCastBtt.IsVisible = enabled;
@@ -301,6 +307,8 @@ namespace CloudStreamForms
 
         private void OpenChromecastView(object sender, EventArgs e)
         {
+            if (core == null) return;
+
             if (sender != null) {
                 ChromeCastPage.isActive = false;
             }
@@ -315,6 +323,8 @@ namespace CloudStreamForms
         public static Movie chromeMovieResult;
         async void WaitChangeChromeCast()
         {
+            if (core == null) return;
+
             if (MainChrome.IsCastingVideo) {
                 Device.BeginInvokeOnMainThread(() => {
                     OpenChromecastView(1, EventArgs.Empty);
@@ -452,10 +462,11 @@ namespace CloudStreamForms
             ReloadAllBtt.Clicked += (o, e) => {
                 App.RemoveKey("CacheImdb", currentMovie.title.id);
                 App.RemoveKey("CacheMAL", currentMovie.title.id);
-                Dispose();
-                Navigation.PopModalAsync(false);
                 Search.mainPoster = new Poster();
-                PushPageFromUrlAndName(currentMovie.title.id, currentMovie.title.name);
+                Navigation.PopModalAsync(false);
+                PushPageFromUrlAndName(currentMovie.title.id, mainPoster.name);
+                Dispose();
+
             };
             ReloadAllBtt.Source = GetImageSource("round_refresh_white_48dp.png");
 
@@ -480,6 +491,7 @@ namespace CloudStreamForms
             };
 
             fishProgressLoaded += (o, e) => {
+                if (core == null) return;
 
                 Device.InvokeOnMainThreadAsync(async () => {
                     SkipAnimeBtt.Text = $"Skip - {e.currentProgress} of {e.maxProgress}"; // {(int)(e.progressProcentage * 100)}%
@@ -531,6 +543,8 @@ namespace CloudStreamForms
 
         void CancelNotifications()
         {
+            if (core == null) return;
+
             var keys = App.GetKey<List<int>>("NotificationsIds", currentMovie.title.id, new List<int>());
             for (int i = 0; i < keys.Count; i++) {
                 App.CancelNotifaction(keys[i]);
@@ -539,6 +553,8 @@ namespace CloudStreamForms
 
         void AddNotifications()
         {
+            if (core == null) return;
+
             List<int> keys = new List<int>();
 
             for (int i = 0; i < setNotificationsTimes.Count; i++) {
@@ -553,6 +569,8 @@ namespace CloudStreamForms
 
         void ToggleNotify()
         {
+            if (core == null) return;
+
             bool hasNot = App.GetKey<bool>("Notifications", currentMovie.title.id, false);
             App.SetKey("Notifications", currentMovie.title.id, !hasNot);
             UpdateNotification(!hasNot);
@@ -567,6 +585,8 @@ namespace CloudStreamForms
 
         void UpdateNotification(bool? overrideNot = null)
         {
+            if (core == null) return;
+
             bool hasNot = overrideNot ?? App.GetKey<bool>("Notifications", currentMovie.title.id, false);
             NotificationImg.Source = App.GetImageSource(hasNot ? "baseline_notifications_active_white_48dp.png" : "baseline_notifications_none_white_48dp.png");
             NotificationImg.Transformations = new List<FFImageLoading.Work.ITransformation>() { (new FFImageLoading.Transformations.TintTransformation(hasNot ? DARK_BLUE_COLOR : LIGHT_LIGHT_BLACK_COLOR)) };
@@ -577,6 +597,8 @@ namespace CloudStreamForms
 
         private void MovieResult_moeDone(object sender, List<MoeEpisode> e)
         {
+            if (core == null) return;
+
             if (e == null) return;
             print("MOE DONE:::: + " + e.Count);
             for (int i = 0; i < e.Count; i++) {
@@ -628,6 +650,8 @@ namespace CloudStreamForms
 
         public void SetColor(EpisodeResult episodeResult)
         {
+            if (core == null) return;
+
             string id = GetId(episodeResult);
             if (id != "") {
                 List<string> hexColors = new List<string>() { "#ffffff", LIGHT_BLUE_COLOR, "#e5e598" };
@@ -695,6 +719,8 @@ namespace CloudStreamForms
 
         async void SetEpisodeFromTo(int segment, int max = -1)
         {
+            if (core == null) return;
+
             epView.MyEpisodeResultCollection.Clear();
 
             int start = MovieResultMainEpisodeView.MAX_EPS_PER * segment;
@@ -722,6 +748,8 @@ namespace CloudStreamForms
         int maxEpisodes = 1;
         public void AddEpisode(EpisodeResult episodeResult, int index)
         {
+            if (core == null) return;
+
             var _episode = ChangeEpisode(episodeResult);
             epView.AllEpisodes[index] = _episode;
         }
@@ -907,6 +935,8 @@ namespace CloudStreamForms
 
         public void ClearEpisodes()
         {
+            if (core == null) return;
+
             episodeView.ItemsSource = null;
             epView.MyEpisodeResultCollection.Clear();
             RecomendationLoaded.IsVisible = true;
@@ -917,12 +947,16 @@ namespace CloudStreamForms
 
         void SetHeight(bool? setNull = null, int? overrideCount = null)
         {
+            if (core == null) return;
+
             episodeView.RowHeight = Settings.EpDecEnabled ? 170 : 100;
             Device.BeginInvokeOnMainThread(() => episodeView.HeightRequest = ((setNull ?? showState != 0) ? 0 : ((overrideCount ?? epView.MyEpisodeResultCollection.Count) * (episodeView.RowHeight) + 40)));
         }
 
         private void TrailerBtt_Clicked(object sender, EventArgs e)
         {
+            if (core == null) return;
+
             if (trailerUrl != null) {
                 if (trailerUrl != "") {
                     App.RequestVlc(trailerUrl, currentMovie.title.name + " - Trailer");
@@ -933,6 +967,8 @@ namespace CloudStreamForms
 
         async void FadeTitles(bool fadeSeason)
         {
+            if (core == null) return;
+
             print("FAFSAFAFAFA:::");
             DescriptionLabel.Opacity = 0;
             RatingLabel.Opacity = 0;
@@ -955,6 +991,8 @@ namespace CloudStreamForms
 
         private void MovieResult_titleLoaded(object sender, Movie e)
         {
+            if (core == null) return;
+
             if (loadedTitle) return;
             if (e.title.name != mainPoster.name) return;
 
@@ -1101,6 +1139,8 @@ namespace CloudStreamForms
 
         void SetRecs()
         {
+            if (core == null) return;
+
             Device.BeginInvokeOnMainThread(() => {
                 const int total = 12;
                 int perCol = (Application.Current.MainPage.Width < Application.Current.MainPage.Height) ? 3 : 6;
@@ -1116,6 +1156,8 @@ namespace CloudStreamForms
 
         private void DubPicker_SelectedIndexChanged(object sender, int e)
         {
+            if (core == null) return;
+
             print("DUBCHANGED::");
             try {
                 isDub = "Dub" == DubPicker.ItemsSource[DubPicker.SelectedIndex];
@@ -1167,6 +1209,8 @@ namespace CloudStreamForms
 
         private void MovieResult_epsiodesLoaded(object sender, List<Episode> e)
         {
+            if (core == null) return;
+
             Device.BeginInvokeOnMainThread(() => {
                 print("GOT RESULTS; LETS GO");
 
@@ -1307,6 +1351,8 @@ namespace CloudStreamForms
 
         private void MovieResult_trailerLoaded(object sender, List<Trailer> e)
         {
+            if (core == null) return;
+
             if (e == null) return;
             epView.CurrentTrailers.Clear();
             for (int i = 0; i < e.Count; i++) {
