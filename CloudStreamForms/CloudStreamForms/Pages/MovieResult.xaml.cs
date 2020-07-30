@@ -23,9 +23,11 @@ namespace CloudStreamForms
     {
         const uint FATE_TIME_MS = 500;
 
+        CloudStreamCore core;
+
         public int SmallFontSize { get; set; } = 11;
         public int WithSize { get; set; } = 50;
-        List<Episode> CurrentEpisodes { set { currentMovie.episodes = value; } get { return currentMovie.episodes; } }
+        List<Episode> CurrentEpisodes { get { return currentMovie.episodes; } }
 
         public MovieResultMainEpisodeView epView;
 
@@ -33,13 +35,12 @@ namespace CloudStreamForms
         LabelList DubPicker;
         LabelList FromToPicker;
 
-
         public Poster mainPoster;
         public string trailerUrl = "";
         List<Button> recBtts = new List<Button>();
 
-        public static List<Movie> lastMovie;
-        List<Poster> RecomendedPosters { set { currentMovie.title.recomended = value; } get { return currentMovie.title.recomended; } }  //= new List<Poster>();
+        //  public static List<Movie> lastMovie;
+        List<Poster> RecomendedPosters { get { return currentMovie.title.recomended; } }  //= new List<Poster>();
 
         bool loadedTitle = false;
         int currentSeason = 0;
@@ -49,7 +50,7 @@ namespace CloudStreamForms
         public const int heightRequestAddEpisodeAndroid = 0;
 
         bool isMovie = false;
-        Movie currentMovie = new Movie();
+        Movie currentMovie { get { return core.activeMovie; } }
         bool isDub = true;
         bool RunningWindows { get { return DeviceInfo.Platform == DevicePlatform.UWP; } }
         string CurrentMalLink {
@@ -73,12 +74,12 @@ namespace CloudStreamForms
         protected override bool OnBackButtonPressed()
         {
             Search.mainPoster = new Poster();
-            if (lastMovie != null) {
+            /*if (lastMovie != null) {
                 if (lastMovie.Count > 1) {
-                    mainCore.activeMovie = lastMovie[lastMovie.Count - 1];
+                    core.activeMovie = lastMovie[lastMovie.Count - 1];
                     lastMovie.RemoveAt(lastMovie.Count - 1);
                 }
-            }
+            }*/
             if (setKey) {
                 App.RemoveKey(App.BOOKMARK_DATA, currentMovie.title.id);
             }
@@ -87,8 +88,6 @@ namespace CloudStreamForms
             //     Navigation.PopModalAsync(false);
             //     return true;
         }
-
-
 
         bool setKey = false;
         void SetKey()
@@ -345,6 +344,7 @@ namespace CloudStreamForms
         public MovieResult()
         {
             InitializeComponent();
+            core = new CloudStreamCore();
 
             mainPoster = Search.mainPoster;
 
@@ -414,18 +414,17 @@ namespace CloudStreamForms
             NameLabel.Text = mainPoster.name;
             RatingLabel.Text = mainPoster.year;
 
-            mainCore.titleLoaded += MovieResult_titleLoaded;
-            mainCore.trailerLoaded += MovieResult_trailerLoaded;
-            mainCore.episodeLoaded += MovieResult_epsiodesLoaded;
+            core.titleLoaded += MovieResult_titleLoaded;
+            core.trailerLoaded += MovieResult_trailerLoaded;
+            core.episodeLoaded += MovieResult_epsiodesLoaded;
 
 
             // TrailerBtt.Clicked += TrailerBtt_Clicked;
             Gradient.Clicked += TrailerBtt_Clicked;
-            mainCore.linkAdded += MovieResult_linkAdded;
+            //  core.linkAdded += MovieResult_linkAdded;
 
-            mainCore.fishingDone += MovieFishingDone;
 
-            mainCore.moeDone += MovieResult_moeDone;
+            core.moeDone += MovieResult_moeDone;
 
             BackgroundColor = Settings.BlackRBGColor;
             BgColorSet.BackgroundColor = Settings.BlackRBGColor;
@@ -456,8 +455,7 @@ namespace CloudStreamForms
             };
             ReloadAllBtt.Source = GetImageSource("round_refresh_white_48dp.png");
 
-            mainCore.GetImdbTitle(mainPoster);
-            currentMovie.title.id = mainPoster.url.Replace("https://imdb.com/title/", "");
+            core.GetImdbTitle(mainPoster);
             ChangeStar();
 
             ChangedRecState(0, true);
@@ -478,7 +476,6 @@ namespace CloudStreamForms
             };
 
             fishProgressLoaded += (o, e) => {
-                if (!SameAsActiveMovie()) return;
 
                 Device.InvokeOnMainThreadAsync(async () => {
                     SkipAnimeBtt.Text = $"Skip - {e.currentProgress} of {e.maxProgress}"; // {(int)(e.progressProcentage * 100)}%
@@ -597,8 +594,6 @@ namespace CloudStreamForms
 
             setNotificationsTimes = e;
 
-
-            if (!SameAsActiveMovie()) return;
             Device.BeginInvokeOnMainThread(() => {
                 try {
                     AddNotifications(); // UPDATE NOTIFICATIONS
@@ -763,12 +758,12 @@ namespace CloudStreamForms
             }
 
             if (episodeResult.PosterUrl == "") {
-                if (mainCore.activeMovie.title.posterUrl != "") {
+                if (core.activeMovie.title.posterUrl != "") {
                     string posterUrl = "";
                     try {
-                        if (mainCore.activeMovie.title.trailers.Count > 0) {
-                            if (mainCore.activeMovie.title.trailers[0].PosterUrl != null) {
-                                posterUrl = mainCore.activeMovie.title.trailers[0].PosterUrl;
+                        if (core.activeMovie.title.trailers.Count > 0) {
+                            if (core.activeMovie.title.trailers[0].PosterUrl != null) {
+                                posterUrl = core.activeMovie.title.trailers[0].PosterUrl;
                             }
                         }
                     }
@@ -784,7 +779,6 @@ namespace CloudStreamForms
             else {
                 episodeResult.PosterUrl = CloudStreamCore.ConvertIMDbImagesToHD(episodeResult.PosterUrl, 224, 126); //episodeResult.PosterUrl.Replace(",126,224_AL", "," + pwidth + "," + pheight + "_AL").Replace("UY126", "UY" + pheight).Replace("UX224", "UX" + pwidth);
             }
-
             episodeResult.Progress = 0;
 
             UpdateLoad(episodeResult);
@@ -844,7 +838,7 @@ namespace CloudStreamForms
                     epView.MyEpisodeResultCollection[_id].downloadState = 4; // SET IS SEARCHING
                     ForceUpdate();
                     currentDownloadSearchesHappening++;
-                    CloudStreamCore coreCopy = (CloudStreamCore)mainCore.Clone();
+                    CloudStreamCore coreCopy = (CloudStreamCore)core.Clone();
 
                     coreCopy.GetEpisodeLink(isMovie ? -1 : (episodeResult.Id + 1), currentSeason, isDub: isDub, purgeCurrentLinkThread: currentDownloadSearchesHappening > 0);
                     print("!!___" + _id);
@@ -900,6 +894,7 @@ namespace CloudStreamForms
                     currentDownloadSearchesHappening--;
                 }
             });
+            episodeResult.IMDBEpisodeId = GetId(episodeResult);
 
             return episodeResult;
         }
@@ -922,83 +917,6 @@ namespace CloudStreamForms
             Device.BeginInvokeOnMainThread(() => episodeView.HeightRequest = ((setNull ?? showState != 0) ? 0 : ((overrideCount ?? epView.MyEpisodeResultCollection.Count) * (episodeView.RowHeight) + 40)));
         }
 
-        private void MovieFishingDone(object sender, Movie e)
-        {
-            if (!SameAsActiveMovie()) return;
-            currentMovie = e;
-        }
-
-        bool SameAsActiveMovie()
-        {
-            return currentMovie.title.id == mainCore.activeMovie.title.id;
-        }
-
-        private void MovieResult_linkAdded(object sender, Link e)
-        {
-            if (!SameAsActiveMovie()) return;
-            if (currentMovie.episodes[0].name + currentMovie.episodes[0].description == mainCore.activeMovie.episodes[0].name + mainCore.activeMovie.episodes[0].description && epView.MyEpisodeResultCollection.Count > 0) {
-            }
-            else {
-                return;
-            }
-
-            MainThread.BeginInvokeOnMainThread(() => {
-                currentMovie = mainCore.activeMovie;
-                if (CurrentEpisodes != null) {
-                    for (int i = 0; i < CurrentEpisodes.Count; i++) {
-                        if (CurrentEpisodes[i].links != null) {
-                            if (CurrentEpisodes[i].links.Count > 0) {
-                                try {
-                                    List<Link> links = CurrentEpisodes[i].links;
-                                    try {
-                                        links = links.OrderBy(l => -l.priority).ToList();
-                                    }
-                                    catch (Exception) { }
-                                    //  if (links.Count != 0) {
-                                    // print("LINK ADDED" + links.Count + "|" + links[links.Count - 1].name);
-                                    //  }
-                                    int realFrom = i % MovieResultMainEpisodeView.MAX_EPS_PER;
-                                    epView.MyEpisodeResultCollection[realFrom].epVis = true;
-                                    List<string> mirrors = new List<string>();
-                                    List<string> mirrorsUrls = new List<string>();
-                                    int mirrorCounter = 0;
-                                    // myEpisodeResultCollection[i].Mirros.Clear();
-                                    for (int f = 0; f < links.Count; f++) {
-                                        try {
-                                            Link link = links[f];
-                                            if (CheckIfURLIsValid(link.url)) {
-                                                string name = link.name;
-                                                if (name.Contains("[MIRRORCOUNTER]")) {
-                                                    mirrorCounter++;
-                                                    name = name.Replace("[MIRRORCOUNTER]", mirrorCounter.ToString());
-                                                }
-                                                mirrors.Add(name);
-                                                mirrorsUrls.Add(link.url);
-                                            }
-                                        }
-                                        catch (Exception) { }
-                                    }
-
-                                    if (mirrors.Count > epView.MyEpisodeResultCollection[realFrom].Mirros.Count) {
-                                        //EpisodeResult epRes = epView.MyEpisodeResultCollection[i];
-                                        epView.MyEpisodeResultCollection[realFrom].mirrosUrls = mirrorsUrls;
-                                        epView.MyEpisodeResultCollection[realFrom].epVis = mirrors.Count > 0;
-                                        epView.MyEpisodeResultCollection[realFrom].Mirros = mirrors;// = new EpisodeResult() { mirros = mirrors, Description = epRes.Description, epVis = mirrors.Count > 0, Id = epRes.Id, mirrosUrls = mirrorsUrls, PosterUrl = epRes.PosterUrl, progress = epRes.progress, Rating = epRes.Rating, subtitles = epRes.subtitles, Title = epRes.Title };
-                                    }
-                                }
-                                catch (Exception _ex) {
-                                    print("THIS SHOULD NEVER EVER HAPPEND");
-                                    print("VERY FATAL EX IN " + _ex);
-                                }
-                            }
-                        }
-                    }
-                }
-            });
-            //print(e + "|" + activeMovie.episodes[1].maxProgress);
-        }
-
-
         private void TrailerBtt_Clicked(object sender, EventArgs e)
         {
             if (trailerUrl != null) {
@@ -1008,8 +926,6 @@ namespace CloudStreamForms
                 }
             }
         }
-
-
 
         async void FadeTitles(bool fadeSeason)
         {
@@ -1037,12 +953,10 @@ namespace CloudStreamForms
         {
             if (loadedTitle) return;
             if (e.title.name != mainPoster.name) return;
-            if (!SameAsActiveMovie()) return;
 
             loadedTitle = true;
             isMovie = (e.title.movieType == MovieType.Movie || e.title.movieType == MovieType.AnimeMovie);
 
-            currentMovie = e;
             if (setKey) {
                 SetKey();
             }
@@ -1100,7 +1014,7 @@ namespace CloudStreamForms
                     }
                     SeasonPicker.ItemsSource = season;
 
-                    int selIndex = App.GetKey<int>("SeasonIndex", mainCore.activeMovie.title.id, 0);
+                    int selIndex = App.GetKey<int>("SeasonIndex", core.activeMovie.title.id, 0);
                     try {
                         SeasonPicker.SelectedIndex = Math.Min(selIndex, SeasonPicker.ItemsSource.Count - 1);
                     }
@@ -1112,11 +1026,11 @@ namespace CloudStreamForms
 
 
                     print("GetImdbEpisodes>>>>>>>>>>>>>>><<");
-                    mainCore.GetImdbEpisodes(currentSeason);
+                    core.GetImdbEpisodes(currentSeason);
                 }
                 else {
                     currentSeason = 0; // MOVIES
-                    mainCore.GetImdbEpisodes();
+                    core.GetImdbEpisodes();
                 }
                 SeasonPicker.SelectedIndexChanged += SeasonPicker_SelectedIndexChanged;
 
@@ -1152,10 +1066,10 @@ namespace CloudStreamForms
                         Commands.SetTap(stackLayout, new Command((o) => {
                             int z = (int)o;
                             if (Search.mainPoster.url != RecomendedPosters[z].url) {
-                                if (lastMovie == null) {
+                                /*if (lastMovie == null) {
                                     lastMovie = new List<Movie>();
                                 }
-                                lastMovie.Add(mainCore.activeMovie);
+                                lastMovie.Add(core.activeMovie);*/
                                 Search.mainPoster = RecomendedPosters[z];
                                 Page _p = new MovieResult();// { mainPoster = mainPoster };
                                 Navigation.PushModalAsync(_p);
@@ -1171,13 +1085,8 @@ namespace CloudStreamForms
                         Recommendations.Children.Add(stackLayout);
                     }
                 }
-
                 SetRecs();
-
             });
-
-
-
         }
 
         const double _RecPosterMulit = 1.75;
@@ -1220,9 +1129,9 @@ namespace CloudStreamForms
 
             DubPicker.button.FadeTo(0, FATE_TIME_MS);
             currentSeason = SeasonPicker.SelectedIndex + 1;
-            App.SetKey("SeasonIndex", mainCore.activeMovie.title.id, SeasonPicker.SelectedIndex);
+            App.SetKey("SeasonIndex", core.activeMovie.title.id, SeasonPicker.SelectedIndex);
 
-            mainCore.GetImdbEpisodes(currentSeason);
+            core.GetImdbEpisodes(currentSeason);
         }
 
         void SetChangeTo(int maxEp = -1)
@@ -1256,7 +1165,6 @@ namespace CloudStreamForms
         {
             Device.BeginInvokeOnMainThread(() => {
                 print("GOT RESULTS; LETS GO");
-                if (!SameAsActiveMovie()) return;
 
                 if (e == null || e.Count == 0) {
                     RecomendationLoaded.IsVisible = false;
@@ -1264,10 +1172,7 @@ namespace CloudStreamForms
                 };
                 print("episodes loaded");
 
-                currentMovie = mainCore.activeMovie;
 
-                currentMovie.episodes = e;
-                CurrentEpisodes = e;
                 ClearEpisodes();
                 //bool isLocalMovie = false;
                 bool isAnime = currentMovie.title.movieType == MovieType.Anime;
@@ -1277,7 +1182,7 @@ namespace CloudStreamForms
                     epView.AllEpisodes = new EpisodeResult[CurrentEpisodes.Count];
                     maxEpisodes = epView.AllEpisodes.Length;
                     for (int i = 0; i < CurrentEpisodes.Count; i++) {
-                        AddEpisode(new EpisodeResult() { Episode = i + 1, Title = CurrentEpisodes[i].name, Id = i, Description = CurrentEpisodes[i].description.Replace("\n", "").Replace("  ", ""), PosterUrl = CurrentEpisodes[i].posterUrl, Rating = CurrentEpisodes[i].rating, Progress = 0, epVis = false, subtitles = new List<string>() { "None" }, Mirros = new List<string>() }, i);
+                        AddEpisode(new EpisodeResult() { Episode = i + 1, Title = CurrentEpisodes[i].name, Id = i, Description = CurrentEpisodes[i].description.Replace("\n", "").Replace("  ", ""), PosterUrl = CurrentEpisodes[i].posterUrl, Rating = CurrentEpisodes[i].rating, Progress = 0, epVis = false, }, i);
                     }
                     if (!isAnime) {
                         SetEpisodeFromTo(0);
@@ -1287,7 +1192,7 @@ namespace CloudStreamForms
                 else { // MOVE
                     maxEpisodes = 1;
                     epView.AllEpisodes = new EpisodeResult[1];
-                    AddEpisode(new EpisodeResult() { Title = currentMovie.title.name, Description = currentMovie.title.description, Id = 0, PosterUrl = "", Progress = 0, Rating = "", epVis = false, subtitles = new List<string>() { "None" }, Mirros = new List<string>() }, 0);
+                    AddEpisode(new EpisodeResult() { Title = currentMovie.title.name, Description = currentMovie.title.description, Id = 0, PosterUrl = "", Progress = 0, Rating = "", epVis = false }, 0);
                     SetEpisodeFromTo(0);
                 }
 
@@ -1295,7 +1200,7 @@ namespace CloudStreamForms
 
                 // SET DUB SUB
                 if (isAnime) {
-                    mainCore.GetSubDub(currentSeason, out bool subExists, out bool dubExists);
+                    core.GetSubDub(currentSeason, out bool subExists, out bool dubExists);
 
                     isDub = dubExists;
 
@@ -1341,32 +1246,39 @@ namespace CloudStreamForms
 
         }
 
+        static Dictionary<string, bool> GetLatestDub = new Dictionary<string, bool>();
 
         void SetDubExist()
         {
+
+
             print("SETDUB:::");
-            if (!SameAsActiveMovie()) return;
             print("SETDUB:::SET");
 
-            TempThread tempThred = mainCore.CreateThread(6);
-            mainCore.StartThread("Set SUB/DUB", () => {
+            TempThread tempThred = core.CreateThread(6);
+            core.StartThread("Set SUB/DUB", () => {
                 try {
-                    int max = mainCore.GetMaxEpisodesInAnimeSeason(currentSeason, isDub, tempThred);
+                    int max = core.GetMaxEpisodesInAnimeSeason(currentSeason, isDub, tempThred);
                     if (max > 0) {
                         print("CLEAR AND ADD");
                         MainThread.BeginInvokeOnMainThread(() => {
                             // CLEAR EPISODES SO SWITCHING SUB DUB 
-                            try {
-                                for (int i = 0; i < epView.MyEpisodeResultCollection.Count; i++) {
-                                    if (epView.MyEpisodeResultCollection[i].mirrosUrls != null) {
-                                        epView.MyEpisodeResultCollection[i].mirrosUrls = new List<string>();
-                                        epView.MyEpisodeResultCollection[i].Mirros = new List<string>();
-                                        //epView.MyEpisodeResultCollection[i].epVis = false;
+                            if (GetLatestDub.ContainsKey(currentMovie.title.id)) {
+                                if (GetLatestDub[currentMovie.title.id] != isDub) {
+                                    try {
+                                        for (int i = 0; i < epView.MyEpisodeResultCollection.Count; i++) {
+                                            if (epView.MyEpisodeResultCollection[i].LoadedLinks) {
+                                                epView.MyEpisodeResultCollection[i].ClearMirror();
+                                            }
+                                        }
+                                    }
+                                    catch (Exception _ex) {
+                                        print("MAIN ERROR IN CLEAR: " + _ex);
                                     }
                                 }
                             }
-                            catch (Exception _ex) {
-                                print("MAIN ERROR IN CLEAR: " + _ex);
+                            else {
+                                GetLatestDub[currentMovie.title.id] = isDub;
                             }
 
                             maxEpisodes = max;
@@ -1383,7 +1295,7 @@ namespace CloudStreamForms
                     }
                 }
                 finally {
-                    mainCore.JoinThred(tempThred);
+                    core.JoinThred(tempThred);
                 }
             });
         }
@@ -1391,9 +1303,7 @@ namespace CloudStreamForms
 
         private void MovieResult_trailerLoaded(object sender, List<Trailer> e)
         {
-            if (!SameAsActiveMovie()) return;
             if (e == null) return;
-            currentMovie.title.trailers = e;
             epView.CurrentTrailers.Clear();
             for (int i = 0; i < e.Count; i++) {
                 epView.CurrentTrailers.Add(e[i]);
@@ -1517,19 +1427,11 @@ namespace CloudStreamForms
         {
             if (loadingLinks) return episodeResult;
 
-            if (episodeResult.LoadedLinks && !overrideLoaded) {
-                print("OPEN : " + episodeResult.Title);
-                if (episodeResult.mirrosUrls.Count > 0) {
-
-                    if (autoPlay) { PlayEpisode(episodeResult); }
-                }
-                else {
-                    episodeView.SelectedItem = null;
-                    App.ShowToast(errorEpisodeToast);
-                }
+            if (episodeResult.LoadedLinks) {
+                if (autoPlay) { PlayEpisode(episodeResult); }
             }
             else {
-                mainCore.GetEpisodeLink(isMovie ? -1 : (episodeResult.Id + 1), currentSeason, isDub: isDub, purgeCurrentLinkThread: currentDownloadSearchesHappening > 0);
+                core.GetEpisodeLink(isMovie ? -1 : (episodeResult.Id + 1), currentSeason, isDub: isDub, purgeCurrentLinkThread: currentDownloadSearchesHappening > 0);
 
                 await Device.InvokeOnMainThreadAsync(async () => {
                     // NormalStack.IsEnabled = false;
@@ -1546,9 +1448,7 @@ namespace CloudStreamForms
                     bool gotError = false;
                     loadingLinks = false;
 
-                    if (SameAsActiveMovie()) {
-                        currentMovie = mainCore.activeMovie;
-                    }
+
                 //NormalStack.IsEnabled = true;
                 // NormalStack.Opacity = 1f;
                 checkerror:;
@@ -1590,7 +1490,7 @@ namespace CloudStreamForms
         // ============================== PLAY VIDEO ==============================
         void PlayEpisode(EpisodeResult episodeResult, bool? overrideSelectVideo = null)
         {
-            string id = GetId(episodeResult);
+            string id = episodeResult.IMDBEpisodeId;
             if (id != "") {
                 if (ViewHistory) {
                     App.SetKey(App.VIEW_HISTORY, id, true);
@@ -1607,7 +1507,10 @@ namespace CloudStreamForms
                     _sub = currentMovie.subtitles[0].data;
                 }
             }*/
-            App.RequestVlc(episodeResult.mirrosUrls, episodeResult.Mirros, episodeResult.OgTitle, GetId(episodeResult), episode: episodeResult.Episode, season: currentSeason, subtitleFull: currentMovie.subtitles.Select(t => t.data).FirstOrDefault(), descript: episodeResult.Description, overrideSelectVideo: overrideSelectVideo, startId: (int)episodeResult.ProgressState, headerId: currentMovie.title.id);// startId: FROM_PROGRESS); //  (int)episodeResult.ProgressState																																																																													  //App.PlayVLCWithSingleUrl(episodeResult.mirrosUrls, episodeResult.Mirros, currentMovie.subtitles.Select(t => t.data).ToList(), currentMovie.subtitles.Select(t => t.name).ToList(), currentMovie.title.name, episodeResult.Episode, currentSeason, overrideSelectVideo);
+            if(currentMovie.subtitles == null) {
+                core.activeMovie.subtitles = new List<Subtitle>();
+            }
+           App.RequestVlc(episodeResult.mirrosUrls, episodeResult.Mirros, episodeResult.OgTitle, episodeResult.IMDBEpisodeId, episode: episodeResult.Episode, season: currentSeason, subtitleFull: currentMovie.subtitles.Select(t => t.data).FirstOrDefault(), descript: episodeResult.Description, overrideSelectVideo: overrideSelectVideo, startId: (int)episodeResult.ProgressState, headerId: currentMovie.title.id);// startId: FROM_PROGRESS); //  (int)episodeResult.ProgressState																																																																													  //App.PlayVLCWithSingleUrl(episodeResult.mirrosUrls, episodeResult.Mirros, currentMovie.subtitles.Select(t => t.data).ToList(), currentMovie.subtitles.Select(t => t.name).ToList(), currentMovie.title.name, episodeResult.Episode, currentSeason, overrideSelectVideo);
         }
 
         // ============================== FORCE UPDATE ==============================
@@ -1664,7 +1567,11 @@ namespace CloudStreamForms
             bool hasDownloadedFile = App.KeyExists("dlength", "id" + GetCorrectId(episodeResult));
             string downloadKeyData = "";
 
-            List<string> actions = new List<string>() { "Play in App", "Play External App", "Play in Browser", "Download", "Download Subtitles", "Copy Link", "Reload" }; // "Remove Link",
+            List<string> actions = new List<string>() { "Play in App", "Play in Browser", "Download", "Download Subtitles", "Copy Link", "Reload" }; // "Remove Link",
+
+            if(App.CanPlayExternalPlayer()) {
+                actions.Insert(1, "Play External App");
+            }
 
             if (hasDownloadedFile) {
                 downloadKeyData = App.GetDownloadInfo(GetCorrectId(episodeResult), false).info.fileUrl;//.GetKey("Download", GetId(episodeResult), "");
@@ -1756,8 +1663,8 @@ namespace CloudStreamForms
                         string mirrorUrl = episodeResult.mirrosUrls[i];
                         string mirrorName = episodeResult.Mirros[i];
                         DownloadSubtitlesToFileLocation(episodeResult, currentMovie, currentSeason, showToast: false);
-                        TempThread tempThred = mainCore.CreateThread(4);
-                        mainCore.StartThread("DownloadThread", async () => {
+                        TempThread tempThred = core.CreateThread(4);
+                        core.StartThread("DownloadThread", async () => {
                             try {
                                 //UserDialogs.Instance.ShowLoading("Checking link...", MaskType.Gradient);
                                 ActionPopup.StartIndeterminateLoadinbar("Checking link...");
@@ -1785,7 +1692,7 @@ namespace CloudStreamForms
                             }
                             finally {
                                 //UserDialogs.Instance.HideLoading();
-                                mainCore.JoinThred(tempThred);
+                                core.JoinThred(tempThred);
                             }
                         });
                     }
@@ -1793,6 +1700,7 @@ namespace CloudStreamForms
             }
             else if (action == "Reload") { // ============================== RELOAD ==============================
                 try {
+                    episodeResult.ClearMirror();
                     await LoadLinksForEpisode(episodeResult, false, true);
                 }
                 catch (Exception) { }
@@ -1887,7 +1795,6 @@ namespace CloudStreamForms
             return GetId(episodeResult, currentMovie);
         }
 
-
         public static string GetId(EpisodeResult episodeResult, Movie currentMovie)
         {
             try {
@@ -1898,8 +1805,6 @@ namespace CloudStreamForms
                 return episodeResult.Id + "Extra=" + ToDown(episodeResult.Title) + "=EndAll";
             }
         }
-
-
 
         // ============================== TOGGLE HAS SEEN EPISODE ==============================
 

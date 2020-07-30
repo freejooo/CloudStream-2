@@ -25,6 +25,7 @@ namespace CloudStreamForms
         LabelList SubLangPicker;
         LabelList SubStylePicker;
         LabelList SubFontPicker;
+        LabelList VideoplayerOptionPicker;
 
         public string MainTxtColor { set; get; } = "#e1e1e1";
 
@@ -37,6 +38,15 @@ namespace CloudStreamForms
             }
             get {
                 return App.GetKey("Settings", nameof(LoadingMiliSec), 5000);
+            }
+        }
+
+        public static int PreferedVideoPlayer {
+            set {
+                App.SetKey("Settings", nameof(PreferedVideoPlayer), value);
+            }
+            get {
+                return App.GetKey("Settings", nameof(PreferedVideoPlayer), -1);
             }
         }
 
@@ -316,7 +326,7 @@ namespace CloudStreamForms
         public static bool CacheImdb { get { return CacheData; } }
         public static bool CacheMAL { get { return CacheData; } }
 
-
+        static bool initVideoPlayer = true;
         VisualElement[] displayElements;
         public Settings()
         {
@@ -356,6 +366,7 @@ namespace CloudStreamForms
                 StarMe,
                 FeedbackBtt,
                 ManageAccount,
+                VideoplayerOption,
                 SetTheme,
                // UpdateBtt,
             };
@@ -390,9 +401,9 @@ namespace CloudStreamForms
             SubLangPicker = new LabelList(SubtitleLang, CloudStreamCore.subtitleNames.ToList(), "Default Subtitle Language");
             SubStylePicker = new LabelList(SubtitleStyle, new List<string>() { "None", "Dropshadow", "Outline", "Outline + dropshadow" }, "Subtitle Style");
             SubFontPicker = new LabelList(SubtitleFont, GlobalFonts, "Subtitle Font", true);
+             
             //outline_reorder_white_48dp.png
-
-
+             
             BackgroundColor = Settings.BlackRBGColor;
 
 
@@ -524,7 +535,8 @@ namespace CloudStreamForms
                 string action = await ActionPopup.DisplayActionSheet("Manage account", actions.ToArray());
                 if (action == "Export data" || action == "Export Everything") {
                     string subaction = await ActionPopup.DisplayEntry(InputPopupPage.InputPopupResult.password, "Password", "Encrypt data", autoPaste: false, confirmText: "Encrypt");
-                    if (subaction != "Cancel") {
+                    
+                    if (subaction != "") {
                         string text = Script.SyncWrapper.GenerateTextFile(action == "Export Everything");
                         if (subaction != "") {
                             text = CloudStreamForms.Cryptography.StringCipher.Encrypt(text, subaction);
@@ -554,7 +566,7 @@ namespace CloudStreamForms
                             while (!success) {
                                 string password = await ActionPopup.DisplayEntry(InputPopupPage.InputPopupResult.password, "Password", "Decrypt data", autoPaste: false, confirmText: "Decrypt");
                                 CloudStreamCore.print("PASSWORDD:D::: " + password);
-                                if (password != "Cancel") {
+                                if (password != "Cancel" && password != "") {
                                     string subFile = CloudStreamForms.Cryptography.StringCipher.Decrypt(file, password);
                                     CloudStreamCore.print("SUBFILE::: " + subFile);
                                     success = subFile.StartsWith(Script.SyncWrapper.header);
@@ -564,7 +576,7 @@ namespace CloudStreamForms
                                             Script.SyncWrapper.SetKeysFromTextFile(subFile);
                                             App.ShowToast("File dectypted and loaded");
                                             Apper();
-                                        } 
+                                        }
                                     }
                                     else {
                                         App.ShowToast("Failed to dectypted file");
@@ -666,12 +678,46 @@ namespace CloudStreamForms
             base.OnDisappearing();
         }
 
+        void InitVideoPlayer()
+        {  
+            // VIDEOPLAYER Option
+            List<string> videoOptions = new List<string>() { App.GetVideoPlayerName(App.VideoPlayer.None) };
+            List<App.VideoPlayer> avalibePlayers = new List<App.VideoPlayer>();
+            foreach (var player in App.GetEnumList<App.VideoPlayer>()) {
+                if (App.GetVideoPlayerInstalled(player)) {
+                    avalibePlayers.Add(player);
+                    videoOptions.Add(App.GetVideoPlayerName(player));
+                }
+            }
+            initVideoPlayer = false;
+            VideoplayerOptionPicker = new LabelList(VideoplayerOption, videoOptions, "External video player");
+            int index = videoOptions.IndexOf(App.GetVideoPlayerName((App.VideoPlayer)Settings.PreferedVideoPlayer));
+            if (index == -1) {
+                if (avalibePlayers.Count > 0) {
+                    index = 1;
+                    // PreferedVideoPlayer = (int)avalibePlayers[0];
+                }
+            }
+
+            VideoplayerOptionPicker.SelectedIndexChanged += (o, e) => {
+                if (e != -1) {
+                    Settings.PreferedVideoPlayer = e - 1; // 0 = no videoplayer
+                    VideoplayerOptionPicker.button.Text = "Current Videoplayer: " + VideoplayerOptionPicker.button.Text;
+                }
+            };
+
+            VideoplayerOptionPicker.SelectedIndex = index == -1 ? 0 : index;
+        }
+
         protected override void OnAppearing()
         {
             //  OnIconStart(3);
             base.OnAppearing();
             Apper();
 
+            if (initVideoPlayer) {
+                InitVideoPlayer();
+            }
             if (Device.RuntimePlatform == Device.Android) {
                 if (NewGithubUpdate) {
                     Grid.SetRow(UpdateBtt, displayElements.Length);
@@ -751,6 +797,7 @@ namespace CloudStreamForms
                 App.RemoveFolder("CacheImdb");
             }
         }
+
         async void ResetToDef()
         {
             bool action = await DisplayAlert("Reset settings to default", "Are you sure that you want to reset settings to default", "Yes", "Cancel");//await ActionPopup.DisplayActionSheet("Reset settings to default", "Clear settings") == "Clear settings"; //

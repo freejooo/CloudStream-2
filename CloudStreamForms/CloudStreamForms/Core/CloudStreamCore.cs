@@ -23,6 +23,7 @@ namespace CloudStreamForms.Core
     {
         public CloudStreamCore() // INIT
         {
+            coreCreation = DateTime.Now;
             // INACTIVE // new DubbedAnimeNetProvider(this)
             animeProviders = new IAnimeProvider[] { new GogoAnimeProvider(this), new KickassAnimeProvider(this), new DubbedAnimeProvider(this), new AnimeFlixProvider(this), new AnimekisaProvider(this), new TheMovieAnimeProvider(this), new KissFreeAnimeProvider(this), new AnimeSimpleProvider(this), new VidstreamingAnimeProvider(this), new AnimeVibeBloatFreeProvider(this), new NineAnimeBloatFreeProvider(this) };
             movieProviders = new IMovieProvider[] { new DirectVidsrcProvider(this), new WatchTVProvider(this), new FMoviesProvider(this), new LiveMovies123Provider(this), new TheMovies123Provider(this), new YesMoviesProvider(this), new WatchSeriesProvider(this), new GomoStreamProvider(this), new Movies123Provider(this), new DubbedAnimeMovieProvider(this), new TheMovieMovieProvider(this), new KickassMovieProvider(this) };
@@ -677,7 +678,7 @@ namespace CloudStreamForms.Core
         [Serializable]
         public struct Episode
         {
-            public List<Link> links;
+            //public List<Link> links;
             public string name;
             public string rating;
             public string description;
@@ -808,7 +809,7 @@ namespace CloudStreamForms.Core
         public event EventHandler<List<Poster>> searchLoaded;
         public event EventHandler<List<Trailer>> trailerLoaded;
         public event EventHandler<List<Episode>> episodeLoaded;
-        public event EventHandler<Link> linkAdded;
+        public event EventHandler<string> linkAdded;
         public event EventHandler<MALData> malDataLoaded;
         public event EventHandler<Episode> linksProbablyDone;
 
@@ -4164,7 +4165,7 @@ namespace CloudStreamForms.Core
                             string newM = jsn.Substring(0, id);
                             newM = newM.Replace("\\", "");
                             print("::>" + newM);
-                            AddPotentialLink(episode, newM, "Mirror [MIRRORCOUNTER]", 0);
+                            AddPotentialLink(episode, newM, "SUBHD", 0);
                         }
                         jsn = jsn.Substring(4, jsn.Length - 4);
                     }
@@ -4470,10 +4471,11 @@ namespace CloudStreamForms.Core
 
                                                         */
 
+                                                        /*
                                                         Episode ep = activeMovie.episodes[episode];
                                                         if (ep.links == null) {
                                                             activeMovie.episodes[episode] = new Episode() { links = new List<Link>(), date = ep.date, description = ep.description, name = ep.name, posterUrl = ep.posterUrl, rating = ep.rating, id = ep.id };
-                                                        }
+                                                        }*/
 
                                                         if (veryURL != "") {
                                                             try {
@@ -7392,7 +7394,6 @@ namespace CloudStreamForms.Core
 
 
 
-
             TempThread tempThred = CreateThread(3);
             StartThread("Get Links", () => {
                 try {
@@ -7405,6 +7406,9 @@ namespace CloudStreamForms.Core
 
                     // --------- CLEAR EPISODE ---------
                     int normalEpisode = episode == -1 ? 0 : episode - 1;                     //normalEp = ep-1;
+                    bool isMovie = activeMovie.title.IsMovie;
+                    string mainId = isMovie ? activeMovie.title.id : activeMovie.episodes[normalEpisode].id;
+                    CreateLinkHolder(mainId, activeMovie.title.id, isMovie ? 1 : episode, isMovie ? 1 : season);
 
                     activeMovie.subtitles = new List<Subtitle>(); // CLEAR SUBTITLES
                     DownloadSubtitlesAndAdd(isEpisode: (activeMovie.title.movieType == MovieType.TVSeries || activeMovie.title.movieType == MovieType.Anime), episodeCounter: normalEpisode); // CHANGE LANG TO USER SETTINGS
@@ -7413,7 +7417,6 @@ namespace CloudStreamForms.Core
                     if (activeMovie.episodes.Count <= normalEpisode) { activeMovie.episodes.Add(new Episode()); }
                     Episode cEpisode = activeMovie.episodes[normalEpisode];
                     activeMovie.episodes[normalEpisode] = new Episode() {
-                        links = new List<Link>(),
                         posterUrl = cEpisode.posterUrl,
                         rating = cEpisode.rating,
                         name = cEpisode.name,
@@ -7607,8 +7610,6 @@ namespace CloudStreamForms.Core
                         bool canShow = GetSettings(MovieType.TVSeries);
 
                         // -------------------- HD MIRRORS --------------------
-
-                        bool isMovie = activeMovie.title.movieType == MovieType.Movie || activeMovie.title.movieType == MovieType.AnimeMovie;
 
                         TempThread temp = CreateThread(3);
                         try {
@@ -8092,11 +8093,175 @@ namespace CloudStreamForms.Core
         }
 
         static object LinkLock = new object();
+
+        [Serializable]
+        public struct VerifiedLink
+        {
+            /// <summary>
+            /// Filesize in bytes
+            /// </summary>
+            public long fileSize;
+            public int width;
+            public int height;
+        }
+
+        [Serializable]
+        public struct AdvancedStream
+        {
+            public string url;
+            public string label;
+        }
+        [Serializable]
+        public struct AdvancedAudioStream
+        {
+            public string url;
+            public string label;
+        }
+        [Serializable]
+        public struct AdvancedSubtitleStream
+        {
+            public string url;
+            public string label;
+        }
+        [Serializable]
+        public struct AdvancedLink
+        {
+            public bool IsSeperatedAudioStream { get { return audioStreams.Count() > 0; } }
+            public List<AdvancedStream> streams;
+            public List<AdvancedAudioStream> audioStreams;
+            public List<AdvancedSubtitleStream> subtitleStreams;
+        }
+
+        [Serializable]
+        public struct BasicLink
+        {
+            public string baseUrl;
+            public bool isAdvancedLink;
+
+            /// <summary>
+            /// Duration in sec, if not given it will be 0
+            /// </summary>
+            public int duration;
+            public string referer;
+
+            public string name;
+            public int mirror;
+            public string label;
+            public string typeName;
+            public string PublicName {
+                get {
+                    return name + (label == "" ? "" : $" {label}") + ((mirror == 0) ? "" : $" (Mirror {mirror})") + (typeName == "" ? "" : $" [{typeName}]");
+                }
+            }
+
+            public int priority;
+            public string originSite;
+
+            public bool hasBeenVerified;
+            public bool hasTriedToVerify;
+            public VerifiedLink verifiedLink;
+        }
+
+
+        /// <summary>
+        /// LinkHolder is generated when a link is added
+        /// Movies will have episode and season set to 1
+        /// </summary>
+        [Serializable]
+        public struct LinkHolder
+        {
+            public List<BasicLink> links;
+            public string headerId;
+
+            public int season;
+            public int episode;
+        }
+
+        [Serializable]
+        public struct TitleSeason
+        {
+            /// <summary>
+            /// 0 = episode 1 ect, Pointer to  LinkHolder (cachedLinks)
+            /// </summary>
+            public List<string> episodeId;
+        }
+
+        /// <summary>
+        /// TitleHolder is generated from IMDB init
+        /// </summary>
+        [Serializable]
+        public struct TitleHolder
+        {
+            public List<TitleSeason> seasons;
+        }
+
+        /// <summary>
+        /// Taken by IMDB episode id
+        /// </summary>
+        public static Dictionary<string, LinkHolder> cachedLinks = new Dictionary<string, LinkHolder>();
+
+        static object cachedTitlesLock = new object();
+        static object cachedLinksLock = new object();
+
+        /// <summary>
+        /// Taken by IMDB header id
+        /// </summary>
+        public static Dictionary<string, TitleHolder> cachedTitles = new Dictionary<string, TitleHolder>();
+
+        /// <summary>
+        /// Taken by IMDB header id
+        /// </summary>
+        public static Dictionary<string, Movie> cachedMovies = new Dictionary<string, Movie>();
+
+        //public static Dictionary<string, CloudStreamCore> activeCores = new Dictionary<string, CloudStreamCore>();
+
+        public DateTime coreCreation;
+
+        public static TitleHolder? GetCachedTitle(string id)
+        {
+            lock (cachedTitlesLock) {
+                if (!cachedTitles.ContainsKey(id)) {
+                    return null;
+                }
+                return cachedTitles[id];
+            }
+        }
+
+        public static LinkHolder? GetCachedLink(string id)
+        {
+            lock (cachedLinksLock) {
+                if (!cachedLinks.ContainsKey(id)) {
+                    return null;
+                }
+                return cachedLinks[id];
+            }
+        }
+
+        public static void ClearCachedLink(string id)
+        {
+            if (cachedLinks.ContainsKey(id)) {
+                cachedLinks.Remove(id);
+            }
+        }
+
+        public static void CreateLinkHolder(string id, string headerId, int episode, int season)
+        {
+            if (!cachedLinks.ContainsKey(id)) {
+                cachedLinks[id] = new LinkHolder() {
+                    episode = episode,
+                    headerId = headerId,
+                    season = season,
+                    links = new List<BasicLink>(),
+                };
+            }
+        }
+
         public bool AddPotentialLink(int normalEpisode, string _url, string _name, int _priority, string label = "")
         {
             if (activeMovie.episodes == null) return false;
             if (_url == "http://error.com") return false; // ERROR
             if (_url.Replace(" ", "") == "") return false;
+            if (!CheckIfURLIsValid(_url)) return false;
 
 #if DEBUG
             int _s = GetStopwatchNum();
@@ -8107,55 +8272,54 @@ namespace CloudStreamForms.Core
             if (_url.StartsWith("https://fvs.io")) {
                 _name = "XStream";
             }
-            if(_url.StartsWith("https://file.gogocdn.net") || _url.Contains("googlevideo.com")) {
+            if (_url.StartsWith("https://file.gogocdn.net") || _url.Contains("googlevideo.com")) {
                 _name = "GoogleVideo";
                 _priority += 10;
             }
             label = label.Replace("HD P", "HD").Replace("P", "p").Replace(" p", "");
-            
-            _name += " " + label;
+
             _name = _name.Replace("  ", " ");
             _url = _url.Replace(" ", "%20");
+
             string _type = "";
             if (_url.Contains(".m3u8")) {
                 _type = "m3u8";
-            } 
-            string typeAdd = (_type == "" ? "" : $" [{_type}]");
+            }
             try {
-                lock (LinkLock) {
-                    if (!LinkListContainsString(activeMovie.episodes[normalEpisode].links, _url)) {
-                        if (CheckIfURLIsValid(_url)) {
-                            // if (GetFileSize(_url) > 0) {
+                lock (cachedLinksLock) {
+                    string id = (activeMovie.title.IsMovie ? activeMovie.title.id : activeMovie.episodes[normalEpisode].id);
+                    var link = GetCachedLink(id);
+                    if (link == null) {
+                        throw new Exception("Episode not loaded " + id);
+                    }
+                    else {
+                        var holder = (LinkHolder)link;
+                        if (!holder.links.Select(t => t.baseUrl).ToList().Contains(_url)) {
                             print("ADD LINK:" + normalEpisode + "|" + _name + "|" + _priority + "|" + _url);
-                            Episode ep = activeMovie.episodes[normalEpisode];
-                            if (ep.links == null) {
-                                activeMovie.episodes[normalEpisode] = new Episode() { links = new List<Link>(), date = ep.date, description = ep.description, name = ep.name, posterUrl = ep.posterUrl, rating = ep.rating, id = ep.id };
-                                ep = activeMovie.episodes[normalEpisode];
-                            }
-
-                            bool done = false;
-                            int count = 1;
-                            string realName = _name;
-                            while (!done && !realName.Contains("[MIRRORCOUNTER]")) {
-                                count++;
-                                done = true;
-                                for (int i = 0; i < ep.links.Count; i++) {
-                                    if (ep.links[i].name == (realName + typeAdd).Replace("  ", " ")) {
-                                        realName = _name + " (Mirror " + count + ")";
-                                        done = false;
-                                        break;
-                                    }
-                                }
-                            }
-                            realName += typeAdd;
-                            realName = realName.Replace("  ", " ");
-                            var link = new Link() { priority = _priority, url = _url, name = realName };
-                            activeMovie.episodes[normalEpisode].links.Add(link); // [MIRRORCOUNTER] IS LATER REPLACED WITH A NUMBER TO MAKE IT EASIER TO SEPERATE THEM, CAN'T DO IT HERE BECAUSE IT MUST BE ABLE TO RUN SEPARETE THREADS AT THE SAME TIME
-                            linkAdded?.Invoke(null, link);
-                            return true;
-                            //}
+                            linkAdded?.Invoke(null, id);
+                            holder.links.Add(new BasicLink() {
+                                baseUrl = _url,
+                                isAdvancedLink = false,
+                                name = _name,
+                                typeName = _type,
+                                label = label,
+                                priority = _priority,
+                                mirror = holder.links.Where(t => t.name == _name).Count()
+                            });
+                            //holder.links = holder.links.OrderBy(t => t.priority).ToList();
                         }
                     }
+
+                    // if (GetFileSize(_url) > 0) {
+                    /*Episode ep = activeMovie.episodes[normalEpisode];
+                    if (ep.links == null) {
+                        activeMovie.episodes[normalEpisode] = new Episode() { links = new List<Link>(), date = ep.date, description = ep.description, name = ep.name, posterUrl = ep.posterUrl, rating = ep.rating, id = ep.id };
+                        ep = activeMovie.episodes[normalEpisode];
+                    }*/
+
+
+                    return true;
+
                 }
 
             }
@@ -8613,6 +8777,7 @@ namespace CloudStreamForms.Core
         /// <param name="links"></param>
         /// <param name="inp"></param>
         /// <returns></returns>
+        /*
         public static bool LinkListContainsString(List<Link> links, string inp)
         {
             if (links == null) {
@@ -8631,7 +8796,7 @@ namespace CloudStreamForms.Core
 
             return false;
         }
-
+        */
         /// <summary>
         /// Simple funct to download a sites fist page as string
         /// </summary>
@@ -8950,7 +9115,7 @@ namespace CloudStreamForms.Core
         }
 
 
-        static readonly List<string> sortingList = new List<string>() { "4k", "2160p", "upstream", "1080p", "hd", "auto", "autop", "720p", "hls", "source", "480p", "360p", "240p" };
+        static readonly List<string> sortingList = new List<string>() { "4k", "2160p", "googlevideo 1080p", "googlevideo 720p" ,"googlevideo hd", "upstream", "1080p", "1068", "hd", "auto", "autop", "720p", "hls", "source", "480p", "360p", "240p" };
         public static MirrorInfo[] SortToHdMirrors(List<string> mirrorsUrls, List<string> mirrorsNames)
         {
             List<MirrorInfo> mirrorInfos = new List<MirrorInfo>();

@@ -598,9 +598,11 @@ namespace CloudStreamForms
         {
             DownloadInfo info = downloads[key];
             List<string> actions = new List<string>() {
-                 "Play in App","Play External App", "Delete File", "Open Source"
+                 "Play in App","Delete File", "Open Source"
             };
-
+            if(App.CanPlayExternalPlayer()) {
+                actions.Insert(1, "Play External App");
+            }
             /*
             if (!MainChrome.IsConnectedToChromeDevice && MainChrome.allChromeDevices.Count() > 0) {
                 actions.Insert(0, "Connect to Chromecast");

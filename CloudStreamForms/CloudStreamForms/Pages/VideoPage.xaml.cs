@@ -169,6 +169,7 @@ namespace CloudStreamForms
 
 
                 disMedia = new Media(_libVLC, currentVideo.downloadFileUrl, FromType.FromPath);//new Uri(currentVideo.downloadFileUrl, UriKind.Absolute)); // currentVideo.downloadFileUrl, FromType.FromPath,);
+                                                                                               // disMedia.AddOption(new MediaConfiguration() { })
 
                 bool succ = vvideo.MediaPlayer.Play(disMedia);
                 return;
@@ -573,7 +574,7 @@ namespace CloudStreamForms
 
             float multi = 1f;
 
- 
+
             //double base1X = SubtitleTxt1.TranslationX;
             double base1Y = -5;
             double base2Y = 20;
@@ -585,7 +586,7 @@ namespace CloudStreamForms
 
             double base1X = SubtitleTxt1.TranslationX;
             double base2X = SubtitleTxt2.TranslationX;
- 
+
             bool hasDropshadow = Settings.SubtitlesHasDropShadow;
             hasOutline = Settings.SubtitlesHasOutline;
 
@@ -792,7 +793,7 @@ namespace CloudStreamForms
             Player.AudioDevice += (o, e) => {
                 SetIsPaused(true);
             };
-            
+
 
             Commands.SetTap(EpisodesTap, new Command(() => {
                 //do something

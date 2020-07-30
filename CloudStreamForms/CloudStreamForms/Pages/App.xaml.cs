@@ -64,9 +64,7 @@ namespace CloudStreamForms
 
         public interface IPlatformDep
         {
-            void ToggleRealFullScreen(bool fullscreen);
-            void PlayVlc(string url, string name, string subtitleLoc);
-            void PlayVlc(List<string> url, List<string> name, string subtitleLoc);
+            void ToggleRealFullScreen(bool fullscreen); 
             void ShowToast(string message, double duration);
             string DownloadFile(string file, string fileName, bool mainPath, string extraPath);
             string ReadFile(string fileName, bool mainPath, string extraPath);
@@ -93,13 +91,14 @@ namespace CloudStreamForms
             bool GainAudioFocus();
             void ReleaseAudioFocus();
             void CancelNot(int id);
+            bool GetPlayerInstalled(VideoPlayer player);
+            //  void PlayExternalApp(VideoPlayer player);
             string DownloadHandleIntent(int id, List<string> mirrorNames, List<string> mirrorUrls, string fileName, string titleName, bool mainPath, string extraPath, bool showNotification = true, bool showNotificationWhenDone = true, bool openWhenDone = false, string poster = "", string beforeTxt = "");
             DownloadProgressInfo GetDownloadProgressInfo(int id, string fileUrl);
             void UpdateDownload(int id, int state);
             /*  BluetoothDeviceID[] GetBluetoothDevices();
               void SearchBluetoothDevices();*/
-            void RequestVlc(List<string> urls, List<string> names, string episodeName, string episodeId, long startId = FROM_PROGRESS, string subtitleFull = "");
-
+            void RequestVlc(List<string> urls, List<string> names, string episodeName, string episodeId, long startId = FROM_PROGRESS, string subtitleFull = "", VideoPlayer preferedPlayer = VideoPlayer.VLC);
         }
 
         public enum DownloadState { Downloading, Downloaded, NotDownloaded, Paused }
@@ -164,22 +163,51 @@ namespace CloudStreamForms
             //public CloudStreamCore.Title title; 
         }
 
+        public static bool CanPlayExternalPlayer()
+        {
+            return ((VideoPlayer)Settings.PreferedVideoPlayer) != VideoPlayer.None;
+        }
+
+        public enum VideoPlayer
+        {
+            None = -1,
+            VLC = 0,
+            //MPV = 1,
+            MXPlayer = 2,
+        }
+
+        public static List<TEnum> GetEnumList<TEnum>() where TEnum : Enum
+    => ((TEnum[])Enum.GetValues(typeof(TEnum))).ToList();
+
+        public static bool GetVideoPlayerInstalled(VideoPlayer player)
+        {
+            return platformDep.GetPlayerInstalled(player);
+        }
+
+        public static string GetVideoPlayerName(VideoPlayer player)
+        {
+            return player switch
+            {
+                VideoPlayer.None => "No Videplayer",
+                VideoPlayer.VLC => "VLC",
+               // VideoPlayer.MPV => "MPV",
+                VideoPlayer.MXPlayer => "MX Player",
+                _ => "",
+            };
+        }
+
+
         public static string GetPathFromType(MovieType t)
         {
-            switch (t) {
-                case MovieType.Movie:
-                    return "Movies";
-                case MovieType.TVSeries:
-                    return "TVSeries";
-                case MovieType.Anime:
-                    return "Anime";
-                case MovieType.AnimeMovie:
-                    return "Movies";
-                case MovieType.YouTube:
-                    return "YouTube";
-                default:
-                    return "Error";
-            }
+            return t switch
+            {
+                MovieType.Movie => "Movies",
+                MovieType.TVSeries => "TVSeries",
+                MovieType.Anime => "Anime",
+                MovieType.AnimeMovie => "Movies",
+                MovieType.YouTube => "YouTube",
+                _ => "Error",
+            };
         }
 
         public static string ReadFile(string fileName, bool mainPath, string extraPath)
@@ -270,7 +298,12 @@ namespace CloudStreamForms
                 ((MainPage)CloudStreamCore.mainPage).Navigation.PushModalAsync(p, false);
             }
             else {
-                platformDep.RequestVlc(urls, names, episodeName, episodeId, startId, subtitleFull);
+                if ((VideoPlayer)Settings.PreferedVideoPlayer == VideoPlayer.None) { 
+                    App.ShowToast("No videoplayer installed");  
+                    return;
+                };
+
+                platformDep.RequestVlc(urls, names, episodeName, episodeId, startId, subtitleFull, (VideoPlayer)Settings.PreferedVideoPlayer);
             }
         }
 
@@ -488,23 +521,7 @@ namespace CloudStreamForms
         public static bool DeleteFile(string path)
         {
             return platformDep.DeleteFile(path);
-        }
-        public static void PlayVLCWithSingleUrl(string url, string name = "", string subtitleLoc = "", bool? overrideSelectVideo = null)
-        {
-            //PlayVlc?.Invoke(null, url);
-
-            bool useVideo = overrideSelectVideo ?? Settings.UseVideoPlayer;
-
-            if (useVideo) {
-                Page p = new VideoPage(new VideoPage.PlayVideo() { descript = "", name = "", isSingleMirror = true, episode = -1, season = -1, MirrorNames = new List<string>() { name }, MirrorUrls = new List<string>() { url }, });//SubtitlesNames = new List<string>()  new List<string>() { "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" }, new List<string>() { "Black" }, new List<string>() { });// { mainPoster = mainPoster };
-                ((MainPage)CloudStreamCore.mainPage).Navigation.PushModalAsync(p, false);
-            }
-            else {
-                platformDep.PlayVlc(url, name, subtitleLoc);
-            }
-
-            //platformDep.PlayVlc(url, name, subtitleLoc);
-        }
+        } 
 
         public static void ShowToast(string message, double duration = 2.5)
         {

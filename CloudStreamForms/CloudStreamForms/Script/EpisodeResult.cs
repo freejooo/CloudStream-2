@@ -1,6 +1,7 @@
 ﻿using CloudStreamForms.Core;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Xamarin.Forms;
 
 namespace CloudStreamForms.Models
@@ -8,6 +9,7 @@ namespace CloudStreamForms.Models
     public class EpisodeResult : ICloneable
     {
         public int Id { set; get; }
+        public string IMDBEpisodeId;
         public int Episode { set; get; } = -1;
         public int Season { set; get; } = -1;
         public string Title { set; get; }
@@ -66,13 +68,48 @@ namespace CloudStreamForms.Models
         public double Progress { set; get; }
         public long ProgressState = -2;
         public bool HasProgress { get { return Progress > 0.05; } } // OVER 5% SO YOU CAN REMOVE IT
-        public List<string> Mirros { set; get; }
-        public List<string> mirrosUrls { set; get; }
-        public List<string> subtitles { set; get; }
-        public List<string> subtitlesUrls { set; get; }
+        /*    public List<string> Mirros { set; get; }
+            public List<string> mirrosUrls { set; get; }
+            public List<string> subtitles { set; get; }
+            public List<string> subtitlesUrls { set; get; }*/
         public bool epVis { set; get; }
         // public LoadResult loadResult { set; get; }
-        public bool LoadedLinks { get { return Mirros.Count > 0; } }
+        public bool LoadedLinks {
+            get {
+                return mirrosUrls.Count > 0;
+                /*
+                var val = CloudStreamCore.GetCachedLink(IMDBEpisodeId);
+                if (val == null) return false;
+                return val.Value.links.Count > 0;*/
+            }
+        }
+
+        public List<string> mirrosUrls {
+            get {
+                return BasicLinks.Where(t => !t.isAdvancedLink).Select(t => t.baseUrl).ToList();
+            }
+        }
+
+        public List<CloudStreamCore.BasicLink> BasicLinks {
+            get {
+                var val = CloudStreamCore.GetCachedLink(IMDBEpisodeId);
+                if (val == null) return new List<CloudStreamCore.BasicLink>();
+                if (val.Value.links.Count == 0) return new List<CloudStreamCore.BasicLink>();
+                return val.Value.links.OrderBy(t => -t.priority).ToList();
+            }
+        }
+
+        public List<string> Mirros {
+            get {
+                return BasicLinks.Where(t => !t.isAdvancedLink).Select(t => t.PublicName).ToList();
+            }
+        }
+
+        public void ClearMirror()
+        {
+            CloudStreamCore.ClearCachedLink(IMDBEpisodeId);
+        }
+
         public string MainTextColor { set; get; } = "#e7e7e7";
         public string MainDarkTextColor { get; set; } = "#a4a4a4"; //"#808080";
         public string ExtraColor { get; set; } = "#a4a4a4"; //"#808080";
