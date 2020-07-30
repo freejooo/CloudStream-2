@@ -1106,36 +1106,20 @@ namespace CloudStreamForms
             try {
                 App.OnAudioFocusChanged -= HandleAudioFocus;
 
-                if (Player != null) {
-
-                    if (Player.State != VLCState.Error && Player.State != VLCState.Opening) {
-                        if (GetPlayerLenght() != -1) {
-                            string lastId = currentVideo.episodeId;
-                            if (lastId != null) {
-                                long pos = GetPlayerTime();//Last position in media when player exited
-                                if (pos > -1) {
-                                    App.SetViewPos(lastId, pos);
-                                    print("ViewHistoryTimePos SET TO: " + lastId + "|" + pos);
-                                }
-                                long dur = GetPlayerLenght();//	long	Total duration of the media
-                                if (dur > -1) {
-                                    App.SetViewDur(lastId, dur);
-                                    print("ViewHistoryTimeDur SET TO: " + lastId + "|" + dur);
-                                }
-                            }
-
+                 if(lastPlayerTime > 20 && lastPlayerLenght > 100) {
+                    string lastId = currentVideo.episodeId;
+                    if (lastId != null) {
+                        long pos = lastPlayerTime;//Last position in media when player exited
+                        if (pos > -1) {
+                            App.SetViewPos(lastId, pos);
+                            print("ViewHistoryTimePos SET TO: " + lastId + "|" + pos);
                         }
-
+                        long dur = lastPlayerLenght;//	long	Total duration of the media
+                        if (dur > -1) {
+                            App.SetViewDur(lastId, dur);
+                            print("ViewHistoryTimeDur SET TO: " + lastId + "|" + dur);
+                        }
                     }
-                    /*
-                    try {
-                        Device.BeginInvokeOnMainThread(() => {
-                            Player.Stop();
-                        });
-                    }
-                    catch (Exception _ex) {
-                        error("EDDDD::: " + _ex);
-                    }*/
                 }
                 // App.ShowStatusBar();
                 if (changeFullscreenWhenPop) {

@@ -757,6 +757,7 @@ namespace CloudStreamForms
 
         EpisodeResult UpdateLoad(EpisodeResult episodeResult)
         {
+            if (core == null) return null;
             long pos;
             long len;
             print("POST PRO ON: " + GetId(episodeResult));
@@ -1628,7 +1629,7 @@ namespace CloudStreamForms
             print("FORCE UPDATING");
             var _e = epView.MyEpisodeResultCollection.ToList();
             Device.BeginInvokeOnMainThread(() => {
-
+                if (core == null) return;
                 // if(item == null) {
                 epView.MyEpisodeResultCollection.Clear();
                 for (int i = 0; i < _e.Count; i++) {
@@ -1641,9 +1642,7 @@ namespace CloudStreamForms
                       EpisodeResult episodeResult = epView.MyEpisodeResultCollection[(int)item];
                       epView.MyEpisodeResultCollection.RemoveAt((int)item);
                       epView.MyEpisodeResultCollection.Insert((int)item, episodeResult);
-                  }*/
-
-
+                  }*/ 
             });
         }
 
