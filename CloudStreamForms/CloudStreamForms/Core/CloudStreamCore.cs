@@ -9114,8 +9114,7 @@ namespace CloudStreamForms.Core
             }
         }
 
-
-        static readonly List<string> sortingList = new List<string>() { "4k", "2160p", "googlevideo 1080p", "googlevideo 720p" ,"googlevideo hd", "upstream", "1080p", "1068", "hd", "auto", "autop", "720p", "hls", "source", "480p", "360p", "240p" };
+        static readonly List<string> sortingList = new List<string>() { "4k", "2160p", "googlevideo 1080p", "googlevideo 720p", "googlevideo hd", "upstream", "1080p", "1068", "hd", "auto", "autop", "720p", "hls", "source", "480p", "360p", "240p" };
         public static MirrorInfo[] SortToHdMirrors(List<string> mirrorsUrls, List<string> mirrorsNames)
         {
             List<MirrorInfo> mirrorInfos = new List<MirrorInfo>();

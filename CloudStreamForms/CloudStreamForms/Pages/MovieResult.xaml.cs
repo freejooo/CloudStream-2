@@ -73,6 +73,8 @@ namespace CloudStreamForms
 
         protected override bool OnBackButtonPressed()
         {
+            if (ActionPopup.isOpen) return true;
+
             Search.mainPoster = new Poster();
             /*if (lastMovie != null) {
                 if (lastMovie.Count > 1) {
@@ -83,6 +85,7 @@ namespace CloudStreamForms
             if (setKey) {
                 App.RemoveKey(App.BOOKMARK_DATA, currentMovie.title.id);
             }
+            Dispose();
             return base.OnBackButtonPressed();
 
             //     Navigation.PopModalAsync(false);
@@ -449,6 +452,7 @@ namespace CloudStreamForms
             ReloadAllBtt.Clicked += (o, e) => {
                 App.RemoveKey("CacheImdb", currentMovie.title.id);
                 App.RemoveKey("CacheMAL", currentMovie.title.id);
+                Dispose();
                 Navigation.PopModalAsync(false);
                 Search.mainPoster = new Poster();
                 PushPageFromUrlAndName(currentMovie.title.id, currentMovie.title.name);
@@ -1486,6 +1490,11 @@ namespace CloudStreamForms
             return episodeResult;
         }
 
+        void Dispose()
+        {
+            core = null;
+        }
+
 
         // ============================== PLAY VIDEO ==============================
         void PlayEpisode(EpisodeResult episodeResult, bool? overrideSelectVideo = null)
@@ -1507,10 +1516,10 @@ namespace CloudStreamForms
                     _sub = currentMovie.subtitles[0].data;
                 }
             }*/
-            if(currentMovie.subtitles == null) {
+            if (currentMovie.subtitles == null) {
                 core.activeMovie.subtitles = new List<Subtitle>();
             }
-           App.RequestVlc(episodeResult.mirrosUrls, episodeResult.Mirros, episodeResult.OgTitle, episodeResult.IMDBEpisodeId, episode: episodeResult.Episode, season: currentSeason, subtitleFull: currentMovie.subtitles.Select(t => t.data).FirstOrDefault(), descript: episodeResult.Description, overrideSelectVideo: overrideSelectVideo, startId: (int)episodeResult.ProgressState, headerId: currentMovie.title.id);// startId: FROM_PROGRESS); //  (int)episodeResult.ProgressState																																																																													  //App.PlayVLCWithSingleUrl(episodeResult.mirrosUrls, episodeResult.Mirros, currentMovie.subtitles.Select(t => t.data).ToList(), currentMovie.subtitles.Select(t => t.name).ToList(), currentMovie.title.name, episodeResult.Episode, currentSeason, overrideSelectVideo);
+            App.RequestVlc(episodeResult.mirrosUrls, episodeResult.Mirros, episodeResult.OgTitle, episodeResult.IMDBEpisodeId, episode: episodeResult.Episode, season: currentSeason, subtitleFull: currentMovie.subtitles.Select(t => t.data).FirstOrDefault(), descript: episodeResult.Description, overrideSelectVideo: overrideSelectVideo, startId: (int)episodeResult.ProgressState, headerId: currentMovie.title.id);// startId: FROM_PROGRESS); //  (int)episodeResult.ProgressState																																																																													  //App.PlayVLCWithSingleUrl(episodeResult.mirrosUrls, episodeResult.Mirros, currentMovie.subtitles.Select(t => t.data).ToList(), currentMovie.subtitles.Select(t => t.name).ToList(), currentMovie.title.name, episodeResult.Episode, currentSeason, overrideSelectVideo);
         }
 
         // ============================== FORCE UPDATE ==============================
@@ -1569,7 +1578,7 @@ namespace CloudStreamForms
 
             List<string> actions = new List<string>() { "Play in App", "Play in Browser", "Download", "Download Subtitles", "Copy Link", "Reload" }; // "Remove Link",
 
-            if(App.CanPlayExternalPlayer()) {
+            if (App.CanPlayExternalPlayer()) {
                 actions.Insert(1, "Play External App");
             }
 

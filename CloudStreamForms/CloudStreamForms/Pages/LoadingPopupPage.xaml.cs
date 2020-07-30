@@ -97,7 +97,7 @@ namespace CloudStreamForms
         {
             return base.OnDisappearingAnimationEndAsync();
         }
-
+        
         // ### Overrided methods which can prevent closing a popup page ###
 
         // Invoked when a hardware back button is pressed

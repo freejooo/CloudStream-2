@@ -307,7 +307,7 @@ namespace CloudStreamForms
         protected override bool OnBackButtonPressed()
         {
             // Return true if you don't want to close this popup page when a back button is pressed
-            return base.OnBackButtonPressed();
+            return true;// base.OnBackButtonPressed();
         }
 
         // Invoked when background is clicked
