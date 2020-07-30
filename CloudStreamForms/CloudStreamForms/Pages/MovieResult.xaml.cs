@@ -9,6 +9,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Xamarin.Essentials;
 using Xamarin.Forms;
+using Xamarin.Forms.Internals;
 using Xamarin.Forms.Xaml;
 using XamEffects;
 using static CloudStreamForms.App;
@@ -52,7 +53,7 @@ namespace CloudStreamForms
         bool isMovie = false;
         Movie currentMovie { get { return core.activeMovie; } }
         bool isDub = true;
-        bool RunningWindows { get { return DeviceInfo.Platform == DevicePlatform.UWP; } }
+        bool RunningWindows { get { return Xamarin.Essentials.DeviceInfo.Platform == DevicePlatform.UWP; } }
         string CurrentMalLink {
             get {
 
@@ -1473,7 +1474,7 @@ namespace CloudStreamForms
 
         static int currentDownloadSearchesHappening = 0;
 
-        async Task<EpisodeResult> LoadLinksForEpisode(EpisodeResult episodeResult, bool autoPlay = true, bool overrideLoaded = false)
+        async Task<EpisodeResult> LoadLinksForEpisode(EpisodeResult episodeResult, bool autoPlay = true, bool overrideLoaded = false, bool showloading = true)
         {
             if (loadingLinks) return episodeResult;
 
@@ -1486,8 +1487,12 @@ namespace CloudStreamForms
                 await Device.InvokeOnMainThreadAsync(async () => {
                     // NormalStack.IsEnabled = false;
                     loadingLinks = true;
-
-                    await ActionPopup.DisplayLoadingBar(LoadingMiliSec, "Loading Links...");
+                    if (showloading) {
+                        await ActionPopup.DisplayLoadingBar(LoadingMiliSec, "Loading Links...");
+                    }
+                    else {
+                        await Task.Delay(LoadingMiliSec);
+                    }
 
                     /*
                     UserDialogs.Instance.ShowLoading("Loading links...", MaskType.Gradient);
@@ -1522,12 +1527,19 @@ namespace CloudStreamForms
                     if (gotError) {
                         if (errorCount < maxErrorcount) {
                             errorCount++;
-                            await ActionPopup.DisplayLoadingBar(2000, "Loading More Links...");
+                            if (showloading) {
+                                await ActionPopup.DisplayLoadingBar(2000, "Loading More Links...");
+                            }
+                            else {
+                                await Task.Delay(2000);
+                            }
                             goto checkerror;
                         }
                         else {
                             episodeView.SelectedItem = null;
-                            App.ShowToast(errorEpisodeToast);
+                            if (showloading) {
+                                App.ShowToast(errorEpisodeToast);
+                            }
                         }
                     }
                 });
@@ -1543,7 +1555,7 @@ namespace CloudStreamForms
 
 
         // ============================== PLAY VIDEO ==============================
-        void PlayEpisode(EpisodeResult episodeResult, bool? overrideSelectVideo = null)
+        async void PlayEpisode(EpisodeResult episodeResult, bool? overrideSelectVideo = null)
         {
             string id = episodeResult.IMDBEpisodeId;
             if (id != "") {
@@ -1565,7 +1577,48 @@ namespace CloudStreamForms
             if (currentMovie.subtitles == null) {
                 core.activeMovie.subtitles = new List<Subtitle>();
             }
+
+            bool useVideo = overrideSelectVideo ?? Settings.UseVideoPlayer;
+            if (useVideo) {
+                if (VideoPage.isShown) {
+                    VideoPage.isShown = false;
+                    VideoPage.changeFullscreenWhenPop = false;
+                    await Navigation.PopModalAsync(false);
+                    await Task.Delay(30);
+                }
+                VideoPage.loadLinkValidForHeader = currentMovie.title.id;
+
+                VideoPage.loadLinkForNext = async (t, load) => {
+                    return await LoadLinkFrom(t, load);
+                };
+
+                VideoPage.canLoad = (t) => {
+                    return CanLoadLinkFrom(t, out int index);
+                };
+
+                VideoPage.maxEpisodeForLoading = maxEpisodes;
+            }
             App.RequestVlc(episodeResult.mirrosUrls, episodeResult.Mirros, episodeResult.OgTitle, episodeResult.IMDBEpisodeId, episode: episodeResult.Episode, season: currentSeason, subtitleFull: currentMovie.subtitles.Select(t => t.data).FirstOrDefault(), descript: episodeResult.Description, overrideSelectVideo: overrideSelectVideo, startId: (int)episodeResult.ProgressState, headerId: currentMovie.title.id);// startId: FROM_PROGRESS); //  (int)episodeResult.ProgressState																																																																													  //App.PlayVLCWithSingleUrl(episodeResult.mirrosUrls, episodeResult.Mirros, currentMovie.subtitles.Select(t => t.data).ToList(), currentMovie.subtitles.Select(t => t.name).ToList(), currentMovie.title.name, episodeResult.Episode, currentSeason, overrideSelectVideo);
+        }
+
+        public bool CanLoadLinkFrom(string id, out int index)
+        {
+            index = 0;
+            if (core == null) return false;
+            index = (epView.MyEpisodeResultCollection.Select(t => t.IMDBEpisodeId).IndexOf(id));
+            if (index == -1) return false;
+            if (epView.MyEpisodeResultCollection.Count - 1 <= index) { // NEXT EPISODE DOSENT EXIST
+                return false;
+            }
+            return true;
+        }
+
+        public async Task<string> LoadLinkFrom(string id, bool load)
+        {
+            if (!CanLoadLinkFrom(id, out int index)) return "";
+            var _ep = epView.MyEpisodeResultCollection[index + 1];
+            await LoadLinksForEpisode(_ep, load,false,load);
+            return _ep.IMDBEpisodeId;
         }
 
         // ============================== FORCE UPDATE ==============================

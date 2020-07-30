@@ -28,6 +28,22 @@ namespace CloudStreamForms
         const string LOCKED_IMAGE = "LockLocked1.png";// "wlockLocked.png";
         const string UN_LOCKED_IMAGE = "LockUnlocked1.png";//"wlockUnLocked.png";
 
+        /// <summary>
+        /// Given current imdbId respond with the next episode id after loading links
+        /// </summary>
+        /// <param name="currentEpIMDBId"></param>
+        /// <returns></returns>
+        public delegate Task<string> LoadLinkForNextEpisode(string currentEpIMDBId, bool loadLinks);
+        public delegate bool CanLoadLinks(string currentEpIMDBId);
+        public static LoadLinkForNextEpisode loadLinkForNext;
+        public static CanLoadLinks canLoad;
+
+        /// <summary>
+        /// If header is correct
+        /// </summary>
+        public static string loadLinkValidForHeader = "";
+        public static int maxEpisodeForLoading = 0;
+
         bool isPaused = false;
 
         MediaPlayer Player { get { return vvideo.MediaPlayer; } set { vvideo.MediaPlayer = value; } }
@@ -68,8 +84,8 @@ namespace CloudStreamForms
         /// <param name="time"></param>
         public void ChangeTime(double time)
         {
-            StartTxt.Text = CloudStreamCore.ConvertTimeToString((Player.Length / 1000) * time);
-            EndTxt.Text = CloudStreamCore.ConvertTimeToString(((Player.Length) / 1000) - (Player.Length / 1000) * time);
+            StartTxt.Text = CloudStreamCore.ConvertTimeToString((GetPlayerLenght() / 1000) * time);
+            EndTxt.Text = CloudStreamCore.ConvertTimeToString(((GetPlayerLenght()) / 1000) - (GetPlayerLenght() / 1000) * time);
         }
 
 
@@ -146,11 +162,11 @@ namespace CloudStreamForms
         {
             if (Player == null) return;
             if (Player.State == VLCState.Error || Player.State == VLCState.Opening) return;
-            if (Player.Length == -1) return;
-            if (!Player.IsPlaying && e) { // HANDLE GAIN AUDIO FOCUS AUTO
+            if (GetPlayerLenght() == -1) return;
+            if (!GetPlayerIsPlaying() && e) { // HANDLE GAIN AUDIO FOCUS AUTO
 
             }
-            if (Player.IsPlaying && !e) { // HANDLE LOST AUDIO FOCUS
+            if (GetPlayerIsPlaying() && !e) { // HANDLE LOST AUDIO FOCUS
                 if (Player.CanPause) {
                     Player.SetPause(true);
                 }
@@ -460,7 +476,55 @@ namespace CloudStreamForms
             }
         }
 
+        const double lazyLoadOverProcentage = 0.8; // 80% compleated before it loads links
+        bool canLazyLoadNextEpisode = false;
+        bool hasLazyLoadedNextEpisode = false;
 
+        public long GetPlayerLenght()
+        {
+            if (Player == null || !isShown) {
+                return -1;
+            }
+            else {
+                return lastPlayerLenght;// Player.Length;
+            }
+        }
+
+        bool IsNotValid()
+        {
+            return Player == null || !isShown;
+        }
+
+        public bool GetPlayerIsPlaying()
+        {
+            if (IsNotValid()) return false;
+            return Player.IsPlaying; // Player.Time;
+        }
+
+        public bool GetPlayerIsSeekable()
+        {
+            if (IsNotValid()) return false;
+            return isSeekeble; // Player.Time;
+        }
+
+        public bool GetPlayerIsPauseble()
+        {
+            if (IsNotValid()) return false;
+            return isPausable; // Player.Time;
+        }
+
+        public long GetPlayerTime()
+        {
+            if (Player == null || !isShown) {
+                return -1;
+            }
+            else {
+                return lastPlayerTime; // Player.Time;
+            }
+        }
+
+        long lastPlayerTime = 0;
+        long lastPlayerLenght = 0;
         public void PlayerTimeChanged(long time)
         {
             if (!isShown) return;
@@ -469,6 +533,18 @@ namespace CloudStreamForms
                 return;
             }
 
+            lastPlayerTime = time;
+            double pro = ((double)(time / 1000) / (double)(lastPlayerLenght / 1000));
+            if (canLazyLoadNextEpisode && !hasLazyLoadedNextEpisode) {
+                if (pro > lazyLoadOverProcentage) {
+                    hasLazyLoadedNextEpisode = true;
+                    try {
+                        loadLinkForNext?.Invoke(currentVideo.episodeId, false);
+                    }
+                    catch (Exception) {
+                    }
+                }
+            }
 
             try {
                 SubtitleLoop();
@@ -483,7 +559,7 @@ namespace CloudStreamForms
                         return;
                     }
                     if (!isShown) return;
-                    var len = Player.Length;
+                    var len = GetPlayerLenght();
 
                     double val = ((double)(time / 1000) / (double)(len / 1000));
                     ChangeTime(val);
@@ -528,6 +604,7 @@ namespace CloudStreamForms
         {
             print("DADAD LOADED VIDEO A");
             isShown = true;
+            changeFullscreenWhenPop = true;
 
             currentVideo = video;
             maxEpisodes = _maxEpisodes;
@@ -665,6 +742,7 @@ namespace CloudStreamForms
             SkipForwardImg.Source = App.GetImageSource("netflixSkipForward.png");
             SkipForwardBtt.TranslationX = TRANSLATE_START_X;
             Commands.SetTap(SkipForwardBtt, new Command(() => {
+                if (!isShown) return;
                 CurrentTap++;
                 StartFade();
                 SeekMedia(SKIPTIME);
@@ -676,6 +754,7 @@ namespace CloudStreamForms
             SkipBackImg.Source = App.GetImageSource("netflixSkipBack.png");
             SkipBackBtt.TranslationX = -TRANSLATE_START_X;
             Commands.SetTap(SkipBackBtt, new Command(() => {
+                if (!isShown) return;
                 CurrentTap++;
                 StartFade();
                 SeekMedia(-SKIPTIME);
@@ -723,6 +802,18 @@ namespace CloudStreamForms
                             }));
                             break;
                         }
+                    }
+                }
+            }
+            else {
+                if (currentVideo.headerId == loadLinkValidForHeader) {
+                    if (canLoad?.Invoke(currentVideo.episodeId) ?? false) {
+                        NextEpisodeTap.IsVisible = true;
+                        canLazyLoadNextEpisode = true;
+
+                        Commands.SetTap(NextEpisodeTap, new Command(async () => {
+                            await loadLinkForNext?.Invoke(currentVideo.episodeId, true);
+                        }));
                     }
                 }
             }
@@ -853,15 +944,25 @@ namespace CloudStreamForms
                 //   LoadingCir.IsEnabled = false;
             };
             Player.TimeChanged += (o, e) => {
-                PlayerTimeChanged(Player.Time);
+                PlayerTimeChanged(e.Time);
             };
+            Player.LengthChanged += (o, e) => {
+                lastPlayerLenght = e.Length;
+            };
+            Player.PausableChanged += (o, e) => {
+                isPausable = e.Pausable == 1;
+            };
+            Player.SeekableChanged += (o, e) => {
+                isSeekeble = e.Seekable == 1;
+            };
+
 
             Player.Buffering += (o, e) => {
                 Device.BeginInvokeOnMainThread(() => {
                     if (e.Cache == 100) {
                         try {
                             if (Player != null) {
-                                SetIsPaused(!Player.IsPlaying);
+                                SetIsPaused(!GetPlayerIsPlaying());
                                 UpdateAudioDelay(App.GetDelayAudio());
                             }
                         }
@@ -901,6 +1002,9 @@ namespace CloudStreamForms
 
             //  Player.AddSlave(MediaSlaveType.Subtitle,"") // ADD SUBTITLEs
         }
+
+        bool isPausable = false;
+        bool isSeekeble = false;
 
         void ShowNextMirror()
         {
@@ -992,9 +1096,8 @@ namespace CloudStreamForms
         }
 
 
-
         public static bool isShown = false;
-
+        public static bool changeFullscreenWhenPop = true;
         protected override void OnDisappearing()
         {
             isShown = false;
@@ -1006,15 +1109,15 @@ namespace CloudStreamForms
                 if (Player != null) {
 
                     if (Player.State != VLCState.Error && Player.State != VLCState.Opening) {
-                        if (Player.Length != -1) {
+                        if (GetPlayerLenght() != -1) {
                             string lastId = currentVideo.episodeId;
                             if (lastId != null) {
-                                long pos = Player.Time;//Last position in media when player exited
+                                long pos = GetPlayerTime();//Last position in media when player exited
                                 if (pos > -1) {
                                     App.SetViewPos(lastId, pos);
                                     print("ViewHistoryTimePos SET TO: " + lastId + "|" + pos);
                                 }
-                                long dur = Player.Length;//	long	Total duration of the media
+                                long dur = GetPlayerLenght();//	long	Total duration of the media
                                 if (dur > -1) {
                                     App.SetViewDur(lastId, dur);
                                     print("ViewHistoryTimeDur SET TO: " + lastId + "|" + dur);
@@ -1035,8 +1138,10 @@ namespace CloudStreamForms
                     }*/
                 }
                 // App.ShowStatusBar();
-                App.NormalOrientation();
-                App.ToggleRealFullScreen(false);
+                if (changeFullscreenWhenPop) {
+                    App.NormalOrientation();
+                    App.ToggleRealFullScreen(false);
+                }
                 //App.ToggleFullscreen(!Settings.HasStatusBar);
                 App.ForceUpdateVideo?.Invoke(null, EventArgs.Empty);
 
@@ -1084,15 +1189,15 @@ namespace CloudStreamForms
 
         public void Dispose()
         {
-            Thread t = new Thread(() => {
+          //  Thread t = new Thread(() => {
                 var mediaPlayer = _mediaPlayer;
                 _mediaPlayer = null;
                 mediaPlayer?.Dispose();
                 _libVLC?.Dispose();
                 _libVLC = null;
-            });
-            t.Name = "DISPOSETHREAD";
-            t.Start();
+           // });
+          //  t.Name = "DISPOSETHREAD";
+            //t.Start();
         }
         async void Hide()
         {
@@ -1104,7 +1209,7 @@ namespace CloudStreamForms
         {
             if (Player == null) return;
             if (Player.State == VLCState.Error || Player.State == VLCState.Opening) return;
-            if (Player.Length == -1) return;
+            if (GetPlayerLenght() == -1) return;
             if (!Player.CanPause && !isPaused) return;
 
             if (isPaused) { // UNPAUSE
@@ -1113,7 +1218,7 @@ namespace CloudStreamForms
 
             //Player.SetPause(true);
             if (!dragingVideo) {
-                if (Player.IsPlaying) {
+                if (GetPlayerIsPlaying()) {
                     Player.SetPause(true);
                 }
                 else {
@@ -1138,8 +1243,8 @@ namespace CloudStreamForms
             CurrentTap++;
             if (Player == null) return;
             if (Player.State == VLCState.Error || Player.State == VLCState.Opening) return;
-            if (Player.Length == -1) return;
-            if (!Player.IsSeekable) return;
+            if (GetPlayerLenght() == -1) return;
+            if (!GetPlayerIsSeekable()) return;
             if (!Player.CanPause) return;
 
             Player.SetPause(true);
@@ -1154,10 +1259,10 @@ namespace CloudStreamForms
             try {
                 if (Player == null) return;
                 if (Player.State == VLCState.Error || Player.State == VLCState.Opening) return;
-                if (!Player.IsSeekable) return;
-                if (Player.Length == -1) return;
+                if (!GetPlayerIsSeekable()) return;
+                if (GetPlayerLenght() == -1) return;
 
-                long len = (long)(VideoSlider.Value * Player.Length);
+                long len = (long)(VideoSlider.Value * GetPlayerLenght());
                 Player.Time = len;
                 //SeekSubtitles(len);
 
@@ -1178,14 +1283,15 @@ namespace CloudStreamForms
 
         private void VideoSlider_ValueChanged(object sender, ValueChangedEventArgs e)
         {
+            if (!isShown) return;
             if (Player == null) return;
             if (Player.State == VLCState.Error || Player.State == VLCState.Opening) return;
-            if (!Player.IsSeekable) return;
-            if (Player.Length == -1) return;
+            if (!GetPlayerIsSeekable()) return;
+            if (GetPlayerLenght() == -1) return;
 
             ChangeTime(e.NewValue);
             if (dragingVideo) {
-                long timeChange = (long)(VideoSlider.Value * Player.Length) - Player.Time;
+                long timeChange = (long)(VideoSlider.Value * GetPlayerLenght()) - GetPlayerTime();
                 CurrentTap++;
                 SlideChangedLabel.TranslationX = ((e.NewValue - 0.5)) * (VideoSlider.Width - 30);
 
@@ -1193,7 +1299,7 @@ namespace CloudStreamForms
 
                 string before = ((Math.Abs(timeChange) < 1000) ? "" : timeChange > 0 ? "+" : "-") + ConvertTimeToString(Math.Abs(timeChange / 1000)); //+ (int)time.Seconds + "s";
 
-                SkiptimeLabel.Text = $"[{ConvertTimeToString(VideoSlider.Value * Player.Length / 1000)}]";
+                SkiptimeLabel.Text = $"[{ConvertTimeToString(VideoSlider.Value * GetPlayerLenght() / 1000)}]";
                 SlideChangedLabel.Text = before;//CloudStreamCore.ConvertTimeToString((timeChange / 1000.0));
             }
         }
@@ -1346,13 +1452,19 @@ namespace CloudStreamForms
 
         private void TouchEffect_TouchAction(object sender, TouchTracking.TouchActionEventArgs args)
         {
+            if (!isShown) return;
             print("TOUCH ACCTION0");
-
             bool lockActionOnly = false;
 
             void CheckLock()
             {
                 if (Player == null) {
+                    lockActionOnly = true; return;
+                }
+                else if (GetPlayerTime() == -1) {
+                    lockActionOnly = true; return;
+                }
+                else if (GetPlayerLenght() == -1) {
                     lockActionOnly = true; return;
                 }
                 else if (Player.State == VLCState.Error) {
@@ -1361,10 +1473,7 @@ namespace CloudStreamForms
                 else if (Player.State == VLCState.Opening) {
                     lockActionOnly = true; return;
                 }
-                else if (Player.Length == -1) {
-                    lockActionOnly = true; return;
-                }
-                else if (!Player.IsSeekable) {
+                else if (!GetPlayerIsSeekable()) {
                     lockActionOnly = true; return;
                 }
             }
@@ -1383,6 +1492,9 @@ namespace CloudStreamForms
             else if (args.Type == TouchTracking.TouchActionType.Cancelled || args.Type == TouchTracking.TouchActionType.Exited || args.Type == TouchTracking.TouchActionType.Released) {
                 StartFade();
             }
+
+            if (!isShown) return;
+
 
             // ========================================== LOCKED LOGIC ==========================================
             if (isLocked || lockActionOnly) {
@@ -1403,7 +1515,12 @@ namespace CloudStreamForms
                 return;
             };
 
+            CheckLock();
             if (lockActionOnly) return;
+
+            long playerTime = GetPlayerTime();
+            long playerLenght = GetPlayerLenght();
+            if (!isShown) return;
 
             // ========================================== NORMAL LOGIC ==========================================
             if (args.Type == TouchTracking.TouchActionType.Pressed) {
@@ -1426,7 +1543,7 @@ namespace CloudStreamForms
 
                 startCursorPosition = args.Location;
                 isMovingFromLeftSide = (TapRec.Width / 2.0 > args.Location.X);
-                isMovingStartTime = Player.Time;
+                isMovingStartTime = playerTime;
                 isMovingSkipTime = 0;
                 isMovingCursor = false;
                 cursorPosition = args.Location;
@@ -1443,10 +1560,10 @@ namespace CloudStreamForms
                 else if (isMovingCursor) { // DRAGINS SKIPING TIME
                     if (isMovingHorozontal) {
                         double diffX = (args.Location.X - startCursorPosition.X) * 2.0 / TapRec.Width;
-                        isMovingSkipTime = (long)((Player.Length * (diffX * diffX) / 10) * (diffX < 0 ? -1 : 1)); // EXPONENTIAL SKIP LIKE VLC
+                        isMovingSkipTime = (long)((playerLenght * (diffX * diffX) / 10) * (diffX < 0 ? -1 : 1)); // EXPONENTIAL SKIP LIKE VLC
 
-                        if (isMovingSkipTime + isMovingStartTime > Player.Length) { // SKIP TO END
-                            isMovingSkipTime = Player.Length - isMovingStartTime;
+                        if (isMovingSkipTime + isMovingStartTime > playerLenght) { // SKIP TO END
+                            isMovingSkipTime = playerLenght - isMovingStartTime;
                         }
                         else if (isMovingSkipTime + isMovingStartTime < 0) { // SKIP TO FRONT
                             isMovingSkipTime = -isMovingStartTime;
@@ -1475,7 +1592,9 @@ namespace CloudStreamForms
             else if (args.Type == TouchTracking.TouchActionType.Released) {
                 if (isMovingCursor && isMovingHorozontal && Math.Abs(isMovingSkipTime) > 1000) { // SKIP TIME
                     FadeEverything(true);
-                    SeekMedia(isMovingSkipTime - Player.Time + isMovingStartTime);
+                    if (Player != null) {
+                        SeekMedia(isMovingSkipTime - playerTime + isMovingStartTime);
+                    }
                 }
                 else {
                     SkiptimeLabel.Text = "";
@@ -1491,12 +1610,13 @@ namespace CloudStreamForms
 
         void SeekMedia(long ms)
         {
+            if (!isShown) return;
             try {
                 if (Player == null) return;
                 if (Player.State == VLCState.Error) return;
                 if (Player.State == VLCState.Opening) return;
-                if (Player.Length == -1) return;
-                if (!Player.IsSeekable) return;
+                if (GetPlayerLenght() == -1) return;
+                if (!GetPlayerIsSeekable()) return;
             }
             catch (Exception _ex) {
                 print("ERRORIN TOUCH: " + _ex);
@@ -1504,7 +1624,7 @@ namespace CloudStreamForms
             }
 
             print("SEEK MEDIA to " + ms);
-            var newTime = Player.Time + ms;
+            var newTime = GetPlayerTime() + ms;
             Player.Time = newTime;
 
             // SeekSubtitles(newTime);
