@@ -72,7 +72,7 @@ namespace CloudStreamForms
             };
             CancelButtonBtt.Clicked += (o, e) => {
                 cancel = true;
-                Done("");
+                Done(IsNumber ? "" : "Cancel");
             };
 
             InputF.ReturnType = ReturnType.Done;
@@ -160,7 +160,7 @@ namespace CloudStreamForms
                 if (InputType == InputPopupResult.decimalNumber || InputType == InputPopupResult.integrerNumber) {
                     return "-1";
                 }
-                else return "";
+                else return "Cancel";
             }
             if (IsNumber && text == "") {
                 return "-1";

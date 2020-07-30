@@ -536,7 +536,7 @@ namespace CloudStreamForms
                 if (action == "Export data" || action == "Export Everything") {
                     string subaction = await ActionPopup.DisplayEntry(InputPopupPage.InputPopupResult.password, "Password", "Encrypt data", autoPaste: false, confirmText: "Encrypt");
                     
-                    if (subaction != "") {
+                    if (subaction != "Cancel") {
                         string text = Script.SyncWrapper.GenerateTextFile(action == "Export Everything");
                         if (subaction != "") {
                             text = CloudStreamForms.Cryptography.StringCipher.Encrypt(text, subaction);
