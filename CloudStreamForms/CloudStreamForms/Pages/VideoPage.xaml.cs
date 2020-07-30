@@ -183,16 +183,13 @@ namespace CloudStreamForms
                 EpisodeLabel.Text = CurrentDisplayName;
                 //  System.IO.File.Open(currentVideo.downloadFileUrl, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite);
 
-
                 disMedia = new Media(_libVLC, currentVideo.downloadFileUrl, FromType.FromPath);//new Uri(currentVideo.downloadFileUrl, UriKind.Absolute)); // currentVideo.downloadFileUrl, FromType.FromPath,);
                                                                                                // disMedia.AddOption(new MediaConfiguration() { })
-
                 bool succ = vvideo.MediaPlayer.Play(disMedia);
                 return;
             }
             if (lastUrl == AllMirrorsUrls[mirror]) return;
-
-
+             
             currentMirrorId = mirror;
 
             print("MIRROR SELECTED : " + CurrentMirrorUrl);
@@ -202,8 +199,13 @@ namespace CloudStreamForms
             }
             else {
                 Device.BeginInvokeOnMainThread(() => {
-                    EpisodeLabel.Text = CurrentDisplayName;
-                    App.ToggleRealFullScreen(true);
+                    try {
+                        EpisodeLabel.Text = CurrentDisplayName;
+                        App.ToggleRealFullScreen(true);
+                    }
+                    catch (Exception) {
+                         
+                    } 
                 });
 
                 bool Completed = ExecuteWithTimeLimit(TimeSpan.FromMilliseconds(1000), () => {
@@ -211,8 +213,10 @@ namespace CloudStreamForms
                         print("PLAY MEDIA " + CurrentMirrorUrl);
                         disMedia = new Media(_libVLC, CurrentMirrorUrl, FromType.FromLocation);
                         lastUrl = CurrentMirrorUrl;
+
+                        if (!isShown) return;
+                        if (Player == null) return;
                         bool succ = vvideo.MediaPlayer.Play(disMedia);
-                        print("SUCC:::: " + succ);
 
                         if (!succ) {
                             ErrorWhenLoading();
@@ -476,10 +480,10 @@ namespace CloudStreamForms
             }
         }
 
-        const double lazyLoadOverProcentage = 0.8; // 80% compleated before it loads links
+        const double lazyLoadOverProcentage = 0.70; // 70% compleated before it loads links
         bool canLazyLoadNextEpisode = false;
         bool hasLazyLoadedNextEpisode = false;
-
+        bool hasLazyLoadSettingTurnedOn = Settings.LazyLoadNextLink;
         public long GetPlayerLenght()
         {
             if (Player == null || !isShown) {
@@ -535,7 +539,7 @@ namespace CloudStreamForms
 
             lastPlayerTime = time;
             double pro = ((double)(time / 1000) / (double)(lastPlayerLenght / 1000));
-            if (canLazyLoadNextEpisode && !hasLazyLoadedNextEpisode) {
+            if (canLazyLoadNextEpisode && !hasLazyLoadedNextEpisode && hasLazyLoadSettingTurnedOn) {
                 if (pro > lazyLoadOverProcentage) {
                     hasLazyLoadedNextEpisode = true;
                     try {
@@ -594,6 +598,8 @@ namespace CloudStreamForms
         Label[] font1;
         Label[] font2;
 
+        bool canStart = true;
+
         /// <summary>
         /// Subtitles are in full
         /// </summary>
@@ -602,6 +608,11 @@ namespace CloudStreamForms
         /// <param name="subtitles"></param>
         public VideoPage(PlayVideo video, int _maxEpisodes = 1)
         {
+            if(!canStart) {
+                return;
+            }
+            canStart = false;
+
             print("DADAD LOADED VIDEO A");
             isShown = true;
             changeFullscreenWhenPop = true;
@@ -1093,14 +1104,14 @@ namespace CloudStreamForms
                 }
                 visible = !visible;
             }*/
-        }
-
+        } 
 
         public static bool isShown = false;
         public static bool changeFullscreenWhenPop = true;
         protected override void OnDisappearing()
         {
             isShown = false;
+            canStart = true;
 
             print("ONDIS:::::::");
             try {

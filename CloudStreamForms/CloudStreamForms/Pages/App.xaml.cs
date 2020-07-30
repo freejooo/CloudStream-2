@@ -12,6 +12,7 @@ using System.Runtime.Serialization.Formatters.Binary;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using Xamarin.Essentials;
 using Xamarin.Forms;
 using static CloudStreamForms.Core.CloudStreamCore;
@@ -259,13 +260,14 @@ namespace CloudStreamForms
         public const int FROM_START = -1;
         public const int FROM_PROGRESS = -2;
 
-        public static void RequestVlc(string url, string name, string episodeName = null, string episodeId = "", int startId = FROM_PROGRESS, string subtitleFull = "", int episode = -1, int season = -1, string descript = "", bool? overrideSelectVideo = null, string headerId = "")
+        public static async Task RequestVlc(string url, string name, string episodeName = null, string episodeId = "", int startId = FROM_PROGRESS, string subtitleFull = "", int episode = -1, int season = -1, string descript = "", bool? overrideSelectVideo = null, string headerId = "")
         {
-            RequestVlc(new List<string>() { url }, new List<string>() { name }, episodeName ?? name, episodeId, startId, subtitleFull, episode, season, descript, overrideSelectVideo, headerId);
+            await RequestVlc(new List<string>() { url }, new List<string>() { name }, episodeName ?? "", episodeId, startId, subtitleFull, episode, season, descript, overrideSelectVideo, headerId);
         }
 
         public static EventHandler ForceUpdateVideo;
 
+        public static bool isRequestingVLC = false;
 
         /// <summary>
         /// More advanced VLC launch, note subtitles seams to not work on android; can open in 
@@ -276,8 +278,10 @@ namespace CloudStreamForms
         /// <param name="episodeId">id for key of lenght seen</param>
         /// <param name="startId">FROM_START, FROM_PROGRESS or time in ms</param>
         /// <param name="subtitleFull">Leave emty for no subtitles, full subtitle text as seen in a regular .srt</param>
-        public static void RequestVlc(List<string> urls, List<string> names, string episodeName, string episodeId, long startId = FROM_PROGRESS, string subtitleFull = "", int episode = -1, int season = -1, string descript = "", bool? overrideSelectVideo = null, string headerId = "")
+        public static async Task RequestVlc(List<string> urls, List<string> names, string episodeName, string episodeId, long startId = FROM_PROGRESS, string subtitleFull = "", int episode = -1, int season = -1, string descript = "", bool? overrideSelectVideo = null, string headerId = "")
         {
+            if (isRequestingVLC) return;
+            isRequestingVLC = true;
             bool useVideo = overrideSelectVideo ?? Settings.UseVideoPlayer;
             bool subtitlesEnabled = subtitleFull != "";
             if (useVideo) {
@@ -295,7 +299,7 @@ namespace CloudStreamForms
                     episodeId = episodeId,
                     headerId = headerId,
                 });//new List<string>() { "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" }, new List<string>() { "Black" }, new List<string>() { });// { mainPoster = mainPoster };
-                ((MainPage)CloudStreamCore.mainPage).Navigation.PushModalAsync(p, false);
+                await ((MainPage)CloudStreamCore.mainPage).Navigation.PushModalAsync(p, true);
             }
             else {
                 if ((VideoPlayer)Settings.PreferedVideoPlayer == VideoPlayer.None) { 
@@ -305,6 +309,9 @@ namespace CloudStreamForms
 
                 platformDep.RequestVlc(urls, names, episodeName, episodeId, startId, subtitleFull, (VideoPlayer)Settings.PreferedVideoPlayer);
             }
+            isRequestingVLC = false;
+
+
         }
 
         public static string CensorFilename(string name, bool toLower = false)

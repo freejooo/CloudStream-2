@@ -288,6 +288,15 @@ namespace CloudStreamForms
             }
         }
 
+        public static bool LazyLoadNextLink {
+            set {
+                App.SetKey("Settings", nameof(LazyLoadNextLink), value);
+            }
+            get {
+                return App.GetKey("Settings", nameof(LazyLoadNextLink), true);
+            }
+        }
+
         public static bool Top100Enabled {
             set {
                 App.SetKey("Settings", nameof(Top100Enabled), value);
@@ -339,6 +348,7 @@ namespace CloudStreamForms
                 G_CacheData,
                 G_AniList,
                 G_Dubbed,
+                G_Lazyload,
                 G_PauseHistory,
 
                 SubtitleStyle,
@@ -387,6 +397,8 @@ namespace CloudStreamForms
             DescriptImg.Source = App.GetImageSource("outline_description_white_48dp.png");
 
             VideoImg.Source = App.GetImageSource("baseline_ondemand_video_white_48dp.png");
+            LazyLoadImg.Source = App.GetImageSource("baseline_ondemand_video_white_48dp.png");
+
             ListAniImg.Source = App.GetImageSource("animation.png");
 
             var ClearSource = App.GetImageSource("outline_delete_white_48dp.png");
@@ -436,6 +448,11 @@ namespace CloudStreamForms
             VideoToggle.Toggled += (o, e) => {
                 UseVideoPlayer = e.Value;
             };
+
+            LazyLoadToggle.Toggled += (o, e) => {
+                LazyLoadNextLink = e.Value;
+            };
+
             //  BlackBgToggle.OnChanged += (o, e) => {
             //     BlackBg = e.Value;
             //  };
@@ -665,6 +682,7 @@ namespace CloudStreamForms
                 SubLangPicker.SelectedIndex = NativeSubtitles;
                 SubStylePicker.SelectedIndex = SubtitleType;
                 SubFontPicker.SelectedIndex = GlobalFonts.IndexOf(GlobalSubtitleFont);
+                LazyLoadToggle.IsToggled = LazyLoadNextLink;
 
                 ListAniToggle.IsToggled = ListViewPopupAnimation;
                 FastListViewPopupAnimation = ListViewPopupAnimation;

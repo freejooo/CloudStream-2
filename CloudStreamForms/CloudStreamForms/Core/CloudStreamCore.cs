@@ -419,7 +419,7 @@ namespace CloudStreamForms.Core
         }
 
         [Serializable]
-        public struct Title
+        public struct Title : ICloneable
         {
             public string name;
             public string ogName;
@@ -462,6 +462,11 @@ namespace CloudStreamForms.Core
             public ReviewHolder reviews;
 
             public bool IsMovie { get { return movieType.IsMovie(); } }
+
+            public object Clone()
+            {
+                return this.MemberwiseClone();
+            }
         }
 
         [Serializable]
@@ -2339,7 +2344,6 @@ namespace CloudStreamForms.Core
                 List<VidStreamingSearchAjax> list = new List<VidStreamingSearchAjax>();
                 try {
                     string d = DownloadString($"https://vidstreaming.io/search.html?keyword={search}").Replace("\\", "");
-                    print(d);
                     const string lookFor = " <li class=\"video-block \">";
                     while (d.Contains(lookFor)) {
                         d = RemoveOne(d, lookFor);
@@ -2439,8 +2443,6 @@ namespace CloudStreamForms.Core
                     }
                 }
                 catch (Exception) {
-
-                    throw;
                 }
             }
 
@@ -4411,267 +4413,272 @@ namespace CloudStreamForms.Core
                                 try {
                                     _webRequest.BeginGetResponse(new AsyncCallback((IAsyncResult _callbackResult) => {
                                         HttpWebRequest request = (HttpWebRequest)_callbackResult.AsyncState;
-                                        HttpWebResponse response = (HttpWebResponse)request.EndGetResponse(_callbackResult);
                                         try {
-                                            using (StreamReader httpWebStreamReader = new StreamReader(response.GetResponseStream())) {
-                                                if (!GetThredActive(tempThred)) { print(":("); return; };
-                                                print("GOT RESPONSE:");
-                                                string result = httpWebStreamReader.ReadToEnd();
-                                                print("RESULT:::" + result);
-                                                try {
-                                                    if (result != "") {
+                                            HttpWebResponse response = (HttpWebResponse)request.EndGetResponse(_callbackResult);
+                                            try {
+                                                using (StreamReader httpWebStreamReader = new StreamReader(response.GetResponseStream())) {
+                                                    if (!GetThredActive(tempThred)) { print(":("); return; };
+                                                    print("GOT RESPONSE:");
+                                                    string result = httpWebStreamReader.ReadToEnd();
+                                                    print("RESULT:::" + result);
+                                                    try {
+                                                        if (result != "") {
 
-                                                        // --------------- GOT RESULT!!!!! ---------------
-
-
-                                                        // --------------- MIRROR LINKS ---------------
-                                                        string veryURL = FindHTML(result, "https:\\/\\/verystream.com\\/e\\/", "\"");
-                                                        string gunURL = "https://gounlimited.to/" + FindHTML(result, "https:\\/\\/gounlimited.to\\/", ".html") + ".html";
-                                                        string onlyURL = "https://onlystream.tv" + FindHTML(result, "https:\\/\\/onlystream.tv", "\"").Replace("\\", "");
-                                                        //string gogoStream = FindHTML(result, "https:\\/\\/" + GOMOURL, "\"");
-                                                        string upstream = FindHTML(result, "https:\\/\\/upstream.to\\/embed-", "\"");
-                                                        string mightyupload = FindHTML(result, "https:\\/\\/mightyupload.com\\/embed-", "\"");//FindHTML(result, "http:\\/\\/mightyupload.com\\/", "\"").Replace("\\/", "/");
-                                                                                                                                              //["https:\/\/upstream.to\/embed-05mzggpp3ohg.html","https:\/\/gomo.to\/vid\/eyJ0eXBlIjoidHYiLCJzIjoiMDEiLCJlIjoiMDEiLCJpbWQiOiJ0dDA5NDQ5NDciLCJfIjoiMzQyMDk0MzQzMzE4NTEzNzY0IiwidG9rZW4iOiI2NjQ0MzkifQ,,&noneemb","https:\/\/hqq.tv\/player\/embed_player.php?vid=SGVsWVI5aUNlVTZxTTdTV09RY0x6UT09&autoplay=no",""]
-
-                                                        if (upstream != "") {
-                                                            string _d = DownloadString("https://upstream.to/embed-" + upstream);
-                                                            if (!GetThredActive(tempThred)) { return; };
-                                                            const string lookFor = "file:\"";
-                                                            int prio = 16;
-                                                            while (_d.Contains(lookFor)) {
-                                                                prio--;
-                                                                string ur = FindHTML(_d, lookFor, "\"");
-                                                                _d = RemoveOne(_d, lookFor);
-                                                                string label = FindHTML(_d, "label:\"", "\"");
-                                                                AddPotentialLink(episode, ur, "HD Upstream", prio, label);
-                                                            }
-                                                        }
-
-                                                        /*
-                                                        if (mightyupload != "") {
-                                                            print("MIGHT: " + mightyupload);
-                                                            string baseUri = "http://mightyupload.com/embed-" + mightyupload;
-                                                            //string _d = DownloadString("http://mightyupload.com/" + mightyupload);
-                                                            string post = "op=download1&usr_login=&id=" + (mightyupload.Replace(".html", "")) + "&fname=" + (mightyupload.Replace(".html", "") + "_play.mp4") + "&referer=&method_free=Free+Download+%3E%3E";
-
-                                                            string _d = PostRequest(baseUri, baseUri, post, tempThred);//op=download1&usr_login=&id=k9on84m2bvr9&fname=tt0371746_play.mp4&referer=&method_free=Free+Download+%3E%3E
-                                                            print("RESMIGHT:" + _d);
-                                                            if (!GetThredActive(tempThred)) { return; };
-                                                            string ur = FindHTML(_d, "<source src=\"", "\"");
-                                                            AddPotentialLink(episode, ur, "HD MightyUpload", 16);
-                                                        }*/
-                                                        /*
-                                                        if (gogoStream.EndsWith(",&noneemb")) {
-                                                            result = RemoveOne(result, ",&noneemb");
-                                                            gogoStream = FindHTML(result, "https:\\/\\/" + GOMOURL, "\"");
-                                                        }
+                                                            // --------------- GOT RESULT!!!!! ---------------
 
 
-                                                        gogoStream = gogoStream.Replace(",,&noneemb", "").Replace("\\", "");
+                                                            // --------------- MIRROR LINKS ---------------
+                                                            string veryURL = FindHTML(result, "https:\\/\\/verystream.com\\/e\\/", "\"");
+                                                            string gunURL = "https://gounlimited.to/" + FindHTML(result, "https:\\/\\/gounlimited.to\\/", ".html") + ".html";
+                                                            string onlyURL = "https://onlystream.tv" + FindHTML(result, "https:\\/\\/onlystream.tv", "\"").Replace("\\", "");
+                                                            //string gogoStream = FindHTML(result, "https:\\/\\/" + GOMOURL, "\"");
+                                                            string upstream = FindHTML(result, "https:\\/\\/upstream.to\\/embed-", "\"");
+                                                            string mightyupload = FindHTML(result, "https:\\/\\/mightyupload.com\\/embed-", "\"");//FindHTML(result, "http:\\/\\/mightyupload.com\\/", "\"").Replace("\\/", "/");
+                                                                                                                                                  //["https:\/\/upstream.to\/embed-05mzggpp3ohg.html","https:\/\/gomo.to\/vid\/eyJ0eXBlIjoidHYiLCJzIjoiMDEiLCJlIjoiMDEiLCJpbWQiOiJ0dDA5NDQ5NDciLCJfIjoiMzQyMDk0MzQzMzE4NTEzNzY0IiwidG9rZW4iOiI2NjQ0MzkifQ,,&noneemb","https:\/\/hqq.tv\/player\/embed_player.php?vid=SGVsWVI5aUNlVTZxTTdTV09RY0x6UT09&autoplay=no",""]
 
-                                                        */
-
-                                                        /*
-                                                        Episode ep = activeMovie.episodes[episode];
-                                                        if (ep.links == null) {
-                                                            activeMovie.episodes[episode] = new Episode() { links = new List<Link>(), date = ep.date, description = ep.description, name = ep.name, posterUrl = ep.posterUrl, rating = ep.rating, id = ep.id };
-                                                        }*/
-
-                                                        if (veryURL != "") {
-                                                            try {
+                                                            if (upstream != "") {
+                                                                string _d = DownloadString("https://upstream.to/embed-" + upstream);
                                                                 if (!GetThredActive(tempThred)) { return; };
-
-                                                                d = DownloadString("https://verystream.com/e/" + veryURL);
-                                                                if (!GetThredActive(tempThred)) { return; };
-
-                                                                // print(d);
-                                                                debug("-------------------- HD --------------------");
-                                                                url = "https://verystream.com/gettoken/" + FindHTML(d, "videolink\">", "<");
-                                                                debug(url);
-                                                                if (url != "https://verystream.com/gettoken/") {
-                                                                    /*
-                                                                    if (!LinkListContainsString(activeMovie.episodes[episode].links, url)) {
-                                                                        // print(activeMovie.episodes[episode].Progress);
-                                                                        activeMovie.episodes[episode].links.Add(new Link() { url = url, priority = 10, name = "HD Verystream" });
-                                                                        linkAdded?.Invoke(null, 1);
-                                                                    }*/
-                                                                    AddPotentialLink(episode, url, "HD Verystream", 20);
+                                                                const string lookFor = "file:\"";
+                                                                int prio = 16;
+                                                                while (_d.Contains(lookFor)) {
+                                                                    prio--;
+                                                                    string ur = FindHTML(_d, lookFor, "\"");
+                                                                    _d = RemoveOne(_d, lookFor);
+                                                                    string label = FindHTML(_d, "label:\"", "\"");
+                                                                    AddPotentialLink(episode, ur, "HD Upstream", prio, label);
                                                                 }
-
-                                                                debug("--------------------------------------------");
-                                                                debug("");
-                                                            }
-                                                            catch (System.Exception) {
-
                                                             }
 
-                                                        }
-                                                        else {
-                                                            debug("HD Verystream Link error (Read api)");
-                                                            debug("");
-                                                        }
-                                                        //   activeMovie.episodes[episode] = SetEpisodeProgress(activeMovie.episodes[episode]);
+                                                            /*
+                                                            if (mightyupload != "") {
+                                                                print("MIGHT: " + mightyupload);
+                                                                string baseUri = "http://mightyupload.com/embed-" + mightyupload;
+                                                                //string _d = DownloadString("http://mightyupload.com/" + mightyupload);
+                                                                string post = "op=download1&usr_login=&id=" + (mightyupload.Replace(".html", "")) + "&fname=" + (mightyupload.Replace(".html", "") + "_play.mp4") + "&referer=&method_free=Free+Download+%3E%3E";
 
-                                                        const string __lookFor = "https:\\/\\/gomo.to\\/vid\\/";
-                                                        while (result.Contains(__lookFor)) {
-                                                            string gogoStream = FindHTML(result, __lookFor, "\"");
-                                                            result = RemoveOne(result, __lookFor);
-                                                            if (gogoStream != "") {
-                                                                debug(gogoStream);
+                                                                string _d = PostRequest(baseUri, baseUri, post, tempThred);//op=download1&usr_login=&id=k9on84m2bvr9&fname=tt0371746_play.mp4&referer=&method_free=Free+Download+%3E%3E
+                                                                print("RESMIGHT:" + _d);
+                                                                if (!GetThredActive(tempThred)) { return; };
+                                                                string ur = FindHTML(_d, "<source src=\"", "\"");
+                                                                AddPotentialLink(episode, ur, "HD MightyUpload", 16);
+                                                            }*/
+                                                            /*
+                                                            if (gogoStream.EndsWith(",&noneemb")) {
+                                                                result = RemoveOne(result, ",&noneemb");
+                                                                gogoStream = FindHTML(result, "https:\\/\\/" + GOMOURL, "\"");
+                                                            }
+
+
+                                                            gogoStream = gogoStream.Replace(",,&noneemb", "").Replace("\\", "");
+
+                                                            */
+
+                                                            /*
+                                                            Episode ep = activeMovie.episodes[episode];
+                                                            if (ep.links == null) {
+                                                                activeMovie.episodes[episode] = new Episode() { links = new List<Link>(), date = ep.date, description = ep.description, name = ep.name, posterUrl = ep.posterUrl, rating = ep.rating, id = ep.id };
+                                                            }*/
+
+                                                            if (veryURL != "") {
                                                                 try {
                                                                     if (!GetThredActive(tempThred)) { return; };
-                                                                    string trueUrl = "https://" + GOMOURL + "/vid/" + gogoStream;
-                                                                    print(trueUrl);
-                                                                    d = DownloadString(trueUrl);
-                                                                    print("-->><<__" + d);
+
+                                                                    d = DownloadString("https://verystream.com/e/" + veryURL);
                                                                     if (!GetThredActive(tempThred)) { return; };
 
-                                                                    //print(d);
-                                                                    // print("https://gomostream.com" + gogoStream);
-                                                                    //https://v16.viduplayer.com/vxokfmpswoalavf4eqnivlo2355co6iwwgaawrhe7je3fble4vtvcgek2jha/v.mp4
+                                                                    // print(d);
                                                                     debug("-------------------- HD --------------------");
-                                                                    url = GetViduplayerUrl(d);
+                                                                    url = "https://verystream.com/gettoken/" + FindHTML(d, "videolink\">", "<");
                                                                     debug(url);
-                                                                    if (!url.EndsWith(".viduplayer.com/urlset/v.mp4") && !url.EndsWith(".viduplayer.com/vplayer/v.mp4") && !url.EndsWith(".viduplayer.com/adb/v.mp4")) {
-                                                                        /*if (!LinkListContainsString(activeMovie.episodes[episode].links, url)) {
-                                                                            //print(activeMovie.episodes[episode].Progress);
-                                                                            activeMovie.episodes[episode].links.Add(new Link() { url = url, priority = 9, name = "HD Viduplayer" });
+                                                                    if (url != "https://verystream.com/gettoken/") {
+                                                                        /*
+                                                                        if (!LinkListContainsString(activeMovie.episodes[episode].links, url)) {
+                                                                            // print(activeMovie.episodes[episode].Progress);
+                                                                            activeMovie.episodes[episode].links.Add(new Link() { url = url, priority = 10, name = "HD Verystream" });
                                                                             linkAdded?.Invoke(null, 1);
-
                                                                         }*/
-                                                                        debug("ADDED");
-                                                                        AddPotentialLink(episode, url, "HD Viduplayer", 19);
-
+                                                                        AddPotentialLink(episode, url, "HD Verystream", 20);
                                                                     }
+
                                                                     debug("--------------------------------------------");
                                                                     debug("");
                                                                 }
                                                                 catch (System.Exception) {
+
                                                                 }
 
                                                             }
                                                             else {
-                                                                debug("HD Viduplayer Link error (Read api)");
+                                                                debug("HD Verystream Link error (Read api)");
                                                                 debug("");
                                                             }
-                                                        }
+                                                            //   activeMovie.episodes[episode] = SetEpisodeProgress(activeMovie.episodes[episode]);
 
-                                                        // activeMovie.episodes[episode] = SetEpisodeProgress(activeMovie.episodes[episode]);
+                                                            const string __lookFor = "https:\\/\\/gomo.to\\/vid\\/";
+                                                            while (result.Contains(__lookFor)) {
+                                                                string gogoStream = FindHTML(result, __lookFor, "\"");
+                                                                result = RemoveOne(result, __lookFor);
+                                                                if (gogoStream != "") {
+                                                                    debug(gogoStream);
+                                                                    try {
+                                                                        if (!GetThredActive(tempThred)) { return; };
+                                                                        string trueUrl = "https://" + GOMOURL + "/vid/" + gogoStream;
+                                                                        print(trueUrl);
+                                                                        d = DownloadString(trueUrl);
+                                                                        print("-->><<__" + d);
+                                                                        if (!GetThredActive(tempThred)) { return; };
 
-                                                        if (gunURL != "https://gounlimited.to/.html" && gunURL != "" && gunURL != "https://gounlimited.to/") {
-                                                            try {
-                                                                if (!GetThredActive(tempThred)) { return; };
+                                                                        //print(d);
+                                                                        // print("https://gomostream.com" + gogoStream);
+                                                                        //https://v16.viduplayer.com/vxokfmpswoalavf4eqnivlo2355co6iwwgaawrhe7je3fble4vtvcgek2jha/v.mp4
+                                                                        debug("-------------------- HD --------------------");
+                                                                        url = GetViduplayerUrl(d);
+                                                                        debug(url);
+                                                                        if (!url.EndsWith(".viduplayer.com/urlset/v.mp4") && !url.EndsWith(".viduplayer.com/vplayer/v.mp4") && !url.EndsWith(".viduplayer.com/adb/v.mp4")) {
+                                                                            /*if (!LinkListContainsString(activeMovie.episodes[episode].links, url)) {
+                                                                                //print(activeMovie.episodes[episode].Progress);
+                                                                                activeMovie.episodes[episode].links.Add(new Link() { url = url, priority = 9, name = "HD Viduplayer" });
+                                                                                linkAdded?.Invoke(null, 1);
 
-                                                                d = DownloadString(gunURL);
-                                                                if (!GetThredActive(tempThred)) { return; };
+                                                                            }*/
+                                                                            debug("ADDED");
+                                                                            AddPotentialLink(episode, url, "HD Viduplayer", 19);
 
-                                                                string mid = FindHTML(d, "mp4|", "|");
-                                                                string server = FindHTML(d, mid + "|", "|");
-                                                                url = "https://" + server + ".gounlimited.to/" + mid + "/v.mp4";
-                                                                if (mid != "" && server != "") {
-                                                                    /*
-                                                                    if (!LinkListContainsString(activeMovie.episodes[episode].links, url)) {
-                                                                        // print(activeMovie.episodes[episode].Progress);
-
-                                                                        activeMovie.episodes[episode].links.Add(new Link() { url = url, priority = 8, name = "HD Go Unlimited" });
-                                                                        linkAdded?.Invoke(null, 1);
-
-                                                                    }*/
-                                                                    AddPotentialLink(episode, url, "HD Go Unlimited", 18);
-
-                                                                }
-                                                                debug("-------------------- HD --------------------");
-                                                                debug(url);
-
-                                                                debug("--------------------------------------------");
-                                                                debug("");
-                                                            }
-                                                            catch (System.Exception) {
-
-                                                            }
-
-                                                        }
-                                                        else {
-                                                            debug("HD Go Link error (Read api)");
-                                                            debug("");
-                                                        }
-                                                        // activeMovie.episodes[episode] = SetEpisodeProgress(activeMovie.episodes[episode]);
-
-                                                        if (onlyURL != "" && onlyURL != "https://onlystream.tv") {
-                                                            try {
-                                                                if (!GetThredActive(tempThred)) { return; };
-
-                                                                d = DownloadString(onlyURL);
-                                                                if (!GetThredActive(tempThred)) { return; };
-
-                                                                string _url = FindHTML(d, "file:\"", "\"");
-
-                                                                if (_url == "") {
-                                                                    _url = FindHTML(d, "src: \"", "\"");
-                                                                }
-
-                                                                bool valid = false;
-                                                                if (CheckIfURLIsValid(_url)) { // NEW USES JW PLAYER I THNIK, EASIER LINK EXTRACTION
-                                                                    url = _url; valid = true;
-                                                                }
-                                                                else { // OLD SYSTEM I THINK
-                                                                    string server = "";//FindHTML(d, "urlset|", "|");
-                                                                    string mid = FindHTML(d, "logo|", "|");
-
-                                                                    if (mid == "" || mid.Length < 10) {
-                                                                        mid = FindHTML(d, "mp4|", "|");
+                                                                        }
+                                                                        debug("--------------------------------------------");
+                                                                        debug("");
+                                                                    }
+                                                                    catch (System.Exception) {
                                                                     }
 
-                                                                    string prefix = FindHTML(d, "ostreamcdn|", "|");
-
-                                                                    url = "";
-                                                                    if (server != "") {
-                                                                        url = "https://" + prefix + ".ostreamcdn.com/" + server + "/" + mid + "/v/mp4"; // /index-v1-a1.m3u8 also works if you want the m3u8 file instead
-                                                                    }
-                                                                    else {
-                                                                        url = "https://" + prefix + ".ostreamcdn.com/" + mid + "/v/mp4";
-                                                                    }
-
-                                                                    if (mid != "" && prefix != "" && mid.Length > 10) {
-                                                                        valid = true;
-                                                                    }
-                                                                }
-
-                                                                if (valid) {
-                                                                    AddPotentialLink(episode, url, "HD Onlystream", 17);
                                                                 }
                                                                 else {
-                                                                    debug(d);
-                                                                    debug("FAILED URL: " + url);
+                                                                    debug("HD Viduplayer Link error (Read api)");
+                                                                    debug("");
+                                                                }
+                                                            }
+
+                                                            // activeMovie.episodes[episode] = SetEpisodeProgress(activeMovie.episodes[episode]);
+
+                                                            if (gunURL != "https://gounlimited.to/.html" && gunURL != "" && gunURL != "https://gounlimited.to/") {
+                                                                try {
+                                                                    if (!GetThredActive(tempThred)) { return; };
+
+                                                                    d = DownloadString(gunURL);
+                                                                    if (!GetThredActive(tempThred)) { return; };
+
+                                                                    string mid = FindHTML(d, "mp4|", "|");
+                                                                    string server = FindHTML(d, mid + "|", "|");
+                                                                    url = "https://" + server + ".gounlimited.to/" + mid + "/v.mp4";
+                                                                    if (mid != "" && server != "") {
+                                                                        /*
+                                                                        if (!LinkListContainsString(activeMovie.episodes[episode].links, url)) {
+                                                                            // print(activeMovie.episodes[episode].Progress);
+
+                                                                            activeMovie.episodes[episode].links.Add(new Link() { url = url, priority = 8, name = "HD Go Unlimited" });
+                                                                            linkAdded?.Invoke(null, 1);
+
+                                                                        }*/
+                                                                        AddPotentialLink(episode, url, "HD Go Unlimited", 18);
+
+                                                                    }
+                                                                    debug("-------------------- HD --------------------");
+                                                                    debug(url);
+
+                                                                    debug("--------------------------------------------");
+                                                                    debug("");
+                                                                }
+                                                                catch (System.Exception) {
+
                                                                 }
 
-                                                                debug("-------------------- HD --------------------");
-                                                                debug(url);
-
-                                                                debug("--------------------------------------------");
+                                                            }
+                                                            else {
+                                                                debug("HD Go Link error (Read api)");
                                                                 debug("");
                                                             }
-                                                            catch (System.Exception) {
+                                                            // activeMovie.episodes[episode] = SetEpisodeProgress(activeMovie.episodes[episode]);
+
+                                                            if (onlyURL != "" && onlyURL != "https://onlystream.tv") {
+                                                                try {
+                                                                    if (!GetThredActive(tempThred)) { return; };
+
+                                                                    d = DownloadString(onlyURL);
+                                                                    if (!GetThredActive(tempThred)) { return; };
+
+                                                                    string _url = FindHTML(d, "file:\"", "\"");
+
+                                                                    if (_url == "") {
+                                                                        _url = FindHTML(d, "src: \"", "\"");
+                                                                    }
+
+                                                                    bool valid = false;
+                                                                    if (CheckIfURLIsValid(_url)) { // NEW USES JW PLAYER I THNIK, EASIER LINK EXTRACTION
+                                                                        url = _url; valid = true;
+                                                                    }
+                                                                    else { // OLD SYSTEM I THINK
+                                                                        string server = "";//FindHTML(d, "urlset|", "|");
+                                                                        string mid = FindHTML(d, "logo|", "|");
+
+                                                                        if (mid == "" || mid.Length < 10) {
+                                                                            mid = FindHTML(d, "mp4|", "|");
+                                                                        }
+
+                                                                        string prefix = FindHTML(d, "ostreamcdn|", "|");
+
+                                                                        url = "";
+                                                                        if (server != "") {
+                                                                            url = "https://" + prefix + ".ostreamcdn.com/" + server + "/" + mid + "/v/mp4"; // /index-v1-a1.m3u8 also works if you want the m3u8 file instead
+                                                                        }
+                                                                        else {
+                                                                            url = "https://" + prefix + ".ostreamcdn.com/" + mid + "/v/mp4";
+                                                                        }
+
+                                                                        if (mid != "" && prefix != "" && mid.Length > 10) {
+                                                                            valid = true;
+                                                                        }
+                                                                    }
+
+                                                                    if (valid) {
+                                                                        AddPotentialLink(episode, url, "HD Onlystream", 17);
+                                                                    }
+                                                                    else {
+                                                                        debug(d);
+                                                                        debug("FAILED URL: " + url);
+                                                                    }
+
+                                                                    debug("-------------------- HD --------------------");
+                                                                    debug(url);
+
+                                                                    debug("--------------------------------------------");
+                                                                    debug("");
+                                                                }
+                                                                catch (System.Exception) {
+
+                                                                }
 
                                                             }
+                                                            else {
+                                                                debug("HD Only Link error (Read api)");
+                                                                debug("");
+                                                            }
 
+                                                            done = true;
                                                         }
                                                         else {
-                                                            debug("HD Only Link error (Read api)");
-                                                            debug("");
+                                                            done = true;
+                                                            debug("DA FAILED");
                                                         }
-
+                                                    }
+                                                    catch (Exception) {
                                                         done = true;
                                                     }
-                                                    else {
-                                                        done = true;
-                                                        debug("DA FAILED");
-                                                    }
-                                                }
-                                                catch (Exception) {
-                                                    done = true;
                                                 }
                                             }
+                                            catch (Exception _ex) {
+                                                error("FATAL EX IN TOKENPOST2:" + _ex);
+                                            } 
                                         }
                                         catch (Exception _ex) {
                                             error("FATAL EX IN TOKENPOST2:" + _ex);
@@ -6819,7 +6826,6 @@ namespace CloudStreamForms.Core
 
                     string d = DownloadString("https://www.imdb.com/title/" + activeMovie.title.id + "/trailers/");
                     if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
-                    print(d);
                     const string lookfor = "viconst=\"";
                     int index = 0;
                     while (d.Contains(lookfor)) {
@@ -6909,7 +6915,6 @@ namespace CloudStreamForms.Core
                             }
                             //<label for="byYear">Year:</label>
                         }
-                        print(d);
                         if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
 
                         int eps = 0;

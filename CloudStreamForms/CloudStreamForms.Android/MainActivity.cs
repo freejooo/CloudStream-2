@@ -1003,6 +1003,9 @@ namespace CloudStreamForms.Droid
 
             base.OnCreate(savedInstanceState);
 
+            System.AppDomain.CurrentDomain.UnhandledException += MainPage.UnhandledExceptionTrapper;
+
+
             string data = Intent?.Data?.EncodedAuthority;
 
             try {

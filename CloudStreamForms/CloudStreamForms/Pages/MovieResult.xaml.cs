@@ -653,7 +653,7 @@ namespace CloudStreamForms
         {
             if (core == null) return;
 
-            string id = GetId(episodeResult);
+            string id = episodeResult.IMDBEpisodeId;
             if (id != "") {
                 List<string> hexColors = new List<string>() { "#ffffff", LIGHT_BLUE_COLOR, "#e5e598" };
                 List<string> darkHexColors = new List<string>() { "#909090", DARK_BLUE_COLOR, "#d3c450" };
@@ -760,8 +760,8 @@ namespace CloudStreamForms
             if (core == null) return null;
             long pos;
             long len;
-            print("POST PRO ON: " + GetId(episodeResult));
-            string realId = GetId(episodeResult);
+            print("POST PRO ON: " + episodeResult.IMDBEpisodeId);
+            string realId = episodeResult.IMDBEpisodeId;
             print("ID::::::: ON " + realId + "|" + App.GetKey(VIEW_TIME_POS, realId, -1L));
             if ((pos = App.GetViewPos(realId)) > 0) {
                 if ((len = App.GetViewDur(realId)) > 0) {
@@ -773,6 +773,7 @@ namespace CloudStreamForms
             return episodeResult;
         }
 
+        static bool canTapEpisode = true;
         EpisodeResult ChangeEpisode(EpisodeResult episodeResult)
         {
             episodeResult.OgTitle = episodeResult.Title;
@@ -828,8 +829,12 @@ namespace CloudStreamForms
             }
 
             episodeResult.TapComTwo = new Command(async (s) => {
+                if (!canTapEpisode) return;
+                if (core == null) return;
+
                 int _id = GetRealIdFromId();
                 if (_id == -1) return;
+                canTapEpisode = false;
                 var epRes = epView.MyEpisodeResultCollection[_id];
                 if (epRes.downloadState == 1) {
                     PlayDownloadedEp(epRes);
@@ -837,9 +842,12 @@ namespace CloudStreamForms
                 else {
                     await LoadLinksForEpisode(epRes);
                 }
+                canTapEpisode = true;
             });
 
             episodeResult.TapCom = new Command(async (s) => {
+                if (core == null) return;
+
                 int _id = GetRealIdFromId();
                 if (_id == -1) return;
 
@@ -860,7 +868,9 @@ namespace CloudStreamForms
                 }
                 else*/
                 if (epRes.IsDownloaded || epRes.IsDownloading) {
+                    if (core == null) return;
                     string action = await ActionPopup.DisplayActionSheet(epRes.OgTitle, "Play", "Delete File"); //await DisplayActionSheet(epRes.OgTitle, "Cancel", null, "Play", "Delete File");
+                    if (core == null) return;
                     if (action == "Delete File") {
                         DeleteData();
                     }
@@ -869,57 +879,66 @@ namespace CloudStreamForms
                     }
                 }
                 else { // DOWNLOAD
+                    if (core == null) return;
                     epView.MyEpisodeResultCollection[_id].downloadState = 4; // SET IS SEARCHING
                     ForceUpdate();
                     currentDownloadSearchesHappening++;
                     CloudStreamCore coreCopy = (CloudStreamCore)core.Clone();
+                    string imdbId = episodeResult.IMDBEpisodeId;
+                    CloudStreamCore.Title titleName = (Title)currentMovie.title.Clone();
 
                     coreCopy.GetEpisodeLink(isMovie ? -1 : (episodeResult.Id + 1), currentSeason, isDub: isDub, purgeCurrentLinkThread: currentDownloadSearchesHappening > 0);
                     print("!!___" + _id);
+                    int epId = GetCorrectId(episodeResult);
+
+                    var _episodeResult = (EpisodeResult)episodeResult.Clone();
                     await Task.Delay(10000); // WAIT 10 Sec
                     try {
                         // if (!SameAsActiveMovie()) return;
 
+                        /*
                         Movie _currentMovie = coreCopy.activeMovie;
-                        print("!!___" + _id);
 
-                        epRes = epView.MyEpisodeResultCollection[_id];
 
+                        var l = 
+                        for (int i = 0; i < l.Length; i++) {
+                            print(l[i].name + "<<<<<<<LD");
+                        }*/
+                        MirrorInfo[] info = null;
                         bool hasMirrors = false;
-                        epView.MyEpisodeResultCollection[_id].downloadState = 0;
-                        if (epRes.mirrosUrls != null) {
-                            if (epRes.mirrosUrls.Count > 0) {
-                                hasMirrors = true;
+                        var baseLinks = CloudStreamCore.GetCachedLink(imdbId);
+                        if (baseLinks.HasValue) {
+                            var _links = baseLinks.Value.links.Where(t => {
+                                return !t.isAdvancedLink;
+                            }).ToList();
+                            hasMirrors = _links.Count > 0;
+
+                            List<string> mirrorUrls = new List<string>();
+                            List<string> mirrorNames = new List<string>();
+                            foreach (var link in _links) {
+                                mirrorNames.Add(link.PublicName);
+                                mirrorUrls.Add(link.baseUrl);
+                            }
+                            info = SortToHdMirrors(epRes.mirrosUrls, epRes.Mirros);
+                        }
+
+                        if (hasMirrors && info != null) {
+                            App.UpdateDownload(epId, -1);
+                            string dpath = App.RequestDownload(epId, _episodeResult.OgTitle, _episodeResult.Description, _episodeResult.Episode, currentSeason, info.Select(t => t.url).ToList(), info.Select(t => t.name).ToList(), _episodeResult.GetDownloadTitle(currentSeason, _episodeResult.Episode) + ".mp4", _episodeResult.PosterUrl, titleName, _episodeResult.IMDBEpisodeId);
+
+                            try {
                                 epView.MyEpisodeResultCollection[_id].downloadState = 2; // SET IS DOWNLOADING
                                 ForceUpdate();
-
-                                // App.ShowToast("Yeet" + epRes.mirrosUrls.Count);
-
-                                var l = SortToHdMirrors(epRes.mirrosUrls, epRes.Mirros);
-                                for (int i = 0; i < l.Length; i++) {
-                                    print(l[i].name + "<<<<<<<LD");
-                                }
-
-                                List<string> mirrorUrls = new List<string>();
-                                List<string> mirrorNames = new List<string>();
-
-                                for (int i = 0; i < l.Length; i++) {
-                                    mirrorNames.Add(l[i].name);
-                                    mirrorUrls.Add(l[i].url);
-                                }
-
-                                App.UpdateDownload(GetCorrectId(episodeResult), -1);
-                                string dpath = App.RequestDownload(GetCorrectId(episodeResult), episodeResult.OgTitle, episodeResult.Description, episodeResult.Episode, currentSeason, mirrorUrls, mirrorNames, episodeResult.GetDownloadTitle(currentSeason, episodeResult.Episode) + ".mp4", episodeResult.PosterUrl, _currentMovie.title, GetId(episodeResult, _currentMovie));
-                                print("SETCOLOR:::");
-                                //  SetColor(epView.MyEpisodeResultCollection[_id]);
-
                             }
-                            print("SET COLOOOROOROROR" + epRes.OgTitle);
-                            //await Task.Delay(1000);
-                            ForceUpdate();
+                            catch (Exception) { }
                         }
-                        if (!hasMirrors) {
-                            App.ShowToast("Download Failed");
+                        else {
+                            App.ShowToast("Download Failed, No Mirrors Found");
+                            try {
+                                epView.MyEpisodeResultCollection[_id].downloadState = 0;
+                                ForceUpdate();
+                            }
+                            catch (Exception) { }
                         }
                     }
                     catch (Exception _ex) {
@@ -932,8 +951,6 @@ namespace CloudStreamForms
 
             return episodeResult;
         }
-
-
 
         public void ClearEpisodes()
         {
@@ -987,8 +1004,6 @@ namespace CloudStreamForms
             if (fadeSeason) {
                 await SeasonBtt.FadeTo(1, FATE_TIME_MS);
             }
-
-
         }
 
         private void MovieResult_titleLoaded(object sender, Movie e)
@@ -1041,8 +1056,6 @@ namespace CloudStreamForms
                 if (e.title.description == "") {
                     DescriptionLabel.HeightRequest = 0;
                 }
-
-
 
                 // ---------------------------- SEASONS ----------------------------
 
@@ -1222,7 +1235,6 @@ namespace CloudStreamForms
                 };
                 print("episodes loaded");
 
-
                 ClearEpisodes();
                 //bool isLocalMovie = false;
                 bool isAnime = currentMovie.title.movieType == MovieType.Anime;
@@ -1275,9 +1287,6 @@ namespace CloudStreamForms
                     SetDubExist();
                 }
 
-
-
-
                 bool enabled = currentMovie.title.movieType == MovieType.Anime; //CurrentMalLink != "";
                 print("SETACTIVE::: " + enabled);
 
@@ -1293,15 +1302,12 @@ namespace CloudStreamForms
                 DubPicker.IsVisible = DubPicker.ItemsSource.Count > 0;
                 DubPicker.button.FadeTo(DubPicker.IsVisible ? 1 : 0, FATE_TIME_MS);
             });
-
         }
 
         static Dictionary<string, bool> GetLatestDub = new Dictionary<string, bool>();
 
         void SetDubExist()
         {
-
-
             print("SETDUB:::");
             print("SETDUB:::SET");
 
@@ -1554,10 +1560,14 @@ namespace CloudStreamForms
             core = null;
         }
 
+        static bool isRequestingPlayEpisode = false;
 
         // ============================== PLAY VIDEO ==============================
         async void PlayEpisode(EpisodeResult episodeResult, bool? overrideSelectVideo = null)
         {
+            if (isRequestingPlayEpisode) return;
+            isRequestingPlayEpisode = true;
+
             string id = episodeResult.IMDBEpisodeId;
             if (id != "") {
                 if (ViewHistory) {
@@ -1584,7 +1594,7 @@ namespace CloudStreamForms
                 if (VideoPage.isShown) {
                     VideoPage.isShown = false;
                     VideoPage.changeFullscreenWhenPop = false;
-                    await Navigation.PopModalAsync(false);
+                    await Navigation.PopModalAsync(true);
                     await Task.Delay(30);
                 }
                 VideoPage.loadLinkValidForHeader = currentMovie.title.id;
@@ -1599,7 +1609,8 @@ namespace CloudStreamForms
 
                 VideoPage.maxEpisodeForLoading = maxEpisodes;
             }
-            App.RequestVlc(episodeResult.mirrosUrls, episodeResult.Mirros, episodeResult.OgTitle, episodeResult.IMDBEpisodeId, episode: episodeResult.Episode, season: currentSeason, subtitleFull: currentMovie.subtitles.Select(t => t.data).FirstOrDefault(), descript: episodeResult.Description, overrideSelectVideo: overrideSelectVideo, startId: (int)episodeResult.ProgressState, headerId: currentMovie.title.id);// startId: FROM_PROGRESS); //  (int)episodeResult.ProgressState																																																																													  //App.PlayVLCWithSingleUrl(episodeResult.mirrosUrls, episodeResult.Mirros, currentMovie.subtitles.Select(t => t.data).ToList(), currentMovie.subtitles.Select(t => t.name).ToList(), currentMovie.title.name, episodeResult.Episode, currentSeason, overrideSelectVideo);
+            await App.RequestVlc(episodeResult.mirrosUrls, episodeResult.Mirros, episodeResult.OgTitle, episodeResult.IMDBEpisodeId, episode: episodeResult.Episode, season: currentSeason, subtitleFull: currentMovie.subtitles.Select(t => t.data).FirstOrDefault(), descript: episodeResult.Description, overrideSelectVideo: overrideSelectVideo, startId: (int)episodeResult.ProgressState, headerId: currentMovie.title.id);// startId: FROM_PROGRESS); //  (int)episodeResult.ProgressState																																																																													  //App.PlayVLCWithSingleUrl(episodeResult.mirrosUrls, episodeResult.Mirros, currentMovie.subtitles.Select(t => t.data).ToList(), currentMovie.subtitles.Select(t => t.name).ToList(), currentMovie.title.name, episodeResult.Episode, currentSeason, overrideSelectVideo);
+            isRequestingPlayEpisode = false;
         }
 
         public bool CanLoadLinkFrom(string id, out int index)
@@ -1618,7 +1629,7 @@ namespace CloudStreamForms
         {
             if (!CanLoadLinkFrom(id, out int index)) return "";
             var _ep = epView.MyEpisodeResultCollection[index + 1];
-            await LoadLinksForEpisode(_ep, load,false,load);
+            await LoadLinksForEpisode(_ep, load, false, load);
             return _ep.IMDBEpisodeId;
         }
 
@@ -1642,14 +1653,16 @@ namespace CloudStreamForms
                       EpisodeResult episodeResult = epView.MyEpisodeResultCollection[(int)item];
                       epView.MyEpisodeResultCollection.RemoveAt((int)item);
                       epView.MyEpisodeResultCollection.Insert((int)item, episodeResult);
-                  }*/ 
+                  }*/
             });
         }
 
         // public string ChromeColor { set; get; }//{ get { return (MainChrome.IsPendingConnection || MainChrome.IsCastingVideo) ? "#303F9F" : "#ffffff"; } set { } }
 
-        async void EpisodeSettings(EpisodeResult episodeResult)
+        async Task EpisodeSettings(EpisodeResult episodeResult)
         {
+            if (loadingLinks) return;
+
             print("EPDATA:::" + episodeResult.OgTitle + "|" + episodeResult.Episode);
             if (!episodeResult.LoadedLinks) {
                 try {
@@ -1785,7 +1798,7 @@ namespace CloudStreamForms
                                     App.UpdateDownload(GetCorrectId(episodeResult), -1);
                                     print("CURRENTSESON: " + currentSeason);
 
-                                    string dpath = App.RequestDownload(GetCorrectId(episodeResult), episodeResult.OgTitle, episodeResult.Description, episodeResult.Episode, currentSeason, new List<string>() { mirrorUrl }, new List<string>() { mirrorName }, episodeResult.GetDownloadTitle(currentSeason, episodeResult.Episode) + ".mp4", episodeResult.PosterUrl, currentMovie.title, GetId(episodeResult, currentMovie));
+                                    string dpath = App.RequestDownload(GetCorrectId(episodeResult), episodeResult.OgTitle, episodeResult.Description, episodeResult.Episode, currentSeason, new List<string>() { mirrorUrl }, new List<string>() { mirrorName }, episodeResult.GetDownloadTitle(currentSeason, episodeResult.Episode) + ".mp4", episodeResult.PosterUrl, currentMovie.title, episodeResult.IMDBEpisodeId);
 
                                     App.ShowToast("Download Started - " + fileSize + "MB");
                                     episodeResult.downloadState = 2;
@@ -1837,7 +1850,7 @@ namespace CloudStreamForms
 
         static void DownloadSubtitlesToFileLocation(EpisodeResult episodeResult, Movie currentMovie, int currentSeason, bool renew = false, bool showToast = true)
         {
-            string id = GetId(episodeResult, currentMovie);
+            string id = episodeResult.IMDBEpisodeId;
             if (!renew && hasSubtitles.ContainsKey(id)) {
                 if (showToast) {
                     App.ShowToast("Subtitles Already Downloaded");
@@ -1870,14 +1883,15 @@ namespace CloudStreamForms
                         if (showToast) {
                             App.ShowToast("Subtitles Downloaded");
                         }
-                        hasSubtitles.Add(id, true);
+                        if (!hasSubtitles.ContainsKey(id)) {
+                            hasSubtitles.Add(id, true);
+                        }
                     }
                 }
                 finally {
                     mainCore.JoinThred(tempThred);
                 }
             });
-
         }
 
         void DeleteFile(string downloadKeyData, EpisodeResult episodeResult)
@@ -1930,7 +1944,7 @@ namespace CloudStreamForms
 
         public void SetEpisode(EpisodeResult episodeResult)
         {
-            string id = GetId(episodeResult);
+            string id = episodeResult.IMDBEpisodeId;
             SetEpisode(id);
             SetColor(episodeResult);
             ForceUpdate(episodeResult.Id);
@@ -1943,7 +1957,7 @@ namespace CloudStreamForms
 
         void ToggleEpisode(EpisodeResult episodeResult)
         {
-            string id = GetId(episodeResult);
+            string id = episodeResult.IMDBEpisodeId;
             ToggleEpisode(id);
             SetColor(episodeResult);
             ForceUpdate(episodeResult.Id);
@@ -1974,8 +1988,10 @@ namespace CloudStreamForms
           }*/
 
         // ============================== SHOW SETTINGS OF VIDEO ==============================
-        private void ViewCell_Tapped(object sender, EventArgs e)
+        private async void ViewCell_Tapped(object sender, EventArgs e)
         {
+            if (!canTapEpisode) return;
+            canTapEpisode = false;
             EpisodeResult episodeResult = ((EpisodeResult)(((ViewCell)sender).BindingContext));
 
             if (toggleViewState) {
@@ -1983,8 +1999,9 @@ namespace CloudStreamForms
                 episodeView.SelectedItem = null;
             }
             else {
-                EpisodeSettings(episodeResult);
+                await EpisodeSettings(episodeResult);
             }
+            canTapEpisode = true;
         }
 
 

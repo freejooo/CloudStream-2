@@ -135,10 +135,10 @@
                                     <ColumnDefinition Width="*" />
                                     <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
-                                <Label Grid.Row="0" Grid.Column="0"  x:Name="StartTxt" Text="00:00" HorizontalOptions="Start" TextColor="White" VerticalOptions="Center" WidthRequest="50"></Label>
+                                <Label Grid.Row="0" Grid.Column="0"  x:Name="StartTxt" Text="00:00" HorizontalOptions="End" TextColor="White" VerticalOptions="Center" WidthRequest="60" MinimumWidthRequest="60"></Label>
 
                                 <Slider VerticalOptions="Center" x:Name="VideoSlider" BackgroundColor="Transparent" Grid.Column="1" ClassId="big" MinimumTrackColor="#617EFF" ThumbColor="#617EFF" HorizontalOptions="Fill" Margin="0,0,0,0" Maximum="1" DragStarted="VideoSlider_DragStarted" DragCompleted="VideoSlider_DragCompleted" ValueChanged="VideoSlider_ValueChanged" HeightRequest="40"></Slider>
-                                <Label VerticalOptions="Center" Grid.Row="0" Grid.Column="2" x:Name="EndTxt" Text="00:00" HorizontalOptions="End" TextColor="White" WidthRequest="50"></Label>
+                                <Label VerticalOptions="Center" Grid.Row="0" Grid.Column="2" x:Name="EndTxt" Text="00:00" HorizontalOptions="Start" TextColor="White" WidthRequest="60" MinimumWidthRequest="60"></Label>
                             </Grid>
                             <Grid x:Name="VideoSettings" VerticalOptions="End" HorizontalOptions="Center" Grid.Row="2" TranslationY="20" ColumnSpacing="20" TranslationX="20" >
                                 <Grid.ColumnDefinitions >

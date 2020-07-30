@@ -290,7 +290,7 @@ namespace CloudStreamForms
             return new ChromeCastPage(new ChromecastData() {
                 descript = episodeResult.Description,
                 episode = episodeResult.Episode,
-                episodeId = MovieResult.GetId(episodeResult, movie),
+                episodeId = episodeResult.IMDBEpisodeId,
                 episodePosterUrl = episodeResult.PosterUrl,
                 episodeTitleName = episodeResult.OgTitle,
                 hdPosterUrl = movie.title.hdPosterUrl,
