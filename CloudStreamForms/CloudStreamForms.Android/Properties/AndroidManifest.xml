@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android" android:versionCode="24" android:versionName="1.8.1" package="com.CloudStreamForms.CloudStreamForms" android:installLocation="auto">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" android:versionCode="25" android:versionName="1.8.2" package="com.CloudStreamForms.CloudStreamForms" android:installLocation="auto">
 	<uses-sdk android:minSdkVersion="21" android:targetSdkVersion="28" />
 	<application android:label="CloudStream 2" android:icon="@drawable/bicon"></application>
 	<uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
@@ -9,7 +9,6 @@
 	<uses-permission android:name="android.permission.WRITE_SETTINGS" />
 	<uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
 	<application android:usesCleartextTraffic="false">
-		
 		<!--<provider android:name="android.support.v4.content.FileProvider" android:authorities="${applicationId}.provider" android:exported="false" android:grantUriPermissions="true">
 			<meta-data android:name="android.support.FILE_PROVIDER_PATHS" android:resource="@xml/provider_paths" />
 		</provider>-->

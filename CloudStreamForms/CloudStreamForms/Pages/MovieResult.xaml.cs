@@ -741,6 +741,7 @@ namespace CloudStreamForms
                 // await Task.Delay(30);
                 epView.MyEpisodeResultCollection.Add(epView.AllEpisodes[i]);
             }
+            ForceUpdate();
             await Task.Delay(100);
             await FadeEpisodes.FadeTo(1);
 
@@ -1301,6 +1302,7 @@ namespace CloudStreamForms
                 DubPicker.button.Opacity = 0;
                 DubPicker.IsVisible = DubPicker.ItemsSource.Count > 0;
                 DubPicker.button.FadeTo(DubPicker.IsVisible ? 1 : 0, FATE_TIME_MS);
+                ForceUpdate();
             });
         }
 
