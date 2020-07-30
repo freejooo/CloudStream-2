@@ -808,7 +808,7 @@ namespace CloudStreamForms
                             NextEpisodeTap.IsVisible = true;
 
                             Commands.SetTap(NextEpisodeTap, new Command(async () => {
-                                await Navigation.PopModalAsync();
+                                await Navigation.PopModalAsync(true);
                                 Download.PlayDownloadedFile(info, false);
                             }));
                             break;

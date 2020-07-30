@@ -574,7 +574,7 @@ namespace CloudStreamForms
                 episodeId = episodeId,
                 headerId = headerId,
             });//new List<string>() { "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" }, new List<string>() { "Black" }, new List<string>() { });// { mainPoster = mainPoster };
-            ((MainPage)CloudStreamCore.mainPage).Navigation.PushModalAsync(p, false);
+            ((MainPage)CloudStreamCore.mainPage).Navigation.PushModalAsync(p, true);
         }
 
         public static void PlayVLCFile(string file, string name, string episodeId, bool startFromSaved = true)

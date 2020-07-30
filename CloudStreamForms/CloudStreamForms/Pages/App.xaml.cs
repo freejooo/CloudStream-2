@@ -105,6 +105,8 @@ namespace CloudStreamForms
         public enum DownloadState { Downloading, Downloaded, NotDownloaded, Paused }
         public enum DownloadType { Normal = 0, YouTube = 1 }
 
+        public static EventHandler OnSomeDownloadFinished;
+
         [System.Serializable]
         public class DownloadInfo
         {

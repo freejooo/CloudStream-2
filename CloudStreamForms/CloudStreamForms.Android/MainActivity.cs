@@ -42,10 +42,10 @@ using AudioTrack = Android.Media.AudioTrack;
 
 namespace CloudStreamForms.Droid
 {
+    // THIS IS USED TO SAVE ALL PROGRESS WHEN THE APP IS KILLED
     [Service]
     public class OnKilledService : Service
     {
-
         public override IBinder OnBind(Intent intent)
         {
             return null;
@@ -108,20 +108,6 @@ namespace CloudStreamForms.Droid
         }
     }
 
-    [Service]
-    public class NullIntent : IntentService
-    {
-        public override void OnCreate()
-        {
-            base.OnCreate();
-
-        }
-
-        protected override void OnHandleIntent(Intent intent)
-        {
-
-        }
-    }
 
     [Service]
     public class ChromeCastIntentService : IntentService
@@ -605,12 +591,11 @@ namespace CloudStreamForms.Droid
 
                 }
 
-                void ShowDone(bool succ, string? overrideText = null)
+                async void ShowDone(bool succ, string? overrideText = null)
                 {
                     print("DAAAAAAAAAASHOW DONE" + succ);
                     if (showDoneNotificaion) {
                         print("DAAAAAAAAAASHOW DONE!!!!");
-
                         Device.BeginInvokeOnMainThread(() => {
                             try {
                                 print("DAAAAAAAAAASHOW DONE222");
@@ -620,6 +605,8 @@ namespace CloudStreamForms.Droid
                                 print("SUPERFATALEX: " + _ex);
                             }
                         });
+                        //await Task.Delay(1000); // 100% sure that it is downloaded
+                        OnSomeDownloadFinished?.Invoke(null, EventArgs.Empty);
                     }
                     else {
                         print("DONT SHOW WHEN DONE");

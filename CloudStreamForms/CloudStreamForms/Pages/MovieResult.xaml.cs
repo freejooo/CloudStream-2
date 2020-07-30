@@ -270,6 +270,9 @@ namespace CloudStreamForms
         {
             base.OnAppearing();
 
+            ForceUpdate(checkColor:true);
+            OnSomeDownloadFinished += OnHandleDownload;
+
             if (!hasAppeared) {
                 hasAppeared = true;
                 ForceUpdateVideo += ForceUpdateAppearing;
@@ -281,8 +284,15 @@ namespace CloudStreamForms
 
         }
 
+        public void OnHandleDownload(object sender, EventArgs arg)
+        {
+            ForceUpdate(checkColor:true);
+        }
+
         protected override void OnDisappearing()
         {
+            OnSomeDownloadFinished -= OnHandleDownload;
+
             //  ForceUpdateVideo -= ForceUpdateAppearing; // CANT REMOVE IT BECAUSE VIDEOPAGE TRIGGERS ONDIS
             base.OnDisappearing();
         }
@@ -741,7 +751,6 @@ namespace CloudStreamForms
                 // await Task.Delay(30);
                 epView.MyEpisodeResultCollection.Add(epView.AllEpisodes[i]);
             }
-            ForceUpdate();
             await Task.Delay(100);
             await FadeEpisodes.FadeTo(1);
 
@@ -756,11 +765,14 @@ namespace CloudStreamForms
             epView.AllEpisodes[index] = _episode;
         }
 
-        EpisodeResult UpdateLoad(EpisodeResult episodeResult)
+        EpisodeResult UpdateLoad(EpisodeResult episodeResult, bool checkColor = false)
         {
             if (core == null) return null;
             long pos;
             long len;
+            if (checkColor) {
+                SetColor(episodeResult);
+            }
             print("POST PRO ON: " + episodeResult.IMDBEpisodeId);
             string realId = episodeResult.IMDBEpisodeId;
             print("ID::::::: ON " + realId + "|" + App.GetKey(VIEW_TIME_POS, realId, -1L));
@@ -948,7 +960,6 @@ namespace CloudStreamForms
                     currentDownloadSearchesHappening--;
                 }
             });
-            episodeResult.IMDBEpisodeId = GetId(episodeResult);
 
             return episodeResult;
         }
@@ -1245,7 +1256,7 @@ namespace CloudStreamForms
                     epView.AllEpisodes = new EpisodeResult[CurrentEpisodes.Count];
                     maxEpisodes = epView.AllEpisodes.Length;
                     for (int i = 0; i < CurrentEpisodes.Count; i++) {
-                        AddEpisode(new EpisodeResult() { Episode = i + 1, Title = CurrentEpisodes[i].name, Id = i, Description = CurrentEpisodes[i].description.Replace("\n", "").Replace("  ", ""), PosterUrl = CurrentEpisodes[i].posterUrl, Rating = CurrentEpisodes[i].rating, Progress = 0, epVis = false, }, i);
+                        AddEpisode(new EpisodeResult() { Episode = i + 1, IMDBEpisodeId = CurrentEpisodes[i].id, Title = CurrentEpisodes[i].name, Id = i, Description = CurrentEpisodes[i].description.Replace("\n", "").Replace("  ", ""), PosterUrl = CurrentEpisodes[i].posterUrl, Rating = CurrentEpisodes[i].rating, Progress = 0, epVis = false, }, i);
                     }
                     if (!isAnime) {
                         SetEpisodeFromTo(0);
@@ -1255,7 +1266,7 @@ namespace CloudStreamForms
                 else { // MOVE
                     maxEpisodes = 1;
                     epView.AllEpisodes = new EpisodeResult[1];
-                    AddEpisode(new EpisodeResult() { Title = currentMovie.title.name, Description = currentMovie.title.description, Id = 0, PosterUrl = "", Progress = 0, Rating = "", epVis = false }, 0);
+                    AddEpisode(new EpisodeResult() { Title = currentMovie.title.name, IMDBEpisodeId = currentMovie.title.id, Description = currentMovie.title.description, Id = 0, PosterUrl = "", Progress = 0, Rating = "", epVis = false }, 0);
                     SetEpisodeFromTo(0);
                 }
 
@@ -1302,7 +1313,7 @@ namespace CloudStreamForms
                 DubPicker.button.Opacity = 0;
                 DubPicker.IsVisible = DubPicker.ItemsSource.Count > 0;
                 DubPicker.button.FadeTo(DubPicker.IsVisible ? 1 : 0, FATE_TIME_MS);
-                ForceUpdate();
+                // ForceUpdate();
             });
         }
 
@@ -1636,8 +1647,11 @@ namespace CloudStreamForms
         }
 
         // ============================== FORCE UPDATE ==============================
-        void ForceUpdate(int? item = null)
+        void ForceUpdate(int? item = null, bool checkColor = false)
         {
+            if (core == null) return;
+            if (epView == null) return;
+            if (epView.MyEpisodeResultCollection.Count == 0) return;
             //return;
             print("FORCE UPDATING");
             var _e = epView.MyEpisodeResultCollection.ToList();
@@ -1647,7 +1661,7 @@ namespace CloudStreamForms
                 epView.MyEpisodeResultCollection.Clear();
                 for (int i = 0; i < _e.Count; i++) {
                     // print("Main::" + _e[i].MainTextColor);
-                    epView.MyEpisodeResultCollection.Add(UpdateLoad((EpisodeResult)_e[i].Clone()));
+                    epView.MyEpisodeResultCollection.Add(UpdateLoad((EpisodeResult)_e[i].Clone(), checkColor));
                 }
                 /*  }
                   else {
