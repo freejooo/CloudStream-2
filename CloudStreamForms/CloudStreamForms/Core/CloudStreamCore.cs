@@ -25,7 +25,7 @@ namespace CloudStreamForms.Core
         {
             coreCreation = DateTime.Now;
             // INACTIVE // new DubbedAnimeNetProvider(this)
-            animeProviders = new IAnimeProvider[] { new GogoAnimeProvider(this), new KickassAnimeProvider(this), new DubbedAnimeProvider(this), new AnimeFlixProvider(this), new AnimekisaProvider(this), new TheMovieAnimeProvider(this), new KissFreeAnimeProvider(this), new AnimeSimpleProvider(this), new VidstreamingAnimeProvider(this), new AnimeVibeBloatFreeProvider(this), new NineAnimeBloatFreeProvider(this) };
+            animeProviders = new IAnimeProvider[] { new AnimeFeverBloatFreeProvider(this), new GogoAnimeProvider(this), new KickassAnimeProvider(this), new DubbedAnimeProvider(this), new AnimeFlixProvider(this), new AnimekisaProvider(this), new TheMovieAnimeProvider(this), new KissFreeAnimeProvider(this), new AnimeSimpleProvider(this), new VidstreamingAnimeProvider(this), new AnimeVibeBloatFreeProvider(this), new NineAnimeBloatFreeProvider(this) };
             movieProviders = new IMovieProvider[] { new DirectVidsrcProvider(this), new WatchTVProvider(this), new FMoviesProvider(this), new LiveMovies123Provider(this), new TheMovies123Provider(this), new YesMoviesProvider(this), new WatchSeriesProvider(this), new GomoStreamProvider(this), new Movies123Provider(this), new DubbedAnimeMovieProvider(this), new TheMovieMovieProvider(this), new KickassMovieProvider(this) };
         }
 
@@ -4679,7 +4679,7 @@ namespace CloudStreamForms.Core
                                             }
                                             catch (Exception _ex) {
                                                 error("FATAL EX IN TOKENPOST2:" + _ex);
-                                            } 
+                                            }
                                         }
                                         catch (Exception _ex) {
                                             error("FATAL EX IN TOKENPOST2:" + _ex);
@@ -8120,6 +8120,7 @@ namespace CloudStreamForms.Core
         [Serializable]
         public struct AdvancedAudioStream
         {
+            public int prio;
             public string url;
             public string label;
         }
@@ -8128,7 +8129,7 @@ namespace CloudStreamForms.Core
         {
             public string url;
             public string label;
-        } 
+        }
 
         [Serializable]
         public struct BasicLink
@@ -8136,7 +8137,7 @@ namespace CloudStreamForms.Core
             public string baseUrl;
             public bool isAdvancedLink;
 
-            public bool IsSeperatedAudioStream { get { return audioStreams.Count() > 0; } }
+            public bool IsSeperatedAudioStream { get { if (audioStreams == null) return false; return audioStreams.Count() > 0; } }
             // public List<AdvancedStream> streams;
             public List<AdvancedAudioStream> audioStreams;
             public List<AdvancedSubtitleStream> subtitleStreams;
@@ -8153,7 +8154,7 @@ namespace CloudStreamForms.Core
             public string typeName;
             public string PublicName {
                 get {
-                    return name + (label == "" ? "" : $" {label}") + ((mirror == 0) ? "" : $" (Mirror {mirror})") + (typeName == "" ? "" : $" [{typeName}]");
+                    return (name + (label == "" ? "" : $" {label}") + ((mirror == 0) ? "" : $" (Mirror {mirror})") + (typeName == "" ? "" : $" [{typeName}]")).Replace("  "," ");
                 }
             }
 
@@ -8260,7 +8261,7 @@ namespace CloudStreamForms.Core
         }
 
         public bool AddPotentialLink(int normalEpisode, BasicLink basicLink)
-        { 
+        {
             lock (cachedLinksLock) {
                 string id = (activeMovie.title.IsMovie ? activeMovie.title.id : activeMovie.episodes[normalEpisode].id);
                 var link = GetCachedLink(id);
@@ -8828,7 +8829,7 @@ namespace CloudStreamForms.Core
             for (int i = 0; i < repeats; i++) {
                 if (s == "") {
                     //s = DownloadStringOnce(url, tempThred, UTF8Encoding, waitTime);
-                    s = DownloadStringWithCert(url, tempThred, waitTime, "", referer, encoding,headerName,headerValue);
+                    s = DownloadStringWithCert(url, tempThred, waitTime, "", referer, encoding, headerName, headerValue);
                 }
             }
 #if DEBUG
@@ -8857,7 +8858,7 @@ namespace CloudStreamForms.Core
 
                 if (headerName != null) {
                     for (int i = 0; i < headerName.Length; i++) {
-                        webRequest.Headers.Add(headerName[i], headerValue[i]); 
+                        webRequest.Headers.Add(headerName[i], headerValue[i]);
                     }
                 }
 

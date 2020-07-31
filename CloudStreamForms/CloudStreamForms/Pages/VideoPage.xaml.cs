@@ -99,6 +99,7 @@ namespace CloudStreamForms
             public List<string> MirrorUrls;
             public List<string> MirrorNames;
             public bool isDownloadFile;
+            public bool isFromIMDB;
             public string downloadFileUrl;
 
             //public List<string> Subtitles;
@@ -125,11 +126,15 @@ namespace CloudStreamForms
         const string ADD_BEFORE_EPISODE = "\"";
         const string ADD_AFTER_EPISODE = "\"";
 
+        public static List<BasicLink> Mirrors = new List<BasicLink>();
+
         public static bool IsSeries { get { return !(currentVideo.season == -1 || currentVideo.episode == -1); } }
         public static string BeforeAddToName { get { return IsSingleMirror && !currentVideo.isDownloadFile ? AllMirrorsNames[0] : (IsSeries ? ("S" + currentVideo.season + ":E" + currentVideo.episode + " ") : ""); } }
         public static string CurrentDisplayName { get { return BeforeAddToName + (IsSeries ? ADD_BEFORE_EPISODE : "") + currentVideo.name + (IsSeries ? ADD_AFTER_EPISODE : "") + (IsSingleMirror ? "" : (" · " + CurrentMirrorName)); } }
-        public static string CurrentMirrorName { get { return currentVideo.MirrorNames[currentMirrorId]; } }
-        public static string CurrentMirrorUrl { get { return currentVideo.MirrorUrls[currentMirrorId]; } }
+
+        public static BasicLink CurrentBasicLink { get { return Mirrors[currentMirrorId]; } }
+        public static string CurrentMirrorName { get { return CurrentBasicLink.PublicName; } }
+        public static string CurrentMirrorUrl { get { return CurrentBasicLink.baseUrl; } }
         //public static string CurrentSubtitles { get { if (currentSubtitlesId == -1) { return ""; } else { return currentVideo.Subtitles[currentSubtitlesId]; } } }
 
         //public static string CurrentSubtitlesNames { get { if (currentSubtitlesId == -1) { return NONE_SUBTITLES; } else { return currentVideo.SubtitlesNames[currentSubtitlesId]; } } }
@@ -138,8 +143,8 @@ namespace CloudStreamForms
 
         // public static List<SubtitleItem[]> ParsedSubtitles = new List<SubtitleItem[]>();
         //   public static SubtitleItem[] Subtrack { get { if (currentSubtitlesId == -1) { return null; } else { return ParsedSubtitles[currentSubtitlesId]; } } }
-        public static List<string> AllMirrorsNames { get { return currentVideo.MirrorNames; } }
-        public static List<string> AllMirrorsUrls { get { return currentVideo.MirrorUrls; } }
+        public static List<string> AllMirrorsNames { get { return Mirrors.Select(t => t.PublicName).ToList(); } }
+        public static List<string> AllMirrorsUrls { get { return Mirrors.Select(t => t.baseUrl).ToList(); } }
 
         string lastUrl = "";
         public static bool ExecuteWithTimeLimit(TimeSpan timeSpan, Action codeBlock)
@@ -164,32 +169,50 @@ namespace CloudStreamForms
             if (Player.State == VLCState.Error || Player.State == VLCState.Opening) return;
             if (GetPlayerLenght() == -1) return;
             if (!GetPlayerIsPlaying() && e) { // HANDLE GAIN AUDIO FOCUS AUTO
-
+                App.ToggleRealFullScreen(true);
             }
             if (GetPlayerIsPlaying() && !e) { // HANDLE LOST AUDIO FOCUS
-                if (Player.CanPause) {
+                if (GetPlayerIsPauseble()) {
                     Player.SetPause(true);
                 }
             }
         }
 
+        bool isFirstLoadedMirror = true;
 
         Media disMedia;
         public void SelectMirror(int mirror)
         {
             if (!isShown) return;
 
+            isPausable = false;
+            isSeekeble = false;
+
+            List<string> options = new List<string>();
+            long pos;
+            bool startTimeSet = false;
+            if (isFirstLoadedMirror) {
+                if ((pos = App.GetViewPos(currentVideo.episodeId ?? "")) != -1) {
+                    long duration = App.GetViewDur(currentVideo.episodeId ?? "");
+                    var pro = ((double)pos / (double)duration);
+                    if (pro < 0.9 && pro > 0.05) {
+                        startTimeSet = true;
+                        options.Add("start-time=" + (pos / 1000));
+                    }
+                }
+            }
+
             if (currentVideo.isDownloadFile) {
                 EpisodeLabel.Text = CurrentDisplayName;
                 //  System.IO.File.Open(currentVideo.downloadFileUrl, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite);
 
-                disMedia = new Media(_libVLC, currentVideo.downloadFileUrl, FromType.FromPath);//new Uri(currentVideo.downloadFileUrl, UriKind.Absolute)); // currentVideo.downloadFileUrl, FromType.FromPath,);
-                                                                                               // disMedia.AddOption(new MediaConfiguration() { })
+                disMedia = new Media(_libVLC, currentVideo.downloadFileUrl, FromType.FromPath, options.ToArray());//new Uri(currentVideo.downloadFileUrl, UriKind.Absolute)); // currentVideo.downloadFileUrl, FromType.FromPath,);
+                                                                                                                  // disMedia.AddOption(new MediaConfiguration() { })
                 bool succ = vvideo.MediaPlayer.Play(disMedia);
                 return;
             }
             if (lastUrl == AllMirrorsUrls[mirror]) return;
-             
+
             currentMirrorId = mirror;
 
             print("MIRROR SELECTED : " + CurrentMirrorUrl);
@@ -200,23 +223,45 @@ namespace CloudStreamForms
             else {
                 Device.BeginInvokeOnMainThread(() => {
                     try {
+
                         EpisodeLabel.Text = CurrentDisplayName;
                         App.ToggleRealFullScreen(true);
                     }
                     catch (Exception) {
-                         
-                    } 
+
+                    }
                 });
 
                 bool Completed = ExecuteWithTimeLimit(TimeSpan.FromMilliseconds(1000), () => {
                     try {
                         print("PLAY MEDIA " + CurrentMirrorUrl);
-                        disMedia = new Media(_libVLC, CurrentMirrorUrl, FromType.FromLocation);
+
+                        if (CurrentBasicLink.referer.IsClean()) {
+                            options.Add("http-referrer=" + CurrentBasicLink.referer);
+                        }
+                        if (!startTimeSet) {
+                            if (lastPlayerTime > 100 && (CurrentBasicLink.originSite ?? "") != "AnimeFever") {
+                                options.Add("start-time=" + (lastPlayerTime / 1000));
+                            }
+                        }
+                        disMedia = new Media(_libVLC, CurrentMirrorUrl, FromType.FromLocation, options.ToArray());
                         lastUrl = CurrentMirrorUrl;
+                        if (CurrentBasicLink.IsSeperatedAudioStream) {
+                            uint prio = 4;
+                            foreach (var audioStream in CurrentBasicLink.audioStreams.OrderBy(t => -t.prio)) {
+                                disMedia.AddSlave(MediaSlaveType.Audio, prio, audioStream.url);
+                                if (prio != 0) {
+                                    prio--;
+                                }
+                            }
+                        }
 
                         if (!isShown) return;
                         if (Player == null) return;
                         bool succ = vvideo.MediaPlayer.Play(disMedia);
+                        if (Player.AudioTrackCount > 0) {
+                            Player.SetAudioTrack(0);
+                        }
 
                         if (!succ) {
                             ErrorWhenLoading();
@@ -608,7 +653,7 @@ namespace CloudStreamForms
         /// <param name="subtitles"></param>
         public VideoPage(PlayVideo video, int _maxEpisodes = 1)
         {
-            if(!canStart) {
+            if (!canStart) {
                 return;
             }
             canStart = false;
@@ -620,9 +665,24 @@ namespace CloudStreamForms
             currentVideo = video;
             maxEpisodes = _maxEpisodes;
             IsSingleMirror = video.isSingleMirror;
+            Mirrors = new List<BasicLink>();
+            if (currentVideo.MirrorNames != null) {
+                for (int i = 0; i < currentVideo.MirrorNames.Count; i++) {
+                    Mirrors.Add(new BasicLink() {
+                        name = currentVideo.MirrorNames[i],
+                        baseUrl = currentVideo.MirrorUrls[i],
+                    });
+                }
+            }
+            if (currentVideo.isFromIMDB) {
+                LinkHolder? holder;
+                if ((holder = GetCachedLink(currentVideo.episodeId)) != null) {
+                    Mirrors = holder.Value.links;
+                }
+            }
+            Mirrors = Mirrors.OrderBy(t => -t.priority).ToList();
 
             InitializeComponent();
-
 
             // ======================= SUBTITLE SETUP =======================
 
@@ -941,28 +1001,33 @@ namespace CloudStreamForms
                 });
             };
             Player.Playing += (o, e) => {
+                isFirstLoadedMirror = false;
                 UpdateAudioDelay(App.GetDelayAudio());
                 Device.BeginInvokeOnMainThread(() => {
                     if (App.GainAudioFocus()) {
                         SetIsPaused(false);
                     }
                     else {
-                        if (Player.CanPause) {
+                        if (GetPlayerIsPauseble()) {
                             Player.SetPause(true);
                         }
                     }
                 });
                 //   LoadingCir.IsEnabled = false;
             };
+
             Player.TimeChanged += (o, e) => {
                 PlayerTimeChanged(e.Time);
             };
+
             Player.LengthChanged += (o, e) => {
                 lastPlayerLenght = e.Length;
             };
+
             Player.PausableChanged += (o, e) => {
                 isPausable = e.Pausable == 1;
             };
+
             Player.SeekableChanged += (o, e) => {
                 isSeekeble = e.Seekable == 1;
             };
@@ -1104,7 +1169,7 @@ namespace CloudStreamForms
                 }
                 visible = !visible;
             }*/
-        } 
+        }
 
         public static bool isShown = false;
         public static bool changeFullscreenWhenPop = true;
@@ -1117,7 +1182,7 @@ namespace CloudStreamForms
             try {
                 App.OnAudioFocusChanged -= HandleAudioFocus;
 
-                 if(lastPlayerTime > 20 && lastPlayerLenght > 100) {
+                if (lastPlayerTime > 20 && lastPlayerLenght > 100) {
                     string lastId = currentVideo.episodeId;
                     if (lastId != null) {
                         long pos = lastPlayerTime;//Last position in media when player exited
@@ -1184,14 +1249,14 @@ namespace CloudStreamForms
 
         public void Dispose()
         {
-          //  Thread t = new Thread(() => {
-                var mediaPlayer = _mediaPlayer;
-                _mediaPlayer = null;
-                mediaPlayer?.Dispose();
-                _libVLC?.Dispose();
-                _libVLC = null;
-           // });
-          //  t.Name = "DISPOSETHREAD";
+            //  Thread t = new Thread(() => {
+            var mediaPlayer = _mediaPlayer;
+            _mediaPlayer = null;
+            mediaPlayer?.Dispose();
+            _libVLC?.Dispose();
+            _libVLC = null;
+            // });
+            //  t.Name = "DISPOSETHREAD";
             //t.Start();
         }
         async void Hide()
@@ -1205,7 +1270,7 @@ namespace CloudStreamForms
             if (Player == null) return;
             if (Player.State == VLCState.Error || Player.State == VLCState.Opening) return;
             if (GetPlayerLenght() == -1) return;
-            if (!Player.CanPause && !isPaused) return;
+            if (!GetPlayerIsPauseble() && !isPaused) return;
 
             if (isPaused) { // UNPAUSE
                 StartFade();
@@ -1240,7 +1305,7 @@ namespace CloudStreamForms
             if (Player.State == VLCState.Error || Player.State == VLCState.Opening) return;
             if (GetPlayerLenght() == -1) return;
             if (!GetPlayerIsSeekable()) return;
-            if (!Player.CanPause) return;
+            if (!GetPlayerIsPauseble()) return;
 
             Player.SetPause(true);
             dragingVideo = true;

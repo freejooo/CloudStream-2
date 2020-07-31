@@ -280,7 +280,7 @@ namespace CloudStreamForms
         /// <param name="episodeId">id for key of lenght seen</param>
         /// <param name="startId">FROM_START, FROM_PROGRESS or time in ms</param>
         /// <param name="subtitleFull">Leave emty for no subtitles, full subtitle text as seen in a regular .srt</param>
-        public static async Task RequestVlc(List<string> urls, List<string> names, string episodeName, string episodeId, long startId = FROM_PROGRESS, string subtitleFull = "", int episode = -1, int season = -1, string descript = "", bool? overrideSelectVideo = null, string headerId = "")
+        public static async Task RequestVlc(List<string> urls, List<string> names, string episodeName, string episodeId, long startId = FROM_PROGRESS, string subtitleFull = "", int episode = -1, int season = -1, string descript = "", bool? overrideSelectVideo = null, string headerId = "", bool isFromIMDB = false)
         {
             if (isRequestingVLC) return;
             isRequestingVLC = true;
@@ -300,7 +300,8 @@ namespace CloudStreamForms
                     startPos = startId,
                     episodeId = episodeId,
                     headerId = headerId,
-                });//new List<string>() { "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" }, new List<string>() { "Black" }, new List<string>() { });// { mainPoster = mainPoster };
+                    isFromIMDB = isFromIMDB,
+                });;//new List<string>() { "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" }, new List<string>() { "Black" }, new List<string>() { });// { mainPoster = mainPoster };
                 await ((MainPage)CloudStreamCore.mainPage).Navigation.PushModalAsync(p, true);
             }
             else {

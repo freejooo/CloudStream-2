@@ -13,7 +13,7 @@ namespace CloudStreamForms.Core.AnimeProviders
 
         public override string Name => "AnimeVibe";
 
-        public override void LoadLink(string episodeLink, int episode, int normalEpisode, TempThread tempThred, object extraData)
+        public override void LoadLink(string episodeLink, int episode, int normalEpisode, TempThread tempThred, object extraData, bool isDub)
         {
             string page = DownloadString(episodeLink,tempThred);
             if (!page.IsClean()) return;

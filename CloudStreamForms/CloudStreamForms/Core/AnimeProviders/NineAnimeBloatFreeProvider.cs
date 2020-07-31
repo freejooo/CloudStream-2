@@ -21,7 +21,7 @@ namespace CloudStreamForms.Core.AnimeProviders
             public string id;
         }
 
-        public override void LoadLink(string episodeLink, int episode, int normalEpisode, TempThread tempThred, object extraData)
+        public override void LoadLink(string episodeLink, int episode, int normalEpisode, TempThread tempThred, object extraData,bool isDub)
         {
             string request = episodeLink.Replace("https://9anime.to/watch/", "") + "/"; // /xrrj358";
             string url = "https://9anime.to/watch/" + request;

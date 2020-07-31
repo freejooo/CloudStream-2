@@ -255,7 +255,8 @@
 
                                 <xe:BorderView x:Name="MirrorsTap" Grid.Column="2"
                                     HeightRequest="35"
-                                    WidthRequest="100"
+                                    WidthRequest="85"
+                                               Margin="0,0,-10,0"
                                     xe:TouchEffect.Color="White" 
                                     HorizontalOptions="Center"
                                     VerticalOptions="Center"
@@ -269,9 +270,9 @@
                                             <ColumnDefinition Width="Auto" />
                                             <ColumnDefinition Width="Auto" />
                                         </Grid.ColumnDefinitions>
-                                        <ff:CachedImage x:Name="MirrosImg" Grid.Column="0" VerticalOptions="Center" TranslationX="-5" TranslationY="1.5" InputTransparent="True" BackgroundColor="Transparent" WidthRequest="32" HeightRequest="32" Aspect="AspectFill"></ff:CachedImage>
+                                        <ff:CachedImage x:Name="MirrosImg" Grid.Column="0" VerticalOptions="Center" TranslationX="-7" TranslationY="1.5" InputTransparent="True" BackgroundColor="Transparent" WidthRequest="32" HeightRequest="32" Aspect="AspectFill"></ff:CachedImage>
                                         <!--  <Button Text="Mirrors"  Grid.Column="1" BackgroundColor="Transparent"></Button>-->
-                                        <Label Text="Mirrors" Grid.Column="1" VerticalOptions="Center" TextColor="White"></Label>
+                                        <Label Text="Mirrors" Grid.Column="1" TranslationX="-2" VerticalOptions="Center" TextColor="White"></Label>
 
                                     </Grid>
                                 </xe:BorderView>

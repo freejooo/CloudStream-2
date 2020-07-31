@@ -5,16 +5,16 @@ using System.Text;
 
 namespace CloudStreamForms.Core.AnimeProviders
 {
-    public class AnimeFeberHelper
+    public class AnimeFeverHelper
     {
-        public class AnimeFeberSearchPoster
+        public class AnimeFeverSearchPoster
         {
             public string source { get; set; }
             public int width { get; set; }
             public int height { get; set; }
         }
 
-        public class AnimeFeberSearchPoster2
+        public class AnimeFeverSearchPoster2
         {
             public int id { get; set; }
             public string disk_name { get; set; }
@@ -30,7 +30,7 @@ namespace CloudStreamForms.Core.AnimeProviders
             public string extension { get; set; }
         }
 
-        public class AnimeFeberSearchLogo
+        public class AnimeFeverSearchLogo
         {
             public int id { get; set; }
             public string disk_name { get; set; }
@@ -46,7 +46,7 @@ namespace CloudStreamForms.Core.AnimeProviders
             public string extension { get; set; }
         }
 
-        public class AnimeFeberSearchDatum
+        public class AnimeFeverSearchDatum
         {
             public int id { get; set; }
             public string uid { get; set; }
@@ -70,17 +70,17 @@ namespace CloudStreamForms.Core.AnimeProviders
             public string slug { get; set; }
             public bool is_collected { get; set; }
             public object collection_status { get; set; }
-            public List<AnimeFeberSearchPoster> posters { get; set; }
+            public List<AnimeFeverSearchPoster> posters { get; set; }
             public object backgrounds { get; set; }
-            public AnimeFeberSearchPoster2 poster { get; set; }
-            public AnimeFeberSearchLogo logo { get; set; }
+            public AnimeFeverSearchPoster2 poster { get; set; }
+            public AnimeFeverSearchLogo logo { get; set; }
             public object background { get; set; }
         }
 
-        public class AnimeFeberSearchInfo
+        public class AnimeFeverSearchInfo
         {
             public int current_page { get; set; }
-            public List<AnimeFeberSearchDatum> data { get; set; }
+            public List<AnimeFeverSearchDatum> data { get; set; }
             public string first_page_url { get; set; }
             public int from { get; set; }
             public int last_page { get; set; }
@@ -93,7 +93,7 @@ namespace CloudStreamForms.Core.AnimeProviders
             public int total { get; set; }
         }
          
-        public class AnimeFeberEpisodeImage
+        public class AnimeFeverEpisodeImage
         {
             public int id { get; set; }
             public string disk_name { get; set; }
@@ -109,29 +109,29 @@ namespace CloudStreamForms.Core.AnimeProviders
             public string extension { get; set; }
         }
 
-        public class AnimeFeberEpisodeVideoMeta
+        public class AnimeFeverEpisodeVideoMeta
         {
             public List<string> audio_languages { get; set; }
             public string status { get; set; }
             public long download_size { get; set; }
         }
 
-        public class AnimeFeberEpisodeDatum
+        public class AnimeFeverEpisodeDatum
         {
             public int id { get; set; }
             public string title { get; set; }
             public string slug { get; set; }
             public string number { get; set; }
             public int duration { get; set; }
-            public AnimeFeberEpisodeImage image { get; set; }
-            public AnimeFeberEpisodeVideoMeta video_meta { get; set; }
+            public AnimeFeverEpisodeImage image { get; set; }
+            public AnimeFeverEpisodeVideoMeta video_meta { get; set; }
             public int is_filler { get; set; }
             public int is_recap { get; set; }
             public bool watched { get; set; }
             public object progress { get; set; }
         }
 
-        public class AnimeFeberEpisodeLinks
+        public class AnimeFeverEpisodeLinks
         {
             public string first { get; set; }
             public string last { get; set; }
@@ -139,7 +139,7 @@ namespace CloudStreamForms.Core.AnimeProviders
             public object next { get; set; }
         }
 
-        public class AnimeFeberEpisodeMeta
+        public class AnimeFeverEpisodeMeta
         {
             public int current_page { get; set; }
             public int from { get; set; }
@@ -150,16 +150,16 @@ namespace CloudStreamForms.Core.AnimeProviders
             public int total { get; set; }
         }
 
-        public class AnimeFeberEpisodeInfo
+        public class AnimeFeverEpisodeInfo
         {
-            public List<AnimeFeberEpisodeDatum> data { get; set; }
-            public AnimeFeberEpisodeLinks links { get; set; }
-            public AnimeFeberEpisodeMeta meta { get; set; }
+            public List<AnimeFeverEpisodeDatum> data { get; set; }
+            public AnimeFeverEpisodeLinks links { get; set; }
+            public AnimeFeverEpisodeMeta meta { get; set; }
         }
 
         static readonly string[] headerValue = new string[] { "animefever", "cloudflare" };
         static readonly string[] headerName = new string[] { "AF-Access-API", "server-provider" };
-        public AnimeFeberSearchInfo GetSearchResults(string search, bool isMovie)
+        public AnimeFeverSearchInfo GetSearchResults(string search, bool isMovie)
         {
             /*   webRequest.Headers.Add("AF-Access-API", "animefever");
             webRequest.Headers.Add("server-provider", "cloudflare");*/
@@ -169,10 +169,10 @@ namespace CloudStreamForms.Core.AnimeProviders
             if (d == "") {
                 return null;
             }
-            return JsonConvert.DeserializeObject<AnimeFeberSearchInfo>(d);
+            return JsonConvert.DeserializeObject<AnimeFeverSearchInfo>(d);
         }
 
-        public AnimeFeberEpisodeInfo GetAnimeFeberEpisodeInfo(int id, string slug)
+        public AnimeFeverEpisodeInfo GetAnimeFeverEpisodeInfo(int id, string slug)
         {
             string qry = $"https://www.animefever.tv/api/anime/details/episodes?id={id}-{slug}";
             string d = core.DownloadString(qry, referer: "https://www.animefever.tv/series",
@@ -180,7 +180,7 @@ namespace CloudStreamForms.Core.AnimeProviders
             if (d == "") {
                 return null;
             }
-            return JsonConvert.DeserializeObject<AnimeFeberEpisodeInfo>(d);
+            return JsonConvert.DeserializeObject<AnimeFeverEpisodeInfo>(d);
         }
 
         public string GetAnimeFeverEpisodeStream(int id)
@@ -193,7 +193,7 @@ namespace CloudStreamForms.Core.AnimeProviders
         }
 
         CloudStreamCore core;
-        public AnimeFeberHelper(CloudStreamCore _core)
+        public AnimeFeverHelper(CloudStreamCore _core)
         {
             core = _core;
         }

@@ -103,7 +103,7 @@ namespace CloudStreamForms.Core
                 }
             }
 
-            public virtual void LoadLink(string episodeLink, int episode, int normalEpisode, TempThread tempThred, object extraData)
+            public virtual void LoadLink(string episodeLink, int episode, int normalEpisode, TempThread tempThred, object extraData, bool isDub)
             {
                 throw new NotImplementedException();
             }
@@ -114,12 +114,12 @@ namespace CloudStreamForms.Core
                 for (int q = 0; q < activeMovie.title.MALData.seasonData[season].seasons.Count; q++) {
                     var ms = GetData(activeMovie.title.MALData.seasonData[season].seasons[q], out bool suc);
                     if (suc) {
-                        int subEp = episode - currentep;
+                        int subEp = normalEpisode - currentep;
                         currentep += isDub ? ms.dubEpisodes.Count : ms.subEpisodes.Count;
                         if (currentep > episode) {
                             try {
                                 print("LOADING LINK FOR: " + Name);
-                                LoadLink(isDub ? ms.dubEpisodes[subEp] : ms.subEpisodes[subEp], subEp, normalEpisode, tempThred, ms.extraData);
+                                LoadLink(isDub ? ms.dubEpisodes[subEp] : ms.subEpisodes[subEp], subEp, normalEpisode, tempThred, ms.extraData,isDub);
                             }
                             catch (Exception _ex) { print("FATAL EX IN Load: " + Name + " | " + _ex); }
                         }
