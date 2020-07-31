@@ -863,6 +863,7 @@ namespace CloudStreamForms.Core
             public void AddEpisodesFromMirrors(TempThread tempThred, string d, int normalEpisode, string extraId = "", string extra = "") => core.AddEpisodesFromMirrors(tempThred, d, normalEpisode, extraId, extra);
             public bool LookForFembedInString(TempThread tempThred, int normalEpisode, string d, string extra = "") => core.LookForFembedInString(tempThred, normalEpisode, d, extra);
             public void AddPotentialLink(int normalEpisode, string _url, string _name, int _priority, string label = "") => core.AddPotentialLink(normalEpisode, _url, _name, _priority, label);
+            public void AddPotentialLink(int normalEpisode, BasicLink basicLink) => core.AddPotentialLink(normalEpisode, basicLink);
             public void AddMp4(string id, int normalEpisode, TempThread tempThred) => core.AddMp4(id, normalEpisode, tempThred);
 
             public BaseProvider(CloudStreamCore _core)
@@ -8127,21 +8128,18 @@ namespace CloudStreamForms.Core
         {
             public string url;
             public string label;
-        }
-        [Serializable]
-        public struct AdvancedLink
-        {
-            public bool IsSeperatedAudioStream { get { return audioStreams.Count() > 0; } }
-            public List<AdvancedStream> streams;
-            public List<AdvancedAudioStream> audioStreams;
-            public List<AdvancedSubtitleStream> subtitleStreams;
-        }
+        } 
 
         [Serializable]
         public struct BasicLink
         {
             public string baseUrl;
             public bool isAdvancedLink;
+
+            public bool IsSeperatedAudioStream { get { return audioStreams.Count() > 0; } }
+            // public List<AdvancedStream> streams;
+            public List<AdvancedAudioStream> audioStreams;
+            public List<AdvancedSubtitleStream> subtitleStreams;
 
             /// <summary>
             /// Duration in sec, if not given it will be 0
@@ -8259,6 +8257,19 @@ namespace CloudStreamForms.Core
                     links = new List<BasicLink>(),
                 };
             }
+        }
+
+        public bool AddPotentialLink(int normalEpisode, BasicLink basicLink)
+        { 
+            lock (cachedLinksLock) {
+                string id = (activeMovie.title.IsMovie ? activeMovie.title.id : activeMovie.episodes[normalEpisode].id);
+                var link = GetCachedLink(id);
+                var holder = (LinkHolder)link;
+                linkAdded?.Invoke(null, id);
+                holder.links.Add(basicLink);
+                return true;
+            }
+
         }
 
         public bool AddPotentialLink(int normalEpisode, string _url, string _name, int _priority, string label = "")
@@ -8808,7 +8819,7 @@ namespace CloudStreamForms.Core
         /// <param name="url"></param>
         /// <param name="UTF8Encoding"></param>
         /// <returns></returns>
-        public string DownloadString(string url, TempThread? tempThred = null, int repeats = 2, int waitTime = 1000, string referer = "", Encoding encoding = null)
+        public string DownloadString(string url, TempThread? tempThred = null, int repeats = 2, int waitTime = 1000, string referer = "", Encoding encoding = null, string[] headerName = null, string[] headerValue = null)
         {
 #if DEBUG
             int _s = GetStopwatchNum();
@@ -8817,7 +8828,7 @@ namespace CloudStreamForms.Core
             for (int i = 0; i < repeats; i++) {
                 if (s == "") {
                     //s = DownloadStringOnce(url, tempThred, UTF8Encoding, waitTime);
-                    s = DownloadStringWithCert(url, tempThred, waitTime, "", referer, encoding);
+                    s = DownloadStringWithCert(url, tempThred, waitTime, "", referer, encoding,headerName,headerValue);
                 }
             }
 #if DEBUG
@@ -8827,7 +8838,7 @@ namespace CloudStreamForms.Core
         }
 
 
-        public string DownloadStringWithCert(string url, TempThread? tempThred = null, int waitTime = 1000, string requestBody = "", string referer = "", Encoding encoding = null)
+        public string DownloadStringWithCert(string url, TempThread? tempThred = null, int waitTime = 1000, string requestBody = "", string referer = "", Encoding encoding = null, string[] headerName = null, string[] headerValue = null)
         {
             if (!url.IsClean()) return "";
             url = url.Replace("http://", "https://");
@@ -8843,6 +8854,13 @@ namespace CloudStreamForms.Core
                 if (encoding == null) {
                     encoding = Encoding.UTF8;
                 }
+
+                if (headerName != null) {
+                    for (int i = 0; i < headerName.Length; i++) {
+                        webRequest.Headers.Add(headerName[i], headerValue[i]); 
+                    }
+                }
+
                 //    string _s = "";
                 //  bool done = false;
                 print("REQUEST::: " + url);

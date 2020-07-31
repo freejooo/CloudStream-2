@@ -145,7 +145,6 @@ namespace CloudStreamForms.Core.AnimeProviders
         }
 
         [Serializable]
-
         public struct NineAnimeDataSearch
         {
             public string title;

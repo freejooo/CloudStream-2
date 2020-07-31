@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using static CloudStreamForms.Core.CloudStreamCore;
 
 namespace CloudStreamForms.Core
@@ -130,6 +131,44 @@ namespace CloudStreamForms.Core
 
     public static class CoreHelpers
     {
+        /// <summary>
+        /// Will return the result, if not match then null
+        /// </summary>
+        /// <param name="input"></param>
+        /// <param name="match"></param>
+        /// <param name="splitChar"></param>
+        /// <param name="searchSplit"></param>
+        /// <returns></returns>
+        public static string[] GetStringRegex(string input, string match, char splitChar = '?', char searchSplit = ' ')
+        {
+            try {
+                string[] splt = input.Split(searchSplit);
+                string rex = "";
+
+                foreach (var sp in splt) {
+                    string[] sps = sp.Split(splitChar);
+                    rex += $".*{sps[0]}(.*?){sps[1]}";
+                }
+                rex = rex.Replace("\"", "\\\"");
+
+                var regex = new Regex(rex);
+                if (regex.IsMatch(match)) {
+                    var mat = regex.Match(match);
+                    if (mat.Success) {
+                        string[] data = new string[mat.Groups.Count - 1];
+                        for (int i = 0; i < data.Length; i++) {
+                            data[i] = mat.Groups[i + 1].Value;
+                        }
+                        return data;
+                    }
+                }
+                return null;
+            }
+            catch (Exception) {
+                return null;
+            }
+        }
+
         public static bool ContainsStuff<T>(this IList<T> list)
         {
             if (list == null) return false;
