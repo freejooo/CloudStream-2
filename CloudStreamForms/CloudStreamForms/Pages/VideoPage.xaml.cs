@@ -235,6 +235,7 @@ namespace CloudStreamForms
                 bool Completed = ExecuteWithTimeLimit(TimeSpan.FromMilliseconds(1000), () => {
                     try {
                         print("PLAY MEDIA " + CurrentMirrorUrl);
+                        options.Add("http-user-agent=" + USERAGENT);
 
                         if (CurrentBasicLink.referer.IsClean()) {
                             options.Add("http-referrer=" + CurrentBasicLink.referer);
@@ -1059,6 +1060,7 @@ namespace CloudStreamForms
 
             Player.EncounteredError += (o, e) => {
                 // TODO: SKIP TO NEXT
+                error(_libVLC.LastLibVLCError);
                 print("ERROR LOADING MDDD: ");
                 ErrorWhenLoading();
             };

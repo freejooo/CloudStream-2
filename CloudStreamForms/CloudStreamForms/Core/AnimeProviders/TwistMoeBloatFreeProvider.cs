@@ -198,34 +198,9 @@ namespace CloudStreamForms.Core.AnimeProviders
             if (openToken != "" && tokenCook != "") return;
             isFetching = true;
             try {
-                
+
                 string d = GetHTMLF("https://twist.moe/");
-                string code = @"var s = {},
-    u, c, U, r, i, l = 0,
-    a, e = eval,
-    w = String.fromCharCode,
-    sucuri_cloudproxy_js = '',
-    S = 'az0iY3YiLmNoYXJBdCgwKSArICIyIiArICAnJyArJycrJ1dqVjEnLnN1YnN0cigzLCAxKSArICcnICsiYSIuc2xpY2UoMCwxKSArICcwJyArICAgJycgKyAKIjkiLnNsaWNlKDAsMSkgKyAiNCIuc2xpY2UoMCwxKSArICI2eiIuY2hhckF0KDApICsgJ2c8ZicuY2hhckF0KDIpKyI0IiArICAnJyArJycrIjYiLnNsaWNlKDAsMSkgKyAnMXg0MScuc3Vic3RyKDMsIDEpICsgJycgKycnKyJmeCIuY2hhckF0KDApICsgJ2hINycuY2hhckF0KDIpKyAnJyArJycrImVjIi5jaGFyQXQoMCkgKyAnNycgKyAgICcnICsgCiI0c2VjIi5zdWJzdHIoMCwxKSArICIxeSIuY2hhckF0KDApICsgIjFzdWN1ciIuY2hhckF0KDApKyIiICsnakxmJy5jaGFyQXQoMikrJzZ2MTUnLnN1YnN0cigzLCAxKSArICcnICsnNScgKyAgICcnICsgCiJhIi5zbGljZSgwLDEpICsgIjgiLnNsaWNlKDAsMSkgKyAgJycgKyAKIjFzdSIuc2xpY2UoMCwxKSArICAnJyArJ2M0YScuY2hhckF0KDIpKyAnJyArIAoiZXN1Ii5zbGljZSgwLDEpICsgIiIgKyJic2VjIi5zdWJzdHIoMCwxKSArICAnJyArIAonVm07MCcuc3Vic3RyKDMsIDEpICsiN3N1Ii5zbGljZSgwLDEpICsgICcnICtTdHJpbmcuZnJvbUNoYXJDb2RlKDB4NjYpICsgImFzZWMiLnN1YnN0cigwLDEpICsgJyc7ZG9jdW1lbnQuY29va2llPSdzc3VjdScuY2hhckF0KDApICArJ3N1Jy5jaGFyQXQoMSkrJ2MnKyd1cycuY2hhckF0KDApKydyJysnaScrJ3NfJy5jaGFyQXQoMSkrJ2NzdWN1Jy5jaGFyQXQoMCkgICsnc3VjdXJpbCcuY2hhckF0KDYpKydzbycuY2hhckF0KDEpKyd1c3VjdXJpJy5jaGFyQXQoMCkgKyAnc3VjdXJkJy5jaGFyQXQoNSkgKyAncHN1Y3UnLmNoYXJBdCgwKSAgKydzdXInLmNoYXJBdCgyKSsnc28nLmNoYXJBdCgxKSsneHMnLmNoYXJBdCgwKSsneScuY2hhckF0KDApKydzdWN1cl8nLmNoYXJBdCg1KSArICd1c3VjdScuY2hhckF0KDApICArJ3UnKycnKydpJysnZCcrJycrJ3N1Y3VyaV8nLmNoYXJBdCg2KSsnOCcrJzJzdWN1cmknLmNoYXJBdCgwKSArICczJysnc3VjdWQnLmNoYXJBdCg0KSsgJzhzJy5jaGFyQXQoMCkrJzgnKyc4c3VjdXJpJy5jaGFyQXQoMCkgKyAnZnMnLmNoYXJBdCgwKSsnc3VjdXJpNycuY2hhckF0KDYpKyI9IiArIGsgKyAnO3BhdGg9LzttYXgtYWdlPTg2NDAwJzsgbG9jYXRpb24ucmVsb2FkKCk7';
-L = S.length;
-U = 0;
-r = '';
-var A = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
-for (u = 0; u < 64; u++) {
-    s[A.charAt(u)] = u;
-}
-for (i = 0; i < L; i++) {
-    c = s[S.charAt(i)];
-    U = (U << 6) + c;
-    l += 6;
-    while (l >= 8) {
-if(U < 0) {
-    U = - U;
-    U ^= 2147483647;
-    U += 1;
-}
-        ((a = (U >> (l -= 8)) & 0xff) || (i < (L - 2))) && (r += (w(a)));
-    }
-}"; ;//FindHTML(d, "<script>", "</script>").Replace("e(r);", ""); // alert(r);
+                string code = FindHTML(d, "<script>", "</script>").Replace("e(r);", ""); // alert(r);
                 string token = "";
                 string token2 = "";
                 tokenCook = "";
@@ -240,14 +215,13 @@ if(U < 0) {
                     print(a);
                     token = a.ToString(); 
                 }));*///.SetValue("log", new Action<string>((a) => { token2 = a; })); ;
-                 var _g =  engine.Execute(code).GetValue("r");
-                token = exit;
+                token = engine.Execute(code).GetValue("r").ToString(); ;
                 char fChar = token[0];
                 token = token.Replace("location.reload();", $"alert({fChar}); alertCook(doccookie);");
                 string find = "+ \';path=";
                 token = token.Replace(find + "" + FindHTML(token, find, "\'") + "\'", "").Replace("document.cookie=", "var doccookie=");
 
-                print("TWISTTOKEN; " +  token);
+                print("TWISTTOKEN; " + token);
                 var engine2 = new Engine()
                          .SetValue("alert", new Action<string>((a) => { token2 = a; })).SetValue("alertCook", new Action<string>((a) => { tokenCook = a; }));
                 engine2.Execute(token);
@@ -268,9 +242,16 @@ if(U < 0) {
                 }
 
                 string allD = HTMLGet("https://twist.moe/api/anime", "https://twist.moe/", cookies: new List<Cookie>() { new Cookie() { Name = FindHTML("|" + tokenCook, "|", "="), Value = FindHTML(tokenCook + "|", "=", "|"), Expires = DateTime.Now.AddSeconds(1000) } }, keys: new List<string>() { "x-access-token" }, values: new List<string>() { openToken });
-                TwistMoeRoot allItems = JsonConvert.DeserializeObject<TwistMoeRoot>(allD);
-                foreach (var item in allItems.MyArray) {
-                    twistMoeSearch[item.mal_id] = item.slug.slug;
+                print("ALLD: " + allD);
+                MoeItem[] allItems = JsonConvert.DeserializeObject<MoeItem[]>(allD);
+                foreach (var item in allItems) {
+                    if (item.mal_id != null) {
+                        var slug = item?.slug?.slug;
+                        print("MALID: " + item.mal_id + "|" + slug);
+                        if (slug != null) {
+                            twistMoeSearch[(int)item.mal_id] = slug;
+                        }
+                    }
                 }
                 hasLoaded = true;
             }
@@ -284,11 +265,11 @@ if(U < 0) {
 
         public class MoeSlug
         {
-            // public int id { get; set; }
-            public string slug { get; set; }
-            // public int anime_id { get; set; }
-            // public string created_at { get; set; }
-            // public string updated_at { get; set; }
+            //public int id { get; set; }
+            public string? slug { get; set; }
+            //public int anime_id { get; set; }
+            //public string created_at { get; set; }
+            //public string updated_at { get; set; }
         }
 
         public class MoeItem
@@ -302,8 +283,8 @@ if(U < 0) {
             // public string created_at { get; set; }
             // public string updated_at { get; set; }
             // public int hidden { get; set; }
-            public int mal_id { get; set; }
-            public MoeSlug slug { get; set; }
+            public int? mal_id { get; set; }
+            public MoeSlug? slug { get; set; }
         }
 
         public class TwistMoeRoot
@@ -314,7 +295,7 @@ if(U < 0) {
         /// <summary>
         /// GIVEN MAL ID, RETURN SLUG
         /// </summary>
-        Dictionary<int, string> twistMoeSearch = new Dictionary<int, string>();
+        static Dictionary<int, string> twistMoeSearch = new Dictionary<int, string>();
 
 
         public class MoeSource
@@ -362,6 +343,7 @@ if(U < 0) {
                 var sources = GetSources(slug);
                 return new NonBloatSeasonData() {
                     subEpisodes = sources.Select(t => t.source).ToList(),
+                    extraData = $"https://twist.moe/a/{slug}/1"
                 };
             }
             return new NonBloatSeasonData();
@@ -370,7 +352,45 @@ if(U < 0) {
         public override void LoadLink(string episodeLink, int episode, int normalEpisode, TempThread tempThred, object extraData, bool isDub)
         {
             string source = FetchMoeUrlFromSalted(episodeLink);
+            if (source == "") return;
+            string url = "https://twist.moe/" + source;
+
+            HttpWebRequest webRequest = (HttpWebRequest)HttpWebRequest.Create(url);
+            webRequest.UserAgent = USERAGENT;
+            webRequest.Accept = "*/*";
+
+            if (GetRequireCert(url)) { webRequest.ServerCertificateValidationCallback = delegate { return true; }; }
+
+            webRequest.Method = "HEAD";
+            print("RESPONSEGET:");
+            webRequest.Timeout = 10000;
+            webRequest.Referer = extraData.ToString();
+
+            using (var webResponse = webRequest.GetResponse()) {
+                try {
+                    print("RESPONSE:");
+                    var fileSize = webResponse.Headers.Get("Content-Length");
+                    var fileSizeInMegaByte = Math.Round(Convert.ToDouble(fileSize) / Math.Pow((double)App.GetSizeOfJumpOnSystem(), 2.0), 2);
+                    print("GETFILESIZE: " + fileSizeInMegaByte);
+
+                }
+                catch (Exception _ex) {
+                    print("ERRORGETFILESIZE: " + url + " | " + _ex);
+                }
+
+            }
+
+
+
             print("TWIST SOURCE: " + source);
+            AddPotentialLink(normalEpisode, new BasicLink() {
+                referer = extraData.ToString(),
+                originSite = Name,
+                isAdvancedLink = true,
+                name = "Twist.Moe",
+                priority = 10,
+                baseUrl = "https://twist.moe/" + source // "https://twistcdn.bunny.sh/" + source
+            }) ;
         }
     }
 }

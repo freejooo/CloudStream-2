@@ -98,17 +98,7 @@ namespace CloudStreamForms.Core.AnimeProviders
             }
 
             try {
-                core.AddMCloud(MyCloud[normalEpisode].id, key, dataTs, "https://9anime.to", normalEpisode, url);
-                /*
-                string target = core.GetTarget(MyCloud[normalEpisode].id, key, dataTs, "https://9anime.to");
-
-                string mresonse = DownloadString(target + "&autostart=true", referer: url);
-                const string lookFor = "file\":\"";
-                while (mresonse.Contains(lookFor)) {
-                    string resUrl = FindHTML(mresonse, lookFor, "\"");
-                    mresonse = RemoveOne(mresonse, lookFor);
-                    AddPotentialLink(normalEpisode, resUrl, "Mcloud", 5);
-                }*/
+                core.AddMCloud(MyCloud[normalEpisode].id, key, dataTs, "https://9anime.to", normalEpisode, url); 
             }
             catch (Exception) {
 

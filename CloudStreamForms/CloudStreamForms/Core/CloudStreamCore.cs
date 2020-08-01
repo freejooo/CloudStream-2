@@ -8158,7 +8158,7 @@ namespace CloudStreamForms.Core
             public string typeName;
             public string PublicName {
                 get {
-                    return (name + (label == "" ? "" : $" {label}") + ((mirror == 0) ? "" : $" (Mirror {mirror})") + (typeName == "" ? "" : $" [{typeName}]")).Replace("  "," ");
+                    return (name + (label == "" ? "" : $" {label}") + ((mirror == 0) ? "" : $" (Mirror {mirror})") + ((typeName ?? "") == "" ? "" : $" [{typeName}]")).Replace("  "," ");
                 }
             }
 
@@ -8168,6 +8168,7 @@ namespace CloudStreamForms.Core
             public bool hasBeenVerified;
             public bool hasTriedToVerify;
             public VerifiedLink verifiedLink;
+            public bool canNotBeDownloaded;
         }
 
 
