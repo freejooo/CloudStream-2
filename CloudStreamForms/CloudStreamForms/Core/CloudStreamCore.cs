@@ -25,7 +25,7 @@ namespace CloudStreamForms.Core
         {
             coreCreation = DateTime.Now;
             // INACTIVE // new DubbedAnimeNetProvider(this)
-            animeProviders = new IAnimeProvider[] { new AnimeFeverBloatFreeProvider(this), new GogoAnimeProvider(this), new KickassAnimeProvider(this), new DubbedAnimeProvider(this), new AnimeFlixProvider(this), new AnimekisaProvider(this), new TheMovieAnimeProvider(this), new KissFreeAnimeProvider(this), new AnimeSimpleProvider(this), new VidstreamingAnimeProvider(this), new AnimeVibeBloatFreeProvider(this), new NineAnimeBloatFreeProvider(this) };
+            animeProviders = new IAnimeProvider[] {  new AnimeFeverBloatFreeProvider(this), new GogoAnimeProvider(this), new KickassAnimeProvider(this), new DubbedAnimeProvider(this), new AnimeFlixProvider(this), new AnimekisaProvider(this), new TheMovieAnimeProvider(this), new KissFreeAnimeProvider(this), new AnimeSimpleProvider(this), new VidstreamingAnimeProvider(this), new AnimeVibeBloatFreeProvider(this), new NineAnimeBloatFreeProvider(this) };
             movieProviders = new IMovieProvider[] { new DirectVidsrcProvider(this), new WatchTVProvider(this), new FMoviesProvider(this), new LiveMovies123Provider(this), new TheMovies123Provider(this), new YesMoviesProvider(this), new WatchSeriesProvider(this), new GomoStreamProvider(this), new Movies123Provider(this), new DubbedAnimeMovieProvider(this), new TheMovieMovieProvider(this), new KickassMovieProvider(this) };
         }
 
@@ -243,6 +243,9 @@ namespace CloudStreamForms.Core
         public struct MALSeason
         {
             public string malUrl;
+            public int MalId { get {
+                    return int.Parse(FindHTML(malUrl, "anime/", "/"));
+                } }
             public string name;
             public string japName;
             public string engName;
@@ -8045,12 +8048,13 @@ namespace CloudStreamForms.Core
                 request.AutomaticDecompression = DecompressionMethods.GZip;
                 request.UserAgent = USERAGENT;
                 request.Referer = url;
+              //  request.TransferEncoding = "UTF8";
                 //request.AddRange(1212416);
 
                 using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
                 using (Stream stream = response.GetResponseStream())
 
-                using (StreamReader reader = new StreamReader(stream)) {
+                using (StreamReader reader = new StreamReader(stream, Encoding.UTF8)) {
                     try {
                         html = reader.ReadToEnd();
                     }
