@@ -29,8 +29,32 @@ namespace CloudStreamForms.Core
         {
             coreCreation = DateTime.Now;
             // INACTIVE // new DubbedAnimeNetProvider(this)
-            animeProviders = new IAnimeProvider[] { new AnimeFeverBloatFreeProvider(this), new GogoAnimeProvider(this), new KickassAnimeProvider(this), new DubbedAnimeProvider(this), new AnimeFlixProvider(this), new AnimekisaProvider(this), new TheMovieAnimeProvider(this), new KissFreeAnimeProvider(this), new AnimeSimpleProvider(this), new VidstreamingAnimeProvider(this), new AnimeVibeBloatFreeProvider(this), new NineAnimeBloatFreeProvider(this) };
-            movieProviders = new IMovieProvider[] { new DirectVidsrcProvider(this), new WatchTVProvider(this), new FMoviesProvider(this), new LiveMovies123Provider(this), new TheMovies123Provider(this), new YesMoviesProvider(this), new WatchSeriesProvider(this), new GomoStreamProvider(this), new Movies123Provider(this), new DubbedAnimeMovieProvider(this), new TheMovieMovieProvider(this), new KickassMovieProvider(this) };
+            animeProviders = new IAnimeProvider[] { 
+                new TwistMoeBloatFreeProvider(this),
+                new AnimeFeverBloatFreeProvider(this), 
+                new GogoAnimeProvider(this), 
+                new KickassAnimeProvider(this), 
+                new DubbedAnimeProvider(this), 
+                new AnimeFlixProvider(this), 
+                new AnimekisaProvider(this), 
+                new TheMovieAnimeProvider(this), 
+                new KissFreeAnimeProvider(this), 
+                new AnimeSimpleProvider(this), 
+                new VidstreamingAnimeProvider(this), 
+                new AnimeVibeBloatFreeProvider(this), 
+                new NineAnimeBloatFreeProvider(this) };
+            movieProviders = new IMovieProvider[] { 
+                new DirectVidsrcProvider(this), 
+                new WatchTVProvider(this), 
+                new LiveMovies123Provider(this), 
+                new TheMovies123Provider(this), 
+                new YesMoviesProvider(this), 
+                new WatchSeriesProvider(this),
+                new GomoStreamProvider(this), 
+                new Movies123Provider(this), 
+                new DubbedAnimeMovieProvider(this), 
+                new TheMovieMovieProvider(this), 
+                new KickassMovieProvider(this) };
         }
 
         public static object mainPage;
@@ -7887,13 +7911,16 @@ namespace CloudStreamForms.Core
             }
         }
 
-        public static double GetFileSize(string url)
+        public static double GetFileSize(string url, string referer = "")
         {
             try {
                 //   var webRequest = HttpWebRequest.Create(new System.Uri(url));
                 HttpWebRequest webRequest = (HttpWebRequest)HttpWebRequest.Create(url);
                 webRequest.UserAgent = USERAGENT;
                 webRequest.Accept = "*/*";
+                if(referer != "") {
+                    webRequest.Referer = referer;
+                }
 
                 if (GetRequireCert(url)) { webRequest.ServerCertificateValidationCallback = delegate { return true; }; }
 
@@ -8218,7 +8245,7 @@ namespace CloudStreamForms.Core
             public bool hasBeenVerified;
             public bool hasTriedToVerify;
             public VerifiedLink verifiedLink;
-            public bool canNotBeDownloaded;
+            public bool canNotRunInVideoplayer;
         }
 
 
@@ -9193,7 +9220,7 @@ namespace CloudStreamForms.Core
             }
         }
 
-        static readonly List<string> sortingList = new List<string>() { "4k", "2160p", "googlevideo 1080p", "googlevideo 720p", "googlevideo hd", "upstream", "1080p", "1068", "hd", "auto", "autop", "720p", "hls", "source", "480p", "360p", "240p" };
+        public static readonly List<string> sortingList = new List<string>() { "4k", "2160p", "googlevideo 1080p", "twist.moe", "googlevideo 720p", "googlevideo hd", "upstream", "1080p", "1068", "hd", "auto", "autop", "720p", "hls", "source", "480p", "360p", "240p" };
         public static MirrorInfo[] SortToHdMirrors(List<string> mirrorsUrls, List<string> mirrorsNames)
         {
             List<MirrorInfo> mirrorInfos = new List<MirrorInfo>();

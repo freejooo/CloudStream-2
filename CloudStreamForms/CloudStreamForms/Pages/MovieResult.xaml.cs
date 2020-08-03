@@ -16,6 +16,7 @@ using static CloudStreamForms.App;
 using static CloudStreamForms.Core.CloudStreamCore;
 using static CloudStreamForms.MainPage;
 using static CloudStreamForms.Settings;
+using static CloudStreamForms.Core.CoreHelpers;
 
 namespace CloudStreamForms
 {
@@ -270,8 +271,9 @@ namespace CloudStreamForms
         {
             base.OnAppearing();
 
-            ForceUpdate(checkColor:true);
+            ForceUpdate(checkColor: true);
             OnSomeDownloadFinished += OnHandleDownload;
+            OnSomeDownloadFailed += OnHandleDownload;
 
             if (!hasAppeared) {
                 hasAppeared = true;
@@ -286,12 +288,13 @@ namespace CloudStreamForms
 
         public void OnHandleDownload(object sender, EventArgs arg)
         {
-            ForceUpdate(checkColor:true);
+            ForceUpdate(checkColor: true);
         }
 
         protected override void OnDisappearing()
         {
             OnSomeDownloadFinished -= OnHandleDownload;
+            OnSomeDownloadFailed -= OnHandleDownload;
 
             //  ForceUpdateVideo -= ForceUpdateAppearing; // CANT REMOVE IT BECAUSE VIDEOPAGE TRIGGERS ONDIS
             base.OnDisappearing();
@@ -917,13 +920,18 @@ namespace CloudStreamForms
                         for (int i = 0; i < l.Length; i++) {
                             print(l[i].name + "<<<<<<<LD");
                         }*/
-                        MirrorInfo[] info = null;
+                        BasicLink[] info = null;
                         bool hasMirrors = false;
                         var baseLinks = CloudStreamCore.GetCachedLink(imdbId);
                         if (baseLinks.HasValue) {
-                            var _links = baseLinks.Value.links.Where(t => {
+                            info = baseLinks.Value.links.OrderHDLinks().ToArray();
+                            hasMirrors = info.Length > 0;
+
+                            /*.Where(t => {
                                 return !t.isAdvancedLink;
-                            }).ToList();
+                            });*/
+
+                            /*.ToList();
                             hasMirrors = _links.Count > 0;
 
                             List<string> mirrorUrls = new List<string>();
@@ -932,12 +940,12 @@ namespace CloudStreamForms
                                 mirrorNames.Add(link.PublicName);
                                 mirrorUrls.Add(link.baseUrl);
                             }
-                            info = SortToHdMirrors(epRes.mirrosUrls, epRes.Mirros);
+                            info = SortToHdMirrors(epRes.mirrosUrls, epRes.Mirros);*/
                         }
 
                         if (hasMirrors && info != null) {
                             App.UpdateDownload(epId, -1);
-                            string dpath = App.RequestDownload(epId, _episodeResult.OgTitle, _episodeResult.Description, _episodeResult.Episode, currentSeason, info.Select(t => t.url).ToList(), info.Select(t => t.name).ToList(), _episodeResult.GetDownloadTitle(currentSeason, _episodeResult.Episode) + ".mp4", _episodeResult.PosterUrl, titleName, _episodeResult.IMDBEpisodeId);
+                            string dpath = App.RequestDownload(epId, _episodeResult.OgTitle, _episodeResult.Description, _episodeResult.Episode, currentSeason, info.Select(t => { return new BasicMirrorInfo() { mirror = t.baseUrl, name = t.name, referer = t.referer }; }).ToList(), _episodeResult.GetDownloadTitle(currentSeason, _episodeResult.Episode) + ".mp4", _episodeResult.PosterUrl, titleName, _episodeResult.IMDBEpisodeId);
 
                             try {
                                 epView.MyEpisodeResultCollection[_id].downloadState = 2; // SET IS DOWNLOADING
@@ -1622,7 +1630,7 @@ namespace CloudStreamForms
 
                 VideoPage.maxEpisodeForLoading = maxEpisodes;
             }
-            await App.RequestVlc(episodeResult.mirrosUrls, episodeResult.Mirros, episodeResult.OgTitle, episodeResult.IMDBEpisodeId, episode: episodeResult.Episode, season: currentSeason, subtitleFull: currentMovie.subtitles.Select(t => t.data).FirstOrDefault(), descript: episodeResult.Description, overrideSelectVideo: overrideSelectVideo, startId: (int)episodeResult.ProgressState, headerId: currentMovie.title.id,isFromIMDB:true);// startId: FROM_PROGRESS); //  (int)episodeResult.ProgressState																																																																													  //App.PlayVLCWithSingleUrl(episodeResult.mirrosUrls, episodeResult.Mirros, currentMovie.subtitles.Select(t => t.data).ToList(), currentMovie.subtitles.Select(t => t.name).ToList(), currentMovie.title.name, episodeResult.Episode, currentSeason, overrideSelectVideo);
+            await App.RequestVlc(episodeResult.mirrosUrls, episodeResult.Mirros, episodeResult.OgTitle, episodeResult.IMDBEpisodeId, episode: episodeResult.Episode, season: currentSeason, subtitleFull: currentMovie.subtitles.Select(t => t.data).FirstOrDefault(), descript: episodeResult.Description, overrideSelectVideo: overrideSelectVideo, startId: (int)episodeResult.ProgressState, headerId: currentMovie.title.id, isFromIMDB: true);// startId: FROM_PROGRESS); //  (int)episodeResult.ProgressState																																																																													  //App.PlayVLCWithSingleUrl(episodeResult.mirrosUrls, episodeResult.Mirros, currentMovie.subtitles.Select(t => t.data).ToList(), currentMovie.subtitles.Select(t => t.name).ToList(), currentMovie.title.name, episodeResult.Episode, currentSeason, overrideSelectVideo);
             isRequestingPlayEpisode = false;
         }
 
@@ -1793,18 +1801,19 @@ namespace CloudStreamForms
                 }
             }
             else if (action == "Download") {  // ============================== DOWNLOAD FILE ==============================
-                string download = await ActionPopup.DisplayActionSheet("Download", episodeResult.Mirros.ToArray()); //await DisplayActionSheet("Download", "Cancel", null, episodeResult.Mirros.ToArray());
-                for (int i = 0; i < episodeResult.Mirros.Count; i++) {
-                    if (episodeResult.Mirros[i] == download) {
-                        string mirrorUrl = episodeResult.mirrosUrls[i];
-                        string mirrorName = episodeResult.Mirros[i];
+                List<BasicLink> links = episodeResult.BasicLinks;
+
+                string download = await ActionPopup.DisplayActionSheet("Download", links.Select(t => t.PublicName).ToArray()); //await DisplayActionSheet("Download", "Cancel", null, episodeResult.Mirros.ToArray());
+                for (int i = 0; i < links.Count; i++) {
+                    if (links[i].PublicName == download) {
+                        var link = links[i];
                         DownloadSubtitlesToFileLocation(episodeResult, currentMovie, currentSeason, showToast: false);
                         TempThread tempThred = core.CreateThread(4);
                         core.StartThread("DownloadThread", async () => {
                             try {
                                 //UserDialogs.Instance.ShowLoading("Checking link...", MaskType.Gradient);
-                                ActionPopup.StartIndeterminateLoadinbar("Checking link...");
-                                double fileSize = CloudStreamCore.GetFileSize(mirrorUrl);
+                                await ActionPopup.StartIndeterminateLoadinbar("Checking link...");
+                                double fileSize = CloudStreamCore.GetFileSize(link.baseUrl, link.referer ?? "");
                                 //    UserDialogs.Instance.HideLoading();
                                 await ActionPopup.StopIndeterminateLoadinbar();
                                 if (fileSize > 1) {
@@ -1814,7 +1823,7 @@ namespace CloudStreamForms
                                     App.UpdateDownload(GetCorrectId(episodeResult), -1);
                                     print("CURRENTSESON: " + currentSeason);
 
-                                    string dpath = App.RequestDownload(GetCorrectId(episodeResult), episodeResult.OgTitle, episodeResult.Description, episodeResult.Episode, currentSeason, new List<string>() { mirrorUrl }, new List<string>() { mirrorName }, episodeResult.GetDownloadTitle(currentSeason, episodeResult.Episode) + ".mp4", episodeResult.PosterUrl, currentMovie.title, episodeResult.IMDBEpisodeId);
+                                    string dpath = App.RequestDownload(GetCorrectId(episodeResult), episodeResult.OgTitle, episodeResult.Description, episodeResult.Episode, currentSeason, new List<BasicMirrorInfo>() { new BasicMirrorInfo() { mirror = link.baseUrl, name = link.PublicName, referer = link.referer } }, episodeResult.GetDownloadTitle(currentSeason, episodeResult.Episode) + ".mp4", episodeResult.PosterUrl, currentMovie.title, episodeResult.IMDBEpisodeId);
 
                                     App.ShowToast("Download Started - " + fileSize + "MB");
                                     episodeResult.downloadState = 2;
@@ -1831,6 +1840,7 @@ namespace CloudStreamForms
                                 core.JoinThred(tempThred);
                             }
                         });
+                        break;
                     }
                 }
             }

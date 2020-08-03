@@ -196,6 +196,7 @@ namespace CloudStreamForms.Core.AnimeProviders
         {
             if (isFetching) return;
             if (openToken != "" && tokenCook != "") return;
+            if (hasLoaded) return;
             isFetching = true;
             try {
 
@@ -361,6 +362,7 @@ namespace CloudStreamForms.Core.AnimeProviders
                 isAdvancedLink = true,
                 name = "Twist.Moe",
                 priority = 10,
+                canNotRunInVideoplayer = true,
                 baseUrl = "https://twist.moe/" + source // "https://twistcdn.bunny.sh/" + source
             }) ;
         }

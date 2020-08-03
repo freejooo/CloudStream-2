@@ -131,6 +131,26 @@ namespace CloudStreamForms.Core
 
     public static class CoreHelpers
     {
+
+        public static List<BasicLink> OrderHDLinks(this List<BasicLink> sort)
+        {
+            List<BasicLink> mirrorInfos = new List<BasicLink>();
+            for (int i = 0; i < sortingList.Count; i++) {
+                for (int q = 0; q < sort.Count; q++) {
+                    string name = sort[q].PublicName;
+                    if ($" {name} ".ToLower().Contains($" {sortingList[i]} ")) {
+                        mirrorInfos.Add(sort[q]);
+                    }
+                }
+            }
+            for (int q = 0; q < sort.Count; q++) {
+                var add = sort[q];
+                if (!mirrorInfos.Contains(add)) {
+                    mirrorInfos.Add(add);
+                }
+            }
+            return mirrorInfos;
+        }
         /// <summary>
         /// Will return the result, if not match then null
         /// </summary>

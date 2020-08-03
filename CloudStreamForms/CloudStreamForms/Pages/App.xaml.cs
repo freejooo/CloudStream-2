@@ -97,7 +97,7 @@ namespace CloudStreamForms
             void CancelNot(int id);
             bool GetPlayerInstalled(VideoPlayer player);
             //  void PlayExternalApp(VideoPlayer player);
-            string DownloadHandleIntent(int id, List<string> mirrorNames, List<string> mirrorUrls, string fileName, string titleName, bool mainPath, string extraPath, bool showNotification = true, bool showNotificationWhenDone = true, bool openWhenDone = false, string poster = "", string beforeTxt = "");
+            string DownloadHandleIntent(int id, List<BasicMirrorInfo> mirrors, string fileName, string titleName, bool mainPath, string extraPath, bool showNotification = true, bool showNotificationWhenDone = true, bool openWhenDone = false, string poster = "", string beforeTxt = "");
             DownloadProgressInfo GetDownloadProgressInfo(int id, string fileUrl);
             void UpdateDownload(int id, int state);
             /*  BluetoothDeviceID[] GetBluetoothDevices();
@@ -105,10 +105,19 @@ namespace CloudStreamForms
             void RequestVlc(List<string> urls, List<string> names, string episodeName, string episodeId, long startId = FROM_PROGRESS, string subtitleFull = "", VideoPlayer preferedPlayer = VideoPlayer.VLC);
         }
 
+        [Serializable]
+        public struct BasicMirrorInfo
+        {
+            public string name;
+            public string mirror;
+            public string referer;
+        }
+
         public enum DownloadState { Downloading, Downloaded, NotDownloaded, Paused }
         public enum DownloadType { Normal = 0, YouTube = 1 }
 
         public static EventHandler OnSomeDownloadFinished;
+        public static EventHandler OnSomeDownloadFailed;
 
         [System.Serializable]
         public class DownloadInfo
@@ -330,7 +339,7 @@ namespace CloudStreamForms
             return name;
         }
 
-        public static string RequestDownload(int id, string name, string description, int episode, int season, List<string> mirrorUrls, List<string> mirrorNames, string downloadTitle, string poster, CloudStreamCore.Title title, string episodeIMDBId)
+        public static string RequestDownload(int id, string name, string description, int episode, int season, List<BasicMirrorInfo> mirrors, string downloadTitle, string poster, CloudStreamCore.Title title, string episodeIMDBId)
         {
             App.SetKey(hasDownloadedFolder, id.ToString(), true);
 
@@ -346,7 +355,7 @@ namespace CloudStreamForms
             App.SetKey(nameof(DownloadHeader), "id" + header.RealId, header);
 
             App.SetKey("DownloadIds", id.ToString(), id);
-            string fileUrl = platformDep.DownloadHandleIntent(id, mirrorNames, mirrorUrls, downloadTitle, name, true, extraPath, true, true, false, poster, isMovie ? "{name}\n" : ($"S{season}:E{episode} - " + "{name}\n"));
+            string fileUrl = platformDep.DownloadHandleIntent(id, mirrors, downloadTitle, name, true, extraPath, true, true, false, poster, isMovie ? "{name}\n" : ($"S{season}:E{episode} - " + "{name}\n"));
             App.SetKey(nameof(DownloadEpisodeInfo), "id" + id, new DownloadEpisodeInfo() { dtype = DownloadType.Normal, source = header.id, description = description, downloadHeader = header.RealId, episode = episode, season = season, fileUrl = fileUrl, id = id, name = name, hdPosterUrl = poster, episodeIMDBId = episodeIMDBId });
 
             return fileUrl;

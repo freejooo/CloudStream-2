@@ -494,8 +494,7 @@ namespace CloudStreamForms.Droid
         public struct DownloadHandleNot
         {
             public int id;
-            public List<string> mirrorNames;
-            public List<string> mirrorUrls;
+            public List<BasicMirrorInfo> mirrors;
             public int mirror;
             public string title;
             public string path;
@@ -512,7 +511,7 @@ namespace CloudStreamForms.Droid
         {
             try {
                 DownloadHandleNot d = JsonConvert.DeserializeObject<DownloadHandleNot>(data);
-                HandleIntent(d.id, d.mirrorNames, d.mirrorUrls, d.mirror, d.title, d.path, d.poster, d.fileName, d.beforeTxt, d.openWhenDone, d.showNotificaion, d.showDoneNotificaion, d.showDoneAsToast, true);
+                HandleIntent(d.id, d.mirrors, d.mirror, d.title, d.path, d.poster, d.fileName, d.beforeTxt, d.openWhenDone, d.showNotificaion, d.showDoneNotificaion, d.showDoneAsToast, true);
 
             }
             catch (Exception) {
@@ -548,7 +547,7 @@ namespace CloudStreamForms.Droid
         /// <param name="showDoneNotificaion"></param>
         /// <param name="showDoneAsToast"></param>
         /// <param name="resumeIntent"></param>
-        public static void HandleIntent(int id, List<string> mirrorNames, List<string> mirrorUrls, int mirror, string title, string path, string poster, string fileName, string beforeTxt, bool openWhenDone, bool showNotificaion, bool showDoneNotificaion, bool showDoneAsToast, bool resumeIntent)
+        public static void HandleIntent(int id, List<BasicMirrorInfo> mirrors, int mirror, string title, string path, string poster, string fileName, string beforeTxt, bool openWhenDone, bool showNotificaion, bool showDoneNotificaion, bool showDoneAsToast, bool resumeIntent)
         {
             const int UPDATE_TIME = 1;
 
@@ -629,12 +628,14 @@ namespace CloudStreamForms.Droid
 
                     Thread t = new Thread(() => {
                         print("START:::");
-                        string json = JsonConvert.SerializeObject(new DownloadHandleNot() { id = id, mirrorNames = mirrorNames, mirrorUrls = mirrorUrls, fileName = fileName, showDoneAsToast = showDoneAsToast, openWhenDone = openWhenDone, showDoneNotificaion = showDoneNotificaion, beforeTxt = beforeTxt, mirror = mirror, path = path, poster = poster, showNotificaion = showNotificaion, title = title });
+                        string json = JsonConvert.SerializeObject(new DownloadHandleNot() { id = id, mirrors = mirrors, fileName = fileName, showDoneAsToast = showDoneAsToast, openWhenDone = openWhenDone, showDoneNotificaion = showDoneNotificaion, beforeTxt = beforeTxt, mirror = mirror, path = path, poster = poster, showNotificaion = showNotificaion, title = title });
 
                         App.SetKey(DOWNLOAD_KEY_INTENT, id.ToString(), json);
 
-                        string url = mirrorUrls[mirror];
-                        string urlName = mirrorNames[mirror];
+                        var mirr = mirrors[mirror];
+                        string url = mirr.mirror;
+                        string urlName = mirr.name;
+                        string referer = mirr.referer ?? "";
 
                         if ((int)Android.OS.Build.VERSION.SdkInt > 9) {
                             StrictMode.ThreadPolicy policy = new
@@ -699,6 +700,9 @@ namespace CloudStreamForms.Droid
                             }
                             print("SET CONNECT ::2");
                             connection.SetRequestProperty("Accept-Encoding", "identity");
+                            if (referer != "") {
+                                connection.SetRequestProperty("Referer", referer);
+                            }
                             int clen = 0;
 
                             bool Completed = ExecuteWithTimeLimit(TimeSpan.FromMilliseconds(10000), () => {
@@ -724,7 +728,7 @@ namespace CloudStreamForms.Droid
                                 if (isStartProgress.ContainsKey(id)) {
                                     isStartProgress.Remove(id);
                                 }
-                                if (mirror < mirrorUrls.Count - 1 && progress < 2 && rFile.Length() < 1000000) { // HAVE MIRRORS LEFT
+                                if (mirror < mirrors.Count - 1 && progress < 2 && rFile.Length() < 1000000) { // HAVE MIRRORS LEFT
                                     mirror++;
                                     removeKeys = false;
                                     resumeIntent = false;
@@ -819,6 +823,7 @@ namespace CloudStreamForms.Droid
                                         changedPause -= UpdateFromId;
                                         activeIds.Remove(id);
                                         removeKeys = true;
+                                        OnSomeDownloadFailed?.Invoke(null, EventArgs.Empty);
                                         Thread.Sleep(100);
                                         return;
                                     }
@@ -870,7 +875,7 @@ namespace CloudStreamForms.Droid
                         catch (Exception _ex) {
                             print("DOWNLOADURL: " + url);
                             print("DOWNLOAD FAILED BC: " + _ex);
-                            if (mirror < mirrorUrls.Count - 1 && progress < 2) { // HAVE MIRRORS LEFT
+                            if (mirror < mirrors.Count - 1 && progress < 2) { // HAVE MIRRORS LEFT
                                 mirror++;
                                 removeKeys = false;
                                 resumeIntent = false;
@@ -1130,8 +1135,8 @@ namespace CloudStreamForms.Droid
         }*/
 
         public void Killed()
-        { 
-           // App.ShowToast("KILLED");
+        {
+            // App.ShowToast("KILLED");
             //ShowNotification("finish", "Yeet");
 #if DEBUG
             EndDebugging();
@@ -1145,7 +1150,7 @@ namespace CloudStreamForms.Droid
         {
             Killed();
             base.OnDestroy();
-        } 
+        }
 
         protected override void OnStop()
         {
@@ -2523,7 +2528,7 @@ namespace CloudStreamForms.Droid
                 error(_ex);
             }
             mainS.Start();
-          //  MainDelayTest();
+            //  MainDelayTest();
             // long delay = getDelay();
 
             //  print("MAIN DELAYYYY::: " + delay);
@@ -2637,12 +2642,12 @@ namespace CloudStreamForms.Droid
             }
         }
 
-        public string DownloadHandleIntent(int id, List<string> mirrorNames, List<string> mirrorUrls, string fileName, string titleName, bool mainPath, string extraPath, bool showNotification = true, bool showNotificationWhenDone = true, bool openWhenDone = false, string poster = "", string beforeTxt = "")//, int mirror, string title, string path, string poster, string fileName, string beforeTxt, bool openWhenDone, bool showNotificaion, bool showDoneNotificaion, bool showDoneAsToast, bool resumeIntent)
+        public string DownloadHandleIntent(int id, List<BasicMirrorInfo> mirrors, string fileName, string titleName, bool mainPath, string extraPath, bool showNotification = true, bool showNotificationWhenDone = true, bool openWhenDone = false, string poster = "", string beforeTxt = "")//, int mirror, string title, string path, string poster, string fileName, string beforeTxt, bool openWhenDone, bool showNotificaion, bool showDoneNotificaion, bool showDoneAsToast, bool resumeIntent)
         {
             try {
                 string path = GetPath(mainPath, extraPath);
                 string full = path + "/" + CensorFilename(fileName);
-                DownloadHandle.HandleIntent(id, mirrorNames, mirrorUrls, 0, titleName, path, poster, fileName, beforeTxt, openWhenDone, showNotification, showNotification, false, false);
+                DownloadHandle.HandleIntent(id, mirrors, 0, titleName, path, poster, fileName, beforeTxt, openWhenDone, showNotification, showNotification, false, false);
                 return full;
             }
             catch (Exception _ex) {
@@ -2824,11 +2829,9 @@ namespace CloudStreamForms.Droid
         {
             return "";
         }
-
-        public string DownloadHandleIntent(int id, List<string> mirrorNames, List<string> mirrorUrls, string fileName, string titleName, bool mainPath, string extraPath, bool showNotification = true, bool showNotificationWhenDone = true, bool openWhenDone = false, string poster = "", string beforeTxt = "")
+        public string DownloadHandleIntent(int id, List<BasicMirrorInfo> mirrors, string fileName, string titleName, bool mainPath, string extraPath, bool showNotification = true, bool showNotificationWhenDone = true, bool openWhenDone = false, string poster = "", string beforeTxt = "")
         {
             return "";
-
         }
 
         public void DownloadUpdate(string update)

@@ -786,7 +786,7 @@ namespace CloudStreamForms
             ImageService.Instance.LoadUrl(v.Thumbnails.HighResUrl, TimeSpan.FromDays(30)); // CASHE IMAGE
             string extraPath = "/" + GetPathFromType(header);
 
-            string fileUrl = platformDep.DownloadHandleIntent(id, new List<string>() { info.VideoQualityLabel }, new List<string>() { info.Url }, v.Title + "." + info.Container.Name, name, true, extraPath, true, true, false, v.Thumbnails.HighResUrl, "{name}\n");//isMovie ? "{name}\n" : ($"S{season}:E{episode} - " + "{name}\n"));
+            string fileUrl = platformDep.DownloadHandleIntent(id, new List<BasicMirrorInfo>() { new BasicMirrorInfo() { name = info.VideoQualityLabel,mirror = info.Url } }, v.Title + "." + info.Container.Name, name, true, extraPath, true, true, false, v.Thumbnails.HighResUrl, "{name}\n");//isMovie ? "{name}\n" : ($"S{season}:E{episode} - " + "{name}\n"));
             return fileUrl;
         }
     }

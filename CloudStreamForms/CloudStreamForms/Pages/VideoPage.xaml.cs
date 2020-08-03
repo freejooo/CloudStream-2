@@ -245,7 +245,7 @@ namespace CloudStreamForms
                                 options.Add("start-time=" + (lastPlayerTime / 1000));
                             }
                         }
-                        
+
                         disMedia = new Media(_libVLC, CurrentMirrorUrl, FromType.FromLocation, options.ToArray());
                         lastUrl = CurrentMirrorUrl;
                         if (CurrentBasicLink.IsSeperatedAudioStream) {
@@ -679,7 +679,7 @@ namespace CloudStreamForms
             if (currentVideo.isFromIMDB) {
                 LinkHolder? holder;
                 if ((holder = GetCachedLink(currentVideo.episodeId)) != null) {
-                    Mirrors = holder.Value.links;
+                    Mirrors = holder.Value.links.Where(t => !t.canNotRunInVideoplayer).ToList();
                 }
             }
             Mirrors = Mirrors.OrderBy(t => -t.priority).ToList();
