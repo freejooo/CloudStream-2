@@ -820,6 +820,8 @@ namespace CloudStreamForms.Droid
                                         App.RemoveKey(DOWNLOAD_KEY, id.ToString());
                                         App.RemoveKey(DOWNLOAD_KEY_INTENT, id.ToString());
                                         App.RemoveKey(App.hasDownloadedFolder, id.ToString());
+                                        App.RemoveKey("dlength", "id" + id);
+                                        App.RemoveKey("DownloadIds", id.ToString());
                                         changedPause -= UpdateFromId;
                                         activeIds.Remove(id);
                                         removeKeys = true;

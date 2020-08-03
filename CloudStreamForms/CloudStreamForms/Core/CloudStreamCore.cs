@@ -29,31 +29,31 @@ namespace CloudStreamForms.Core
         {
             coreCreation = DateTime.Now;
             // INACTIVE // new DubbedAnimeNetProvider(this)
-            animeProviders = new IAnimeProvider[] { 
+            animeProviders = new IAnimeProvider[] {
                 new TwistMoeBloatFreeProvider(this),
-                new AnimeFeverBloatFreeProvider(this), 
-                new GogoAnimeProvider(this), 
-                new KickassAnimeProvider(this), 
-                new DubbedAnimeProvider(this), 
-                new AnimeFlixProvider(this), 
-                new AnimekisaProvider(this), 
-                new TheMovieAnimeProvider(this), 
-                new KissFreeAnimeProvider(this), 
-                new AnimeSimpleProvider(this), 
-                new VidstreamingAnimeProvider(this), 
-                new AnimeVibeBloatFreeProvider(this), 
+                new AnimeFeverBloatFreeProvider(this),
+                new GogoAnimeProvider(this),
+                new KickassAnimeProvider(this),
+                new DubbedAnimeProvider(this),
+                new AnimeFlixProvider(this),
+                new AnimekisaProvider(this),
+                new TheMovieAnimeProvider(this),
+                new KissFreeAnimeProvider(this),
+                new AnimeSimpleProvider(this),
+                new VidstreamingAnimeProvider(this),
+                new AnimeVibeBloatFreeProvider(this),
                 new NineAnimeBloatFreeProvider(this) };
-            movieProviders = new IMovieProvider[] { 
-                new DirectVidsrcProvider(this), 
-                new WatchTVProvider(this), 
-                new LiveMovies123Provider(this), 
-                new TheMovies123Provider(this), 
-                new YesMoviesProvider(this), 
+            movieProviders = new IMovieProvider[] {
+                new DirectVidsrcProvider(this),
+                new WatchTVProvider(this),
+                new LiveMovies123Provider(this),
+                new TheMovies123Provider(this),
+                new YesMoviesProvider(this),
                 new WatchSeriesProvider(this),
-                new GomoStreamProvider(this), 
-                new Movies123Provider(this), 
-                new DubbedAnimeMovieProvider(this), 
-                new TheMovieMovieProvider(this), 
+                new GomoStreamProvider(this),
+                new Movies123Provider(this),
+                new DubbedAnimeMovieProvider(this),
+                new TheMovieMovieProvider(this),
                 new KickassMovieProvider(this) };
         }
 
@@ -4905,11 +4905,11 @@ namespace CloudStreamForms.Core
                         int i1 = int.Parse(s1.Replace(".", ""));
                         int i2 = int.Parse(s2.Replace(".", ""));
 
-                       // print(i1 + "||" + i2 + "START:::" + ToDown(other[i].removedTitle.Replace("-", "").Replace(":", ""), replaceSpace: "") + "<<>>" + ToDown(activeMovie.title.name.Replace("-", "").Replace(":", ""), replaceSpace: "") + ":::");
+                        // print(i1 + "||" + i2 + "START:::" + ToDown(other[i].removedTitle.Replace("-", "").Replace(":", ""), replaceSpace: "") + "<<>>" + ToDown(activeMovie.title.name.Replace("-", "").Replace(":", ""), replaceSpace: "") + ":::");
                         if ((i1 == i2 || i1 == i2 - 1 || i1 == i2 + 1) && ToDown(other[i].removedTitle.Replace("-", "").Replace(":", ""), replaceSpace: "") == ToDown(activeMovie.title.name.Replace("-", "").Replace(":", ""), replaceSpace: "")) {
 
                             if (other[i].released == activeMovie.title.year.Substring(0, 4) || activeMovie.title.movieType != MovieType.Movie) {
-                            //    print("TRUE:::::" + other[i].imdbScore + "|" + other[i].released + "|" + other[i].href + "|" + other[i].title + "|" + other[i].removedTitle);
+                                //    print("TRUE:::::" + other[i].imdbScore + "|" + other[i].released + "|" + other[i].href + "|" + other[i].title + "|" + other[i].removedTitle);
                                 if (other[i].href != "") {
                                     activeMovie.title.watchSeriesHdMetaData.Add(new WatchSeriesHdMetaData() { season = other[i].season, url = other[i].href });
                                 }
@@ -5964,7 +5964,7 @@ namespace CloudStreamForms.Core
                         string tt = FindHTML(_d, " data-tconst=\"", "\"");
                         string name = FindHTML(_d, "alt=\"", "\"", decodeToNonHtml: true);
                         string img = FindHTML(_d, "loadlate=\"", "\"");
-                      //  print("DATA::::::::" + tt + "|" + _d);
+                        //  print("DATA::::::::" + tt + "|" + _d);
                         string d = RemoveOne(_d, "<a href=\"/title/" + tt + "/vote?v=X;k", -200);
                         string __d = FindHTML(_d, "<div class=\"rec-title\">\n       <a href=\"/title/" + tt, "<div class=\"rec-rating\">");
                         List<string> genresNames = new List<string>() { "Action", "Adventure", "Animation", "Biography", "Comedy", "Crime", "Drama", "Family", "Fantasy", "Film-Noir", "History", "Horror", "Music", "Musical", "Mystery", "Romance", "Sci-Fi", "Sport", "Thriller", "War", "Western" };
@@ -7918,7 +7918,7 @@ namespace CloudStreamForms.Core
                 HttpWebRequest webRequest = (HttpWebRequest)HttpWebRequest.Create(url);
                 webRequest.UserAgent = USERAGENT;
                 webRequest.Accept = "*/*";
-                if(referer != "") {
+                if (referer != "") {
                     webRequest.Referer = referer;
                 }
 
@@ -8217,7 +8217,7 @@ namespace CloudStreamForms.Core
         {
             public string baseUrl;
             public bool isAdvancedLink;
-
+            public bool CanBeDownloaded { get { return typeName != "m3u8"; } }
             public bool IsSeperatedAudioStream { get { if (audioStreams == null) return false; return audioStreams.Count() > 0; } }
             // public List<AdvancedStream> streams;
             public List<AdvancedAudioStream> audioStreams;
@@ -8348,11 +8348,11 @@ namespace CloudStreamForms.Core
                 string id = (activeMovie.title.IsMovie ? activeMovie.title.id : activeMovie.episodes[normalEpisode].id);
                 var link = GetCachedLink(id);
                 var holder = (LinkHolder)link;
+                if (holder.links.Select(t => t.baseUrl).Contains(basicLink.baseUrl)) return false;
                 linkAdded?.Invoke(null, id);
                 holder.links.Add(basicLink);
                 return true;
-            }
-
+            } 
         }
 
         public bool AddPotentialLink(int normalEpisode, string _url, string _name, int _priority, string label = "")
@@ -8393,20 +8393,20 @@ namespace CloudStreamForms.Core
                     }
                     else {
                         var holder = (LinkHolder)link;
-                        if (!holder.links.Select(t => t.baseUrl).ToList().Contains(_url)) {
-                            print("ADD LINK:" + normalEpisode + "|" + _name + "|" + _priority + "|" + _url);
-                            linkAdded?.Invoke(null, id);
-                            holder.links.Add(new BasicLink() {
-                                baseUrl = _url,
-                                isAdvancedLink = false,
-                                name = _name,
-                                typeName = _type,
-                                label = label,
-                                priority = _priority,
-                                mirror = holder.links.Where(t => t.name == _name).Count()
-                            });
+                        if (holder.links.Select(t => t.baseUrl).Contains(_url)) return false;
+
+                        print("ADD LINK:" + normalEpisode + "|" + _name + "|" + _priority + "|" + _url);
+                        linkAdded?.Invoke(null, id);
+                        holder.links.Add(new BasicLink() {
+                            baseUrl = _url,
+                            isAdvancedLink = false,
+                            name = _name,
+                            typeName = _type,
+                            label = label,
+                            priority = _priority,
+                            mirror = holder.links.Where(t => t.name == _name).Count()
                             //holder.links = holder.links.OrderBy(t => t.priority).ToList();
-                        }
+                        });
                     }
 
                     // if (GetFileSize(_url) > 0) {
@@ -9220,7 +9220,10 @@ namespace CloudStreamForms.Core
             }
         }
 
-        public static readonly List<string> sortingList = new List<string>() { "4k", "2160p", "googlevideo 1080p", "twist.moe", "googlevideo 720p", "googlevideo hd", "upstream", "1080p", "1068", "hd", "auto", "autop", "720p", "hls", "source", "480p", "360p", "240p" };
+        public static readonly List<string> sortingList = new List<string>() { 
+            "4k", "2160p", "googlevideo 1080p", "twist.moe", "googlevideo 720p", "googlevideo hd", 
+            "upstream", "1080p", "1068", "hd", "auto", "autop", "720p", "hls", "source", "480p", "360p", "240p" };
+
         public static MirrorInfo[] SortToHdMirrors(List<string> mirrorsUrls, List<string> mirrorsNames)
         {
             List<MirrorInfo> mirrorInfos = new List<MirrorInfo>();

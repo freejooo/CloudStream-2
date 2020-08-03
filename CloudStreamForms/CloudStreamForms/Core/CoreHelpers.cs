@@ -110,6 +110,8 @@ namespace CloudStreamForms.Core
 
             public override void LoadLinksTSync(int episode, int season, int normalEpisode, bool isDub, TempThread tempThred)
             {
+                if ((isDub && !HasDub) || (!isDub && !HasSub)) return;
+
                 int currentep = 0;
                 for (int q = 0; q < activeMovie.title.MALData.seasonData[season].seasons.Count; q++) {
                     var ms = GetData(activeMovie.title.MALData.seasonData[season].seasons[q], out bool suc);

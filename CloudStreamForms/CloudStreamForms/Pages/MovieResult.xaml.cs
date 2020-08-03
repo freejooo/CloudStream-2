@@ -924,7 +924,7 @@ namespace CloudStreamForms
                         bool hasMirrors = false;
                         var baseLinks = CloudStreamCore.GetCachedLink(imdbId);
                         if (baseLinks.HasValue) {
-                            info = baseLinks.Value.links.OrderHDLinks().ToArray();
+                            info = baseLinks.Value.links.Where(t => t.CanBeDownloaded).ToList().OrderHDLinks().ToArray();
                             hasMirrors = info.Length > 0;
 
                             /*.Where(t => {
@@ -945,7 +945,7 @@ namespace CloudStreamForms
 
                         if (hasMirrors && info != null) {
                             App.UpdateDownload(epId, -1);
-                            string dpath = App.RequestDownload(epId, _episodeResult.OgTitle, _episodeResult.Description, _episodeResult.Episode, currentSeason, info.Select(t => { return new BasicMirrorInfo() { mirror = t.baseUrl, name = t.name, referer = t.referer }; }).ToList(), _episodeResult.GetDownloadTitle(currentSeason, _episodeResult.Episode) + ".mp4", _episodeResult.PosterUrl, titleName, _episodeResult.IMDBEpisodeId);
+                            string dpath = App.RequestDownload(epId, _episodeResult.OgTitle, _episodeResult.Description, _episodeResult.Episode, currentSeason, info.Select(t => { return new BasicMirrorInfo() { mirror = t.baseUrl, name = t.PublicName, referer = t.referer }; }).ToList(), _episodeResult.GetDownloadTitle(currentSeason, _episodeResult.Episode) + ".mp4", _episodeResult.PosterUrl, titleName, _episodeResult.IMDBEpisodeId);
 
                             try {
                                 epView.MyEpisodeResultCollection[_id].downloadState = 2; // SET IS DOWNLOADING
@@ -1339,12 +1339,20 @@ namespace CloudStreamForms
                     if (max > 0) {
                         print("CLEAR AND ADD");
                         MainThread.BeginInvokeOnMainThread(() => {
+
+                            maxEpisodes = max;
+                            print("MAXUSsssss" + maxEpisodes + "|" + max + "|" + (int)Math.Ceiling((double)max / (double)MovieResultMainEpisodeView.MAX_EPS_PER));
+
+                            SetEpisodeFromTo(0, max);
+                            SetChangeTo(max);
+
                             // CLEAR EPISODES SO SWITCHING SUB DUB 
                             if (GetLatestDub.ContainsKey(currentMovie.title.id)) {
                                 if (GetLatestDub[currentMovie.title.id] != isDub) {
                                     try {
                                         for (int i = 0; i < epView.MyEpisodeResultCollection.Count; i++) {
                                             if (epView.MyEpisodeResultCollection[i].LoadedLinks) {
+                                                print("CLEAR OS : " + i);
                                                 epView.MyEpisodeResultCollection[i].ClearMirror();
                                             }
                                         }
@@ -1354,15 +1362,8 @@ namespace CloudStreamForms
                                     }
                                 }
                             }
-                            else {
-                                GetLatestDub[currentMovie.title.id] = isDub;
-                            }
+                            GetLatestDub[currentMovie.title.id] = isDub;
 
-                            maxEpisodes = max;
-                            print("MAXUSsssss" + maxEpisodes + "|" + max + "|" + (int)Math.Ceiling((double)max / (double)MovieResultMainEpisodeView.MAX_EPS_PER));
-
-                            SetEpisodeFromTo(0, max);
-                            SetChangeTo(max);
                         });
                     }
                     else {
@@ -1711,7 +1712,7 @@ namespace CloudStreamForms
             bool hasDownloadedFile = App.KeyExists("dlength", "id" + GetCorrectId(episodeResult));
             string downloadKeyData = "";
 
-            List<string> actions = new List<string>() { "Play in App", "Play in Browser", "Download", "Download Subtitles", "Copy Link", "Reload" }; // "Remove Link",
+            List<string> actions = new List<string>() { "Play in App", "Play in Browser", "Auto Download", "Download", "Download Subtitles", "Copy Link", "Reload" }; // "Remove Link",
 
             if (App.CanPlayExternalPlayer()) {
                 actions.Insert(1, "Play External App");
@@ -1800,8 +1801,30 @@ namespace CloudStreamForms
                     }
                 }
             }
+            else if (action == "Auto Download") {
+                int epId = GetCorrectId(episodeResult);
+                BasicLink[] info = null;
+                bool hasMirrors = false;
+                var baseLinks = CloudStreamCore.GetCachedLink(episodeResult.IMDBEpisodeId);
+                if (baseLinks.HasValue) {
+                    info = baseLinks.Value.links.Where(t => t.CanBeDownloaded).ToList().OrderHDLinks().ToArray();
+                    hasMirrors = info.Length > 0;
+                }
+                if (hasMirrors && info != null) {
+                    App.ShowToast("Download Started");
+                    App.UpdateDownload(epId, -1);
+                    string dpath = App.RequestDownload(epId, episodeResult.OgTitle, episodeResult.Description, episodeResult.Episode, currentSeason, info.Select(t => { return new BasicMirrorInfo() { mirror = t.baseUrl, name = t.PublicName, referer = t.referer }; }).ToList(), episodeResult.GetDownloadTitle(currentSeason, episodeResult.Episode) + ".mp4", episodeResult.PosterUrl, currentMovie.title, episodeResult.IMDBEpisodeId);
+                    episodeResult.downloadState = 2; // SET IS DOWNLOADING
+                    ForceUpdate();
+                }
+                else {
+                    App.ShowToast("Download Failed, No Mirrors Found");
+                    episodeResult.downloadState = 0;
+                    ForceUpdate();
+                }
+            }
             else if (action == "Download") {  // ============================== DOWNLOAD FILE ==============================
-                List<BasicLink> links = episodeResult.BasicLinks;
+                List<BasicLink> links = episodeResult.BasicLinks.Where(t => t.CanBeDownloaded).ToList();
 
                 string download = await ActionPopup.DisplayActionSheet("Download", links.Select(t => t.PublicName).ToArray()); //await DisplayActionSheet("Download", "Cancel", null, episodeResult.Mirros.ToArray());
                 for (int i = 0; i < links.Count; i++) {
