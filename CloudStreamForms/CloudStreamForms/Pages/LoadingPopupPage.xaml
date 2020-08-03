@@ -21,7 +21,7 @@
     </pages:PopupPage.Animation>-->
     <!--You can use any elements here which are extended from Xamarin.Forms.View-->
     <StackLayout>
-        <AbsoluteLayout x:Name="TheStack" HorizontalOptions="Center" VerticalOptions="CenterAndExpand" BackgroundColor="Transparent" TranslationY="-50">
+        <AbsoluteLayout x:Name="TheStack" HorizontalOptions="Center" VerticalOptions="CenterAndExpand" BackgroundColor="Transparent" >
             <Grid  RowSpacing="0" VerticalOptions="Center"    >
                 <Grid.RowDefinitions >
                     <RowDefinition Height="Auto" />

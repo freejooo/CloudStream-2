@@ -661,7 +661,10 @@ namespace CloudStreamForms
                                     AccountPassword = password;
                                     AccountUsername = username;
                                     HasAccountLogin = true;
-                                    GetSyncAccount(0,logindata);
+                                    GetSyncAccount(0, logindata);
+                                }
+                                else if(error == LoginErrorType.ClientError) {
+                                    App.ShowToast("Too short username or password");
                                 }
                             }
                             catch (Exception _ex) {
@@ -705,6 +708,9 @@ namespace CloudStreamForms
                                 }
                                 else if (error == LoginErrorType.WrongPassword) {
                                     App.ShowToast("Internal server error");
+                                }
+                                else if (error == LoginErrorType.ClientError) {
+                                    App.ShowToast("Too short username or password");
                                 }
                             }
                             catch (Exception _ex) {
@@ -935,6 +941,7 @@ namespace CloudStreamForms
             InternetError = 1,
             WrongPassword = 2,
             UsernameTaken = 3,
+            ClientError = 10,
         }
 
         // DO NOT CHANGE, WILL BREAK ALL CURRENT ACCOUNTS!
@@ -1000,10 +1007,17 @@ namespace CloudStreamForms
 
         public static string GetAccountResponse(string url, string name, string password, Logintype logintype, out LoginErrorType result, string data = "")
         {
-            password = BEFORE_SALT_PASSWORD + password + AFTER_SALT_PASSWORD; // This is so the server cant use hash tables to look up password
             name = name.Replace(" ", "");
 
+            if (name.Length < 4 || password.Length < 4) {
+                result = LoginErrorType.ClientError;
+                return "";
+            }
+
+            password = BEFORE_SALT_PASSWORD + password + AFTER_SALT_PASSWORD + name; // This is so the server cant use hash tables to look up password
             result = LoginErrorType.InternetError;
+
+
             try {
                 int waitTime = 400;
                 HttpWebRequest webRequest = (HttpWebRequest)HttpWebRequest.Create(url);
@@ -1020,7 +1034,7 @@ namespace CloudStreamForms
                     webRequest.Headers.Add("HASHPASSWORD", StringCipher.HashData(password));
                 }
                 else {
-                    webRequest.Headers.Add("ONETIMEPASSWORD", StringCipher.Encrypt(rng.Next(0, int.MaxValue) + "CORRECTPASS[" + DateTime.Now.ToBinary() + "]", StringCipher.HashData(password)));
+                    webRequest.Headers.Add("ONETIMEPASSWORD", StringCipher.Encrypt(rng.Next(0, int.MaxValue) + "CORRECTPASS[" + DateTime.UtcNow.ToBinary() + "]", StringCipher.HashData(password)));
                 }
                 if (logintype != Logintype.LoginAccount) {
                     //    webRequest.Headers.Add("DATA", StringCipher.Encrypt(data, password));
@@ -1043,10 +1057,10 @@ namespace CloudStreamForms
 
                     // BEGIN RESPONSE
 
-                    try { 
+                    try {
                         HttpWebRequest request = webRequest;
                         HttpWebResponse response = (HttpWebResponse)webRequest.GetResponse();
-                         
+
                         using (StreamReader httpWebStreamReader = new StreamReader(response.GetResponseStream())) {
                             try {
                                 string s = httpWebStreamReader.ReadToEnd();
