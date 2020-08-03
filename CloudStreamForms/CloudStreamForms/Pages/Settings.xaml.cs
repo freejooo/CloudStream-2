@@ -598,6 +598,7 @@ namespace CloudStreamForms
                                     CloudStreamCore.print("SUBFILE::: " + subFile);
                                     success = subFile.StartsWith(Script.SyncWrapper.header);
                                     if (success) {
+                                        await System.Threading.Tasks.Task.Delay(200);
                                         string import = await ActionPopup.DisplayActionSheet("Override Current Data", "Yes, import data and override current", "No, dont override current data");
                                         if (import.StartsWith("Y")) {
                                             Script.SyncWrapper.SetKeysFromTextFile(subFile);
@@ -619,9 +620,13 @@ namespace CloudStreamForms
                     }
                 }
                 else if (action.StartsWith("Logout from")) {
+                    await ActionPopup.StartIndeterminateLoadinbar("Backing up data...");
+                    GetAccountResponse(AccountSite, AccountUsername, AccountPassword, Logintype.EditAccount, out LoginErrorType error, Script.SyncWrapper.GenerateTextFile(false));
+                    await ActionPopup.StopIndeterminateLoadinbar();
                     AccountUsername = "";
                     AccountSite = "";
                     AccountPassword = "";
+                    HasAccountLogin = false;
                     App.ShowToast("Logout compleate");
                 }
                 else if (action == "Login") {
@@ -655,6 +660,8 @@ namespace CloudStreamForms
                                     AccountSite = site;
                                     AccountPassword = password;
                                     AccountUsername = username;
+                                    HasAccountLogin = true;
+                                    GetSyncAccount(0,logindata);
                                 }
                             }
                             catch (Exception _ex) {
@@ -679,7 +686,7 @@ namespace CloudStreamForms
                             password = data[2];
                             try {
                                 await ActionPopup.StartIndeterminateLoadinbar("Creating Account...");
-                                string logindata = GetAccountResponse(site, username, password, Logintype.CreateAccount, out LoginErrorType error);
+                                string logindata = GetAccountResponse(site, username, password, Logintype.CreateAccount, out LoginErrorType error, Script.SyncWrapper.GenerateTextFile(false));
                                 await ActionPopup.StopIndeterminateLoadinbar();
 
                                 if (error == LoginErrorType.InternetError) {
@@ -694,6 +701,7 @@ namespace CloudStreamForms
                                     AccountSite = site;
                                     AccountPassword = password;
                                     AccountUsername = username;
+                                    HasAccountLogin = true;
                                 }
                                 else if (error == LoginErrorType.WrongPassword) {
                                     App.ShowToast("Internal server error");
@@ -711,10 +719,10 @@ namespace CloudStreamForms
             };
 
             if (AccountOverrideServerData) { // If get account dident work and you have changed then override server data
-                PublishSyncAccount();
+                PublishSyncAccount(5000);
             }
             else { // Get account data, will override current data 
-                GetSyncAccount();
+                GetSyncAccount(5000);
             }
             AccountOverrideServerData = true;
 
@@ -935,12 +943,14 @@ namespace CloudStreamForms
 
         static Random rng = new Random();
 
-        public static void GetSyncAccount()
+        public static void GetSyncAccount(int delay = 0, string _data = null)
         {
             if (AccountPassword != "" && AccountUsername != "" && AccountPassword != "") {
                 Thread t = new Thread(() => {
+                    Thread.Sleep(delay);
                     try {
-                        string data = GetAccountResponse(AccountSite, AccountUsername, AccountPassword, Logintype.LoginAccount, out LoginErrorType error);
+                        LoginErrorType error = LoginErrorType.Ok;
+                        string data = _data ?? GetAccountResponse(AccountSite, AccountUsername, AccountPassword, Logintype.LoginAccount, out error);
                         if (error != LoginErrorType.Ok) {
                             App.ShowToast("Account Server error");
                             AccountOverrideServerData = true;
@@ -964,10 +974,12 @@ namespace CloudStreamForms
             }
         }
 
-        public static void PublishSyncAccount()
+        public static void PublishSyncAccount(int delay = 0)
         {
             if (AccountPassword != "" && AccountUsername != "" && AccountPassword != "") {
                 Thread t = new Thread(() => {
+                    Thread.Sleep(delay);
+
                     try {
                         string data = GetAccountResponse(AccountSite, AccountUsername, AccountPassword, Logintype.EditAccount, out LoginErrorType error, Script.SyncWrapper.GenerateTextFile(false));
                         if (error != LoginErrorType.Ok) {
@@ -996,13 +1008,13 @@ namespace CloudStreamForms
                 int waitTime = 400;
                 HttpWebRequest webRequest = (HttpWebRequest)HttpWebRequest.Create(url);
                 if (CloudStreamCore.GetRequireCert(url)) { webRequest.ServerCertificateValidationCallback = delegate { return true; }; }
-                webRequest.Method = "GET";
+                webRequest.Method = "POST";
                 webRequest.UserAgent = "CLOUDSTREAM APP v" + App.GetBuildNumber();
                 webRequest.Timeout = waitTime * 10;
                 webRequest.ReadWriteTimeout = waitTime * 10;
                 webRequest.ContinueTimeout = waitTime * 10;
                 webRequest.Headers.Add("LOGINTYPE", ((int)logintype).ToString());
-
+                int ff = webRequest.MaximumResponseHeadersLength;
                 webRequest.Headers.Add("NAME", StringCipher.HashData(name));
                 if (logintype == Logintype.CreateAccount) {
                     webRequest.Headers.Add("HASHPASSWORD", StringCipher.HashData(password));
@@ -1011,9 +1023,66 @@ namespace CloudStreamForms
                     webRequest.Headers.Add("ONETIMEPASSWORD", StringCipher.Encrypt(rng.Next(0, int.MaxValue) + "CORRECTPASS[" + DateTime.Now.ToBinary() + "]", StringCipher.HashData(password)));
                 }
                 if (logintype != Logintype.LoginAccount) {
-                    webRequest.Headers.Add("DATA", StringCipher.Encrypt(data, password));
+                    //    webRequest.Headers.Add("DATA", StringCipher.Encrypt(data, password));
                 }
 
+
+
+                try {
+
+                    HttpWebRequest _webRequest = webRequest;
+                    Stream postStream = _webRequest.GetRequestStream();
+
+                    string requestBody = logintype != Logintype.LoginAccount ? StringCipher.Encrypt(data, password) : "";// --- RequestHeaders ---
+
+                    byte[] byteArray = Encoding.UTF8.GetBytes(requestBody);
+
+                    postStream.Write(byteArray, 0, byteArray.Length);
+                    postStream.Close();
+
+
+                    // BEGIN RESPONSE
+
+                    try { 
+                        HttpWebRequest request = webRequest;
+                        HttpWebResponse response = (HttpWebResponse)webRequest.GetResponse();
+                         
+                        using (StreamReader httpWebStreamReader = new StreamReader(response.GetResponseStream())) {
+                            try {
+                                string s = httpWebStreamReader.ReadToEnd();
+                                if (s.StartsWith("OKDATA")) {
+                                    result = LoginErrorType.Ok;
+                                    if (logintype == Logintype.LoginAccount) {
+                                        string _s = s.Split('\n')[1];
+                                        return StringCipher.Decrypt(_s, password); // THE DATA IS OKDATA\nUSERDATA 
+                                    }
+                                    else {
+                                        return "";
+                                    }
+                                }
+                                else {
+                                    result = (LoginErrorType)int.Parse(CloudStreamCore.FindHTML(s, "ERRORCODE[", "]"));
+                                    return "";
+                                }
+                            }
+                            catch (Exception) {
+                                return "";
+                            }
+                        }
+
+                    }
+                    catch (Exception _ex) {
+                        CloudStreamCore.error("FATAL EX IN POST2: " + _ex);
+                    }
+
+                }
+                catch (Exception _ex) {
+                    CloudStreamCore.error("FATAL EX IN POSTREQUEST");
+                }
+
+
+
+                /*
                 using (var webResponse = webRequest.GetResponse()) {
                     try {
                         using (StreamReader httpWebStreamReader = new StreamReader(webResponse.GetResponseStream(), Encoding.UTF8)) {
@@ -1046,6 +1115,7 @@ namespace CloudStreamForms
                     }
 
                 }
+                */
                 return "";
             }
             catch (Exception _ex) {
