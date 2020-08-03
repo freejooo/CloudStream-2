@@ -355,34 +355,6 @@ namespace CloudStreamForms.Core.AnimeProviders
             if (source == "") return;
             string url = "https://twist.moe/" + source;
 
-            HttpWebRequest webRequest = (HttpWebRequest)HttpWebRequest.Create(url);
-            webRequest.UserAgent = USERAGENT;
-            webRequest.Accept = "*/*";
-
-            if (GetRequireCert(url)) { webRequest.ServerCertificateValidationCallback = delegate { return true; }; }
-
-            webRequest.Method = "HEAD";
-            print("RESPONSEGET:");
-            webRequest.Timeout = 10000;
-            webRequest.Referer = extraData.ToString();
-
-            using (var webResponse = webRequest.GetResponse()) {
-                try {
-                    print("RESPONSE:");
-                    var fileSize = webResponse.Headers.Get("Content-Length");
-                    var fileSizeInMegaByte = Math.Round(Convert.ToDouble(fileSize) / Math.Pow((double)App.GetSizeOfJumpOnSystem(), 2.0), 2);
-                    print("GETFILESIZE: " + fileSizeInMegaByte);
-
-                }
-                catch (Exception _ex) {
-                    print("ERRORGETFILESIZE: " + url + " | " + _ex);
-                }
-
-            }
-
-
-
-            print("TWIST SOURCE: " + source);
             AddPotentialLink(normalEpisode, new BasicLink() {
                 referer = extraData.ToString(),
                 originSite = Name,

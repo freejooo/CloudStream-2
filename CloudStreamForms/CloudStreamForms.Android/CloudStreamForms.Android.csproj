@@ -59,7 +59,7 @@
     <BundleAssemblies>false</BundleAssemblies>
     <LangVersion>8.0</LangVersion>
     <MandroidI18n />
-    <AndroidSupportedAbis />
+    <AndroidSupportedAbis>arm64-v8a</AndroidSupportedAbis>
     <AndroidLinkSkip>System.Runtime.Serialization</AndroidLinkSkip>
   </PropertyGroup>
   <ItemGroup>

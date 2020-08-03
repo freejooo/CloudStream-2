@@ -245,6 +245,7 @@ namespace CloudStreamForms
                                 options.Add("start-time=" + (lastPlayerTime / 1000));
                             }
                         }
+                        
                         disMedia = new Media(_libVLC, CurrentMirrorUrl, FromType.FromLocation, options.ToArray());
                         lastUrl = CurrentMirrorUrl;
                         if (CurrentBasicLink.IsSeperatedAudioStream) {

@@ -6,7 +6,6 @@ using Xamarin.Forms;
 using Xamarin.Forms.Platform.Android;
 using G = Android.Graphics;
 
-
 [assembly: ExportRenderer(typeof(SearchBar), typeof(CustomSearchBarRenderer))]
 namespace CloudStreamForms.Droid
 {

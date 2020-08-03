@@ -1130,19 +1130,27 @@ namespace CloudStreamForms.Droid
         }*/
 
         public void Killed()
-        {
-            // ShowNotification("finish", "Yeet");
+        { 
+           // App.ShowToast("KILLED");
+            //ShowNotification("finish", "Yeet");
 #if DEBUG
             EndDebugging();
 #endif
             MainDroid.CancelChromecast(); // TO REMOVE IT, CANT INTERACT WITHOUT THE CORE
             DownloadHandle.OnKilled();
+            App.OnAppKilled?.Invoke(null, EventArgs.Empty);
         }
 
         protected override void OnDestroy()
         {
             Killed();
             base.OnDestroy();
+        } 
+
+        protected override void OnStop()
+        {
+            App.OnAppNotInForground?.Invoke(null, EventArgs.Empty);
+            base.OnStop();
         }
 
 
@@ -2514,13 +2522,27 @@ namespace CloudStreamForms.Droid
             catch (Exception _ex) {
                 error(_ex);
             }
-
+            mainS.Start();
+          //  MainDelayTest();
             // long delay = getDelay();
 
             //  print("MAIN DELAYYYY::: " + delay);
 
 
         }
+
+        static Stopwatch mainS = new Stopwatch();
+        async Task MainDelayTest()
+        {
+            await Task.Delay(250);
+            long f1 = mainS.ElapsedMilliseconds;
+            Device.BeginInvokeOnMainThread(() => {
+                long f2 = mainS.ElapsedMilliseconds;
+                App.ShowToast("SHOW: " + (f2 - f1));
+            });
+            MainDelayTest();
+        }
+
 
         MyAudioFocusListener myAudioFocusListener;
 

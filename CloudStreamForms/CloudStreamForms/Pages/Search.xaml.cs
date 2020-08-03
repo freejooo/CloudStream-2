@@ -184,8 +184,7 @@ namespace CloudStreamForms
         private void Search_searchLoaded(object sender, List<Poster> e)
         {
             activePosters = e;
-            MainThread.BeginInvokeOnMainThread(() => {
-
+            Device.BeginInvokeOnMainThread(() => { 
                 mySearchResultCollection.Clear();
                 for (int i = 0; i < mainCore.activeSearchResults.Count; i++) {
                     string extra = mainCore.activeSearchResults[i].extra;

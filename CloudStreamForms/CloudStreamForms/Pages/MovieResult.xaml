@@ -36,7 +36,7 @@ xmlns:ffTransformations="clr-namespace:FFImageLoading.Transformations;assembly=F
 
                         <Grid Grid.Row="0"  Grid.Column="0">
 
-                            <ff:CachedImage x:Name="TrailerBtt" BackgroundColor="Transparent"   Aspect="AspectFill" ></ff:CachedImage>
+                            <Image x:Name="TrailerBtt" BackgroundColor="Transparent" InputTransparent="True"  Aspect="AspectFill" ></Image>
                             <ImageButton x:Name="Gradient" HorizontalOptions="Fill" Aspect="AspectFill" Rotation="180" Opacity="1" Source="gradient.png" BackgroundColor="Transparent"></ImageButton>
                             <ff:CachedImage x:Name="PlayBttGradient" HorizontalOptions="Center" VerticalOptions="Center"  Scale="1.8" WidthRequest="40" HeightRequest="40" Opacity="1"  BackgroundColor="Transparent" InputTransparent="True"></ff:CachedImage>
                             <ImageButton x:Name="ReloadAllBtt" BackgroundColor="Transparent" HorizontalOptions="End" HeightRequest="30" WidthRequest="30" VerticalOptions="Start" TranslationX="-10" TranslationY="10"></ImageButton>

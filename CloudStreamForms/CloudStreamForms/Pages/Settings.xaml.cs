@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text;
+using System.Threading;
 using Xamarin.Forms;
 using Xamarin.Forms.Internals;
 using Xamarin.Forms.Xaml;
@@ -123,7 +124,14 @@ namespace CloudStreamForms
             }
         }
 
-
+        public static bool AccountOverrideServerData {
+            set {
+                App.SetKey("Account", nameof(AccountOverrideServerData), value);
+            }
+            get {
+                return App.GetKey("Account", nameof(AccountOverrideServerData), false);
+            }
+        }
 
 
 
@@ -413,9 +421,9 @@ namespace CloudStreamForms
             SubLangPicker = new LabelList(SubtitleLang, CloudStreamCore.subtitleNames.ToList(), "Default Subtitle Language");
             SubStylePicker = new LabelList(SubtitleStyle, new List<string>() { "None", "Dropshadow", "Outline", "Outline + dropshadow" }, "Subtitle Style");
             SubFontPicker = new LabelList(SubtitleFont, GlobalFonts, "Subtitle Font", true);
-             
+
             //outline_reorder_white_48dp.png
-             
+
             BackgroundColor = Settings.BlackRBGColor;
 
 
@@ -536,23 +544,25 @@ namespace CloudStreamForms
                 }
             };
 
+
+
             ManageAccount.Clicked += async (o, e) => {
                 List<string> actions = new List<string>() { };
                 // TODO ADD LOGIN
-                /*
+
                 if (HasAccountLogin) {
                     actions.Add("Logout from " + AccountUsername);
                 }
                 else {
                     actions.Add("Create account");
                     actions.Add("Login");
-                }*/
+                }
                 actions.AddRange(new string[] { "Export data", "Export Everything", "Import data", });
 
                 string action = await ActionPopup.DisplayActionSheet("Manage account", actions.ToArray());
                 if (action == "Export data" || action == "Export Everything") {
                     string subaction = await ActionPopup.DisplayEntry(InputPopupPage.InputPopupResult.password, "Password", "Encrypt data", autoPaste: false, confirmText: "Encrypt");
-                    
+
                     if (subaction != "Cancel") {
                         string text = Script.SyncWrapper.GenerateTextFile(action == "Export Everything");
                         if (subaction != "") {
@@ -609,7 +619,10 @@ namespace CloudStreamForms
                     }
                 }
                 else if (action.StartsWith("Logout from")) {
-
+                    AccountUsername = "";
+                    AccountSite = "";
+                    AccountPassword = "";
+                    App.ShowToast("Logout compleate");
                 }
                 else if (action == "Login") {
                     bool tryLogin = true;
@@ -622,22 +635,92 @@ namespace CloudStreamForms
                             site = data[0];
                             username = data[1];
                             password = data[2];
-                            await ActionPopup.StartIndeterminateLoadinbar("Tryig to login...");
-                            string logindata = GetAccountResponse(site, username, password, Logintype.LoginAccount, out LoginErrorType error);
-                            await ActionPopup.StopIndeterminateLoadinbar();
+                            try {
+                                await ActionPopup.StartIndeterminateLoadinbar("Trying to login...");
+                                string logindata = GetAccountResponse(site, username, password, Logintype.LoginAccount, out LoginErrorType error);
+                                await ActionPopup.StopIndeterminateLoadinbar();
 
-                            App.ShowToast(error.ToString());
+                                if (error == LoginErrorType.InternetError) {
+                                    App.ShowToast("Could not connect to the server");
+                                }
+                                else if (error == LoginErrorType.UsernameTaken) {
+                                    App.ShowToast("Username taken");
+                                }
+                                else if (error == LoginErrorType.WrongPassword) {
+                                    App.ShowToast("Wrong password");
+                                }
+                                else if (error == LoginErrorType.Ok) {
+                                    App.ShowToast("Login compleate");
+                                    tryLogin = false;
+                                    AccountSite = site;
+                                    AccountPassword = password;
+                                    AccountUsername = username;
+                                }
+                            }
+                            catch (Exception _ex) {
+                                App.ShowToast("Internal server error");
+                            }
                         }
                         else {
                             tryLogin = false;
                         }
                     }
-
-
                 }
                 else if (action == "Create account") {
+                    bool tryCreate = true;
+                    string password = "";
+                    string username = "";
+                    string site = "";
+                    while (tryCreate) {
+                        List<string> data = await ActionPopup.DisplayLogin("Create", "Cancel", "Create account", new LoginPopupPage.PopupFeildsDatas() { placeholder = "Server Url", setText = site }, new LoginPopupPage.PopupFeildsDatas() { placeholder = "Username", setText = username }, new LoginPopupPage.PopupFeildsDatas() { placeholder = "Password", isPassword = true, setText = password });
+                        if (data.Count == 3) {
+                            site = data[0];
+                            username = data[1];
+                            password = data[2];
+                            try {
+                                await ActionPopup.StartIndeterminateLoadinbar("Creating Account...");
+                                string logindata = GetAccountResponse(site, username, password, Logintype.CreateAccount, out LoginErrorType error);
+                                await ActionPopup.StopIndeterminateLoadinbar();
 
+                                if (error == LoginErrorType.InternetError) {
+                                    App.ShowToast("Could not connect to the server");
+                                }
+                                else if (error == LoginErrorType.UsernameTaken) {
+                                    App.ShowToast("Username taken");
+                                }
+                                else if (error == LoginErrorType.Ok) {
+                                    App.ShowToast("Account created");
+                                    tryCreate = false;
+                                    AccountSite = site;
+                                    AccountPassword = password;
+                                    AccountUsername = username;
+                                }
+                                else if (error == LoginErrorType.WrongPassword) {
+                                    App.ShowToast("Internal server error");
+                                }
+                            }
+                            catch (Exception _ex) {
+                                App.ShowToast("Internal server error");
+                            }
+                        }
+                        else {
+                            tryCreate = false;
+                        }
+                    }
                 }
+            };
+
+            if (AccountOverrideServerData) { // If get account dident work and you have changed then override server data
+                PublishSyncAccount();
+            }
+            else { // Get account data, will override current data 
+                GetSyncAccount();
+            }
+            AccountOverrideServerData = true;
+
+            App.OnAppNotInForground += (o, e) => {
+                AccountOverrideServerData = false;
+                PublishSyncAccount();
             };
 
             /*
@@ -697,7 +780,7 @@ namespace CloudStreamForms
         }
 
         void InitVideoPlayer()
-        {  
+        {
             // VIDEOPLAYER Option
             List<string> videoOptions = new List<string>() { App.GetVideoPlayerName(App.VideoPlayer.None) };
             List<App.VideoPlayer> avalibePlayers = new List<App.VideoPlayer>();
@@ -846,15 +929,75 @@ namespace CloudStreamForms
             UsernameTaken = 3,
         }
 
+        // DO NOT CHANGE, WILL BREAK ALL CURRENT ACCOUNTS!
+        const string BEFORE_SALT_PASSWORD = "BeforeSalt";
+        const string AFTER_SALT_PASSWORD = "AfterSalt";
+
         static Random rng = new Random();
+
+        public static void GetSyncAccount()
+        {
+            if (AccountPassword != "" && AccountUsername != "" && AccountPassword != "") {
+                Thread t = new Thread(() => {
+                    try {
+                        string data = GetAccountResponse(AccountSite, AccountUsername, AccountPassword, Logintype.LoginAccount, out LoginErrorType error);
+                        if (error != LoginErrorType.Ok) {
+                            App.ShowToast("Account Server error");
+                            AccountOverrideServerData = true;
+                        }
+                        else if (data != "") {
+                            if (data.StartsWith(Script.SyncWrapper.header)) {
+                                Script.SyncWrapper.SetKeysFromTextFile(data);
+                            }
+                            else {
+                                App.ShowToast("Account data corrupted");
+                                PublishSyncAccount();
+                            }
+                        }
+                    }
+                    catch (Exception _ex) {
+                        App.ShowToast("Account error");
+                        AccountOverrideServerData = true;
+                    }
+                });
+                t.Start();
+            }
+        }
+
+        public static void PublishSyncAccount()
+        {
+            if (AccountPassword != "" && AccountUsername != "" && AccountPassword != "") {
+                Thread t = new Thread(() => {
+                    try {
+                        string data = GetAccountResponse(AccountSite, AccountUsername, AccountPassword, Logintype.EditAccount, out LoginErrorType error, Script.SyncWrapper.GenerateTextFile(false));
+                        if (error != LoginErrorType.Ok) {
+                            App.ShowToast("Account Server error");
+                        }
+                        else if (data != "") {
+                            Script.SyncWrapper.SetKeysFromTextFile(data);
+                        }
+
+                    }
+                    catch (Exception _ex) {
+                        App.ShowToast("Account error");
+                    }
+                });
+                t.Start();
+            }
+        }
+
         public static string GetAccountResponse(string url, string name, string password, Logintype logintype, out LoginErrorType result, string data = "")
         {
+            password = BEFORE_SALT_PASSWORD + password + AFTER_SALT_PASSWORD; // This is so the server cant use hash tables to look up password
+            name = name.Replace(" ", "");
+
             result = LoginErrorType.InternetError;
             try {
                 int waitTime = 400;
                 HttpWebRequest webRequest = (HttpWebRequest)HttpWebRequest.Create(url);
                 if (CloudStreamCore.GetRequireCert(url)) { webRequest.ServerCertificateValidationCallback = delegate { return true; }; }
                 webRequest.Method = "GET";
+                webRequest.UserAgent = "CLOUDSTREAM APP v" + App.GetBuildNumber();
                 webRequest.Timeout = waitTime * 10;
                 webRequest.ReadWriteTimeout = waitTime * 10;
                 webRequest.ContinueTimeout = waitTime * 10;
@@ -879,7 +1022,7 @@ namespace CloudStreamForms
                                 if (s.StartsWith("OKDATA")) {
                                     result = LoginErrorType.Ok;
                                     if (logintype == Logintype.LoginAccount) {
-                                        return StringCipher.Decrypt(s.Split('\n')[1], password);
+                                        return StringCipher.Decrypt(s.Split('\n')[1], password); // THE DATA IS OKDATA\nUSERDATA 
                                     }
                                     else {
                                         return "";

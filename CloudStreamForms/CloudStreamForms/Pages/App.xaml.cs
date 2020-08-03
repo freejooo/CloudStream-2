@@ -63,9 +63,12 @@ namespace CloudStreamForms
             public string id;
         }
 
+        public static EventHandler OnAppNotInForground;
+        public static EventHandler OnAppKilled;
+
         public interface IPlatformDep
         {
-            void ToggleRealFullScreen(bool fullscreen); 
+            void ToggleRealFullScreen(bool fullscreen);
             void ShowToast(string message, double duration);
             string DownloadFile(string file, string fileName, bool mainPath, string extraPath);
             string ReadFile(string fileName, bool mainPath, string extraPath);
@@ -193,7 +196,7 @@ namespace CloudStreamForms
             {
                 VideoPlayer.None => "No Videplayer",
                 VideoPlayer.VLC => "VLC",
-               // VideoPlayer.MPV => "MPV",
+                // VideoPlayer.MPV => "MPV",
                 VideoPlayer.MXPlayer => "MX Player",
                 _ => "",
             };
@@ -301,12 +304,12 @@ namespace CloudStreamForms
                     episodeId = episodeId,
                     headerId = headerId,
                     isFromIMDB = isFromIMDB,
-                });;//new List<string>() { "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" }, new List<string>() { "Black" }, new List<string>() { });// { mainPoster = mainPoster };
+                }); ;//new List<string>() { "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" }, new List<string>() { "Black" }, new List<string>() { });// { mainPoster = mainPoster };
                 await ((MainPage)CloudStreamCore.mainPage).Navigation.PushModalAsync(p, true);
             }
             else {
-                if ((VideoPlayer)Settings.PreferedVideoPlayer == VideoPlayer.None) { 
-                    App.ShowToast("No videoplayer installed");  
+                if ((VideoPlayer)Settings.PreferedVideoPlayer == VideoPlayer.None) {
+                    App.ShowToast("No videoplayer installed");
                     return;
                 };
 
@@ -531,7 +534,7 @@ namespace CloudStreamForms
         public static bool DeleteFile(string path)
         {
             return platformDep.DeleteFile(path);
-        } 
+        }
 
         public static void ShowToast(string message, double duration = 2.5)
         {

@@ -21,11 +21,15 @@ namespace CloudStreamForms.Core
     [Serializable]
     public class CloudStreamCore : ICloneable
     {
+
+        public static bool[] isAnimeProviderEnabled;
+        public static bool[] isMovieProviderEnabled;
+
         public CloudStreamCore() // INIT
         {
             coreCreation = DateTime.Now;
             // INACTIVE // new DubbedAnimeNetProvider(this)
-            animeProviders = new IAnimeProvider[] {  new AnimeFeverBloatFreeProvider(this), new GogoAnimeProvider(this), new KickassAnimeProvider(this), new DubbedAnimeProvider(this), new AnimeFlixProvider(this), new AnimekisaProvider(this), new TheMovieAnimeProvider(this), new KissFreeAnimeProvider(this), new AnimeSimpleProvider(this), new VidstreamingAnimeProvider(this), new AnimeVibeBloatFreeProvider(this), new NineAnimeBloatFreeProvider(this) };
+            animeProviders = new IAnimeProvider[] { new AnimeFeverBloatFreeProvider(this), new GogoAnimeProvider(this), new KickassAnimeProvider(this), new DubbedAnimeProvider(this), new AnimeFlixProvider(this), new AnimekisaProvider(this), new TheMovieAnimeProvider(this), new KissFreeAnimeProvider(this), new AnimeSimpleProvider(this), new VidstreamingAnimeProvider(this), new AnimeVibeBloatFreeProvider(this), new NineAnimeBloatFreeProvider(this) };
             movieProviders = new IMovieProvider[] { new DirectVidsrcProvider(this), new WatchTVProvider(this), new FMoviesProvider(this), new LiveMovies123Provider(this), new TheMovies123Provider(this), new YesMoviesProvider(this), new WatchSeriesProvider(this), new GomoStreamProvider(this), new Movies123Provider(this), new DubbedAnimeMovieProvider(this), new TheMovieMovieProvider(this), new KickassMovieProvider(this) };
         }
 
@@ -243,9 +247,11 @@ namespace CloudStreamForms.Core
         public struct MALSeason
         {
             public string malUrl;
-            public int MalId { get {
+            public int MalId {
+                get {
                     return int.Parse(FindHTML(malUrl, "anime/", "/"));
-                } }
+                }
+            }
             public string name;
             public string japName;
             public string engName;
@@ -853,6 +859,7 @@ namespace CloudStreamForms.Core
 
         public interface IMovieProvider // FOR MOVIES AND SHOWS
         {
+            string Name { get; }
             void FishMainLinkTSync(TempThread tempThread);
             void LoadLinksTSync(int episode, int season, int normalEpisode, bool isMovie, TempThread tempThred);
         }
@@ -877,8 +884,10 @@ namespace CloudStreamForms.Core
 
         public class BaseMovieProvier : BaseProvider, IMovieProvider
         {
+
             public BaseMovieProvier(CloudStreamCore _core) : base(_core) { }
 
+            public virtual string Name => throw new NotImplementedException();
 
             public virtual void FishMainLinkTSync(TempThread tempThread)
             {
@@ -1197,6 +1206,7 @@ namespace CloudStreamForms.Core
 
         class KickassMovieProvider : BaseMovieProvier
         {
+            public override string Name => "KickassMovie";
             public override void FishMainLinkTSync(TempThread tempThread)
             {
                 print("MAIN FISHHH::: " + activeMovie.title.movieType);
@@ -1670,6 +1680,7 @@ namespace CloudStreamForms.Core
 
         public class DubbedAnimeMovieProvider : BaseMovieProvier
         {
+            public override string Name => "DubbedAnime";
             DubbedAnimeProvider back;
             public DubbedAnimeMovieProvider(CloudStreamCore _core) : base(_core)
             {
@@ -3732,6 +3743,8 @@ namespace CloudStreamForms.Core
 
         class DirectVidsrcProvider : BaseMovieProvier
         {
+            public override string Name => "Vidsrc";
+
             public DirectVidsrcProvider(CloudStreamCore _core) : base(_core) { }
 
             public static string GetMainUrl(string url, bool en = true, string overrideReferer = null)
@@ -3809,6 +3822,8 @@ namespace CloudStreamForms.Core
 
         class WatchTVProvider : BaseMovieProvier
         {
+            public override string Name => "WatchTv";
+
             public WatchTVProvider(CloudStreamCore _core) : base(_core) { }
 
             public override void FishMainLinkTSync(TempThread tempThread) { }
@@ -3848,6 +3863,8 @@ namespace CloudStreamForms.Core
 
         class LiveMovies123Provider : BaseMovieProvier
         {
+            public override string Name => "LiveMovies123";
+
             public LiveMovies123Provider(CloudStreamCore _core) : base(_core) { }
 
             public override void LoadLinksTSync(int episode, int season, int normalEpisode, bool isMovie, TempThread tempThred)
@@ -3911,6 +3928,8 @@ namespace CloudStreamForms.Core
 
         class Movies123Provider : BaseMovieProvier
         {
+            public override string Name => "Movies123";
+
             public Movies123Provider(CloudStreamCore _core) : base(_core) { }
 
             public override void FishMainLinkTSync(TempThread tempThread)
@@ -4185,6 +4204,8 @@ namespace CloudStreamForms.Core
 
         class FullMoviesProvider : BaseMovieProvier
         {
+            public override string Name => "FreeFullMovies";
+
             public FullMoviesProvider(CloudStreamCore _core) : base(_core) { }
 
             public override void FishMainLinkTSync(TempThread tempThread) { }
@@ -4228,6 +4249,8 @@ namespace CloudStreamForms.Core
 
         class TheMovies123Provider : BaseMovieProvier
         {
+            public override string Name => "TheMovies123";
+
             public TheMovies123Provider(CloudStreamCore _core) : base(_core) { }
 
             public override void FishMainLinkTSync(TempThread tempThread) { }
@@ -4265,6 +4288,8 @@ namespace CloudStreamForms.Core
 
         class GomoStreamProvider : BaseMovieProvier
         {
+            public override string Name => "GomoStream";
+
             public GomoStreamProvider(CloudStreamCore _core) : base(_core) { }
 
             public override void FishMainLinkTSync(TempThread tempThread) { }
@@ -4719,6 +4744,8 @@ namespace CloudStreamForms.Core
 
         class TMDBProvider : BaseMovieProvier
         {
+            public override string Name => "MovieTv";
+
             public TMDBProvider(CloudStreamCore _core) : base(_core) { }
 
             public override void FishMainLinkTSync(TempThread tempThread) { }
@@ -4762,6 +4789,8 @@ namespace CloudStreamForms.Core
 
         class WatchSeriesProvider : BaseMovieProvier
         {
+            public override string Name => "WatchSeries";
+
             public WatchSeriesProvider(CloudStreamCore _core) : base(_core) { }
 
             public override void FishMainLinkTSync(TempThread tempThread)
@@ -4852,11 +4881,11 @@ namespace CloudStreamForms.Core
                         int i1 = int.Parse(s1.Replace(".", ""));
                         int i2 = int.Parse(s2.Replace(".", ""));
 
-                        print(i1 + "||" + i2 + "START:::" + ToDown(other[i].removedTitle.Replace("-", "").Replace(":", ""), replaceSpace: "") + "<<>>" + ToDown(activeMovie.title.name.Replace("-", "").Replace(":", ""), replaceSpace: "") + ":::");
+                       // print(i1 + "||" + i2 + "START:::" + ToDown(other[i].removedTitle.Replace("-", "").Replace(":", ""), replaceSpace: "") + "<<>>" + ToDown(activeMovie.title.name.Replace("-", "").Replace(":", ""), replaceSpace: "") + ":::");
                         if ((i1 == i2 || i1 == i2 - 1 || i1 == i2 + 1) && ToDown(other[i].removedTitle.Replace("-", "").Replace(":", ""), replaceSpace: "") == ToDown(activeMovie.title.name.Replace("-", "").Replace(":", ""), replaceSpace: "")) {
 
                             if (other[i].released == activeMovie.title.year.Substring(0, 4) || activeMovie.title.movieType != MovieType.Movie) {
-                                print("TRUE:::::" + other[i].imdbScore + "|" + other[i].released + "|" + other[i].href + "|" + other[i].title + "|" + other[i].removedTitle);
+                            //    print("TRUE:::::" + other[i].imdbScore + "|" + other[i].released + "|" + other[i].href + "|" + other[i].title + "|" + other[i].removedTitle);
                                 if (other[i].href != "") {
                                     activeMovie.title.watchSeriesHdMetaData.Add(new WatchSeriesHdMetaData() { season = other[i].season, url = other[i].href });
                                 }
@@ -4922,6 +4951,8 @@ namespace CloudStreamForms.Core
 
         class FMoviesProvider : BaseMovieProvier
         {
+            public override string Name => "FMovies";
+
             public FMoviesProvider(CloudStreamCore _core) : base(_core) { }
 
             public override void FishMainLinkTSync(TempThread tempThread)
@@ -5154,6 +5185,8 @@ namespace CloudStreamForms.Core
 
         class FMoviesUpdatedProvider : BaseMovieProvier
         {
+            public override string Name => "FMovies";
+
             public FMoviesUpdatedProvider(CloudStreamCore _core) : base(_core) { }
 
             public override void FishMainLinkTSync(TempThread tempThread)
@@ -5347,6 +5380,8 @@ namespace CloudStreamForms.Core
 
         class YesMoviesProvider : BaseMovieProvier
         {
+            public override string Name => "YesMovies";
+
             public YesMoviesProvider(CloudStreamCore _core) : base(_core) { }
 
             // DONT USE tinyzonetv recaptcha
@@ -5496,9 +5531,7 @@ namespace CloudStreamForms.Core
 
             public static int GetMaxEp(string d, string href)
             {
-                print("GOT MAX EP::: " + d);
                 string ending = FindHTML(href + "|", "watchmovie.movie", "|");
-                print("GOT MAX EP::: ENDING " + ending);
                 return int.Parse(FindHTML(d, ending.Replace("-info", "") + "-episode-", "\""));
             }
 
@@ -5653,6 +5686,7 @@ namespace CloudStreamForms.Core
 
         public class TheMovieMovieProvider : BaseMovieProvier
         {
+            public override string Name => "TheMovie";
             public TheMovieMovieProvider(CloudStreamCore _core) : base(_core) { }
 
             public override void FishMainLinkTSync(TempThread tempThread)
@@ -5906,7 +5940,7 @@ namespace CloudStreamForms.Core
                         string tt = FindHTML(_d, " data-tconst=\"", "\"");
                         string name = FindHTML(_d, "alt=\"", "\"", decodeToNonHtml: true);
                         string img = FindHTML(_d, "loadlate=\"", "\"");
-                        print("DATA::::::::" + tt + "|" + _d);
+                      //  print("DATA::::::::" + tt + "|" + _d);
                         string d = RemoveOne(_d, "<a href=\"/title/" + tt + "/vote?v=X;k", -200);
                         string __d = FindHTML(_d, "<div class=\"rec-title\">\n       <a href=\"/title/" + tt, "<div class=\"rec-rating\">");
                         List<string> genresNames = new List<string>() { "Action", "Adventure", "Animation", "Biography", "Comedy", "Crime", "Drama", "Family", "Fantasy", "Film-Noir", "History", "Horror", "Music", "Musical", "Mystery", "Romance", "Sci-Fi", "Sport", "Thriller", "War", "Western" };
@@ -6608,6 +6642,9 @@ namespace CloudStreamForms.Core
             return _inp;
         }
 
+
+
+        public Stopwatch mainS = new Stopwatch();
         public void GetImdbTitle(Poster imdb, bool purgeCurrentTitleThread = true, bool autoSearchTrailer = true, bool cacheData = true)
         {
             string __id = imdb.url.Replace("https://imdb.com/title/", "");
@@ -6635,9 +6672,12 @@ namespace CloudStreamForms.Core
                 activeMovie = new Movie();
                 activeMovie.title.id = __id;
             }
+            print("MAIN1: " + mainS.ElapsedMilliseconds);
             // TurnNullMovieToActive(movie);
             TempThread tempThred = CreateThread(2);
             StartThread("Imdb", () => {
+                Stopwatch s = new Stopwatch();
+                s.Start();
                 try {
                     string d = "";
                     List<string> keyWords = new List<string>();
@@ -6746,10 +6786,12 @@ namespace CloudStreamForms.Core
                                 GetMALData();
                             }
                             else { // FISHING : THIS IS TO SPEED UP LINK FETHING
+                                Task.Factory.StartNew(() => {
+                                    TempThread tempThread = CreateThread(3);
 
-                                TempThread tempThread = CreateThread(3);
-                                Parallel.For(0, movieProviders.Length, (int i) => {
-                                    movieProviders[i].FishMainLinkTSync(tempThread);
+                                    Parallel.For(0, movieProviders.Length, (int i) => {
+                                        movieProviders[i].FishMainLinkTSync(tempThread);
+                                    });
                                 });
 
                             }
@@ -6786,10 +6828,14 @@ namespace CloudStreamForms.Core
                                 App.SetKey("CacheImdb", __id, activeMovie);
                             }
                         }
+                        long f = s.ElapsedMilliseconds;
+                        print("MAIN2: " + mainS.ElapsedMilliseconds);
+
                         titleLoaded?.Invoke(null, activeMovie);
                     }
                 }
                 finally {
+
                     JoinThred(tempThred);
                 }
             });
@@ -6889,6 +6935,8 @@ namespace CloudStreamForms.Core
 
         public void GetImdbEpisodes(int season = 1, bool purgeCurrentSeasonThread = true)
         {
+            Stopwatch _s = new Stopwatch();
+
             if (purgeCurrentSeasonThread) {
                 PurgeThreads(6);
             }
@@ -6989,6 +7037,8 @@ namespace CloudStreamForms.Core
                 Episode ep = new Episode() { name = activeMovie.title.name };
                 activeMovie.episodes = new List<Episode>();
                 activeMovie.episodes.Add(ep);
+                _s.Stop();
+
                 episodeLoaded?.Invoke(null, activeMovie.episodes);
             }
         }
@@ -8048,7 +8098,7 @@ namespace CloudStreamForms.Core
                 request.AutomaticDecompression = DecompressionMethods.GZip;
                 request.UserAgent = USERAGENT;
                 request.Referer = url;
-              //  request.TransferEncoding = "UTF8";
+                //  request.TransferEncoding = "UTF8";
                 //request.AddRange(1212416);
 
                 using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
@@ -8158,7 +8208,7 @@ namespace CloudStreamForms.Core
             public string typeName;
             public string PublicName {
                 get {
-                    return (name + (label == "" ? "" : $" {label}") + ((mirror == 0) ? "" : $" (Mirror {mirror})") + ((typeName ?? "") == "" ? "" : $" [{typeName}]")).Replace("  "," ");
+                    return (name + (label == "" ? "" : $" {label}") + ((mirror == 0) ? "" : $" (Mirror {mirror})") + ((typeName ?? "") == "" ? "" : $" [{typeName}]")).Replace("  ", " ");
                 }
             }
 
