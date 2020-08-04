@@ -847,6 +847,7 @@ namespace CloudStreamForms.Core
         public event EventHandler<List<Poster>> searchLoaded;
         public event EventHandler<List<Trailer>> trailerLoaded;
         public event EventHandler<List<Episode>> episodeLoaded;
+        public event EventHandler<List<Episode>> episodeHalfLoaded;
         public event EventHandler<string> linkAdded;
         public event EventHandler<MALData> malDataLoaded;
         public event EventHandler<Episode> linksProbablyDone;
@@ -7004,21 +7005,14 @@ namespace CloudStreamForms.Core
                                 break;
                             }
                         }
-                        print("EPPSPPS:" + eps);
-                        if (activeMovie.title.movieType == MovieType.Anime) {
-                            while (!activeMovie.title.MALData.done) {
-                                Thread.Sleep(100);
-                                if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
-                            }
-                            //string _d = DownloadString("");
-                        }
+                        //episodeLoaded?.Invoke(null, activeMovie.episodes);
 
                         activeMovie.episodes = new List<Episode>();
 
                         for (int q = 1; q <= eps; q++) {
                             string lookFor = "?ref_=ttep_ep" + q;
                             try {
-                                d = d.Substring(d.IndexOf(lookFor), d.Length - d.IndexOf(lookFor));
+                                d = d[d.IndexOf(lookFor)..];
                                 string name = FindHTML(d, "title=\"", "\"", decodeToNonHtml: true);
                                 string id = FindHTML(d, "div data-const=\"", "\"");
                                 string rating = FindHTML(d, "<span class=\"ipl-rating-star__rating\">", "<");
@@ -7047,8 +7041,20 @@ namespace CloudStreamForms.Core
 
                             }
                         }
-                        //print(activeMovie.title.MALData.japName + "<<<<<<<<<<<<<<<<<<<<<<<<");
-                        //     https://www9.gogoanime.io/category/mix-meisei-story
+
+                        episodeHalfLoaded?.Invoke(null, activeMovie.episodes);
+
+                        print("EPPSPPS:" + eps);
+                        if (activeMovie.title.movieType == MovieType.Anime) {
+                            while (!activeMovie.title.MALData.done) {
+                                Thread.Sleep(10);
+                                if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
+                            }
+                            //string _d = DownloadString("");
+                        }
+
+                      
+
                         print("EPLOADED::::::");
                         episodeLoaded?.Invoke(null, activeMovie.episodes);
                     }
@@ -8352,7 +8358,7 @@ namespace CloudStreamForms.Core
                 linkAdded?.Invoke(null, id);
                 holder.links.Add(basicLink);
                 return true;
-            } 
+            }
         }
 
         public bool AddPotentialLink(int normalEpisode, string _url, string _name, int _priority, string label = "")
@@ -9220,8 +9226,8 @@ namespace CloudStreamForms.Core
             }
         }
 
-        public static readonly List<string> sortingList = new List<string>() { 
-            "4k", "2160p", "googlevideo 1080p", "twist.moe", "googlevideo 720p", "googlevideo hd", 
+        public static readonly List<string> sortingList = new List<string>() {
+            "4k", "2160p", "googlevideo 1080p", "twist.moe", "googlevideo 720p", "googlevideo hd",
             "upstream", "1080p", "1068", "hd", "auto", "autop", "720p", "hls", "source", "480p", "360p", "240p" };
 
         public static MirrorInfo[] SortToHdMirrors(List<string> mirrorsUrls, List<string> mirrorsNames)

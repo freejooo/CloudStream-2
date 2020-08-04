@@ -376,12 +376,14 @@ namespace CloudStreamForms
             mainPoster = Search.mainPoster;
 
             Gradient.Source = GetGradient();
-            IMDbBtt.Source = GetImageSource("IMDbWhite.png");//"imdbIcon.png");
-            MALBtt.Source = GetImageSource("MALWhite.png");//"MALIcon.png");
-            ShareBtt.Source = GetImageSource("baseline_share_white_48dp.png");//GetImageSource("round_reply_white_48dp_inverted.png");
+            Gradient.HeightRequest = 200;
+
+            //   IMDbBtt.Source = GetImageSource("IMDbWhite.png");//"imdbIcon.png");
+            //   MALBtt.Source = GetImageSource("MALWhite.png");//"MALIcon.png");
+            //   ShareBtt.Source = GetImageSource("baseline_share_white_48dp.png");//GetImageSource("round_reply_white_48dp_inverted.png");
             StarBtt.Source = GetImageSource("notBookmarkedBtt.png");
-            SubtitleBtt.Source = GetImageSource("outline_subtitles_white_48dp.png"); //GetImageSource("round_subtitles_white_48dp.png");
-                                                                                     //  IMDbBlue.Source = GetImageSource("IMDbBlue.png"); //GetImageSource("round_subtitles_white_48dp.png");
+            //   SubtitleBtt.Source = GetImageSource("outline_subtitles_white_48dp.png"); //GetImageSource("round_subtitles_white_48dp.png");
+            //  IMDbBlue.Source = GetImageSource("IMDbBlue.png"); //GetImageSource("round_subtitles_white_48dp.png");
 
             ReviewLabel.Clicked += (o, e) => {
                 if (!ReviewPage.isOpen) {
@@ -443,11 +445,12 @@ namespace CloudStreamForms
 
             core.titleLoaded += MovieResult_titleLoaded;
             core.trailerLoaded += MovieResult_trailerLoaded;
-            core.episodeLoaded += MovieResult_epsiodesLoaded;
+            core.episodeLoaded += EpisodesLoaded;
+            core.episodeHalfLoaded += EpisodesHalfLoaded;
 
 
             // TrailerBtt.Clicked += TrailerBtt_Clicked;
-            Gradient.Clicked += TrailerBtt_Clicked;
+            TrailerBtt.Clicked += TrailerBtt_Clicked;
             //  core.linkAdded += MovieResult_linkAdded;
 
 
@@ -552,6 +555,7 @@ namespace CloudStreamForms
             };
 
         }
+
 
         bool hasSkipedLoading = false;
 
@@ -1026,6 +1030,17 @@ namespace CloudStreamForms
             }
         }
 
+        public async void AnimateInTrailer()
+        {
+            /*
+            await Task.Delay(5000);
+            TrailerBtt.HeightRequest = 200;
+            Gradient.HeightRequest = 200;
+            TrailerBtt.Opacity = 0;
+            TrailerBtt.FadeTo(1);
+            NormalStack.TranslateTo(0, 200,500);*/
+        }
+        bool setFirstEpAsFade = false;
         private void MovieResult_titleLoaded(object sender, Movie e)
         {
             if (core == null) return;
@@ -1043,11 +1058,15 @@ namespace CloudStreamForms
                 //App.ShowNotIntent("NEW EPISODE - " + currentMovie.title.name, currentMovie.title.name, 1337, currentMovie.title.id, currentMovie.title.name, bigIconUrl: currentMovie.title.hdPosterUrl, time: DateTime.UtcNow.AddSeconds(1));//ShowNotification("NEW EPISODE - " + currentMovie.title.name, setNotificationsTimes[i].episodeName, _id, i * 10);
 
                 EPISODES.Text = isMovie ? "MOVIE" : "EPISODES";
+                setFirstEpAsFade = true;
 
                 try {
                     string souceUrl = e.title.trailers.First().PosterUrl;
                     if (CheckIfURLIsValid(souceUrl)) {
+                        TrailerBtt.Opacity = 0;
+                        TrailerBtt.FadeTo(1);
                         TrailerBtt.Source = souceUrl;
+                        setFirstEpAsFade = false;
                     }
                     else {
                         TrailerBtt.Source = ImageSource.FromResource("CloudStreamForms.Resource.gradient.png", Assembly.GetExecutingAssembly());
@@ -1118,7 +1137,6 @@ namespace CloudStreamForms
                     Grid.SetRow(item, 0);
                 }
                 Recommendations.Children.Clear();
-
                 for (int i = 0; i < RecomendedPosters.Count; i++) {
                     Poster p = e.title.recomended[i];
                     string posterURL = ConvertIMDbImagesToHD(p.posterUrl, 76, 113, 1.75); //.Replace(",76,113_AL", "," + pwidth + "," + pheight + "_AL").Replace("UY113", "UY" + pheight).Replace("UX76", "UX" + pwidth);
@@ -1185,7 +1203,7 @@ namespace CloudStreamForms
                     Grid.SetRow(Recommendations.Children[i], (int)Math.Floor(i / (double)perCol));
                 }
                 // Recommendations.HeightRequest = (RecPosterHeight + Recommendations.RowSpacing) * (total / perCol);
-                Recommendations.HeightRequest = (RecPosterHeight + Recommendations.RowSpacing) * (total / perCol);
+                Recommendations.HeightRequest = (RecPosterHeight + Recommendations.RowSpacing) * (total / perCol) - 7 + Recommendations.RowSpacing;
             });
         }
 
@@ -1242,7 +1260,20 @@ namespace CloudStreamForms
 
         }
 
-        private void MovieResult_epsiodesLoaded(object sender, List<Episode> e)
+
+        private void EpisodesHalfLoaded(object sender, List<Episode> e)
+        {
+            if (e.Count > 0) {
+                if (setFirstEpAsFade) {
+                    Device.BeginInvokeOnMainThread(() => {
+                        TrailerBtt.Source = CloudStreamCore.ConvertIMDbImagesToHD(e[0].posterUrl, 356, 200);
+                        TrailerBtt.Opacity = 0;
+                        TrailerBtt.FadeTo(1);
+                    });
+                }
+            }
+        }
+        private void EpisodesLoaded(object sender, List<Episode> e)
         {
             if (core == null) return;
 
@@ -1256,6 +1287,7 @@ namespace CloudStreamForms
                 print("episodes loaded");
 
                 ClearEpisodes();
+
                 //bool isLocalMovie = false;
                 bool isAnime = currentMovie.title.movieType == MovieType.Anime;
 
@@ -1335,6 +1367,7 @@ namespace CloudStreamForms
             TempThread tempThred = core.CreateThread(6);
             core.StartThread("Set SUB/DUB", () => {
                 try {
+                    if (core == null) return;
                     int max = core.GetMaxEpisodesInAnimeSeason(currentSeason, isDub, tempThred);
                     if (max > 0) {
                         print("CLEAR AND ADD");
@@ -1373,7 +1406,9 @@ namespace CloudStreamForms
                     }
                 }
                 finally {
-                    core.JoinThred(tempThred);
+                    if (core != null) {
+                        core.JoinThred(tempThred);
+                    }
                 }
             });
         }
@@ -2142,6 +2177,12 @@ namespace CloudStreamForms
         private void RecomendationLoaded_SizeChanged(object sender, EventArgs e)
         {
 
+        }
+
+        private void ScrollView_Scrolled(object sender, ScrolledEventArgs e)
+        {
+            TrailerBtt.TranslationY = -e.ScrollY / 15.0;
+            // PlayBttGradient.TranslationY = -e.ScrollY / 15.0;
         }
     }
 }
