@@ -73,7 +73,9 @@
     <None Remove="Resource\baseline_volume_off_white_48dp.png" />
     <None Remove="Resource\baseline_volume_up_white_48dp.png" />
     <None Remove="Resource\bbox.png" />
+    <None Remove="Resource\bookmark.svg" />
     <None Remove="Resource\bookmarkedBtt.png" />
+    <None Remove="Resource\bookmark_off.svg" />
     <None Remove="Resource\dropdown.png" />
     <None Remove="Resource\emtyPoster.png" />
     <None Remove="Resource\faded.png" />
@@ -90,6 +92,7 @@
     <None Remove="Resource\IMDbWhite.png" />
     <None Remove="Resource\LockLocked1.png" />
     <None Remove="Resource\LockUnlocked1.png" />
+    <None Remove="Resource\MainSearchIcon.png" />
     <None Remove="Resource\MALBlue.png" />
     <None Remove="Resource\MALIcon.png" />
     <None Remove="Resource\MALWhite.png" />
@@ -164,11 +167,15 @@
     <None Remove="Resource\shareIcon.png" />
     <None Remove="Resource\starBtt.png" />
     <None Remove="Resource\subtitleIcon.png" />
+    <None Remove="Resource\subtitles.svg" />
+    <None Remove="Resource\subtitles_off.svg" />
     <None Remove="Resource\upButton.png" />
     <None Remove="Resource\upButton2.png" />
     <None Remove="Resource\upButton3.png" />
     <None Remove="Resource\viewOffIcon.png" />
     <None Remove="Resource\viewOnIcon.png" />
+    <None Remove="Resource\visibility.svg" />
+    <None Remove="Resource\visibility_off.svg" />
     <None Remove="Resource\wcir.png" />
     <None Remove="Resource\wlockLocked.png" />
     <None Remove="Resource\wlockUnLocked.png" />
@@ -210,7 +217,9 @@
     <EmbeddedResource Include="Resource\baseline_volume_off_white_48dp.png" />
     <EmbeddedResource Include="Resource\baseline_volume_up_white_48dp.png" />
     <EmbeddedResource Include="Resource\bbox.png" />
+    <EmbeddedResource Include="Resource\bookmark.svg" />
     <EmbeddedResource Include="Resource\bookmarkedBtt.png" />
+    <EmbeddedResource Include="Resource\bookmark_off.svg" />
     <EmbeddedResource Include="Resource\dropdown.png" />
     <EmbeddedResource Include="Resource\emtyPoster.png" />
     <EmbeddedResource Include="Resource\faded.png" />
@@ -227,6 +236,7 @@
     <EmbeddedResource Include="Resource\IMDbWhite.png" />
     <EmbeddedResource Include="Resource\LockLocked1.png" />
     <EmbeddedResource Include="Resource\LockUnlocked1.png" />
+    <EmbeddedResource Include="Resource\MainSearchIcon.png" />
     <EmbeddedResource Include="Resource\MALBlue.png" />
     <EmbeddedResource Include="Resource\MALIcon.png" />
     <EmbeddedResource Include="Resource\MALWhite.png" />
@@ -301,11 +311,15 @@
     <EmbeddedResource Include="Resource\shareIcon.png" />
     <EmbeddedResource Include="Resource\starBtt.png" />
     <EmbeddedResource Include="Resource\subtitleIcon.png" />
+    <EmbeddedResource Include="Resource\subtitles.svg" />
+    <EmbeddedResource Include="Resource\subtitles_off.svg" />
     <EmbeddedResource Include="Resource\upButton.png" />
     <EmbeddedResource Include="Resource\upButton2.png" />
     <EmbeddedResource Include="Resource\upButton3.png" />
     <EmbeddedResource Include="Resource\viewOffIcon.png" />
     <EmbeddedResource Include="Resource\viewOnIcon.png" />
+    <EmbeddedResource Include="Resource\visibility.svg" />
+    <EmbeddedResource Include="Resource\visibility_off.svg" />
     <EmbeddedResource Include="Resource\wcir.png" />
     <EmbeddedResource Include="Resource\wlockLocked.png" />
     <EmbeddedResource Include="Resource\wlockUnLocked.png" />
@@ -405,6 +419,9 @@
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
     </EmbeddedResource>
     <EmbeddedResource Update="Pages\MovieResult.xaml">
+      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Pages\SettingsPage.xaml">
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
     </EmbeddedResource>
     <EmbeddedResource Update="Properties\Resources.resx">

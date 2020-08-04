@@ -6,6 +6,7 @@ using Xamarin.Forms;
 using Xamarin.Forms.PlatformConfiguration.AndroidSpecific;
 using static CloudStreamForms.Core.CloudStreamCore;
 using CloudStreamForms.Core;
+using CloudStreamForms.Pages;
 
 namespace CloudStreamForms
 {
@@ -143,7 +144,7 @@ namespace CloudStreamForms
 
             List<string> names = new List<string>() { "Home", "Search", "Downloads", "Settings" };
             //List<string> icons = new List<string>() { "homeIcon.png", "searchIcon.png", "downloadIcon.png", "baseline_settings_applications_white_48dp_inverted_big.png" };
-            List<Page> pages = new List<Page>() { new Home(), new Search(), new Download(), new Settings(), };
+            List<Page> pages = new List<Page>() { new Home(), new Search(), new Download(), new SettingsPage(), };
 
             for (int i = 0; i < names.Count; i++) {
                 Children.Add(pages[i]);

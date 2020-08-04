@@ -1,0 +1,82 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:d="http://xamarin.com/schemas/2014/forms/design"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+                          		xmlns:ffs="clr-namespace:FFImageLoading.Svg.Forms;assembly=FFImageLoading.Svg.Forms"
+
+              xmlns:ff="clr-namespace:FFImageLoading.Forms;assembly=FFImageLoading.Forms"  
+             xmlns:ffTransformations="clr-namespace:FFImageLoading.Transformations;assembly=FFImageLoading.Transformations"
+             x:Class="CloudStreamForms.Pages.SettingsPage">
+    <ContentPage.Content >
+        <ScrollView>
+
+            <StackLayout >
+                <Label Margin="3,5.1" Text="Settings" HorizontalOptions="Center"  FontSize="25"   TextColor="#ffffff" ></Label>
+
+
+                <Grid RowSpacing="2" x:Name="AddTextGrid">
+                    <Grid.RowDefinitions >
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                     <!--
+                    <Label Grid.Row="0" Text="General" FontSize="Body" FontAttributes="Bold" TranslationX="10" Margin="10,20,10,10" TextColor="#ffffff"></Label>
+ 
+                    <Grid Grid.Row="1">
+                        <Button  BackgroundColor="#141414">
+                        </Button>
+                        <Switch  x:Name="InstantSearchToggle"  VerticalOptions="Center" HorizontalOptions="End"></Switch>
+
+                        <Grid ColumnSpacing="10" HeightRequest="70"  HorizontalOptions="Fill" InputTransparent="True">
+                            <Grid.ColumnDefinitions >
+                                <ColumnDefinition Width="Auto"></ColumnDefinition>
+                                <ColumnDefinition Width="*"></ColumnDefinition>
+                                <ColumnDefinition Width="*"></ColumnDefinition>
+                            </Grid.ColumnDefinitions>
+                            <ffs:SvgCachedImage Grid.Column="0" x:Name="InstantSearchImg" Source="bookmark_off.svg" HorizontalOptions="Start" WidthRequest="25" HeightRequest="25" Margin="5" TranslationX="5" VerticalOptions="Center" BackgroundColor="Transparent">
+                                <ffs:SvgCachedImage.Transformations >
+                                    <ffTransformations:TintTransformation HexColor="#707070" ></ffTransformations:TintTransformation>
+                                </ffs:SvgCachedImage.Transformations>
+                            </ffs:SvgCachedImage>
+                            <Grid Grid.Column="1" HeightRequest="50" RowSpacing="-10" VerticalOptions="Center" InputTransparent="True">
+                                <Label Text="Instant search" HorizontalOptions="Start" VerticalOptions="Center"  FontSize="Body"  TextColor="#e6e6e6"></Label>
+                                <Label Grid.Row="1" Text="Search every caracter" VerticalOptions="Center" FontSize="12" TextColor="#AAA"></Label>
+                            </Grid>
+                        </Grid>
+
+                    </Grid>
+                    <Label Grid.Row="2" Text="General"  FontSize="Body" FontAttributes="Bold" TranslationX="10" Margin="10,20,10,10" TextColor="#ffffff"></Label>
+ -->
+                </Grid>
+
+            </StackLayout>
+        </ScrollView>
+
+    </ContentPage.Content>
+</ContentPage>

@@ -5,9 +5,8 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:local="clr-namespace:CloudStreamForms;assembly=CloudStreamForms"
             xmlns:ff="clr-namespace:FFImageLoading.Forms;assembly=FFImageLoading.Forms"  
-xmlns:ffSvg="clr-namespace:FFImageLoading.Svg.Forms;assembly=FFImageLoading.Svg.Forms"  
                          xmlns:xe="clr-namespace:XamEffects;assembly=XamEffects"
-
+		xmlns:ffs="clr-namespace:FFImageLoading.Svg.Forms;assembly=FFImageLoading.Svg.Forms"
 xmlns:ffTransformations="clr-namespace:FFImageLoading.Transformations;assembly=FFImageLoading.Transformations"
              xmlns:cloudstreamforms="clr-namespace:CloudStreamForms"
              mc:Ignorable="d"
@@ -118,12 +117,12 @@ xmlns:ffTransformations="clr-namespace:FFImageLoading.Transformations;assembly=F
                                 <Grid>
                                     <Grid Grid.Row="0"  Grid.Column="0">
                                         <!--595959-->
-                                        <ff:CachedImage x:Name="StarBtt" HeightRequest="50"  BackgroundColor="Transparent"  WidthRequest="50">
-                                            <ff:CachedImage.Transformations>
+                                        <ffs:SvgCachedImage x:Name="StarBtt" HeightRequest="50"  BackgroundColor="Transparent"  WidthRequest="50">
+                                            <ffs:SvgCachedImage.Transformations>
                                                 <ffTransformations:TintTransformation HexColor="#201E20" ></ffTransformations:TintTransformation>
 
-                                            </ff:CachedImage.Transformations>
-                                        </ff:CachedImage>
+                                            </ffs:SvgCachedImage.Transformations>
+                                        </ffs:SvgCachedImage>
                                         <ImageButton BackgroundColor="Transparent" Clicked="StarBttClicked"></ImageButton>
                                     </Grid>
                                     <Grid Grid.Row="1"  Grid.Column="0">
@@ -131,12 +130,12 @@ xmlns:ffTransformations="clr-namespace:FFImageLoading.Transformations;assembly=F
                                     </Grid>
 
                                     <Grid Grid.Row="0"  Grid.Column="1">
-                                        <ff:CachedImage x:Name="SubtitleBtt" HeightRequest="40" Source="outline_subtitles_white_48dp.png"  BackgroundColor="Transparent"  WidthRequest="50">
-                                            <ff:CachedImage.Transformations>
+                                        <ffs:SvgCachedImage x:Name="SubtitleBtt" HeightRequest="40" Source="subtitles.svg"  BackgroundColor="Transparent"  WidthRequest="50">
+                                            <ffs:SvgCachedImage.Transformations>
                                                 <ffTransformations:TintTransformation HexColor="#e6e6e6" ></ffTransformations:TintTransformation>
 
-                                            </ff:CachedImage.Transformations>
-                                        </ff:CachedImage>
+                                            </ffs:SvgCachedImage.Transformations>
+                                        </ffs:SvgCachedImage>
                                         <ImageButton BackgroundColor="Transparent" Clicked="SubtitleBttClicked" HeightRequest="40" ></ImageButton>
                                     </Grid>
                                     <Grid Grid.Row="1"  Grid.Column="1">
@@ -145,12 +144,12 @@ xmlns:ffTransformations="clr-namespace:FFImageLoading.Transformations;assembly=F
 
                                     <Grid Grid.Row="0"  Grid.Column="2">
 
-                                        <ff:CachedImage x:Name="ViewToggle" InputTransparent="True" BackgroundColor="Transparent"  WidthRequest="50">
-                                            <ff:CachedImage.Transformations>
+                                        <ffs:SvgCachedImage x:Name="ViewToggle" InputTransparent="True" BackgroundColor="Transparent"  WidthRequest="50">
+                                            <ffs:SvgCachedImage.Transformations>
                                                 <ffTransformations:TintTransformation HexColor="#e6e6e6" ></ffTransformations:TintTransformation>
 
-                                            </ff:CachedImage.Transformations>
-                                        </ff:CachedImage>
+                                            </ffs:SvgCachedImage.Transformations>
+                                        </ffs:SvgCachedImage>
                                         <ImageButton BackgroundColor="Transparent" Clicked="ViewToggle_Clicked" HeightRequest="40" ></ImageButton>
                                     </Grid>
                                     <Grid Grid.Row="1"  Grid.Column="2">
@@ -158,13 +157,13 @@ xmlns:ffTransformations="clr-namespace:FFImageLoading.Transformations;assembly=F
                                     </Grid>
                                     <Grid Grid.Row="0"  Grid.Column="3">
 
-                                        <ff:CachedImage x:Name="ShareBtt"  HeightRequest="40" Source="baseline_share_white_48dp.png" BackgroundColor="Transparent" Scale="1.2"  WidthRequest="50">
+                                        <ffs:SvgCachedImage x:Name="ShareBtt"  HeightRequest="40" Source="share_white_48dp.svg" BackgroundColor="Transparent" Scale="1.2"  WidthRequest="50">
                                             <!--Scale="0.8"-->
-                                            <ff:CachedImage.Transformations>
+                                            <ffs:SvgCachedImage.Transformations>
                                                 <ffTransformations:TintTransformation HexColor="#e6e6e6" ></ffTransformations:TintTransformation>
 
-                                            </ff:CachedImage.Transformations>
-                                        </ff:CachedImage>
+                                            </ffs:SvgCachedImage.Transformations>
+                                        </ffs:SvgCachedImage>
                                         <ImageButton BackgroundColor="Transparent" Clicked="ShareBttClicked" HeightRequest="40" ></ImageButton>
                                     </Grid>
                                     <Grid Grid.Row="1"  Grid.Column="3">
@@ -172,18 +171,18 @@ xmlns:ffTransformations="clr-namespace:FFImageLoading.Transformations;assembly=F
                                     </Grid>
 
                                     <Grid Grid.Row="0"  Grid.Column="4">
-                                        <ff:CachedImage x:Name="IMDbBtt" HeightRequest="40" Source="IMDbWhite.png" BackgroundColor="Transparent" Scale="0.8" WidthRequest="50" >
-                                            <ff:CachedImage.Transformations>
+                                        <ffs:SvgCachedImage x:Name="IMDbBtt" HeightRequest="40" Source="public_globe.svg" BackgroundColor="Transparent"  >
+                                            <ffs:SvgCachedImage.Transformations>
                                                 <ffTransformations:TintTransformation HexColor="#e6e6e6" ></ffTransformations:TintTransformation>
 
-                                            </ff:CachedImage.Transformations>
-                                        </ff:CachedImage>
-                                        <ImageButton  Clicked="IMDb_Clicked" BackgroundColor="Transparent" HeightRequest="30" ></ImageButton>
+                                            </ffs:SvgCachedImage.Transformations>
+                                        </ffs:SvgCachedImage>
+                                        <ImageButton  Clicked="IMDb_Clicked" BackgroundColor="Transparent" HeightRequest="40" ></ImageButton>
                                     </Grid>
                                     <Grid Grid.Row="1"  Grid.Column="4">
-                                        <Label Text="IMDb" HorizontalOptions="Center" TextColor="Gray" FontSize="11"  ></Label>
+                                        <Label Text="Metadata" HorizontalOptions="Center" TextColor="Gray" FontSize="11"  ></Label>
                                     </Grid>
-
+<!--
                                     <Grid Grid.Row="0"  Grid.Column="5" x:Name="MALB">
                                         <ff:CachedImage x:Name="MALBtt" HeightRequest="30" Source="MALWhite.png" BackgroundColor="Transparent" TranslationY="0" TranslationX="7" Scale="0.8" WidthRequest="50">
                                             <ff:CachedImage.Transformations>
@@ -195,7 +194,7 @@ xmlns:ffTransformations="clr-namespace:FFImageLoading.Transformations;assembly=F
                                     </Grid>
                                     <Grid Grid.Row="1"  Grid.Column="5" x:Name="MALA">
                                         <Label Text="MAL" HorizontalOptions="Center"  x:Name="MALTxt"  TextColor="Gray" TranslationX="7" FontSize="11"  ></Label>
-                                    </Grid>
+                                    </Grid>-->
 
                                 </Grid>
                             </Grid>
@@ -223,7 +222,7 @@ xmlns:ffTransformations="clr-namespace:FFImageLoading.Transformations;assembly=F
 
                             <Button x:Name="DubBtt" Grid.Column="1" InputTransparent="False" BackgroundColor="#333333" Text="Dub" TextColor="#e7e7e7" FontAttributes="Bold" FontSize="Body" CornerRadius="5" HeightRequest="37" WidthRequest="60" ></Button>
                             <Button x:Name="FromToBtt" Grid.Column="2" InputTransparent="False" IsVisible="False" IsEnabled="False" BackgroundColor="#333333" Text="Test" TextColor="#e7e7e7" FontAttributes="Bold" FontSize="Body" CornerRadius="5" HeightRequest="37" WidthRequest="80" ></Button>
-                            <ff:CachedImage x:Name="NotificationImg" Grid.Column="3" VerticalOptions="Center" HorizontalOptions="End" ></ff:CachedImage>
+                            <ffs:SvgCachedImage x:Name="NotificationImg" Grid.Column="3" VerticalOptions="Center" HorizontalOptions="End" ></ffs:SvgCachedImage>
                             <xe:BorderView x:Name="NotificationBtt" IsEnabled="False" xe:TouchEffect.Color="White"  Opacity="0.4" Grid.Column="3" TranslationX="2.5" WidthRequest="36" HeightRequest="36" CornerRadius="18"  VerticalOptions="Center" HorizontalOptions="End"></xe:BorderView>
                             <Label x:Name="NotificationTime" Grid.Column="4" VerticalOptions="Center" HorizontalOptions="End" Margin="10,0"></Label>
                             <!--   <Picker x:Name="DubPicker" IsVisible="False" VerticalOptions="Center" HorizontalOptions="Start"  FontAttributes="Bold" FontSize="Body" TextColor="Transparent" TranslationX="13"></Picker> -->

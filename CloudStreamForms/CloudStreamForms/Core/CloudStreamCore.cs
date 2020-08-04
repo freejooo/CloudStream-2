@@ -271,6 +271,7 @@ namespace CloudStreamForms.Core
         public struct MALSeason
         {
             public string malUrl;
+            public string aniListUrl;
             public int MalId {
                 get {
                     return int.Parse(FindHTML(malUrl, "anime/", "/"));
@@ -434,6 +435,7 @@ namespace CloudStreamForms.Core
         {
             public List<MALSeason> seasons;
             public string malUrl;
+            public string aniListUrl;
         }
 
         [Serializable]
@@ -6362,14 +6364,17 @@ namespace CloudStreamForms.Core
 
                                 static string ToMalUrl(int? id)
                                 {
-                                    return $"https://myanimelist.net/anime/{id}/";
+                                    return id == null ? "" : $"https://myanimelist.net/anime/{id}/";
                                 }
 
+                                static string ToAniListUrl(int? id)
+                                {
+                                    return id == null ? "" : $"https://anilist.co/anime/{id}/";
+                                }
 
                                 static string ToDate(int? year, int? month, int? day)
                                 {
-                                    try {
-
+                                    try { 
                                         return $"{shortdates[(int)(month) - 1]} {day}, {year}";
 
                                     }
@@ -6378,7 +6383,7 @@ namespace CloudStreamForms.Core
                                     }
                                 }
 
-                                List<MALSeasonData> data = new List<MALSeasonData>() { new MALSeasonData() { malUrl = ToMalUrl(media[0].idMal), seasons = new List<MALSeason>() } };
+                                List<MALSeasonData> data = new List<MALSeasonData>() { new MALSeasonData() { malUrl = ToMalUrl(media[0].idMal),aniListUrl = ToAniListUrl(media[0].id), seasons = new List<MALSeason>() } };
                                 string jap = media[0].title.native;
                                 string eng = media[0].title.english;
                                 string firstName = eng;
@@ -6394,17 +6399,18 @@ namespace CloudStreamForms.Core
                                         string _jap = title.title.native;
                                         List<string> _synos = title.synonyms == null ? new List<string>() : title.synonyms.Where(t => t != null).Select(t => t.ToString()).ToList();
                                         string _malLink = ToMalUrl(title.idMal);
+                                        string _aniListLink = ToAniListUrl(title.id);
                                         var _startDate = ToDate(title.startDate.year, title.startDate.month, title.startDate.day);
                                         var _endDate = ToDate(title.endDate.year, title.endDate.month, title.endDate.day);
-                                        if (currentName.Contains("Part ") && !currentName.Contains("Part 1")) // WILL ONLY WORK UNTIL PART 10, BUT JUST HOPE THAT THAT DOSENT HAPPEND :) (Not on jojo)
-                                                                  {
-                                            data[data.Count - 1].seasons.Add(new MALSeason() { name = currentName, engName = _eng, japName = _jap, synonyms = _synos, malUrl = _malLink, startDate = _startDate, endDate = _endDate });
+                                        if (currentName.Contains("Part ") && !currentName.Contains("Part 1")) { // WILL ONLY WORK UNTIL PART 10, BUT JUST HOPE THAT THAT DOSENT HAPPEND :) (Not on jojo)
+                                            data[data.Count - 1].seasons.Add(new MALSeason() { aniListUrl = _aniListLink, name = currentName, engName = _eng, japName = _jap, synonyms = _synos, malUrl = _malLink, startDate = _startDate, endDate = _endDate });
                                         }
                                         else {
                                             data.Add(new MALSeasonData() {
-                                                seasons = new List<MALSeason>() { new MALSeason() { name = currentName, engName = _eng, japName = _jap, synonyms = _synos, malUrl = _malLink, startDate = _startDate, endDate = _endDate } },
-                                                malUrl = ToMalUrl(title.idMal)
-                                            });
+                                                seasons = new List<MALSeason>() { new MALSeason() { aniListUrl = _aniListLink, name = currentName, engName = _eng, japName = _jap, synonyms = _synos, malUrl = _malLink, startDate = _startDate, endDate = _endDate } },
+                                                malUrl = _malLink,
+                                                aniListUrl = _aniListLink
+                                            }) ;
                                         }
                                     }
                                     catch (Exception _ex) {

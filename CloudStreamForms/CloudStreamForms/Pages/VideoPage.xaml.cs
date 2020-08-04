@@ -938,15 +938,15 @@ namespace CloudStreamForms
 
             // ========== IMGS ==========
             // SubtitlesImg.Source = App.GetImageSource("netflixSubtitlesCut.png"); //App.GetImageSource("baseline_subtitles_white_48dp.png");
-            MirrosImg.Source = App.GetImageSource("baseline_playlist_play_white_48dp.png");
+            //MirrosImg.Source = App.GetImageSource("baseline_playlist_play_white_48dp.png");
             AudioImg.Source = App.GetImageSource("AudioVolLow3.png"); // App.GetImageSource("baseline_volume_up_white_48dp.png");
             EpisodesImg.Source = App.GetImageSource("netflixEpisodesCut.png");
-            NextImg.Source = App.GetImageSource("baseline_skip_next_white_48dp.png");
-            BacktoMain.Source = App.GetImageSource("baseline_keyboard_arrow_left_white_48dp.png");
-            NextMirror.Source = App.GetImageSource("baseline_skip_next_white_48dp.png");
+           // NextImg.Source = App.GetImageSource("baseline_skip_next_white_48dp.png");
+           // BacktoMain.Source = App.GetImageSource("baseline_keyboard_arrow_left_white_48dp.png");
+           // NextMirror.Source = App.GetImageSource("baseline_skip_next_white_48dp.png");
             SetIsLocked();
             // LockImg.Source = App.GetImageSource("wlockUnLocked.png");
-            SubtitleImg.Source = App.GetImageSource("outline_subtitles_white_48dp.png");
+            //SubtitleImg.Source = App.GetImageSource("outline_subtitles_white_48dp.png");
 
 
             //  GradientBottom.Source = App.GetImageSource("gradient.png");

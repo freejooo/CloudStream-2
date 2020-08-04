@@ -6,6 +6,7 @@
              xmlns:ff="clr-namespace:FFImageLoading.Forms;assembly=FFImageLoading.Forms"
                                       xmlns:xe="clr-namespace:XamEffects;assembly=XamEffects"
              xmlns:tt="clr-namespace:TouchTracking.Forms;assembly=TouchTracking.Forms"
+             		xmlns:ffs="clr-namespace:FFImageLoading.Svg.Forms;assembly=FFImageLoading.Svg.Forms"
              x:Class="CloudStreamForms.VideoPage">
     <ContentPage.Content >
         <AbsoluteLayout>
@@ -97,11 +98,11 @@
                         <Image x:Name="SkipForwardImg"   VerticalOptions="Center" HorizontalOptions="Center" TranslationX="200" AbsoluteLayout.LayoutFlags="All" WidthRequest="50" HeightRequest="50" />
                         <xe:BorderView  x:Name="SkipForwardBtt" xe:TouchEffect.Color="White"  TranslationX="100" Opacity="0.6" VerticalOptions="Center" WidthRequest="34" HeightRequest="34" CornerRadius="17" HorizontalOptions="Center" BackgroundColor="Transparent">
                         </xe:BorderView>
-                        <ff:CachedImage x:Name="BacktoMain" HorizontalOptions="Start" VerticalOptions="Start" TranslationX="8" TranslationY="8" InputTransparent="True"></ff:CachedImage>
+                        <ffs:SvgCachedImage x:Name="BacktoMain" HorizontalOptions="Start" VerticalOptions="Start" TranslationX="8" TranslationY="8" InputTransparent="True" Source="chevron_left.svg" BackgroundColor="Transparent" HeightRequest="38" WidthRequest="38"></ffs:SvgCachedImage>
                         <xe:BorderView  x:Name="GoBackBtt" xe:TouchEffect.Color="White"  VerticalOptions="Start" TranslationX="-3" TranslationY="-3" Opacity="0.6" WidthRequest="54" HeightRequest="54" CornerRadius="27" Scale="1" HorizontalOptions="Start" BackgroundColor="Transparent">
                         </xe:BorderView>
 
-                        <ff:CachedImage x:Name="NextMirror" HorizontalOptions="End" VerticalOptions="Start" TranslationX="-8" TranslationY="8" InputTransparent="True"></ff:CachedImage>
+                        <ffs:SvgCachedImage x:Name="NextMirror" HorizontalOptions="End" VerticalOptions="Start" TranslationX="-8" TranslationY="8" InputTransparent="True" HeightRequest="30" WidthRequest="30" BackgroundColor="Transparent" Source="skip_next.svg"></ffs:SvgCachedImage>
                         <xe:BorderView  x:Name="NextMirrorBtt" xe:TouchEffect.Color="White"  VerticalOptions="Start" TranslationX="3" TranslationY="-3" Opacity="0.6" WidthRequest="54" HeightRequest="54" CornerRadius="27" Scale="1" HorizontalOptions="End" BackgroundColor="Transparent">
                         </xe:BorderView>
 
@@ -270,7 +271,7 @@
                                             <ColumnDefinition Width="Auto" />
                                             <ColumnDefinition Width="Auto" />
                                         </Grid.ColumnDefinitions>
-                                        <ff:CachedImage x:Name="MirrosImg" Grid.Column="0" VerticalOptions="Center" TranslationX="-7" TranslationY="1.5" InputTransparent="True" BackgroundColor="Transparent" WidthRequest="32" HeightRequest="32" Aspect="AspectFill"></ff:CachedImage>
+                                        <ffs:SvgCachedImage x:Name="MirrosImg" Grid.Column="0" VerticalOptions="Center" TranslationX="-7" TranslationY="1.5" InputTransparent="True" BackgroundColor="Transparent" WidthRequest="32" HeightRequest="32" Aspect="AspectFill" Source="playlist_play.svg"></ffs:SvgCachedImage>
                                         <!--  <Button Text="Mirrors"  Grid.Column="1" BackgroundColor="Transparent"></Button>-->
                                         <Label Text="Mirrors" Grid.Column="1" TranslationX="-2" VerticalOptions="Center" TextColor="White"></Label>
 
@@ -315,7 +316,7 @@
                                             <ColumnDefinition Width="Auto" />
                                             <ColumnDefinition Width="Auto" />
                                         </Grid.ColumnDefinitions>
-                                        <ff:CachedImage x:Name="SubtitleImg" Grid.Column="0" VerticalOptions="Center" TranslationX="-5"  InputTransparent="True" BackgroundColor="Transparent" WidthRequest="30" HeightRequest="30"   Aspect="AspectFill"></ff:CachedImage>
+                                        <ffs:SvgCachedImage x:Name="SubtitleImg" Grid.Column="0" VerticalOptions="Center" TranslationX="-5"  InputTransparent="True" BackgroundColor="Transparent" WidthRequest="30" HeightRequest="30" Source="subtitles.svg" Aspect="AspectFill"></ffs:SvgCachedImage>
                                         <!--  <Button Text="Mirrors"  Grid.Column="1" BackgroundColor="Transparent"></Button>-->
                                         <Label Text="Subtitles"  Grid.Column="1" VerticalOptions="Center" TextColor="White"></Label>
 
@@ -338,10 +339,9 @@
                                             <ColumnDefinition Width="Auto" />
                                             <ColumnDefinition Width="Auto" />
                                         </Grid.ColumnDefinitions>
-                                        <ff:CachedImage x:Name="NextImg" Grid.Column="0" VerticalOptions="Center" TranslationX="-5"  InputTransparent="True" BackgroundColor="Transparent" WidthRequest="35" HeightRequest="35"   Aspect="AspectFill"></ff:CachedImage>
+                                        <ffs:SvgCachedImage x:Name="NextImg" Grid.Column="0" VerticalOptions="Center" TranslationX="-5"  InputTransparent="True" BackgroundColor="Transparent" WidthRequest="35" HeightRequest="35"   Aspect="AspectFill" Source="skip_next.svg"></ffs:SvgCachedImage>
                                         <!--  <Button Text="Mirrors"  Grid.Column="1" BackgroundColor="Transparent"></Button>-->
                                         <Label Text="Next Episode"  Grid.Column="1" VerticalOptions="Center" TextColor="White"></Label>
-
                                     </Grid>
                                 </xe:BorderView>
                                 <!--

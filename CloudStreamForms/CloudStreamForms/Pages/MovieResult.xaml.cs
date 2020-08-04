@@ -72,6 +72,23 @@ namespace CloudStreamForms
                 }
             }
         }
+        string CurrentAniListLink {
+            get {
+
+                try {
+                    string s = currentMovie.title.MALData.seasonData[currentSeason].aniListUrl;
+                    if (s.IsClean()) {
+                        return s;
+                    }
+                    else {
+                        return "";
+                    }
+                }
+                catch (Exception) {
+                    return "";
+                }
+            }
+        }
 
         protected override bool OnBackButtonPressed()
         {
@@ -139,6 +156,9 @@ namespace CloudStreamForms
             if (CurrentMalLink != "") {
                 actions.Insert(3, "MAL Link");
             }
+            if (CurrentAniListLink.IsClean()) {
+                actions.Insert(4, "AniList Link");
+            }
             if (trailerUrl != "") {
                 actions.Insert(actions.Count - 2, "Trailer Link");
             }
@@ -189,6 +209,9 @@ namespace CloudStreamForms
             else if (a == "Trailer Link") {
                 copyTxt = trailerUrl;
             }
+            else if (a == "AniList Link") {
+                copyTxt = CurrentAniListLink;
+            }
             else if (a == "Everything") {
                 copyTxt = currentMovie.title.name + " | " + RatingLabel.Text + "\n" + currentMovie.title.description;
                 string _s = await GetMovieCode();
@@ -198,10 +221,13 @@ namespace CloudStreamForms
                 }
                 copyTxt = copyTxt + "\nIMDb: " + "https://www.imdb.com/title/" + currentMovie.title.id;
                 if (CurrentMalLink != "") {
-                    copyTxt = copyTxt + "\nMAL: " + CurrentMalLink;
+                    copyTxt += "\nMAL: " + CurrentMalLink;
+                }
+                if (CurrentAniListLink.IsClean()) {
+                    copyTxt += "\nAniList: " + CurrentAniListLink;
                 }
                 if (trailerUrl != "") {
-                    copyTxt = copyTxt + "\nTrailer: " + trailerUrl;
+                    copyTxt += "\nTrailer: " + trailerUrl;
                 }
             }
             if (a != "Cancel" && copyTxt != "") {
@@ -226,7 +252,7 @@ namespace CloudStreamForms
             else {
                 keyExists = (bool)overrideBool;
             }
-            StarBtt.Source = GetImageSource((keyExists ? "bookmarkedBtt.png" : "notBookmarkedBtt.png"));
+            StarBtt.Source = keyExists ? "bookmark.svg" : "bookmark_off.svg";//GetImageSource(());
             Device.BeginInvokeOnMainThread(() => {
                 StarBtt.Transformations = new List<FFImageLoading.Work.ITransformation>() { (new FFImageLoading.Transformations.TintTransformation(keyExists ? DARK_BLUE_COLOR : LIGHT_LIGHT_BLACK_COLOR)) };
             });
@@ -247,6 +273,7 @@ namespace CloudStreamForms
             }
 
             Device.BeginInvokeOnMainThread(() => {
+                SubtitleBtt.Source = res ? "subtitles.svg" : "subtitles_off.svg";//App.GetImageSource();
                 SubtitleBtt.Transformations = new List<FFImageLoading.Work.ITransformation>() { (new FFImageLoading.Transformations.TintTransformation(res ? DARK_BLUE_COLOR : LIGHT_LIGHT_BLACK_COLOR)) };
             });
         }
@@ -381,7 +408,7 @@ namespace CloudStreamForms
             //   IMDbBtt.Source = GetImageSource("IMDbWhite.png");//"imdbIcon.png");
             //   MALBtt.Source = GetImageSource("MALWhite.png");//"MALIcon.png");
             //   ShareBtt.Source = GetImageSource("baseline_share_white_48dp.png");//GetImageSource("round_reply_white_48dp_inverted.png");
-            StarBtt.Source = GetImageSource("notBookmarkedBtt.png");
+            //  StarBtt.Source = GetImageSource("notBookmarkedBtt.png");
             //   SubtitleBtt.Source = GetImageSource("outline_subtitles_white_48dp.png"); //GetImageSource("round_subtitles_white_48dp.png");
             //  IMDbBlue.Source = GetImageSource("IMDbBlue.png"); //GetImageSource("round_subtitles_white_48dp.png");
 
@@ -459,12 +486,13 @@ namespace CloudStreamForms
             BackgroundColor = Settings.BlackRBGColor;
             BgColorSet.BackgroundColor = Settings.BlackRBGColor;
 
+            /*
             MALB.IsVisible = false;
             MALB.IsEnabled = false;
             MALA.IsVisible = false;
             MALA.IsEnabled = false;
             Grid.SetColumn(MALB, 0);
-            Grid.SetColumn(MALA, 0);
+            Grid.SetColumn(MALA, 0);*/
 
             DubBtt.IsVisible = false;
             SeasonBtt.IsVisible = false;
@@ -606,7 +634,7 @@ namespace CloudStreamForms
             if (core == null) return;
 
             bool hasNot = overrideNot ?? App.GetKey<bool>("Notifications", currentMovie.title.id, false);
-            NotificationImg.Source = App.GetImageSource(hasNot ? "baseline_notifications_active_white_48dp.png" : "baseline_notifications_none_white_48dp.png");
+            NotificationImg.Source = hasNot ? "notifications_active.svg" : "notifications.svg"; //App.GetImageSource(hasNot ? "baseline_notifications_active_white_48dp.png" : "baseline_notifications_none_white_48dp.png");
             NotificationImg.Transformations = new List<FFImageLoading.Work.ITransformation>() { (new FFImageLoading.Transformations.TintTransformation(hasNot ? DARK_BLUE_COLOR : LIGHT_LIGHT_BLACK_COLOR)) };
             NotificationTime.TextColor = hasNot ? Color.FromHex(DARK_BLUE_COLOR) : Color.Gray;
         }
@@ -1342,13 +1370,14 @@ namespace CloudStreamForms
                 bool enabled = currentMovie.title.movieType == MovieType.Anime; //CurrentMalLink != "";
                 print("SETACTIVE::: " + enabled);
 
+                /*
                 MALB.IsVisible = enabled;
                 MALB.IsEnabled = enabled;
                 MALA.IsVisible = enabled;
                 MALA.IsEnabled = enabled;
 
                 Grid.SetColumn(MALB, enabled ? 5 : 0);
-                Grid.SetColumn(MALA, enabled ? 5 : 0);
+                Grid.SetColumn(MALA, enabled ? 5 : 0);*/
 
                 DubPicker.button.Opacity = 0;
                 DubPicker.IsVisible = DubPicker.ItemsSource.Count > 0;
@@ -1492,15 +1521,32 @@ namespace CloudStreamForms
             });*/
 
         }
-        private void IMDb_Clicked(object sender, EventArgs e)
+        private async void IMDb_Clicked(object sender, EventArgs e)
         {
             // if (!SameAsActiveMovie()) return;
-            App.OpenBrowser("https://www.imdb.com/title/" + mainPoster.url);
+            List<string> options = new List<string>() {
+                "IMDb",
+            };
+            if (CurrentMalLink.IsClean()) {
+                options.Add("MAL");
+            }
+            if (CurrentAniListLink.IsClean()) {
+                options.Add("AniList");
+            }
+            string option = await ActionPopup.DisplayActionSheet("Open", options.ToArray());
+            if (option == "IMDb") {
+                App.OpenBrowser("https://www.imdb.com/title/" + mainPoster.url);
+            }
+            else if (option == "MAL") {
+                App.OpenBrowser(CurrentMalLink);
+            }
+            else if (option == "AniList") {
+                App.OpenBrowser(CurrentAniListLink);
+            }
         }
         private void MAL_Clicked(object sender, EventArgs e)
         {
             //   if (!SameAsActiveMovie()) return;
-            App.OpenBrowser(CurrentMalLink);
         }
 
         void PlayDownloadedEp(EpisodeResult episodeResult, string data = null)
@@ -2022,7 +2068,7 @@ namespace CloudStreamForms
 
         void ChangeViewToggle()
         {
-            ViewToggle.Source = GetImageSource((toggleViewState ? "outline_visibility_off_white_48dp.png" : "outline_visibility_white_48dp.png"));// GetImageSource((toggleViewState ? "viewOffIcon.png" : "viewOnIcon.png"));
+            ViewToggle.Source = toggleViewState ? "visibility.svg" : "visibility_off.svg";// GetImageSource((toggleViewState ? "viewOffIcon.png" : "viewOnIcon.png"));
             ViewToggle.Transformations = new List<FFImageLoading.Work.ITransformation>() { (new FFImageLoading.Transformations.TintTransformation(toggleViewState ? DARK_BLUE_COLOR : LIGHT_LIGHT_BLACK_COLOR)) };
         }
 
