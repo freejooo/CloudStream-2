@@ -21,7 +21,7 @@ namespace CloudStreamForms
 
         public static async Task<string> DisplayActionSheet(string title, int sel, params string[] buttons)
         {
-            var page = new SelectPopup(buttons.ToList(), sel, title, true);
+            var page = new SelectPopup(buttons.ToList(), sel, title, true,title == "Subtitle Font");
             await PopupNavigation.Instance.PushAsync(page);
             return await page.WaitForResult();
         }

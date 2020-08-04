@@ -7,6 +7,7 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using Xamarin.Forms;
 using Xamarin.Forms.Internals;
 using Xamarin.Forms.Xaml;
@@ -62,6 +63,10 @@ namespace CloudStreamForms
                 return SubtitleType >= 2;
             }
         }
+
+        public static readonly string[] SubtitleTypeNames = {
+            "None", "Dropshadow", "Outline", "Outline + dropshadow"
+        };
 
         /// <summary>
         /// 0 = None, 1 = Dropshadow, 2 = Outline, 3 = Outline + dropshadow 
@@ -203,6 +208,10 @@ namespace CloudStreamForms
                 return App.GetKey("Settings", nameof(HasStatusBar), false);
             }
         }
+
+        public static readonly string[] BlackBgNames = {
+            "Black", "Dark", "Netflix", "YouTube"
+        };
 
         /// <summary>
         /// 0 = Almond black, 1 = Dark, 2 = Netflix, 3 = YouTube
@@ -597,7 +606,7 @@ namespace CloudStreamForms
             }*/
         }
 
-        public static async void ManageAccountClicked(Action appear)
+        public static async Task ManageAccountClicked(Action appear)
         {
             List<string> actions = new List<string>() { };
 

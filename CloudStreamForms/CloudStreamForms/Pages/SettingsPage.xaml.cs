@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 using Xamarin.Forms;
+using Xamarin.Forms.Internals;
 using Xamarin.Forms.Xaml;
 
 namespace CloudStreamForms.Pages
@@ -21,7 +22,7 @@ namespace CloudStreamForms.Pages
 
         public class SettingsButton : SettingsItem
         {
-            public SettingsButton(string _img, string title, string minTitle, Action _onChange)
+            public SettingsButton(string _img, string title, string minTitle, Func<Task> _onChange)
             {
                 img = _img;
                 isSwitch = false;
@@ -29,6 +30,19 @@ namespace CloudStreamForms.Pages
                 OnChange = _onChange;
                 mainTxt = title;
                 descriptTxt = minTitle;
+            }
+        }
+        public class SettingsList : SettingsItem
+        {
+            public SettingsList(string _img, string title, string minTitle, Func<string> _onResult, Func<Task> _onChange)
+            {
+                img = _img;
+                isSwitch = false;
+                isList = true;
+                OnChange = _onChange;
+                mainTxt = title;
+                descriptTxt = minTitle;
+                OnResult = _onResult;
             }
         }
 
@@ -39,6 +53,7 @@ namespace CloudStreamForms.Pages
             public string descriptTxt;
             public bool isButton = false;
             public bool isSwitch = true;
+            public bool isList = false;
             private string _varName;
             public EventHandler onAppear;
             public string VarName {
@@ -48,9 +63,11 @@ namespace CloudStreamForms.Pages
                 }
             }
             public VarRef<bool> variable;
-
-            public Action OnChange;
+            public Func<string> OnResult;
+            public Func<Task> OnChange;
+            public Button btt;
         }
+         
 
         public class VarRef<T>
         {
@@ -72,11 +89,11 @@ namespace CloudStreamForms.Pages
         public static SettingsHolder GeneralSettings = new SettingsHolder() {
             header = "General",
             settings = new SettingsItem[] {
-                new SettingsItem() { img= "MainSearchIcon.png",mainTxt="QuickSearch",descriptTxt="Search every character" ,VarName = nameof( Settings.SearchEveryCharEnabled) },
+                new SettingsItem() { img= "MainSearchIcon.png",mainTxt="Quick Search",descriptTxt="Search every character" ,VarName = nameof( Settings.SearchEveryCharEnabled) },
                 new SettingsItem() { img= "outline_subtitles_white_48dp.png",mainTxt="Subtitles",descriptTxt="Auto download subtitles" ,VarName = nameof( Settings.SubtitlesEnabled) },
-                new SettingsItem() { img= "outline_cached_white_48dp.png",mainTxt="Cache data",descriptTxt="Speed up loading speed" ,VarName = nameof( Settings.CacheData) },
+                new SettingsItem() { img= "outline_cached_white_48dp.png",mainTxt="Cache data",descriptTxt="Speed up loading time" ,VarName = nameof( Settings.CacheData) },
                 new SettingsItem() { img= "outline_cached_white_48dp.png",mainTxt="Use AniList",descriptTxt="Prefer AniList over MAL for faster load" ,VarName = nameof( Settings.UseAniList) },
-                new SettingsItem() { img= "outline_record_voice_over_white_48dp.png",mainTxt="Deafult dub",descriptTxt="Autoset to dub/sub when it can" ,VarName = nameof( Settings.DefaultDub) },
+                new SettingsItem() { img= "outline_record_voice_over_white_48dp.png",mainTxt="Default dub",descriptTxt="Autoset to dub/sub when it can" ,VarName = nameof( Settings.DefaultDub) },
                 new SettingsItem() { img= "baseline_ondemand_video_white_48dp.png",mainTxt="Autoload next episode",descriptTxt="Autoload the next episode in the background while in the videoplayer" ,VarName = nameof( Settings.LazyLoadNextLink) },
                 new SettingsItem() { img= "outline_history_white_48dp.png",mainTxt="Pause history",descriptTxt="Will pause all viewing history" ,VarName = nameof( Settings.PauseHistory) },
             },
@@ -85,7 +102,7 @@ namespace CloudStreamForms.Pages
         public static SettingsHolder UISettings = new SettingsHolder() {
             header = "UI",
             settings = new SettingsItem[] {
-                new SettingsItem() { img= "outline_aspect_ratio_white_48dp.png",mainTxt="Show statusbar",descriptTxt="This will not affect app videoplayer" ,VarName = nameof( Settings.HasStatusBar),OnChange = () => { App.UpdateStatusBar();} },
+                new SettingsItem() { img= "outline_aspect_ratio_white_48dp.png",mainTxt="Show statusbar",descriptTxt="This will not affect app videoplayer" ,VarName = nameof( Settings.HasStatusBar),OnChange = async () => { App.UpdateStatusBar();} },
                 new SettingsItem() { img= "outline_reorder_white_48dp.png",mainTxt="Top 100",descriptTxt="" ,VarName = nameof( Settings.Top100Enabled)},
                 new SettingsItem() { img= "baseline_ondemand_video_white_48dp.png",mainTxt="Use in app videoplayer",descriptTxt="" ,VarName = nameof( Settings.UseVideoPlayer)},
                 new SettingsItem() { img= "outline_description_white_48dp.png",mainTxt="Episode description",descriptTxt="To remove spoilers or shorten episode list" ,VarName = nameof( Settings.EpDecEnabled)},
@@ -121,8 +138,8 @@ namespace CloudStreamForms.Pages
                         App.RemoveFolder(App.BOOKMARK_DATA);
                     }
                 }),
-                new SettingsButton("baseline_refresh_white_48dp.png","Reset settings","Will reset all settings to deafult",async () => {
-                    string o = await ActionPopup.DisplayActionSheet($"Reset all settings","Yes, reset to deafult","No, dont reset settings");
+                new SettingsButton("baseline_refresh_white_48dp.png","Reset settings","Will reset all settings to default",async () => {
+                    string o = await ActionPopup.DisplayActionSheet($"Reset all settings","Yes, reset to default","No, dont reset settings");
                     if(o.StartsWith("Yes")) {
                         App.RemoveFolder("Settings");
                         Appear();
@@ -131,24 +148,83 @@ namespace CloudStreamForms.Pages
             },
         };
 
+        public static SettingsHolder SubtitleSettings = new SettingsHolder() {
+            header = "Subtitles",
+            settings = new SettingsItem[] {
+                new SettingsList("outline_subtitles_white_48dp.png","Subtitle Font","For in app videoplayer and chromecast",() => {return Settings.GlobalSubtitleFont; },async () => {
+                    string action = await ActionPopup.DisplayActionSheet("Subtitle Font",Settings.GlobalFonts.IndexOf(Settings.GlobalSubtitleFont),Settings.GlobalFonts.ToArray());
+                    if(action != "" && action != "Cancel") {
+                        Settings.GlobalSubtitleFont = action;
+                    }
+                }),
+                new SettingsList("outline_subtitles_white_48dp.png","Subtitle Outline","For in app videoplayer",() => {return Settings.SubtitleTypeNames[Settings.SubtitleType]; },async () => {
+                    string action = await ActionPopup.DisplayActionSheet("Subtitle Outline",Settings.SubtitleType,Settings.SubtitleTypeNames);
+                    int index;
+                    if((index = Settings.SubtitleTypeNames.IndexOf(action)) != -1) {
+                        Settings.SubtitleType = index;
+                    }
+                }),
+                new SettingsList("outline_subtitles_white_48dp.png","Subtitle Language","Default subtitle language",() => {return  CloudStreamCore.subtitleNames[Settings.NativeSubtitles]; },async () => {
+                    string action = await ActionPopup.DisplayActionSheet("Subtitle Language",Settings.NativeSubtitles,CloudStreamCore.subtitleNames);
+                    int index;
+                    if((index = CloudStreamCore.subtitleNames.IndexOf(action)) != -1) {
+                        Settings.NativeSubtitles = index;
+                    }
+                }),
+            },
+        };
+
         public static SettingsHolder BuildSettings = new SettingsHolder() {
             header = "Build v" + App.GetBuildNumber(),
             settings = new SettingsItem[] {
-                new SettingsButton("outline_code_white_48dp.png","Open Github","https://github.com/LagradOst/CloudStream-2",() => {
-                    App.OpenBrowser("https://github.com/LagradOst/CloudStream-2");
+                new SettingsButton("outline_code_white_48dp.png","Open Github","https://github.com/LagradOst/CloudStream-2",async () => {
+                    await App.OpenBrowser("https://github.com/LagradOst/CloudStream-2");
                 }),
-                new SettingsButton("round_add_white_48dp.png","Leave feedback","",() => {
-                    thisPage.Navigation.PushModalAsync(new Feedback());
+                new SettingsButton("round_add_white_48dp.png","Leave feedback","",async () => {
+                    await thisPage.Navigation.PushModalAsync(new Feedback());
                 }),
-                new SettingsButton("outline_settings_white_48dp.png","Manage Account","",() => {
-                    Settings.ManageAccountClicked(() => Appear());
+
+                new SettingsList("baseline_ondemand_video_white_48dp.png","Current Videoplayer","External videoplayer",() => { return App.GetVideoPlayerName((App.VideoPlayer)Settings.PreferedVideoPlayer); }, async () => {
+                    List<string> videoOptions = new List<string>() { App.GetVideoPlayerName(App.VideoPlayer.None) };
+                    List<App.VideoPlayer> avalibePlayers = new List<App.VideoPlayer>() { App.VideoPlayer.None };
+                    foreach (var player in App.GetEnumList<App.VideoPlayer>()) {
+                        if (App.GetVideoPlayerInstalled(player)) {
+                            avalibePlayers.Add(player);
+                            videoOptions.Add(App.GetVideoPlayerName(player));
+                        }
+                    }
+
+                    string action = await ActionPopup.DisplayActionSheet("External Videoplayer",avalibePlayers.IndexOf((App.VideoPlayer)Settings.PreferedVideoPlayer),videoOptions.ToArray());
+
+                    for (int i = 0; i < videoOptions.Count; i++)
+                    {
+                        if(videoOptions[i] == action) {
+                            Settings.PreferedVideoPlayer =(int)avalibePlayers[i];
+                            break;
+                        }
+                    }
                 }),
+
+                new SettingsList("outline_color_lens_white_48dp.png","Theme","Set app theme",() => {return Settings.BlackBgNames[Settings.BlackBgType]; },async () => {
+                    string action = await ActionPopup.DisplayActionSheet("Select Theme",Settings.BlackBgType,Settings.BlackBgNames);
+                    int index;
+                    if((index = Settings.BlackBgNames.IndexOf(action)) != -1) {
+                        Settings.BlackBgType = index;
+                    }
+                    Appear();
+                    App.UpdateBackground();
+                }),
+                new SettingsButton("outline_settings_white_48dp.png","Manage Account","",async ()  => {
+                   await Settings.ManageAccountClicked(() => Appear());
+                }),
+
             },
         };
 
         public static List<SettingsHolder> settings = new List<SettingsHolder>() {
             GeneralSettings,
             UISettings,
+            SubtitleSettings,
             ClearSettigns,
             BuildSettings,
         };
@@ -161,9 +237,14 @@ namespace CloudStreamForms.Pages
 
         static void Appear()
         {
+            thisPage.BackgroundColor = Settings.BlackRBGColor;
+            double _color = Math.Min(Settings.BlackColor +3, 255)/255.0;
+            Color c = new Color(_color);
+
             foreach (var set in settings) {
                 foreach (var subSet in set.settings) {
                     subSet.onAppear?.Invoke(null, EventArgs.Empty);
+                    subSet.btt.BackgroundColor = c;
                 }
             }
         }
@@ -173,10 +254,10 @@ namespace CloudStreamForms.Pages
         public SettingsPage()
         {
             InitializeComponent();
+            BindingContext = this;
             Settings.OnInit();
             thisPage = this;
 
-            BackgroundColor = Settings.BlackRBGColor;
             int counter = 0;
 
             void AddChild(View v)
@@ -217,6 +298,7 @@ namespace CloudStreamForms.Pages
                     var bgBtn = new Button() {
                         BackgroundColor = Color.FromHex("#141414")
                     };
+                    subSet.btt = bgBtn;
 
                     List<View> mainChilds = new List<View>() {
                        bgBtn,
@@ -263,6 +345,25 @@ namespace CloudStreamForms.Pages
                             subSet.OnChange?.Invoke();
                         };
                     }
+                    if (subSet.isList) {
+                        var _tex = new Label() {
+                            VerticalOptions = LayoutOptions.Center,
+                            HorizontalOptions = LayoutOptions.End,
+                            Padding = new Thickness(10),
+                            InputTransparent = true,
+                        };
+                        mainChilds.Insert(1, _tex);
+
+                        bgBtn.Clicked += async (o, e) => {
+                            await subSet.OnChange();
+                            _tex.Text = subSet.OnResult();
+                        };
+
+                        subSet.onAppear += (o, e) => {
+                            _tex.Text = subSet.OnResult();
+                        };
+                    }
+
                     var _grid = new Grid() {
                         HeightRequest = 70,
                     };
@@ -276,7 +377,7 @@ namespace CloudStreamForms.Pages
                     Grid.SetColumn(subGrid, 1);
                 }
             }
-
+            Appear();
 
         }
     }

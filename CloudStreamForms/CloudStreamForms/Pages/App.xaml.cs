@@ -916,12 +916,12 @@ namespace CloudStreamForms
             }
         }
 
-        public static void OpenBrowser(string url)
+        public static async Task OpenBrowser(string url)
         {
             CloudStreamCore.print("Trying to open: " + url);
             if (CloudStreamCore.CheckIfURLIsValid(url)) {
                 try {
-                    Launcher.OpenAsync(new Uri(url));
+                  await  Launcher.OpenAsync(new Uri(url));
                 }
                 catch (Exception _ex) {
                     CloudStreamCore.print("BROWSER LOADED ERROR, SHOULD NEVER HAPPEND!!" + _ex);
