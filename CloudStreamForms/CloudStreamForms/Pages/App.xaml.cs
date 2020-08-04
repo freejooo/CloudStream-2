@@ -617,6 +617,8 @@ namespace CloudStreamForms
 
         public static void SetKey(string folder, string name, object value)
         {
+            if (Settings.CachedPauseHis && (folder == VIEW_HISTORY || folder == VIEW_TIME_DUR || folder == VIEW_TIME_POS)) return;
+
             try {
                 string path = GetKeyPath(folder, name);
                 SetKey(path, value);
@@ -624,6 +626,7 @@ namespace CloudStreamForms
             catch (Exception _ex) {
                 print("EX SET KEY:" + _ex);
             }
+
         }
 
         static long GetLongRegex(string id)

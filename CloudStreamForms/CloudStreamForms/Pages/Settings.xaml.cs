@@ -235,12 +235,24 @@ namespace CloudStreamForms
 
         public static bool ViewHistory {
             set {
+                CachedPauseHis = !value;
                 App.SetKey("Settings", nameof(ViewHistory), value);
             }
             get {
                 return App.GetKey("Settings", nameof(ViewHistory), true);
             }
         }
+
+        public static bool PauseHistory {
+            set {
+                ViewHistory = !value;
+            }
+            get {
+                return !ViewHistory;
+            }
+        }
+
+        public static bool CachedPauseHis;
 
         public static bool EpDecEnabled {
             set {
@@ -345,9 +357,17 @@ namespace CloudStreamForms
 
         static bool initVideoPlayer = true;
         VisualElement[] displayElements;
+
+        public static void OnInit()
+        {
+            CachedPauseHis = PauseHistory;
+        }
+
         public Settings()
         {
             InitializeComponent();
+            OnInit();
+
 
             displayElements = new VisualElement[] {
                 G_GeneralTxt,
@@ -547,181 +567,7 @@ namespace CloudStreamForms
 
 
             ManageAccount.Clicked += async (o, e) => {
-                List<string> actions = new List<string>() { };
-                // TODO ADD LOGIN
-
-                if (HasAccountLogin) {
-                    actions.Add("Logout from " + AccountUsername);
-                }
-                else {
-                    actions.Add("Create account");
-                    actions.Add("Login");
-                }
-                actions.AddRange(new string[] { "Export data", "Export Everything", "Import data", });
-
-                string action = await ActionPopup.DisplayActionSheet("Manage account", actions.ToArray());
-                if (action == "Export data" || action == "Export Everything") {
-                    string subaction = await ActionPopup.DisplayEntry(InputPopupPage.InputPopupResult.password, "Password", "Encrypt data", autoPaste: false, confirmText: "Encrypt");
-
-                    if (subaction != "Cancel") {
-                        string text = Script.SyncWrapper.GenerateTextFile(action == "Export Everything");
-                        if (subaction != "") {
-                            text = CloudStreamForms.Cryptography.StringCipher.Encrypt(text, subaction);
-                        }
-                        string fileloc = App.DownloadFile(text, App.DATA_FILENAME, true);
-                        if (fileloc != "") {
-                            App.ShowToast($"Saved data to {fileloc}");
-                        }
-                    }
-                }
-                else if (action == "Import data") {
-                    string file = App.ReadFile(App.DATA_FILENAME, true, "");
-                    if (file == "") {
-                        App.ShowToast("No file found");
-                    }
-                    else {
-                        if (file.StartsWith(Script.SyncWrapper.header)) {
-                            string import = await ActionPopup.DisplayActionSheet("Override Current Data", "Yes, import data and override current", "No, dont override current data");
-                            if (import.StartsWith("Y")) {
-                                Script.SyncWrapper.SetKeysFromTextFile(file);
-                                App.ShowToast("File loaded");
-                                Apper();
-                            }
-                        }
-                        else {
-                            bool success = false;
-                            while (!success) {
-                                string password = await ActionPopup.DisplayEntry(InputPopupPage.InputPopupResult.password, "Password", "Decrypt data", autoPaste: false, confirmText: "Decrypt");
-                                CloudStreamCore.print("PASSWORDD:D::: " + password);
-                                if (password != "Cancel" && password != "") {
-                                    string subFile = CloudStreamForms.Cryptography.StringCipher.Decrypt(file, password);
-                                    CloudStreamCore.print("SUBFILE::: " + subFile);
-                                    success = subFile.StartsWith(Script.SyncWrapper.header);
-                                    if (success) {
-                                        await System.Threading.Tasks.Task.Delay(200);
-                                        string import = await ActionPopup.DisplayActionSheet("Override Current Data", "Yes, import data and override current", "No, dont override current data");
-                                        if (import.StartsWith("Y")) {
-                                            Script.SyncWrapper.SetKeysFromTextFile(subFile);
-                                            App.ShowToast("File dectypted and loaded");
-                                            Apper();
-                                        }
-                                    }
-                                    else {
-                                        App.ShowToast("Failed to dectypted file");
-                                        await System.Threading.Tasks.Task.Delay(200);
-                                    }
-                                }
-                                else {
-                                    success = true;
-                                }
-                            }
-
-                        }
-                    }
-                }
-                else if (action.StartsWith("Logout from")) {
-                    await ActionPopup.StartIndeterminateLoadinbar("Backing up data...");
-                    GetAccountResponse(AccountSite, AccountUsername, AccountPassword, Logintype.EditAccount, out LoginErrorType error, Script.SyncWrapper.GenerateTextFile(false));
-                    await ActionPopup.StopIndeterminateLoadinbar();
-                    AccountUsername = "";
-                    AccountSite = "";
-                    AccountPassword = "";
-                    HasAccountLogin = false;
-                    App.ShowToast("Logout compleate");
-                }
-                else if (action == "Login") {
-                    bool tryLogin = true;
-                    string password = "";
-                    string username = "";
-                    string site = "";
-                    while (tryLogin) {
-                        List<string> data = await ActionPopup.DisplayLogin("Login", "Cancel", "Login to account", new LoginPopupPage.PopupFeildsDatas() { placeholder = "Server Url", setText = site }, new LoginPopupPage.PopupFeildsDatas() { placeholder = "Username", setText = username }, new LoginPopupPage.PopupFeildsDatas() { placeholder = "Password", isPassword = true, setText = password });
-                        if (data.Count == 3) {
-                            site = data[0];
-                            username = data[1];
-                            password = data[2];
-                            try {
-                                await ActionPopup.StartIndeterminateLoadinbar("Trying to login...");
-                                string logindata = GetAccountResponse(site, username, password, Logintype.LoginAccount, out LoginErrorType error);
-                                await ActionPopup.StopIndeterminateLoadinbar();
-
-                                if (error == LoginErrorType.InternetError) {
-                                    App.ShowToast("Could not connect to the server");
-                                }
-                                else if (error == LoginErrorType.UsernameTaken) {
-                                    App.ShowToast("Username taken");
-                                }
-                                else if (error == LoginErrorType.WrongPassword) {
-                                    App.ShowToast("Wrong password");
-                                }
-                                else if (error == LoginErrorType.Ok) {
-                                    App.ShowToast("Login compleate");
-                                    tryLogin = false;
-                                    AccountSite = site;
-                                    AccountPassword = password;
-                                    AccountUsername = username;
-                                    HasAccountLogin = true;
-                                    GetSyncAccount(0, logindata);
-                                }
-                                else if(error == LoginErrorType.ClientError) {
-                                    App.ShowToast("Too short username or password");
-                                }
-                            }
-                            catch (Exception _ex) {
-                                App.ShowToast("Internal server error");
-                            }
-                        }
-                        else {
-                            tryLogin = false;
-                        }
-                    }
-                }
-                else if (action == "Create account") {
-                    bool tryCreate = true;
-                    string password = "";
-                    string username = "";
-                    string site = "";
-                    while (tryCreate) {
-                        List<string> data = await ActionPopup.DisplayLogin("Create", "Cancel", "Create account", new LoginPopupPage.PopupFeildsDatas() { placeholder = "Server Url", setText = site }, new LoginPopupPage.PopupFeildsDatas() { placeholder = "Username", setText = username }, new LoginPopupPage.PopupFeildsDatas() { placeholder = "Password", isPassword = true, setText = password });
-                        if (data.Count == 3) {
-                            site = data[0];
-                            username = data[1];
-                            password = data[2];
-                            try {
-                                await ActionPopup.StartIndeterminateLoadinbar("Creating Account...");
-                                string logindata = GetAccountResponse(site, username, password, Logintype.CreateAccount, out LoginErrorType error, Script.SyncWrapper.GenerateTextFile(false));
-                                await ActionPopup.StopIndeterminateLoadinbar();
-
-                                if (error == LoginErrorType.InternetError) {
-                                    App.ShowToast("Could not connect to the server");
-                                }
-                                else if (error == LoginErrorType.UsernameTaken) {
-                                    App.ShowToast("Username taken");
-                                }
-                                else if (error == LoginErrorType.Ok) {
-                                    App.ShowToast("Account created");
-                                    tryCreate = false;
-                                    AccountSite = site;
-                                    AccountPassword = password;
-                                    AccountUsername = username;
-                                    HasAccountLogin = true;
-                                }
-                                else if (error == LoginErrorType.WrongPassword) {
-                                    App.ShowToast("Internal server error");
-                                }
-                                else if (error == LoginErrorType.ClientError) {
-                                    App.ShowToast("Too short username or password");
-                                }
-                            }
-                            catch (Exception _ex) {
-                                App.ShowToast("Internal server error");
-                            }
-                        }
-                        else {
-                            tryCreate = false;
-                        }
-                    }
-                }
+                ManageAccountClicked(() => Apper());
             };
 
             if (AccountOverrideServerData) { // If get account dident work and you have changed then override server data
@@ -750,6 +596,184 @@ namespace CloudStreamForms
                 }
             }*/
         }
+
+        public static async void ManageAccountClicked(Action appear)
+        {
+            List<string> actions = new List<string>() { };
+
+            if (HasAccountLogin) {
+                actions.Add("Logout from " + AccountUsername);
+            }
+            else {
+                actions.Add("Create account");
+                actions.Add("Login");
+            }
+            actions.AddRange(new string[] { "Export data", "Export Everything", "Import data", });
+
+            string action = await ActionPopup.DisplayActionSheet("Manage account", actions.ToArray());
+            if (action == "Export data" || action == "Export Everything") {
+                string subaction = await ActionPopup.DisplayEntry(InputPopupPage.InputPopupResult.password, "Password", "Encrypt data", autoPaste: false, confirmText: "Encrypt");
+
+                if (subaction != "Cancel") {
+                    string text = Script.SyncWrapper.GenerateTextFile(action == "Export Everything");
+                    if (subaction != "") {
+                        text = CloudStreamForms.Cryptography.StringCipher.Encrypt(text, subaction);
+                    }
+                    string fileloc = App.DownloadFile(text, App.DATA_FILENAME, true);
+                    if (fileloc != "") {
+                        App.ShowToast($"Saved data to {fileloc}");
+                    }
+                }
+            }
+            else if (action == "Import data") {
+                string file = App.ReadFile(App.DATA_FILENAME, true, "");
+                if (file == "") {
+                    App.ShowToast("No file found");
+                }
+                else {
+                    if (file.StartsWith(Script.SyncWrapper.header)) {
+                        string import = await ActionPopup.DisplayActionSheet("Override Current Data", "Yes, import data and override current", "No, dont override current data");
+                        if (import.StartsWith("Y")) {
+                            Script.SyncWrapper.SetKeysFromTextFile(file);
+                            App.ShowToast("File loaded");
+                            appear?.Invoke();
+                        }
+                    }
+                    else {
+                        bool success = false;
+                        while (!success) {
+                            string password = await ActionPopup.DisplayEntry(InputPopupPage.InputPopupResult.password, "Password", "Decrypt data", autoPaste: false, confirmText: "Decrypt");
+                            CloudStreamCore.print("PASSWORDD:D::: " + password);
+                            if (password != "Cancel" && password != "") {
+                                string subFile = CloudStreamForms.Cryptography.StringCipher.Decrypt(file, password);
+                                CloudStreamCore.print("SUBFILE::: " + subFile);
+                                success = subFile.StartsWith(Script.SyncWrapper.header);
+                                if (success) {
+                                    await System.Threading.Tasks.Task.Delay(200);
+                                    string import = await ActionPopup.DisplayActionSheet("Override Current Data", "Yes, import data and override current", "No, dont override current data");
+                                    if (import.StartsWith("Y")) {
+                                        Script.SyncWrapper.SetKeysFromTextFile(subFile);
+                                        App.ShowToast("File dectypted and loaded");
+                                        appear?.Invoke();
+                                    }
+                                }
+                                else {
+                                    App.ShowToast("Failed to dectypted file");
+                                    await System.Threading.Tasks.Task.Delay(200);
+                                }
+                            }
+                            else {
+                                success = true;
+                            }
+                        }
+
+                    }
+                }
+            }
+            else if (action.StartsWith("Logout from")) {
+                await ActionPopup.StartIndeterminateLoadinbar("Backing up data...");
+                GetAccountResponse(AccountSite, AccountUsername, AccountPassword, Logintype.EditAccount, out LoginErrorType error, Script.SyncWrapper.GenerateTextFile(false));
+                await ActionPopup.StopIndeterminateLoadinbar();
+                AccountUsername = "";
+                AccountSite = "";
+                AccountPassword = "";
+                HasAccountLogin = false;
+                App.ShowToast("Logout compleate");
+            }
+            else if (action == "Login") {
+                bool tryLogin = true;
+                string password = "";
+                string username = "";
+                string site = "";
+                while (tryLogin) {
+                    List<string> data = await ActionPopup.DisplayLogin("Login", "Cancel", "Login to account", new LoginPopupPage.PopupFeildsDatas() { placeholder = "Server Url", setText = site }, new LoginPopupPage.PopupFeildsDatas() { placeholder = "Username", setText = username }, new LoginPopupPage.PopupFeildsDatas() { placeholder = "Password", isPassword = true, setText = password });
+                    if (data.Count == 3) {
+                        site = data[0];
+                        username = data[1];
+                        password = data[2];
+                        try {
+                            await ActionPopup.StartIndeterminateLoadinbar("Trying to login...");
+                            string logindata = GetAccountResponse(site, username, password, Logintype.LoginAccount, out LoginErrorType error);
+                            await ActionPopup.StopIndeterminateLoadinbar();
+
+                            if (error == LoginErrorType.InternetError) {
+                                App.ShowToast("Could not connect to the server");
+                            }
+                            else if (error == LoginErrorType.UsernameTaken) {
+                                App.ShowToast("Username taken");
+                            }
+                            else if (error == LoginErrorType.WrongPassword) {
+                                App.ShowToast("Wrong password");
+                            }
+                            else if (error == LoginErrorType.Ok) {
+                                App.ShowToast("Login compleate");
+                                tryLogin = false;
+                                AccountSite = site;
+                                AccountPassword = password;
+                                AccountUsername = username;
+                                HasAccountLogin = true;
+                                GetSyncAccount(0, logindata);
+                            }
+                            else if (error == LoginErrorType.ClientError) {
+                                App.ShowToast("Too short username or password");
+                            }
+                        }
+                        catch (Exception _ex) {
+                            App.ShowToast("Internal server error");
+                        }
+                    }
+                    else {
+                        tryLogin = false;
+                    }
+                }
+            }
+            else if (action == "Create account") {
+                bool tryCreate = true;
+                string password = "";
+                string username = "";
+                string site = "";
+                while (tryCreate) {
+                    List<string> data = await ActionPopup.DisplayLogin("Create", "Cancel", "Create account", new LoginPopupPage.PopupFeildsDatas() { placeholder = "Server Url", setText = site }, new LoginPopupPage.PopupFeildsDatas() { placeholder = "Username", setText = username }, new LoginPopupPage.PopupFeildsDatas() { placeholder = "Password", isPassword = true, setText = password });
+                    if (data.Count == 3) {
+                        site = data[0];
+                        username = data[1];
+                        password = data[2];
+                        try {
+                            await ActionPopup.StartIndeterminateLoadinbar("Creating Account...");
+                            string logindata = GetAccountResponse(site, username, password, Logintype.CreateAccount, out LoginErrorType error, Script.SyncWrapper.GenerateTextFile(false));
+                            await ActionPopup.StopIndeterminateLoadinbar();
+
+                            if (error == LoginErrorType.InternetError) {
+                                App.ShowToast("Could not connect to the server");
+                            }
+                            else if (error == LoginErrorType.UsernameTaken) {
+                                App.ShowToast("Username taken");
+                            }
+                            else if (error == LoginErrorType.Ok) {
+                                App.ShowToast("Account created");
+                                tryCreate = false;
+                                AccountSite = site;
+                                AccountPassword = password;
+                                AccountUsername = username;
+                                HasAccountLogin = true;
+                            }
+                            else if (error == LoginErrorType.WrongPassword) {
+                                App.ShowToast("Internal server error");
+                            }
+                            else if (error == LoginErrorType.ClientError) {
+                                App.ShowToast("Too short username or password");
+                            }
+                        }
+                        catch (Exception _ex) {
+                            App.ShowToast("Internal server error");
+                        }
+                    }
+                    else {
+                        tryCreate = false;
+                    }
+                }
+            }
+        }  
 
         const double MAX_LOADING_TIME = 30000;
         const double MIN_LOADING_TIME = 1000;
