@@ -1,4 +1,5 @@
 ﻿using CloudStreamForms.Core;
+using Esprima.Ast;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -32,6 +33,21 @@ namespace CloudStreamForms.Pages
                 descriptTxt = minTitle;
             }
         }
+
+        public class SettingsCondButton : SettingsItem
+        {
+            public SettingsCondButton(string _img, string title, string minTitle, Func<Task> _onClick, Func<string> _onResult, Func<bool> _canAppear)
+            {
+                img = _img;
+                isSwitch = false;
+                isCondButton = true;
+                CanAppear = _canAppear;
+                mainTxt = title;
+                descriptTxt = minTitle;
+                OnChange = _onClick;
+                OnResult = _onResult;
+            }
+        }
         public class SettingsList : SettingsItem
         {
             public SettingsList(string _img, string title, string minTitle, Func<string> _onResult, Func<Task> _onChange)
@@ -54,6 +70,7 @@ namespace CloudStreamForms.Pages
             public bool isButton = false;
             public bool isSwitch = true;
             public bool isList = false;
+            public bool isCondButton = false;
             private string _varName;
             public EventHandler onAppear;
             public string VarName {
@@ -64,7 +81,10 @@ namespace CloudStreamForms.Pages
             }
             public VarRef<bool> variable;
             public Func<string> OnResult;
+            public bool isFromAppear;
             public Func<Task> OnChange;
+            public Func<Task> OnHumanInput;
+            public Func<bool> CanAppear;
             public Button btt;
         }
 
@@ -106,8 +126,9 @@ namespace CloudStreamForms.Pages
                 new SettingsItem() { img= "outline_cached_white_48dp.png",mainTxt="Cache data",descriptTxt="Speed up loading time" ,VarName = nameof( Settings.CacheData) },
                 new SettingsItem() { img= "outline_cached_white_48dp.png",mainTxt="Use AniList",descriptTxt="Prefer AniList over MAL for faster load" ,VarName = nameof( Settings.UseAniList) },
                 new SettingsItem() { img= "outline_record_voice_over_white_48dp.png",mainTxt="Default dub",descriptTxt="Autoset to dub/sub when it can" ,VarName = nameof( Settings.DefaultDub) },
-                new SettingsItem() { img= "baseline_ondemand_video_white_48dp.png",mainTxt="Autoload next episode",descriptTxt="Autoload the next episode in the background while in the videoplayer" ,VarName = nameof( Settings.LazyLoadNextLink) },
                 new SettingsItem() { img= "outline_history_white_48dp.png",mainTxt="Pause history",descriptTxt="Will pause all viewing history" ,VarName = nameof( Settings.PauseHistory) },
+                new SettingsItem() { img= "baseline_ondemand_video_white_48dp.png",mainTxt="Autoload next episode",descriptTxt="Autoload the next episode in the background while in the app videoplayer" ,VarName = nameof( Settings.LazyLoadNextLink) },
+                new SettingsItem() { img= "baseline_ondemand_video_white_48dp.png",mainTxt="Use in app videoplayer",descriptTxt="" ,VarName = nameof( Settings.UseVideoPlayer)},
                 new SettingsList("baseline_ondemand_video_white_48dp.png","Current Videoplayer","External videoplayer",() => { return App.GetVideoPlayerName((App.VideoPlayer)Settings.PreferedVideoPlayer); }, async () => {
                     List<string> videoOptions = new List<string>() { App.GetVideoPlayerName(App.VideoPlayer.None) };
                     List<App.VideoPlayer> avalibePlayers = new List<App.VideoPlayer>() { App.VideoPlayer.None };
@@ -127,15 +148,6 @@ namespace CloudStreamForms.Pages
                             break;
                         }
                     }
-                }),
-                new SettingsList("outline_color_lens_white_48dp.png","Theme","Set app theme",() => {return Settings.BlackBgNames[Settings.BlackBgType]; },async () => {
-                    string action = await ActionPopup.DisplayActionSheet("Select Theme",Settings.BlackBgType,Settings.BlackBgNames);
-                    int index;
-                    if((index = Settings.BlackBgNames.IndexOf(action)) != -1) {
-                        Settings.BlackBgType = index;
-                    }
-                    Appear();
-                    App.UpdateBackground();
                 }),
             },
         };
@@ -174,9 +186,17 @@ namespace CloudStreamForms.Pages
         public static SettingsHolder UISettings = new SettingsHolder() {
             header = "UI",
             settings = new SettingsItem[] {
+                new SettingsList("outline_color_lens_white_48dp.png","Theme","Set app theme",() => {return Settings.BlackBgNames[Settings.BlackBgType]; },async () => {
+                    string action = await ActionPopup.DisplayActionSheet("Select Theme",Settings.BlackBgType,Settings.BlackBgNames);
+                    int index;
+                    if((index = Settings.BlackBgNames.IndexOf(action)) != -1) {
+                        Settings.BlackBgType = index;
+                    }
+                    Appear();
+                    App.UpdateBackground();
+                }),
                 new SettingsItem() { img= "outline_aspect_ratio_white_48dp.png",mainTxt="Show statusbar",descriptTxt="This will not affect app videoplayer" ,VarName = nameof( Settings.HasStatusBar),OnChange = async () => { App.UpdateStatusBar();} },
                 new SettingsItem() { img= "outline_reorder_white_48dp.png",mainTxt="Top 100",descriptTxt="" ,VarName = nameof( Settings.Top100Enabled)},
-                new SettingsItem() { img= "baseline_ondemand_video_white_48dp.png",mainTxt="Use in app videoplayer",descriptTxt="" ,VarName = nameof( Settings.UseVideoPlayer)},
                 new SettingsItem() { img= "outline_description_white_48dp.png",mainTxt="Episode description",descriptTxt="To remove spoilers or shorten episode list" ,VarName = nameof( Settings.EpDecEnabled)},
                 new SettingsItem() { img= "animation.png",mainTxt="List animation",descriptTxt="To remove the popup animation for top 100" ,VarName = nameof( Settings.ListViewPopupAnimation)},
             },
@@ -272,12 +292,27 @@ namespace CloudStreamForms.Pages
         public static SettingsHolder BuildSettings = new SettingsHolder() {
             header = "Build v" + App.GetBuildNumber(),
             settings = new SettingsItem[] {
+                 new SettingsItem() {
+                    mainTxt = "Show app updates",
+                    img = "baseline_notifications_active_white_48dp.png",//"outline_build_white_48dp.png",
+                    VarName = nameof(Settings.ShowAppUpdate),
+                    OnHumanInput = async () => {
+                        if(MainPage.NewGithubUpdate && Settings.ShowAppUpdate) {
+                            await MainPage.ShowUpdate();
+                        }
+                    }
+                },
+                new SettingsCondButton( "outline_get_app_white_48dp.png","No update found","",async
+                     () => { await MainPage.ShowUpdate(true); },
+                     () => { return $"Update from v{App.GetBuildNumber()} to {MainPage.githubUpdateTag}"; },
+                     () => { return MainPage.NewGithubUpdate; }),
                 new SettingsButton("GitHub-Mark-Light-120px-plus.png","Open Github","https://github.com/LagradOst/CloudStream-2",async () => {
                     await App.OpenBrowser("https://github.com/LagradOst/CloudStream-2");
                 }),
                 new SettingsButton("Discord-Logo-White.png","Join Discord","https://discord.gg/5Hus6fM",async () => {
                     await App.OpenBrowser("https://discord.gg/5Hus6fM");
                 }),
+
                 new SettingsButton("baseline_feedback_white_48dp.png","Leave feedback","",async () => {
                     await thisPage.Navigation.PushModalAsync(new Feedback());
                 }),
@@ -369,6 +404,9 @@ namespace CloudStreamForms.Pages
                         BackgroundColor = Color.FromHex("#141414")
                     };
                     subSet.btt = bgBtn;
+                    var _grid = new Grid() {
+                        HeightRequest = 70,
+                    };
 
                     List<View> mainChilds = new List<View>() {
                        bgBtn,
@@ -399,14 +437,19 @@ namespace CloudStreamForms.Pages
                         mainChilds.Insert(1, _switch);
 
                         bgBtn.Clicked += (o, e) => {
+                            subSet.isFromAppear = false;
                             _switch.IsToggled = !_switch.IsToggled;
                             subSet.variable.Value = _switch.IsToggled;
                         };
                         _switch.Toggled += (o, e) => {
                             subSet.variable.Value = e.Value;
                             subSet.OnChange?.Invoke();
+                            if (!subSet.isFromAppear) {
+                                subSet.OnHumanInput?.Invoke();
+                            }
                         };
                         subSet.onAppear += (o, e) => {
+                            subSet.isFromAppear = true;
                             _switch.IsToggled = subSet.variable.Value;
                         };
                     };
@@ -433,10 +476,21 @@ namespace CloudStreamForms.Pages
                             _tex.Text = subSet.OnResult();
                         };
                     }
+                    if (subSet.isCondButton) {
+                        string defTxt = subSet.mainTxt;
+                        subSet.onAppear += (o, e) => {
+                            bool enabled = subSet.CanAppear();
+                            mainLabel.Text = enabled ? subSet.OnResult() : defTxt;
+                            _grid.Opacity = enabled ? 1 : 0.5;
+                        };
+                        bgBtn.Clicked += async (o, e) => {
+                            if (subSet.CanAppear()) {
+                                await subSet.OnChange();
+                                subSet.onAppear?.Invoke(null, EventArgs.Empty);
+                            }
+                        };
+                    }
 
-                    var _grid = new Grid() {
-                        HeightRequest = 70,
-                    };
                     foreach (var _child in mainChilds) {
                         _grid.Children.Add(_child);
                     }

@@ -2133,7 +2133,7 @@ namespace CloudStreamForms
                 else {
                     await EpisodeSettings(episodeResult);
                 }
-            }
+            } 
             finally {
                 canTapEpisode = true;
             }

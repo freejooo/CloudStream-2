@@ -103,6 +103,8 @@ namespace CloudStreamForms
             /*  BluetoothDeviceID[] GetBluetoothDevices();
               void SearchBluetoothDevices();*/
             void RequestVlc(List<string> urls, List<string> names, string episodeName, string episodeId, long startId = FROM_PROGRESS, string subtitleFull = "", VideoPlayer preferedPlayer = VideoPlayer.VLC);
+
+            public int GetArchitecture();
         }
 
         [Serializable]
@@ -562,7 +564,7 @@ namespace CloudStreamForms
             }
         }
 
-        public enum VersionArchitecture
+        public enum AndroidVersionArchitecture
         {
             Universal = 0,
             arm64_v8a = 1,
@@ -571,17 +573,22 @@ namespace CloudStreamForms
             x86_64 = 4, 
         }
 
-        public static string GetVersionName(VersionArchitecture version)
+        static string GetVersionBuildName(AndroidVersionArchitecture version)
         {
-            if(version == VersionArchitecture.Universal) {
+            if(version == AndroidVersionArchitecture.Universal) {
                 return "";
             }
-            return version.ToString() + "-";
+            return version.ToString().Replace("_","-") + "-";
         }
 
-        public static void DownloadNewGithubUpdate(string update, VersionArchitecture version)
+        public static string GetVersionPublicName(AndroidVersionArchitecture version)
         {
-            platformDep.DownloadUpdate(update, GetVersionName(version));
+            return version.ToString().Replace("_", "-");
+        }
+
+        public static void DownloadNewGithubUpdate(string update, AndroidVersionArchitecture version)
+        {
+            platformDep.DownloadUpdate(update, GetVersionBuildName(version));
         }
 
         public static string GetDownloadPath(string path, string extraFolder)

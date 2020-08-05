@@ -80,6 +80,15 @@ namespace CloudStreamForms
             }
         }
 
+        public static bool ShowAppUpdate {
+            set {
+                App.SetKey("Settings", nameof(ShowAppUpdate), value);
+            }
+            get {
+                return App.GetKey("Settings", nameof(ShowAppUpdate), true);
+            }
+        }
+
         public static bool IsProviderActive(string name)
         {
             return App.GetKey("ProviderActive", name, true);
@@ -580,7 +589,7 @@ namespace CloudStreamForms
 
             UpdateBtt.Clicked += (o, e) => {
                 if (NewGithubUpdate) {
-                    App.DownloadNewGithubUpdate(githubUpdateTag,App.VersionArchitecture.Universal);
+                    App.DownloadNewGithubUpdate(githubUpdateTag,App.AndroidVersionArchitecture.Universal);
                 }
             };
 

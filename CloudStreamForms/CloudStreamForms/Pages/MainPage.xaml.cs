@@ -8,6 +8,7 @@ using static CloudStreamForms.Core.CloudStreamCore;
 using CloudStreamForms.Core;
 using CloudStreamForms.Pages;
 using Rg.Plugins.Popup.Services;
+using System.Linq;
 
 namespace CloudStreamForms
 {
@@ -50,6 +51,34 @@ namespace CloudStreamForms
         public static string githubUpdateTag = "";
         public static string githubUpdateText = "";
 
+        public static async Task ShowUpdate(bool skipIntro = false)
+        {
+            if (Device.RuntimePlatform == Device.Android) {
+                var recommendedArc = (App.AndroidVersionArchitecture)App.platformDep.GetArchitecture();
+
+                string option = skipIntro ? "Download Update" : await ActionPopup.DisplayActionSheet($"App update {githubUpdateTag}", "Download Update", "Ignore this time", "Dont show this again");
+                if (option == "Download Update") {
+
+                    List<string> options = new List<string>() { };
+                    var arcs = App.GetEnumList<App.AndroidVersionArchitecture>();
+                    foreach (var ver in arcs) {
+                        options.Add(App.GetVersionPublicName(ver) + (recommendedArc == ver ? " (Recommended)" : " "));
+                    }
+                    string version = await ActionPopup.DisplayActionSheet("Download App Architecture", options.ToArray());
+                    if (version == "Cancel" || version == "") return;
+                    foreach (var ver in arcs) {
+                        if (version.StartsWith(App.GetVersionPublicName(ver) + " ")) {
+                            App.DownloadNewGithubUpdate(githubUpdateTag, ver);
+                            break;
+                        }
+                    }
+                }
+                else if (option == "Dont show this again") {
+                    Settings.ShowAppUpdate = false;
+                }
+            }
+        }
+
         public static void CheckGitHubUpdate()
         {
             try {
@@ -65,8 +94,12 @@ namespace CloudStreamForms
                             //   float bigf = -1;
                             //     string bigUpdTxt = "";
                             // while (d.Contains(look)) {
+
                             githubUpdateTag = FindHTML(d, look, "\"");
                             githubUpdateText = FindHTML(d, look + githubUpdateTag + "\">", "<");
+                            if (Settings.ShowAppUpdate && NewGithubUpdate) {
+                                ShowUpdate();
+                            }
                             print("UPDATE SEARCHED: " + githubUpdateTag + "|" + githubUpdateText);
                         }
                         finally {
@@ -113,8 +146,8 @@ namespace CloudStreamForms
 
         public static void UnhandledExceptionTrapper(object sender, UnhandledExceptionEventArgs e)
         {
-            print(" ===================================== SUPERFATAL EX =====================================\n" + 
-                e.ExceptionObject.ToString() + "\n" + 
+            print(" ===================================== SUPERFATAL EX =====================================\n" +
+                e.ExceptionObject.ToString() + "\n" +
                 e.IsTerminating + "\n" +
                 sender.ToString() +
                 "\n ===================================== END ====================================="
@@ -124,7 +157,7 @@ namespace CloudStreamForms
         public MainPage()
         {
             InitializeComponent(); mainPage = this; CloudStreamCore.mainPage = mainPage;
-            
+
             System.AppDomain.CurrentDomain.UnhandledException += UnhandledExceptionTrapper;
             //Application. += MYThreadHandler;
             //throw new Exception("Kaboom");
@@ -179,7 +212,7 @@ namespace CloudStreamForms
             }
             catch (Exception _ex) {
                 error(_ex);
-            } 
+            }
             // BarBackgroundColor = Color.Black;
             //   BarTextColor = Color.OrangeRed;
 
@@ -194,7 +227,7 @@ namespace CloudStreamForms
             // PushPageFromUrlAndName("tt10954274", "ID: Invaded");
         }
 
-         
+
         async void LateCheck()
         {
             await Task.Delay(5000);

@@ -2807,6 +2807,27 @@ namespace CloudStreamForms.Droid
             }
             return IsAppInstalled(GetVideoPlayerPackage(player));
         }
+
+        //https://stackoverflow.com/questions/37112544/how-to-identify-processor-architecture-in-xamarin-android
+        public int GetArchitecture()
+        {
+            IList<string> abis = Android.OS.Build.SupportedAbis;
+            foreach (var item in abis) { // arm64-v8a armeabi-v7a armeabi x86 x86_64
+                if(item == "arm64-v8a") {
+                    return (int)App.AndroidVersionArchitecture.arm64_v8a;
+                }
+                else if (item == "armeabi-v7a") {
+                    return (int)App.AndroidVersionArchitecture.armeabi_v7a;
+                }
+                else if (item == "x86") {
+                    return (int)App.AndroidVersionArchitecture.x86;
+                }
+                else if (item == "x86_64") {
+                    return (int)App.AndroidVersionArchitecture.x86_64;
+                } 
+            }
+            return 0;
+        }
     }
 
     public class NullPlatfrom : App.IPlatformDep
@@ -2853,6 +2874,11 @@ namespace CloudStreamForms.Droid
         public bool GainAudioFocus()
         {
             return true;
+        }
+
+        public int GetArchitecture()
+        {
+            throw new NotImplementedException();
         }
 
         /*

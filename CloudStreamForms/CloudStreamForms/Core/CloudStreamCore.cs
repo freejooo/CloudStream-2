@@ -979,7 +979,7 @@ namespace CloudStreamForms.Core
 
         class GogoAnimeProvider : BaseAnimeProvider
         {
-            public override string Name => "Gogoanime";
+            public override string Name => "GogoAnime";
             public GogoAnimeProvider(CloudStreamCore _core) : base(_core) { }
 
             public override void GetHasDubSub(MALSeason data, out bool dub, out bool sub)
@@ -1339,7 +1339,7 @@ namespace CloudStreamForms.Core
             {
             }
 
-            public override string Name => "Kickassanime";
+            public override string Name => "KickassAnime";
 
             public override void GetHasDubSub(MALSeason data, out bool dub, out bool sub)
             {
@@ -3096,7 +3096,7 @@ namespace CloudStreamForms.Core
             {
             }
 
-            public override string Name => "Animekisa";
+            public override string Name => "AnimeKisa";
 
             public override void GetHasDubSub(MALSeason data, out bool dub, out bool sub)
             {
