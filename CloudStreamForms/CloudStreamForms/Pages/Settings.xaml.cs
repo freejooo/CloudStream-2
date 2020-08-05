@@ -96,8 +96,7 @@ namespace CloudStreamForms
                 return App.GetKey("Settings", nameof(GlobalSubtitleFont), GlobalFonts[0]); // Trebuchet MS, Open Sans, Google Sans
             }
         }
-
-
+         
         public static bool HasAccountLogin {
             set {
                 App.SetKey("Account", nameof(HasAccountLogin), value);
@@ -142,9 +141,7 @@ namespace CloudStreamForms
                 return App.GetKey("Account", nameof(AccountOverrideServerData), false);
             }
         }
-
-
-
+         
         public static string NativeSubShortName {
             get {
                 return CloudStreamCore.subtitleShortNames[NativeSubtitles];
@@ -166,12 +163,21 @@ namespace CloudStreamForms
             }
         }
 
-        public static int LoadingChromeSec {
+        public static int ChromecastSkipTime {
             set {
-                App.SetKey("Settings", nameof(LoadingChromeSec), value);
+                App.SetKey("Settings", nameof(ChromecastSkipTime), value);
             }
             get {
-                return App.GetKey("Settings", nameof(LoadingChromeSec), 30);
+                return App.GetKey("Settings", nameof(ChromecastSkipTime), 30);
+            }
+        }
+
+        public static int VideoPlayerSkipTime {
+            set {
+                App.SetKey("Settings", nameof(VideoPlayerSkipTime), value);
+            }
+            get {
+                return App.GetKey("Settings", nameof(VideoPlayerSkipTime), 10);
             }
         }
 
@@ -574,28 +580,15 @@ namespace CloudStreamForms
 
             UpdateBtt.Clicked += (o, e) => {
                 if (NewGithubUpdate) {
-                    App.DownloadNewGithubUpdate(githubUpdateTag);
+                    App.DownloadNewGithubUpdate(githubUpdateTag,App.VersionArchitecture.Universal);
                 }
             };
-
 
 
             ManageAccount.Clicked += async (o, e) => {
                 ManageAccountClicked(() => Apper());
             };
-
-            if (AccountOverrideServerData) { // If get account dident work and you have changed then override server data
-                PublishSyncAccount(5000);
-            }
-            else { // Get account data, will override current data 
-                GetSyncAccount(5000);
-            }
-            AccountOverrideServerData = true;
-
-            App.OnAppNotInForground += (o, e) => {
-                AccountOverrideServerData = false;
-                PublishSyncAccount();
-            };
+            OnInitAfter();
 
             /*
             if (Device.RuntimePlatform != Device.Android) {
@@ -610,13 +603,28 @@ namespace CloudStreamForms
                 }
             }*/
         }
+        public static void OnInitAfter()
+        {  
+            if (AccountOverrideServerData) { // If get account dident work and you have changed then override server data
+                PublishSyncAccount(5000);
+            }
+            else { // Get account data, will override current data 
+                GetSyncAccount(5000);
+            }
+            AccountOverrideServerData = true;
+
+            App.OnAppNotInForground += (o, e) => {
+                AccountOverrideServerData = false;
+                PublishSyncAccount();
+            };
+        }
 
         public static async Task ManageAccountClicked(Action appear)
         {
             List<string> actions = new List<string>() { };
 
             if (HasAccountLogin) {
-                actions.Add("Logout from " + AccountUsername);
+                actions.Add("Log out from " + AccountUsername);
             }
             else {
                 actions.Add("Create account");
@@ -684,7 +692,7 @@ namespace CloudStreamForms
                     }
                 }
             }
-            else if (action.StartsWith("Logout from")) {
+            else if (action.StartsWith("Log out from")) {
                 await ActionPopup.StartIndeterminateLoadinbar("Backing up data...");
                 GetAccountResponse(AccountSite, AccountUsername, AccountPassword, Logintype.EditAccount, out LoginErrorType error, Script.SyncWrapper.GenerateTextFile(false));
                 await ActionPopup.StopIndeterminateLoadinbar();
@@ -692,7 +700,7 @@ namespace CloudStreamForms
                 AccountSite = "";
                 AccountPassword = "";
                 HasAccountLogin = false;
-                App.ShowToast("Logout compleate");
+                App.ShowToast("Logout complete");
             }
             else if (action == "Login") {
                 bool tryLogin = true;
@@ -720,7 +728,7 @@ namespace CloudStreamForms
                                 App.ShowToast("Wrong password");
                             }
                             else if (error == LoginErrorType.Ok) {
-                                App.ShowToast("Login compleate");
+                                App.ShowToast("Login complete");
                                 tryLogin = false;
                                 AccountSite = site;
                                 AccountPassword = password;
@@ -802,7 +810,7 @@ namespace CloudStreamForms
                 SetSliderTime();
                 SetSliderChromeTime();
                 LoadingSlider.Value = ((LoadingMiliSec - MIN_LOADING_TIME) / (MAX_LOADING_TIME - MIN_LOADING_TIME));
-                CastSlider.Value = ((LoadingChromeSec - MIN_LOADING_CHROME) / (MAX_LOADING_CHROME - MIN_LOADING_CHROME));
+                CastSlider.Value = ((ChromecastSkipTime - MIN_LOADING_CHROME) / (MAX_LOADING_CHROME - MIN_LOADING_CHROME));
                 SubtitlesToggle.IsToggled = SubtitlesEnabled;
                 DubbedToggle.IsToggled = DefaultDub;
                 VideoToggle.IsToggled = UseVideoPlayer;
@@ -891,7 +899,7 @@ namespace CloudStreamForms
 
         private void Slider_DragCompleted2(object sender, EventArgs e)
         {
-            LoadingChromeSec = (int)(Math.Round((Math.Round(((Slider)sender).Value * (MAX_LOADING_CHROME - MIN_LOADING_CHROME)) + MIN_LOADING_CHROME) / Math.Pow(10, ROUND_LOADING_CHROME_DECIMALES)) * Math.Pow(10, ROUND_LOADING_CHROME_DECIMALES));
+            ChromecastSkipTime = (int)(Math.Round((Math.Round(((Slider)sender).Value * (MAX_LOADING_CHROME - MIN_LOADING_CHROME)) + MIN_LOADING_CHROME) / Math.Pow(10, ROUND_LOADING_CHROME_DECIMALES)) * Math.Pow(10, ROUND_LOADING_CHROME_DECIMALES));
             SetSliderChromeTime();
         }
 
@@ -906,7 +914,7 @@ namespace CloudStreamForms
 
         void SetSliderChromeTime()
         {
-            CastTime.Text = "Skip time: " + LoadingChromeSec + "s";
+            CastTime.Text = "Skip time: " + ChromecastSkipTime + "s";
         }
 
         private void TextCell_Tapped(object sender, EventArgs e)

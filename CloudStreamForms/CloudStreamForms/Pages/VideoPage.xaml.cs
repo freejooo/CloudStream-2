@@ -660,6 +660,7 @@ namespace CloudStreamForms
             }
             canStart = false;
 
+
             print("DADAD LOADED VIDEO A");
             isShown = true;
             changeFullscreenWhenPop = true;
@@ -684,7 +685,15 @@ namespace CloudStreamForms
             }
             Mirrors = Mirrors.OrderBy(t => -t.priority).ToList();
 
-            InitializeComponent();
+            InitializeComponent(); 
+
+            int skip = Settings.VideoPlayerSkipTime;
+            SkipTime = skip * 1000;
+            SkipForward.Text = "+" + skip;
+            SkipBack.Text = "-" + skip;
+
+            SkipForwardSmall.Text = skip.ToString();
+            SkipBackSmall.Text = skip.ToString();
 
             // ======================= SUBTITLE SETUP =======================
 
@@ -818,7 +827,7 @@ namespace CloudStreamForms
                 if (!isShown) return;
                 CurrentTap++;
                 StartFade();
-                SeekMedia(SKIPTIME);
+                SeekMedia(SkipTime);
                 lastClick = DateTime.Now;
                 SkipFor();
             }));
@@ -830,7 +839,7 @@ namespace CloudStreamForms
                 if (!isShown) return;
                 CurrentTap++;
                 StartFade();
-                SeekMedia(-SKIPTIME);
+                SeekMedia(-SkipTime);
                 lastClick = DateTime.Now;
                 SkipBac();
             }));
@@ -1428,7 +1437,7 @@ namespace CloudStreamForms
 
         DateTime lastClick = DateTime.MinValue;
 
-        public const int SKIPTIME = 10000;
+        public static int SkipTime = 10000;
         const float minimumDistance = 1;
         bool isMovingCursor = false;
         bool isMovingHorozontal = false;
@@ -1591,7 +1600,7 @@ namespace CloudStreamForms
                     lastRelease = DateTime.Now;
 
                     bool forward = (TapRec.Width / 2.0 < args.Location.X);
-                    SeekMedia(SKIPTIME * (forward ? 1 : -1));
+                    SeekMedia(SkipTime * (forward ? 1 : -1));
                     CurrentTap++;
                     StartFade();
                     if (forward) {

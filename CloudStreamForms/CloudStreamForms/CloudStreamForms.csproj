@@ -50,6 +50,9 @@
     <None Remove="Resource\AudioVolLow1.png" />
     <None Remove="Resource\AudioVolLow2.png" />
     <None Remove="Resource\AudioVolLow3.png" />
+    <None Remove="Resource\baseline_access_time_white_48dp.png" />
+    <None Remove="Resource\baseline_fast_forward_white_48dp.png" />
+    <None Remove="Resource\baseline_feedback_white_48dp.png" />
     <None Remove="Resource\baseline_get_app_white_48dp.png" />
     <None Remove="Resource\baseline_keyboard_arrow_down_white_48dp.png" />
     <None Remove="Resource\baseline_keyboard_arrow_left_white_48dp.png" />
@@ -77,9 +80,11 @@
     <None Remove="Resource\bookmark.svg" />
     <None Remove="Resource\bookmarkedBtt.png" />
     <None Remove="Resource\bookmark_off.svg" />
+    <None Remove="Resource\Discord-Logo-White.png" />
     <None Remove="Resource\dropdown.png" />
     <None Remove="Resource\emtyPoster.png" />
     <None Remove="Resource\faded.png" />
+    <None Remove="Resource\GitHub-Mark-Light-120px-plus.png" />
     <None Remove="Resource\gradient.png" />
     <None Remove="Resource\gradient0.png" />
     <None Remove="Resource\gradient17.png" />
@@ -195,6 +200,9 @@
     <EmbeddedResource Include="Resource\AudioVolLow1.png" />
     <EmbeddedResource Include="Resource\AudioVolLow2.png" />
     <EmbeddedResource Include="Resource\AudioVolLow3.png" />
+    <EmbeddedResource Include="Resource\baseline_access_time_white_48dp.png" />
+    <EmbeddedResource Include="Resource\baseline_fast_forward_white_48dp.png" />
+    <EmbeddedResource Include="Resource\baseline_feedback_white_48dp.png" />
     <EmbeddedResource Include="Resource\baseline_get_app_white_48dp.png" />
     <EmbeddedResource Include="Resource\baseline_keyboard_arrow_down_white_48dp.png" />
     <EmbeddedResource Include="Resource\baseline_keyboard_arrow_left_white_48dp.png" />
@@ -222,9 +230,11 @@
     <EmbeddedResource Include="Resource\bookmark.svg" />
     <EmbeddedResource Include="Resource\bookmarkedBtt.png" />
     <EmbeddedResource Include="Resource\bookmark_off.svg" />
+    <EmbeddedResource Include="Resource\Discord-Logo-White.png" />
     <EmbeddedResource Include="Resource\dropdown.png" />
     <EmbeddedResource Include="Resource\emtyPoster.png" />
     <EmbeddedResource Include="Resource\faded.png" />
+    <EmbeddedResource Include="Resource\GitHub-Mark-Light-120px-plus.png" />
     <EmbeddedResource Include="Resource\gradient.png" />
     <EmbeddedResource Include="Resource\gradient0.png" />
     <EmbeddedResource Include="Resource\gradient17.png" />

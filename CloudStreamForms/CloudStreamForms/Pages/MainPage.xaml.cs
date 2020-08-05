@@ -179,9 +179,7 @@ namespace CloudStreamForms
             }
             catch (Exception _ex) {
                 error(_ex);
-            }
-
-            Pops();
+            } 
             // BarBackgroundColor = Color.Black;
             //   BarTextColor = Color.OrangeRed;
 
@@ -196,14 +194,7 @@ namespace CloudStreamForms
             // PushPageFromUrlAndName("tt10954274", "ID: Invaded");
         }
 
-
-        async void Pops()
-        {
-            await Task.Delay(1000);
-
-            var page = new SwitchPopup(new List<string>() { "9Anime", "Twist.moe", "Animefever.tv" }, new List<bool>() { false, true, true }, "Providers");
-            await PopupNavigation.Instance.PushAsync(page);
-        }
+         
         async void LateCheck()
         {
             await Task.Delay(5000);

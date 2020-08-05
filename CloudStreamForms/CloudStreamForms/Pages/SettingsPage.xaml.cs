@@ -86,6 +86,18 @@ namespace CloudStreamForms.Pages
             }
         }
 
+        public static readonly string[] SkipTimes = {
+            "5s","10s","15s","20s","30s","40s","50s","60s"
+        };
+
+        public static readonly string[] SmallSkipTimes = {
+            "1s","2s","3s","4s","5s","7.5s","10s","15s","20s"
+        };
+
+        public static readonly int[] SmallSkipTimesMs = {
+            1000,2000,3000,4000,5000,7500,10000,15000,20000
+        };
+
         public static SettingsHolder GeneralSettings = new SettingsHolder() {
             header = "General",
             settings = new SettingsItem[] {
@@ -96,8 +108,68 @@ namespace CloudStreamForms.Pages
                 new SettingsItem() { img= "outline_record_voice_over_white_48dp.png",mainTxt="Default dub",descriptTxt="Autoset to dub/sub when it can" ,VarName = nameof( Settings.DefaultDub) },
                 new SettingsItem() { img= "baseline_ondemand_video_white_48dp.png",mainTxt="Autoload next episode",descriptTxt="Autoload the next episode in the background while in the videoplayer" ,VarName = nameof( Settings.LazyLoadNextLink) },
                 new SettingsItem() { img= "outline_history_white_48dp.png",mainTxt="Pause history",descriptTxt="Will pause all viewing history" ,VarName = nameof( Settings.PauseHistory) },
+                new SettingsList("baseline_ondemand_video_white_48dp.png","Current Videoplayer","External videoplayer",() => { return App.GetVideoPlayerName((App.VideoPlayer)Settings.PreferedVideoPlayer); }, async () => {
+                    List<string> videoOptions = new List<string>() { App.GetVideoPlayerName(App.VideoPlayer.None) };
+                    List<App.VideoPlayer> avalibePlayers = new List<App.VideoPlayer>() { App.VideoPlayer.None };
+                    foreach (var player in App.GetEnumList<App.VideoPlayer>()) {
+                        if (App.GetVideoPlayerInstalled(player)) {
+                            avalibePlayers.Add(player);
+                            videoOptions.Add(App.GetVideoPlayerName(player));
+                        }
+                    }
+
+                    string action = await ActionPopup.DisplayActionSheet("External Videoplayer",avalibePlayers.IndexOf((App.VideoPlayer)Settings.PreferedVideoPlayer),videoOptions.ToArray());
+
+                    for (int i = 0; i < videoOptions.Count; i++)
+                    {
+                        if(videoOptions[i] == action) {
+                            Settings.PreferedVideoPlayer =(int)avalibePlayers[i];
+                            break;
+                        }
+                    }
+                }),
+                new SettingsList("outline_color_lens_white_48dp.png","Theme","Set app theme",() => {return Settings.BlackBgNames[Settings.BlackBgType]; },async () => {
+                    string action = await ActionPopup.DisplayActionSheet("Select Theme",Settings.BlackBgType,Settings.BlackBgNames);
+                    int index;
+                    if((index = Settings.BlackBgNames.IndexOf(action)) != -1) {
+                        Settings.BlackBgType = index;
+                    }
+                    Appear();
+                    App.UpdateBackground();
+                }),
             },
         };
+
+        public static SettingsHolder TimeSettings = new SettingsHolder() {
+            header = "Time",
+            settings = new SettingsItem[] {
+                 new SettingsList("baseline_fast_forward_white_48dp.png","App Videoplayer fast forward","",() => { return $"{Settings.VideoPlayerSkipTime}s"; }, async () => {
+                    string skip = await ActionPopup.DisplayActionSheet("Videoplayer skip",SkipTimes.IndexOf(Settings.VideoPlayerSkipTime + "s"),SkipTimes);
+                    if(skip == "Cancel" || skip == "") return;
+
+                    if(int.TryParse(skip.Replace("s",""),out int res)) {
+                        Settings.VideoPlayerSkipTime = res;
+                    }
+                }),
+                new SettingsList("baseline_fast_forward_white_48dp.png","Chromecast fast forward","",() => { return $"{Settings.ChromecastSkipTime}s"; }, async () => {
+                    string skip = await ActionPopup.DisplayActionSheet("Chromecast skip",SkipTimes.IndexOf(Settings.ChromecastSkipTime + "s"),SkipTimes);
+                    if(skip == "Cancel" || skip == "") return;
+
+                    if(int.TryParse(skip.Replace("s",""),out int res)) {
+                        Settings.ChromecastSkipTime = res;
+                    }
+                }),
+                new SettingsList("baseline_access_time_white_48dp.png","Loading time","",() => { return $"{ (Settings.LoadingMiliSec/100)/10.0  }s"; }, async () => {
+                    string skip = await ActionPopup.DisplayActionSheet("Set loading time",SmallSkipTimesMs.IndexOf(Settings.LoadingMiliSec),SmallSkipTimes);
+                    if(skip == "Cancel" || skip == "") return;
+
+                    if(decimal.TryParse(skip.Replace("s",""),out decimal res)) {
+                        Settings.LoadingMiliSec = (int)(res*1000);
+                    }
+                }),
+            },
+        };
+
 
         public static SettingsHolder UISettings = new SettingsHolder() {
             header = "UI",
@@ -200,47 +272,18 @@ namespace CloudStreamForms.Pages
         public static SettingsHolder BuildSettings = new SettingsHolder() {
             header = "Build v" + App.GetBuildNumber(),
             settings = new SettingsItem[] {
-                new SettingsButton("outline_code_white_48dp.png","Open Github","https://github.com/LagradOst/CloudStream-2",async () => {
+                new SettingsButton("GitHub-Mark-Light-120px-plus.png","Open Github","https://github.com/LagradOst/CloudStream-2",async () => {
                     await App.OpenBrowser("https://github.com/LagradOst/CloudStream-2");
                 }),
-                new SettingsButton("round_add_white_48dp.png","Leave feedback","",async () => {
+                new SettingsButton("Discord-Logo-White.png","Join Discord","https://discord.gg/5Hus6fM",async () => {
+                    await App.OpenBrowser("https://discord.gg/5Hus6fM");
+                }),
+                new SettingsButton("baseline_feedback_white_48dp.png","Leave feedback","",async () => {
                     await thisPage.Navigation.PushModalAsync(new Feedback());
                 }),
-
-                new SettingsList("baseline_ondemand_video_white_48dp.png","Current Videoplayer","External videoplayer",() => { return App.GetVideoPlayerName((App.VideoPlayer)Settings.PreferedVideoPlayer); }, async () => {
-                    List<string> videoOptions = new List<string>() { App.GetVideoPlayerName(App.VideoPlayer.None) };
-                    List<App.VideoPlayer> avalibePlayers = new List<App.VideoPlayer>() { App.VideoPlayer.None };
-                    foreach (var player in App.GetEnumList<App.VideoPlayer>()) {
-                        if (App.GetVideoPlayerInstalled(player)) {
-                            avalibePlayers.Add(player);
-                            videoOptions.Add(App.GetVideoPlayerName(player));
-                        }
-                    }
-
-                    string action = await ActionPopup.DisplayActionSheet("External Videoplayer",avalibePlayers.IndexOf((App.VideoPlayer)Settings.PreferedVideoPlayer),videoOptions.ToArray());
-
-                    for (int i = 0; i < videoOptions.Count; i++)
-                    {
-                        if(videoOptions[i] == action) {
-                            Settings.PreferedVideoPlayer =(int)avalibePlayers[i];
-                            break;
-                        }
-                    }
-                }),
-
-                new SettingsList("outline_color_lens_white_48dp.png","Theme","Set app theme",() => {return Settings.BlackBgNames[Settings.BlackBgType]; },async () => {
-                    string action = await ActionPopup.DisplayActionSheet("Select Theme",Settings.BlackBgType,Settings.BlackBgNames);
-                    int index;
-                    if((index = Settings.BlackBgNames.IndexOf(action)) != -1) {
-                        Settings.BlackBgType = index;
-                    }
-                    Appear();
-                    App.UpdateBackground();
-                }),
-                new SettingsButton("outline_settings_white_48dp.png","Manage Account","",async ()  => {
+                new SettingsList("outline_settings_white_48dp.png","Manage Account","", () => { return (Settings.HasAccountLogin ? $"Logged in as {Settings.AccountUsername}" : ""); },async ()  => {
                    await Settings.ManageAccountClicked(() => Appear());
                 }),
-
             },
         };
 
@@ -249,6 +292,7 @@ namespace CloudStreamForms.Pages
             UISettings,
             SubtitleSettings,
             ProviderActive,
+            TimeSettings,
             ClearSettigns,
             BuildSettings,
         };
@@ -280,6 +324,8 @@ namespace CloudStreamForms.Pages
             InitializeComponent();
             BindingContext = this;
             Settings.OnInit();
+            Settings.OnInitAfter();
+
             thisPage = this;
 
             int counter = 0;

@@ -59,6 +59,7 @@ namespace CloudStreamForms
         List<bool> result = null;
         public SwitchPopup(List<string> options, List<bool> isToggled, string header = "")
         {
+            InitializeComponent();
             if (ActionPopup.isOpen) {
                 PopupNavigation.PopAsync(false);
             }
@@ -66,7 +67,6 @@ namespace CloudStreamForms
             optionsCount = options.Count;
 
             BackgroundColor = new Color(0, 0, 0, 0.9);
-            InitializeComponent();
 
             UpdateScreenRot();
             TheStack.SizeChanged += (o, e) => {
@@ -80,6 +80,7 @@ namespace CloudStreamForms
             CancelButton.Source = GetImageSource("netflixCancel.png");
             CancelButtonBtt.Clicked += async (o, e) => {
                 result = selectBinding.MyNameCollection.Select(t => t.IsSelected).ToList();
+                ActionPopup.isOpen = false;
                 await PopupNavigation.PopAsync(true);
             };
             void ForceUpdate()

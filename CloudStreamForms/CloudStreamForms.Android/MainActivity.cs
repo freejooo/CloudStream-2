@@ -2709,10 +2709,10 @@ namespace CloudStreamForms.Droid
             return GetPath(mainPath, extraPath) + "/" + CensorFilename(fileName);
         }
 
-        public void DownloadUpdate(string update)
+        public void DownloadUpdate(string update, string version)
         {
             try {
-                string downloadLink = "https://github.com/LagradOst/CloudStream-2/releases/download/" + update + "/com.CloudStreamForms.CloudStreamForms.apk";
+                string downloadLink = "https://github.com/LagradOst/CloudStream-2/releases/download/" + update + $"/{version}com.CloudStreamForms.CloudStreamForms.apk";
                 App.ShowToast("Download started!");
                 //  DownloadUrl(downloadLink, "com.CloudStreamForms.CloudStreamForms.apk", true, "", "Download complete!");
                 DownloadFromLink(downloadLink, "com.CloudStreamForms.CloudStreamForms.apk", "Download complete!", "", false, "");
@@ -2838,6 +2838,11 @@ namespace CloudStreamForms.Droid
 
         public void DownloadUpdate(string update)
         {
+        }
+
+        public void DownloadUpdate(string update, string version)
+        {
+            throw new NotImplementedException();
         }
 
         public string DownloadUrl(string url, string fileName, bool mainPath, string extraPath, string toast = "", bool isNotification = false, string body = "")

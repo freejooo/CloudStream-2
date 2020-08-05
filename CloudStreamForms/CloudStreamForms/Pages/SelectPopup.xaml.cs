@@ -210,6 +210,7 @@ namespace CloudStreamForms
             CancelButtonBtt.Clicked += (o, e) => {
                 OnSelectedChanged = null;
                 optionSelected = "Cancel";
+                ActionPopup.isOpen = false;
                 PopupNavigation.PopAsync(true);
             };
 

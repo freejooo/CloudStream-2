@@ -74,7 +74,7 @@ namespace CloudStreamForms
             string ReadFile(string fileName, bool mainPath, string extraPath);
             string DownloadUrl(string url, string fileName, bool mainPath, string extraPath, string toast = "", bool isNotification = false, string body = "");
             bool DeleteFile(string path);
-            void DownloadUpdate(string update);
+            void DownloadUpdate(string update, string version);
             string GetDownloadPath(string path, string extraFolder);
             StorageInfo GetStorageInformation(string path = "");
             int ConvertDPtoPx(int dp);
@@ -562,9 +562,26 @@ namespace CloudStreamForms
             }
         }
 
-        public static void DownloadNewGithubUpdate(string update)
+        public enum VersionArchitecture
         {
-            platformDep.DownloadUpdate(update);
+            Universal = 0,
+            arm64_v8a = 1,
+            armeabi_v7a = 2,
+            x86 = 3,
+            x86_64 = 4, 
+        }
+
+        public static string GetVersionName(VersionArchitecture version)
+        {
+            if(version == VersionArchitecture.Universal) {
+                return "";
+            }
+            return version.ToString() + "-";
+        }
+
+        public static void DownloadNewGithubUpdate(string update, VersionArchitecture version)
+        {
+            platformDep.DownloadUpdate(update, GetVersionName(version));
         }
 
         public static string GetDownloadPath(string path, string extraFolder)

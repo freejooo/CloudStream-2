@@ -883,14 +883,18 @@ namespace CloudStreamForms
                 int _id = GetRealIdFromId();
                 if (_id == -1) return;
                 canTapEpisode = false;
-                var epRes = epView.MyEpisodeResultCollection[_id];
-                if (epRes.downloadState == 1) {
-                    PlayDownloadedEp(epRes);
+                try {
+                    var epRes = epView.MyEpisodeResultCollection[_id];
+                    if (epRes.downloadState == 1) {
+                        PlayDownloadedEp(epRes);
+                    }
+                    else {
+                        await LoadLinksForEpisode(epRes);
+                    }
                 }
-                else {
-                    await LoadLinksForEpisode(epRes);
+                finally {
+                    canTapEpisode = true;
                 }
-                canTapEpisode = true;
             });
 
             episodeResult.TapCom = new Command(async (s) => {
@@ -1786,7 +1790,6 @@ namespace CloudStreamForms
                 return;
             }
 
-
             // ============================== GET ACTION ==============================
             string action = "";
 
@@ -1811,7 +1814,6 @@ namespace CloudStreamForms
 
             action = await ActionPopup.DisplayActionSheet(episodeResult.Title, actions.ToArray());//await DisplayActionSheet(episodeResult.Title, "Cancel", null, actions.ToArray());
 
-
             async void ChromecastAt(int count)
             {
                 chromeResult = episodeResult;
@@ -1833,7 +1835,6 @@ namespace CloudStreamForms
                 ChromeCastPage.currentSelected = count;
 
             }
-
 
             if (action == "Play in Browser") {
                 string copy = await ActionPopup.DisplayActionSheet("Open Link", episodeResult.Mirros.ToArray()); // await DisplayActionSheet("Open Link", "Cancel", null, episodeResult.Mirros.ToArray());
@@ -2122,16 +2123,20 @@ namespace CloudStreamForms
         {
             if (!canTapEpisode) return;
             canTapEpisode = false;
-            EpisodeResult episodeResult = ((EpisodeResult)(((ViewCell)sender).BindingContext));
+            try {
+                EpisodeResult episodeResult = ((EpisodeResult)(((ViewCell)sender).BindingContext));
 
-            if (toggleViewState) {
-                ToggleEpisode(episodeResult);
-                episodeView.SelectedItem = null;
+                if (toggleViewState) {
+                    ToggleEpisode(episodeResult);
+                    episodeView.SelectedItem = null;
+                }
+                else {
+                    await EpisodeSettings(episodeResult);
+                }
             }
-            else {
-                await EpisodeSettings(episodeResult);
+            finally {
+                canTapEpisode = true;
             }
-            canTapEpisode = true;
         }
 
 

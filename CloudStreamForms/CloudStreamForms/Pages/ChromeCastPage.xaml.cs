@@ -34,10 +34,10 @@ namespace CloudStreamForms
         public int BigIconSize { set; get; } = 60;
 
         public int FastForwardTime {
-            get { return Settings.LoadingChromeSec; }
+            get { return Settings.ChromecastSkipTime; }
         }
         public int BackForwardTime {
-            get { return Settings.LoadingChromeSec; }
+            get { return Settings.ChromecastSkipTime; }
         }
 
         public float ScaleAll { set; get; } = 1.4f;
