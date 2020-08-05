@@ -59,6 +59,13 @@ namespace CloudStreamForms
             //PopupNavigation.PopAsync(false);
         }
 
+        public static async Task<List<bool>> DisplaySwitchList(List<string> names,List<bool> toggled, string header)
+        {
+            var page = new SwitchPopup(names,toggled,header);
+            await PopupNavigation.Instance.PushAsync(page);
+            return await page.WaitForResult();
+        }
+
         public static async Task<string> DisplayEntry(InputPopupResult result, string placeHolder, string title = "", int offset = -1, bool autoPaste = true, string setText = null, string confirmText = "")
         {
             var page = new InputPopupPage(result, placeHolder, title, offset, autoPaste, setText, confirmText);
@@ -231,8 +238,10 @@ namespace CloudStreamForms
             if (selected != -1) {
                 epview.ScrollTo(selectBinding.MyNameCollection[selected], ScrollToPosition.Center, false);
             }
+             
 
         }
+
 
         public class PopupName
         {

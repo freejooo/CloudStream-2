@@ -205,16 +205,18 @@ namespace CloudStreamForms.Core
                 for (int q = 0; q < activeMovie.title.MALData.seasonData[season].seasons.Count; q++) {
                     MALSeason ms = activeMovie.title.MALData.seasonData[season].seasons[q];
                     foreach (var provider in animeProviders) {
-                        try {
-                            provider.GetHasDubSub(ms, out bool dub, out bool sub);
-                            if (dub) {
-                                dubExists = true;
+                        if (Settings.IsProviderActive(provider.Name)) {
+                            try {
+                                provider.GetHasDubSub(ms, out bool dub, out bool sub);
+                                if (dub) {
+                                    dubExists = true;
+                                }
+                                if (sub) {
+                                    subExists = true;
+                                }
                             }
-                            if (sub) {
-                                subExists = true;
-                            }
+                            catch (Exception) { }
                         }
-                        catch (Exception) { }
                     }
                 }
             }
@@ -6374,7 +6376,7 @@ namespace CloudStreamForms.Core
 
                                 static string ToDate(int? year, int? month, int? day)
                                 {
-                                    try { 
+                                    try {
                                         return $"{shortdates[(int)(month) - 1]} {day}, {year}";
 
                                     }
@@ -6383,7 +6385,7 @@ namespace CloudStreamForms.Core
                                     }
                                 }
 
-                                List<MALSeasonData> data = new List<MALSeasonData>() { new MALSeasonData() { malUrl = ToMalUrl(media[0].idMal),aniListUrl = ToAniListUrl(media[0].id), seasons = new List<MALSeason>() } };
+                                List<MALSeasonData> data = new List<MALSeasonData>() { new MALSeasonData() { malUrl = ToMalUrl(media[0].idMal), aniListUrl = ToAniListUrl(media[0].id), seasons = new List<MALSeason>() } };
                                 string jap = media[0].title.native;
                                 string eng = media[0].title.english;
                                 string firstName = eng;
@@ -6410,7 +6412,7 @@ namespace CloudStreamForms.Core
                                                 seasons = new List<MALSeason>() { new MALSeason() { aniListUrl = _aniListLink, name = currentName, engName = _eng, japName = _jap, synonyms = _synos, malUrl = _malLink, startDate = _startDate, endDate = _endDate } },
                                                 malUrl = _malLink,
                                                 aniListUrl = _aniListLink
-                                            }) ;
+                                            });
                                         }
                                     }
                                     catch (Exception _ex) {
@@ -6478,7 +6480,10 @@ namespace CloudStreamForms.Core
                             Parallel.For(0, animeProviders.Length, (int i) => {
                                 print("STARTEDANIME: " + animeProviders[i].ToString() + "|" + i);
                                 fishProgressLoaded?.Invoke(null, new FishLoaded() { name = animeProviders[i].Name, progressProcentage = ((double)count) / animeProviders.Length, maxProgress = animeProviders.Length, currentProgress = count });
-                                animeProviders[i].FishMainLink(currentSelectedYear, tempThred, activeMovie.title.MALData);
+                                if (Settings.IsProviderActive(animeProviders[i].Name)) {
+                                    animeProviders[i].FishMainLink(currentSelectedYear, tempThred, activeMovie.title.MALData);
+                                }
+
                                 count++;
                                 fishProgressLoaded?.Invoke(null, new FishLoaded() { name = animeProviders[i].Name, progressProcentage = ((double)count) / animeProviders.Length, maxProgress = animeProviders.Length, currentProgress = count });
                                 print("COUNT INCRESED < -------------------------------- " + count);
@@ -6821,7 +6826,9 @@ namespace CloudStreamForms.Core
                                     TempThread tempThread = CreateThread(3);
 
                                     Parallel.For(0, movieProviders.Length, (int i) => {
-                                        movieProviders[i].FishMainLinkTSync(tempThread);
+                                        if (Settings.IsProviderActive(movieProviders[i].Name)) {
+                                            movieProviders[i].FishMainLinkTSync(tempThread);
+                                        }
                                     });
                                 });
 
@@ -7059,7 +7066,7 @@ namespace CloudStreamForms.Core
                             //string _d = DownloadString("");
                         }
 
-                      
+
 
                         print("EPLOADED::::::");
                         episodeLoaded?.Invoke(null, activeMovie.episodes);
@@ -7150,9 +7157,11 @@ namespace CloudStreamForms.Core
             if (activeMovie.title.MALData.seasonData.Count > currentSeason) {
                 int currentMax = 0;
                 for (int i = 0; i < animeProviders.Length; i++) {
-                    int cmax = animeProviders[i].GetLinkCount(currentSeason, isDub, tempThred);
-                    if (cmax > currentMax) {
-                        currentMax = cmax;
+                    if (Settings.IsProviderActive(animeProviders[i].Name)) {
+                        int cmax = animeProviders[i].GetLinkCount(currentSeason, isDub, tempThred);
+                        if (cmax > currentMax) {
+                            currentMax = cmax;
+                        }
                     }
                 }
                 return currentMax;
@@ -7539,7 +7548,9 @@ namespace CloudStreamForms.Core
 #if DEBUG
                                 int _s = GetStopwatchNum();
 #endif
-                                animeProviders[i].LoadLinksTSync(episode, season, normalEpisode, isDub, temp);
+                                if (Settings.IsProviderActive(animeProviders[i].Name)) {
+                                    animeProviders[i].LoadLinksTSync(episode, season, normalEpisode, isDub, temp);
+                                }
 #if DEBUG
                                 EndStopwatchNum(_s, animeProviders[i].Name);
 #endif
@@ -7709,12 +7720,14 @@ namespace CloudStreamForms.Core
                         TempThread temp = CreateThread(3);
                         try {
                             Parallel.For(0, movieProviders.Length, (int i) => {
-                                try {
-                                    movieProviders[i].LoadLinksTSync(episode, season, normalEpisode, isMovie, temp);
-                                    print("LOADED DONE:::: " + movieProviders[i].GetType().Name);
-                                }
-                                catch (Exception _ex) {
-                                    print("CLICKED CHRASH::: " + _ex);
+                                if (Settings.IsProviderActive(movieProviders[i].Name)) {
+                                    try {
+                                        movieProviders[i].LoadLinksTSync(episode, season, normalEpisode, isMovie, temp);
+                                        print("LOADED DONE:::: " + movieProviders[i].GetType().Name);
+                                    }
+                                    catch (Exception _ex) {
+                                        print("CLICKED CHRASH::: " + _ex);
+                                    }
                                 }
                             });
                         }

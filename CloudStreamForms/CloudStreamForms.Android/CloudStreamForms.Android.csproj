@@ -477,5 +477,8 @@
   <ItemGroup>
     <AndroidResource Include="Resources\drawable\chevron_left.svg" />
   </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\drawable\gradient.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\Android\Xamarin.Android.CSharp.targets" />
 </Project>

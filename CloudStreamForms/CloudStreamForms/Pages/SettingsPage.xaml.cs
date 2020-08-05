@@ -67,7 +67,7 @@ namespace CloudStreamForms.Pages
             public Func<Task> OnChange;
             public Button btt;
         }
-         
+
 
         public class VarRef<T>
         {
@@ -108,6 +108,29 @@ namespace CloudStreamForms.Pages
                 new SettingsItem() { img= "outline_description_white_48dp.png",mainTxt="Episode description",descriptTxt="To remove spoilers or shorten episode list" ,VarName = nameof( Settings.EpDecEnabled)},
                 new SettingsItem() { img= "animation.png",mainTxt="List animation",descriptTxt="To remove the popup animation for top 100" ,VarName = nameof( Settings.ListViewPopupAnimation)},
             },
+        };
+
+        public static SettingsHolder ProviderActive = new SettingsHolder() {
+            header = "Providers",
+            settings = new SettingsItem[] {
+                new SettingsList("baseline_theaters_white_48dp.png","Movie Providers","", () => { return CloudStreamCore.mainCore.movieProviders.Select(t => t.Name).Where(t => Settings.IsProviderActive(t)).Count() + "/" + CloudStreamCore.mainCore.movieProviders.Length + " Active"; }, async () => {
+                    List<string> names = CloudStreamCore.mainCore.movieProviders.Select(t => t.Name).ToList();
+                    List<bool> res = await ActionPopup.DisplaySwitchList(names,names.Select(t => Settings.IsProviderActive(t)).ToList(),"Movie providers");
+                    for (int i = 0; i < res.Count; i++)
+                    {
+                        App.SetKey("ProviderActive",names[i],res[i]);
+                    }
+                }),
+                new SettingsList("baseline_theaters_white_48dp.png","Anime Providers","", () => { return CloudStreamCore.mainCore.animeProviders.Select(t => t.Name).Where(t => Settings.IsProviderActive(t)).Count() + "/" + CloudStreamCore.mainCore.animeProviders.Length + " Active"; },async () => {
+                    List<string> names = CloudStreamCore.mainCore.animeProviders.Select(t => t.Name).ToList();
+                    List<bool> res = await ActionPopup.DisplaySwitchList(names,names.Select(t => Settings.IsProviderActive(t)).ToList(),"Anime providers");
+                    for (int i = 0; i < res.Count; i++)
+                    {
+                        App.SetKey("ProviderActive",names[i],res[i]);
+                    }
+                }),
+            },
+
         };
 
         public static SettingsHolder ClearSettigns = new SettingsHolder() {
@@ -225,6 +248,7 @@ namespace CloudStreamForms.Pages
             GeneralSettings,
             UISettings,
             SubtitleSettings,
+            ProviderActive,
             ClearSettigns,
             BuildSettings,
         };
@@ -238,7 +262,7 @@ namespace CloudStreamForms.Pages
         static void Appear()
         {
             thisPage.BackgroundColor = Settings.BlackRBGColor;
-            double _color = Math.Min(Settings.BlackColor +3, 255)/255.0;
+            double _color = Math.Min(Settings.BlackColor + 3, 255) / 255.0;
             Color c = new Color(_color);
 
             foreach (var set in settings) {
