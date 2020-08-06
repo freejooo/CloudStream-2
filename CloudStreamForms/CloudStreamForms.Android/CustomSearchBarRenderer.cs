@@ -23,7 +23,7 @@ namespace CloudStreamForms.Droid
             // Get native control (background set in shared code, but can use SetBackgroundColor here)
             SearchView searchView = (base.Control as SearchView);
             searchView.SetInputType(InputTypes.ClassText | InputTypes.TextVariationNormal);
-            searchView.FilterTouchesWhenObscured = true;
+           // searchView.FilterTouchesWhenObscured = true;
 
             // Access search textview within control
             int textViewId = searchView.Context.Resources.GetIdentifier("android:id/search_src_text", null, null);

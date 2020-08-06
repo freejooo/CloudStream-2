@@ -42,7 +42,8 @@ namespace CloudStreamForms.Core
                 new AnimeSimpleProvider(this),
                 new VidstreamingAnimeProvider(this),
                 new AnimeVibeBloatFreeProvider(this),
-                new NineAnimeBloatFreeProvider(this) };
+                new NineAnimeBloatFreeProvider(this),
+                new FourAnimeBloatFreeProvider(this)};
             movieProviders = new IMovieProvider[] {
                 new DirectVidsrcProvider(this),
                 new WatchTVProvider(this),
@@ -284,6 +285,14 @@ namespace CloudStreamForms.Core
             public string engName;
             public string startDate;
             public string endDate;
+            public int Year { get {
+                    try {
+                        return DateTime.Parse(startDate).Year;
+                    }
+                    catch (Exception) {
+                        return -1;
+                    }
+                } }
             public List<string> synonyms;
 
             public GogoAnimeData gogoData;
@@ -6673,7 +6682,7 @@ namespace CloudStreamForms.Core
                 _inp = _inp.Replace(" ", "");
             }
             if (_inp.EndsWith(" ")) {
-                _inp = _inp.Substring(0, _inp.Length - 1);
+                _inp = _inp[0..^1];
             }
             return _inp;
         }

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using Xamarin.Forms.Markup;
 using static CloudStreamForms.Core.CloudStreamCore;
 
 namespace CloudStreamForms.Core
@@ -13,8 +14,8 @@ namespace CloudStreamForms.Core
         public struct NonBloatSeasonData
         {
             public string name; // ID OF PROVIDER
-            public bool subExists => subEpisodes.ContainsStuff();
-            public bool dubExists => dubEpisodes.ContainsStuff();
+            public bool subExists => subEpisodes.Where(t => t.IsClean()).Count() > 0;
+            public bool dubExists => dubEpisodes.Where(t => t.IsClean()).Count() > 0;
             public List<string> subEpisodes;
             public List<string> dubEpisodes;
             public object extraData;
@@ -33,7 +34,15 @@ namespace CloudStreamForms.Core
                         if (list.Count > 0) {
                             var ms = list[0];
                             if ((ms.dubExists && isDub) || (ms.subExists && !isDub)) {
-                                count += (isDub ? ms.dubEpisodes.Count : ms.subEpisodes.Count);
+                                List<string> episodes = isDub ? ms.dubEpisodes : ms.subEpisodes;
+                                int maxCount = 0;
+                                for (int i = 0; i < episodes.Count; i++) {
+                                    if(episodes[i].IsClean()) {
+                                        maxCount = i+1;
+                                    }
+                                }
+
+                                count += maxCount;//(isDub ? ms.dubEpisodes.Select(t => t.IsClean(),).Count : ms.subEpisodes.Count);
                             }
                         }
                     }
