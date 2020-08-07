@@ -289,6 +289,20 @@ namespace CloudStreamForms.Pages
             },
         };
 
+        public static SettingsHolder AdvancedSettings = new SettingsHolder() {
+            header = "Advanced Settings",
+            settings = new SettingsItem[] {
+                 new SettingsList("baseline_report_problem_white_48dp.png","Tapjack protection (Requires restart)","Disable this if you cant press certain things", () => { return $"{(Settings.TapjackProtectionButton ? 1 : 0) + (Settings.TapjackProtectionPicker ? 1 : 0) + (Settings.TapjackProtectionSearch ? 1 : 0)}/3 Active"; },async () => {
+                     List<bool> res = await ActionPopup.DisplaySwitchList(new List<string>() { "Search","Buttons","Picker" }, new List<bool>() { Settings.TapjackProtectionSearch,Settings.TapjackProtectionButton,Settings.TapjackProtectionPicker},"Tapjack protection");
+                     Settings.TapjackProtectionSearch = res[0];
+                     Settings.TapjackProtectionButton = res[1];
+                     Settings.TapjackProtectionPicker = res[2];
+                 }),
+                 new SettingsItem() { img = "baseline_report_problem_white_48dp.png", mainTxt = "Ignore SSL Certificate", descriptTxt = "If you disable this, some sites cant be reached", VarName = nameof(Settings.IgnoreSSLCert) },
+             },
+
+        };
+
         public static SettingsHolder BuildSettings = new SettingsHolder() {
             header = "Build v" + App.GetBuildNumber(),
             settings = new SettingsItem[] {
@@ -328,6 +342,7 @@ namespace CloudStreamForms.Pages
             SubtitleSettings,
             ProviderActive,
             TimeSettings,
+            AdvancedSettings,
             ClearSettigns,
             BuildSettings,
         };

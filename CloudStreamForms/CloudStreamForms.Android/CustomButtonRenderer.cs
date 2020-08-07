@@ -1,5 +1,6 @@
 ﻿using Android.Content;
 using Android.Widget;
+using CloudStreamForms;
 using Xamarin.Forms;
 using Xamarin.Forms.Platform.Android;
 using Button = Xamarin.Forms.Button;
@@ -19,6 +20,8 @@ public class CustomButtonRenderer : ButtonRenderer
         if (e.NewElement.ClassId != "CUST") {
             e.NewElement.TextColor = Color.FromHex("e6e6e6");
         }
-        Control.FilterTouchesWhenObscured = true;
+        if (Settings.TapjackProtectionButton) {
+            Control.FilterTouchesWhenObscured = true;
+        }
     }
 }

@@ -5835,6 +5835,8 @@ namespace CloudStreamForms.Core
 
         public static bool GetRequireCert(string url)
         {
+            if (!Settings.IgnoreSSLCert) return false;
+
             foreach (var _url in CertExeptSites) {
                 if (url.Contains(_url)) return true;
             }

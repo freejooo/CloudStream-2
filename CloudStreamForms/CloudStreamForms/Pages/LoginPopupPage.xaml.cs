@@ -20,10 +20,24 @@ namespace CloudStreamForms
             public bool isPassword;
         }
 
+        const bool setOnLeft = true;
+        void UpdateScreenRot()
+        {
+            bool hightOverWidth = Bounds.Height > Bounds.Width;
+            if (setOnLeft) {
+                TheStack.TranslationY = hightOverWidth ? -100 : 0;
+            }
+        }
+
         public LoginPopupPage(string okButton, string cancelButton, string header, params PopupFeildsDatas[] loginData)
         {
             InitializeComponent();
             BackgroundColor = new Color(0, 0, 0, 0.9);
+            
+            UpdateScreenRot();
+            TheStack.SizeChanged += (o, e) => {
+                UpdateScreenRot();
+            };
 
             HeaderTitle.Text = header;
 

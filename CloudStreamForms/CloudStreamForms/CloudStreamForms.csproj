@@ -65,6 +65,7 @@
     <None Remove="Resource\baseline_refresh_white_48dp.png" />
     <None Remove="Resource\baseline_replay_white_48dp.png" />
     <None Remove="Resource\baseline_replay_white_48dp_mirror.png" />
+    <None Remove="Resource\baseline_report_problem_white_48dp.png" />
     <None Remove="Resource\baseline_settings_applications_white_48dp_inverted.png" />
     <None Remove="Resource\baseline_share_white_48dp.png" />
     <None Remove="Resource\baseline_skip_next_white_48dp.png" />
@@ -215,6 +216,7 @@
     <EmbeddedResource Include="Resource\baseline_refresh_white_48dp.png" />
     <EmbeddedResource Include="Resource\baseline_replay_white_48dp.png" />
     <EmbeddedResource Include="Resource\baseline_replay_white_48dp_mirror.png" />
+    <EmbeddedResource Include="Resource\baseline_report_problem_white_48dp.png" />
     <EmbeddedResource Include="Resource\baseline_settings_applications_white_48dp_inverted.png" />
     <EmbeddedResource Include="Resource\baseline_share_white_48dp.png" />
     <EmbeddedResource Include="Resource\baseline_skip_next_white_48dp.png" />

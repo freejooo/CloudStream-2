@@ -66,7 +66,9 @@ namespace CloudStreamForms.Droid
             //for example ,change the line to red:
             //  SetControlStyle();
             var c = Android.Graphics.Color.Transparent;
-            Control.FilterTouchesWhenObscured = true;
+            if (Settings.TapjackProtectionPicker) {
+                Control.FilterTouchesWhenObscured = true;
+            }
             if (Build.VERSION.SdkInt >= BuildVersionCodes.Lollipop)
                 Control.BackgroundTintList = ColorStateList.ValueOf(c);
             else

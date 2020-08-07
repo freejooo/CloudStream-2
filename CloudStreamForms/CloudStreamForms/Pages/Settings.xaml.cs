@@ -346,6 +346,43 @@ namespace CloudStreamForms
             }
         }
 
+        public static bool TapjackProtectionSearch {
+            set {
+                App.SetKey("Settings", nameof(TapjackProtectionSearch), value);
+            }
+            get {
+                return App.GetKey("Settings", nameof(TapjackProtectionSearch), true);
+            }
+        }
+        public static bool TapjackProtectionButton {
+            set {
+                App.SetKey("Settings", nameof(TapjackProtectionButton), value);
+            }
+            get {
+                return App.GetKey("Settings", nameof(TapjackProtectionButton), true);
+            }
+        }
+        public static bool TapjackProtectionPicker {
+            set {
+                App.SetKey("Settings", nameof(TapjackProtectionPicker), value);
+            }
+            get {
+                return App.GetKey("Settings", nameof(TapjackProtectionPicker), true);
+            }
+        }
+
+        public static bool IgnoreSSLCert {
+            set {
+                _IgnoreSSLCert = value;
+                App.SetKey("Settings", nameof(IgnoreSSLCert), value);
+            }
+            get {
+                return App.GetKey("Settings", nameof(IgnoreSSLCert), true);
+            }
+        }
+
+        public static bool _IgnoreSSLCert = true;
+
         public static bool Top100Enabled {
             set {
                 App.SetKey("Settings", nameof(Top100Enabled), value);
@@ -390,6 +427,7 @@ namespace CloudStreamForms
         public static void OnInit()
         {
             CachedPauseHis = PauseHistory;
+            _IgnoreSSLCert = IgnoreSSLCert;
         }
 
         public Settings()
