@@ -172,6 +172,7 @@
     <None Remove="Resource\searchIcon.png" />
     <None Remove="Resource\settingsIcon.png" />
     <None Remove="Resource\shareIcon.png" />
+    <None Remove="Resource\sponsorblock.png" />
     <None Remove="Resource\starBtt.png" />
     <None Remove="Resource\subtitleIcon.png" />
     <None Remove="Resource\subtitles.svg" />
@@ -323,6 +324,7 @@
     <EmbeddedResource Include="Resource\searchIcon.png" />
     <EmbeddedResource Include="Resource\settingsIcon.png" />
     <EmbeddedResource Include="Resource\shareIcon.png" />
+    <EmbeddedResource Include="Resource\sponsorblock.png" />
     <EmbeddedResource Include="Resource\starBtt.png" />
     <EmbeddedResource Include="Resource\subtitleIcon.png" />
     <EmbeddedResource Include="Resource\subtitles.svg" />

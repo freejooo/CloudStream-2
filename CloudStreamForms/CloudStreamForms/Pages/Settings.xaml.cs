@@ -52,6 +52,33 @@ namespace CloudStreamForms
             }
         }
 
+        public static bool VideoPlayerShowSkip {
+            set {
+                App.SetKey("Settings", nameof(VideoPlayerShowSkip), value);
+            }
+            get {
+                return App.GetKey("Settings", nameof(VideoPlayerShowSkip), true);
+            }
+        }
+
+        public static bool VideoPlayerSponsorblock {
+            set {
+                App.SetKey("Settings", nameof(VideoPlayerSponsorblock), value);
+            }
+            get {
+                return App.GetKey("Settings", nameof(VideoPlayerSponsorblock), true);
+            }
+        }
+
+        public static bool VideoPlayerSponsorblockAutoSkipAds {
+            set {
+                App.SetKey("Settings", nameof(VideoPlayerSponsorblockAutoSkipAds), value);
+            }
+            get {
+                return App.GetKey("Settings", nameof(VideoPlayerSponsorblockAutoSkipAds), true);
+            }
+        }
+
         public static bool SubtitlesHasDropShadow {
             get {
                 return SubtitleType == 1 || SubtitleType == 3;

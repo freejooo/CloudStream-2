@@ -721,6 +721,14 @@ namespace CloudStreamForms.Core
         #endregion
 
         [Serializable]
+        public struct YTSponsorblockVideoSegments
+        {
+            public string category;
+            public List<double> segment;
+            public string UUID;
+        }
+
+        [Serializable]
         public struct Link
         {
             public string name;

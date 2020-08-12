@@ -1,6 +1,7 @@
 ﻿using CloudStreamForms.Core;
 using CloudStreamForms.Models;
 using FFImageLoading;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -14,6 +15,7 @@ using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 using YoutubeExplode;
 using YoutubeExplode.Channels;
+using YoutubeExplode.Converter;
 using YoutubeExplode.Videos;
 using YoutubeExplode.Videos.Streams;
 using static CloudStreamForms.App;
@@ -101,13 +103,26 @@ namespace CloudStreamForms
                                 //   string dpath = YouTube.GetYTPath(v.Title);
                                 var author = await YouTube.GetAuthorFromVideoAsync(v);
                                 var data = await YouTube.GetInfoAsync(v);
+                                int id = ConvertStringToInt(v.Id);
 
+
+                                string vId = v.Id.Value;
+                                var t = mainCore.CreateThread(4);
+                                mainCore.StartThread("Sponsorblock", () => {
+                                    try {
+                                        string _d = mainCore.DownloadString("https://sponsor.ajay.app/api/skipSegments?videoID=" + vId, t);
+                                        if (_d != "") {
+                                            var smgs = JsonConvert.DeserializeObject<List<YTSponsorblockVideoSegments>>(_d);
+                                            App.SetKey("Sponsorblock", v.Id.Value.ToString(), smgs);
+                                        }
+                                    }
+                                    catch (Exception) { }
+                                });
                                 double mb = App.ConvertBytesToAny(data.Size.TotalBytes, 5, 2);
 
                                 ImageService.Instance.LoadUrl(v.Thumbnails.HighResUrl, TimeSpan.FromDays(30)); // CASHE IMAGE
 
                                 DownloadHeader header = new DownloadHeader() { movieType = MovieType.YouTube, id = author.Id, name = author.Title, hdPosterUrl = author.LogoUrl, posterUrl = author.LogoUrl, ogName = author.Title }; //description = v.Description,hdPosterUrl=v.Thumbnails.HighResUrl, };//ConvertTitleToHeader(title);
-                                int id = ConvertStringToInt(v.Id);
 
                                 string filePath = YouTube.DownloadVideo(data, v.Title, data, v, id, header, true);
 
@@ -126,19 +141,6 @@ namespace CloudStreamForms
                             }
                         }
                     });
-                    /*UserDialogs.Instance.Prompt(new PromptConfig() {
-                        Title = "YouTube Download",
-                        CancelText = "Cancel",
-                        OkText = "Download",
-                        InputType = InputType.Url,
-                        Text = txt,
-                        Placeholder = "YouTube Link",
-                        OnAction = new Action<PromptResult>(async t => {
-                            if (t.Ok) {
-
-                            }
-                        })
-                    });*/
                 };
 
                 MyEpisodeResultCollection = new ObservableCollection<EpisodeResult>();
@@ -550,10 +552,10 @@ namespace CloudStreamForms
                 //long dur = App.GetKey(VIEW_TIME_DUR, episodeId, -1L);
                 print("MAINPOS: " + pos + "|" + episodeId);
                 if (pos != -1L) {// && dur != -1L) {
-                    RequestVlc(new List<string>() { file }, new List<string>() { name }, name, episodeId, startId: pos,overrideSelectVideo:false);
+                    RequestVlc(new List<string>() { file }, new List<string>() { name }, name, episodeId, startId: pos, overrideSelectVideo: false);
                 }
                 else {
-                    RequestVlc(new List<string>() { file }, new List<string>() { name }, name, episodeId,overrideSelectVideo:false);
+                    RequestVlc(new List<string>() { file }, new List<string>() { name }, name, episodeId, overrideSelectVideo: false);
                 }
                 return;
             }
@@ -600,15 +602,16 @@ namespace CloudStreamForms
             List<string> actions = new List<string>() {
                  "Play in App","Delete File", "Open Source"
             };
-            if(App.CanPlayExternalPlayer()) {
+            if (App.CanPlayExternalPlayer()) {
                 actions.Insert(1, "Play External App");
             }
             /*
             if (!MainChrome.IsConnectedToChromeDevice && MainChrome.allChromeDevices.Count() > 0) {
                 actions.Insert(0, "Connect to Chromecast");
             }
-            else*/ if (MainChrome.IsConnectedToChromeDevice) {
-               // actions.Insert(0, "Disconnect");
+            else*/
+            if (MainChrome.IsConnectedToChromeDevice) {
+                // actions.Insert(0, "Disconnect");
                 actions.Insert(0, "Chromecast");
             }
 
@@ -627,7 +630,7 @@ namespace CloudStreamForms
             }
             else if (action == "Chromecast") {
                 var header = downloadHeaders[info.info.downloadHeader];
-                 
+
                 await MainChrome.CastVideo(info.info.fileUrl, info.info.name, posterUrl: header.posterUrl, movieTitle: header.name, fromFile: true);
                 chromeDownload = info.info;
                 Page _p = ChromeCastPage.CreateChromePage(info.info); //{ episodeResult = new EpisodeResult() { }, chromeMovieResult = new Movie() { } };
@@ -714,6 +717,16 @@ namespace CloudStreamForms
 
     public static class YouTube
     {
+        public static string GetYTVideoId(string url)
+        {
+            try {
+                return VideoId.TryParse(url)?.Value;
+            }
+            catch (Exception) {
+                return "";
+            }
+        }
+
         public static async Task<Video> GetYTVideo(string url)
         {
             return await client.Videos.GetAsync(url);
@@ -786,7 +799,7 @@ namespace CloudStreamForms
             ImageService.Instance.LoadUrl(v.Thumbnails.HighResUrl, TimeSpan.FromDays(30)); // CASHE IMAGE
             string extraPath = "/" + GetPathFromType(header);
 
-            string fileUrl = platformDep.DownloadHandleIntent(id, new List<BasicMirrorInfo>() { new BasicMirrorInfo() { name = info.VideoQualityLabel,mirror = info.Url } }, v.Title + "." + info.Container.Name, name, true, extraPath, true, true, false, v.Thumbnails.HighResUrl, "{name}\n");//isMovie ? "{name}\n" : ($"S{season}:E{episode} - " + "{name}\n"));
+            string fileUrl = platformDep.DownloadHandleIntent(id, new List<BasicMirrorInfo>() { new BasicMirrorInfo() { name = info.VideoQualityLabel, mirror = info.Url } }, v.Title + "." + info.Container.Name, name, true, extraPath, true, true, false, v.Thumbnails.HighResUrl, "{name}\n");//isMovie ? "{name}\n" : ($"S{season}:E{episode} - " + "{name}\n"));
             return fileUrl;
         }
     }

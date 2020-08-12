@@ -408,6 +408,7 @@
                         </Grid>
                     </Grid>
                     <ActivityIndicator x:Name="LoadingCir"  IsVisible="False"  InputTransparent="True" IsRunning="True"  Opacity="1" VerticalOptions="Center" HorizontalOptions="Center" Color="#617EFF"></ActivityIndicator>
+                    <Button x:Name="SkipSomething" VerticalOptions="Start" Opacity="0" IsEnabled="False"  Text="Skip Opening" Padding="13,0"  HorizontalOptions="End" HeightRequest="40" BackgroundColor="#66000000" BorderColor="White" BorderWidth="1" InputTransparent="False" Margin="30,30,50,30" CornerRadius="5"></Button>
                     <Label x:Name="BufferLabel" Text=""  FontSize="14" VerticalOptions="Center" HorizontalOptions="Center" TextColor="#617EFF"></Label>
                 </Grid>
 

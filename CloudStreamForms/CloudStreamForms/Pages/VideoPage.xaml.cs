@@ -13,6 +13,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Xamarin.Forms;
 using Xamarin.Forms.Internals;
+using Xamarin.Forms.Markup;
 using Xamarin.Forms.Xaml;
 using XamEffects;
 using static CloudStreamForms.Core.CloudStreamCore;
@@ -576,12 +577,67 @@ namespace CloudStreamForms
 
         long lastPlayerTime = 0;
         long lastPlayerLenght = 0;
+
+        public bool isShowingSkip = false;
+
+        long skipToEnd;
+
         public void PlayerTimeChanged(long time)
         {
             if (!isShown) return;
 
             if (Player == null) {
                 return;
+            }
+            if (!isShowingSkip) {
+                var skip = skips.Where(t => t.timestamp < time).Where(t => t.timestamp + t.duration > time).Where(t => !t.hasShown).ToArray();
+                if (skip.Length > 0) {
+                    var _skip = skip[0];
+                    isShowingSkip = true;
+
+                    Device.InvokeOnMainThreadAsync(async () => {
+                        skipToEnd = _skip.timestamp + _skip.duration;
+                        SkipSomething.IsEnabled = true;
+                        SkipSomething.Text = _skip.name;
+                        await Task.Delay(100);
+
+                        var skipBounds = SkipSomething.Bounds;
+                        var fadeToBounds = new Rectangle(skipBounds.X, skipBounds.Y, 2, skipBounds.Height);
+
+                        SkipSomething.Layout(fadeToBounds);
+                        SkipSomething.TranslationX = 0;
+                        SkipSomething.FadeTo(1, easing: Easing.SinOut);
+                        SkipSomething.LayoutTo(skipBounds, easing: Easing.SinOut);
+
+                        if (!_skip.forceSkip) {
+                            int delay = Math.Max((int)Math.Min(5000, _skip.duration), 300);
+                            for (int i = 0; i < delay / 100; i++) {
+                                if (GetPlayerTime() > skipToEnd || GetPlayerTime() < _skip.timestamp) break;
+                                await Task.Delay(100);
+                            }
+                        }
+                        else {
+                            Player.Time = skipToEnd + 1;
+                            await Task.Delay(500);
+                        }
+
+                        SkipSomething.TranslateTo(100, 0, easing: Easing.SinOut);
+                        SkipSomething.FadeTo(0, easing: Easing.SinOut);
+
+                        SkipSomething.IsEnabled = false;
+
+                        int index = skips.IndexOf(_skip);
+                        _skip.hasShown = true;
+                        skips[index] = _skip;
+
+                        await SkipSomething.LayoutTo(fadeToBounds, easing: Easing.SinOut);
+                        isShowingSkip = false;
+
+                        SkipSomething.Layout(skipBounds);
+
+                    });
+
+                }
             }
 
             lastPlayerTime = time;
@@ -635,7 +691,9 @@ namespace CloudStreamForms
         void UpdateAudioDelay(long delay)
         {
             print("SETAUDIO:::: " + delay);
+
             if (Player == null) return;
+            if (GetPlayerLenght() == -1) return;
             if (Player.State == VLCState.Error || Player.State == VLCState.Opening) return;
             Player.SetAudioDelay(delay * 1000); // MS TO NS
         }
@@ -646,6 +704,20 @@ namespace CloudStreamForms
         Label[] font2;
 
         bool canStart = true;
+
+        struct SkipMetadata
+        {
+            public string name;
+            public long timestamp;
+            public long duration;
+            public bool forceSkip;
+            public bool hasShown;
+        }
+
+        List<SkipMetadata> skips = new List<SkipMetadata>();
+
+        Func<Task> NextEpisodeClicked;
+
 
         /// <summary>
         /// Subtitles are in full
@@ -667,7 +739,7 @@ namespace CloudStreamForms
 
             currentVideo = video;
             maxEpisodes = _maxEpisodes;
-            IsSingleMirror = video.isSingleMirror;
+            IsSingleMirror = video.isFromIMDB ? false : video.isSingleMirror;
             Mirrors = new List<BasicLink>();
             if (currentVideo.MirrorNames != null) {
                 for (int i = 0; i < currentVideo.MirrorNames.Count; i++) {
@@ -694,6 +766,18 @@ namespace CloudStreamForms
 
             SkipForwardSmall.Text = skip.ToString();
             SkipBackSmall.Text = skip.ToString();
+
+            SkipSomething.Clicked += async (o, e) => {
+                if (Player != null) {
+                    var _len = GetPlayerLenght();
+                    if (_len < skipToEnd + 1000 && NextEpisodeClicked != null) {
+                        await NextEpisodeClicked();
+                    }
+                    else {
+                        Player.Time = skipToEnd + 1;
+                    }
+                }
+            };
 
             // ======================= SUBTITLE SETUP =======================
 
@@ -878,9 +962,13 @@ namespace CloudStreamForms
                         if (info.episode == currentVideo.episode + 1 && info.season == currentVideo.season) {
                             NextEpisodeTap.IsVisible = true;
 
-                            Commands.SetTap(NextEpisodeTap, new Command(async () => {
+                            NextEpisodeClicked = async () => {
                                 await Navigation.PopModalAsync(true);
                                 Download.PlayDownloadedFile(info, false);
+                            };
+
+                            Commands.SetTap(NextEpisodeTap, new Command(async () => {
+                                await NextEpisodeClicked();
                             }));
                             break;
                         }
@@ -893,8 +981,12 @@ namespace CloudStreamForms
                         NextEpisodeTap.IsVisible = true;
                         canLazyLoadNextEpisode = true;
 
-                        Commands.SetTap(NextEpisodeTap, new Command(async () => {
+                        NextEpisodeClicked = async () => {
                             await loadLinkForNext?.Invoke(currentVideo.episodeId, true);
+                        };
+
+                        Commands.SetTap(NextEpisodeTap, new Command(async () => {
+                            await NextEpisodeClicked();
                         }));
                     }
                 }
@@ -1011,24 +1103,72 @@ namespace CloudStreamForms
                     //   LoadingCir.IsEnabled = false;
                 });
             };
+
             Player.Playing += (o, e) => {
-                isFirstLoadedMirror = false;
-                int chapterCount = Player.ChapterCount;
-                if (chapterCount > 0) {
-                    var cc = Player.FullChapterDescriptions();
-                    foreach (var t in cc) { // SKIP INTRO
-                        if (t.Name.IsClean()) {
-                            var name = t.Name.ToLower();
-                            if (name.Contains("opening")) {
-
-                            }
-                            else if (name.Contains("ending") || name == "end") {
-
+                skips = new List<SkipMetadata>();
+                if (Settings.VideoPlayerShowSkip) {
+                    int chapterCount = Player.ChapterCount;
+                    if (chapterCount > 0) {
+                        var cc = Player.FullChapterDescriptions();
+                        foreach (var t in cc) { // SKIP INTRO
+                            if (t.Name.IsClean()) {
+                                var name = t.Name.ToLower();
+                                if (name.Contains("opening")) {
+                                    skips.Add(new SkipMetadata() { duration = t.Duration, name = "Skip Opening", timestamp = t.TimeOffset });
+                                }
+                                else if (name.Contains("ending") || name == "end") {
+                                    string _name = "Skip Credits";
+                                    if (t.Duration + t.TimeOffset + 1000 > Player.Length && NextEpisodeClicked != null) {
+                                        _name = "Next episode";
+                                    }
+                                    skips.Add(new SkipMetadata() { duration = t.Duration, name = _name, timestamp = t.TimeOffset });
+                                }
                             }
                         }
+                        print(cc);
                     }
-                    print(cc);
+
+                    if (NextEpisodeClicked != null) {
+                        skips.Add(new SkipMetadata() { duration = 5000, name = "Next episode", timestamp = Player.Length - 5000 });
+                    }
+
+                    if (Settings.VideoPlayerSponsorblock) {
+                        bool autoSkip = Settings.VideoPlayerSponsorblockAutoSkipAds;
+                        try {
+                            if (video.headerId.Contains("youtube.com") || video.headerId.Contains("youtu.be")) {
+                                var id = YouTube.GetYTVideoId(video.headerId);
+                                if (id != "") {
+                                    var segments = App.GetKey<List<YTSponsorblockVideoSegments>>("Sponsorblock", id, null);
+                                    if (segments != null) {
+                                        foreach (var seg in segments) {
+                                            long start = (long)(seg.segment[0] * 1000);
+                                            long end = (long)(seg.segment[1] * 1000);
+
+                                            if (seg.category == "sponsor" || seg.category == "selfpromo") {
+                                                skips.Add(new SkipMetadata() { duration = end - start, name = "Skip Ad", timestamp = start, forceSkip = autoSkip });
+                                            }
+                                            else if (seg.category == "intro") {
+                                                skips.Add(new SkipMetadata() { duration = end - start, name = "Skip Intro", timestamp = start });
+                                            }
+                                            else if (seg.category == "outro") {
+                                                skips.Add(new SkipMetadata() { duration = end - start, name = "Skip Outro", timestamp = start });
+                                            }
+                                            else if (seg.category == "music_offtopic") {
+                                                skips.Add(new SkipMetadata() { duration = end - start, name = "Skip Music", timestamp = start });
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        catch (Exception) {
+
+                        }
+
+                    }
                 }
+                isFirstLoadedMirror = false;
+
                 UpdateAudioDelay(App.GetDelayAudio());
                 Device.BeginInvokeOnMainThread(() => {
                     if (App.GainAudioFocus()) {

@@ -128,6 +128,11 @@ namespace CloudStreamForms.Pages
                 new SettingsItem() { img= "outline_record_voice_over_white_48dp.png",mainTxt="Default dub",descriptTxt="Autoset to dub/sub when it can" ,VarName = nameof( Settings.DefaultDub) },
                 new SettingsItem() { img= "outline_history_white_48dp.png",mainTxt="Pause history",descriptTxt="Will pause all viewing history" ,VarName = nameof( Settings.PauseHistory) },
                 new SettingsItem() { img= "baseline_ondemand_video_white_48dp.png",mainTxt="Autoload next episode",descriptTxt="Autoload the next episode in the background while in the app videoplayer" ,VarName = nameof( Settings.LazyLoadNextLink) },
+                new SettingsItem() { img= "baseline_fast_forward_white_48dp.png",mainTxt="Show skip",descriptTxt="Skip opening/credits in videoplayer" ,VarName = nameof(Settings.VideoPlayerShowSkip) },
+               
+                new SettingsItem() { img= "sponsorblock.png",mainTxt="YouTube sponsorblock",descriptTxt="Skip ads, intro, outro" ,VarName = nameof(Settings.VideoPlayerSponsorblock) },
+                new SettingsItem() { img= "sponsorblock.png",mainTxt="Autoskip YouTube ads",descriptTxt="" ,VarName = nameof(Settings.VideoPlayerSponsorblockAutoSkipAds) },
+
                 new SettingsItem() { img= "baseline_ondemand_video_white_48dp.png",mainTxt="Use in app videoplayer",descriptTxt="" ,VarName = nameof( Settings.UseVideoPlayer)},
                 new SettingsList("baseline_ondemand_video_white_48dp.png","Current Videoplayer","External videoplayer",() => { return App.GetVideoPlayerName((App.VideoPlayer)Settings.PreferedVideoPlayer); }, async () => {
                     List<string> videoOptions = new List<string>() { App.GetVideoPlayerName(App.VideoPlayer.None) };
