@@ -361,8 +361,10 @@ namespace CloudStreamForms.Pages
 
             foreach (var set in settings) {
                 foreach (var subSet in set.settings) {
-                    subSet.onAppear?.Invoke(null, EventArgs.Empty);
-                    subSet.btt.BackgroundColor = c;
+                    if (subSet.btt != null) {
+                        subSet.onAppear?.Invoke(null, EventArgs.Empty);
+                        subSet.btt.BackgroundColor = c;
+                    }
                 }
             }
         }
@@ -373,57 +375,61 @@ namespace CloudStreamForms.Pages
         {
             InitializeComponent();
             BindingContext = this;
-            Settings.OnInit();
-            Settings.OnInitAfter();
 
-            thisPage = this;
+            Device.InvokeOnMainThreadAsync(async () => {
 
-            int counter = 0;
+                Settings.OnInit();
+                Settings.OnInitAfter();
 
-            void AddChild(View v)
-            {
-                AddTextGrid.Children.Add(v);
-                Grid.SetRow(v, counter);
-                counter++;
-            }
+                thisPage = this;
 
-            foreach (var set in settings) {
-                AddChild(new Label() { Text = set.header, FontSize = 17, FontAttributes = FontAttributes.Bold, TranslationX = 10, Margin = new Thickness(10, 20, 10, 10), TextColor = Color.White });
+                await Task.Delay(1000);
+                int counter = 0;
 
-                foreach (var subSet in set.settings) {
+                void AddChild(View v)
+                {
+                    AddTextGrid.Children.Add(v);
+                    Grid.SetRow(v, counter);
+                    counter++;
+                }
 
-                    var mainLabel = new Label() { Text = subSet.mainTxt, VerticalOptions = LayoutOptions.Center, FontSize = 16, TextColor = Color.FromHex("#e6e6e6") };
-                    var sublabel = new Label() { Text = subSet.descriptTxt, VerticalOptions = LayoutOptions.Center, FontSize = 12, TextColor = Color.FromHex("#AAA") };
-                    var _img = new FFImageLoading.Forms.CachedImage() {
-                        HorizontalOptions = LayoutOptions.Start,
-                        WidthRequest = 25,
-                        HeightRequest = 25,
-                        Margin = new Thickness(5),
-                        TranslationX = 5,
-                        VerticalOptions = LayoutOptions.Center,
-                        Source = App.GetImageSource(subSet.img),
-                    };
+                foreach (var set in settings) {
+                    AddChild(new Label() { Text = set.header, FontSize = 17, FontAttributes = FontAttributes.Bold, TranslationX = 10, Margin = new Thickness(10, 20, 10, 10), TextColor = Color.White });
 
-                    var subGrid = new Grid() {
-                        HeightRequest = 50,
-                        RowSpacing = -10,
-                        Padding = new Thickness(0, 0, 50, 0),
-                        VerticalOptions = LayoutOptions.Center,
-                    };
-                    subGrid.Children.Add(mainLabel);
-                    if (subSet.descriptTxt.IsClean()) {
-                        subGrid.Children.Add(sublabel);
-                    }
+                    foreach (var subSet in set.settings) {
 
-                    var bgBtn = new Button() {
-                        BackgroundColor = Color.FromHex("#141414")
-                    };
-                    subSet.btt = bgBtn;
-                    var _grid = new Grid() {
-                        HeightRequest = 70,
-                    };
+                        var mainLabel = new Label() { Text = subSet.mainTxt, VerticalOptions = LayoutOptions.Center, FontSize = 16, TextColor = Color.FromHex("#e6e6e6") };
+                        var sublabel = new Label() { Text = subSet.descriptTxt, VerticalOptions = LayoutOptions.Center, FontSize = 12, TextColor = Color.FromHex("#AAA") };
+                        var _img = new FFImageLoading.Forms.CachedImage() {
+                            HorizontalOptions = LayoutOptions.Start,
+                            WidthRequest = 25,
+                            HeightRequest = 25,
+                            Margin = new Thickness(5),
+                            TranslationX = 5,
+                            VerticalOptions = LayoutOptions.Center,
+                            Source = App.GetImageSource(subSet.img),
+                        };
 
-                    List<View> mainChilds = new List<View>() {
+                        var subGrid = new Grid() {
+                            HeightRequest = 50,
+                            RowSpacing = -10,
+                            Padding = new Thickness(0, 0, 50, 0),
+                            VerticalOptions = LayoutOptions.Center,
+                        };
+                        subGrid.Children.Add(mainLabel);
+                        if (subSet.descriptTxt.IsClean()) {
+                            subGrid.Children.Add(sublabel);
+                        }
+
+                        var bgBtn = new Button() {
+                            BackgroundColor = Color.FromHex("#141414")
+                        };
+                        subSet.btt = bgBtn;
+                        var _grid = new Grid() {
+                            HeightRequest = 70,
+                        };
+
+                        List<View> mainChilds = new List<View>() {
                        bgBtn,
 
                         new Grid() {
@@ -444,79 +450,80 @@ namespace CloudStreamForms.Pages
                             }
                         }
                     };
-                    if (subSet.isSwitch) {
-                        var _switch = new Switch() {
-                            VerticalOptions = LayoutOptions.Center,
-                            HorizontalOptions = LayoutOptions.End,
-                        };
-                        mainChilds.Insert(1, _switch);
+                        if (subSet.isSwitch) {
+                            var _switch = new Switch() {
+                                VerticalOptions = LayoutOptions.Center,
+                                HorizontalOptions = LayoutOptions.End,
+                            };
+                            mainChilds.Insert(1, _switch);
 
-                        bgBtn.Clicked += (o, e) => {
-                            subSet.isFromAppear = false;
-                            _switch.IsToggled = !_switch.IsToggled;
-                            subSet.variable.Value = _switch.IsToggled;
+                            bgBtn.Clicked += (o, e) => {
+                                subSet.isFromAppear = false;
+                                _switch.IsToggled = !_switch.IsToggled;
+                                subSet.variable.Value = _switch.IsToggled;
+                            };
+                            _switch.Toggled += (o, e) => {
+                                subSet.variable.Value = e.Value;
+                                subSet.OnChange?.Invoke();
+                                if (!subSet.isFromAppear) {
+                                    subSet.OnHumanInput?.Invoke();
+                                }
+                            };
+                            subSet.onAppear += (o, e) => {
+                                subSet.isFromAppear = true;
+                                _switch.IsToggled = subSet.variable.Value;
+                            };
                         };
-                        _switch.Toggled += (o, e) => {
-                            subSet.variable.Value = e.Value;
-                            subSet.OnChange?.Invoke();
-                            if (!subSet.isFromAppear) {
-                                subSet.OnHumanInput?.Invoke();
-                            }
-                        };
-                        subSet.onAppear += (o, e) => {
-                            subSet.isFromAppear = true;
-                            _switch.IsToggled = subSet.variable.Value;
-                        };
-                    };
-                    if (subSet.isButton) {
-                        bgBtn.Clicked += (o, e) => {
-                            subSet.OnChange?.Invoke();
-                        };
-                    }
-                    if (subSet.isList) {
-                        var _tex = new Label() {
-                            VerticalOptions = LayoutOptions.Center,
-                            HorizontalOptions = LayoutOptions.End,
-                            Padding = new Thickness(10),
-                            InputTransparent = true,
-                        };
-                        mainChilds.Insert(1, _tex);
+                        if (subSet.isButton) {
+                            bgBtn.Clicked += (o, e) => {
+                                subSet.OnChange?.Invoke();
+                            };
+                        }
+                        if (subSet.isList) {
+                            var _tex = new Label() {
+                                VerticalOptions = LayoutOptions.Center,
+                                HorizontalOptions = LayoutOptions.End,
+                                Padding = new Thickness(10),
+                                InputTransparent = true,
+                            };
+                            mainChilds.Insert(1, _tex);
 
-                        bgBtn.Clicked += async (o, e) => {
-                            await subSet.OnChange();
-                            _tex.Text = subSet.OnResult();
-                        };
-
-                        subSet.onAppear += (o, e) => {
-                            _tex.Text = subSet.OnResult();
-                        };
-                    }
-                    if (subSet.isCondButton) {
-                        string defTxt = subSet.mainTxt;
-                        subSet.onAppear += (o, e) => {
-                            bool enabled = subSet.CanAppear();
-                            mainLabel.Text = enabled ? subSet.OnResult() : defTxt;
-                            _grid.Opacity = enabled ? 1 : 0.5;
-                        };
-                        bgBtn.Clicked += async (o, e) => {
-                            if (subSet.CanAppear()) {
+                            bgBtn.Clicked += async (o, e) => {
                                 await subSet.OnChange();
-                                subSet.onAppear?.Invoke(null, EventArgs.Empty);
-                            }
-                        };
-                    }
+                                _tex.Text = subSet.OnResult();
+                            };
 
-                    foreach (var _child in mainChilds) {
-                        _grid.Children.Add(_child);
+                            subSet.onAppear += (o, e) => {
+                                _tex.Text = subSet.OnResult();
+                            };
+                        }
+                        if (subSet.isCondButton) {
+                            string defTxt = subSet.mainTxt;
+                            subSet.onAppear += (o, e) => {
+                                bool enabled = subSet.CanAppear();
+                                mainLabel.Text = enabled ? subSet.OnResult() : defTxt;
+                                _grid.Opacity = enabled ? 1 : 0.5;
+                            };
+                            bgBtn.Clicked += async (o, e) => {
+                                if (subSet.CanAppear()) {
+                                    await subSet.OnChange();
+                                    subSet.onAppear?.Invoke(null, EventArgs.Empty);
+                                }
+                            };
+                        }
+
+                        foreach (var _child in mainChilds) {
+                            _grid.Children.Add(_child);
+                        }
+                        AddChild(_grid);
+                        if (subSet.descriptTxt.IsClean()) {
+                            Grid.SetRow(sublabel, 1);
+                        }
+                        Grid.SetColumn(subGrid, 1);
                     }
-                    AddChild(_grid);
-                    if (subSet.descriptTxt.IsClean()) {
-                        Grid.SetRow(sublabel, 1);
-                    }
-                    Grid.SetColumn(subGrid, 1);
                 }
-            }
-            Appear();
+                Appear();
+            });
 
         }
     }

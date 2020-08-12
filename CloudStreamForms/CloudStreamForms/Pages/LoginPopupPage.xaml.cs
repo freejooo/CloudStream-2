@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
+using static CloudStreamForms.InputPopupPage;
 
 namespace CloudStreamForms
 {
@@ -18,6 +19,7 @@ namespace CloudStreamForms
             public string placeholder;
             public string setText;
             public bool isPassword;
+            public InputPopupResult? res;
         }
 
         const bool setOnLeft = true;
@@ -25,7 +27,7 @@ namespace CloudStreamForms
         {
             bool hightOverWidth = Bounds.Height > Bounds.Width;
             if (setOnLeft) {
-                TheStack.TranslationY = hightOverWidth ? -100 : 0;
+                TheStack.TranslationY = hightOverWidth ? -70 : 0;
             }
         }
 
@@ -33,7 +35,7 @@ namespace CloudStreamForms
         {
             InitializeComponent();
             BackgroundColor = new Color(0, 0, 0, 0.9);
-            
+
             UpdateScreenRot();
             TheStack.SizeChanged += (o, e) => {
                 UpdateScreenRot();
@@ -46,6 +48,11 @@ namespace CloudStreamForms
                 var login = loginData[i];
 
                 var entry = new Entry() { Margin = 10, HorizontalOptions = LayoutOptions.Center, TranslationX = 12, WidthRequest = 250, FontSize = 20, HeightRequest = 50, MinimumWidthRequest = 50, Placeholder = login.placeholder, IsPassword = login.isPassword, Text = login.setText, };
+                var _res = login.res ?? InputPopupResult.plainText;
+                entry.HorizontalOptions = LayoutOptions.Center;
+
+                CheckEntry(entry, _res, false, login.setText, false, false);
+
                 GridRow.Children.Add(entry);
                 Grid.SetRow(entry, i);
                 entrys.Add(entry);

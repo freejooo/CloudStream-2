@@ -197,6 +197,8 @@ namespace CloudStreamForms.Core.AnimeProviders
             if (isFetching) return;
             if (openToken != "" && tokenCook != "") return;
             if (hasLoaded) return;
+            if (!Settings.IsProviderActive(Name)) return;
+
             isFetching = true;
             try {
 
@@ -243,7 +245,7 @@ namespace CloudStreamForms.Core.AnimeProviders
                 }
 
                 string allD = HTMLGet("https://twist.moe/api/anime", "https://twist.moe/", cookies: new List<Cookie>() { new Cookie() { Name = FindHTML("|" + tokenCook, "|", "="), Value = FindHTML(tokenCook + "|", "=", "|"), Expires = DateTime.Now.AddSeconds(1000) } }, keys: new List<string>() { "x-access-token" }, values: new List<string>() { openToken });
-              //  print("ALLD: " + allD);
+                //  print("ALLD: " + allD);
                 MoeItem[] allItems = JsonConvert.DeserializeObject<MoeItem[]>(allD);
                 foreach (var item in allItems) {
                     if (item.mal_id != null) {
@@ -324,6 +326,7 @@ namespace CloudStreamForms.Core.AnimeProviders
             if (isFetching) return;
             if (openToken != "" && tokenCook != "") return;
             Thread t = new Thread(() => {
+                Thread.Sleep(5000);
                 Setup();
             });
             t.Start();
@@ -364,7 +367,7 @@ namespace CloudStreamForms.Core.AnimeProviders
                 priority = 10,
                 canNotRunInVideoplayer = true,
                 baseUrl = "https://twist.moe/" + source // "https://twistcdn.bunny.sh/" + source
-            }) ;
+            });
         }
     }
 }

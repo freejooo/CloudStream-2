@@ -98,6 +98,8 @@ namespace CloudStreamForms.Core
             ".cdnfile."
         };
 
+        public const bool FETCH_NOTIFICATION = false;
+
         #endregion
 
         // ========================================================= DATA =========================================================
@@ -6577,6 +6579,8 @@ namespace CloudStreamForms.Core
 
         void FishMALNotification()
         {
+            if (!FETCH_NOTIFICATION) return;
+
             TempThread tempThred = CreateThread(2);
             StartThread("FishMALNotification", () => {
                 try {
@@ -7440,8 +7444,7 @@ namespace CloudStreamForms.Core
                                 string _extra = DownloadString(extraBeforeId + vid);
 
                                 const string elookFor = "file: \'";
-                                print("EXTRA:::==>>" + _extra);
-
+ 
                                 while (_extra.Contains(elookFor)) {
                                     string extraUrl = FindHTML(_extra, elookFor, "\'");
                                     _extra = RemoveOne(_extra, elookFor);

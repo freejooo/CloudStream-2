@@ -21,6 +21,68 @@ namespace CloudStreamForms
             url = 4,
         }
 
+        public static void CheckEntry(Entry entry, InputPopupResult inputType, bool autoPaste = false, string setText = null, bool setWidth = true, bool setFontSize = true)
+        {
+            entry.ReturnType = ReturnType.Done;
+            bool _isNumber = (inputType == InputPopupResult.decimalNumber || inputType == InputPopupResult.integrerNumber);
+            // FORCE CORRENT TYPE
+            entry.TextChanged += (o, e) => {
+                if (inputType == InputPopupResult.integrerNumber || inputType == InputPopupResult.decimalNumber) {
+                    if (e.NewTextValue.Contains("-") && !e.NewTextValue.StartsWith("-")) {
+                        entry.Text = e.OldTextValue;
+                    }
+                }
+
+                if (inputType == InputPopupResult.integrerNumber) {
+                    entry.Text = Regex.Replace(e.NewTextValue, "[^0-9-]", "");
+                }
+                else if (inputType == InputPopupResult.decimalNumber) {
+                    entry.Text = Regex.Replace(e.NewTextValue, "[^0-9.,-]", "");
+                    if (e.OldTextValue.IsClean()) {
+                        if (e.OldTextValue.Contains(",") || e.OldTextValue.Contains(".")) { // REMOVE DUPLICATES
+                            if (e.NewTextValue.EndsWith(",") || e.NewTextValue.EndsWith(".")) {
+                                entry.Text = entry.Text.Substring(0, entry.Text.Length - 1);
+                            }
+                        }
+                    }
+                    else {
+                        if (e.NewTextValue.StartsWith(",") || e.NewTextValue.StartsWith(".")) {
+                            entry.Text = "";
+                        }
+                    }
+                }
+            };
+
+            entry.Text = setText ?? "";
+
+            if (inputType == InputPopupResult.decimalNumber || inputType == InputPopupResult.integrerNumber) {
+                entry.IsSpellCheckEnabled = false;
+                entry.IsTextPredictionEnabled = false;
+                entry.Keyboard = Keyboard.Numeric;
+            }
+            else if (inputType == InputPopupResult.password) {
+                entry.IsPassword = true;
+            }
+            else if (inputType == InputPopupResult.url) {
+                entry.Keyboard = Keyboard.Url;
+                entry.IsSpellCheckEnabled = false;
+                if (autoPaste && Xamarin.Essentials.Clipboard.HasText) {
+                    CloudStreamCore.print("AUTOPLAS:E ");
+                    var paste = Xamarin.Essentials.Clipboard.GetTextAsync().Result;
+                    CloudStreamCore.print("AUTOPLAS:E222: " + paste);
+                    entry.Text = paste;
+                }
+            }
+            entry.ClearButtonVisibility = ClearButtonVisibility.WhileEditing;
+
+            if (setWidth) {
+                entry.WidthRequest = _isNumber ? 150 : 300;
+            }
+            if (setFontSize) {
+                entry.FontSize = _isNumber ? 25 : 20;
+            }
+        }
+
         readonly InputPopupResult InputType;
         public InputPopupPage(InputPopupResult inputType, string placeHolder = "", string title = "", int offset = -1, bool autoPaste = true, string setText = null, string confirmText = "")
         {
@@ -75,66 +137,13 @@ namespace CloudStreamForms
                 Done(IsNumber ? "" : "Cancel");
             };
 
-            InputF.ReturnType = ReturnType.Done;
-            InputF.Placeholder = placeHolder;
-
-            // FORCE CORRENT TYPE
-            InputF.TextChanged += (o, e) => {
-                if (inputType == InputPopupResult.integrerNumber || inputType == InputPopupResult.decimalNumber) {
-                    if (e.NewTextValue.Contains("-") && !e.NewTextValue.StartsWith("-")) {
-                        InputF.Text = e.OldTextValue;
-                    }
-                }
-
-                if (inputType == InputPopupResult.integrerNumber) {
-                    InputF.Text = Regex.Replace(e.NewTextValue, "[^0-9-]", "");
-                }
-                else if (inputType == InputPopupResult.decimalNumber) {
-                    InputF.Text = Regex.Replace(e.NewTextValue, "[^0-9.,-]", "");
-                    if (e.OldTextValue.IsClean()) {
-                        if (e.OldTextValue.Contains(",") || e.OldTextValue.Contains(".")) { // REMOVE DUPLICATES
-                            if (e.NewTextValue.EndsWith(",") || e.NewTextValue.EndsWith(".")) {
-                                InputF.Text = InputF.Text.Substring(0, InputF.Text.Length - 1);
-                            }
-                        }
-                    }
-                    else {
-                        if (e.NewTextValue.StartsWith(",") || e.NewTextValue.StartsWith(".")) {
-                            InputF.Text = "";
-                        }
-                    }
-                }
-            };
-
-            InputF.Text = setText ?? "";
-
-            if (inputType == InputPopupResult.decimalNumber || inputType == InputPopupResult.integrerNumber) {
-                InputF.IsSpellCheckEnabled = false;
-                InputF.IsTextPredictionEnabled = false;
-                InputF.Keyboard = Keyboard.Numeric;
-            }
-            else if (inputType == InputPopupResult.password) {
-                InputF.IsPassword = true;
-            }
-            else if (inputType == InputPopupResult.url) {
-                InputF.Keyboard = Keyboard.Url;
-                InputF.IsSpellCheckEnabled = false;
-                if (autoPaste && Xamarin.Essentials.Clipboard.HasText) {
-                    CloudStreamCore.print("AUTOPLAS:E ");
-                    var paste = Xamarin.Essentials.Clipboard.GetTextAsync().Result;
-                    CloudStreamCore.print("AUTOPLAS:E222: " + paste);
-                    InputF.Text = paste;
-                }
-            }
-            InputF.ClearButtonVisibility = ClearButtonVisibility.WhileEditing;
-            HeaderTitle.Text = title;
-
-            InputF.WidthRequest = IsNumber ? 150 : 300;
-            InputF.FontSize = IsNumber ? 25 : 20;
-
             InputF.Completed += (o, e) => {
                 Done();
             };
+            InputF.Placeholder = placeHolder;
+            CheckEntry(InputF, inputType, autoPaste, setText);
+
+            HeaderTitle.Text = title;
         }
 
         string text = "";

@@ -985,7 +985,7 @@ namespace CloudStreamForms.Droid
         public static int PublicNot;
 
         protected override void OnCreate(Bundle savedInstanceState)
-        {
+        {  
             print("ON CREATED:::::!!!!!!!!!");
 
             SetTheme(Resource.Style.MainTheme_NonSplash);

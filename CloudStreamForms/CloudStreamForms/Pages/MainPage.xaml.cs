@@ -156,7 +156,9 @@ namespace CloudStreamForms
 
         public MainPage()
         {
-            InitializeComponent(); mainPage = this; CloudStreamCore.mainPage = mainPage;
+            InitializeComponent(); 
+
+            mainPage = this; CloudStreamCore.mainPage = mainPage;
 
             System.AppDomain.CurrentDomain.UnhandledException += UnhandledExceptionTrapper;
             //Application. += MYThreadHandler;
@@ -178,15 +180,16 @@ namespace CloudStreamForms
 
             List<string> names = new List<string>() { "Home", "Search", "Downloads", "Settings" };
             //List<string> icons = new List<string>() { "homeIcon.png", "searchIcon.png", "downloadIcon.png", "baseline_settings_applications_white_48dp_inverted_big.png" };
-            List<Page> pages = new List<Page>() { new Home(), new Search(), new Download(), new SettingsPage(), };
+            List<Page> pages = new List<Page>() { new Home(), new Search(), new Download(),  new SettingsPage(), };
 
-            for (int i = 0; i < names.Count; i++) {
+            for (int i = 0; i < pages.Count; i++) {
                 Children.Add(pages[i]);
                 Children[i].Title = names[i];
                 Children[i].IconImageSource = baseIcons[i];
             }
             On<Xamarin.Forms.PlatformConfiguration.Android>().SetToolbarPlacement(ToolbarPlacement.Bottom);
 
+            /*
             if (Settings.IS_TEST_BUILD) {
                 return;
             }
@@ -212,7 +215,7 @@ namespace CloudStreamForms
             }
             catch (Exception _ex) {
                 error(_ex);
-            }
+            }*/
             // BarBackgroundColor = Color.Black;
             //   BarTextColor = Color.OrangeRed;
 

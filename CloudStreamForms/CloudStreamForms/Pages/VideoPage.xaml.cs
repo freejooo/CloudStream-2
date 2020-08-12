@@ -685,7 +685,7 @@ namespace CloudStreamForms
             }
             Mirrors = Mirrors.OrderBy(t => -t.priority).ToList();
 
-            InitializeComponent(); 
+            InitializeComponent();
 
             int skip = Settings.VideoPlayerSkipTime;
             SkipTime = skip * 1000;
@@ -950,9 +950,9 @@ namespace CloudStreamForms
             //MirrosImg.Source = App.GetImageSource("baseline_playlist_play_white_48dp.png");
             AudioImg.Source = App.GetImageSource("AudioVolLow3.png"); // App.GetImageSource("baseline_volume_up_white_48dp.png");
             EpisodesImg.Source = App.GetImageSource("netflixEpisodesCut.png");
-           // NextImg.Source = App.GetImageSource("baseline_skip_next_white_48dp.png");
-           // BacktoMain.Source = App.GetImageSource("baseline_keyboard_arrow_left_white_48dp.png");
-           // NextMirror.Source = App.GetImageSource("baseline_skip_next_white_48dp.png");
+            // NextImg.Source = App.GetImageSource("baseline_skip_next_white_48dp.png");
+            // BacktoMain.Source = App.GetImageSource("baseline_keyboard_arrow_left_white_48dp.png");
+            // NextMirror.Source = App.GetImageSource("baseline_skip_next_white_48dp.png");
             SetIsLocked();
             // LockImg.Source = App.GetImageSource("wlockUnLocked.png");
             //SubtitleImg.Source = App.GetImageSource("outline_subtitles_white_48dp.png");
@@ -1013,6 +1013,22 @@ namespace CloudStreamForms
             };
             Player.Playing += (o, e) => {
                 isFirstLoadedMirror = false;
+                int chapterCount = Player.ChapterCount;
+                if (chapterCount > 0) {
+                    var cc = Player.FullChapterDescriptions();
+                    foreach (var t in cc) { // SKIP INTRO
+                        if (t.Name.IsClean()) {
+                            var name = t.Name.ToLower();
+                            if (name.Contains("opening")) {
+
+                            }
+                            else if (name.Contains("ending") || name == "end") {
+
+                            }
+                        }
+                    }
+                    print(cc);
+                }
                 UpdateAudioDelay(App.GetDelayAudio());
                 Device.BeginInvokeOnMainThread(() => {
                     if (App.GainAudioFocus()) {
