@@ -39,8 +39,7 @@ namespace CloudStreamForms
 
         public Poster mainPoster;
         public string trailerUrl = "";
-        List<Button> recBtts = new List<Button>();
-
+ 
         //  public static List<Movie> lastMovie;
         List<Poster> RecomendedPosters { get { return currentMovie.title.recomended; } }  //= new List<Poster>();
 
@@ -120,6 +119,8 @@ namespace CloudStreamForms
 
         private void StarBttClicked(object sender, EventArgs e)
         {
+            Home.UpdateIsRequired = true;
+
             bool keyExists = App.KeyExists(App.BOOKMARK_DATA, currentMovie.title.id);
             if (keyExists) {
                 App.RemoveKey(App.BOOKMARK_DATA, currentMovie.title.id);
@@ -1224,10 +1225,11 @@ namespace CloudStreamForms
 
                 // ---------------------------- RECOMMENDATIONS ----------------------------
 
+                /*
                 foreach (var item in Recommendations.Children) { // SETUP
                     Grid.SetColumn(item, 0);
                     Grid.SetRow(item, 0);
-                }
+                }*/
                 Recommendations.Children.Clear();
                 for (int i = 0; i < RecomendedPosters.Count; i++) {
                     Poster p = e.title.recomended[i];
@@ -1264,8 +1266,7 @@ namespace CloudStreamForms
                             //do something
                         }));
                         Commands.SetTapParameter(stackLayout, i);
-                        recBtts.Add(imageButton);
-
+ 
                         stackLayout.Children.Add(ff);
                         stackLayout.Children.Add(imageButton);
 
@@ -1317,6 +1318,7 @@ namespace CloudStreamForms
         {
             ClearEpisodes();
             //  epView.MyEpisodeResultCollection.Clear();
+            ChangeBatchDownload();
 
             DubPicker.button.FadeTo(0, FATE_TIME_MS);
             currentSeason = SeasonPicker.SelectedIndex + 1;
@@ -1364,6 +1366,13 @@ namespace CloudStreamForms
             }
         }
 
+        void ChangeBatchDownload()
+        {
+            bool canBatchDownload = epView.MyEpisodeResultCollection.Count > 1;
+            BatchDownloadBtt.IsEnabled = canBatchDownload;
+            BatchDownloadBtt.FadeTo(canBatchDownload ? 1 : 0);
+        }
+
         private void EpisodesLoaded(object sender, List<Episode> e)
         {
             if (core == null) return;
@@ -1400,9 +1409,7 @@ namespace CloudStreamForms
                     AddEpisode(new EpisodeResult() { Title = currentMovie.title.name, IMDBEpisodeId = currentMovie.title.id, Description = currentMovie.title.description, Id = 0, PosterUrl = "", Progress = 0, Rating = "", epVis = false }, 0);
                     SetEpisodeFromTo(0);
                 }
-                bool canBatchDownload = epView.AllEpisodes.Length > 1;
-                BatchDownloadBtt.IsEnabled = canBatchDownload;
-                BatchDownloadBtt.FadeTo(canBatchDownload ? 1 : 0);
+                ChangeBatchDownload();
 
                 DubPicker.ItemsSource.Clear();
 
@@ -1492,7 +1499,7 @@ namespace CloudStreamForms
                                 }
                             }
                             GetLatestDub[currentMovie.title.id] = isDub;
-
+                            ChangeBatchDownload();
                         });
                     }
                     else {

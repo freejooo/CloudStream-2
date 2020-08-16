@@ -18,7 +18,6 @@ namespace CloudStreamForms.Droid
         protected override void OnElementChanged(ElementChangedEventArgs<Xamarin.Forms.ProgressBar> e)
         {
             base.OnElementChanged(e);
-            Console.WriteLine("PROGRESSTO::" + e.NewElement.ClassId);
             if (e.NewElement.ClassId == "id") {
                 Control.Indeterminate = true;
             }

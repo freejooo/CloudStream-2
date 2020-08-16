@@ -18,6 +18,7 @@ namespace CloudStreamForms
     {
         const int POSTER_HIGHT = 96;
         const int POSTER_WIDTH = 67;
+
         public MainEpisodeView epView;
         public List<IMDbTopList> iMDbTopList = new List<IMDbTopList>();
         readonly List<string> genres = new List<string>() { "", "action", "adventure", "animation", "biography", "comedy", "crime", "drama", "family", "fantasy", "film-noir", "history", "horror", "music", "musical", "mystery", "romance", "sci-fi", "sport", "thriller", "war", "western" };
@@ -206,6 +207,7 @@ namespace CloudStreamForms
         {
 
             InitializeComponent();
+
             if (Settings.IS_TEST_BUILD) {
                 return;
             }
@@ -427,7 +429,10 @@ namespace CloudStreamForms
                         SetHeight();
                     };*/
                 }
-                UpdateBookmarks();
+                if (UpdateIsRequired) {
+                    UpdateBookmarks();
+                    UpdateIsRequired = false;
+                }
                 Top100Stack.IsEnabled = Settings.Top100Enabled;
                 Top100Stack.IsVisible = Settings.Top100Enabled;
                 BackgroundColor = Settings.BlackRBGColor;
@@ -443,8 +448,45 @@ namespace CloudStreamForms
         //            await PopupNavigation.Instance.PushAsync(new SelectPopup(new List<string>() { "Season 1", "Season 2", "Season 3", "Season 3", "Season 3", }, 1));
 
 
+        const double _RecPosterMulit = 1.75;
+        const int _RecPosterHeight = 100;
+        const int _RecPosterWith = 65;
+        int RecPosterHeight { get { return (int)Math.Round(_RecPosterHeight * _RecPosterMulit); } }
+        int RecPosterWith { get { return (int)Math.Round(_RecPosterWith * _RecPosterMulit); } }
+
         List<BookmarkPoster> bookmarkPosters = new List<BookmarkPoster>();
-        void UpdateBookmarks()
+
+
+        static double lastWidth = -1;
+        static double lastHeight = -1;
+        protected override void OnSizeAllocated(double width, double height)
+        {
+            base.OnSizeAllocated(width, height);
+            if (lastHeight != height || lastWidth != width) {
+                lastWidth = width;
+                lastHeight = height;
+                SetRecs();
+            }
+        }
+
+        void SetRecs()
+        {
+            Device.BeginInvokeOnMainThread(() => {
+                int perCol = (Application.Current.MainPage.Width < Application.Current.MainPage.Height) ? 3 : 6;
+
+                for (int i = 0; i < Bookmarks.Children.Count; i++) { // GRID
+                    Grid.SetColumn(Bookmarks.Children[i], i % perCol);
+                    Grid.SetRow(Bookmarks.Children[i], i / perCol);
+                }
+               // int row = (int)Math.Floor((Bookmarks.Children.Count - 1) / (double)perCol);
+                // Recommendations.HeightRequest = (RecPosterHeight + Recommendations.RowSpacing) * (total / perCol);
+                Bookmarks.HeightRequest = (RecPosterHeight + Bookmarks.RowSpacing) * (((Bookmarks.Children.Count-1) / perCol) + 1) - 7 + Bookmarks.RowSpacing;
+            });
+        }
+
+        public static bool UpdateIsRequired = true;
+
+        async void UpdateBookmarks()
         {
             try {
                 int height = 150;
@@ -453,80 +495,118 @@ namespace CloudStreamForms
                 List<string> data = new List<string>();
                 bookmarkPosters = new List<BookmarkPoster>();
                 Bookmarks.Children.Clear();
+                int index = 0;
+                bool allDone = false;
                 for (int i = 0; i < keys.Count; i++) {
                     string __key = App.ConvertToObject<string>(keys[i], "");
                     if (__key == "") {
                         continue;
                     }
                     string name = FindHTML(__key, "Name=", "|||");
-                    print("BOOKMARK:" + name);
                     string posterUrl = FindHTML(__key, "PosterUrl=", "|||");
                     posterUrl = ConvertIMDbImagesToHD(posterUrl, 182, 268);
-                    print("POSTERURL:::" + posterUrl);
 
                     string id = FindHTML(__key, "Id=", "|||");
                     if (name != "" && posterUrl != "" && id != "") {
                         if (CheckIfURLIsValid(posterUrl)) {
-                            Grid stackLayout = new Grid();
+                            string posterURL = ConvertIMDbImagesToHD(posterUrl, 76, 113, 1.75); //.Replace(",76,113_AL", "," + pwidth + "," + pheight + "_AL").Replace("UY113", "UY" + pheight).Replace("UX76", "UX" + pwidth);
+                            if (CheckIfURLIsValid(posterURL)) {
+                                Grid stackLayout = new Grid() { VerticalOptions = LayoutOptions.Start };
+                                Button imageButton = new Button() { HeightRequest = RecPosterHeight, WidthRequest = RecPosterWith, BackgroundColor = Color.Transparent, VerticalOptions = LayoutOptions.Start };
+                                var ff = new FFImageLoading.Forms.CachedImage {
+                                    Source = posterURL,
+                                    HeightRequest = RecPosterHeight,
+                                    WidthRequest = RecPosterWith,
+                                    BackgroundColor = Color.Transparent,
+                                    VerticalOptions = LayoutOptions.Start,
+                                    Transformations = {
+                            //  new FFImageLoading.Transformations.RoundedTransformation(10,1,1.5,10,"#303F9F")
+                                    new FFImageLoading.Transformations.RoundedTransformation(1, 1, 1.5, 0, "#303F9F")
+                                    },
+                                    InputTransparent = true,
+                                };
 
+                                // ================================================================ RECOMMENDATIONS CLICKED ================================================================
+                                stackLayout.SetValue(XamEffects.TouchEffect.ColorProperty, Color.White);
+                                Commands.SetTap(stackLayout, new Command((o) => {
+                                    var z = (BookmarkPoster)o;
+                                    PushPageFromUrlAndName(z.id, z.name);
+                                }));
+                                Commands.SetTapParameter(stackLayout, new BookmarkPoster() { id = id, name = name, posterUrl = posterUrl });
 
-                            //  Button imageButton = new Button() { HeightRequest = 150, WidthRequest = 90, BackgroundColor = Color.Transparent, VerticalOptions = LayoutOptions.Start };
-                            var ff = new FFImageLoading.Forms.CachedImage {
-                                Source = posterUrl,
-                                HeightRequest = height,
-                                WidthRequest = 87,
-                                BackgroundColor = Color.Transparent,
-                                VerticalOptions = LayoutOptions.Start,
-                                Transformations = {
-                                new FFImageLoading.Transformations.RoundedTransformation(1,1,1.5,0,"#303F9F")
-                            },
-                                InputTransparent = true,
-                            };
+                                stackLayout.Children.Add(ff);
+                                stackLayout.Children.Add(imageButton);
+                                stackLayout.Children.Add(new Label() { Text = name, VerticalOptions = LayoutOptions.End, TextColor = Color.White, ClassId = "OUTLINE" });
+                                stackLayout.Opacity = 0;
 
-                            //Source = p.posterUrl
-
-                            stackLayout.Children.Add(ff);
-                            // stackLayout.Children.Add(imageButton);
-                            bookmarkPosters.Add(new BookmarkPoster() { id = id, name = name, posterUrl = posterUrl });
-                            Grid.SetColumn(stackLayout, Bookmarks.Children.Count);
-                            Bookmarks.Children.Add(stackLayout);
-
-                            // --- RECOMMENDATIONS CLICKED -----
-                            stackLayout.SetValue(XamEffects.TouchEffect.ColorProperty, Color.White);
-                            Commands.SetTap(stackLayout, new Command((o) => {
-                                int z = (int)o;
-                                PushPageFromUrlAndName(bookmarkPosters[z].id, bookmarkPosters[z].name);
-                                //do something
-                            }));
-                            Commands.SetTapParameter(stackLayout, i);
-                            /*
-                            imageButton.Clicked += (o, _e) => {
-                                for (int z = 0; z < bookmarkPosters.Count; z++) {
-                                    if (((Button)o).Id == bookmarkPosters[z].button.Id) {
-                                        PushPageFromUrlAndName(bookmarkPosters[z].id, bookmarkPosters[z].name);
+                                async void WaitUntillComplete()
+                                {
+                                    stackLayout.Opacity = 0;
+                                    while (!allDone) {
+                                        await Task.Delay(50);
                                     }
+                                    await stackLayout.FadeTo(1, (uint)(200 + index * 50), Easing.Linear);
                                 }
-                            };*/
+
+                                WaitUntillComplete();
+
+                                index++;
+                                Bookmarks.Children.Add(stackLayout);
+
+                                /*
+                                Grid stackLayout = new Grid();
+
+
+                                 var ff = new FFImageLoading.Forms.CachedImage {
+                                    Source = posterUrl,
+                                    HeightRequest = height,
+                                    WidthRequest = 87,
+                                    BackgroundColor = Color.Transparent,
+                                    VerticalOptions = LayoutOptions.Start,
+                                    Transformations = {
+                                    new FFImageLoading.Transformations.RoundedTransformation(1,1,1.5,0,"#303F9F")
+                                },
+                                    InputTransparent = true,
+                                };
+
+                                //Source = p.posterUrl
+
+                                stackLayout.Children.Add(ff);
+                                // stackLayout.Children.Add(imageButton);
+                                bookmarkPosters.Add(new BookmarkPoster() { id = id, name = name, posterUrl = posterUrl });
+                                Grid.SetColumn(stackLayout, Bookmarks.Children.Count);
+                                Bookmarks.Children.Add(stackLayout);
+
+                                // --- RECOMMENDATIONS CLICKED -----
+                                stackLayout.SetValue(XamEffects.TouchEffect.ColorProperty, Color.White);
+                                Commands.SetTap(stackLayout, new Command((o) => {
+                                    int z = (int)o;
+                                    PushPageFromUrlAndName(bookmarkPosters[z].id, bookmarkPosters[z].name);
+                                 }));
+                                Commands.SetTapParameter(stackLayout, i);*/
+
+                            }
                         }
+                        // data.Add(App.GetKey("BookmarkData"))
                     }
-                    // data.Add(App.GetKey("BookmarkData"))
+                    //await Task.Delay(100);
+
+                    //MScroll.HeightRequest = keys.Count > 0 ? 130 : 0;
+
                 }
-
-                MScroll.HeightRequest = keys.Count > 0 ? 130 : 0;
+                allDone = true;
                 if (ImdbTypePicker.SelectedIndex == -1) {
-
                     ImdbTypePicker.SelectedIndex = bookmarkPosters.Count > 0 ? 0 : 2; // SET TO POPULAR BY DEAFULT
                 }
+                SetRecs();
+
             }
             catch (Exception _ex) {
-
                 error(_ex);
             }
 
         }
         public double currentWidth { get { return Application.Current.MainPage.Width; } }
-
-
 
         private void Grid_BindingContextChanged(object sender, EventArgs e)
         {

@@ -9,25 +9,23 @@
              xmlns:cloudstreamforms="clr-namespace:CloudStreamForms"
              mc:Ignorable="d"
              x:Class="CloudStreamForms.Home">
-        <StackLayout>
-        <Label Margin="3" Text="Home" HorizontalOptions="Center"  FontSize="25"   TextColor="#ffffff" ></Label>
+    <ScrollView>
+        <StackLayout x:Name="MainStack">
+     
+        <Label x:Name="TitleName" Margin="3" Text="Home" HorizontalOptions="Center"  FontSize="25"   TextColor="#ffffff" ></Label>
         <!--TextColor="#303F9F"-->
         <!--   <Label Text="Bookmarks" FontAttributes="Italic" TranslationX="10" VerticalOptions="Start" HorizontalOptions="FillAndExpand" FontSize="Small"  x:Name="BTxt"></Label>-->
-        <FlexLayout Margin="0,0,0,0">
             
            
             <!--<BoxView HeightRequest="1" Color="#303F9F"></BoxView>-->
-            <ScrollView Orientation="Horizontal" x:Name="MScroll" VerticalOptions="Start" HeightRequest="130" HorizontalScrollBarVisibility="Never" Margin="10,10,10,0">
-                <StackLayout>
-                    <Grid x:Name="Bookmarks" VerticalOptions="Start" HorizontalOptions="Start" HeightRequest="130">
+                 <StackLayout>
+                    <Grid x:Name="Bookmarks" VerticalOptions="Start" HorizontalOptions="Start" >
 
                     </Grid>
                 </StackLayout>
-            </ScrollView>
-
+ 
             <!--   <BoxView HeightRequest="1" Color="#303F9F"></BoxView>-->
            
-        </FlexLayout>
         <!--<BoxView  HeightRequest="3" Color="#303F9F" TranslationY="10"></BoxView>-->
 
         <StackLayout x:Name="Top100Stack">
@@ -196,4 +194,5 @@
        <!-- <BoxView HorizontalOptions="Fill" Color="#4b4b4b"  HeightRequest="2" ></BoxView>-->
 
     </StackLayout>
+    </ScrollView>
 </ContentPage>
