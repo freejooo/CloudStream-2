@@ -160,6 +160,12 @@ namespace CloudStreamForms
         { 
             base.OnAppearing(); 
 
+            /*
+            if(VideoPage.showOnAppear ) {
+                Page p = new VideoPage(VideoPage.showOnAppearPage);
+                Navigation.PushModalAsync(p);
+            }*/
+
             if (Settings.IS_TEST_BUILD) {
                 return;
             }
@@ -432,37 +438,29 @@ namespace CloudStreamForms
 
         public static int ConvertToSortOrder(MovieType movieType)
         {
-            switch (movieType) {
-                case MovieType.Movie:
-                    return 0;
-                case MovieType.TVSeries:
-                    return 2;
-                case MovieType.Anime:
-                    return 3;
-                case MovieType.AnimeMovie:
-                    return 1;
-                case MovieType.YouTube:
-                    return 4;
-                default:
-                    return -1;
-            }
+            return movieType switch
+            {
+                MovieType.Movie => 0,
+                MovieType.TVSeries => 2,
+                MovieType.Anime => 3,
+                MovieType.AnimeMovie => 1,
+                MovieType.YouTube => 4,
+                _ => -1,
+            };
         }
 
 
         public static string GetExtraString(DownloadState state)
         {
-            switch (state) {
-                case App.DownloadState.Downloading:
-                    return "Downloading";
-                case App.DownloadState.Downloaded:
-                    return "Downloaded";
-                case App.DownloadState.NotDownloaded: // CAN HEPPEND IF DOWNLOADED, BUT STOPPED DUE TO INTERNET or NOT DOWNLOADED
-                    return "Stopped";
-                case App.DownloadState.Paused:
-                    return "Paused";
-                default:
-                    return "";
-            }
+            return state switch
+            {
+                App.DownloadState.Downloading => "Downloading",
+                App.DownloadState.Downloaded => "Downloaded",
+                // CAN HEPPEND IF DOWNLOADED, BUT STOPPED DUE TO INTERNET or NOT DOWNLOADED
+                App.DownloadState.NotDownloaded => "Stopped",
+                App.DownloadState.Paused => "Paused",
+                _ => "",
+            };
         }
 
         public class DownloadHeaderHelper
@@ -783,7 +781,7 @@ namespace CloudStreamForms
         {
             string rootPath = App.GetDownloadPath("", "/YouTube");
             if (rootPath.EndsWith("\\")) {
-                rootPath = rootPath.Substring(0, rootPath.Length - 1);
+                rootPath = rootPath[0..^1];
             }
 
             if (!File.Exists(rootPath)) {

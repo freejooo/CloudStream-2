@@ -590,7 +590,7 @@ namespace CloudStreamForms.Droid
 
                 }
 
-                async void ShowDone(bool succ, string? overrideText = null)
+                async void ShowDone(bool succ, string overrideText = null)
                 {
                     print("DAAAAAAAAAASHOW DONE" + succ);
                     if (showDoneNotificaion) {
@@ -985,7 +985,7 @@ namespace CloudStreamForms.Droid
         public static int PublicNot;
 
         protected override void OnCreate(Bundle savedInstanceState)
-        {  
+        {
             print("ON CREATED:::::!!!!!!!!!");
 
             SetTheme(Resource.Style.MainTheme_NonSplash);
@@ -1158,7 +1158,7 @@ namespace CloudStreamForms.Droid
         {
             App.OnAppNotInForground?.Invoke(null, EventArgs.Empty);
             base.OnStop();
-        } 
+        }
 
         /*protected override void OnPause()
         {
@@ -1167,8 +1167,8 @@ namespace CloudStreamForms.Droid
 
         protected override void OnRestart()
         {
-            App.OnAppReopen?.Invoke(null,EventArgs.Empty);
             base.OnRestart();
+            App.OnAppReopen?.Invoke(null, EventArgs.Empty);
         }
 
         /*protected override void OnResume()
@@ -1228,7 +1228,7 @@ namespace CloudStreamForms.Droid
                 if (duration >= 3) {
                     toastLength = ToastLength.Long;
                 }
-                Toast toast = Toast.MakeText(Application.Context, Html.FromHtml("<font color='#ffffff' >" + msg + "</font>"), ToastLength.Short);
+                Toast toast = Toast.MakeText(Application.Context, Html.FromHtml("<font color='#ffffff' >" + msg + "</font>"), toastLength);
                 toast.SetGravity(GravityFlags.CenterHorizontal | GravityFlags.Top, 0, 0);
                 var view = toast.View;
                 //Gets the actual oval background of the Toast then sets the colour filter
@@ -1876,7 +1876,7 @@ namespace CloudStreamForms.Droid
             return utcAlarmTimeInMillis;
         }
 
-        static bool hidden = false;
+        // static bool hidden = false;
         // static int baseShow = 0;
 
         public void UpdateBackground(int color)
@@ -2079,7 +2079,7 @@ namespace CloudStreamForms.Droid
         {
             try {
                 //if (hidden) return;
-                hidden = true;
+                //hidden = true;
 
                 Window window = MainActivity.activity.Window;
                 //  window.AddFlags(WindowManagerFlags.TurnScreenOn);
@@ -2208,9 +2208,6 @@ namespace CloudStreamForms.Droid
             }*/
         }
 
-        static readonly int NOTIFICATION_ID = 1000;
-        static readonly string CHANNEL_ID = "location_notification";
-        internal static readonly string COUNT_KEY = "count";
         public void Test()
         {
             return;
@@ -2412,7 +2409,7 @@ namespace CloudStreamForms.Droid
             if (preferedPlayer == VideoPlayer.None) { App.ShowToast("No videoplayer installed"); };
             try {
                 string absolutePath = Android.OS.Environment.ExternalStorageDirectory + "/" + Android.OS.Environment.DirectoryDownloads;
-                subtitleFull = subtitleFull ?? "";
+                subtitleFull ??= "";
                 bool subtitlesEnabled = subtitleFull != "";
                 string writeData = CloudStreamForms.App.ConvertPathAndNameToM3U8(urls, names, subtitlesEnabled, "content://" + absolutePath + "/");
                 WriteFile(CloudStreamForms.App.baseM3u8Name, absolutePath, writeData);
@@ -2580,24 +2577,19 @@ namespace CloudStreamForms.Droid
                 print("AUDIOFOCUS CHANGED:::: " + focusChange.ToString() + "|" + (int)focusChange);
                 switch (focusChange) {
                     case AudioFocus.GainTransient:
-                        if (FocusChanged != null)
-                            FocusChanged(this, true);
+                        FocusChanged?.Invoke(this, true);
                         break;
                     case AudioFocus.LossTransient:
-                        if (FocusChanged != null)
-                            FocusChanged(this, false);
+                        FocusChanged?.Invoke(this, false);
                         break;
                     case AudioFocus.Loss:
-                        if (FocusChanged != null)
-                            FocusChanged(this, false);
+                        FocusChanged?.Invoke(this, false);
                         break;
                     case AudioFocus.GainTransientExclusive:
-                        if (FocusChanged != null)
-                            FocusChanged(this, true);
+                        FocusChanged?.Invoke(this, true);
                         break;
                     case AudioFocus.Gain:
-                        if (FocusChanged != null)
-                            FocusChanged(this, true);
+                        FocusChanged?.Invoke(this, true);
                         break;
                 }
             }
@@ -2686,35 +2678,34 @@ namespace CloudStreamForms.Droid
                 basePath += "/" + CensorFilename(fileName);
                 CloudStreamCore.print(basePath);
                 //webClient.DownloadFile(url, basePath);
-                using (WebClient wc = new WebClient()) {
-                    wc.DownloadProgressChanged += (o, e) => {
+                using WebClient wc = new WebClient();
+                wc.DownloadProgressChanged += (o, e) => {
 
-                        App.OnDownloadProgressChanged(basePath, e);
+                    App.OnDownloadProgressChanged(basePath, e);
 
-                        /*
-                        if (e.ProgressPercentage == 100) {
-                            App.ShowToast("Download Successful");
-                            //OpenFile(basePath);
-                        }*/
-                        // print(e.ProgressPercentage + "|" + basePath);
-                    };
-                    wc.DownloadFileCompleted += (o, e) => {
-                        if (toast != "") {
-                            if (isNotification) {
-                                App.ShowNotification(toast, body);
-                            }
-                            else {
-                                App.ShowToast(toast);
-                            }
+                    /*
+                    if (e.ProgressPercentage == 100) {
+                        App.ShowToast("Download Successful");
+                        //OpenFile(basePath);
+                    }*/
+                    // print(e.ProgressPercentage + "|" + basePath);
+                };
+                wc.DownloadFileCompleted += (o, e) => {
+                    if (toast != "") {
+                        if (isNotification) {
+                            App.ShowNotification(toast, body);
                         }
-                    };
-                    wc.DownloadFileAsync(
-                        // Param1 = Link of file
-                        new System.Uri(url),
-                        // Param2 = Path to save
-                        basePath
-                    );
-                }
+                        else {
+                            App.ShowToast(toast);
+                        }
+                    }
+                };
+                wc.DownloadFileAsync(
+                    // Param1 = Link of file
+                    new System.Uri(url),
+                    // Param2 = Path to save
+                    basePath
+                );
 
             }
             catch (Exception) {
@@ -2752,7 +2743,6 @@ namespace CloudStreamForms.Droid
         public string GetExternalStoragePath()
         {
             try {
-
                 return Android.OS.Environment.ExternalStorageDirectory.Path;
             }
             catch (Exception _ex) {
@@ -2829,7 +2819,7 @@ namespace CloudStreamForms.Droid
         {
             IList<string> abis = Android.OS.Build.SupportedAbis;
             foreach (var item in abis) { // arm64-v8a armeabi-v7a armeabi x86 x86_64
-                if(item == "arm64-v8a") {
+                if (item == "arm64-v8a") {
                     return (int)App.AndroidVersionArchitecture.arm64_v8a;
                 }
                 else if (item == "armeabi-v7a") {
@@ -2840,7 +2830,7 @@ namespace CloudStreamForms.Droid
                 }
                 else if (item == "x86_64") {
                     return (int)App.AndroidVersionArchitecture.x86_64;
-                } 
+                }
             }
             return 0;
         }

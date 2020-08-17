@@ -2,7 +2,6 @@
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -43,25 +42,21 @@ namespace CloudStreamForms.Core.AnimeProviders
             request.Headers.Add("TE", "Trailers");
 
             try {
-                using (HttpWebResponse response = (HttpWebResponse)request.GetResponse()) {
-                    if (br) {
-                        return "";
+                using HttpWebResponse response = (HttpWebResponse)request.GetResponse();
+                if (br) {
+                    return "";
+                }
+                else {
+                    print(response.ResponseUri);
+                    using Stream stream = response.GetResponseStream();
+                    // print("res" + response.StatusCode);
+                    foreach (string e in response.Headers) {
+                        // print("Head: " + e);
                     }
-                    else {
-                        print(response.ResponseUri);
-                        using (Stream stream = response.GetResponseStream()) {
-                            // print("res" + response.StatusCode);
-                            foreach (string e in response.Headers) {
-                                // print("Head: " + e);
-                            }
-                            // print("LINK:" + response.GetResponseHeader("Set-Cookie"));
-                            using (StreamReader reader = new StreamReader(stream, Encoding.UTF8)) {
-
-                                string result = reader.ReadToEnd();
-                                return result;
-                            }
-                        }
-                    }
+                    // print("LINK:" + response.GetResponseHeader("Set-Cookie"));
+                    using StreamReader reader = new StreamReader(stream, Encoding.UTF8);
+                    string result = reader.ReadToEnd();
+                    return result;
                 }
             }
             catch (Exception) {
@@ -71,14 +66,14 @@ namespace CloudStreamForms.Core.AnimeProviders
 
         static string FetchMoeUrlFromSalted(string _salted)
         {
-            byte[] CreateMD5Byte(byte[] input)
+            static byte[] CreateMD5Byte(byte[] input)
             {
-                using (System.Security.Cryptography.MD5 md5 = System.Security.Cryptography.MD5.Create()) {
-                    byte[] hashBytes = md5.ComputeHash(input);
-                    return hashBytes;
-                }
+                using System.Security.Cryptography.MD5 md5 = System.Security.Cryptography.MD5.Create();
+                byte[] hashBytes = md5.ComputeHash(input);
+                return hashBytes;
             }
-            string DecryptStringFromBytes_Aes(byte[] cipherText, byte[] Key, byte[] IV)
+
+            static string DecryptStringFromBytes_Aes(byte[] cipherText, byte[] Key, byte[] IV)
             {
                 if (cipherText == null || cipherText.Length <= 0)
                     throw new ArgumentNullException("cipherText");
@@ -93,23 +88,22 @@ namespace CloudStreamForms.Core.AnimeProviders
                     aesAlg.Mode = CipherMode.CBC;
                     aesAlg.Padding = PaddingMode.PKCS7;
                     ICryptoTransform decryptor = aesAlg.CreateDecryptor(aesAlg.Key, aesAlg.IV);
-                    using (MemoryStream msDecrypt = new MemoryStream(cipherText)) {
-                        using (CryptoStream csDecrypt = new CryptoStream(msDecrypt, decryptor, CryptoStreamMode.Read)) {
-                            using (StreamReader srDecrypt = new StreamReader(csDecrypt, Encoding.UTF8)) {
-                                plaintext = srDecrypt.ReadToEnd();
-                            }
-                        }
-                    }
+                    using MemoryStream msDecrypt = new MemoryStream(cipherText);
+                    using CryptoStream csDecrypt = new CryptoStream(msDecrypt, decryptor, CryptoStreamMode.Read);
+                    using StreamReader srDecrypt = new StreamReader(csDecrypt, Encoding.UTF8);
+                    plaintext = srDecrypt.ReadToEnd();
                 }
                 return plaintext;
             }
-            byte[] SubArray(byte[] data, int index, int length)
+
+            static byte[] SubArray(byte[] data, int index, int length)
             {
                 byte[] result = new byte[length];
                 Array.Copy(data, index, result, 0, length);
                 return result;
             }
-            byte[] Combine(params byte[][] arrays)
+
+            static byte[] Combine(params byte[][] arrays)
             {
                 byte[] rv = new byte[arrays.Sum(a => a.Length)];
                 int offset = 0;
@@ -119,7 +113,8 @@ namespace CloudStreamForms.Core.AnimeProviders
                 }
                 return rv;
             }
-            byte[] bytes_to_key(byte[] data, byte[] _salt, int output = 48)
+
+            static byte[] bytes_to_key(byte[] data, byte[] _salt, int output = 48)
             {
                 data = Combine(data, _salt);
                 byte[] _key = CreateMD5Byte(data);
@@ -207,7 +202,6 @@ namespace CloudStreamForms.Core.AnimeProviders
                 string token = "";
                 string token2 = "";
                 tokenCook = "";
-                string exit = "";
                 //code = code.Replace("String.fromCharCode", "tocharf");
 
                 var engine = new Engine();

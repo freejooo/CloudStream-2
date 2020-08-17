@@ -41,7 +41,7 @@ namespace CloudStreamForms
                     if (e.OldTextValue.IsClean()) {
                         if (e.OldTextValue.Contains(",") || e.OldTextValue.Contains(".")) { // REMOVE DUPLICATES
                             if (e.NewTextValue.EndsWith(",") || e.NewTextValue.EndsWith(".")) {
-                                entry.Text = entry.Text.Substring(0, entry.Text.Length - 1);
+                                entry.Text = entry.Text[0..^1];
                             }
                         }
                     }

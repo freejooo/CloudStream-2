@@ -1181,27 +1181,26 @@ namespace CloudStreamForms
                         HttpWebRequest request = webRequest;
                         HttpWebResponse response = (HttpWebResponse)webRequest.GetResponse();
 
-                        using (StreamReader httpWebStreamReader = new StreamReader(response.GetResponseStream())) {
-                            try {
-                                string s = httpWebStreamReader.ReadToEnd();
-                                if (s.StartsWith("OKDATA")) {
-                                    result = LoginErrorType.Ok;
-                                    if (logintype == Logintype.LoginAccount) {
-                                        string _s = s.Split('\n')[1];
-                                        return StringCipher.Decrypt(_s, password); // THE DATA IS OKDATA\nUSERDATA 
-                                    }
-                                    else {
-                                        return "";
-                                    }
+                        using StreamReader httpWebStreamReader = new StreamReader(response.GetResponseStream());
+                        try {
+                            string s = httpWebStreamReader.ReadToEnd();
+                            if (s.StartsWith("OKDATA")) {
+                                result = LoginErrorType.Ok;
+                                if (logintype == Logintype.LoginAccount) {
+                                    string _s = s.Split('\n')[1];
+                                    return StringCipher.Decrypt(_s, password); // THE DATA IS OKDATA\nUSERDATA 
                                 }
                                 else {
-                                    result = (LoginErrorType)int.Parse(CloudStreamCore.FindHTML(s, "ERRORCODE[", "]"));
                                     return "";
                                 }
                             }
-                            catch (Exception) {
+                            else {
+                                result = (LoginErrorType)int.Parse(CloudStreamCore.FindHTML(s, "ERRORCODE[", "]"));
                                 return "";
                             }
+                        }
+                        catch (Exception) {
+                            return "";
                         }
 
                     }

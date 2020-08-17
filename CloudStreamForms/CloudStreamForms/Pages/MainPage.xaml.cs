@@ -190,6 +190,7 @@ namespace CloudStreamForms
                 Children[i].IconImageSource = baseIcons[i];
             }
             On<Xamarin.Forms.PlatformConfiguration.Android>().SetToolbarPlacement(ToolbarPlacement.Bottom);
+            LateCheck();
 
             /*
             if (Settings.IS_TEST_BUILD) {
@@ -198,7 +199,6 @@ namespace CloudStreamForms
             try {
                 OnIconStart(0);
 
-                LateCheck();
                 int oldPage = 0;
                 CurrentPageChanged += (o, e) => {
                     try {
@@ -243,8 +243,7 @@ namespace CloudStreamForms
             }
             catch (Exception _ex) {
                 error("ERROR IN LATECHECK::: " + _ex);
-            }
-
+            } 
         }
 
         public static void PushPageFromUrlAndName(string url, string name)

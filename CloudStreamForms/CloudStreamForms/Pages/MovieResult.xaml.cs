@@ -53,7 +53,7 @@ namespace CloudStreamForms
         bool isMovie = false;
         Movie currentMovie { get { return core.activeMovie; } }
         bool isDub = true;
-        bool RunningWindows { get { return Xamarin.Essentials.DeviceInfo.Platform == DevicePlatform.UWP; } }
+       // bool RunningWindows { get { return Xamarin.Essentials.DeviceInfo.Platform == DevicePlatform.UWP; } }
         string CurrentMalLink {
             get {
 
@@ -387,6 +387,7 @@ namespace CloudStreamForms
             return GetImageSource("gradient" + Settings.BlackColor + ".png");//BlackBg ? "gradient.png" : "gradientGray.png");
         }
 
+        /*
         async void FadeAppear()
         {
             NormalStack.Opacity = 0;
@@ -394,7 +395,7 @@ namespace CloudStreamForms
             await Task.Delay(100);
             NormalStack.FadeTo(1);
             NormalStack.ScaleTo(1);
-        }
+        }*/
 
         public MovieResult()
         {
@@ -646,6 +647,8 @@ namespace CloudStreamForms
 
         bool hasSkipedLoading = false;
 
+        // NOTIFICATIONS
+        /*
         void CancelNotifications()
         {
             if (core == null) return;
@@ -686,7 +689,7 @@ namespace CloudStreamForms
             else {
                 CancelNotifications();
             }
-        }
+        }*/
 
         void UpdateNotification(bool? overrideNot = null)
         {
@@ -699,7 +702,7 @@ namespace CloudStreamForms
             NotificationTime.TextColor = hasNot ? Color.FromHex(DARK_BLUE_COLOR) : Color.Gray;*/
         }
 
-        List<MoeEpisode> setNotificationsTimes = new List<MoeEpisode>();
+       // List<MoeEpisode> setNotificationsTimes = new List<MoeEpisode>();
 
         private void MovieResult_moeDone(object sender, List<MoeEpisode> e)
         {
@@ -1110,7 +1113,7 @@ namespace CloudStreamForms
             RatingLabel.Opacity = 0;
             RatingLabelRating.Opacity = 0;
             SeasonBtt.Opacity = 0;
-            Rectangle bounds = DescriptionLabel.Bounds;
+            //Rectangle bounds = DescriptionLabel.Bounds;
             // DescriptionLabel.LayoutTo(new Rectangle(bounds.X, bounds.Y, bounds.Width, 0), FATE_TIME_MS);
             await RatingLabelRating.FadeTo(1, FATE_TIME_MS);
             ReviewLabel.FadeTo(1, FATE_TIME_MS);
@@ -1343,8 +1346,9 @@ namespace CloudStreamForms
                     source.Add(f);
                 }
 
-                FromToPicker = new LabelList(FromToBtt, source, "Select Episode");//.IsVisible = FromToPicker.ItemsSource.Count > 1;                
-                FromToPicker.SelectedIndex = 0;//.IsVisible = FromToPicker.ItemsSource.Count > 1;           
+                FromToPicker = new LabelList(FromToBtt, source, "Select Episode") {
+                    SelectedIndex = 0//.IsVisible = FromToPicker.ItemsSource.Count > 1;           
+                };//.IsVisible = FromToPicker.ItemsSource.Count > 1;                
                 FromToPicker.IsVisible = FromToPicker.ItemsSource.Count > 1;
                 FromToPicker.button.IsEnabled = FromToPicker.ItemsSource.Count > 1;
                 FromToPicker.SelectedIndexChanged += (o, e) => {
@@ -2245,16 +2249,13 @@ namespace CloudStreamForms
             System.Timers.Timer timer = new System.Timers.Timer(10);
             ProgressBar GetBar(int _state)
             {
-                switch (_state) {
-                    case 0:
-                        return EPISODESBar;
-                    case 1:
-                        return RECOMMENDATIONSBar;
-                    case 2:
-                        return TRAILERSBar;
-                    default:
-                        return null;
-                }
+                return _state switch
+                {
+                    0 => EPISODESBar,
+                    1 => RECOMMENDATIONSBar,
+                    2 => TRAILERSBar,
+                    _ => null,
+                };
             }
             GetBar(prevState).ScaleXTo(0, 70, Easing.Linear);
             GetBar(state).ScaleXTo(1, 70, Easing.Linear);

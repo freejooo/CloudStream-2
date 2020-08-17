@@ -1,6 +1,7 @@
 ﻿using CloudStreamForms.Core;
 using FFImageLoading;
 using LibVLCSharp.Shared;
+using Rg.Plugins.Popup.Extensions;
 using SubtitlesParser.Classes;
 using SubtitlesParser.Classes.Parsers;
 using System;
@@ -128,8 +129,7 @@ namespace CloudStreamForms
         public static int currentMirrorId = 0;
         //public static int currentSubtitlesId = -2; // -2 = null, -1 = none, 0 = def
         public static PlayVideo currentVideo;
-
-        const string NONE_SUBTITLES = "None";
+         
         const string ADD_BEFORE_EPISODE = "\"";
         const string ADD_AFTER_EPISODE = "\"";
 
@@ -381,9 +381,10 @@ namespace CloudStreamForms
                     if (data.IsClean()) {
                         if (!ContainsLang()) {
                             lock (subtitleMutex) {
-                                VideoSubtitle s = new VideoSubtitle();
-                                s.name = name;
-                                s.subtitles = MainChrome.ParseSubtitles(data).ToArray();
+                                VideoSubtitle s = new VideoSubtitle {
+                                    name = name,
+                                    subtitles = MainChrome.ParseSubtitles(data).ToArray()
+                                };
                                 currentSubtitles.Add(s);
                             }
                             App.ShowToast(name + " subtitles added");
@@ -721,7 +722,7 @@ namespace CloudStreamForms
         List<SkipMetadata> skips = new List<SkipMetadata>();
 
         Func<Task> NextEpisodeClicked;
-
+        static PlayVideo lastVideo;
 
         /// <summary>
         /// Subtitles are in full
@@ -731,11 +732,11 @@ namespace CloudStreamForms
         /// <param name="subtitles"></param>
         public VideoPage(PlayVideo video, int _maxEpisodes = 1)
         {
+            lastVideo = (PlayVideo)video.Clone();
             if (!canStart) {
                 return;
             }
             canStart = false;
-
 
             print("DADAD LOADED VIDEO A");
             isShown = true;
@@ -762,6 +763,17 @@ namespace CloudStreamForms
             Mirrors = Mirrors.OrderBy(t => -t.priority).ToList();
 
             InitializeComponent();
+            overLay.SizeChanged += async (o, e) => {
+                /*
+                if (!VideoPage.showOnAppear) return;
+
+                await Task.Delay(10000);
+               await Navigation.PopModalAsync(false);
+                await Task.Delay(10000);
+                Page p = new VideoPage(VideoPage.showOnAppearPage);
+                await Navigation.PushModalAsync(p);
+                print("SIZE: ");*/
+            };
 
             int skip = Settings.VideoPlayerSkipTime;
             SkipTime = skip * 1000;
@@ -1029,8 +1041,6 @@ namespace CloudStreamForms
                 }
             }));
 
-
-
             // ======================= SETUP ======================= 
             if (_libVLC == null) {
                 _libVLC = new LibVLC();
@@ -1294,17 +1304,16 @@ namespace CloudStreamForms
 
         // =========================================================================== APP OPEN/CLOSE ===========================================================================
 
+
+        public static PlayVideo showOnAppearPage;
+        public static bool showOnAppear = false;
         public async void ForceReloadVideo()
         {
-            return;
-
-            var video = (PlayVideo)currentVideo.Clone();
-            video.preferedMirror = currentMirrorId;
-
-            await Navigation.PopModalAsync(false);
-
-            Page p = new VideoPage(video);
-            await ((MainPage)CloudStreamCore.mainPage).Navigation.PushModalAsync(p, true);
+            Device.InvokeOnMainThreadAsync(async () => { 
+                await Navigation.PopModalAsync();
+                await Task.Delay(10000);
+                await Navigation.PushModalAsync(new VideoPage(lastVideo), true);
+            });
         }
 
         public void HandleAppExit()

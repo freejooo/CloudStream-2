@@ -44,41 +44,38 @@ namespace CloudStreamForms.Core
             var thread = CloudStreamCore.mainCore.CreateThread(77);
             mainCore.StartThread("SubThread", () => {
                 try {
-                    using (var listener = new HttpListener()) {
-                        listener.Prefixes.Add(url);
+                    using var listener = new HttpListener();
+                    listener.Prefixes.Add(url);
 
-                        listener.Start();
+                    listener.Start();
 
-                        while (true) {
-                            if (!mainCore.GetThredActive(thread)) {
-                                print("ABORT!!!!!!!!!!!!");
-                                return;
-                            }
-                            print("Listening...");
-
-                            HttpListenerContext context = listener.GetContext();
-                            HttpListenerRequest request = context.Request;
-
-                            using (HttpListenerResponse response = context.Response) {
-                                response.ContentType = "text/vtt";
-                                response.StatusCode = 200;
-                                response.AppendHeader("access-control-expose-headers", "Content-Length, Date, Server, Transfer-Encoding, X-GUploader-UploadID, X-Google-Trace, origin, range");
-                                response.AppendHeader("access-control-allow-origin", "*");
-                                response.AppendHeader("accept-ranges", "bytes");
-                                if (request.HttpMethod == "OPTIONS") {
-                                    response.AddHeader("Access-Control-Allow-Headers", "Content-Type, Accept, X-Requested-With");
-                                    response.AddHeader("Access-Control-Allow-Methods", "GET, POST");
-                                    response.AddHeader("Access-Control-Max-Age", "1728000");
-                                }
-
-                                string responseString = SubData;
-                                byte[] buffer = System.Text.Encoding.UTF8.GetBytes(responseString);
-                                response.ContentLength64 = buffer.Length;
-                                using (var output = response.OutputStream) {
-                                    output.Write(buffer, 0, buffer.Length);
-                                }
-                            }
+                    while (true) {
+                        if (!mainCore.GetThredActive(thread)) {
+                            print("ABORT!!!!!!!!!!!!");
+                            return;
                         }
+                        print("Listening...");
+
+                        HttpListenerContext context = listener.GetContext();
+                        HttpListenerRequest request = context.Request;
+
+                        using HttpListenerResponse response = context.Response;
+                        response.ContentType = "text/vtt";
+                        response.StatusCode = 200;
+                        response.AppendHeader("access-control-expose-headers", "Content-Length, Date, Server, Transfer-Encoding, X-GUploader-UploadID, X-Google-Trace, origin, range");
+                        response.AppendHeader("access-control-allow-origin", "*");
+                        response.AppendHeader("accept-ranges", "bytes");
+                        if (request.HttpMethod == "OPTIONS") {
+                            response.AddHeader("Access-Control-Allow-Headers", "Content-Type, Accept, X-Requested-With");
+                            response.AddHeader("Access-Control-Allow-Methods", "GET, POST");
+                            response.AddHeader("Access-Control-Max-Age", "1728000");
+                        }
+
+                        string responseString = SubData;
+                        byte[] buffer = System.Text.Encoding.UTF8.GetBytes(responseString);
+                        response.ContentLength64 = buffer.Length;
+                        using var output = response.OutputStream;
+                        output.Write(buffer, 0, buffer.Length);
                     }
                 }
                 catch (Exception _ex) {
@@ -545,42 +542,41 @@ namespace CloudStreamForms.Core
             var thread = CloudStreamCore.mainCore.CreateThread(76);
             mainCore.StartThread("VideoThread", () => {
                 try {
-                    using (var listener = new HttpListener()) {
-                        listener.Prefixes.Add(url);
+                    using var listener = new HttpListener();
+                    listener.Prefixes.Add(url);
 
-                        listener.Start();
-                        // Task.Factory.StartNew(() =>
-                        // {
-                        while (true) {
-                            try {
+                    listener.Start();
+                    // Task.Factory.StartNew(() =>
+                    // {
+                    while (true) {
+                        try {
 
-                                HttpListenerContext context = listener.GetContext();
-                                Task.Factory.StartNew((ctx) => {
-                                    ListWriteFile((HttpListenerContext)ctx, videoStreamPath);
-                                }, context, TaskCreationOptions.LongRunning);
+                            HttpListenerContext context = listener.GetContext();
+                            Task.Factory.StartNew((ctx) => {
+                                ListWriteFile((HttpListenerContext)ctx, videoStreamPath);
+                            }, context, TaskCreationOptions.LongRunning);
 
-                            }
-                            catch (Exception _ex) {
-                                error(_ex);
-                            }
                         }
-                        // }, TaskCreationOptions.LongRunning);
+                        catch (Exception _ex) {
+                            error(_ex);
+                        }
+                    }
+                    // }, TaskCreationOptions.LongRunning);
+
+                    /*
+                    while (true) {
+                        if (!mainCore.GetThredActive(thread)) {
+                            print("ABORT!!!!!!!!!!!!");
+                            return;
+                        }
+                        print("Listening VIDEO...");
+
+
 
                         /*
-                        while (true) {
-                            if (!mainCore.GetThredActive(thread)) {
-                                print("ABORT!!!!!!!!!!!!");
-                                return;
-                            }
-                            print("Listening VIDEO...");
-
-                        
-
-                            /*
-                            var result = listener.BeginGetContext(ListenerCallback, listener);
-                            result.AsyncWaitHandle.WaitOne(); 
-                        }*/
-                    }
+                        var result = listener.BeginGetContext(ListenerCallback, listener);
+                        result.AsyncWaitHandle.WaitOne(); 
+                    }*/
                 }
                 catch (Exception _ex) {
                     print("MAMAMMAMAMMAMAMMAMA: " + _ex);

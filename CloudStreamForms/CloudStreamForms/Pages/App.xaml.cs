@@ -847,9 +847,8 @@ namespace CloudStreamForms
         public static T FromByteArray<T>(byte[] rawValue)
         {
             BinaryFormatter bf = new BinaryFormatter();
-            using (MemoryStream ms = new MemoryStream(rawValue)) {
-                return (T)bf.Deserialize(ms);
-            }
+            using MemoryStream ms = new MemoryStream(rawValue);
+            return (T)bf.Deserialize(ms);
         }
 
         public static string ConvertToString(object o)
@@ -862,10 +861,9 @@ namespace CloudStreamForms
             if (obj == null)
                 return null;
             BinaryFormatter bf = new BinaryFormatter();
-            using (MemoryStream ms = new MemoryStream()) {
-                bf.Serialize(ms, obj);
-                return ms.ToArray();
-            }
+            using MemoryStream ms = new MemoryStream();
+            bf.Serialize(ms, obj);
+            return ms.ToArray();
         }
 
 
