@@ -156,7 +156,9 @@ namespace CloudStreamForms
 
         public MainPage()
         {
-            InitializeComponent(); 
+            InitializeComponent();
+
+            
 
             mainPage = this; CloudStreamCore.mainPage = mainPage;
 

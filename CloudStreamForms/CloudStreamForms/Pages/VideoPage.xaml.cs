@@ -95,8 +95,9 @@ namespace CloudStreamForms
         /// </summary>
         /// 
         [System.Serializable]
-        public struct PlayVideo
+        public struct PlayVideo : ICloneable
         {
+            public int preferedMirror;
             public List<string> MirrorUrls;
             public List<string> MirrorNames;
             public bool isDownloadFile;
@@ -113,6 +114,11 @@ namespace CloudStreamForms
             public long startPos; // -2 from progress, -1 = from start
             public string episodeId;
             public string headerId;
+
+            public object Clone()
+            {
+                return this.MemberwiseClone();
+            }
         }
 
         /// <summary>
@@ -185,6 +191,9 @@ namespace CloudStreamForms
         public void SelectMirror(int mirror)
         {
             if (!isShown) return;
+            if (AllMirrorsUrls.Count <= mirror || mirror < 0) { // VALIDATE INPUT
+                mirror = 0;
+            }
 
             isPausable = false;
             isSeekeble = false;
@@ -192,7 +201,7 @@ namespace CloudStreamForms
             List<string> options = new List<string>();
             long pos;
             bool startTimeSet = false;
-            if (isFirstLoadedMirror) {
+            if (isFirstLoadedMirror) { // THIS IS TO MAKE IT USE DURATION KEY OVER LAST PLAYER POS
                 if ((pos = App.GetViewPos(currentVideo.episodeId ?? "")) != -1) {
                     long duration = App.GetViewDur(currentVideo.episodeId ?? "");
                     var pro = ((double)pos / (double)duration);
@@ -205,13 +214,11 @@ namespace CloudStreamForms
 
             if (currentVideo.isDownloadFile) {
                 EpisodeLabel.Text = CurrentDisplayName;
-                //  System.IO.File.Open(currentVideo.downloadFileUrl, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite);
-
-                disMedia = new Media(_libVLC, currentVideo.downloadFileUrl, FromType.FromPath, options.ToArray());//new Uri(currentVideo.downloadFileUrl, UriKind.Absolute)); // currentVideo.downloadFileUrl, FromType.FromPath,);
-                                                                                                                  // disMedia.AddOption(new MediaConfiguration() { })
+                disMedia = new Media(_libVLC, currentVideo.downloadFileUrl, FromType.FromPath, options.ToArray());
                 bool succ = vvideo.MediaPlayer.Play(disMedia);
                 return;
             }
+
             if (lastUrl == AllMirrorsUrls[mirror]) return;
 
             currentMirrorId = mirror;
@@ -224,13 +231,10 @@ namespace CloudStreamForms
             else {
                 Device.BeginInvokeOnMainThread(() => {
                     try {
-
                         EpisodeLabel.Text = CurrentDisplayName;
                         App.ToggleRealFullScreen(true);
                     }
-                    catch (Exception) {
-
-                    }
+                    catch (Exception) { }
                 });
 
                 bool Completed = ExecuteWithTimeLimit(TimeSpan.FromMilliseconds(1000), () => {
@@ -1037,6 +1041,13 @@ namespace CloudStreamForms
 
             vvideo.MediaPlayer = _mediaPlayer; // = new VideoView() { MediaPlayer = _mediaPlayer };
 
+            App.OnAppNotInForground += (o, e) => {
+                HandleAppExit();
+            };
+            App.OnAppReopen += (o, e) => {
+                HandleAppReopen();
+            };
+
             // ========== IMGS ==========
             // SubtitlesImg.Source = App.GetImageSource("netflixSubtitlesCut.png"); //App.GetImageSource("baseline_subtitles_white_48dp.png");
             //MirrosImg.Source = App.GetImageSource("baseline_playlist_play_white_48dp.png");
@@ -1230,7 +1241,9 @@ namespace CloudStreamForms
                 print("ERROR LOADING MDDD: ");
                 ErrorWhenLoading();
             };
-            SelectMirror(0);
+
+
+            SelectMirror(currentVideo.preferedMirror);
             ShowNextMirror();
 
 
@@ -1279,6 +1292,39 @@ namespace CloudStreamForms
             SelectMirror(_currentMirrorId);
         }
 
+        // =========================================================================== APP OPEN/CLOSE ===========================================================================
+
+        public async void ForceReloadVideo()
+        {
+            return;
+
+            var video = (PlayVideo)currentVideo.Clone();
+            video.preferedMirror = currentMirrorId;
+
+            await Navigation.PopModalAsync(false);
+
+            Page p = new VideoPage(video);
+            await ((MainPage)CloudStreamCore.mainPage).Navigation.PushModalAsync(p, true);
+        }
+
+        public void HandleAppExit()
+        {
+            //  ForceReloadOnAppOpen = true;
+        }
+
+        public void HandleAppReopen()
+        {
+            //   if(ForceReloadOnAppOpen) {
+            ForceReloadVideo();
+            //       ForceReloadOnAppOpen = false;
+            //  }
+        }
+
+
+        public bool ForceReloadOnAppOpen = false;
+
+        // ======================================================================================================================================================================
+
         protected override void OnAppearing()
         {
             base.OnAppearing();
@@ -1300,43 +1346,6 @@ namespace CloudStreamForms
             Hide();
             App.LandscapeOrientation();
             App.ToggleRealFullScreen(true);
-            /*
-            TapRec. += (o, e) => {
-                print("CHANGED:::<<<<<<<<<<<<:");
-                if (visible) {
-                    VideoSettings.FadeTo(0);
-                }
-                else {
-                    VideoSettings.FadeTo(1);
-                }
-                visible = !visible;*/
-            /*
-            StringBuilder sb = new StringBuilder("");
-
-            //print($" { e.NumberOfTaps} times with {e.NumberOfTouches} fingers.");
-            print($" ViewPosition: {e.ViewPosition.X}/{ e.ViewPosition.Y}/{e.ViewPosition.Width}/{ e.ViewPosition.Height}, Touches: ");
-            if (e.Touches != null && e.Touches.Length > 0)
-                print(String.Join(", ", e.Touches.Select(t => t.X + "/" + t.Y)));
-
-            print("DADAAAAAAAAAAAAAAAAAAAAAAAAADDDGGGGGGGGGGG" + (e.ViewPosition.X < e.ViewPosition.Width / 2.0));
-            print(e.Touches.Length);*/
-            /*};
-            TapRec.DoubleTapped += (o, e) => {
-                var d = e;
-                throw new Exception();
-            };*/
-            /*
-            print("CHADHSHAHDSANN:" + e.GestureId);
-            if (e.GestureId == (int)GestureStatus.Started) {
-                print("CHANGED:::<<<<<<<<<<<<:");
-                if (visible) {
-                    VideoSettings.FadeTo(0);
-                }
-                else {
-                    VideoSettings.FadeTo(1);
-                }
-                visible = !visible;
-            }*/
         }
 
         public static bool isShown = false;

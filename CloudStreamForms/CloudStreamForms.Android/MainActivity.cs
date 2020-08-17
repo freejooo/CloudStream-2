@@ -1158,7 +1158,23 @@ namespace CloudStreamForms.Droid
         {
             App.OnAppNotInForground?.Invoke(null, EventArgs.Empty);
             base.OnStop();
+        } 
+
+        /*protected override void OnPause()
+        {
+            base.OnPause();
+        }*/
+
+        protected override void OnRestart()
+        {
+            App.OnAppReopen?.Invoke(null,EventArgs.Empty);
+            base.OnRestart();
         }
+
+        /*protected override void OnResume()
+        {
+            base.OnResume();
+        }*/
 
 
         public override void OnRequestPermissionsResult(int requestCode, string[] permissions, [GeneratedEnum] Android.Content.PM.Permission[] grantResults)

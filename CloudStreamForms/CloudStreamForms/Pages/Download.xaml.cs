@@ -152,17 +152,14 @@ namespace CloudStreamForms
             }
         }
         protected override void OnDisappearing()
-        {
-            // OnIconEnd(2);
+        { 
             base.OnDisappearing();
         }
 
-
         protected override void OnAppearing()
-        {
-            //OnIconStart(2);
+        { 
+            base.OnAppearing(); 
 
-            base.OnAppearing();
             if (Settings.IS_TEST_BUILD) {
                 return;
             }

@@ -64,8 +64,9 @@ namespace CloudStreamForms
         }
 
         public static EventHandler OnAppNotInForground;
-        public static EventHandler OnAppKilled;
-
+        public static EventHandler OnAppKilled; 
+        public static EventHandler OnAppReopen;
+         
         public interface IPlatformDep
         {
             void ToggleRealFullScreen(bool fullscreen);
@@ -570,15 +571,15 @@ namespace CloudStreamForms
             arm64_v8a = 1,
             armeabi_v7a = 2,
             x86 = 3,
-            x86_64 = 4, 
+            x86_64 = 4,
         }
 
         static string GetVersionBuildName(AndroidVersionArchitecture version)
         {
-            if(version == AndroidVersionArchitecture.Universal) {
+            if (version == AndroidVersionArchitecture.Universal) {
                 return "";
             }
-            return version.ToString().Replace("_","-") + "-";
+            return version.ToString().Replace("_", "-") + "-";
         }
 
         public static string GetVersionPublicName(AndroidVersionArchitecture version)
@@ -945,7 +946,7 @@ namespace CloudStreamForms
             CloudStreamCore.print("Trying to open: " + url);
             if (CloudStreamCore.CheckIfURLIsValid(url)) {
                 try {
-                  await  Launcher.OpenAsync(new Uri(url));
+                    await Launcher.OpenAsync(new Uri(url));
                 }
                 catch (Exception _ex) {
                     CloudStreamCore.print("BROWSER LOADED ERROR, SHOULD NEVER HAPPEND!!" + _ex);
