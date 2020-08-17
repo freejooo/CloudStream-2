@@ -369,8 +369,7 @@ namespace CloudStreamForms.Droid
     public class AlertReceiver : BroadcastReceiver
     {
         public override void OnReceive(Context context, Intent intent)
-        {
-            ToastLength toastLength = ToastLength.Short;
+        { 
             LocalNot localNot = new LocalNot();
             foreach (var prop in typeof(LocalNot).GetFields()) {
                 if (prop.FieldType == typeof(string)) {
@@ -391,20 +390,7 @@ namespace CloudStreamForms.Droid
             }
 
             //  Toast.MakeText(Android.App.Application.Context, "da:" + localNot.title, toastLength).Show();
-            ShowLocalNot(localNot);
-
-            /*
-            try {
-              //  print("GOT DATATATA::::::::::::::::::::::::::::::::::::.!!");
-                string data = intent.GetStringExtra("data");
-                var not = App.ConvertToObject<LocalNot>(data, null);
-                if (not != null) {
-                    MainDroid.ShowLocalNot(not);
-                }
-            }
-            catch (Exception) {
-
-            }*/
+            ShowLocalNot(localNot); 
         }
     }
 
@@ -413,7 +399,7 @@ namespace CloudStreamForms.Droid
     public static class DownloadHandle
     {
 
-        static Dictionary<int, long> progressDownloads = new Dictionary<int, long>();
+        readonly static Dictionary<int, long> progressDownloads = new Dictionary<int, long>();
         const string DOWNLOAD_KEY = "DownloadProgress";
         const string DOWNLOAD_KEY_INTENT = "DownloadProgressIntent";
 
@@ -478,8 +464,8 @@ namespace CloudStreamForms.Droid
             }
         }
 
-        static Dictionary<int, OutputStream> outputStreams = new Dictionary<int, OutputStream>();
-        static Dictionary<int, InputStream> inputStreams = new Dictionary<int, InputStream>();
+        readonly static Dictionary<int, OutputStream> outputStreams = new Dictionary<int, OutputStream>();
+        readonly static Dictionary<int, InputStream> inputStreams = new Dictionary<int, InputStream>();
         public static List<int> activeIds = new List<int>();
         /// <summary>
         /// 0 = download, 1 = Pause, 2 = remove
@@ -590,7 +576,7 @@ namespace CloudStreamForms.Droid
 
                 }
 
-                async void ShowDone(bool succ, string overrideText = null)
+                void ShowDone(bool succ, string overrideText = null)
                 {
                     print("DAAAAAAAAAASHOW DONE" + succ);
                     if (showDoneNotificaion) {
@@ -1027,7 +1013,7 @@ namespace CloudStreamForms.Droid
             trustEveryone();
             LoadApplication(new App());
             if (Settings.IS_TEST_BUILD) {
-                platformDep = new NullPlatfrom();
+                PlatformDep = new NullPlatfrom();
                 return;
             }
             try {
@@ -1243,7 +1229,7 @@ namespace CloudStreamForms.Droid
         , IBluetoothProfileServiceListener
     {
         public BluetoothHeadset btHeadset;
-        public void Dispose()
+        public void TryToDispose()
         {
             print("TRYIGNT O DISPOSE");
             //  throw new NotImplementedException();
@@ -1315,18 +1301,19 @@ namespace CloudStreamForms.Droid
         /**
   * The audio latency has not been estimated yet
   */
-        private static long AUDIO_LATENCY_NOT_ESTIMATED = long.MinValue + 1;
+        private const long AUDIO_LATENCY_NOT_ESTIMATED = long.MinValue + 1;
 
         /**
          * The audio latency default value if we cannot estimate it
          */
-        private static long DEFAULT_AUDIO_LATENCY = 100L * 1000L * 1000L; // 100ms
+        private const long DEFAULT_AUDIO_LATENCY = 100L * 1000L * 1000L; // 100ms
 
-        private static long _framesToNanoSeconds(long frames)
+        private static long FramesToNanoSeconds(long frames)
         {
             return frames * 1000000000L / 16000;
         }
-        private static long nanoTime()
+
+        private static long NanoTime()
         {
             long nano = 10000L * Stopwatch.GetTimestamp();
             nano /= TimeSpan.TicksPerMillisecond;
@@ -1335,7 +1322,7 @@ namespace CloudStreamForms.Droid
         }
 
         // Source: https://stackoverflow.com/a/52559996/497368
-        private long getDelay()
+        private long GetDelay()
         {
             long estimatedAudioLatency = AUDIO_LATENCY_NOT_ESTIMATED;
             long audioFramesWritten = 0;
@@ -1353,11 +1340,11 @@ namespace CloudStreamForms.Droid
                     long frameIndexDelta = audioFramesWritten - audioTimestamp.FramePosition;
 
                     // Calculate the time which the next frame will be presented
-                    long frameTimeDelta = _framesToNanoSeconds(frameIndexDelta);
+                    long frameTimeDelta = FramesToNanoSeconds(frameIndexDelta);
                     long nextFramePresentationTime = audioTimestamp.NanoTime + frameTimeDelta;
 
                     // Assume that the next frame will be written at the current time
-                    long nextFrameWriteTime = nanoTime();
+                    long nextFrameWriteTime = NanoTime();
 
                     // Calculate the latency
                     estimatedAudioLatency = nextFramePresentationTime - nextFrameWriteTime;
@@ -1513,7 +1500,7 @@ namespace CloudStreamForms.Droid
 
 
 
-        public async void ShowNotIntentAsync(string title, string body, int id, string titleId, string titleName, DateTime? time = null, string bigIconUrl = "")
+        public void ShowNotIntentAsync(string title, string body, int id, string titleId, string titleName, DateTime? time = null, string bigIconUrl = "")
         {
 
             var localNot = new LocalNot() { title = title, body = body, id = id, data = titleId == "-1" ? ("cloudstreamforms:" + titleId + "Name=" + titleName + "=EndAll") : null, bigIcon = bigIconUrl, autoCancel = true, mediaStyle = true, notificationImportance = (int)NotificationImportance.Default, showWhen = true, when = time, smallIcon = PublicNot };
@@ -1671,7 +1658,7 @@ namespace CloudStreamForms.Droid
             _manager.Cancel(CHROME_CAST_NOTIFICATION_ID);
         }
 
-        static MediaSession mediaSession = new MediaSession(Application.Context, "Chromecast");
+        readonly static MediaSession mediaSession = new MediaSession(Application.Context, "Chromecast");
 
         public static async void UpdateChromecastNotification(string title, string body, bool isPaused, string poster)
         {
@@ -2374,7 +2361,7 @@ namespace CloudStreamForms.Droid
             }
         }
 
-        public static void openVlc(Activity _activity, int requestId, Android.Net.Uri uri, long time, String title, string subfile = "")
+        public static void OpenVlc(Activity _activity, int requestId, Android.Net.Uri uri, long time, String title, string subfile = "")
         {
             Intent vlcIntent = new Intent(VLC_INTENT_ACTION_RESULT);
 
@@ -2517,7 +2504,7 @@ namespace CloudStreamForms.Droid
             try {
                 System.Net.ServicePointManager.DefaultConnectionLimit = 999;
 
-                App.platformDep = this;
+                App.PlatformDep = this;
                 myAudioFocusListener = new MyAudioFocusListener();
                 myAudioFocusListener.FocusChanged += ((sender, b) => {
                     OnAudioFocusChanged?.Invoke(this, b);
@@ -2551,8 +2538,8 @@ namespace CloudStreamForms.Droid
 
         }
 
-        static Stopwatch mainS = new Stopwatch();
-        async Task MainDelayTest()
+        readonly static Stopwatch mainS = new Stopwatch();
+        async void MainDelayTest()
         {
             await Task.Delay(250);
             long f1 = mainS.ElapsedMilliseconds;

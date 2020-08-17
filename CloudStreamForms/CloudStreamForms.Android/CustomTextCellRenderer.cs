@@ -24,7 +24,6 @@ public class CustomTextCellRenderer : TextCellRenderer
         TextView t2 = (TextView)layout.GetChildAt(1);
 
         List<string> attributes = new List<string>() { "FONTSIZE", "BOLD", "BLACK", "POSX", "POSY" };
-        bool applyCanges = false;
         string resTxt = t2.Text;
         List<bool> values = new List<bool>();
         List<float> ftts = new List<float>();

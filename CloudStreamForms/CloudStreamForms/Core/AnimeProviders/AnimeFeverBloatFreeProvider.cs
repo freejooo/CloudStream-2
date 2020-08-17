@@ -9,7 +9,7 @@ namespace CloudStreamForms.Core.AnimeProviders
 {
     class AnimeFeverBloatFreeProvider : BloatFreeBaseAnimeProvider
     {
-        AnimeFeverHelper helper;
+        readonly AnimeFeverHelper helper;
         public AnimeFeverBloatFreeProvider(CloudStreamCore _core) : base(_core)
         {
             helper = new AnimeFeverHelper(_core);
@@ -135,13 +135,14 @@ namespace CloudStreamForms.Core.AnimeProviders
                     try {
                         var mainInfo = helper.GetAnimeFeverEpisodeInfo(subData.id, subData.slug);
                         if (mainInfo == null) continue;
-                        
-                        var emtyList = new string[mainInfo.data.Count].ToList();
-                        var referers = new string[mainInfo.data.Count];
+                        var _mainInfo = mainInfo.Value;
+
+                        var emtyList = new string[_mainInfo.data.Count].ToList();
+                        var referers = new string[_mainInfo.data.Count];
                         int index = 0;
                         setData.dubEpisodes = emtyList;
                         setData.subEpisodes = emtyList;
-                        foreach (var epInfo in mainInfo.data) {
+                        foreach (var epInfo in _mainInfo.data) {
                             var langs = epInfo.video_meta.audio_languages;
                             if (langs.Contains("eng")) {
                                 setData.dubEpisodes[index] = (epInfo.id.ToString());

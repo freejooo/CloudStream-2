@@ -26,8 +26,8 @@ namespace CloudStreamForms
 
         readonly List<string> recomendationTypes = new List<string> { "Related", "Top 100", "Popular" };
 
-        LabelList MovieTypePicker;
-        LabelList ImdbTypePicker;
+        readonly LabelList MovieTypePicker;
+        readonly LabelList ImdbTypePicker;
 
         public bool IsRecommended { get { return ImdbTypePicker.SelectedIndex == 0; } }
         public bool IsTop100 { get { return ImdbTypePicker.SelectedIndex == 1; } }
@@ -183,7 +183,7 @@ namespace CloudStreamForms
             //episodeView.SelectedItem = null;
         }
 
-        List<FFImageLoading.Forms.CachedImage> play_btts = new List<FFImageLoading.Forms.CachedImage>();
+       readonly List<FFImageLoading.Forms.CachedImage> play_btts = new List<FFImageLoading.Forms.CachedImage>();
         private void Image_PropertyChanging(object sender, PropertyChangingEventArgs e)
         {
 
@@ -306,48 +306,18 @@ namespace CloudStreamForms
         }
 
 
-        async Task AddEpisodeAsync(EpisodeResult episodeResult, bool setHeight = true, int delay = 10, bool setH = false)
+        async Task AddEpisodeAsync(EpisodeResult episodeResult, bool setHeight = true, int delay = 10)
         {
-            AddEpisode(episodeResult, setHeight, setH);
+            AddEpisode(episodeResult, setHeight);
             await Task.Delay(delay);
         }
 
-        void AddEpisode(EpisodeResult episodeResult, bool setHeight = true, bool setH = false, bool addtoGrid = false)
+        void AddEpisode(EpisodeResult episodeResult, bool setHeight = true)
         {
-            epView.MyEpisodeResultCollection.Add(episodeResult);
-
-
-            /*
-           
-            // Device.BeginInvokeOnMainThread(() => {
-            var ff = new FFImageLoading.Forms.CachedImage {
-                Source = episodeResult.PosterUrl,
-                HeightRequest = POSTER_HIGHT,
-                WidthRequest = POSTER_WIDTH,
-                BackgroundColor = Color.Transparent,
-                VerticalOptions = LayoutOptions.Start,
-                Transformations = {
-                                new FFImageLoading.Transformations.RoundedTransformation(10,1,1.5,10,"#303F9F")
-                            },
-                InputTransparent = true,
-            };
-
-            cachedImages.Add(ff);*/
-            if (addtoGrid) {
-                /*
-                ItemGrid.Children.Add(ff);
-                if (setH) {
-                    SetChashedImagePos(ItemGrid.Children.Count - 1);
-                }*/
-            }
-
+            epView.MyEpisodeResultCollection.Add(episodeResult); 
             if (setHeight) {
                 SetHeight();
-            }
-
-            //}); 
-
-
+            } 
         }
 
         void ClearEpisodes(bool clearData = true)
@@ -365,7 +335,7 @@ namespace CloudStreamForms
 
         public int PosterAtScreenWith { get { return (int)(currentWidth / (double)POSTER_WIDTH); } }
         public int PosterAtScreenHight { get { return (int)(currentWidth / (double)POSTER_HIGHT); } }
-        List<FFImageLoading.Forms.CachedImage> cachedImages = new List<FFImageLoading.Forms.CachedImage>();
+        readonly List<FFImageLoading.Forms.CachedImage> cachedImages = new List<FFImageLoading.Forms.CachedImage>();
 
         void SetHeight()
         {
@@ -386,21 +356,7 @@ namespace CloudStreamForms
             int y = (int)(pos / PosterAtScreenWith);
             Grid.SetColumn(cachedImages[pos], x);
             Grid.SetRow(cachedImages[pos], y);
-        }
-
-        async void SaveData()
-        {
-            print("SAVING DATA");
-            try {
-                await Application.Current.SavePropertiesAsync();
-            }
-            catch (Exception _ex) {
-                error(_ex);
-            }
-            print("SAVING DATA DONE!!");
-
-        }
-
+        } 
         bool hasAppered = false;
 
         protected override void OnDisappearing()
@@ -419,7 +375,7 @@ namespace CloudStreamForms
             try {
                 // OnIconStart(0);
                 base.OnAppearing();
-                SaveData();
+                App.SaveData();
                 if (!hasAppered) {
                     App.UpdateStatusBar();
                     App.UpdateBackground();
@@ -486,7 +442,7 @@ namespace CloudStreamForms
 
         public static bool UpdateIsRequired = true;
 
-        async void UpdateBookmarks()
+        void UpdateBookmarks()
         {
             try {
                 int height = 150;

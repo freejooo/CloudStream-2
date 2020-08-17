@@ -249,7 +249,7 @@ namespace CloudStreamForms.Core
 
         public static string CurrentImageSource { get { return GetSourceFromInt(CurrentImage); } }
 
-        public static async Task StartImageChanger()
+        public static async void StartImageChanger()
         {
             try {
                 while (true) {
@@ -352,7 +352,6 @@ namespace CloudStreamForms.Core
             castLastUpdate = mm.CurrentTime;
         }
 
-        static Dictionary<string, string> subtitleParsed = new Dictionary<string, string>();
         static bool ContainsStartColor(string inp)
         {
             return inp.Contains("<font color=");
@@ -423,7 +422,7 @@ namespace CloudStreamForms.Core
                     var _sub = ParseSubtitles(data).ToArray();
                     print("SUBLENNN::: " + _sub);
                     realSubText += "WEBVTT\n\n";
-                    string ToSubTime(int tick)
+                    static string ToSubTime(int tick)
                     {
                         if (tick < 0) {
                             tick = 0;
@@ -748,7 +747,7 @@ namespace CloudStreamForms.Core
 
         }
 
-        public static async void JustStopVideo()
+        public static void JustStopVideo()
         {
             ShowLogo();
 
@@ -837,7 +836,7 @@ namespace CloudStreamForms.Core
             //}
         }
 
-        private static async Task SetVolumeAsync(float level) // 0 = 0%, 1 = 100%
+        private static async void SetVolumeAsync(float level) // 0 = 0%, 1 = 100%
         {
             if (IsCastingVideo) {
                 await SendChannelCommandAsync<IReceiverChannel>(IsStopped, null, async c => await c.SetVolumeAsync(level));
@@ -856,54 +855,54 @@ namespace CloudStreamForms.Core
             }
         }
 
+        /* // ================= UPLOADS A TEMPORARY TEXT FILE =================
+       static string GetUrlFromUploadSubtitles(string fullData, string ending = ".srt")
+       {
+           string boundary = Guid.NewGuid().ToString();
 
-        static string GetUrlFromUploadSubtitles(string fullData, string ending = ".srt")
-        {
-            string boundary = Guid.NewGuid().ToString();
+           WebRequest request = WebRequest.Create("https://uguu.se/api.php?d=upload-tool");
+           request.Method = "POST";
+           request.ContentType = string.Format("multipart/form-data; boundary={0}", boundary);
+           //request.Headers.Add(HttpRequestHeader.Cookie, header);
+           string ff = string.Format("--{0}", boundary) + "\n";
 
-            WebRequest request = WebRequest.Create("https://uguu.se/api.php?d=upload-tool");
-            request.Method = "POST";
-            request.ContentType = string.Format("multipart/form-data; boundary={0}", boundary);
-            //request.Headers.Add(HttpRequestHeader.Cookie, header);
-            string ff = string.Format("--{0}", boundary) + "\n";
+           string textMode = "plain";
+           if (ending == ".vtt") {
+               textMode = "vtt";
+           }
 
-            string textMode = "plain";
-            if (ending == ".vtt") {
-                textMode = "vtt";
-            }
+           string _1 = $"{ff}Content-Disposition: form-data; name=\"MAX_FILE_SIZE\"\n\n150000000\n";
+           string _2 = $"{ff}Content-Disposition: form-data; name=\"file\"; filename=\"subtitles{ending}\"\nContent-Type: text/{textMode}\n\n{fullData}\n\n";
+           string _3 = $"{ff}Content-Disposition: form-data; name=\"name\"\n\n\n";
+           string _4 = $"--{boundary}--";
 
-            string _1 = $"{ff}Content-Disposition: form-data; name=\"MAX_FILE_SIZE\"\n\n150000000\n";
-            string _2 = $"{ff}Content-Disposition: form-data; name=\"file\"; filename=\"subtitles{ending}\"\nContent-Type: text/{textMode}\n\n{fullData}\n\n";
-            string _3 = $"{ff}Content-Disposition: form-data; name=\"name\"\n\n\n";
-            string _4 = $"--{boundary}--";
+           byte[] _data = Encoding.UTF8.GetBytes(_1 + _2 + _3 + _4);
 
-            byte[] _data = Encoding.UTF8.GetBytes(_1 + _2 + _3 + _4);
+           if (_data != null) {
+               request.ContentLength = _data.Length;
+           }
 
-            if (_data != null) {
-                request.ContentLength = _data.Length;
-            }
+           Stream dataStream = request.GetRequestStream();
 
-            Stream dataStream = request.GetRequestStream();
+           if (_data != null && _data.Length > 0) {
+               dataStream.Write(_data, 0, _data.Length);
+           }
 
-            if (_data != null && _data.Length > 0) {
-                dataStream.Write(_data, 0, _data.Length);
-            }
+           dataStream.Close();
 
-            dataStream.Close();
+           WebResponse response = request.GetResponse();
 
-            WebResponse response = request.GetResponse();
+           dataStream = response.GetResponseStream();
 
-            dataStream = response.GetResponseStream();
+           StreamReader reader = new StreamReader(dataStream);
 
-            StreamReader reader = new StreamReader(dataStream);
+           string responseReader = reader.ReadToEnd();
+           reader.Close();
+           dataStream.Close();
+           response.Close();
 
-            string responseReader = reader.ReadToEnd();
-            reader.Close();
-            dataStream.Close();
-            response.Close();
-
-            return responseReader;
-        }
+           return responseReader;
+       }*/
     }
 
 }

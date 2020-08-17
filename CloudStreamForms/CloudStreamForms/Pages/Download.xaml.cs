@@ -152,13 +152,13 @@ namespace CloudStreamForms
             }
         }
         protected override void OnDisappearing()
-        { 
+        {
             base.OnDisappearing();
         }
 
         protected override void OnAppearing()
-        { 
-            base.OnAppearing(); 
+        {
+            base.OnAppearing();
 
             /*
             if(VideoPage.showOnAppear ) {
@@ -485,29 +485,14 @@ namespace CloudStreamForms
 
             //  EpisodeResult episodeResult = ((EpisodeResult)((ListView)sender).BindingContext);
 
-            //PlayEpisode(episodeResult);
+            //PlayEpisode(episodeResult); 
+        } 
 
-        }
-
-        /*
-        void PlayEpisode(EpisodeResult episodeResult)
-        {
-            App.PlayVLCWithSingleUrl(episodeResult.mirrosUrls[0], episodeResult.Title);
-            print("MAIN EP FROM DLOAD: " + episodeResult.Id.ToString());
-            
-            MovieResult.SetEpisode("tt"+ episodeResult.Id);
-            episodeView.SelectedItem = null;
-        }*/
-
-        private void ViewCell_Tapped(object sender, EventArgs e)
+        private async void ViewCell_Tapped(object sender, EventArgs e)
         {
             EpisodeResult episodeResult = (EpisodeResult)(((ViewCell)sender).BindingContext);
-            HandleEpisodeAsync(episodeResult);
-            episodeView.SelectedItem = null;
-            //            EpsodeShow(episodeResult);
-            //EpisodeResult episodeResult = ((EpisodeResult)((ImageButton)sender).BindingContext);
-            //App.PlayVLCWithSingleUrl(episodeResult.mirrosUrls[0], episodeResult.Title);
-            //episodeView.SelectedItem = null;
+            await HandleEpisodeAsync(episodeResult);
+            episodeView.SelectedItem = null; 
         }
 
         async Task HandleEpisodeAsync(EpisodeResult episodeResult)
@@ -526,7 +511,7 @@ namespace CloudStreamForms
                 await HandleEpisodeTapped(infoKey, p);
             }
             else {
-                p.Navigation.PushModalAsync(new DownloadViewPage(key), false);
+                await p.Navigation.PushModalAsync(new DownloadViewPage(key), false);
             }
         }
 
@@ -536,54 +521,54 @@ namespace CloudStreamForms
             //Download.PlayDownloadedFile(_info.info.fileUrl, _info.info.name, _info.info.episode, _info.info.season, _info.info.episodeIMDBId, _info.info.source, true, vlc ?? !Settings.UseVideoPlayer);
         }
         public static void PlayDownloadedFile(DownloadEpisodeInfo _info, bool? vlc = null)
-        {
-            Download.PlayDownloadedFile(_info.fileUrl, _info.name, _info.episode, _info.season, _info.episodeIMDBId, _info.source, true, vlc ?? !Settings.UseVideoPlayer);
+        { 
+            Download.PlayDownloadedFile(_info.fileUrl, _info.name, _info.episode, _info.season, _info.dtype == DownloadType.YouTube ? _info.id.ToString() : _info.episodeIMDBId, _info.source, true, vlc ?? !Settings.UseVideoPlayer);
         }
 
-        public static void PlayDownloadedFile(string file, string name, int episode, int season, string episodeId, string headerId, bool startFromSaved = true, bool vlc = false)
+        public static async void PlayDownloadedFile(string file, string name, int episode, int season, string episodeId, string headerId, bool startFromSaved = true, bool vlc = false)
         {
             long pos = startFromSaved ? GetViewPos(episodeId) : -1L;//App.GetKey(VIEW_TIME_POS, _episodeId, -1L);
             if (vlc) {
                 //long dur = App.GetKey(VIEW_TIME_DUR, episodeId, -1L);
                 print("MAINPOS: " + pos + "|" + episodeId);
                 if (pos != -1L) {// && dur != -1L) {
-                    RequestVlc(new List<string>() { file }, new List<string>() { name }, name, episodeId, startId: pos, overrideSelectVideo: false);
+                    await RequestVlc(new List<string>() { file }, new List<string>() { name }, name, episodeId, startId: pos, overrideSelectVideo: false);
                 }
                 else {
-                    RequestVlc(new List<string>() { file }, new List<string>() { name }, name, episodeId, overrideSelectVideo: false);
+                    await RequestVlc(new List<string>() { file }, new List<string>() { name }, name, episodeId, overrideSelectVideo: false);
                 }
-                return;
+            }
+            else {
+                Page p = new VideoPage(new VideoPage.PlayVideo() {
+                    descript = "",
+                    name = name,
+                    isSingleMirror = true,
+                    episode = episode,
+                    isDownloadFile = true,
+                    season = season,
+
+                    downloadFileUrl = file,
+                    //Subtitles = subtitlesEnabled ? new List<string>() { subtitleFull } : new List<string>(),
+                    //SubtitlesNames = subtitlesEnabled ? new List<string>() { "English" } : new List<string>(),
+                    startPos = pos,
+                    episodeId = episodeId,
+                    headerId = headerId,
+                });//new List<string>() { "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" }, new List<string>() { "Black" }, new List<string>() { });// { mainPoster = mainPoster };
+                await ((MainPage)CloudStreamCore.mainPage).Navigation.PushModalAsync(p, true);
             }
 
-
-            Page p = new VideoPage(new VideoPage.PlayVideo() {
-                descript = "",
-                name = name,
-                isSingleMirror = true,
-                episode = episode,
-                isDownloadFile = true,
-                season = season,
-
-                downloadFileUrl = file,
-                //Subtitles = subtitlesEnabled ? new List<string>() { subtitleFull } : new List<string>(),
-                //SubtitlesNames = subtitlesEnabled ? new List<string>() { "English" } : new List<string>(),
-                startPos = pos,
-                episodeId = episodeId,
-                headerId = headerId,
-            });//new List<string>() { "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" }, new List<string>() { "Black" }, new List<string>() { });// { mainPoster = mainPoster };
-            ((MainPage)CloudStreamCore.mainPage).Navigation.PushModalAsync(p, true);
         }
 
-        public static void PlayVLCFile(string file, string name, string episodeId, bool startFromSaved = true)
+        public static async void PlayVLCFile(string file, string name, string episodeId, bool startFromSaved = true)
         {
             long pos = startFromSaved ? GetViewPos(episodeId) : -1L;//App.GetKey(VIEW_TIME_POS, _episodeId, -1L);
                                                                     //long dur = App.GetKey(VIEW_TIME_DUR, episodeId, -1L);
             print("MAINPOS: " + pos + "|" + episodeId);
             if (pos != -1L) {// && dur != -1L) {
-                RequestVlc(new List<string>() { file }, new List<string>() { name }, name, episodeId, startId: pos);
+                await RequestVlc(new List<string>() { file }, new List<string>() { name }, name, episodeId, startId: pos);
             }
             else {
-                RequestVlc(new List<string>() { file }, new List<string>() { name }, name, episodeId);
+                await RequestVlc(new List<string>() { file }, new List<string>() { name }, name, episodeId);
             }
 
             //App.PlayVLCWithSingleUrl(file, name, overrideSelectVideo: false);
@@ -629,7 +614,7 @@ namespace CloudStreamForms
                 await MainChrome.CastVideo(info.info.fileUrl, info.info.name, posterUrl: header.posterUrl, movieTitle: header.name, fromFile: true);
                 chromeDownload = info.info;
                 Page _p = ChromeCastPage.CreateChromePage(info.info); //{ episodeResult = new EpisodeResult() { }, chromeMovieResult = new Movie() { } };
-                MainPage.mainPage.Navigation.PushModalAsync(_p, false);
+                await MainPage.mainPage.Navigation.PushModalAsync(_p, false);
             }
             else if (action == "Play External App") {
                 PlayDownloadedFile(info, true);
@@ -653,7 +638,7 @@ namespace CloudStreamForms
             }
             else if (action == "Open Source") {
                 if (info.info.dtype == DownloadType.YouTube) {
-                    App.OpenBrowser(info.info.source);
+                    await App.OpenBrowser(info.info.source);
                 }
                 else {
                     var header = downloadHeaders[info.info.downloadHeader];
@@ -670,30 +655,12 @@ namespace CloudStreamForms
             string moviePath = FindHTML(keyData, "_dpath=", "|||");
             App.PlayVLCWithSingleUrl(moviePath, title);
         }*/
+         
 
-        List<FFImageLoading.Forms.CachedImage> play_btts = new List<FFImageLoading.Forms.CachedImage>();
-        private void Image_PropertyChanging(object sender, PropertyChangingEventArgs e)
-        {
-
-            FFImageLoading.Forms.CachedImage image = ((FFImageLoading.Forms.CachedImage)sender);
-
-            if (play_btts.Where(t => t.Id == image.Id).Count() == 0) {
-                play_btts.Add(image);
-                image.Source = image.Source = App.GetImageSource("nexflixPlayBtt.png");//ImageSource.FromResource("CloudStreamForms.Resource.playBtt.png", Assembly.GetExecutingAssembly());
-                if (Device.RuntimePlatform == Device.Android) {
-                    image.Scale = 0.5f;
-                }
-                else {
-                    image.Scale = 0.3f;
-                }
-            }
-
-        }
-
-        private void ImageButton_Clicked(object sender, EventArgs e)
+        private async void ImageButton_Clicked(object sender, EventArgs e)
         {
             EpisodeResult episodeResult = ((EpisodeResult)((ImageButton)sender).BindingContext);
-            HandleEpisodeAsync(episodeResult);
+            await HandleEpisodeAsync(episodeResult);
             //HandleEpisode(episodeResult, this);
             //PlayEpisode(episodeResult);
         }
@@ -794,7 +761,7 @@ namespace CloudStreamForms
             ImageService.Instance.LoadUrl(v.Thumbnails.HighResUrl, TimeSpan.FromDays(30)); // CASHE IMAGE
             string extraPath = "/" + GetPathFromType(header);
 
-            string fileUrl = platformDep.DownloadHandleIntent(id, new List<BasicMirrorInfo>() { new BasicMirrorInfo() { name = info.VideoQualityLabel, mirror = info.Url } }, v.Title + "." + info.Container.Name, name, true, extraPath, true, true, false, v.Thumbnails.HighResUrl, "{name}\n");//isMovie ? "{name}\n" : ($"S{season}:E{episode} - " + "{name}\n"));
+            string fileUrl = PlatformDep.DownloadHandleIntent(id, new List<BasicMirrorInfo>() { new BasicMirrorInfo() { name = info.VideoQualityLabel, mirror = info.Url } }, v.Title + "." + info.Container.Name, name, true, extraPath, true, true, false, v.Thumbnails.HighResUrl, "{name}\n");//isMovie ? "{name}\n" : ($"S{season}:E{episode} - " + "{name}\n"));
             return fileUrl;
         }
     }

@@ -125,8 +125,8 @@ namespace CloudStreamForms.Core
             public int season;
         }
 
-        Dictionary<int, int> tokens = new Dictionary<int, int>();
-        object tokenLock = new object();
+        readonly Dictionary<int, int> tokens = new Dictionary<int, int>();
+        readonly object tokenLock = new object();
 
         public bool GetThredActive(TempThread temp)
         {
@@ -1665,7 +1665,7 @@ namespace CloudStreamForms.Core
                     }
                 }
 
-                string GetBase(string _url)
+                static string GetBase(string _url)
                 {
                     string from = FindHTML(_url, "/", "?");
                     int _i = from.LastIndexOf("/");
@@ -1730,7 +1730,7 @@ namespace CloudStreamForms.Core
         public class DubbedAnimeMovieProvider : BaseMovieProvier
         {
             public override string Name => "DubbedAnime";
-            DubbedAnimeProvider back;
+            readonly DubbedAnimeProvider back;
             public DubbedAnimeMovieProvider(CloudStreamCore _core) : base(_core)
             {
                 back = new DubbedAnimeProvider(_core);
@@ -2329,20 +2329,20 @@ namespace CloudStreamForms.Core
             string dload = "https://www.mp4upload.com/" + id.Replace(".html", "");
 
             string d = DownloadString(dload);
-            string op = FindHTML(d, "name=\"op\" value=\"", "\""); //
-            string usr_login = FindHTML(d, "name=\"usr_login\" value=\"", "\"");
-            string _id = FindHTML(d, "name=\"id\" value=\"", "\""); //
-            string fname = FindHTML(d, "name=\"fname\" value=\"", "\"");
+            // op = FindHTML(d, "name=\"op\" value=\"", "\""); 
+           // string usr_login = FindHTML(d, "name=\"usr_login\" value=\"", "\"");
+           // string _id = FindHTML(d, "name=\"id\" value=\"", "\""); //
+            /*string fname = FindHTML(d, "name=\"fname\" value=\"", "\"");
             if (fname == "") {
                 fname = FindHTML(d, "filename\">", "<");
-            }
+            }*/
             string rand = FindHTML(d, "name=\"rand\" value=\"", "\""); //
             string referer = mp4;//FindHTML(d, "name=\"referer\" value=\"", "\"");
             string method_free = FindHTML(d, "name=\"method_free\" value=\"", "\"");
             string method_premium = FindHTML(d, "name=\"method_premium\" value=\"", "\"");
 
             for (int i = 1; i < 3; i++) {
-                op = "download" + i;
+                string op = "download" + i;
 
                 string post = $"op={op}&id={id.Replace(".html", "")}&rand={rand}&referer={referer}&method_free={method_free}&method_premium={method_premium}".Replace(" ", "+");//.Replace(":", "%3A").Replace("/", "%2F");
                                                                                                                                                                                 //           op=download1&id=7z6ie54lu8fm&rand=&referer=https%3A%2F%2Fwww.mp4upload.com%2Fembed-7z6ie54lu8fm.html&method_free=+&method_premium=
@@ -2559,93 +2559,93 @@ namespace CloudStreamForms.Core
             [Serializable]
             public struct DubbedAnimeNetRelated
             {
-                public string Alternative_version { get; set; }
-                public string Parent_story { get; set; }
-                public string Other { get; set; }
-                public string Prequel { get; set; }
-                public string Side_story { get; set; }
-                public string Sequel { get; set; }
-                public string Character { get; set; }
+                public string Alternative_version;
+                public string Parent_story;
+                public string Other;
+                public string Prequel;
+                public string Side_story;
+                public string Sequel;
+                public string Character;
             }
             [Serializable]
             public struct DubbedAnimeNetSearchResult
             {
-                public string id { get; set; }
-                public string slug { get; set; }
-                public string title { get; set; }
-                public string image { get; set; }
-                public string synopsis { get; set; }
-                public string english { get; set; }
-                public string japanese { get; set; }
-                public string synonyms { get; set; }
-                public string type { get; set; }
-                public string total { get; set; }
-                public string status { get; set; }
-                public string date { get; set; }
-                public string aired { get; set; }
-                public object year { get; set; }
-                public object season { get; set; }
-                public string premiered { get; set; }
-                public string duration { get; set; }
-                public string rating { get; set; }
-                public string genres { get; set; }
-                public List<DubbedAnimeNetRelated> related { get; set; }
-                public string score { get; set; }
-                public string rank { get; set; }
-                public string popularity { get; set; }
-                public string mal_id { get; set; }
-                public string url { get; set; }
+                public string id;
+                public string slug;
+                public string title;
+                public string image;
+                public string synopsis;
+                public string english;
+                public string japanese;
+                public string synonyms;
+                public string type;
+                public string total;
+                public string status;
+                public string date;
+                public string aired;
+                public object year;
+                public object season;
+                public string premiered;
+                public string duration;
+                public string rating;
+                public string genres;
+                public List<DubbedAnimeNetRelated> related;
+                public string score;
+                public string rank;
+                public string popularity;
+                public string mal_id;
+                public string url;
             }
             [Serializable]
             public struct DubbedAnimeNetQuickSearch
             {
-                public List<DubbedAnimeNetSearchResult> results { get; set; }
-                public int pages { get; set; }
-                public string query { get; set; }
-                public int total { get; set; }
+                public List<DubbedAnimeNetSearchResult> results;
+                public int pages;
+                public string query;
+                public int total;
             }
 
             [Serializable]
             public struct DubbedAnimeNetName
             {
-                public string @default { get; set; }
-                public string english { get; set; }
+                public string @default;
+                public string english;
             }
 
             [Serializable]
             public struct DubbedAnimeNetVideo
             {
-                public string host { get; set; }
-                public string id { get; set; }
-                public string type { get; set; }
-                public string date { get; set; }
+                public string host;
+                public string id;
+                public string type;
+                public string date;
             }
 
             [Serializable]
             public struct DubbedAnimeNetAPIEpisode
             {
-                public string id { get; set; }
-                public string anime_id { get; set; }
-                public string slug { get; set; }
-                public string number { get; set; }
-                public DubbedAnimeNetName name { get; set; }
-                public string title { get; set; }
-                public string description { get; set; }
-                public string date { get; set; }
-                public List<DubbedAnimeNetVideo> videos { get; set; }
-                public string image { get; set; }
-                public string next_id { get; set; }
-                public object previous_id { get; set; }
-                public string url { get; set; }
-                public string lang { get; set; }
+                public string id;
+                public string anime_id;
+                public string slug;
+                public string number;
+                public DubbedAnimeNetName name;
+                public string title;
+                public string description;
+                public string date;
+                public List<DubbedAnimeNetVideo> videos;
+                public string image;
+                public string next_id;
+                public object previous_id;
+                public string url;
+                public string lang;
             }
 
             [Serializable]
             public struct DubbedAnimeNetEpisodeExternalAPI
             {
-                public string host { get; set; }
-                public string id { get; set; }
-                public string type { get; set; }
+                public string host;
+                public string id;
+                public string type;
             }
             #endregion
 
@@ -3507,109 +3507,109 @@ namespace CloudStreamForms.Core
         [Serializable]
         public struct AnimeFlixSearchItem
         {
-            public int id { get; set; }
-            public int dynamic_id { get; set; }
-            public string title { get; set; }
-            public string english_title { get; set; }
-            public string slug { get; set; }
-            public string status { get; set; }
-            public string description { get; set; }
-            public string year { get; set; }
-            public string season { get; set; }
-            public string type { get; set; }
-            public string cover_photo { get; set; }
-            public List<string> alternate_titles { get; set; }
-            public string duration { get; set; }
-            public string broadcast_day { get; set; }
-            public string broadcast_time { get; set; }
-            public string rating { get; set; }
-            public double? rating_scores { get; set; }
-            public double gwa_rating { get; set; }
+            public int id;
+            public int dynamic_id;
+            public string title;
+            public string english_title;
+            public string slug;
+            public string status;
+            public string description;
+            public string year;
+            public string season;
+            public string type;
+            public string cover_photo;
+            public List<string> alternate_titles;
+            public string duration;
+            public string broadcast_day;
+            public string broadcast_time;
+            public string rating;
+            public double? rating_scores;
+            public double gwa_rating;
         }
         [Serializable]
         public struct AnimeFlixQuickSearch
         {
-            public List<AnimeFlixSearchItem> data { get; set; }
+            public List<AnimeFlixSearchItem> data;
         }
 
         [Serializable]
         public struct AnimeFlixAnimeEpisode
         {
-            public int id { get; set; }
-            public int dynamic_id { get; set; }
-            public string title { get; set; }
-            public string episode_num { get; set; }
-            public string airing_date { get; set; }
-            public int views { get; set; }
-            public int sub { get; set; }
-            public int dub { get; set; }
-            public string thumbnail { get; set; }
+            public int id;
+            public int dynamic_id;
+            public string title;
+            public string episode_num;
+            public string airing_date;
+            public int views;
+            public int sub;
+            public int dub;
+            public string thumbnail;
         }
 
         [Serializable]
         public struct AnimeFlixAnimeLink
         {
-            public string first { get; set; }
-            public string last { get; set; }
-            public object prev { get; set; }
-            public string next { get; set; }
+            public string first;
+            public string last;
+            public object prev;
+            public string next;
         }
 
         [Serializable]
         public struct AnimeFlixAnimeMetaData
         {
-            public int current_page { get; set; }
-            public int from { get; set; }
-            public int last_page { get; set; }
-            public string path { get; set; }
-            public int per_page { get; set; }
-            public int to { get; set; }
-            public int total { get; set; }
+            public int current_page;
+            public int from;
+            public int last_page;
+            public string path;
+            public int per_page;
+            public int to;
+            public int total;
         }
 
         [Serializable]
         public struct AnimeFlixAnimeData
         {
-            public int id { get; set; }
-            public int dynamic_id { get; set; }
-            public string title { get; set; }
-            public string english_title { get; set; }
-            public string slug { get; set; }
-            public string status { get; set; }
-            public string description { get; set; }
-            public string year { get; set; }
-            public string season { get; set; }
-            public string type { get; set; }
-            public string cover_photo { get; set; }
-            public List<string> alternate_titles { get; set; }
-            public string duration { get; set; }
-            public string broadcast_day { get; set; }
-            public string broadcast_time { get; set; }
-            public string rating { get; set; }
-            public double rating_scores { get; set; }
-            public double gwa_rating { get; set; }
+            public int id;
+            public int dynamic_id;
+            public string title;
+            public string english_title;
+            public string slug;
+            public string status;
+            public string description;
+            public string year;
+            public string season;
+            public string type;
+            public string cover_photo;
+            public List<string> alternate_titles;
+            public string duration;
+            public string broadcast_day;
+            public string broadcast_time;
+            public string rating;
+            public double rating_scores;
+            public double gwa_rating;
         }
 
         [Serializable]
         public struct AnimeFlixAnimeSeason
         {
-            public List<AnimeFlixAnimeEpisode> data { get; set; }
-            public AnimeFlixAnimeLink links { get; set; }
-            public AnimeFlixAnimeMetaData meta { get; set; }
-            public AnimeFlixAnimeData anime { get; set; }
+            public List<AnimeFlixAnimeEpisode> data;
+            public AnimeFlixAnimeLink links;
+            public AnimeFlixAnimeMetaData meta;
+            public AnimeFlixAnimeData anime;
         }
 
         [Serializable]
         public struct AnimeFlixRawEpisode
         {
-            public string id { get; set; }
-            public string provider { get; set; }
-            public string file { get; set; }
-            public string lang { get; set; }
-            public string type { get; set; }
-            public bool hardsub { get; set; }
-            public string thumbnail { get; set; }
-            public string resolution { get; set; }
+            public string id;
+            public string provider;
+            public string file;
+            public string lang;
+            public string type;
+            public bool hardsub;
+            public string thumbnail;
+            public string resolution;
         }
         #endregion
 
@@ -6181,7 +6181,7 @@ namespace CloudStreamForms.Core
 
         // DONT USE www2.himovies.to they have google recaptcha
 
-        static string[] shortdates = new string[] {
+        static readonly string[] shortdates = new string[] {
                                 "Jan",
                                 "Feb",
                                 "Mar",
@@ -6423,8 +6423,8 @@ namespace CloudStreamForms.Core
                                         List<string> _synos = title.synonyms == null ? new List<string>() : title.synonyms.Where(t => t != null).Select(t => t.ToString()).ToList();
                                         string _malLink = ToMalUrl(title.idMal);
                                         string _aniListLink = ToAniListUrl(title.id);
-                                        var _startDate = ToDate(title.startDate.year, title.startDate.month, title.startDate.day);
-                                        var _endDate = ToDate(title.endDate.year, title.endDate.month, title.endDate.day);
+                                        var _startDate = ToDate(title.startDate?.year, title.startDate?.month, title.startDate?.day);
+                                        var _endDate = ToDate(title.endDate?.year, title.endDate?.month, title.endDate?.day);
                                         if (currentName.Contains("Part ") && !currentName.Contains("Part 1")) { // WILL ONLY WORK UNTIL PART 10, BUT JUST HOPE THAT THAT DOSENT HAPPEND :) (Not on jojo)
                                             data[^1].seasons.Add(new MALSeason() { aniListUrl = _aniListLink, name = currentName, engName = _eng, japName = _jap, synonyms = _synos, malUrl = _malLink, startDate = _startDate, endDate = _endDate });
                                         }
@@ -6563,25 +6563,25 @@ namespace CloudStreamForms.Core
         [Serializable]
         public struct AnimeNotTitle
         {
-            public string romaji { get; set; }
-            public string english { get; set; }
-            public string japanese { get; set; }
+            public string romaji;
+            public string english;
+            public string japanese;
         }
         [Serializable]
         public struct AiringDate
         {
-            public DateTime start { get; set; }
-            public DateTime end { get; set; }
+            public DateTime start;
+            public DateTime end;
         }
 
         [Serializable]
         public struct AnimeNotEpisode
         {
-            public string animeId { get; set; }
-            public int number { get; set; }
-            public AnimeNotTitle title { get; set; }
-            public AiringDate airingDate { get; set; }
-            public string id { get; set; }
+            public string animeId;
+            public int number;
+            public AnimeNotTitle title;
+            public AiringDate airingDate;
+            public string id;
         }
 
 
@@ -6595,7 +6595,7 @@ namespace CloudStreamForms.Core
                     var malSeason = activeMovie.title.MALData.seasonData;
                     var season = malSeason[^1].seasons;
                     if (season.Count == 0) return;
-                    string downloadString = "https://notify.moe/search/" + season[season.Count - 1].engName;
+                    string downloadString = "https://notify.moe/search/" + season[^1].engName;
                     print("DOWNLOADINGMOE::" + downloadString);
                     string d = DownloadString(downloadString);
                     if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
@@ -6618,7 +6618,7 @@ namespace CloudStreamForms.Core
                         }
 
                         // print("DA:::" + season[season.Count - 1].engName + "==||==" + api.title.English + "||" + serviceId + "|" + season[season.Count - 1].malUrl);
-                        if (FindHTML(season[season.Count - 1].malUrl, "/anime/", "/") == serviceId && serviceId != "-1") {
+                        if (FindHTML(season[^1].malUrl, "/anime/", "/") == serviceId && serviceId != "-1") {
                             doIt = true;
                         }
                         // if(Fi season[season.Count - 1].malUrl)
@@ -7101,8 +7101,9 @@ namespace CloudStreamForms.Core
             }
             else {
                 Episode ep = new Episode() { name = activeMovie.title.name };
-                activeMovie.episodes = new List<Episode>();
-                activeMovie.episodes.Add(ep);
+                activeMovie.episodes = new List<Episode> {
+                    ep
+                };
                 _s.Stop();
 
                 episodeLoaded?.Invoke(null, activeMovie.episodes);
@@ -8322,8 +8323,8 @@ namespace CloudStreamForms.Core
         /// </summary>
         public static Dictionary<string, LinkHolder> cachedLinks = new Dictionary<string, LinkHolder>();
 
-        static object cachedTitlesLock = new object();
-        static object cachedLinksLock = new object();
+        readonly static object cachedTitlesLock = new object();
+        readonly static object cachedLinksLock = new object();
 
         /// <summary>
         /// Taken by IMDB header id
@@ -9142,12 +9143,12 @@ namespace CloudStreamForms.Core
 
 
 #if DEBUG
-        static object stopwatchLock = new object();
-        static Dictionary<string, long> stopwatchPairs = new Dictionary<string, long>();
-        static Dictionary<string, int> stopwatchCalls = new Dictionary<string, int>();
-        static Dictionary<int, Stopwatch> stopwatchs = new Dictionary<int, Stopwatch>();
+        readonly static object stopwatchLock = new object();
+        readonly static Dictionary<string, long> stopwatchPairs = new Dictionary<string, long>();
+        readonly static Dictionary<string, int> stopwatchCalls = new Dictionary<string, int>();
+        readonly static Dictionary<int, Stopwatch> stopwatchs = new Dictionary<int, Stopwatch>();
         static int debuggNum = 0;
-        static object debuggNumLock = new object();
+        readonly static object debuggNumLock = new object();
 
         public static void EndDebugging()
         {
@@ -9959,140 +9960,139 @@ namespace AniListAPI
 
     namespace Model
     {
-        public class Title
+        public struct Title
         {
-            public string romaji { get; set; }
-            public string english { get; set; }
-            public string native { get; set; }
+            public string romaji;
+            public string english;
+            public string native;
         }
 
-        public class Edges
+        public struct Edges
         {
-            public int id { set; get; }
-            public string relationType { set; get; }
-            public Node node { set; get; }
+            public int id;
+            public string relationType;
+            public Node node;
         }
 
-        public class CoverImage
+        public struct CoverImage
         {
-            public string medium { get; set; }
-            public string large { get; set; }
+            public string medium;
+            public string large;
         }
 
-        public class StartDate
+        public struct StartDate
         {
-            public int? year { get; set; }
-            public int? month { get; set; }
-            public int? day { get; set; }
+            public int? year;
+            public int? month;
+            public int? day;
         }
 
-        public class EndDate
+        public struct EndDate
         {
-            public int? year { get; set; }
-            public int? month { get; set; }
-            public int? day { get; set; }
+            public int? year;
+            public int? month;
+            public int? day;
         }
 
-        public class Medium
+        public struct Medium
         {
-            public int id { get; set; }
-            public Title title { get; set; }
-            public CoverImage coverImage { get; set; }
-            public string format { get; set; }
-            public string type { get; set; }
-            //    public int averageScore { get; set; }
-            public int popularity { get; set; }
-            //  public int episodes { get; set; }
-            public string season { get; set; }
-            public string hashtag { get; set; }
-            public bool isAdult { get; set; }
-            public StartDate? startDate { get; set; }
-            public EndDate? endDate { get; set; }
-            public object bannerImage { get; set; }
-            public string status { get; set; }
-            public object chapters { get; set; }
-            public object volumes { get; set; }
-            public string description { get; set; }
-            public int meanScore { get; set; }
-            public List<string> genres { get; set; }
-            public List<object> synonyms { get; set; }
-            public object nextAiringEpisode { get; set; }
+            public int id;
+            public Title title;
+            public CoverImage coverImage;
+            public string format;
+            public string type;
+            //    public int averageScore;
+            public int popularity;
+            //  public int episodes;
+            public string season;
+            public string hashtag;
+            public bool isAdult;
+            public StartDate? startDate;
+            public EndDate? endDate;
+            public object bannerImage;
+            public string status;
+            public object chapters;
+            public object volumes;
+            public string description;
+            public int meanScore;
+            public List<string> genres;
+            public List<object> synonyms;
+            public object nextAiringEpisode;
+            public Relations relations;
+            public int? idMal;
+        }
+
+        public struct Relations
+        {
+            public Edges[] edges;
+        }
+
+        public struct Page
+        {
+            public List<Medium> media;
+        }
+
+        public struct Data
+        {
+            public Page Page;
+            public Media Media;
+        }
+
+        public struct Media
+        {
+            public Characters characters;
+            public int popularity;
+            public object hashtag;
+            public bool isAdult;
+            public int id;
+            public Title title;
+            public StartDate? startDate;
+            public EndDate? endDate;
+            public CoverImage coverImage;
+            public object bannerImage;
+            public string format;
+            public string type;
+            public string status;
+            //       public int episodes;
+            public object chapters;
+            public object volumes;
+            public string season;
+            public string description;
+            //   public int averageScore;
+            public int meanScore;
+            public List<string> genres;
+            public List<object> synonyms;
+            public object nextAiringEpisode;
             public Relations relations { set; get; }
             public int? idMal { set; get; }
         }
 
-        public class Relations
+        public struct PageInfo
         {
-            public Edges[] edges { set; get; }
+            public int total;
+            public int perPage;
+            public bool hasNextPage;
+            public int currentPage;
+            public int lastPage;
         }
 
-        public class Page
+        public struct Name
         {
-            public List<Medium> media { get; set; }
+            public string first;
+            public string last;
         }
 
-        public class Data
+        public struct Image
         {
-            public Page Page { get; set; }
-            public Media Media { get; set; }
+            public string medium;
+            public string large;
         }
 
-        public class Media
+        public struct Node
         {
-            public Characters characters { get; set; }
-            public int popularity { get; set; }
-            public object hashtag { get; set; }
-            public bool isAdult { get; set; }
-            public int id { get; set; }
-            public Title title { get; set; }
-            public StartDate? startDate { get; set; }
-            public EndDate? endDate { get; set; }
-            public CoverImage coverImage { get; set; }
-            public object bannerImage { get; set; }
-            public string format { get; set; }
-            public string type { get; set; }
-            public string status { get; set; }
-            //       public int episodes { get; set; }
-            public object chapters { get; set; }
-            public object volumes { get; set; }
-            public string season { get; set; }
-            public string description { get; set; }
-            //   public int averageScore { get; set; }
-            public int meanScore { get; set; }
-            public List<string> genres { get; set; }
-            public List<object> synonyms { get; set; }
-            public object nextAiringEpisode { get; set; }
-            public Relations relations { set; get; }
-            public int? idMal { set; get; }
-
-
-        }
-        public class PageInfo
-        {
-            public int total { get; set; }
-            public int perPage { get; set; }
-            public bool hasNextPage { get; set; }
-            public int currentPage { get; set; }
-            public int lastPage { get; set; }
-        }
-
-        public class Name
-        {
-            public string first { get; set; }
-            public string last { get; set; }
-        }
-
-        public class Image
-        {
-            public string medium { get; set; }
-            public string large { get; set; }
-        }
-
-        public class Node
-        {
-            public int id { get; set; }
-            public Name name { get; set; }
-            public Image image { get; set; }
+            public int id;
+            public Name name;
+            public Image image;
         }
 
         public class Name2

@@ -54,7 +54,7 @@ namespace CloudStreamForms
         public static async Task ShowUpdate(bool skipIntro = false)
         {
             if (Device.RuntimePlatform == Device.Android) {
-                var recommendedArc = (App.AndroidVersionArchitecture)App.platformDep.GetArchitecture();
+                var recommendedArc = (App.AndroidVersionArchitecture)App.PlatformDep.GetArchitecture();
 
                 string option = skipIntro ? "Download Update" : await ActionPopup.DisplayActionSheet($"App update {githubUpdateTag}", "Download Update", "Ignore this time", "Dont show this again");
                 if (option == "Download Update") {
@@ -85,7 +85,7 @@ namespace CloudStreamForms
                 if (Device.RuntimePlatform == Device.Android) { // ONLY ANDROID CAN UPDATE
 
                     TempThread tempThred = mainCore.CreateThread(4);
-                    mainCore.StartThread("GitHub Update Thread", () => {
+                    mainCore.StartThread("GitHub Update Thread", async () => {
                         try {
                             string d = mainCore.DownloadString("https://github.com/LagradOst/CloudStream-2/releases", tempThred);
                             if (!mainCore.GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
@@ -98,7 +98,7 @@ namespace CloudStreamForms
                             githubUpdateTag = FindHTML(d, look, "\"");
                             githubUpdateText = FindHTML(d, look + githubUpdateTag + "\">", "<");
                             if (Settings.ShowAppUpdate && NewGithubUpdate) {
-                                ShowUpdate();
+                                await ShowUpdate();
                             }
                             print("UPDATE SEARCHED: " + githubUpdateTag + "|" + githubUpdateText);
                         }
@@ -158,7 +158,17 @@ namespace CloudStreamForms
         {
             InitializeComponent();
 
-            
+            App.OnAppReopen += async (o, e) => {
+                if (VideoPage.CanReopen) {
+                    VideoPage.CanReopen = false;
+                    await Device.InvokeOnMainThreadAsync(async () => {
+                        await Navigation.PushModalAsync(new VideoPage(VideoPage.lastVideo), true);
+                    });
+                }
+            };
+            App.OnAppNotInForground += (o, e) => {
+                App.SaveData();
+            };
 
             mainPage = this; CloudStreamCore.mainPage = mainPage;
 
@@ -182,7 +192,7 @@ namespace CloudStreamForms
 
             List<string> names = new List<string>() { "Home", "Search", "Downloads", "Settings" };
             //List<string> icons = new List<string>() { "homeIcon.png", "searchIcon.png", "downloadIcon.png", "baseline_settings_applications_white_48dp_inverted_big.png" };
-            List<Page> pages = new List<Page>() { new Home(), new Search(), new Download(),  new SettingsPage(), };
+            List<Page> pages = new List<Page>() { new Home(), new Search(), new Download(), new SettingsPage(), };
 
             for (int i = 0; i < pages.Count; i++) {
                 Children.Add(pages[i]);
@@ -243,7 +253,7 @@ namespace CloudStreamForms
             }
             catch (Exception _ex) {
                 error("ERROR IN LATECHECK::: " + _ex);
-            } 
+            }
         }
 
         public static void PushPageFromUrlAndName(string url, string name)
@@ -257,7 +267,7 @@ namespace CloudStreamForms
             }
         }
 
-        public static async Task PushPageFromUrlAndName(string intentData)
+        public static void PushPageFromUrlAndName(string intentData)
         {
             string url = FindHTML(intentData, "cloudstreamforms:", "Name=");
             string name = FindHTML(intentData, "Name=", "=EndAll");

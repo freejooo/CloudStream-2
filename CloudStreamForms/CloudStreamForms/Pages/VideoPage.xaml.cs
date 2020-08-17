@@ -99,6 +99,7 @@ namespace CloudStreamForms
         public struct PlayVideo : ICloneable
         {
             public int preferedMirror;
+            public long preferedStart;
             public List<string> MirrorUrls;
             public List<string> MirrorNames;
             public bool isDownloadFile;
@@ -129,7 +130,7 @@ namespace CloudStreamForms
         public static int currentMirrorId = 0;
         //public static int currentSubtitlesId = -2; // -2 = null, -1 = none, 0 = def
         public static PlayVideo currentVideo;
-         
+
         const string ADD_BEFORE_EPISODE = "\"";
         const string ADD_AFTER_EPISODE = "\"";
 
@@ -287,8 +288,8 @@ namespace CloudStreamForms
 
         public List<VideoSubtitle> currentSubtitles = new List<VideoSubtitle>();
         public int subtitleIndex = -1;
-        object subtitleMutex = new object();
-        Dictionary<string, bool> searchingForLang = new Dictionary<string, bool>();
+        readonly object subtitleMutex = new object();
+        readonly Dictionary<string, bool> searchingForLang = new Dictionary<string, bool>();
         int subtitleDelay = 0;
 
         public struct VideoSubtitle
@@ -534,9 +535,9 @@ namespace CloudStreamForms
         }
 
         const double lazyLoadOverProcentage = 0.70; // 70% compleated before it loads links
-        bool canLazyLoadNextEpisode = false;
+        readonly bool canLazyLoadNextEpisode = false;
         bool hasLazyLoadedNextEpisode = false;
-        bool hasLazyLoadSettingTurnedOn = Settings.LazyLoadNextLink;
+        readonly bool hasLazyLoadSettingTurnedOn = Settings.LazyLoadNextLink;
         public long GetPlayerLenght()
         {
             if (Player == null || !isShown) {
@@ -639,9 +640,7 @@ namespace CloudStreamForms
                         isShowingSkip = false;
 
                         SkipSomething.Layout(skipBounds);
-
                     });
-
                 }
             }
 
@@ -688,8 +687,8 @@ namespace CloudStreamForms
             });
         }
 
-        VisualElement[] lockElements;
-        VisualElement[] settingsElements;
+        readonly VisualElement[] lockElements;
+        readonly VisualElement[] settingsElements;
 
         public static bool IsSingleMirror = false;
 
@@ -705,8 +704,8 @@ namespace CloudStreamForms
 
         static bool hasOutline = false;
 
-        Label[] font1;
-        Label[] font2;
+        readonly Label[] font1;
+        readonly Label[] font2;
 
         bool canStart = true;
 
@@ -721,8 +720,8 @@ namespace CloudStreamForms
 
         List<SkipMetadata> skips = new List<SkipMetadata>();
 
-        Func<Task> NextEpisodeClicked;
-        static PlayVideo lastVideo;
+        readonly Func<Task> NextEpisodeClicked;
+        public static PlayVideo lastVideo;
 
         /// <summary>
         /// Subtitles are in full
@@ -732,72 +731,73 @@ namespace CloudStreamForms
         /// <param name="subtitles"></param>
         public VideoPage(PlayVideo video, int _maxEpisodes = 1)
         {
-            lastVideo = (PlayVideo)video.Clone();
-            if (!canStart) {
-                return;
-            }
-            canStart = false;
-
-            print("DADAD LOADED VIDEO A");
-            isShown = true;
-            changeFullscreenWhenPop = true;
-
-            currentVideo = video;
-            maxEpisodes = _maxEpisodes;
-            IsSingleMirror = video.isFromIMDB ? false : video.isSingleMirror;
-            Mirrors = new List<BasicLink>();
-            if (currentVideo.MirrorNames != null) {
-                for (int i = 0; i < currentVideo.MirrorNames.Count; i++) {
-                    Mirrors.Add(new BasicLink() {
-                        name = currentVideo.MirrorNames[i],
-                        baseUrl = currentVideo.MirrorUrls[i],
-                    });
+            try {
+                lastVideo = (PlayVideo)video.Clone();
+                if (!canStart) {
+                    return;
                 }
-            }
-            if (currentVideo.isFromIMDB) {
-                LinkHolder? holder;
-                if ((holder = GetCachedLink(currentVideo.episodeId)) != null) {
-                    Mirrors = holder.Value.links.Where(t => !t.canNotRunInVideoplayer).ToList();
-                }
-            }
-            Mirrors = Mirrors.OrderBy(t => -t.priority).ToList();
+                canStart = false;
 
-            InitializeComponent();
-            overLay.SizeChanged += async (o, e) => {
+                print("DADAD LOADED VIDEO A");
+                isShown = true;
+                changeFullscreenWhenPop = true;
+
+                currentVideo = video;
+                maxEpisodes = _maxEpisodes;
+                IsSingleMirror = !video.isFromIMDB && video.isSingleMirror;
+                Mirrors = new List<BasicLink>();
+                if (currentVideo.MirrorNames != null) {
+                    for (int i = 0; i < currentVideo.MirrorNames.Count; i++) {
+                        Mirrors.Add(new BasicLink() {
+                            name = currentVideo.MirrorNames[i],
+                            baseUrl = currentVideo.MirrorUrls[i],
+                        });
+                    }
+                }
+                if (currentVideo.isFromIMDB) {
+                    LinkHolder? holder;
+                    if ((holder = GetCachedLink(currentVideo.episodeId)) != null) {
+                        Mirrors = holder.Value.links.Where(t => !t.canNotRunInVideoplayer).ToList();
+                    }
+                }
+                Mirrors = Mirrors.OrderBy(t => -t.priority).ToList();
+
+                InitializeComponent();
                 /*
-                if (!VideoPage.showOnAppear) return;
+    overLay.SizeChanged += async (o, e) => {
+       if (!VideoPage.showOnAppear) return;
 
-                await Task.Delay(10000);
-               await Navigation.PopModalAsync(false);
-                await Task.Delay(10000);
-                Page p = new VideoPage(VideoPage.showOnAppearPage);
-                await Navigation.PushModalAsync(p);
-                print("SIZE: ");*/
-            };
+       await Task.Delay(10000);
+      await Navigation.PopModalAsync(false);
+       await Task.Delay(10000);
+       Page p = new VideoPage(VideoPage.showOnAppearPage);
+       await Navigation.PushModalAsync(p);
+       print("SIZE: ");
+            };*/
 
-            int skip = Settings.VideoPlayerSkipTime;
-            SkipTime = skip * 1000;
-            SkipForward.Text = "+" + skip;
-            SkipBack.Text = "-" + skip;
+                int skip = Settings.VideoPlayerSkipTime;
+                SkipTime = skip * 1000;
+                SkipForward.Text = "+" + skip;
+                SkipBack.Text = "-" + skip;
 
-            SkipForwardSmall.Text = skip.ToString();
-            SkipBackSmall.Text = skip.ToString();
+                SkipForwardSmall.Text = skip.ToString();
+                SkipBackSmall.Text = skip.ToString();
 
-            SkipSomething.Clicked += async (o, e) => {
-                if (Player != null) {
-                    var _len = GetPlayerLenght();
-                    if (_len < skipToEnd + 1000 && NextEpisodeClicked != null) {
-                        await NextEpisodeClicked();
+                SkipSomething.Clicked += async (o, e) => {
+                    if (Player != null) {
+                        var _len = GetPlayerLenght();
+                        if (_len < skipToEnd + 1000 && NextEpisodeClicked != null) {
+                            await NextEpisodeClicked();
+                        }
+                        else {
+                            Player.Time = skipToEnd + 1;
+                        }
                     }
-                    else {
-                        Player.Time = skipToEnd + 1;
-                    }
-                }
-            };
+                };
 
-            // ======================= SUBTITLE SETUP =======================
+                // ======================= SUBTITLE SETUP =======================
 
-            Vector2[] offsets = new Vector2[]  {
+                Vector2[] offsets = new Vector2[]  {
                 new Vector2(0,1),
                 new Vector2(1,1),
                 new Vector2(1,0),
@@ -808,7 +808,7 @@ namespace CloudStreamForms
                 new Vector2(-1,1),
             };
 
-            font1 = new Label[] {
+                font1 = new Label[] {
                  SubtitleTxt1Back1,
                  SubtitleTxt1Back2,
                  SubtitleTxt1Back3,
@@ -820,7 +820,7 @@ namespace CloudStreamForms
             };
 
 
-            font2 = new Label[] {
+                font2 = new Label[] {
                 SubtitleTxt2Back1,
                 SubtitleTxt2Back2,
                 SubtitleTxt2Back3,
@@ -831,442 +831,443 @@ namespace CloudStreamForms
                 SubtitleTxt2Back8,
             };
 
-            float multi = 1f;
+                float multi = 1f;
 
 
-            //double base1X = SubtitleTxt1.TranslationX;
-            double base1Y = -5;
-            double base2Y = 20;
-            SubtitleTxt1.TranslationY = base1Y;
-            SubtitleTxt2.TranslationY = base2Y;
+                //double base1X = SubtitleTxt1.TranslationX;
+                double base1Y = -5;
+                double base2Y = 20;
+                SubtitleTxt1.TranslationY = base1Y;
+                SubtitleTxt2.TranslationY = base2Y;
 
-            double hreq = SubtitleTxt1.HeightRequest;
-
-
-            double base1X = SubtitleTxt1.TranslationX;
-            double base2X = SubtitleTxt2.TranslationX;
-
-            bool hasDropshadow = Settings.SubtitlesHasDropShadow;
-            hasOutline = Settings.SubtitlesHasOutline;
-
-            string fontFam = App.GetFont(Settings.GlobalSubtitleFont);
-
-            string classId = hasDropshadow ? "OUTLINE" : "";
-            for (int i = 0; i < font1.Length; i++) {
-                if (hasOutline) {
-                    font1[i].FontFamily = fontFam;
-                    font1[i].TranslationX = base1X + offsets[i].X * multi;
-                    font1[i].TranslationY = base1Y + offsets[i].Y * multi;
-                    font1[i].ClassId = classId;
-                    font1[i].HeightRequest = hreq;
-                }
-                else {
-                    font1[i].IsVisible = false;
-                    font1[i].IsEnabled = false;
-                }
-            }
-
-            for (int i = 0; i < font2.Length; i++) {
-                if (hasOutline) {
-                    font2[i].FontFamily = fontFam;
-                    font2[i].TranslationX = base2X + offsets[i].X * multi;
-                    font2[i].TranslationY = base2Y + offsets[i].Y * multi;
-                    font2[i].ClassId = classId;
-                    font1[i].HeightRequest = hreq;
-
-                }
-                else {
-                    font2[i].IsVisible = false;
-                    font2[i].IsEnabled = false;
-                }
-            }
-
-            SubtitleTxt1.FontFamily = fontFam;
-            SubtitleTxt2.FontFamily = fontFam;
-
-            SubtitleTxt1.ClassId = classId;
-            SubtitleTxt2.ClassId = classId;
-
-            // ======================= END =======================
-
-            LibVLCSharp.Shared.Core.Initialize();
-            lockElements = new VisualElement[] { NextMirror, NextMirrorBtt, BacktoMain, GoBackBtt, EpisodeLabel, PausePlayClickBtt, PausePlayBtt, SkipForward, SkipForwardBtt, SkipForwardImg, SkipForwardSmall, SkipBack, SkipBackBtt, SkipBackImg, SkipBackSmall };
-            settingsElements = new VisualElement[] { EpisodesTap, MirrorsTap, DelayTap, SubTap, NextEpisodeTap, };
-            VisualElement[] pressIcons = new VisualElement[] { LockTap, EpisodesTap, MirrorsTap, DelayTap, SubTap, NextEpisodeTap };
-
-            void SetIsLocked()
-            {
-                LockImg.Source = App.GetImageSource(isLocked ? LOCKED_IMAGE : UN_LOCKED_IMAGE);
-                LockTxt.TextColor = Color.FromHex(isLocked ? "#516bde" : "#FFFFFF"); // 516bde 617EFF
-                // LockTap.SetValue(XamEffects.TouchEffect.ColorProperty, Color.FromHex(isLocked ? "#617EFF" : "#FFFFFF"));
-                LockTap.SetValue(XamEffects.TouchEffect.ColorProperty, Color.FromHex(isLocked ? "#99acff" : "#FFFFFF"));
-                //LockTap.BackgroundColor = isLocked ? new Color(0.6, 0.67, 1, 0.1) : Color.Transparent;
-                LockImg.Transformations = new List<FFImageLoading.Work.ITransformation>() { (new FFImageLoading.Transformations.TintTransformation(isLocked ? MainPage.DARK_BLUE_COLOR : "#FFFFFF")) };
-                VideoSlider.InputTransparent = isLocked;
-
-                foreach (var visual in lockElements) {
-                    visual.IsEnabled = !isLocked;
-                    visual.IsVisible = !isLocked;
-                }
-
-                foreach (var visual in settingsElements) {
-                    visual.Opacity = isLocked ? 0 : 1;
-                    visual.IsEnabled = !isLocked;
-                }
-
-                if (!isLocked) {
-                    ShowNextMirror();
-                }
-            }
+                double hreq = SubtitleTxt1.HeightRequest;
 
 
-            SkipForward.TranslationX = TRANSLATE_START_X;
-            SkipForwardImg.Source = App.GetImageSource("netflixSkipForward.png");
-            SkipForwardBtt.TranslationX = TRANSLATE_START_X;
-            Commands.SetTap(SkipForwardBtt, new Command(() => {
-                if (!isShown) return;
-                CurrentTap++;
-                StartFade();
-                SeekMedia(SkipTime);
-                lastClick = DateTime.Now;
-                SkipFor();
-            }));
+                double base1X = SubtitleTxt1.TranslationX;
+                double base2X = SubtitleTxt2.TranslationX;
 
-            SkipBack.TranslationX = -TRANSLATE_START_X;
-            SkipBackImg.Source = App.GetImageSource("netflixSkipBack.png");
-            SkipBackBtt.TranslationX = -TRANSLATE_START_X;
-            Commands.SetTap(SkipBackBtt, new Command(() => {
-                if (!isShown) return;
-                CurrentTap++;
-                StartFade();
-                SeekMedia(-SkipTime);
-                lastClick = DateTime.Now;
-                SkipBac();
-            }));
+                bool hasDropshadow = Settings.SubtitlesHasDropShadow;
+                hasOutline = Settings.SubtitlesHasOutline;
 
-            Commands.SetTap(LockTap, new Command(() => {
-                isLocked = !isLocked;
-                CurrentTap++;
-                FadeEverything(false);
-                StartFade();
-                SetIsLocked();
-            }));
+                string fontFam = App.GetFont(Settings.GlobalSubtitleFont);
 
-            MirrorsTap.IsVisible = currentVideo.isDownloadFile ? false : AllMirrorsUrls.Count > 1;
-
-
-            if (Settings.SUBTITLES_INVIDEO_ENABELD) {
-                try {
-                    if (globalSubtitlesEnabled && HasSupportForSubtitles()) {
-                        PopulateSubtitle();
+                string classId = hasDropshadow ? "OUTLINE" : "";
+                for (int i = 0; i < font1.Length; i++) {
+                    if (hasOutline) {
+                        font1[i].FontFamily = fontFam;
+                        font1[i].TranslationX = base1X + offsets[i].X * multi;
+                        font1[i].TranslationY = base1Y + offsets[i].Y * multi;
+                        font1[i].ClassId = classId;
+                        font1[i].HeightRequest = hreq;
+                    }
+                    else {
+                        font1[i].IsVisible = false;
+                        font1[i].IsEnabled = false;
                     }
                 }
-                catch (Exception _ex) {
-                    print("A_A__A__A:: " + _ex);
+
+                for (int i = 0; i < font2.Length; i++) {
+                    if (hasOutline) {
+                        font2[i].FontFamily = fontFam;
+                        font2[i].TranslationX = base2X + offsets[i].X * multi;
+                        font2[i].TranslationY = base2Y + offsets[i].Y * multi;
+                        font2[i].ClassId = classId;
+                        font1[i].HeightRequest = hreq;
+
+                    }
+                    else {
+                        font2[i].IsVisible = false;
+                        font2[i].IsEnabled = false;
+                    }
                 }
-            }
 
-            SubTap.IsVisible = HasSupportForSubtitles() && Settings.SUBTITLES_INVIDEO_ENABELD;
-            EpisodesTap.IsVisible = false; // TODO: ADD EPISODES SWITCH
-            NextEpisodeTap.IsVisible = false; // TODO: ADD NEXT EPISODE
+                SubtitleTxt1.FontFamily = fontFam;
+                SubtitleTxt2.FontFamily = fontFam;
 
-            if (currentVideo.isDownloadFile) {
-                var keys = Download.downloads.Keys;
-                foreach (var key in keys) {
-                    var info = Download.downloads[key].info;
-                    if (info.source == currentVideo.headerId) {
-                        if (info.episode == currentVideo.episode + 1 && info.season == currentVideo.season) {
+                SubtitleTxt1.ClassId = classId;
+                SubtitleTxt2.ClassId = classId;
+
+                // ======================= END =======================
+
+                LibVLCSharp.Shared.Core.Initialize();
+                lockElements = new VisualElement[] { NextMirror, NextMirrorBtt, BacktoMain, GoBackBtt, EpisodeLabel, PausePlayClickBtt, PausePlayBtt, SkipForward, SkipForwardBtt, SkipForwardImg, SkipForwardSmall, SkipBack, SkipBackBtt, SkipBackImg, SkipBackSmall };
+                settingsElements = new VisualElement[] { EpisodesTap, MirrorsTap, DelayTap, SubTap, NextEpisodeTap, };
+                VisualElement[] pressIcons = new VisualElement[] { LockTap, EpisodesTap, MirrorsTap, DelayTap, SubTap, NextEpisodeTap };
+
+                void SetIsLocked()
+                {
+                    LockImg.Source = App.GetImageSource(isLocked ? LOCKED_IMAGE : UN_LOCKED_IMAGE);
+                    LockTxt.TextColor = Color.FromHex(isLocked ? "#516bde" : "#FFFFFF"); // 516bde 617EFF
+                                                                                         // LockTap.SetValue(XamEffects.TouchEffect.ColorProperty, Color.FromHex(isLocked ? "#617EFF" : "#FFFFFF"));
+                    LockTap.SetValue(XamEffects.TouchEffect.ColorProperty, Color.FromHex(isLocked ? "#99acff" : "#FFFFFF"));
+                    //LockTap.BackgroundColor = isLocked ? new Color(0.6, 0.67, 1, 0.1) : Color.Transparent;
+                    LockImg.Transformations = new List<FFImageLoading.Work.ITransformation>() { (new FFImageLoading.Transformations.TintTransformation(isLocked ? MainPage.DARK_BLUE_COLOR : "#FFFFFF")) };
+                    VideoSlider.InputTransparent = isLocked;
+
+                    foreach (var visual in lockElements) {
+                        visual.IsEnabled = !isLocked;
+                        visual.IsVisible = !isLocked;
+                    }
+
+                    foreach (var visual in settingsElements) {
+                        visual.Opacity = isLocked ? 0 : 1;
+                        visual.IsEnabled = !isLocked;
+                    }
+
+                    if (!isLocked) {
+                        ShowNextMirror();
+                    }
+                }
+
+
+                SkipForward.TranslationX = TRANSLATE_START_X;
+                SkipForwardImg.Source = App.GetImageSource("netflixSkipForward.png");
+                SkipForwardBtt.TranslationX = TRANSLATE_START_X;
+                Commands.SetTap(SkipForwardBtt, new Command(() => {
+                    if (!isShown) return;
+                    CurrentTap++;
+                    StartFade();
+                    SeekMedia(SkipTime);
+                    lastClick = DateTime.Now;
+                    SkipFor();
+                }));
+
+                SkipBack.TranslationX = -TRANSLATE_START_X;
+                SkipBackImg.Source = App.GetImageSource("netflixSkipBack.png");
+                SkipBackBtt.TranslationX = -TRANSLATE_START_X;
+                Commands.SetTap(SkipBackBtt, new Command(() => {
+                    if (!isShown) return;
+                    CurrentTap++;
+                    StartFade();
+                    SeekMedia(-SkipTime);
+                    lastClick = DateTime.Now;
+                    SkipBac();
+                }));
+
+                Commands.SetTap(LockTap, new Command(() => {
+                    isLocked = !isLocked;
+                    CurrentTap++;
+                    FadeEverything(false);
+                    StartFade();
+                    SetIsLocked();
+                }));
+
+                MirrorsTap.IsVisible = !currentVideo.isDownloadFile && AllMirrorsUrls.Count > 1;
+
+                if (Settings.SUBTITLES_INVIDEO_ENABELD) {
+                    try {
+                        if (globalSubtitlesEnabled && HasSupportForSubtitles()) {
+                            PopulateSubtitle();
+                        }
+                    }
+                    catch (Exception _ex) {
+                        print("A_A__A__A:: " + _ex);
+                    }
+                }
+
+                SubTap.IsVisible = HasSupportForSubtitles() && Settings.SUBTITLES_INVIDEO_ENABELD;
+                EpisodesTap.IsVisible = false; // TODO: ADD EPISODES SWITCH
+                NextEpisodeTap.IsVisible = false; // TODO: ADD NEXT EPISODE
+
+                if (currentVideo.isDownloadFile) {
+                    var keys = Download.downloads.Keys;
+                    foreach (var key in keys) {
+                        var info = Download.downloads[key].info;
+                        if (info.source == currentVideo.headerId) {
+                            if (info.episode == currentVideo.episode + 1 && info.season == currentVideo.season) {
+                                NextEpisodeTap.IsVisible = true;
+
+                                NextEpisodeClicked = async () => {
+                                    await Navigation.PopModalAsync(true);
+                                    Download.PlayDownloadedFile(info, false);
+                                };
+
+                                Commands.SetTap(NextEpisodeTap, new Command(async () => {
+                                    await NextEpisodeClicked();
+                                }));
+                                break;
+                            }
+                        }
+                    }
+                }
+                else {
+                    if (currentVideo.headerId == loadLinkValidForHeader) {
+                        if (canLoad?.Invoke(currentVideo.episodeId) ?? false) {
                             NextEpisodeTap.IsVisible = true;
+                            canLazyLoadNextEpisode = true;
 
                             NextEpisodeClicked = async () => {
-                                await Navigation.PopModalAsync(true);
-                                Download.PlayDownloadedFile(info, false);
+                                await loadLinkForNext?.Invoke(currentVideo.episodeId, true);
                             };
 
                             Commands.SetTap(NextEpisodeTap, new Command(async () => {
                                 await NextEpisodeClicked();
                             }));
-                            break;
                         }
                     }
                 }
-            }
-            else {
-                if (currentVideo.headerId == loadLinkValidForHeader) {
-                    if (canLoad?.Invoke(currentVideo.episodeId) ?? false) {
-                        NextEpisodeTap.IsVisible = true;
-                        canLazyLoadNextEpisode = true;
-
-                        NextEpisodeClicked = async () => {
-                            await loadLinkForNext?.Invoke(currentVideo.episodeId, true);
-                        };
-
-                        Commands.SetTap(NextEpisodeTap, new Command(async () => {
-                            await NextEpisodeClicked();
-                        }));
-                    }
-                }
-            }
 
 
-            Commands.SetTap(MirrorsTap, new Command(async () => {
-                string action = await ActionPopup.DisplayActionSheet("Mirrors", AllMirrorsNames.ToArray());//await DisplayActionSheet("Mirrors", "Cancel", null, AllMirrorsNames.ToArray());
-                App.ToggleRealFullScreen(true);
-                CurrentTap++;
-                StartFade();
-                print("ACTION = " + action);
-                if (action != "Cancel") {
-                    for (int i = 0; i < AllMirrorsNames.Count; i++) {
-                        if (AllMirrorsNames[i] == action) {
-                            print("SELECT MIRR" + action);
-                            SelectMirror(i);
-                        }
-                    }
-                }
-            }));
-
-            Commands.SetTap(SubTap, new Command(async () => {
-                await SubtitleOptions();
-            }));
-
-            Commands.SetTap(DelayTap, new Command(async () => {
-                int action = await ActionPopup.DisplayIntEntry("ms", "Audio Delay", 50, false, App.GetDelayAudio().ToString(), "Set Delay");//await DisplayActionSheet("Mirrors", "Cancel", null, AllMirrorsNames.ToArray());
-                print("MAINACTIONFROM : " + action);
-                App.ToggleRealFullScreen(true);
-                CurrentTap++;
-                StartFade();
-                if (action != -1) {
-                    App.SetAudioDelay(action);
-                    UpdateAudioDelay(action);
-                }
-            }));
-
-            // ======================= SETUP ======================= 
-            if (_libVLC == null) {
-                _libVLC = new LibVLC();
-            }
-            if (_mediaPlayer == null) {
-                _mediaPlayer = new MediaPlayer(_libVLC) { EnableHardwareDecoding = false, };
-            }
-
-            vvideo.MediaPlayer = _mediaPlayer; // = new VideoView() { MediaPlayer = _mediaPlayer };
-
-            App.OnAppNotInForground += (o, e) => {
-                HandleAppExit();
-            };
-            App.OnAppReopen += (o, e) => {
-                HandleAppReopen();
-            };
-
-            // ========== IMGS ==========
-            // SubtitlesImg.Source = App.GetImageSource("netflixSubtitlesCut.png"); //App.GetImageSource("baseline_subtitles_white_48dp.png");
-            //MirrosImg.Source = App.GetImageSource("baseline_playlist_play_white_48dp.png");
-            AudioImg.Source = App.GetImageSource("AudioVolLow3.png"); // App.GetImageSource("baseline_volume_up_white_48dp.png");
-            EpisodesImg.Source = App.GetImageSource("netflixEpisodesCut.png");
-            // NextImg.Source = App.GetImageSource("baseline_skip_next_white_48dp.png");
-            // BacktoMain.Source = App.GetImageSource("baseline_keyboard_arrow_left_white_48dp.png");
-            // NextMirror.Source = App.GetImageSource("baseline_skip_next_white_48dp.png");
-            SetIsLocked();
-            // LockImg.Source = App.GetImageSource("wlockUnLocked.png");
-            //SubtitleImg.Source = App.GetImageSource("outline_subtitles_white_48dp.png");
-
-
-            //  GradientBottom.Source = App.GetImageSource("gradient.png");
-            // DownloadImg.Source = App.GetImageSource("netflixEpisodesCut.png");//App.GetImageSource("round_more_vert_white_48dp.png");
-
-
-
-            Player.AudioDevice += (o, e) => {
-                SetIsPaused(true);
-            };
-
-
-            Commands.SetTap(EpisodesTap, new Command(() => {
-                //do something
-                print("Hello");
-            }));
-            Commands.SetTap(NextMirrorBtt, new Command(() => {
-                SelectNextMirror();
-            }));
-
-
-            //Commands.SetTapParameter(view, someObject);
-            // ================================================================================ UI ================================================================================
-            PausePlayBtt.Source = PAUSE_IMAGE;//App.GetImageSource(PAUSE_IMAGE);
-            //PausePlayClickBtt.set
-            Commands.SetTap(PausePlayClickBtt, new Command(() => {
-                //do something
-                PausePlayBtt_Clicked(null, EventArgs.Empty);
-                print("Hello");
-            }));
-            Commands.SetTap(GoBackBtt, new Command(() => {
-                print("DAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAdddddddddddAAAAAAAA");
-                Navigation.PopModalAsync();
-                //Navigation.PopModalAsync();
-            }));
-
-            void SetIsPaused(bool paused)
-            {
-                PausePlayBtt.Source = paused ? PLAY_IMAGE : PAUSE_IMAGE;//App.GetImageSource(paused ? PLAY_IMAGE : PAUSE_IMAGE);
-                PausePlayBtt.Opacity = 1;
-                LoadingCir.IsVisible = false;
-                BufferLabel.IsVisible = false;
-                isPaused = paused;
-                if (!isPaused) {
-                    UpdateAudioDelay(App.GetDelayAudio());
-                }
-            }
-
-            Player.Paused += (o, e) => {
-                Device.BeginInvokeOnMainThread(() => {
-                    SetIsPaused(true);
-                    App.ReleaseAudioFocus();
-                    //   LoadingCir.IsEnabled = false;
-                });
-            };
-
-            Player.Playing += (o, e) => {
-                skips = new List<SkipMetadata>();
-                if (Settings.VideoPlayerShowSkip) {
-                    int chapterCount = Player.ChapterCount;
-                    if (chapterCount > 0) {
-                        var cc = Player.FullChapterDescriptions();
-                        foreach (var t in cc) { // SKIP INTRO
-                            if (t.Name.IsClean()) {
-                                var name = t.Name.ToLower();
-                                if (name.Contains("opening")) {
-                                    skips.Add(new SkipMetadata() { duration = t.Duration, name = "Skip Opening", timestamp = t.TimeOffset });
-                                }
-                                else if (name.Contains("ending") || name == "end") {
-                                    string _name = "Skip Credits";
-                                    if (t.Duration + t.TimeOffset + 1000 > Player.Length && NextEpisodeClicked != null) {
-                                        _name = "Next episode";
-                                    }
-                                    skips.Add(new SkipMetadata() { duration = t.Duration, name = _name, timestamp = t.TimeOffset });
-                                }
+                Commands.SetTap(MirrorsTap, new Command(async () => {
+                    string action = await ActionPopup.DisplayActionSheet("Mirrors", AllMirrorsNames.ToArray());//await DisplayActionSheet("Mirrors", "Cancel", null, AllMirrorsNames.ToArray());
+                    App.ToggleRealFullScreen(true);
+                    CurrentTap++;
+                    StartFade();
+                    print("ACTION = " + action);
+                    if (action != "Cancel") {
+                        for (int i = 0; i < AllMirrorsNames.Count; i++) {
+                            if (AllMirrorsNames[i] == action) {
+                                print("SELECT MIRR" + action);
+                                SelectMirror(i);
                             }
                         }
-                        print(cc);
                     }
+                }));
 
-                    if (NextEpisodeClicked != null) {
-                        skips.Add(new SkipMetadata() { duration = 5000, name = "Next episode", timestamp = Player.Length - 5000 });
+                Commands.SetTap(SubTap, new Command(async () => {
+                    await SubtitleOptions();
+                }));
+
+                Commands.SetTap(DelayTap, new Command(async () => {
+                    int action = await ActionPopup.DisplayIntEntry("ms", "Audio Delay", 50, false, App.GetDelayAudio().ToString(), "Set Delay");//await DisplayActionSheet("Mirrors", "Cancel", null, AllMirrorsNames.ToArray());
+                    print("MAINACTIONFROM : " + action);
+                    App.ToggleRealFullScreen(true);
+                    CurrentTap++;
+                    StartFade();
+                    if (action != -1) {
+                        App.SetAudioDelay(action);
+                        UpdateAudioDelay(action);
                     }
+                }));
 
-                    if (Settings.VideoPlayerSponsorblock) {
-                        bool autoSkip = Settings.VideoPlayerSponsorblockAutoSkipAds;
-                        try {
-                            if (video.headerId.Contains("youtube.com") || video.headerId.Contains("youtu.be")) {
-                                var id = YouTube.GetYTVideoId(video.headerId);
-                                if (id != "") {
-                                    var segments = App.GetKey<List<YTSponsorblockVideoSegments>>("Sponsorblock", id, null);
-                                    if (segments != null) {
-                                        foreach (var seg in segments) {
-                                            long start = (long)(seg.segment[0] * 1000);
-                                            long end = (long)(seg.segment[1] * 1000);
+                // ======================= SETUP ======================= 
+                if (_libVLC == null) {
+                    _libVLC = new LibVLC();
+                }
+                if (_mediaPlayer == null) {
+                    _mediaPlayer = new MediaPlayer(_libVLC) { EnableHardwareDecoding = false, };
+                }
 
-                                            if (seg.category == "sponsor" || seg.category == "selfpromo") {
-                                                skips.Add(new SkipMetadata() { duration = end - start, name = "Skip Ad", timestamp = start, forceSkip = autoSkip });
-                                            }
-                                            else if (seg.category == "intro") {
-                                                skips.Add(new SkipMetadata() { duration = end - start, name = "Skip Intro", timestamp = start });
-                                            }
-                                            else if (seg.category == "outro") {
-                                                skips.Add(new SkipMetadata() { duration = end - start, name = "Skip Outro", timestamp = start });
-                                            }
-                                            else if (seg.category == "music_offtopic") {
-                                                skips.Add(new SkipMetadata() { duration = end - start, name = "Skip Music", timestamp = start });
+                vvideo.MediaPlayer = _mediaPlayer; // = new VideoView() { MediaPlayer = _mediaPlayer };
+
+                App.OnAppNotInForground += (o, e) => {
+                    HandleAppExit();
+                };
+
+
+                // ========== IMGS ==========
+                // SubtitlesImg.Source = App.GetImageSource("netflixSubtitlesCut.png"); //App.GetImageSource("baseline_subtitles_white_48dp.png");
+                //MirrosImg.Source = App.GetImageSource("baseline_playlist_play_white_48dp.png");
+                AudioImg.Source = App.GetImageSource("AudioVolLow3.png"); // App.GetImageSource("baseline_volume_up_white_48dp.png");
+                EpisodesImg.Source = App.GetImageSource("netflixEpisodesCut.png");
+                // NextImg.Source = App.GetImageSource("baseline_skip_next_white_48dp.png");
+                // BacktoMain.Source = App.GetImageSource("baseline_keyboard_arrow_left_white_48dp.png");
+                // NextMirror.Source = App.GetImageSource("baseline_skip_next_white_48dp.png");
+                SetIsLocked();
+                // LockImg.Source = App.GetImageSource("wlockUnLocked.png");
+                //SubtitleImg.Source = App.GetImageSource("outline_subtitles_white_48dp.png");
+
+
+                //  GradientBottom.Source = App.GetImageSource("gradient.png");
+                // DownloadImg.Source = App.GetImageSource("netflixEpisodesCut.png");//App.GetImageSource("round_more_vert_white_48dp.png");
+
+
+
+                Player.AudioDevice += (o, e) => {
+                    SetIsPaused(true);
+                };
+
+
+                Commands.SetTap(EpisodesTap, new Command(() => {
+                    //do something
+                    print("Hello");
+                }));
+                Commands.SetTap(NextMirrorBtt, new Command(() => {
+                    SelectNextMirror();
+                }));
+
+
+                //Commands.SetTapParameter(view, someObject);
+                // ================================================================================ UI ================================================================================
+                PausePlayBtt.Source = PAUSE_IMAGE;//App.GetImageSource(PAUSE_IMAGE);
+                                                  //PausePlayClickBtt.set
+                Commands.SetTap(PausePlayClickBtt, new Command(() => {
+                    //do something
+                    PausePlayBtt_Clicked(null, EventArgs.Empty);
+                    print("Hello");
+                }));
+                Commands.SetTap(GoBackBtt, new Command(() => {
+                    print("DAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAdddddddddddAAAAAAAA");
+                    Navigation.PopModalAsync();
+                    //Navigation.PopModalAsync();
+                }));
+
+                void SetIsPaused(bool paused)
+                {
+                    PausePlayBtt.Source = paused ? PLAY_IMAGE : PAUSE_IMAGE;//App.GetImageSource(paused ? PLAY_IMAGE : PAUSE_IMAGE);
+                    PausePlayBtt.Opacity = 1;
+                    LoadingCir.IsVisible = false;
+                    BufferLabel.IsVisible = false;
+                    isPaused = paused;
+                    if (!isPaused) {
+                        UpdateAudioDelay(App.GetDelayAudio());
+                    }
+                }
+
+                Player.Paused += (o, e) => {
+                    Device.BeginInvokeOnMainThread(() => {
+                        SetIsPaused(true);
+                        App.ReleaseAudioFocus();
+                        //   LoadingCir.IsEnabled = false;
+                    });
+                };
+
+                Player.Playing += (o, e) => {
+                    skips = new List<SkipMetadata>();
+                    if (Settings.VideoPlayerShowSkip) {
+                        int chapterCount = Player.ChapterCount;
+                        if (chapterCount > 0) {
+                            var cc = Player.FullChapterDescriptions();
+                            foreach (var t in cc) { // SKIP INTRO
+                                if (t.Name.IsClean()) {
+                                    var name = t.Name.ToLower();
+                                    if (name.Contains("opening")) {
+                                        skips.Add(new SkipMetadata() { duration = t.Duration, name = "Skip Opening", timestamp = t.TimeOffset });
+                                    }
+                                    else if (name.Contains("ending") || name == "end") {
+                                        string _name = "Skip Credits";
+                                        if (t.Duration + t.TimeOffset + 1000 > Player.Length && NextEpisodeClicked != null) {
+                                            _name = "Next episode";
+                                        }
+                                        skips.Add(new SkipMetadata() { duration = t.Duration, name = _name, timestamp = t.TimeOffset });
+                                    }
+                                }
+                            }
+                            print(cc);
+                        }
+
+                        if (NextEpisodeClicked != null) {
+                            skips.Add(new SkipMetadata() { duration = 5000, name = "Next episode", timestamp = Player.Length - 5000 });
+                        }
+
+                        if (Settings.VideoPlayerSponsorblock) {
+                            bool autoSkip = Settings.VideoPlayerSponsorblockAutoSkipAds;
+                            try {
+                                if (video.headerId.Contains("youtube.com") || video.headerId.Contains("youtu.be")) {
+                                    var id = YouTube.GetYTVideoId(video.headerId);
+                                    if (id != "") {
+                                        var segments = App.GetKey<List<YTSponsorblockVideoSegments>>("Sponsorblock", id, null);
+                                        if (segments != null) {
+                                            foreach (var seg in segments) {
+                                                long start = (long)(seg.segment[0] * 1000);
+                                                long end = (long)(seg.segment[1] * 1000);
+
+                                                if (seg.category == "sponsor" || seg.category == "selfpromo") {
+                                                    skips.Add(new SkipMetadata() { duration = end - start, name = "Skip Ad", timestamp = start, forceSkip = autoSkip });
+                                                }
+                                                else if (seg.category == "intro") {
+                                                    skips.Add(new SkipMetadata() { duration = end - start, name = "Skip Intro", timestamp = start });
+                                                }
+                                                else if (seg.category == "outro") {
+                                                    skips.Add(new SkipMetadata() { duration = end - start, name = "Skip Outro", timestamp = start });
+                                                }
+                                                else if (seg.category == "music_offtopic") {
+                                                    skips.Add(new SkipMetadata() { duration = end - start, name = "Skip Music", timestamp = start });
+                                                }
                                             }
                                         }
                                     }
                                 }
                             }
-                        }
-                        catch (Exception) {
+                            catch (Exception) {
+
+                            }
 
                         }
-
                     }
-                }
-                isFirstLoadedMirror = false;
+                    isFirstLoadedMirror = false;
 
-                UpdateAudioDelay(App.GetDelayAudio());
-                Device.BeginInvokeOnMainThread(() => {
-                    if (App.GainAudioFocus()) {
-                        SetIsPaused(false);
-                    }
-                    else {
-                        if (GetPlayerIsPauseble()) {
-                            Player.SetPause(true);
+                    UpdateAudioDelay(App.GetDelayAudio());
+                    Device.BeginInvokeOnMainThread(() => {
+                        if (App.GainAudioFocus()) {
+                            SetIsPaused(false);
                         }
-                    }
-                });
-                //   LoadingCir.IsEnabled = false;
-            };
-
-            Player.TimeChanged += (o, e) => {
-                PlayerTimeChanged(e.Time);
-            };
-
-            Player.LengthChanged += (o, e) => {
-                lastPlayerLenght = e.Length;
-            };
-
-            Player.PausableChanged += (o, e) => {
-                isPausable = e.Pausable == 1;
-            };
-
-            Player.SeekableChanged += (o, e) => {
-                isSeekeble = e.Seekable == 1;
-            };
-
-
-            Player.Buffering += (o, e) => {
-                Device.BeginInvokeOnMainThread(() => {
-                    if (e.Cache == 100) {
-                        try {
-                            if (Player != null) {
-                                SetIsPaused(!GetPlayerIsPlaying());
-                                UpdateAudioDelay(App.GetDelayAudio());
+                        else {
+                            if (GetPlayerIsPauseble()) {
+                                Player.SetPause(true);
                             }
                         }
-                        catch (Exception) {
+                    });
+                    //   LoadingCir.IsEnabled = false;
+                };
 
+                Player.TimeChanged += (o, e) => {
+                    PlayerTimeChanged(e.Time);
+                };
+
+                Player.LengthChanged += (o, e) => {
+                    lastPlayerLenght = e.Length;
+                };
+
+                Player.PausableChanged += (o, e) => {
+                    isPausable = e.Pausable == 1;
+                };
+
+                Player.SeekableChanged += (o, e) => {
+                    isSeekeble = e.Seekable == 1;
+                };
+
+
+                Player.Buffering += (o, e) => {
+                    Device.BeginInvokeOnMainThread(() => {
+                        if (e.Cache == 100) {
+                            try {
+                                if (Player != null) {
+                                    SetIsPaused(!GetPlayerIsPlaying());
+                                    UpdateAudioDelay(App.GetDelayAudio());
+                                }
+                            }
+                            catch (Exception) {
+
+                            }
                         }
+                        else {
+                            //BufferBar.ProgressTo(e.Cache / 100.0, 50, Easing.Linear);
+                            BufferLabel.Text = "" + (int)e.Cache + "%";
+                            BufferLabel.IsVisible = true;
+                            PausePlayBtt.Opacity = 0;
+                            LoadingCir.IsVisible = true;
+                        }
+                    });
+
+                };
+
+                Player.EncounteredError += (o, e) => {
+                    // TODO: SKIP TO NEXT
+                    error(_libVLC.LastLibVLCError);
+                    print("ERROR LOADING MDDD: ");
+                    ErrorWhenLoading();
+                };
+
+
+                SelectMirror(currentVideo.preferedMirror);
+                ShowNextMirror();
+
+
+                int columCount = 0;
+                for (int i = 0; i < pressIcons.Length; i++) {
+                    if (pressIcons[i].IsVisible) {
+                        Grid.SetColumn(pressIcons[i], columCount);
+                        columCount++;
                     }
-                    else {
-                        //BufferBar.ProgressTo(e.Cache / 100.0, 50, Easing.Linear);
-                        BufferLabel.Text = "" + (int)e.Cache + "%";
-                        BufferLabel.IsVisible = true;
-                        PausePlayBtt.Opacity = 0;
-                        LoadingCir.IsVisible = true;
-                    }
-                });
-
-            };
-
-            Player.EncounteredError += (o, e) => {
-                // TODO: SKIP TO NEXT
-                error(_libVLC.LastLibVLCError);
-                print("ERROR LOADING MDDD: ");
-                ErrorWhenLoading();
-            };
-
-
-            SelectMirror(currentVideo.preferedMirror);
-            ShowNextMirror();
-
-
-            int columCount = 0;
-            for (int i = 0; i < pressIcons.Length; i++) {
-                if (pressIcons[i].IsVisible) {
-                    Grid.SetColumn(pressIcons[i], columCount);
-                    columCount++;
                 }
+
+
             }
-
-
-
+            catch (Exception _ex) {
+                error("Videoplayer: " + _ex);
+            }
+             
             //  Player.AddSlave(MediaSlaveType.Subtitle,"") // ADD SUBTITLEs
         }
 
@@ -1306,28 +1307,18 @@ namespace CloudStreamForms
 
 
         public static PlayVideo showOnAppearPage;
-        public static bool showOnAppear = false;
-        public async void ForceReloadVideo()
-        {
-            Device.InvokeOnMainThreadAsync(async () => { 
-                await Navigation.PopModalAsync();
-                await Task.Delay(10000);
-                await Navigation.PushModalAsync(new VideoPage(lastVideo), true);
-            });
-        }
+        public static bool showOnAppear = false; 
+        public static bool CanReopen = false;
 
-        public void HandleAppExit()
+        public async void HandleAppExit()
         {
+            CanReopen = true;
+            lastVideo.preferedMirror = currentMirrorId;
+
+            await Navigation.PopModalAsync();
+
             //  ForceReloadOnAppOpen = true;
-        }
-
-        public void HandleAppReopen()
-        {
-            //   if(ForceReloadOnAppOpen) {
-            ForceReloadVideo();
-            //       ForceReloadOnAppOpen = false;
-            //  }
-        }
+        } 
 
 
         public bool ForceReloadOnAppOpen = false;
@@ -1369,7 +1360,7 @@ namespace CloudStreamForms
                 App.OnAudioFocusChanged -= HandleAudioFocus;
 
                 if (lastPlayerTime > 20 && lastPlayerLenght > 100) {
-                    string lastId = currentVideo.episodeId;
+                    string lastId = currentVideo.episodeId ?? currentVideo.episodeId;
                     if (lastId != null) {
                         long pos = lastPlayerTime;//Last position in media when player exited
                         if (pos > -1) {
@@ -1383,6 +1374,8 @@ namespace CloudStreamForms
                         }
                     }
                 }
+                App.SaveData();
+
                 // App.ShowStatusBar();
                 if (changeFullscreenWhenPop) {
                     App.NormalOrientation();
@@ -1659,8 +1652,8 @@ namespace CloudStreamForms
             EpisodeLabel.TranslateTo(EpisodeLabel.TranslationX, disable ? -60 : 20, fadeTime, Easing.Linear);
 
 
-            List<Label> subHolders = new List<Label>();
-            /*subHolders.AddRange(font1);
+            /*List<Label> subHolders = new List<Label>();
+            subHolders.AddRange(font1);
             subHolders.AddRange(font2);
             subHolders.Add(SubtitleTxt1);
             subHolders.Add(SubtitleTxt2);

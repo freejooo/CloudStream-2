@@ -169,7 +169,7 @@ namespace CloudStreamForms
             public string id;
             public int RealId { get { if (id.StartsWith("tt")) { return int.Parse(id.Replace("tt", "")); } else { return ConvertStringToInt(id); } } }
             public string year;
-            public string ogYear => year.Substring(0, 4);
+            public string OgYear => year.Substring(0, 4);
             public string rating;
             public string runtime;
             public string posterUrl;
@@ -199,7 +199,7 @@ namespace CloudStreamForms
 
         public static bool GetVideoPlayerInstalled(VideoPlayer player)
         {
-            return platformDep.GetPlayerInstalled(player);
+            return PlatformDep.GetPlayerInstalled(player);
         }
 
         public static string GetVideoPlayerName(VideoPlayer player)
@@ -230,7 +230,7 @@ namespace CloudStreamForms
 
         public static string ReadFile(string fileName, bool mainPath, string extraPath)
         {
-            return platformDep.ReadFile(fileName, mainPath, extraPath);
+            return PlatformDep.ReadFile(fileName, mainPath, extraPath);
         }
 
         public static string GetPathFromType(DownloadHeader header)
@@ -243,7 +243,7 @@ namespace CloudStreamForms
         /// </summary>
         public static void UpdateDownload(int id, int state)
         {
-            platformDep.UpdateDownload(id, state);
+            PlatformDep.UpdateDownload(id, state);
         }
 
         /*
@@ -262,7 +262,7 @@ namespace CloudStreamForms
               current = devices.FirstOrDefault();
           }*/
 
-        static string outputId = "none";
+        readonly static string outputId = "none";
 
         public static int GetDelayAudio()
         {
@@ -325,7 +325,7 @@ namespace CloudStreamForms
                     return;
                 };
 
-                platformDep.RequestVlc(urls, names, episodeName, episodeId, startId, subtitleFull, (VideoPlayer)Settings.PreferedVideoPlayer);
+                PlatformDep.RequestVlc(urls, names, episodeName, episodeId, startId, subtitleFull, (VideoPlayer)Settings.PreferedVideoPlayer);
             }
             isRequestingVLC = false;
 
@@ -358,7 +358,7 @@ namespace CloudStreamForms
             App.SetKey(nameof(DownloadHeader), "id" + header.RealId, header);
 
             App.SetKey("DownloadIds", id.ToString(), id);
-            string fileUrl = platformDep.DownloadHandleIntent(id, mirrors, downloadTitle, name, true, extraPath, true, true, false, poster, isMovie ? "{name}\n" : ($"S{season}:E{episode} - " + "{name}\n"));
+            string fileUrl = PlatformDep.DownloadHandleIntent(id, mirrors, downloadTitle, name, true, extraPath, true, true, false, poster, isMovie ? "{name}\n" : ($"S{season}:E{episode} - " + "{name}\n"));
             App.SetKey(nameof(DownloadEpisodeInfo), "id" + id, new DownloadEpisodeInfo() { dtype = DownloadType.Normal, source = header.id, description = description, downloadHeader = header.RealId, episode = episode, season = season, fileUrl = fileUrl, id = id, name = name, hdPosterUrl = poster, episodeIMDBId = episodeIMDBId });
 
             return fileUrl;
@@ -384,7 +384,7 @@ namespace CloudStreamForms
             if (info == null) return null;
             //  Stopwatch stop = new Stopwatch();
             //stop.Start();
-            var i = new DownloadInfo() { info = info, state = hasState ? platformDep.GetDownloadProgressInfo(id, info.fileUrl) : null };
+            var i = new DownloadInfo() { info = info, state = hasState ? PlatformDep.GetDownloadProgressInfo(id, info.fileUrl) : null };
             //   stop.Stop(); print("DLENNNNN:::" + stop.ElapsedMilliseconds);
             return i;
         }
@@ -419,11 +419,11 @@ namespace CloudStreamForms
 
         public static void Test()
         {
-            platformDep.Test();
+            PlatformDep.Test();
         }
 
         private static IPlatformDep _platformDep;
-        public static IPlatformDep platformDep {
+        public static IPlatformDep PlatformDep {
             set {
                 _platformDep = value;
                 _platformDep.OnAudioFocusChanged += (o, e) => { OnAudioFocusChanged?.Invoke(o, e); };
@@ -435,42 +435,42 @@ namespace CloudStreamForms
 
         public static bool GainAudioFocus()
         {
-            return platformDep.GainAudioFocus();
+            return PlatformDep.GainAudioFocus();
         }
 
         public static void ReleaseAudioFocus()
         {
-            platformDep.ReleaseAudioFocus();
+            PlatformDep.ReleaseAudioFocus();
         }
 
         public static void UpdateStatusBar()
         {
-            platformDep.UpdateStatusBar();
+            PlatformDep.UpdateStatusBar();
         }
 
         public static void ToggleFullscreen(bool fullscreen)
         {
-            platformDep.ToggleFullscreen(fullscreen);
+            PlatformDep.ToggleFullscreen(fullscreen);
         }
 
         public static void ToggleRealFullScreen(bool fullscreen)
         {
-            platformDep.ToggleRealFullScreen(fullscreen);
+            PlatformDep.ToggleRealFullScreen(fullscreen);
         }
 
         public static double GetBrightness()
         {
-            return platformDep.GetBrightness();
+            return PlatformDep.GetBrightness();
         }
 
         public static void SetBrightness(double brightness)
         {
-            platformDep.SetBrightness(brightness);
+            PlatformDep.SetBrightness(brightness);
         }
 
         public static void ShowNotIntent(string title, string body, int id, string titleId, string titleName, DateTime? time = null, string bigIconUrl = "")
         {
-            platformDep.ShowNotIntent(title, body, id, titleId, titleName, time, bigIconUrl);
+            PlatformDep.ShowNotIntent(title, body, id, titleId, titleName, time, bigIconUrl);
         }
 
         public static bool isOnMainPage = true;
@@ -482,32 +482,32 @@ namespace CloudStreamForms
             }
             CloudStreamForms.MainPage.mainPage.BarBackgroundColor = new Color(color / 255.0, color / 255.0, color / 255.0, 1);
 
-            platformDep.UpdateBackground(isOnMainPage ? color : Settings.BlackColor);
+            PlatformDep.UpdateBackground(isOnMainPage ? color : Settings.BlackColor);
         }
 
         public static void UpdateToTransparentBg()
         {
-            platformDep.UpdateBackground();
+            PlatformDep.UpdateBackground();
         }
 
         public static void HideStatusBar()
         {
-            platformDep.HideStatusBar();
+            PlatformDep.HideStatusBar();
         }
 
         public static void ShowStatusBar()
         {
-            platformDep.ShowStatusBar();
+            PlatformDep.ShowStatusBar();
         }
 
         public static void LandscapeOrientation()
         {
-            platformDep.LandscapeOrientation();
+            PlatformDep.LandscapeOrientation();
         }
 
         public static void NormalOrientation()
         {
-            platformDep.NormalOrientation();
+            PlatformDep.NormalOrientation();
         }
 
         public App()
@@ -519,12 +519,12 @@ namespace CloudStreamForms
 
         public static int ConvertDPtoPx(int dp)
         {
-            return platformDep.ConvertDPtoPx(dp);
+            return PlatformDep.ConvertDPtoPx(dp);
         }
 
         public static StorageInfo GetStorage()
         {
-            return platformDep.GetStorageInformation();
+            return PlatformDep.GetStorageInformation();
         }
 
         public static double ConvertBytesToGB(long bytes, int digits = 2)
@@ -545,12 +545,12 @@ namespace CloudStreamForms
 
         public static bool DeleteFile(string path)
         {
-            return platformDep.DeleteFile(path);
+            return PlatformDep.DeleteFile(path);
         }
 
         public static void ShowToast(string message, double duration = 2.5)
         {
-            platformDep.ShowToast(message, duration);
+            PlatformDep.ShowToast(message, duration);
         }
 
         public static string GetBuildNumber()
@@ -589,13 +589,26 @@ namespace CloudStreamForms
 
         public static void DownloadNewGithubUpdate(string update, AndroidVersionArchitecture version)
         {
-            platformDep.DownloadUpdate(update, GetVersionBuildName(version));
+            PlatformDep.DownloadUpdate(update, GetVersionBuildName(version));
         }
 
         public static string GetDownloadPath(string path, string extraFolder)
         {
-            return platformDep.GetDownloadPath(path, extraFolder);
+            return PlatformDep.GetDownloadPath(path, extraFolder);
         }
+
+        public static async void SaveData()
+        {
+            print("SAVING DATA");
+            try {
+                await Application.Current.SavePropertiesAsync();
+            }
+            catch (Exception _ex) {
+                error(_ex);
+            }
+            print("SAVING DATA DONE!!");
+        }
+
 
         /*
         public static void PlayVLCWithSingleUrl(List<string> url, List<string> name, List<string> subtitleData, List<string> subtitleNames, string publicName = "", int episode = -1, int season = -1, bool? overrideSelectVideo = null)
@@ -676,6 +689,7 @@ namespace CloudStreamForms
 
         public static long GetViewPos(string id)
         {
+            if (!id.IsClean()) return -1;
             long _parse = GetLongRegex(id);
             return GetKey(VIEW_TIME_POS, _parse.ToString(), -1L);
         }
@@ -687,6 +701,7 @@ namespace CloudStreamForms
 
         public static long GetViewDur(string id)
         {
+            if (!id.IsClean()) return -1;
             long _parse = GetLongRegex(id);
             return GetViewDur(_parse);
         }
@@ -885,7 +900,7 @@ namespace CloudStreamForms
         public static void CancelNotifaction(int id)
         {
             CrossLocalNotifications.Current.Cancel(id);
-            platformDep.CancelNot(id);
+            PlatformDep.CancelNot(id);
         }
 
         private static ISettings AppSettings =>
@@ -897,12 +912,12 @@ namespace CloudStreamForms
 
         public static string DownloadUrl(string url, string fileName, bool mainPath = true, string extraPath = "", string toast = "", bool isNotification = false, string body = "")
         {
-            return platformDep.DownloadUrl(url, fileName, mainPath, extraPath, toast, isNotification, body);
+            return PlatformDep.DownloadUrl(url, fileName, mainPath, extraPath, toast, isNotification, body);
         }
 
         public static string DownloadFile(string file, string fileName, bool mainPath = true, string extraPath = "")
         {
-            return platformDep.DownloadFile(file, fileName, mainPath, extraPath);
+            return PlatformDep.DownloadFile(file, fileName, mainPath, extraPath);
         }
 
         public static string ConvertPathAndNameToM3U8(List<string> path, List<string> name, bool isSubtitleEnabled = false, string beforePath = "", string overrideSubtitles = null)

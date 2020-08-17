@@ -23,10 +23,10 @@ namespace CloudStreamForms
 
         public const bool IS_TEST_BUILD = false;
 
-        LabelList ColorPicker;
-        LabelList SubLangPicker;
-        LabelList SubStylePicker;
-        LabelList SubFontPicker;
+        readonly LabelList ColorPicker;
+        readonly LabelList SubLangPicker;
+        readonly LabelList SubStylePicker;
+        readonly LabelList SubFontPicker;
         LabelList VideoplayerOptionPicker;
 
         public string MainTxtColor { set; get; } = "#e1e1e1";
@@ -132,7 +132,7 @@ namespace CloudStreamForms
                 return App.GetKey("Settings", nameof(GlobalSubtitleFont), GlobalFonts[0]); // Trebuchet MS, Open Sans, Google Sans
             }
         }
-         
+
         public static bool HasAccountLogin {
             set {
                 App.SetKey("Account", nameof(HasAccountLogin), value);
@@ -177,7 +177,7 @@ namespace CloudStreamForms
                 return App.GetKey("Account", nameof(AccountOverrideServerData), false);
             }
         }
-         
+
         public static string NativeSubShortName {
             get {
                 return CloudStreamCore.subtitleShortNames[NativeSubtitles];
@@ -449,7 +449,7 @@ namespace CloudStreamForms
         public static bool CacheMAL { get { return CacheData; } }
 
         static bool initVideoPlayer = true;
-        VisualElement[] displayElements;
+        readonly VisualElement[] displayElements;
 
         public static void OnInit()
         {
@@ -461,7 +461,6 @@ namespace CloudStreamForms
         {
             InitializeComponent();
             OnInit();
-
 
             displayElements = new VisualElement[] {
                 G_GeneralTxt,
@@ -553,8 +552,8 @@ namespace CloudStreamForms
             //  if (Device.RuntimePlatform == Device.UWP) {
             BindingContext = this;
             // }
-            StarMe.Clicked += (o, e) => {
-                App.OpenBrowser("https://github.com/LagradOst/CloudStream-2");
+            StarMe.Clicked += async (o, e) => {
+                await App.OpenBrowser("https://github.com/LagradOst/CloudStream-2");
             };
             BuildNumber.Text = "Build Version: " + App.GetBuildNumber();
             Apper();
@@ -654,13 +653,13 @@ namespace CloudStreamForms
 
             UpdateBtt.Clicked += (o, e) => {
                 if (NewGithubUpdate) {
-                    App.DownloadNewGithubUpdate(githubUpdateTag,App.AndroidVersionArchitecture.Universal);
+                    App.DownloadNewGithubUpdate(githubUpdateTag, App.AndroidVersionArchitecture.Universal);
                 }
             };
 
 
             ManageAccount.Clicked += async (o, e) => {
-                ManageAccountClicked(() => Apper());
+                await ManageAccountClicked(() => Apper());
             };
             OnInitAfter();
 
@@ -678,7 +677,7 @@ namespace CloudStreamForms
             }*/
         }
         public static void OnInitAfter()
-        {  
+        {
             if (AccountOverrideServerData) { // If get account dident work and you have changed then override server data
                 PublishSyncAccount(5000);
             }
@@ -869,7 +868,7 @@ namespace CloudStreamForms
                     }
                 }
             }
-        }  
+        }
 
         const double MAX_LOADING_TIME = 30000;
         const double MIN_LOADING_TIME = 1000;
@@ -1068,7 +1067,7 @@ namespace CloudStreamForms
         const string BEFORE_SALT_PASSWORD = "BeforeSalt";
         const string AFTER_SALT_PASSWORD = "AfterSalt";
 
-        static Random rng = new Random();
+        readonly static Random rng = new Random();
 
         public static void GetSyncAccount(int delay = 0, string _data = null)
         {

@@ -243,7 +243,7 @@ namespace CloudStreamForms.Core.AnimeProviders
                 MoeItem[] allItems = JsonConvert.DeserializeObject<MoeItem[]>(allD);
                 foreach (var item in allItems) {
                     if (item.mal_id != null) {
-                        var slug = item?.slug?.slug;
+                        var slug = item.slug?.slug;
                         //print("MALID: " + item.mal_id + "|" + slug);
                         if (slug != null) {
                             twistMoeSearch[(int)item.mal_id] = slug;
@@ -260,16 +260,16 @@ namespace CloudStreamForms.Core.AnimeProviders
             }
         }
 
-        public class MoeSlug
+        public struct MoeSlug
         {
             //public int id { get; set; }
-            public string? slug { get; set; }
+            public string slug;
             //public int anime_id { get; set; }
             //public string created_at { get; set; }
             //public string updated_at { get; set; }
         }
 
-        public class MoeItem
+        public struct MoeItem
         {
             // public int id { get; set; }
             // public string title { get; set; }
@@ -280,8 +280,8 @@ namespace CloudStreamForms.Core.AnimeProviders
             // public string created_at { get; set; }
             // public string updated_at { get; set; }
             // public int hidden { get; set; }
-            public int? mal_id { get; set; }
-            public MoeSlug? slug { get; set; }
+            public int? mal_id;
+            public MoeSlug? slug;
         }
 
         public class TwistMoeRoot
@@ -292,7 +292,7 @@ namespace CloudStreamForms.Core.AnimeProviders
         /// <summary>
         /// GIVEN MAL ID, RETURN SLUG
         /// </summary>
-        static Dictionary<int, string> twistMoeSearch = new Dictionary<int, string>();
+        readonly static Dictionary<int, string> twistMoeSearch = new Dictionary<int, string>();
 
 
         public class MoeSource

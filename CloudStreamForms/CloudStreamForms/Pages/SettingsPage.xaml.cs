@@ -91,8 +91,8 @@ namespace CloudStreamForms.Pages
 
         public class VarRef<T>
         {
-            private Func<T> _get;
-            private Action<T> _set;
+            private readonly Func<T> _get;
+            private readonly Action<T> _set;
 
             public VarRef(Func<T> @get, Action<T> @set)
             {
