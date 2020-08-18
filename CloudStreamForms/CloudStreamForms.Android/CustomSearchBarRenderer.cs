@@ -48,11 +48,16 @@ namespace CloudStreamForms.Droid
             int frameId = searchView.Context.Resources.GetIdentifier("android:id/search_plate", null, null);
             Android.Views.View frameView = (searchView.FindViewById(frameId) as Android.Views.View);
             frameView.SetBackgroundColor(G.Color.Transparent);//G.Color.ParseColor(CloudStreamForms.Settings.MainBackgroundColor));
-
+            
 
             var searchIconId = searchView.Resources.GetIdentifier("android:id/search_mag_icon", null, null);
             if (searchIconId > 0) {
                 var searchPlateIcon = searchView.FindViewById(searchIconId);
+                searchPlateIcon.ScaleX = 0.75f;
+                searchPlateIcon.ScaleY = 0.75f;
+                searchPlateIcon.TranslationX = -5;
+                
+                (searchPlateIcon as ImageView).SetImageDrawable(context.GetDrawable(Resource.Drawable.MainSearchIcon));
                 (searchPlateIcon as ImageView).SetColorFilter(G.Color.Rgb(190, 190, 190));
             }
         }

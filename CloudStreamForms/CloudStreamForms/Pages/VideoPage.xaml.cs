@@ -1136,9 +1136,7 @@ namespace CloudStreamForms
                         //   LoadingCir.IsEnabled = false;
                     });
                 };
-
-
-
+                 
                 Player.Playing += (o, e) => {
                     skips = new List<SkipMetadata>();
                     if (Settings.VideoPlayerShowSkip) {

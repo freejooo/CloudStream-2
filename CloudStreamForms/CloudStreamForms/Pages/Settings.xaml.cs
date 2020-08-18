@@ -731,6 +731,7 @@ namespace CloudStreamForms
                         string import = await ActionPopup.DisplayActionSheet("Override Current Data", "Yes, import data and override current", "No, dont override current data");
                         if (import.StartsWith("Y")) {
                             Script.SyncWrapper.SetKeysFromTextFile(file);
+                            Home.UpdateIsRequired = true;
                             App.ShowToast("File loaded");
                             appear?.Invoke();
                         }
@@ -749,6 +750,7 @@ namespace CloudStreamForms
                                     string import = await ActionPopup.DisplayActionSheet("Override Current Data", "Yes, import data and override current", "No, dont override current data");
                                     if (import.StartsWith("Y")) {
                                         Script.SyncWrapper.SetKeysFromTextFile(subFile);
+                                        Home.UpdateIsRequired = true;
                                         App.ShowToast("File dectypted and loaded");
                                         appear?.Invoke();
                                     }
@@ -1013,6 +1015,7 @@ namespace CloudStreamForms
             bool action = await DisplayAlert("Clear bookmarks", "Are you sure that you want to remove all bookmarks" + " (" + App.GetKeyCount("BookmarkData") + " items)", "Yes", "Cancel");
             if (action) {
                 App.RemoveFolder(App.BOOKMARK_DATA);
+                Home.UpdateIsRequired = true;
             }
         }
 
@@ -1085,6 +1088,7 @@ namespace CloudStreamForms
                         else if (data != "") {
                             if (data.StartsWith(Script.SyncWrapper.header)) {
                                 Script.SyncWrapper.SetKeysFromTextFile(data);
+                                Home.UpdateIsRequired = true;
                             }
                             else {
                                 App.ShowToast("Account data corrupted");
@@ -1114,6 +1118,7 @@ namespace CloudStreamForms
                         }
                         else if (data != "") {
                             Script.SyncWrapper.SetKeysFromTextFile(data);
+                            Home.UpdateIsRequired = true;
                         }
 
                     }

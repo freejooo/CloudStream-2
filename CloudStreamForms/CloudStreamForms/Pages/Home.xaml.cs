@@ -183,7 +183,7 @@ namespace CloudStreamForms
             //episodeView.SelectedItem = null;
         }
 
-       readonly List<FFImageLoading.Forms.CachedImage> play_btts = new List<FFImageLoading.Forms.CachedImage>();
+        readonly List<FFImageLoading.Forms.CachedImage> play_btts = new List<FFImageLoading.Forms.CachedImage>();
         private void Image_PropertyChanging(object sender, PropertyChangingEventArgs e)
         {
 
@@ -314,10 +314,10 @@ namespace CloudStreamForms
 
         void AddEpisode(EpisodeResult episodeResult, bool setHeight = true)
         {
-            epView.MyEpisodeResultCollection.Add(episodeResult); 
+            epView.MyEpisodeResultCollection.Add(episodeResult);
             if (setHeight) {
                 SetHeight();
-            } 
+            }
         }
 
         void ClearEpisodes(bool clearData = true)
@@ -336,6 +336,7 @@ namespace CloudStreamForms
         public int PosterAtScreenWith { get { return (int)(currentWidth / (double)POSTER_WIDTH); } }
         public int PosterAtScreenHight { get { return (int)(currentWidth / (double)POSTER_HIGHT); } }
         readonly List<FFImageLoading.Forms.CachedImage> cachedImages = new List<FFImageLoading.Forms.CachedImage>();
+        public const int bookmarkLabelTransY = 30;
 
         void SetHeight()
         {
@@ -346,7 +347,7 @@ namespace CloudStreamForms
                 SetChashedImagePos(i);
             }*/
 
-            Device.BeginInvokeOnMainThread(() => { episodeView.HeightRequest = epView.MyEpisodeResultCollection.Count * episodeView.RowHeight + 200; });
+            Device.BeginInvokeOnMainThread(() => { episodeView.HeightRequest = epView.MyEpisodeResultCollection.Count * (bookmarkLabelTransY + episodeView.RowHeight) + 200; });
 
         }
 
@@ -356,7 +357,7 @@ namespace CloudStreamForms
             int y = (int)(pos / PosterAtScreenWith);
             Grid.SetColumn(cachedImages[pos], x);
             Grid.SetRow(cachedImages[pos], y);
-        } 
+        }
         bool hasAppered = false;
 
         protected override void OnDisappearing()
@@ -379,11 +380,6 @@ namespace CloudStreamForms
                 if (!hasAppered) {
                     App.UpdateStatusBar();
                     App.UpdateBackground();
-
-                    /*
-                    Application.Current.MainPage.SizeChanged += (o, e) => {
-                        SetHeight();
-                    };*/
                 }
                 if (UpdateIsRequired) {
                     UpdateBookmarks();
@@ -434,9 +430,9 @@ namespace CloudStreamForms
                     Grid.SetColumn(Bookmarks.Children[i], i % perCol);
                     Grid.SetRow(Bookmarks.Children[i], i / perCol);
                 }
-               // int row = (int)Math.Floor((Bookmarks.Children.Count - 1) / (double)perCol);
+                // int row = (int)Math.Floor((Bookmarks.Children.Count - 1) / (double)perCol);
                 // Recommendations.HeightRequest = (RecPosterHeight + Recommendations.RowSpacing) * (total / perCol);
-                Bookmarks.HeightRequest = (RecPosterHeight + Bookmarks.RowSpacing) * (((Bookmarks.Children.Count-1) / perCol) + 1) - 7 + Bookmarks.RowSpacing;
+                Bookmarks.HeightRequest = (bookmarkLabelTransY + RecPosterHeight + Bookmarks.RowSpacing) * (((Bookmarks.Children.Count - 1) / perCol) + 1) - 7 + Bookmarks.RowSpacing;
             });
         }
 
@@ -492,7 +488,7 @@ namespace CloudStreamForms
 
                                 stackLayout.Children.Add(ff);
                                 stackLayout.Children.Add(imageButton);
-                                stackLayout.Children.Add(new Label() { Text = name, VerticalOptions = LayoutOptions.End, TextColor = Color.White, ClassId = "OUTLINE" });
+                                stackLayout.Children.Add(new Label() { Text = name, VerticalOptions = LayoutOptions.Start,HorizontalTextAlignment = TextAlignment.Center, HorizontalOptions = LayoutOptions.Center, Padding=3, TextColor = Color.White, ClassId = "OUTLINE", TranslationY =  RecPosterHeight });
                                 stackLayout.Opacity = 0;
 
                                 async void WaitUntillComplete()
