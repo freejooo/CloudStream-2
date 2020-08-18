@@ -1493,7 +1493,7 @@ namespace CloudStreamForms
                                 if (GetLatestDub[currentMovie.title.id] != isDub) {
                                     try {
                                         for (int i = 0; i < epView.MyEpisodeResultCollection.Count; i++) {
-                                            if (epView.MyEpisodeResultCollection[i].LoadedLinks) {
+                                            if (epView.MyEpisodeResultCollection[i].GetHasLoadedLinks()) {
                                                 print("CLEAR OS : " + i);
                                                 epView.MyEpisodeResultCollection[i].ClearMirror();
                                             }
@@ -1668,7 +1668,7 @@ namespace CloudStreamForms
         {
             if (loadingLinks) return episodeResult;
 
-            if (episodeResult.LoadedLinks) {
+            if (episodeResult.GetHasLoadedLinks()) {
                 if (autoPlay) { PlayEpisode(episodeResult); }
             }
             else {
@@ -1701,13 +1701,13 @@ namespace CloudStreamForms
                         gotError = true;
                     }
                     else {
-                        if (episodeResult.mirrosUrls == null) {
+                        if (episodeResult.GetMirrosUrls() == null) {
                             gotError = true;
                         }
                         else {
-                            if (episodeResult.mirrosUrls.Count > 0) {
+                            if (episodeResult.GetMirrosUrls().Count > 0) {
                                 if (autoPlay) { PlayEpisode(episodeResult); }
-                                //episodeResult.LoadedLinks = true;
+                                //episodeResult.GetHasLoadedLinks() = true;
                             }
                             else {
                                 gotError = true;
@@ -1792,7 +1792,7 @@ namespace CloudStreamForms
 
                 VideoPage.maxEpisodeForLoading = maxEpisodes;
             }
-            await App.RequestVlc(episodeResult.mirrosUrls, episodeResult.Mirros, episodeResult.OgTitle, episodeResult.IMDBEpisodeId, episode: episodeResult.Episode, season: currentSeason, subtitleFull: currentMovie.subtitles.Select(t => t.data).FirstOrDefault(), descript: episodeResult.Description, overrideSelectVideo: overrideSelectVideo, startId: (int)episodeResult.ProgressState, headerId: currentMovie.title.id, isFromIMDB: true);// startId: FROM_PROGRESS); //  (int)episodeResult.ProgressState																																																																													  //App.PlayVLCWithSingleUrl(episodeResult.mirrosUrls, episodeResult.Mirros, currentMovie.subtitles.Select(t => t.data).ToList(), currentMovie.subtitles.Select(t => t.name).ToList(), currentMovie.title.name, episodeResult.Episode, currentSeason, overrideSelectVideo);
+            await App.RequestVlc(episodeResult.GetMirrosUrls(), episodeResult.GetMirros(), episodeResult.OgTitle, episodeResult.IMDBEpisodeId, episode: episodeResult.Episode, season: currentSeason, subtitleFull: currentMovie.subtitles.Select(t => t.data).FirstOrDefault(), descript: episodeResult.Description, overrideSelectVideo: overrideSelectVideo, startId: (int)episodeResult.ProgressState, headerId: currentMovie.title.id, isFromIMDB: true);// startId: FROM_PROGRESS); //  (int)episodeResult.ProgressState																																																																													  //App.PlayVLCWithSingleUrl(episodeResult.mirrosUrls, episodeResult.Mirros, currentMovie.subtitles.Select(t => t.data).ToList(), currentMovie.subtitles.Select(t => t.name).ToList(), currentMovie.title.name, episodeResult.Episode, currentSeason, overrideSelectVideo);
             isRequestingPlayEpisode = false;
         }
 
@@ -1839,7 +1839,7 @@ namespace CloudStreamForms
             if (loadingLinks) return;
 
             print("EPDATA:::" + episodeResult.OgTitle + "|" + episodeResult.Episode);
-            if (!episodeResult.LoadedLinks) {
+            if (!episodeResult.GetHasLoadedLinks()) {
                 try {
                     await LoadLinksForEpisode(episodeResult, false);
                 }
@@ -1850,7 +1850,7 @@ namespace CloudStreamForms
                 await Task.Delay(LoadingMiliSec + 40);
             }*/
 
-            if (!episodeResult.LoadedLinks) {
+            if (!episodeResult.GetHasLoadedLinks()) {
                 //   App.ShowToast(errorEpisodeToast); episodeView.SelectedItem = null;
                 return;
             }
@@ -1890,11 +1890,11 @@ namespace CloudStreamForms
                 while (!succ) {
                     count++;
 
-                    if (count >= episodeResult.Mirros.Count) {
+                    if (count >= episodeResult.GetMirros().Count) {
                         succ = true;
                     }
                     else {
-                        succ = await MainChrome.CastVideo(episodeResult.mirrosUrls[count], episodeResult.Mirros[count], subtitleUrl: "", posterUrl: currentMovie.title.hdPosterUrl, movieTitle: currentMovie.title.name, subtitleDelay: 0);
+                        succ = await MainChrome.CastVideo(episodeResult.GetMirrosUrls()[count], episodeResult.GetMirros()[count], subtitleUrl: "", posterUrl: currentMovie.title.hdPosterUrl, movieTitle: currentMovie.title.name, subtitleDelay: 0);
                     }
                 }
                 ChromeCastPage.currentSelected = count;
@@ -1902,20 +1902,20 @@ namespace CloudStreamForms
             }
 
             if (action == "Play in Browser") {
-                string copy = await ActionPopup.DisplayActionSheet("Open Link", episodeResult.Mirros.ToArray()); // await DisplayActionSheet("Open Link", "Cancel", null, episodeResult.Mirros.ToArray());
-                for (int i = 0; i < episodeResult.Mirros.Count; i++) {
-                    if (episodeResult.Mirros[i] == copy) {
-                        App.OpenSpecifiedBrowser(episodeResult.mirrosUrls[i]);
+                string copy = await ActionPopup.DisplayActionSheet("Open Link", episodeResult.GetMirros().ToArray()); // await DisplayActionSheet("Open Link", "Cancel", null, episodeResult.Mirros.ToArray());
+                for (int i = 0; i < episodeResult.GetMirros().Count; i++) {
+                    if (episodeResult.GetMirros()[i] == copy) {
+                        App.OpenSpecifiedBrowser(episodeResult.GetMirrosUrls()[i]);
                     }
                 }
             }
             else if (action == "Remove Link") {
-                string rLink = await ActionPopup.DisplayActionSheet("Remove Link", episodeResult.Mirros.ToArray()); //await DisplayActionSheet("Download", "Cancel", null, episodeResult.Mirros.ToArray());
-                for (int i = 0; i < episodeResult.Mirros.Count; i++) {
-                    if (episodeResult.Mirros[i] == rLink) {
-                        App.ShowToast("Removed " + episodeResult.Mirros[i]);
-                        episodeResult.mirrosUrls.RemoveAt(i);
-                        episodeResult.Mirros.RemoveAt(i);
+                string rLink = await ActionPopup.DisplayActionSheet("Remove Link", episodeResult.GetMirros().ToArray()); //await DisplayActionSheet("Download", "Cancel", null, episodeResult.Mirros.ToArray());
+                for (int i = 0; i < episodeResult.GetMirros().Count; i++) {
+                    if (episodeResult.GetMirros()[i] == rLink) {
+                        App.ShowToast("Removed " + episodeResult.GetMirros()[i]);
+                        episodeResult.GetMirrosUrls().RemoveAt(i);
+                        episodeResult.GetMirros().RemoveAt(i);
                         await EpisodeSettings(episodeResult);
                         break;
                     }
@@ -1926,8 +1926,8 @@ namespace CloudStreamForms
                 print("CASTOS");
             }
             else if (action == "Chromecast mirror") {
-                string subMirror = await ActionPopup.DisplayActionSheet("Cast Mirror", episodeResult.Mirros.ToArray());//await DisplayActionSheet("Copy Link", "Cancel", null, episodeResult.Mirros.ToArray());
-                ChromecastAt(episodeResult.Mirros.IndexOf(subMirror));
+                string subMirror = await ActionPopup.DisplayActionSheet("Cast Mirror", episodeResult.GetMirros().ToArray());//await DisplayActionSheet("Copy Link", "Cancel", null, episodeResult.Mirros.ToArray());
+                ChromecastAt(episodeResult.GetMirros().IndexOf(subMirror));
             }
             else if (action == "Play") { // ============================== PLAY ==============================
                 PlayEpisode(episodeResult);
@@ -1939,10 +1939,10 @@ namespace CloudStreamForms
                 PlayEpisode(episodeResult, true);
             }
             else if (action == "Copy Link") { // ============================== COPY LINK ==============================
-                string copy = await ActionPopup.DisplayActionSheet("Copy Link", episodeResult.Mirros.ToArray());//await DisplayActionSheet("Copy Link", "Cancel", null, episodeResult.Mirros.ToArray());
-                for (int i = 0; i < episodeResult.Mirros.Count; i++) {
-                    if (episodeResult.Mirros[i] == copy) {
-                        await Clipboard.SetTextAsync(episodeResult.mirrosUrls[i]);
+                string copy = await ActionPopup.DisplayActionSheet("Copy Link", episodeResult.GetMirros().ToArray());//await DisplayActionSheet("Copy Link", "Cancel", null, episodeResult.Mirros.ToArray());
+                for (int i = 0; i < episodeResult.GetMirros().Count; i++) {
+                    if (episodeResult.GetMirros()[i] == copy) {
+                        await Clipboard.SetTextAsync(episodeResult.GetMirrosUrls()[i]);
                         App.ShowToast("Copied Link to Clipboard");
                         break;
                     }
@@ -1971,7 +1971,7 @@ namespace CloudStreamForms
                 }
             }
             else if (action == "Download") {  // ============================== DOWNLOAD FILE ==============================
-                List<BasicLink> links = episodeResult.BasicLinks.Where(t => t.CanBeDownloaded).ToList();
+                List<BasicLink> links = episodeResult.GetBasicLinks().Where(t => t.CanBeDownloaded).ToList();
 
                 string download = await ActionPopup.DisplayActionSheet("Download", links.Select(t => t.PublicName).ToArray()); //await DisplayActionSheet("Download", "Cancel", null, episodeResult.Mirros.ToArray());
                 for (int i = 0; i < links.Count; i++) {
@@ -2023,7 +2023,7 @@ namespace CloudStreamForms
 
                 //await Task.Delay(LoadingMiliSec + 40);
 
-                if (!episodeResult.LoadedLinks) {
+                if (!episodeResult.GetHasLoadedLinks()) {
                     return;
                 }
                 await EpisodeSettings(episodeResult);

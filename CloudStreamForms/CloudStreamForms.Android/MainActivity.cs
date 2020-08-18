@@ -1146,10 +1146,10 @@ namespace CloudStreamForms.Droid
             base.OnStop();
         }
 
-        /*protected override void OnPause()
+        protected override void OnPause()
         {
             base.OnPause();
-        }*/
+        }
 
         protected override void OnRestart()
         {
@@ -1157,10 +1157,11 @@ namespace CloudStreamForms.Droid
             App.OnAppReopen?.Invoke(null, EventArgs.Empty);
         }
 
-        /*protected override void OnResume()
+        protected override void OnResume()
         {
             base.OnResume();
-        }*/
+            OnAppResume?.Invoke(null, EventArgs.Empty);
+        }
 
 
         public override void OnRequestPermissionsResult(int requestCode, string[] permissions, [GeneratedEnum] Android.Content.PM.Permission[] grantResults)

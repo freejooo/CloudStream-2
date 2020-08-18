@@ -604,7 +604,7 @@ namespace CloudStreamForms
                     Device.InvokeOnMainThreadAsync(async () => {
                         skipToEnd = _skip.timestamp + _skip.duration;
                         SkipSomething.IsEnabled = true;
-                        SkipSomething.Text = _skip.name;
+                        SkipSomething.Text = _skip.name.ToUpper();
                         await Task.Delay(100);
 
                         var skipBounds = SkipSomething.Bounds;
@@ -732,6 +732,8 @@ namespace CloudStreamForms
         public VideoPage(PlayVideo video, int _maxEpisodes = 1)
         {
             try {
+                print("Videoplage init");
+
                 lastVideo = (PlayVideo)video.Clone();
                 if (!canStart) {
                     return;
@@ -760,9 +762,13 @@ namespace CloudStreamForms
                         Mirrors = holder.Value.links.Where(t => !t.canNotRunInVideoplayer).ToList();
                     }
                 }
+                print("Videoplage Start 2");
+
                 Mirrors = Mirrors.OrderBy(t => -t.priority).ToList();
+                print("Videoplage Start 3");
 
                 InitializeComponent();
+                print("Videoplage Start 4");
                 /*
     overLay.SizeChanged += async (o, e) => {
        if (!VideoPage.showOnAppear) return;
@@ -782,6 +788,7 @@ namespace CloudStreamForms
 
                 SkipForwardSmall.Text = skip.ToString();
                 SkipBackSmall.Text = skip.ToString();
+                print("Videoplage Start 5");
 
                 SkipSomething.Clicked += async (o, e) => {
                     if (Player != null) {
@@ -830,6 +837,7 @@ namespace CloudStreamForms
                 SubtitleTxt2Back7,
                 SubtitleTxt2Back8,
             };
+                print("Videoplage Start 6");
 
                 float multi = 1f;
 
@@ -886,6 +894,7 @@ namespace CloudStreamForms
 
                 SubtitleTxt1.ClassId = classId;
                 SubtitleTxt2.ClassId = classId;
+                print("Videoplage Start 7");
 
                 // ======================= END =======================
 
@@ -918,6 +927,7 @@ namespace CloudStreamForms
                         ShowNextMirror();
                     }
                 }
+                print("Videoplage Start 8");
 
 
                 SkipForward.TranslationX = TRANSLATE_START_X;
@@ -964,6 +974,8 @@ namespace CloudStreamForms
                         print("A_A__A__A:: " + _ex);
                     }
                 }
+                print("Videoplage Start 9");
+
 
                 SubTap.IsVisible = HasSupportForSubtitles() && Settings.SUBTITLES_INVIDEO_ENABELD;
                 EpisodesTap.IsVisible = false; // TODO: ADD EPISODES SWITCH
@@ -1006,6 +1018,8 @@ namespace CloudStreamForms
                         }
                     }
                 }
+                print("Videoplage Start 10");
+
 
 
                 Commands.SetTap(MirrorsTap, new Command(async () => {
@@ -1041,18 +1055,18 @@ namespace CloudStreamForms
                 }));
 
                 // ======================= SETUP ======================= 
+                print("Videoplage Start 11");
                 if (_libVLC == null) {
                     _libVLC = new LibVLC();
                 }
                 if (_mediaPlayer == null) {
-                    _mediaPlayer = new MediaPlayer(_libVLC) { EnableHardwareDecoding = false, };
+                    _mediaPlayer = new MediaPlayer(_libVLC) { EnableHardwareDecoding = true, };
                 }
 
                 vvideo.MediaPlayer = _mediaPlayer; // = new VideoView() { MediaPlayer = _mediaPlayer };
 
-                App.OnAppNotInForground += (o, e) => {
-                    HandleAppExit();
-                };
+
+                print("Videoplage Start 11");
 
 
                 // ========== IMGS ==========
@@ -1085,6 +1099,7 @@ namespace CloudStreamForms
                 Commands.SetTap(NextMirrorBtt, new Command(() => {
                     SelectNextMirror();
                 }));
+                print("Videoplage Start 12");
 
 
                 //Commands.SetTapParameter(view, someObject);
@@ -1122,6 +1137,8 @@ namespace CloudStreamForms
                     });
                 };
 
+
+
                 Player.Playing += (o, e) => {
                     skips = new List<SkipMetadata>();
                     if (Settings.VideoPlayerShowSkip) {
@@ -1147,7 +1164,7 @@ namespace CloudStreamForms
                         }
 
                         if (NextEpisodeClicked != null) {
-                            skips.Add(new SkipMetadata() { duration = 5000, name = "Next episode", timestamp = Player.Length - 5000 });
+                            skips.Add(new SkipMetadata() { duration = 7000, name = "Next episode", timestamp = Player.Length - 7000 }); // 7 sec before quit, but fade after 5
                         }
 
                         if (Settings.VideoPlayerSponsorblock) {
@@ -1200,6 +1217,7 @@ namespace CloudStreamForms
                     });
                     //   LoadingCir.IsEnabled = false;
                 };
+                print("Videoplage Start 12");
 
                 Player.TimeChanged += (o, e) => {
                     PlayerTimeChanged(e.Time);
@@ -1261,13 +1279,13 @@ namespace CloudStreamForms
                         columCount++;
                     }
                 }
-
+                print("Videoplage Start 13");
 
             }
             catch (Exception _ex) {
                 error("Videoplayer: " + _ex);
             }
-             
+
             //  Player.AddSlave(MediaSlaveType.Subtitle,"") // ADD SUBTITLEs
         }
 
@@ -1307,18 +1325,24 @@ namespace CloudStreamForms
 
 
         public static PlayVideo showOnAppearPage;
-        public static bool showOnAppear = false; 
+        public static bool showOnAppear = false;
         public static bool CanReopen = false;
-
-        public async void HandleAppExit()
+        public async void HandleAppResume(object o, EventArgs e)
         {
+            App.ToggleRealFullScreen(true);
+        }
+
+        public async void HandleAppExit(object o, EventArgs e)
+        {
+            if (!isShown) return;
+
             CanReopen = true;
             lastVideo.preferedMirror = currentMirrorId;
 
             await Navigation.PopModalAsync();
-
+            MainDispose();
             //  ForceReloadOnAppOpen = true;
-        } 
+        }
 
 
         public bool ForceReloadOnAppOpen = false;
@@ -1333,6 +1357,8 @@ namespace CloudStreamForms
             print("ON APPEARING VIDEOPAGE");
             isShown = true;
             App.OnAudioFocusChanged += HandleAudioFocus;
+            App.OnAppNotInForground += HandleAppExit;
+            App.OnAppResume += HandleAppResume;
 
             try { // SETTINGS NOW ALLOWED 
                 BrightnessProcentage = App.GetBrightness() * 100;
@@ -1357,6 +1383,8 @@ namespace CloudStreamForms
 
             print("ONDIS:::::::");
             try {
+                App.OnAppNotInForground -= HandleAppExit;
+                App.OnAppResume -= HandleAppResume;
                 App.OnAudioFocusChanged -= HandleAudioFocus;
 
                 if (lastPlayerTime > 20 && lastPlayerLenght > 100) {
@@ -1375,6 +1403,7 @@ namespace CloudStreamForms
                     }
                 }
                 App.SaveData();
+                MainDispose();
 
                 // App.ShowStatusBar();
                 if (changeFullscreenWhenPop) {
@@ -1397,6 +1426,13 @@ namespace CloudStreamForms
                 print("ERROR IN DISAPEERING" + _ex);
             }
 
+
+
+            base.OnDisappearing();
+        }
+
+        void MainDispose()
+        {
             try {
                 if (currentVideo.isDownloadFile) {
                     if (disMedia != null) {
@@ -1405,25 +1441,15 @@ namespace CloudStreamForms
                     Dispose();
                 }
                 else {
-                    //Thread t = new Thread(() => {
                     _mediaPlayer.Stop();
-                    //});
-                    //t.Start();
                     Dispose();
 
                 }
-
-                /*
-                _libVLC.Dispose();
-                _mediaPlayer.Dispose();*/
-                //Player.Dispose();
             }
             catch (Exception) {
 
             }
 
-
-            base.OnDisappearing();
         }
 
         public void Dispose()
@@ -1476,7 +1502,7 @@ namespace CloudStreamForms
 
 
 
-        static bool dragingVideo = false;
+        bool dragingVideo = false;
         private void VideoSlider_DragStarted(object sender, EventArgs e)
         {
             CurrentTap++;
@@ -1501,18 +1527,24 @@ namespace CloudStreamForms
                 if (!GetPlayerIsSeekable()) return;
                 if (GetPlayerLenght() == -1) return;
 
-                long len = (long)(VideoSlider.Value * GetPlayerLenght());
-                Player.Time = len;
-                //SeekSubtitles(len);
-
-                if (App.GainAudioFocus()) {
-                    Player.SetPause(false);
+                if (VideoSlider.Value >= 0.995) {
+                    Navigation.PopModalAsync();
                 }
-                dragingVideo = false;
-                SlideChangedLabel.IsVisible = false;
-                SlideChangedLabel.Text = "";
-                SkiptimeLabel.Text = "";
-                StartFade();
+                else {
+                    long len = (long)(VideoSlider.Value * GetPlayerLenght());
+                    Player.Time = len;
+                    //SeekSubtitles(len);
+
+                    if (App.GainAudioFocus()) {
+                        Player.SetPause(false);
+                    }
+
+                    dragingVideo = false;
+                    SlideChangedLabel.IsVisible = false;
+                    SlideChangedLabel.Text = "";
+                    SkiptimeLabel.Text = "";
+                    StartFade();
+                }
             }
             catch (Exception _ex) {
                 print("ERROR DTAG: " + _ex);
@@ -1864,6 +1896,14 @@ namespace CloudStreamForms
 
             print("SEEK MEDIA to " + ms);
             var newTime = GetPlayerTime() + ms;
+
+            var len = GetPlayerLenght();
+            if (newTime > len) {
+                newTime = len;
+            }
+            if (newTime < 0) {
+                newTime = 0;
+            }
             Player.Time = newTime;
 
             // SeekSubtitles(newTime);

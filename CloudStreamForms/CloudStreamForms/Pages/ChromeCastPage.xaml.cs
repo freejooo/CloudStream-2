@@ -297,8 +297,8 @@ namespace CloudStreamForms
                 headerId = movie.title.id,
                 season = episodeResult.Season,
                 isFromFile = false,
-                MirrorsNames = episodeResult.Mirros,
-                MirrorsUrls = episodeResult.mirrosUrls,
+                MirrorsNames = episodeResult.GetMirros(),
+                MirrorsUrls = episodeResult.GetMirrosUrls(),
                 titleName = movie.title.name,
                 movieType = movie.title.movieType
             });

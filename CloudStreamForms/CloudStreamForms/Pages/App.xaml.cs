@@ -66,6 +66,7 @@ namespace CloudStreamForms
         public static EventHandler OnAppNotInForground;
         public static EventHandler OnAppKilled; 
         public static EventHandler OnAppReopen;
+        public static EventHandler OnAppResume;
          
         public interface IPlatformDep
         {

@@ -60,6 +60,8 @@ namespace CloudStreamForms
         public Download()
         {
             InitializeComponent();
+            OffBar.Source = App.GetImageSource("gradient.png"); OffBar.HeightRequest = 3; OffBar.HorizontalOptions = LayoutOptions.Fill; OffBar.ScaleX = 100; OffBar.Opacity = 0.3; OffBar.TranslationY = 9;
+
             if (Settings.IS_TEST_BUILD) {
                 return;
             }
@@ -187,7 +189,6 @@ namespace CloudStreamForms
                         DownloadSizeGrid.HeightRequest = 25;
                     }
                     else {
-                        OffBar.Source = App.GetImageSource("gradient.png"); OffBar.HeightRequest = 3; OffBar.HorizontalOptions = LayoutOptions.Fill; OffBar.ScaleX = 100; OffBar.Opacity = 0.3; OffBar.TranslationY = 9;
                     }
                 }
                 catch (Exception) {
@@ -223,8 +224,12 @@ namespace CloudStreamForms
             }
         }
 
+        bool inProgress = false;
         void UpdateDownloaded()
         {
+            print("UPDATE DOWNLOAD!!");
+            if (inProgress) return;
+
             if (Settings.IS_TEST_BUILD) {
                 return;
             }
@@ -233,6 +238,8 @@ namespace CloudStreamForms
                 object clock = new object();
 
                 Thread mThread = new Thread(() => {
+                    if (inProgress) return;
+                    inProgress = true;
                     Thread.Sleep(100);
 
                     try {
@@ -320,7 +327,7 @@ namespace CloudStreamForms
 
                         //   List<EpisodeResult> eps = new List<EpisodeResult>();
                         var ckeys = downloadHeaders.Keys.OrderBy(t => t).ToList();
-                        EpisodeResult[] epres = new EpisodeResult[ckeys.Count];
+                        EpisodeResult[] epres = new EpisodeResult[int.Parse(ckeys.Count.ToString())];
                         Parallel.For(0, ckeys.Count, i => {
                             int key;
                             lock (clock) {
@@ -395,31 +402,49 @@ namespace CloudStreamForms
                             print(i + "KEY:::" + ckeys[i]);
                         }
 
-                        epres = epres.OrderBy(t => t.Episode).ToArray(); // MOVIE -> ANIMEMOVIE -> TV-SERIES -> ANIME -> YOUTUBE
+                        var _epres = ((EpisodeResult[])epres.Clone()).OrderBy(t => t.Episode).ToArray(); // MOVIE -> ANIMEMOVIE -> TV-SERIES -> ANIME -> YOUTUBE
 
-                        MyEpisodeResultCollection.Clear();
-                        for (int i = 0; i < epres.Length; i++) {
-                            print("IIIIII::: " + i + "." + epres[i].Title);
-                            MyEpisodeResultCollection.Add(epres[i]);
-                        }
+                     
 
-                        App.SetKey("Settings", "hasDownloads", epres.Length != 0);
+                        App.SetKey("Settings", "hasDownloads", _epres.Length != 0);
 
+                        bool noDownloads = _epres.Length == 0;
+                        print("DONELOAD");
                         Device.BeginInvokeOnMainThread(() => {
+
+                            MyEpisodeResultCollection.Clear();
+                            foreach (var ep in _epres) {
+                                try {
+                                    print("IIIIII::: " + ep.Title);
+                                    MyEpisodeResultCollection.Add(ep);
+                                }
+                                catch (Exception _ex) {
+                                    error("FATAL EX: " + _ex);
+                                }
+                            }
+
                             // episodeView.Opacity = 0;
                             // episodeView.FadeTo(1, 200);
+                            print("start1 DONE!");
 
-                            bool noDownloads = epres.Length == 0;
                             baseTxt.IsVisible = noDownloads;
+                            print("start2 DONE!");
                             baseImg.IsVisible = noDownloads;
+                            print("start3 DONE!");
                             SetHeight();
+                            print("ALL DONE!");
                         });
                     }
                     catch (Exception _ex) {
                         error(_ex);
                     }
+                    finally {
+                        inProgress = false;
+                        print("FINISH LOAD");
+                    }
                 });
                 //mThread.SetApartmentState(ApartmentState.STA);
+                mThread.Name = "EpisodeThread";
                 mThread.Start();
             }
             catch (Exception _ex) {
@@ -486,13 +511,13 @@ namespace CloudStreamForms
             //  EpisodeResult episodeResult = ((EpisodeResult)((ListView)sender).BindingContext);
 
             //PlayEpisode(episodeResult); 
-        } 
+        }
 
         private async void ViewCell_Tapped(object sender, EventArgs e)
         {
             EpisodeResult episodeResult = (EpisodeResult)(((ViewCell)sender).BindingContext);
             await HandleEpisodeAsync(episodeResult);
-            episodeView.SelectedItem = null; 
+            episodeView.SelectedItem = null;
         }
 
         async Task HandleEpisodeAsync(EpisodeResult episodeResult)
@@ -521,7 +546,7 @@ namespace CloudStreamForms
             //Download.PlayDownloadedFile(_info.info.fileUrl, _info.info.name, _info.info.episode, _info.info.season, _info.info.episodeIMDBId, _info.info.source, true, vlc ?? !Settings.UseVideoPlayer);
         }
         public static void PlayDownloadedFile(DownloadEpisodeInfo _info, bool? vlc = null)
-        { 
+        {
             Download.PlayDownloadedFile(_info.fileUrl, _info.name, _info.episode, _info.season, _info.dtype == DownloadType.YouTube ? _info.id.ToString() : _info.episodeIMDBId, _info.source, true, vlc ?? !Settings.UseVideoPlayer);
         }
 
@@ -556,7 +581,6 @@ namespace CloudStreamForms
                 });//new List<string>() { "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" }, new List<string>() { "Black" }, new List<string>() { });// { mainPoster = mainPoster };
                 await ((MainPage)CloudStreamCore.mainPage).Navigation.PushModalAsync(p, true);
             }
-
         }
 
         public static async void PlayVLCFile(string file, string name, string episodeId, bool startFromSaved = true)
@@ -655,7 +679,7 @@ namespace CloudStreamForms
             string moviePath = FindHTML(keyData, "_dpath=", "|||");
             App.PlayVLCWithSingleUrl(moviePath, title);
         }*/
-         
+
 
         private async void ImageButton_Clicked(object sender, EventArgs e)
         {

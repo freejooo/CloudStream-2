@@ -74,35 +74,28 @@ namespace CloudStreamForms.Models
             public List<string> subtitlesUrls { set; get; }*/
         public bool epVis { set; get; }
         // public LoadResult loadResult { set; get; }
-        public bool LoadedLinks {
-            get {
-                return mirrosUrls.Count > 0;
-                /*
-                var val = CloudStreamCore.GetCachedLink(IMDBEpisodeId);
-                if (val == null) return false;
-                return val.Value.links.Count > 0;*/
-            }
+        public bool GetHasLoadedLinks()
+        {
+            return GetMirrosUrls().Count > 0;
         }
 
-        public List<string> mirrosUrls {
-            get {
-                return BasicLinks.Where(t => !t.isAdvancedLink).Select(t => t.baseUrl).ToList();
-            }
+        public List<string> GetMirrosUrls()
+        {
+            return GetBasicLinks().Where(t => !t.isAdvancedLink).Select(t => t.baseUrl).ToList();
         }
 
-        public List<CloudStreamCore.BasicLink> BasicLinks {
-            get {
-                var val = CloudStreamCore.GetCachedLink(IMDBEpisodeId);
-                if (val == null) return new List<CloudStreamCore.BasicLink>();
-                if (val.Value.links.Count == 0) return new List<CloudStreamCore.BasicLink>();
-                return val.Value.links.OrderBy(t => -t.priority).ToList();
-            }
+
+        public List<CloudStreamCore.BasicLink> GetBasicLinks()
+        {
+            var val = CloudStreamCore.GetCachedLink(IMDBEpisodeId);
+            if (val == null) return new List<CloudStreamCore.BasicLink>();
+            if (val.Value.links.Count == 0) return new List<CloudStreamCore.BasicLink>();
+            return val.Value.links.OrderBy(t => -t.priority).ToList();
         }
 
-        public List<string> Mirros {
-            get {
-                return BasicLinks.Where(t => !t.isAdvancedLink).Select(t => t.PublicName).ToList();
-            }
+        public List<string> GetMirros()
+        {
+            return GetBasicLinks().Where(t => !t.isAdvancedLink).Select(t => t.PublicName).ToList();
         }
 
         public void ClearMirror()
