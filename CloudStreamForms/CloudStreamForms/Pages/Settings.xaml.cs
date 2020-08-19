@@ -416,7 +416,6 @@ namespace CloudStreamForms
                 App.SetKey("Settings", nameof(Top100Enabled), value);
             }
             get {
-                return false;
                 return App.GetKey("Settings", nameof(Top100Enabled), true);
             }
         }
