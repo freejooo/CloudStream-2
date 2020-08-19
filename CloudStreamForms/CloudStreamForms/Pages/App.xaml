@@ -15,6 +15,18 @@
             <Color x:Key="MenuBackgroundColor">#272627</Color>
             <Color x:Key="MenuTextColor">#B9B8B9</Color>
             <Color x:Key="WhiteColor">#FFFFFF</Color>
+            
+            <!--
+            <Style TargetType="Label" >
+                <Setter Property="FontFamily" Value="Gotham.ttf#Google Sans" />
+                <Setter Property="FontSize" Value="14" />
+            </Style>
+            <Style TargetType="Button">
+                <Setter Property="FontFamily" Value="Gotham.ttf#Google Sans" />
+            </Style>
+            <Style TargetType="SearchBar">
+                <Setter Property="FontFamily" Value="Gotham.ttf#Google Sans" />
+            </Style>-->
 
             <!-- STYLES -->
             <Style TargetType="NavigationPage">

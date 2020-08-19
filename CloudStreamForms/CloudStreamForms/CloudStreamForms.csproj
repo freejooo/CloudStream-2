@@ -72,6 +72,7 @@
     <None Remove="Resource\baseline_skip_previous_white_48dp.png" />
     <None Remove="Resource\baseline_stop_white_48dp.png" />
     <None Remove="Resource\baseline_subtitles_white_48dp.png" />
+    <None Remove="Resource\baseline_text_format_white_48dp.png" />
     <None Remove="Resource\baseline_theaters_white_48dp.png" />
     <None Remove="Resource\baseline_volume_down_white_48dp.png" />
     <None Remove="Resource\baseline_volume_mute_white_48dp.png" />
@@ -224,6 +225,7 @@
     <EmbeddedResource Include="Resource\baseline_skip_previous_white_48dp.png" />
     <EmbeddedResource Include="Resource\baseline_stop_white_48dp.png" />
     <EmbeddedResource Include="Resource\baseline_subtitles_white_48dp.png" />
+    <EmbeddedResource Include="Resource\baseline_text_format_white_48dp.png" />
     <EmbeddedResource Include="Resource\baseline_theaters_white_48dp.png" />
     <EmbeddedResource Include="Resource\baseline_volume_down_white_48dp.png" />
     <EmbeddedResource Include="Resource\baseline_volume_mute_white_48dp.png" />
@@ -480,5 +482,9 @@
     <None Update="Search.xaml">
       <Generator>MSBuild:Compile</Generator>
     </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Themes\" />
   </ItemGroup>
 </Project>

@@ -109,6 +109,7 @@
     <AndroidAsset Include="Assets\Lucida-Grande.ttf" />
     <AndroidAsset Include="Assets\Google-Sans.ttf" />
     <AndroidAsset Include="Assets\Open-Sans.ttf" />
+    <AndroidAsset Include="Assets\Gotham.ttf" />
     <None Include="Resources\AboutResources.txt" />
     <None Include="Assets\AboutAssets.txt" />
     <None Include="Properties\AndroidManifest.xml" />

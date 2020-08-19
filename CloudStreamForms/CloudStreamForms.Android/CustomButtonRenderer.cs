@@ -20,6 +20,11 @@ public class CustomButtonRenderer : ButtonRenderer
         if (e.NewElement.ClassId != "CUST") {
             e.NewElement.TextColor = Color.FromHex("e6e6e6");
         }
+
+        if (e.NewElement.FontFamily == null) {
+            e.NewElement.FontFamily = CloudStreamForms.Settings.CurrentFont.FontStyle;
+        }
+
         if (Settings.TapjackProtectionButton) {
             Control.FilterTouchesWhenObscured = true;
         }

@@ -129,7 +129,7 @@ namespace CloudStreamForms.Pages
                 new SettingsItem() { img= "outline_history_white_48dp.png",mainTxt="Pause history",descriptTxt="Will pause all viewing history" ,VarName = nameof( Settings.PauseHistory) },
                 new SettingsItem() { img= "baseline_ondemand_video_white_48dp.png",mainTxt="Autoload next episode",descriptTxt="Autoload the next episode in the background while in the app videoplayer" ,VarName = nameof( Settings.LazyLoadNextLink) },
                 new SettingsItem() { img= "baseline_fast_forward_white_48dp.png",mainTxt="Show skip",descriptTxt="Skip opening/credits in videoplayer" ,VarName = nameof(Settings.VideoPlayerShowSkip) },
-               
+
                 new SettingsItem() { img= "sponsorblock.png",mainTxt="YouTube sponsorblock",descriptTxt="Skip ads, intro, outro" ,VarName = nameof(Settings.VideoPlayerSponsorblock) },
                 new SettingsItem() { img= "sponsorblock.png",mainTxt="Autoskip YouTube ads",descriptTxt="" ,VarName = nameof(Settings.VideoPlayerSponsorblockAutoSkipAds) },
 
@@ -200,10 +200,19 @@ namespace CloudStreamForms.Pages
                     Appear();
                     App.UpdateBackground();
                 }),
+                new SettingsList("baseline_text_format_white_48dp.png","App Font","Restart Required", () => { return Settings.CurrentUpdatedFont.Name; }, async () => {
+                    string[] fonts = Settings.CurrentGlobalFonts.Select(t => t.Name).ToArray();
+                    var sel = await ActionPopup.DisplayActionSheet("App Font", fonts.IndexOf(Settings.CurrentUpdatedFont.Name), fonts);
+                    int index = fonts.IndexOf(sel);
+                    if(index != -1) {
+                        Settings.BackCurrentGlobalFont = index;
+                    }
+                }),
                 new SettingsItem() { img= "outline_aspect_ratio_white_48dp.png",mainTxt="Show statusbar",descriptTxt="This will not affect app videoplayer" ,VarName = nameof( Settings.HasStatusBar),OnChange = async () => { App.UpdateStatusBar();} },
                 new SettingsItem() { img= "outline_reorder_white_48dp.png",mainTxt="Top 100",descriptTxt="" ,VarName = nameof( Settings.Top100Enabled)},
                 new SettingsItem() { img= "outline_description_white_48dp.png",mainTxt="Episode description",descriptTxt="To remove spoilers or shorten episode list" ,VarName = nameof( Settings.EpDecEnabled)},
-                new SettingsItem() { img= "animation.png",mainTxt="List animation",descriptTxt="To remove the popup animation for top 100" ,VarName = nameof( Settings.ListViewPopupAnimation)},
+                new SettingsItem() { img= "animation.png",mainTxt="List animation",descriptTxt="To remove the popup animation for top 100" ,VarName = nameof(Settings.ListViewPopupAnimation)},
+            
             },
         };
 
@@ -305,7 +314,6 @@ namespace CloudStreamForms.Pages
                  }),
                  new SettingsItem() { img = "baseline_report_problem_white_48dp.png", mainTxt = "Ignore SSL Certificate", descriptTxt = "If you disable this, some sites cant be reached", VarName = nameof(Settings.IgnoreSSLCert) },
              },
-
         };
 
         public static SettingsHolder BuildSettings = new SettingsHolder() {

@@ -31,6 +31,9 @@ namespace CloudStreamForms.Droid
             int textViewId = searchView.Context.Resources.GetIdentifier("android:id/search_src_text", null, null);
             EditText textView = (searchView.FindViewById(textViewId) as EditText);
 
+            if (args.NewElement.FontFamily == null) {
+                args.NewElement.FontFamily = CloudStreamForms.Settings.CurrentFont.FontStyle;
+            }
             // Set custom colors
             // textView.SetBackgroundColor(G.Color.Rgb(25, 25, 25));
             int color = Settings.BlackColor - 5;

@@ -48,13 +48,12 @@ namespace CloudStreamForms
             }
         }
 
-        public static string GetFont(string f)
+        public static string GetFont(string f, bool extend = true)
         {
-            print("FONT::::" + f);
             if (f == "App default") {
                 return "";
             }
-            return f.Replace(" ", "-") + ".ttf#" + f;
+            return f.Replace(" ", "-") + ".ttf" + (extend ? "#" + f : "");
         }
 
         public struct BluetoothDeviceID
@@ -64,10 +63,10 @@ namespace CloudStreamForms
         }
 
         public static EventHandler OnAppNotInForground;
-        public static EventHandler OnAppKilled; 
+        public static EventHandler OnAppKilled;
         public static EventHandler OnAppReopen;
         public static EventHandler OnAppResume;
-         
+
         public interface IPlatformDep
         {
             void ToggleRealFullScreen(bool fullscreen);
@@ -511,9 +510,38 @@ namespace CloudStreamForms
             PlatformDep.NormalOrientation();
         }
 
+        public string AppFont { get; set; } = "Gotham.ttf#Google Sans";
+        public int AppFontSize { get; set; } = 50;
+
         public App()
         {
+
+            // Resources["LABELFONT"] = LabelFont;
+
             InitializeComponent();
+
+            /*
+            var LabelFont = new Style(typeof(Label)) {
+                Setters = {
+                    new Setter() {
+                        Property = Label.FontFamilyProperty,
+                        Value = "Gotham.ttf#Google Sans",
+                    }
+                }
+            };
+
+            ICollection<ResourceDictionary> mergedDictionaries = Application.Current.Resources.MergedDictionaries;
+            if (mergedDictionaries != null) {
+                mergedDictionaries.Clear();
+                mergedDictionaries.Add(new DarkTheme());
+
+            }*/
+
+            int set = Settings.BackCurrentGlobalFont;
+            if (set != -1) {
+                Settings.CurrentGlobalFont = set;
+                Settings.BackCurrentGlobalFont = -1;
+            }
 
             MainPage = new MainPage();
         }

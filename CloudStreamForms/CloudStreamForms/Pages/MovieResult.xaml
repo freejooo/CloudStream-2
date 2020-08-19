@@ -20,9 +20,7 @@ xmlns:ffTransformations="clr-namespace:FFImageLoading.Transformations;assembly=F
                 <StackLayout x:Name="NormalStack"> 
                     <Grid x:Name="XGRID" HorizontalOptions="Center" 
             RowSpacing="10" Margin="0,-8,0,0" MinimumHeightRequest="0" 
-				    VerticalOptions="Start">
-
-
+				    VerticalOptions="Start"> 
                         <Grid.RowDefinitions >
                             <RowDefinition Height="Auto" />
                             <RowDefinition Height="Auto" />
@@ -30,9 +28,7 @@ xmlns:ffTransformations="clr-namespace:FFImageLoading.Transformations;assembly=F
                             <RowDefinition Height="Auto" />
                             <RowDefinition Height="Auto" />
                         </Grid.RowDefinitions>
-
-
-
+ 
                         <Grid Grid.Row="0"  Grid.Column="0" HeightRequest="150">
 
                             <ImageButton x:Name="TrailerBtt" BackgroundColor="Transparent"   HeightRequest="150" Aspect="AspectFill" ></ImageButton>
@@ -70,7 +66,7 @@ xmlns:ffTransformations="clr-namespace:FFImageLoading.Transformations;assembly=F
 						</Grid>
 
 						<Grid Grid.Row="3"  Grid.Column="0" InputTransparent="True">
-                            <Label x:Name="DescriptionLabel" Text="" HorizontalOptions="Fill" VerticalOptions="Start" Margin="10,0,10,0" MinimumHeightRequest="0" TranslationY="-20" TextColor="#dadada"></Label>
+                            <Label x:Name="DescriptionLabel" Text="" HorizontalOptions="Fill" VerticalOptions="Start" Margin="10,0,10,0" MinimumHeightRequest="0" TranslationY="-20" FontSize="14" TextColor="#dadada"></Label>
 
                         </Grid>
 

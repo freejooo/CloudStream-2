@@ -488,7 +488,7 @@ namespace CloudStreamForms
 
                                 stackLayout.Children.Add(ff);
                                 stackLayout.Children.Add(imageButton);
-                                stackLayout.Children.Add(new Label() { Text = name, VerticalOptions = LayoutOptions.Start,HorizontalTextAlignment = TextAlignment.Center, HorizontalOptions = LayoutOptions.Center, Padding=3, TextColor = Color.White, ClassId = "OUTLINE", TranslationY =  RecPosterHeight });
+                                stackLayout.Children.Add(new Label() { Text = name, VerticalOptions = LayoutOptions.Start,HorizontalTextAlignment = TextAlignment.Center, HorizontalOptions = LayoutOptions.Center, Padding=1, TextColor = Color.White, ClassId = "OUTLINE", TranslationY =  RecPosterHeight });
                                 stackLayout.Opacity = 0;
 
                                 async void WaitUntillComplete()

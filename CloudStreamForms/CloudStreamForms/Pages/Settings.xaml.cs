@@ -1,4 +1,5 @@
-﻿using CloudStreamForms.Core;
+﻿using AngleSharp.Html;
+using CloudStreamForms.Core;
 using CloudStreamForms.Cryptography;
 using System;
 using System.Collections.Generic;
@@ -121,7 +122,7 @@ namespace CloudStreamForms
             return App.GetKey("ProviderActive", name, true);
         }
 
-        public static readonly List<string> GlobalFonts = new List<string>() { "Trebuchet MS", "Open Sans", "Google Sans", "Lucida Grande", "Verdana", "Futura", "STIXGeneral", "Times New Roman", "App default" }; //ARIAL IS TO BIG
+        public static readonly List<string> GlobalFonts = new List<string>() { "App default", "Gotham", "Trebuchet MS", "Open Sans", "Google Sans", "Lucida Grande", "Verdana", "Futura", "STIXGeneral", "Times New Roman", }; //ARIAL IS TO BIG
 
         public static string GlobalSubtitleFont {
             set {
@@ -445,6 +446,88 @@ namespace CloudStreamForms
         public static ScrollBarVisibility ScrollBarVisibility {
             get { return HasScrollBar ? ScrollBarVisibility.Default : ScrollBarVisibility.Never; }
         }
+
+        public struct GlobalFont
+        {
+            public string Name;
+            public float FontSpacing;
+            public int FontSize;
+            public string FontStyle { get { var s = App.GetFont(Name); return s == "" ? null : s; } }
+            public string FontStylePath { get { var s = App.GetFont(Name, false); return s == "" ? null : s; } }
+        }
+
+        // "Trebuchet MS", "Open Sans", "Google Sans", "Lucida Grande", "Verdana", "Futura", "STIXGeneral", "Times New Roman", "App default" 
+        // "Gotham","Trebuchet MS", "Open Sans", "Google Sans", "Lucida Grande", "Verdana", "Futura", "STIXGeneral", "Times New Roman", "App default"
+        public static GlobalFont[] CurrentGlobalFonts = {
+            new GlobalFont() {
+                Name = "App default",
+                FontSpacing = 1,
+                FontSize = -1,
+            },
+            new GlobalFont() {
+                Name = "Gotham",
+                FontSpacing = 1.2f,
+                FontSize = 14,
+            },
+            new GlobalFont() {
+                Name = "Trebuchet MS",
+                FontSpacing = 1f,
+                FontSize = -1,
+            },
+            new GlobalFont() {
+                Name = "Open Sans",
+                FontSpacing = 1f,
+                FontSize = 14,
+            },
+            new GlobalFont() {
+                Name = "Google Sans",
+                FontSpacing = 1f,
+                FontSize = 14,
+            },
+            new GlobalFont() {
+                Name = "Lucida Grande",
+                FontSpacing = 1f,
+                FontSize = 14,
+            },
+            new GlobalFont() {
+                Name = "Futura",
+                FontSpacing = 1f,
+                FontSize = 14,
+            },
+            new GlobalFont() {
+                Name = "STIXGeneral",
+                FontSpacing = 1f,
+                FontSize = 15,
+            },
+            new GlobalFont() {
+                Name = "Times New Roman",
+                FontSpacing = 1f,
+                FontSize = 14,
+            },
+        };
+
+        public static int BackCurrentGlobalFont {
+            set {
+                App.SetKey("Settings", nameof(BackCurrentGlobalFont), value);
+                CurrentUpdatedFont = CurrentGlobalFonts[value < 0 ? CurrentGlobalFont : value];
+            }
+            get {
+                return App.GetKey("Settings", nameof(BackCurrentGlobalFont), -1);
+            }
+        }
+
+        public static int CurrentGlobalFont {
+            set {
+                App.SetKey("Settings", nameof(CurrentGlobalFont), value);
+                CurrentFont = CurrentGlobalFonts[value];
+            }
+            get {
+                return App.GetKey("Settings", nameof(CurrentGlobalFont), 1); // BY DEAFULT Gotham
+            }
+        }
+
+        public static GlobalFont CurrentFont = CurrentGlobalFonts[CurrentGlobalFont];
+        public static GlobalFont CurrentUpdatedFont = CurrentGlobalFonts[CurrentGlobalFont];
 
         public static bool CacheImdb { get { return CacheData; } }
         public static bool CacheMAL { get { return CacheData; } }
