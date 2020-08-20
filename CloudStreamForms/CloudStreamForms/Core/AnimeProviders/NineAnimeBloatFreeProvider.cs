@@ -21,10 +21,11 @@ namespace CloudStreamForms.Core.AnimeProviders
             public string id;
         }
 
+        const string NineAnimeSite = "https://www10.9anime.to";
         public override void LoadLink(string episodeLink, int episode, int normalEpisode, TempThread tempThred, object extraData,bool isDub)
         {
-            string request = episodeLink.Replace("https://9anime.to/watch/", "") + "/"; // /xrrj358";
-            string url = "https://9anime.to/watch/" + request;
+            string request = episodeLink.Replace(NineAnimeSite+"/watch/", "") + "/"; // /xrrj358";
+            string url = NineAnimeSite + "/watch/" + request;
             string d = DownloadString(url);
             string key = core.GetMcloudKey(url);
 
@@ -34,13 +35,12 @@ namespace CloudStreamForms.Core.AnimeProviders
             string _under = rng.Next(100, 999).ToString();
             // print(_id + "|" + _endId);
 
-            string requestServer = $"https://9anime.to/ajax/film/servers?id={_id}&ts={dataTs}&_={_under}"; // &episode={_endId}
+            string requestServer = $"{NineAnimeSite}/ajax/film/servers?id={_id}&ts={dataTs}&_={_under}"; // &episode={_endId}
             string serverResponse = DownloadString(requestServer).Replace("\\", "").Replace("  ", "");
             //   print(serverResponse);
             string real = FindHTML(serverResponse, "{\"html\":\"", "\"}");
             // real = real.Substring(0, real.Length - 2);
             print(real);
-
 
             var doc = new HtmlAgilityPack.HtmlDocument();
             doc.LoadHtml(real);
@@ -83,7 +83,7 @@ namespace CloudStreamForms.Core.AnimeProviders
             }
 
             try {
-                string target = core.GetTarget(Mp4upload[normalEpisode].id, key, dataTs, "https://9anime.to", url);
+                string target = core.GetTarget(Mp4upload[normalEpisode].id, key, dataTs, NineAnimeSite, url);
                 AddMp4(FindHTML(target, "embed-", "."), normalEpisode, tempThred);
             }
             catch (Exception) {
@@ -91,14 +91,14 @@ namespace CloudStreamForms.Core.AnimeProviders
             }
 
             try {
-                core.AddStreamTape(Streamtape[normalEpisode].id, key, dataTs, "https://9anime.to", normalEpisode, url);
+                core.AddStreamTape(Streamtape[normalEpisode].id, key, dataTs, NineAnimeSite, normalEpisode, url);
             }
             catch (Exception) {
 
             }
 
             try {
-                core.AddMCloud(MyCloud[normalEpisode].id, key, dataTs, "https://9anime.to", normalEpisode, url); 
+                core.AddMCloud(MyCloud[normalEpisode].id, key, dataTs, NineAnimeSite, normalEpisode, url); 
             }
             catch (Exception) {
 
@@ -113,7 +113,11 @@ namespace CloudStreamForms.Core.AnimeProviders
 
         public override NonBloatSeasonData GetSeasonData(MALSeason ms, TempThread tempThread, string year, object storedData)
         {
+            if (storedData == null) return new NonBloatSeasonData();
+
             List<NineAnimeDataSearch> data = (List<NineAnimeDataSearch>)storedData;
+            if (data.Count == 0) return new NonBloatSeasonData();
+
             print("START:::: " + data.FString());
             NonBloatSeasonData setData = new NonBloatSeasonData() { dubEpisodes = new List<string>(), subEpisodes = new List<string>() };
             foreach (var subData in data) {
@@ -148,9 +152,9 @@ namespace CloudStreamForms.Core.AnimeProviders
         {
             List<NineAnimeDataSearch> searchData = new List<NineAnimeDataSearch>();
 
-            string url = "https://9anime.to/search?keyword=" + search;
+            string url = NineAnimeSite+"/search?keyword=" + search;
             string d = DownloadString(url);
-            print(d);
+            if (!d.IsClean()) return null;
             var doc = new HtmlAgilityPack.HtmlDocument();
             doc.LoadHtml(d);
             var data = doc.QuerySelector("div.film-list");
@@ -160,7 +164,7 @@ namespace CloudStreamForms.Core.AnimeProviders
                 string dataTip = item.GetAttributeValue("data-tip", "");
 
                 if (dataTip != "") {
-                    string _d = DownloadString("https://9anime.to" + dataTip, referer: url);
+                    string _d = DownloadString(NineAnimeSite + dataTip, referer: url);
                     int.TryParse(FindHTML(_d, "Episode ", "/"), out int maxEp);
                     if (maxEp != 0) { // IF NOT MOVIE 
                         string otherNames = FindHTML(_d, "<label>Other names:</label>\n            <span>", "<").Replace("  ", "").Replace("\n", "").Replace(";", "");

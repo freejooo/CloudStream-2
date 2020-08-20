@@ -75,27 +75,19 @@
 
                     </AbsoluteLayout>
 
-                    <Grid x:Name="AllButtons">
-                        <Button BackgroundColor="Black" Opacity="0.3" InputTransparent="True" HorizontalOptions="FillAndExpand" VerticalOptions="FillAndExpand"></Button>
-
+                    <Grid x:Name="AllButtons" >
+                        <Button BackgroundColor="Black" Opacity="0.3" x:Name="BlackBg" ClassId="NOFADE" InputTransparent="True" HorizontalOptions="FillAndExpand" VerticalOptions="FillAndExpand"></Button>
 
                         <xe:BorderView  x:Name="PausePlayClickBtt" xe:TouchEffect.Color="White"  Opacity="0.6" VerticalOptions="Center" WidthRequest="80" HeightRequest="80" CornerRadius="40" HorizontalOptions="Center" BackgroundColor="Transparent">
 
                         </xe:BorderView>
-                        <!--  <Button Clicked="PausePlayBtt_Clicked" VerticalOptions="Center" WidthRequest="100" HeightRequest="100" CornerRadius="50" HorizontalOptions="Center" BackgroundColor="White" Opacity="0"></Button>-->
 
-                        <Image x:Name="PausePlayBtt" VerticalOptions="Center" WidthRequest="70" HeightRequest="70" HorizontalOptions="Center" BackgroundColor="Transparent" InputTransparent="True">
+                        <Image x:Name="PausePlayBtt" VerticalOptions="Center" WidthRequest="70" HeightRequest="70" HorizontalOptions="Center" BackgroundColor="Transparent" InputTransparent="True"></Image>
 
-                        </Image>
-                        <!--
-                    <ff:CachedImage x:Name="PausePlayBtt" VerticalOptions="Center" WidthRequest="70" HeightRequest="70" HorizontalOptions="Center" BackgroundColor="Transparent" InputTransparent="True">
-
-                    </ff:CachedImage>
- -->
-
-                        <Label x:Name="SkipForward" Text="+10" IsVisible="False" Opacity="0" VerticalOptions="Center" HorizontalOptions="Center" TranslationX="200" AbsoluteLayout.LayoutFlags="All" FontSize="24" TextColor="White" />
+                        <Label x:Name="SkipForward" ClassId="NOFADE" Text="+10" IsVisible="False" Opacity="0" VerticalOptions="Center" HorizontalOptions="Center" TranslationX="200" AbsoluteLayout.LayoutFlags="All" FontSize="24" TextColor="White" />
                         <Label x:Name="SkipForwardSmall" Text="10" VerticalOptions="Center" HorizontalOptions="Center" TranslationX="200" AbsoluteLayout.LayoutFlags="All" FontSize="20" TextColor="White" />
                         <Image x:Name="SkipForwardImg"   VerticalOptions="Center" HorizontalOptions="Center" TranslationX="200" AbsoluteLayout.LayoutFlags="All" WidthRequest="50" HeightRequest="50" />
+                       
                         <xe:BorderView  x:Name="SkipForwardBtt" xe:TouchEffect.Color="White"  TranslationX="100" Opacity="0.6" VerticalOptions="Center" WidthRequest="34" HeightRequest="34" CornerRadius="17" HorizontalOptions="Center" BackgroundColor="Transparent">
                         </xe:BorderView>
                         <ffs:SvgCachedImage x:Name="BacktoMain" HorizontalOptions="Start" VerticalOptions="Start" TranslationX="4" TranslationY="4" InputTransparent="True" Source="chevron_left.svg" BackgroundColor="Transparent" HeightRequest="38" WidthRequest="38"></ffs:SvgCachedImage>
@@ -106,10 +98,9 @@
                         <xe:BorderView  x:Name="NextMirrorBtt" xe:TouchEffect.Color="White"  VerticalOptions="Start" TranslationX="3" TranslationY="-3" Opacity="0.6" WidthRequest="54" HeightRequest="54" CornerRadius="27" Scale="1" HorizontalOptions="End" BackgroundColor="Transparent">
                         </xe:BorderView>
 
-
-                        <Label x:Name="SkipBack" Text="-10" IsVisible="False" Opacity="0" VerticalOptions="Center" HorizontalOptions="Center" TranslationX="-200" AbsoluteLayout.LayoutFlags="All" FontSize="24" TextColor="White" />
-                        <Label x:Name="SkipBackSmall" Text="10" VerticalOptions="Center" HorizontalOptions="Center" TranslationX="-200" AbsoluteLayout.LayoutFlags="All" FontSize="20" TextColor="White" />
-                        <Image x:Name="SkipBackImg"   VerticalOptions="Center" HorizontalOptions="Center" TranslationX="-200" AbsoluteLayout.LayoutFlags="All" WidthRequest="50" HeightRequest="50" />
+                        <Label x:Name="SkipBack" ClassId="NOFADE" Text="-10" IsVisible="False" Opacity="0" VerticalOptions="Center" HorizontalOptions="Center" TranslationX="-200" AbsoluteLayout.LayoutFlags="All" FontSize="24" TextColor="White" />
+                        <Label x:Name="SkipBackSmall"   Text="10" VerticalOptions="Center" HorizontalOptions="Center" TranslationX="-200" AbsoluteLayout.LayoutFlags="All" FontSize="20" TextColor="White" />
+                        <Image x:Name="SkipBackImg" VerticalOptions="Center" HorizontalOptions="Center" TranslationX="-200" AbsoluteLayout.LayoutFlags="All" WidthRequest="50" HeightRequest="50" />
                         <xe:BorderView  x:Name="SkipBackBtt" xe:TouchEffect.Color="White"  TranslationX="-100" Opacity="0.6" VerticalOptions="Center" WidthRequest="34" HeightRequest="34" CornerRadius="17" HorizontalOptions="Center" BackgroundColor="Transparent">
                         </xe:BorderView>
 
@@ -136,7 +127,7 @@
                                     <ColumnDefinition Width="*" />
                                     <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
-                                <Label Grid.Row="0" Grid.Column="0"  x:Name="StartTxt" Text="00:00" HorizontalOptions="End" TextColor="White" VerticalOptions="Center" WidthRequest="60" MinimumWidthRequest="60"></Label>
+                                <Label Grid.Row="0" Grid.Column="0"  x:Name="StartTxt" HorizontalTextAlignment="End" Text="00:00" HorizontalOptions="End" TextColor="White" VerticalOptions="Center" WidthRequest="60" MinimumWidthRequest="60"></Label>
 
                                 <Slider VerticalOptions="Center" x:Name="VideoSlider" BackgroundColor="Transparent" Grid.Column="1" ClassId="big" MinimumTrackColor="#617EFF" ThumbColor="#617EFF" HorizontalOptions="Fill" Margin="0,0,0,0" Maximum="1" DragStarted="VideoSlider_DragStarted" DragCompleted="VideoSlider_DragCompleted" ValueChanged="VideoSlider_ValueChanged" HeightRequest="40"></Slider>
                                 <Label VerticalOptions="Center" Grid.Row="0" Grid.Column="2" x:Name="EndTxt" Text="00:00" HorizontalOptions="Start" TextColor="White" WidthRequest="60" MinimumWidthRequest="60"></Label>
@@ -149,68 +140,7 @@
                                     <ColumnDefinition Width="Auto" />
                                     <ColumnDefinition Width="Auto" />
                                     <ColumnDefinition Width="Auto" />
-                                </Grid.ColumnDefinitions>
-
-                                <!--
-                    <Grid Grid.Column="0" xe:TouchEffect.Color="White" x:Name="EpisodesTap" >
-                        <Grid.ColumnDefinitions >
-                            <ColumnDefinition Width="Auto" />
-                            <ColumnDefinition Width="Auto" />
-                        </Grid.ColumnDefinitions>
-                        <ff:CachedImage x:Name="EpisodesImg" Grid.Column="0" VerticalOptions="Center" TranslationY="-2" InputTransparent="True" BackgroundColor="Transparent" WidthRequest="27" HeightRequest="27" ></ff:CachedImage>
-                        <Button Text="Episodes"  Grid.Column="2" BackgroundColor="Transparent"></Button>
-                    </Grid>-->
-                                <!--
-                    <xe:BorderView x:Name="LockTap" Grid.Column="0"
-          HeightRequest="35"
-          WidthRequest="35"
-                                    xe:TouchEffect.Color="White" 
-          HorizontalOptions="Center"
-          VerticalOptions="Center"
-          BackgroundColor="Transparent"
-          CornerRadius="2"
-          BorderColor="Transparent"
-          BorderWidth="0">
-
-                        <ff:CachedImage x:Name="LockImg" Grid.Column="0" VerticalOptions="Center"  TranslationX="0"  InputTransparent="True" BackgroundColor="Transparent" WidthRequest="23" HeightRequest="23"  ></ff:CachedImage>
-
-                    </xe:BorderView>
-
-                    <xe:BorderView x:Name="SubTap" Grid.Column="1"
-          HeightRequest="35"
-          WidthRequest="35"
-                                    xe:TouchEffect.Color="White" 
-          HorizontalOptions="Center"
-          VerticalOptions="Center"
-          BackgroundColor="Transparent"
-          CornerRadius="2"
-          BorderColor="Transparent"
-          BorderWidth="0">
-
-                        <ff:CachedImage x:Name="SubtitleImg" Grid.Column="0" VerticalOptions="Center"  TranslationX="0"  InputTransparent="True" BackgroundColor="Transparent" WidthRequest="30" HeightRequest="30"  ></ff:CachedImage>
-
-                    </xe:BorderView>
-
-                    <BoxView WidthRequest="3" Color="White" HeightRequest="35" Grid.Column="2">
-                        
-                    </BoxView>
-                    -->
-
-                                <!--  <xe:BorderView x:Name="LockTap" Grid.Column="0" Padding="40,0"
-          HeightRequest="35"
-          WidthRequest="35"
-                                    xe:TouchEffect.Color="White" 
-          HorizontalOptions="Center"
-          VerticalOptions="Center"
-          BackgroundColor="Transparent"
-          CornerRadius="2"
-          BorderColor="Transparent"
-          BorderWidth="0">
-
-                        <ff:CachedImage x:Name="LockImg" Grid.Column="0" VerticalOptions="Center"  TranslationX="0"  InputTransparent="True" BackgroundColor="Transparent" WidthRequest="23" HeightRequest="23"  ></ff:CachedImage>
-
-                    </xe:BorderView>
-                    -->
+                                </Grid.ColumnDefinitions> 
                                 <xe:BorderView x:Name="LockTap" Grid.Column="0" Margin="0,10"
                                     HeightRequest="35"
                                     WidthRequest="70"
@@ -343,66 +273,7 @@
                                         <!--  <Button Text="Mirrors"  Grid.Column="1" BackgroundColor="Transparent"></Button>-->
                                         <Label Text="Next Episode"  Grid.Column="1" VerticalOptions="Center" TextColor="White"></Label>
                                     </Grid>
-                                </xe:BorderView>
-                                <!--
-                    <xe:BorderView x:Name="SubTap" Margin="40,0" Grid.Column="4"
-          HeightRequest="35"
-          WidthRequest="35"
-                                    xe:TouchEffect.Color="White" 
-          HorizontalOptions="Center"
-          VerticalOptions="Center"
-          BackgroundColor="Transparent"
-          CornerRadius="2"
-          BorderColor="Transparent"
-          BorderWidth="0">
-
-                        <ff:CachedImage x:Name="SubtitleImg" Grid.Column="0" VerticalOptions="Center"  TranslationX="0"  InputTransparent="True" BackgroundColor="Transparent" WidthRequest="30" HeightRequest="30"  ></ff:CachedImage>
-
-                    </xe:BorderView>-->
-                                <!--<Grid Grid.Column="1">
-                        <Grid.ColumnDefinitions >
-                            <ColumnDefinition Width="Auto" />
-                            <ColumnDefinition Width="Auto" />
-                        </Grid.ColumnDefinitions>
-                        <ff:CachedImage x:Name="MirrosImg" Grid.Column="0" VerticalOptions="Center" TranslationY="-2" InputTransparent="True" BackgroundColor="Transparent" WidthRequest="27" HeightRequest="27" ></ff:CachedImage>
-                        <Button Text="Mirrors"  Grid.Column="2" BackgroundColor="Transparent"></Button>
-                    </Grid>-->
-                                <!--
-                    <Grid Grid.Column="0">
-                        <Grid.ColumnDefinitions >
-                            <ColumnDefinition Width="Auto" />
-                            <ColumnDefinition Width="Auto" />
-                        </Grid.ColumnDefinitions>
-                        <ff:CachedImage x:Name="LockImg" Grid.Column="0" VerticalOptions="Center" TranslationY="-2" InputTransparent="True" BackgroundColor="Transparent" WidthRequest="27" HeightRequest="27" ></ff:CachedImage>
-                        <Button Text="Lock view"  Grid.Column="2" BackgroundColor="Transparent"></Button>
-                    </Grid>
-
-                    <Grid Grid.Column="1">
-                        <Grid.ColumnDefinitions >
-                            <ColumnDefinition Width="Auto" />
-                            <ColumnDefinition Width="Auto" />
-                        </Grid.ColumnDefinitions>
-
-                        <Image x:Name="SubtitlesImg" Grid.Column="1" VerticalOptions="Center" TranslationX="10" InputTransparent="True" ></Image>
-                        <Button Text="Subtitles"  Grid.Column="2" BackgroundColor="Transparent"></Button>
-                    </Grid>
-                    <Grid Grid.Column="2">
-                        <Grid.ColumnDefinitions >
-                            <ColumnDefinition Width="Auto" />
-                            <ColumnDefinition Width="Auto" />
-                        </Grid.ColumnDefinitions>
-                        <Image x:Name="MirrosImg" Grid.Column="0" VerticalOptions="Center" TranslationX="10" InputTransparent="True" Scale="1.2"></Image>
-                        <Button Text="Mirrors"  Grid.Column="1" BackgroundColor="Transparent"></Button>
-                    </Grid>
-                    <Grid Grid.Column="3">
-                        <Grid.ColumnDefinitions >
-                            <ColumnDefinition Width="Auto" />
-                            <ColumnDefinition Width="Auto" />
-                        </Grid.ColumnDefinitions>
-                        <Image x:Name="DownloadImg" Grid.Column="0" VerticalOptions="Center" TranslationX="10" InputTransparent="True" Scale="1"></Image>
-                        <Button Text="Download"  Grid.Column="1" BackgroundColor="Transparent"></Button>
-                    </Grid>
-                -->
+                                </xe:BorderView> 
                             </Grid>
 
                         </Grid>

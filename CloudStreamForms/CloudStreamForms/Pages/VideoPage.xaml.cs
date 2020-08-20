@@ -1136,7 +1136,7 @@ namespace CloudStreamForms
                         //   LoadingCir.IsEnabled = false;
                     });
                 };
-                 
+
                 Player.Playing += (o, e) => {
                     skips = new List<SkipMetadata>();
                     if (Settings.VideoPlayerShowSkip) {
@@ -1674,6 +1674,8 @@ namespace CloudStreamForms
                 return;
             }
             await Task.Delay(100);
+            double fade = disable ? 0 : 1;
+            if (AllButtons.Opacity == fade) return;
 
             print("FADETO: " + disable);
             VideoSliderAndSettings.AbortAnimation("TranslateTo");
@@ -1682,21 +1684,24 @@ namespace CloudStreamForms
             EpisodeLabel.TranslateTo(EpisodeLabel.TranslationX, disable ? -60 : 20, fadeTime, Easing.Linear);
 
 
-            /*List<Label> subHolders = new List<Label>();
-            subHolders.AddRange(font1);
-            subHolders.AddRange(font2);
-            subHolders.Add(SubtitleTxt1);
-            subHolders.Add(SubtitleTxt2);
-
-            for (int i = 0; i < subHolders.; i++) {
-
-            }*/
             SubHolder.AbortAnimation("TranslateTo");
             SubHolder.TranslateTo(EpisodeLabel.TranslationX, disable ? 0 : -90, fadeTime, Easing.Linear);
 
             AllButtons.AbortAnimation("FadeTo");
             AllButtons.IsEnabled = !disable;
-            await AllButtons.FadeTo(disable ? 0 : 1, fadeTime, Easing.Linear);
+            //    await Task.Delay((int)fadeTime);
+
+            AllButtons.Opacity = 1;
+            BlackBg.FadeTo(fade * 0.3);
+            foreach (var item in AllButtons.Children) {
+                if (item.ClassId != "NOFADE") {
+                    item.FadeTo(fade, fadeTime);
+                }
+            }
+            await Task.Delay((int)fadeTime);
+            AllButtons.Opacity = fade;
+
+            //    await AllButtons.FadeTo(, fadeTime, Easing.Linear);
         }
 
         async void StartFade(bool overridePause = false)
@@ -1793,6 +1798,7 @@ namespace CloudStreamForms
 
             // ========================================== NORMAL LOGIC ==========================================
             if (args.Type == TouchTracking.TouchActionType.Pressed) {
+
                 if (DateTime.Now.Subtract(lastClick).TotalSeconds < 0.25) { // Doubble click
                     lastRelease = DateTime.Now;
 
@@ -1805,9 +1811,10 @@ namespace CloudStreamForms
                     }
                     else {
                         SkipBac();
-                    }
+                    }  
                 }
                 lastClick = DateTime.Now;
+
                 FadeEverything(false);
 
                 startCursorPosition = args.Location;
@@ -1818,6 +1825,7 @@ namespace CloudStreamForms
                 cursorPosition = args.Location;
 
                 maxVol = Volume >= 100 ? 200 : 100;
+
             }
             else if (args.Type == TouchTracking.TouchActionType.Moved) {
                 print(startCursorPosition.X - args.Location.X);

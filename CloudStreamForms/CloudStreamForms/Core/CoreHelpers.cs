@@ -12,8 +12,8 @@ namespace CloudStreamForms.Core
         public struct NonBloatSeasonData
         {
             public string name; // ID OF PROVIDER
-            public bool subExists => subEpisodes.Where(t => t.IsClean()).Count() > 0;
-            public bool dubExists => dubEpisodes.Where(t => t.IsClean()).Count() > 0;
+            public bool subExists => subEpisodes != null && subEpisodes.Where(t => t.IsClean()).Count() > 0;
+            public bool dubExists => dubEpisodes != null && dubEpisodes.Where(t => t.IsClean()).Count() > 0;
             public List<string> subEpisodes;
             public List<string> dubEpisodes;
             public object extraData;

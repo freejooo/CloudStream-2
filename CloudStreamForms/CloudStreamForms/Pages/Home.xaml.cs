@@ -323,10 +323,10 @@ namespace CloudStreamForms
                     MovieTypePickerBttScrollY -= lastScroll - e.ScrollY;
                     lastScroll = e.ScrollY;
 
-                    if(MovieTypePickerBttScrollY > MovieTypePickerBttMinScrollY) {
+                    if (MovieTypePickerBttScrollY > MovieTypePickerBttMinScrollY) {
                         MovieTypePickerBttScrollY = MovieTypePickerBttMinScrollY;
                     }
-                    else if(MovieTypePickerBttScrollY < 0) {
+                    else if (MovieTypePickerBttScrollY < 0) {
                         MovieTypePickerBttScrollY = 0;
                     }
 
@@ -587,7 +587,7 @@ namespace CloudStreamForms
                                 stackLayout.Children.Add(boxView);
                                 stackLayout.Children.Add(ff);
                                 stackLayout.Children.Add(imageButton);
-                                stackLayout.Children.Add(new Label() { Text = name, VerticalOptions = LayoutOptions.Start, VerticalTextAlignment = TextAlignment.Center, HorizontalTextAlignment = TextAlignment.Center, HorizontalOptions = LayoutOptions.Center, Padding = 1, TextColor = Color.White, ClassId = "OUTLINE", TranslationY = RecPosterHeight });
+                                stackLayout.Children.Add(new Label() { Text = name, VerticalOptions = LayoutOptions.Start, VerticalTextAlignment = TextAlignment.Center, HorizontalTextAlignment = TextAlignment.Center, HorizontalOptions = LayoutOptions.Center, Padding = 1, TextColor = Color.White, MaxLines = 2, ClassId = "OUTLINE", TranslationY = RecPosterHeight });
                                 stackLayout.Opacity = 0;
 
 

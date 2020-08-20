@@ -40,7 +40,7 @@ namespace CloudStreamForms.Core
                 new KissFreeAnimeProvider(this),
                 new AnimeSimpleProvider(this),
                 new VidstreamingAnimeProvider(this),
-                new AnimeVibeBloatFreeProvider(this),
+             //   new AnimeVibeBloatFreeProvider(this), // HCaptcha ??
                 new NineAnimeBloatFreeProvider(this),
                 new FourAnimeBloatFreeProvider(this)};
             movieProviders = new IMovieProvider[] {
@@ -5582,7 +5582,7 @@ namespace CloudStreamForms.Core
                 return int.Parse(FindHTML(d, ending.Replace("-info", "") + "-episode-", "\""));
             }
 
-            const string watchMovieSite = "https://www10.watchmovie.movie";
+            const string watchMovieSite = "https://www11.watchmovie.movie";
             /// <summary>
             /// BLOCKING SEARCH QRY, NOT SORTED OR FILTERED
             /// </summary>
