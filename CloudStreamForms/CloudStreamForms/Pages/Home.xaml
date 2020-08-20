@@ -15,7 +15,7 @@
 
         <!--TextColor="#303F9F"-->
         <!--   <Label Text="Bookmarks" FontAttributes="Italic" TranslationX="10" VerticalOptions="Start" HorizontalOptions="FillAndExpand" FontSize="Small"  x:Name="BTxt"></Label>-->
-        <Grid x:Name="ViewGrid" HeightRequest="35" MinimumHeightRequest="35" >
+        <Grid x:Name="ViewGrid" HeightRequest="35" MinimumHeightRequest="50" >
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"></ColumnDefinition>
                 <ColumnDefinition Width="*"></ColumnDefinition>
@@ -23,21 +23,24 @@
                 <ColumnDefinition Width="*"></ColumnDefinition>
             </Grid.ColumnDefinitions>
             <xe:BorderView xe:TouchEffect.Color="White" CornerRadius="5" x:Name="HomeBtt">
-                <Label Text="Home" FontSize="17" Margin="10" Scale="1.2" FontAttributes="Bold" HorizontalTextAlignment="Center" TextColor="White" x:Name="HomeLbl"></Label>
+                <Label Text="Home" FontSize="17" VerticalOptions="Center" Scale="1.2" FontAttributes="Bold" MinimumHeightRequest="50"  HorizontalTextAlignment="Center" TextColor="White" x:Name="HomeLbl"></Label>
             </xe:BorderView>
             <xe:BorderView Grid.Column="1" xe:TouchEffect.Color="White" CornerRadius="5" x:Name="RelatedBtt">
-                <Label Text="Related" FontSize="17" Scale="0.9" Margin="10" HorizontalTextAlignment="Center" TextColor="White" x:Name="RelatedLbl"></Label>
+                <Label Text="Related" FontSize="17" VerticalOptions="Center"  Scale="0.9"  HorizontalTextAlignment="Center" MinimumHeightRequest="50"  TextColor="White" x:Name="RelatedLbl"></Label>
             </xe:BorderView>
             <xe:BorderView Grid.Column="2" xe:TouchEffect.Color="White" CornerRadius="5" x:Name="TopBtt">
-                <Label Text="Top 100" FontSize="17" Scale="0.9" Margin="10" HorizontalTextAlignment="Center" TextColor="White" x:Name="TopLbl"></Label>
+                <Label Text="Top 100" FontSize="17" VerticalOptions="Center" Scale="0.9" HorizontalTextAlignment="Center" MinimumHeightRequest="50" TextColor="White" x:Name="TopLbl"></Label>
             </xe:BorderView>
             <xe:BorderView Grid.Column="3" xe:TouchEffect.Color="White" CornerRadius="5" x:Name="TrendingBtt">
-                <Label Text="Trending" FontSize="17" Scale="0.9" Margin="10" HorizontalTextAlignment="Center" TextColor="White" x:Name="TrendingLbl"></Label>
+                <Label Text="Trending" FontSize="17" VerticalOptions="Center" Scale="0.9"  HorizontalTextAlignment="Center" MinimumHeightRequest="50" TextColor="White" x:Name="TrendingLbl"></Label>
             </xe:BorderView>
 
         </Grid>
-        <Grid>
+        <Grid VerticalOptions="Fill"   HeightRequest="20000">
 
+            <Image x:Name="baseImg" IsVisible="False" VerticalOptions="Fill" HorizontalOptions="Fill" Scale="0.8" BackgroundColor="Transparent" AbsoluteLayout.LayoutBounds="0, 0, 1, 1" AbsoluteLayout.LayoutFlags="All"  InputTransparent="True" TranslationY="-40"></Image>
+            <Label x:Name="baseTxt" IsVisible="False" AbsoluteLayout.LayoutBounds="0, 0, 1, 1" AbsoluteLayout.LayoutFlags="All"  VerticalOptions="Center" HorizontalOptions="Center" TextColor="#434343" ClassId="CUST" FontAttributes="Bold" FontSize="18" TranslationY="100" InputTransparent="True" Text="No Bookmarks"></Label>
+            <!--<Button x:Name="baseMore" IsVisible="true" BackgroundColor="White" CornerRadius="10" TextColor="Black" ClassId="CUST" AbsoluteLayout.LayoutBounds="0, 0, 1, 1" AbsoluteLayout.LayoutFlags="All"  VerticalOptions="Center" HorizontalOptions="Center" HeightRequest="30" FontAttributes="Bold" FontSize="18" TranslationY="200" Padding="10,0" InputTransparent="True" Text="Search for more titles"></Button>-->
 
 
             <!--<BoxView HeightRequest="1" Color="#303F9F"></BoxView>-->

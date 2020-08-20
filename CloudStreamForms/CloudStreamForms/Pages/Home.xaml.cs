@@ -212,8 +212,10 @@ namespace CloudStreamForms
 
         public async void ChangeSizeOfTabs()
         {
+            UpdateNoBookmarks();
             for (int i = 0; i < selectTabItems.Length; i++) {
                 selectTabLabels[i].ScaleTo(selectedTabItem == i ? 1.2 : 0.9, 150, Easing.SinOut);
+                selectTabLabels[i].FontAttributes = selectedTabItem == i ? FontAttributes.Bold : FontAttributes.None;
             }
             bool bookmarkVis = selectedTabItem == 0;
             SetHeight();
@@ -251,6 +253,8 @@ namespace CloudStreamForms
         public Home()
         {
             InitializeComponent();
+            baseImg.Source = App.GetImageSource("NoBookmarks.png");
+
             selectTabItems = new BorderView[] {
                 HomeBtt,RelatedBtt,TopBtt,TrendingBtt,
             };
@@ -470,6 +474,11 @@ namespace CloudStreamForms
                 if (!hasAppered) {
                     IndexChanged();
                 }
+                ViewGrid.IsVisible = Settings.Top100Enabled;
+                if (!Settings.Top100Enabled && selectedTabItem != 0) {
+                    selectedTabItem = 0;
+                    ChangeSizeOfTabs();
+                }
                 BackgroundColor = Settings.BlackRBGColor;
                 //Color.FromHex(Settings.MainBackgroundColor);
                 hasAppered = true;
@@ -520,6 +529,14 @@ namespace CloudStreamForms
         }
 
         public static bool UpdateIsRequired = true;
+        static bool hasBookmarks = false;
+
+        void UpdateNoBookmarks()
+        {
+            bool vis = (!hasBookmarks && selectedTabItem == 0);
+            baseImg.IsVisible = vis;
+            baseTxt.IsVisible = vis;
+        }
 
         void UpdateBookmarks()
         {
@@ -562,15 +579,19 @@ namespace CloudStreamForms
                                 };
 
                                 // ================================================================ RECOMMENDATIONS CLICKED ================================================================
-                                stackLayout.SetValue(XamEffects.TouchEffect.ColorProperty, Color.White);
                                 // stackLayout.SetValue(XamEffects.BorderView.CornerRadiusProperty, 20);
 
-                                Commands.SetTap(stackLayout, new Command((o) => {
+                                var brView = new BorderView() { VerticalOptions = LayoutOptions.Fill, HorizontalOptions = LayoutOptions.Fill, CornerRadius = 5 };
+
+                                brView.SetValue(XamEffects.TouchEffect.ColorProperty, Color.White);
+                                Commands.SetTap(brView, new Command((o) => {
                                     var z = (BookmarkPoster)o;
                                     PushPageFromUrlAndName(z.id, z.name);
                                 }));
                                 var _b = new BookmarkPoster() { id = id, name = name, posterUrl = posterUrl };
-                                Commands.SetTapParameter(stackLayout, _b);
+                                Commands.SetTapParameter(brView, _b);
+
+
                                 bookmarkPosters.Add(_b);
 
                                 var _color = Settings.BlackColor + 5;
@@ -579,18 +600,17 @@ namespace CloudStreamForms
                                     BackgroundColor = Color.FromRgb(_color, _color, _color),
                                     InputTransparent = true,
                                     CornerRadius = 10,
-                                    HeightRequest = RecPosterHeight + bookmarkLabelTransY - 5,
-                                    TranslationY = 5,
+                                    HeightRequest = RecPosterHeight + bookmarkLabelTransY,
+                                    TranslationY = 0,
                                     WidthRequest = RecPosterWith,
                                 };
-
                                 stackLayout.Children.Add(boxView);
                                 stackLayout.Children.Add(ff);
                                 stackLayout.Children.Add(imageButton);
                                 stackLayout.Children.Add(new Label() { Text = name, VerticalOptions = LayoutOptions.Start, VerticalTextAlignment = TextAlignment.Center, HorizontalTextAlignment = TextAlignment.Center, HorizontalOptions = LayoutOptions.Center, Padding = 1, TextColor = Color.White, MaxLines = 2, ClassId = "OUTLINE", TranslationY = RecPosterHeight });
+                                stackLayout.Children.Add(brView);
                                 stackLayout.Opacity = 0;
-
-
+                                 
                                 async void WaitUntillComplete()
                                 {
                                     stackLayout.Opacity = 0;
@@ -647,6 +667,9 @@ namespace CloudStreamForms
 
                 }
                 allDone = true;
+                hasBookmarks = bookmarkPosters.Count > 0;
+
+                UpdateNoBookmarks();
                 /*if (ImdbTypePicker.SelectedIndex == -1) {
                     ImdbTypePicker.SelectedIndex = bookmarkPosters.Count > 0 ? 0 : 2; // SET TO POPULAR BY DEAFULT
                 }*/

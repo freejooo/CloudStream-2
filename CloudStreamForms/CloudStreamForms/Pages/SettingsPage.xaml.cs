@@ -265,6 +265,7 @@ namespace CloudStreamForms.Pages
                     string o = await ActionPopup.DisplayActionSheet($"Remove all bookmarks ({items} items)","Yes, remove all bookmarks","No, dont remove bookmarks");
                     if(o.StartsWith("Yes")) {
                         App.RemoveFolder(App.BOOKMARK_DATA);
+                        Home.UpdateIsRequired = true;
                     }
                 }),
                 new SettingsButton("baseline_refresh_white_48dp.png","Reset settings","Will reset all settings to default",async () => {

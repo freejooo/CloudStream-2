@@ -148,6 +148,7 @@ namespace CloudStreamForms
                 MyEpisodeResultCollection = new ObservableCollection<EpisodeResult>();
                 BindingContext = this;
                 BackgroundColor = Settings.BlackRBGColor;
+                ChangeStorage();
             }
             catch (Exception _ex) {
                 error(_ex);
@@ -156,6 +157,48 @@ namespace CloudStreamForms
         protected override void OnDisappearing()
         {
             base.OnDisappearing();
+        }
+
+        void ChangeStorage()
+        {
+            Task.Run(() => {
+
+                var d = App.GetStorage();
+                try {
+                    Device.InvokeOnMainThreadAsync(() => {
+
+                        SpaceProgress.Progress = d.UsedProcentage;
+
+                        FreeSpace.Text = "Free Space · " + App.ConvertBytesToGB(d.FreeSpace) + "GB";
+                        UsedSpace.Text = "Used Space · " + App.ConvertBytesToGB(d.UsedSpace) + "GB";
+                        if (Device.RuntimePlatform == Device.UWP) {
+                            OffBar.IsVisible = false;
+                            OffBar.IsEnabled = false;
+                            DownloadSizeGrid.HeightRequest = 25;
+                        }
+                        else {
+                        }
+                    });
+
+                }
+                catch (Exception) {
+
+                }
+            });
+
+        }
+
+        void OnAppear()
+        {
+            try {
+                BackgroundColor = Settings.BlackRBGColor; 
+                UpdateDownloaded();
+                ChangeStorage(); 
+                episodeView.VerticalScrollBarVisibility = Settings.ScrollBarVisibility;
+            }
+            catch (Exception _ex) {
+                error(_ex);
+            }
         }
 
         protected override void OnAppearing()
@@ -171,37 +214,9 @@ namespace CloudStreamForms
             if (Settings.IS_TEST_BUILD) {
                 return;
             }
+            OnAppear();
 
-            try {
-                BackgroundColor = Settings.BlackRBGColor;
-
-                UpdateDownloaded();
-
-                var d = App.GetStorage();
-                try {
-                    SpaceProgress.Progress = d.UsedProcentage;
-
-                    FreeSpace.Text = "Free Space · " + App.ConvertBytesToGB(d.FreeSpace) + "GB";
-                    UsedSpace.Text = "Used Space · " + App.ConvertBytesToGB(d.UsedSpace) + "GB";
-                    if (Device.RuntimePlatform == Device.UWP) {
-                        OffBar.IsVisible = false;
-                        OffBar.IsEnabled = false;
-                        DownloadSizeGrid.HeightRequest = 25;
-                    }
-                    else {
-                    }
-                }
-                catch (Exception) {
-
-                }
-                episodeView.VerticalScrollBarVisibility = Settings.ScrollBarVisibility;
-
-            }
-            catch (Exception _ex) {
-                error(_ex);
-            }
             //print("PRO:" + d.UsedProcentage + " Total Size: " + App.ConvertBytesToGB(d.TotalSpace, 2) + "GB Current Space: " + App.ConvertBytesToGB(d.FreeSpace, 2) + "GB" + " Used Space: " + App.ConvertBytesToGB(d.UsedSpace, 2) + "GB");
-
         }
 
         void SetHeight()
@@ -404,7 +419,7 @@ namespace CloudStreamForms
 
                         var _epres = ((EpisodeResult[])epres.Clone()).OrderBy(t => t.Episode).ToArray(); // MOVIE -> ANIMEMOVIE -> TV-SERIES -> ANIME -> YOUTUBE
 
-                     
+
 
                         App.SetKey("Settings", "hasDownloads", _epres.Length != 0);
 
