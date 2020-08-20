@@ -420,6 +420,15 @@ namespace CloudStreamForms
             }
         }
 
+        public static bool Top100Anime {
+            set {
+                App.SetKey("Settings", nameof(Top100Anime), value);
+            }
+            get {
+                return App.GetKey("Settings", nameof(Top100Anime), false);
+            }
+        }
+
         public string MainColor { get { return Device.RuntimePlatform == Device.UWP ? "#303F9F" : "#515467"; } }
         private static String HexConverter(Color c)
         {
