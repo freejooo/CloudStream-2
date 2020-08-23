@@ -1130,11 +1130,10 @@ namespace CloudStreamForms.Droid
         {
             if (App.IsPictureInPicture) {
                 if (App.currentVideoStatus.isPaused) {
-                    UpdatePictureInPictureActions(Resource.Drawable.netflixPlay128v2, "Play", (int)App.PlayerEventType.Play, Constants.REQUEST_PLAY);
-
+                    UpdatePictureInPictureActions(Resource.Drawable.netflixPlay128v2, "Play", (int)App.PlayerEventType.Play);
                 }
                 else {
-                    UpdatePictureInPictureActions(Resource.Drawable.netflixPause128v2, "Pause", (int)App.PlayerEventType.Pause, Constants.REQUEST_PAUSE);
+                    UpdatePictureInPictureActions(Resource.Drawable.netflixPause128v2, "Pause", (int)App.PlayerEventType.Pause);
                 }
             }
         }
@@ -1146,6 +1145,8 @@ namespace CloudStreamForms.Droid
 
             try {
                 if (Build.VERSION.SdkInt >= BuildVersionCodes.N && PackageManager.HasSystemFeature(PackageManager.FeaturePictureInPicture)) {
+                    App.OnPictureInPictureModeChanged?.Invoke(null, true);
+
                     if (Build.VERSION.SdkInt >= BuildVersionCodes.O) {
                         //Rational rational = new Rational(450, 250);
                         PictureInPictureParams.Builder builder = new PictureInPictureParams.Builder();
@@ -1170,6 +1171,7 @@ namespace CloudStreamForms.Droid
         {
             IsPipModeEnabled = IsInPictureInPictureMode;
             if (!IsInPictureInPictureMode) {
+                App.OnPictureInPictureModeChanged?.Invoke(null, false);
                 OnBackPressed();
             }
         }
@@ -1188,32 +1190,33 @@ namespace CloudStreamForms.Droid
         /// <param name="title">The title text.</param>
         /// <param name="controlType">The type of action.</param>
         /// <param name="requestCode">The request code for the pending intent.</param>
-        public void UpdatePictureInPictureActions([DrawableRes] int iconId, string title,   int controlType, int requestCode)
+        public void UpdatePictureInPictureActions([DrawableRes] int iconId, string title, int controlType)
         {
             var actions = new List<RemoteAction>();
 
             // This is the PendingIntent that is invoked when a user clicks on the action item.
             // You need to use distinct request codes for play and pause, or the PendingIntent won't
             // be properly updated.
-            PendingIntent intent = PendingIntent.GetBroadcast(this, requestCode, new Intent(Constants.ACTION_MEDIA_CONTROL)
-                                                              .PutExtra(Constants.EXTRA_CONTROL_TYPE, controlType), 0);
+            PendingIntent GetPen(int code)
+            {
+                return PendingIntent.GetBroadcast(this, code, new Intent(Constants.ACTION_MEDIA_CONTROL).PutExtra(Constants.EXTRA_CONTROL_TYPE, code), 0);
+            }
+
+            PendingIntent intent = GetPen(controlType);
+
             Icon icon = Icon.CreateWithResource(this, iconId);
+
+            var context = Application.Context;
+            actions.Add(new RemoteAction(Icon.CreateWithResource(context, Resource.Drawable.netflixSkipMobileBackEmpty), "Back", "Seek Back", GetPen((int)App.PlayerEventType.SeekBack)));
             actions.Add(new RemoteAction(icon, title, title, intent));
-
-            // Another action item. This is a fixed action.
-
-            /*actions.Add(new RemoteAction(
-                Icon.CreateWithResource(this, Resource.Drawable.ic_info_24dp),
-                GetString(Resource.String.info), GetString(Resource.String.info_description),
-                PendingIntent.GetActivity(this, Constants.REQUEST_INFO,
-                                          new Intent(Intent.ActionView, Android.Net.Uri.Parse(GetString(Resource.String.info_uri))), 0)));
-            */
-
+            actions.Add(new RemoteAction(Icon.CreateWithResource(context, Resource.Drawable.netflixSkipMobileEmpty), "Forward", "Seek Forward", GetPen((int)App.PlayerEventType.SeekForward)));
+            // MAX 3 ACTIONS
+            /*if (App.currentVideoStatus.hasNextEpisode) {
+                actions.Add(new RemoteAction(Icon.CreateWithResource(context, Resource.Drawable.baseline_skip_next_white_48dp), "Next", "Next Episode", GetPen((int)App.PlayerEventType.NextEpisode)));
+            }*/
+             
             pictureInPictureParamsBuilder.SetActions(actions).Build();
-
-            // This is how you can update action items (or aspect ratio) for Picture-in-Picture mode.
-            // Note this call can happen even when the app is not in PiP mode. In that case, the
-            // arguments will be used for at the next call of #enterPictureInPictureMode.
+             
             SetPictureInPictureParams(pictureInPictureParamsBuilder.Build());
         }
 

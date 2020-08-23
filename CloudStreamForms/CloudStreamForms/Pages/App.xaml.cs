@@ -110,7 +110,7 @@ namespace CloudStreamForms
             public void PictureInPicture();
         }
 
-        public static VideoPlayerStatus currentVideoStatus = new VideoPlayerStatus() { isInVideoplayer = false, isLoaded = false, isPaused = false, };
+        public static VideoPlayerStatus currentVideoStatus = new VideoPlayerStatus() { isInVideoplayer = false, isLoaded = false, isPaused = false, hasNextEpisode = false };
 
         private static bool _IsPictureInPicture = false;
         public static bool IsPictureInPicture { set { _IsPictureInPicture = value; OnPictureInPictureModeChanged?.Invoke(null, value); } get { return _IsPictureInPicture; } }
@@ -121,6 +121,7 @@ namespace CloudStreamForms
             public bool isInVideoplayer;
             public bool isPaused;
             public bool isLoaded;
+            public bool hasNextEpisode;
         }
 
         [Serializable]
@@ -133,7 +134,7 @@ namespace CloudStreamForms
 
         public enum DownloadState { Downloading, Downloaded, NotDownloaded, Paused }
         public enum DownloadType { Normal = 0, YouTube = 1 }
-        public enum PlayerEventType { Stop = -1, Pause = 0, Play = 1, NextMirror = 2, PrevMirror = 3, SeekForward = 4, SeekBack = 5, SkipCurrentChapter = 6 }
+        public enum PlayerEventType { Stop = -1, Pause = 0, Play = 1, NextMirror = 2, PrevMirror = 3, SeekForward = 4, SeekBack = 5, SkipCurrentChapter = 6, NextEpisode = 7 }
 
         public static EventHandler OnSomeDownloadFinished;
         public static EventHandler OnSomeDownloadFailed;

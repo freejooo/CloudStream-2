@@ -856,7 +856,7 @@ namespace CloudStreamForms
                         if (info.source == currentVideo.headerId) {
                             if (info.episode == currentVideo.episode + 1 && info.season == currentVideo.season) {
                                 NextEpisodeTap.IsVisible = true;
-
+                                
                                 NextEpisodeClicked = async () => {
                                     await Navigation.PopModalAsync(true);
                                     Download.PlayDownloadedFile(info, false);
@@ -969,7 +969,7 @@ namespace CloudStreamForms
                     HandleVideoAction(App.PlayerEventType.Stop);
                 }));
                 Commands.SetTap(GoPipMode, new Command(() => {
-                    GoIntoPipMode(); 
+                    GoIntoPipMode();
                 }));
 
                 void SetIsPausedUI(bool paused)
@@ -1139,6 +1139,9 @@ namespace CloudStreamForms
                 }
                 print("Videoplage Start 13");
 
+
+                App.currentVideoStatus.hasNextEpisode = NextEpisodeClicked != null;
+                UpdateVideoStatus();
             }
             catch (Exception _ex) {
                 error("Videoplayer: " + _ex);
@@ -1196,7 +1199,7 @@ namespace CloudStreamForms
 
         void GoIntoPipMode()
         {
-            HandleAppPipMode(null, true);
+            //HandleAppPipMode(null, true);
             App.PlatformDep.PictureInPicture();
         }
 
@@ -1233,12 +1236,12 @@ namespace CloudStreamForms
                 case App.PlayerEventType.Pause:
                     if (GetPlayerIsPauseble()) {
                         Player.SetPause(true);
-                    } 
+                    }
                     break;
                 case App.PlayerEventType.Play:
                     if (GetPlayerIsPauseble()) {
                         Player.SetPause(false);
-                    } 
+                    }
                     break;
                 case App.PlayerEventType.NextMirror:
                     SelectNextMirror();
@@ -1254,6 +1257,11 @@ namespace CloudStreamForms
                     break;
                 case App.PlayerEventType.SkipCurrentChapter:
                     await SkipCurrentCap();
+                    break;
+                case App.PlayerEventType.NextEpisode:
+                    if (NextEpisodeClicked != null) {
+                        await NextEpisodeClicked();
+                    }
                     break;
                 default:
                     break;
