@@ -86,6 +86,7 @@
     <PackageReference Include="Xamarin.Essentials" Version="1.5.3.2" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Constants.cs" />
     <Compile Include="CustomButtonRenderer.cs" />
     <Compile Include="CustomTabbedPageRenderer.cs" />
     <Compile Include="CustomSliderRenderer.cs" />
@@ -97,6 +98,7 @@
     <Compile Include="CustomSearchBarRenderer.cs" />
     <Compile Include="CustomPickerRenderer.cs" />
     <Compile Include="MainActivity.cs" />
+    <Compile Include="PIPBroadcastReceiver.cs" />
     <Compile Include="Resources\Resource.designer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -480,6 +482,15 @@
   </ItemGroup>
   <ItemGroup>
     <AndroidResource Include="Resources\drawable\gradient.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\drawable\pip_white.svg" />
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\drawable-xxxhdpi\netflixSkipForward.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\drawable-xxxhdpi\netflixSkipBack.png" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\Android\Xamarin.Android.CSharp.targets" />
 </Project>

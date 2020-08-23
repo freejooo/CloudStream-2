@@ -154,6 +154,13 @@ namespace CloudStreamForms
                 );
         }
 
+        public async void LoadVideoPage()
+        {
+            await Device.InvokeOnMainThreadAsync(async () => {
+                await Navigation.PushModalAsync(new VideoPage(VideoPage.lastVideo), true);
+            });
+        }
+
         public MainPage()
         {
             InitializeComponent();
@@ -161,11 +168,10 @@ namespace CloudStreamForms
             App.OnAppReopen += async (o, e) => {
                 if (VideoPage.CanReopen) {
                     VideoPage.CanReopen = false;
-                    await Device.InvokeOnMainThreadAsync(async () => {
-                        await Navigation.PushModalAsync(new VideoPage(VideoPage.lastVideo), true);
-                    });
+                    LoadVideoPage();
                 }
             };
+
             App.OnAppNotInForground += (o, e) => {
                 App.SaveData();
             };
@@ -246,6 +252,7 @@ namespace CloudStreamForms
         async void LateCheck()
         {
             await Task.Delay(5000);
+         //   App.PlatformDep.PictureInPicture();
             try {
                 CheckGitHubUpdate();
                 MainChrome.StartImageChanger();

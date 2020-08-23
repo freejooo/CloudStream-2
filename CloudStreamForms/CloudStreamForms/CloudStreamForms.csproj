@@ -132,6 +132,7 @@
     <None Remove="Resource\outline_visibility_off_white_48dp.png" />
     <None Remove="Resource\outline_visibility_white_48dp.png" />
     <None Remove="Resource\pausePlay.png" />
+    <None Remove="Resource\pip_white.svg" />
     <None Remove="Resource\round_add_white_48dp.png" />
     <None Remove="Resource\round_audiotrack_white_48dp.png" />
     <None Remove="Resource\round_build_white_48dp.png" />
@@ -286,6 +287,7 @@
     <EmbeddedResource Include="Resource\outline_visibility_off_white_48dp.png" />
     <EmbeddedResource Include="Resource\outline_visibility_white_48dp.png" />
     <EmbeddedResource Include="Resource\pausePlay.png" />
+    <EmbeddedResource Include="Resource\pip_white.svg" />
     <EmbeddedResource Include="Resource\round_add_white_48dp.png" />
     <EmbeddedResource Include="Resource\round_audiotrack_white_48dp.png" />
     <EmbeddedResource Include="Resource\round_build_white_48dp.png" />

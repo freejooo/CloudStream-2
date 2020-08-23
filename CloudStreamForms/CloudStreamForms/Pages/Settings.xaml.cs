@@ -347,6 +347,15 @@ namespace CloudStreamForms
             }
         }
 
+        public static bool PictureInPicture {
+            set {
+                App.SetKey("Settings", nameof(PictureInPicture), value);
+            }
+            get {
+                return App.GetKey("Settings", nameof(PictureInPicture), true);
+            }
+        }
+
         public static bool UseAniList {
             set {
                 App.SetKey("Settings", nameof(UseAniList), value);

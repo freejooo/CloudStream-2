@@ -106,6 +106,21 @@ namespace CloudStreamForms
             void RequestVlc(List<string> urls, List<string> names, string episodeName, string episodeId, long startId = FROM_PROGRESS, string subtitleFull = "", VideoPlayer preferedPlayer = VideoPlayer.VLC);
 
             public int GetArchitecture();
+
+            public void PictureInPicture();
+        }
+
+        public static VideoPlayerStatus currentVideoStatus = new VideoPlayerStatus() { isInVideoplayer = false, isLoaded = false, isPaused = false, };
+
+        private static bool _IsPictureInPicture = false;
+        public static bool IsPictureInPicture { set { _IsPictureInPicture = value; OnPictureInPictureModeChanged?.Invoke(null, value); } get { return _IsPictureInPicture; } }
+
+        [Serializable]
+        public struct VideoPlayerStatus
+        {
+            public bool isInVideoplayer;
+            public bool isPaused;
+            public bool isLoaded;
         }
 
         [Serializable]
@@ -118,9 +133,13 @@ namespace CloudStreamForms
 
         public enum DownloadState { Downloading, Downloaded, NotDownloaded, Paused }
         public enum DownloadType { Normal = 0, YouTube = 1 }
+        public enum PlayerEventType { Stop = -1, Pause = 0, Play = 1, NextMirror = 2, PrevMirror = 3, SeekForward = 4, SeekBack = 5, SkipCurrentChapter = 6 }
 
         public static EventHandler OnSomeDownloadFinished;
         public static EventHandler OnSomeDownloadFailed;
+        public static EventHandler<bool> OnPictureInPictureModeChanged;
+        public static EventHandler<PlayerEventType> OnRemovePlayAction;
+        public static EventHandler OnVideoStatusChanged;
 
         [System.Serializable]
         public class DownloadInfo
@@ -513,9 +532,11 @@ namespace CloudStreamForms
         public string AppFont { get; set; } = "Gotham.ttf#Google Sans";
         public int AppFontSize { get; set; } = 50;
 
+
+        public static App instance;
         public App()
         {
-
+            instance = this;
             // Resources["LABELFONT"] = LabelFont;
 
             InitializeComponent();
@@ -545,6 +566,7 @@ namespace CloudStreamForms
 
             MainPage = new MainPage();
         }
+
 
         public static int ConvertDPtoPx(int dp)
         {

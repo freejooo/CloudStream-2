@@ -4,14 +4,18 @@ using Android.App;
 using Android.Bluetooth;
 using Android.Content;
 using Android.Content.PM;
+using Android.Content.Res;
 using Android.Graphics;
+using Android.Graphics.Drawables;
 using Android.Media;
 using Android.Media.Session;
 using Android.OS;
 using Android.Runtime;
+using Android.Support.Annotation;
 using Android.Support.V4.App;
 using Android.Support.V4.Content;
 using Android.Text;
+using Android.Util;
 using Android.Views;
 using Android.Webkit;
 using Android.Widget;
@@ -21,6 +25,7 @@ using Java.Net;
 using Javax.Net.Ssl;
 using LibVLCSharp.Forms.Shared;
 using Newtonsoft.Json;
+using Org.Videolan.Libvlc.Utils;
 using Plugin.LocalNotifications;
 using System;
 using System.Collections.Generic;
@@ -369,7 +374,7 @@ namespace CloudStreamForms.Droid
     public class AlertReceiver : BroadcastReceiver
     {
         public override void OnReceive(Context context, Intent intent)
-        { 
+        {
             LocalNot localNot = new LocalNot();
             foreach (var prop in typeof(LocalNot).GetFields()) {
                 if (prop.FieldType == typeof(string)) {
@@ -390,7 +395,7 @@ namespace CloudStreamForms.Droid
             }
 
             //  Toast.MakeText(Android.App.Application.Context, "da:" + localNot.title, toastLength).Show();
-            ShowLocalNot(localNot); 
+            ShowLocalNot(localNot);
         }
     }
 
@@ -903,7 +908,9 @@ namespace CloudStreamForms.Droid
 
 
 
-    [Activity(Label = "CloudStream 2", Icon = "@drawable/bicon9", Theme = "@style/MainTheme.Splash", MainLauncher = true, LaunchMode = LaunchMode.SingleTop, ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation), IntentFilter(new[] { Intent.ActionView }, DataScheme = "cloudstreamforms", Categories = new[] { Intent.CategoryDefault, Intent.CategoryBrowsable })]
+    [Activity(Label = "CloudStream 2", Icon = "@drawable/bicon9", Theme = "@style/MainTheme.Splash", MainLauncher = true, LaunchMode = LaunchMode.SingleTop,
+        ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation | ConfigChanges.SmallestScreenSize | ConfigChanges.ScreenLayout  // MUST HAVE FOR PIP MODE OR ELSE IT WILL TRIGGER ONCREATE
+        , SupportsPictureInPicture = true), IntentFilter(new[] { Intent.ActionView }, DataScheme = "cloudstreamforms", Categories = new[] { Intent.CategoryDefault, Intent.CategoryBrowsable })]
     public class MainActivity : global::Xamarin.Forms.Platform.Android.FormsAppCompatActivity
     {
         public static MainDroid mainDroid;
@@ -974,6 +981,8 @@ namespace CloudStreamForms.Droid
         {
             print("ON CREATED:::::!!!!!!!!!");
 
+            isPictureInPictureSupported = Settings.PictureInPicture;
+
             SetTheme(Resource.Style.MainTheme_NonSplash);
 
             PublicNot = Resource.Drawable.bicon;
@@ -984,7 +993,6 @@ namespace CloudStreamForms.Droid
             base.OnCreate(savedInstanceState);
 
             System.AppDomain.CurrentDomain.UnhandledException += MainPage.UnhandledExceptionTrapper;
-
 
             string data = Intent?.Data?.EncodedAuthority;
 
@@ -1012,6 +1020,12 @@ namespace CloudStreamForms.Droid
 
             trustEveryone();
             LoadApplication(new App());
+
+            App.OnVideoStatusChanged += (o, e) => {
+                UpdatePipVideostatus();
+            };
+
+
             if (Settings.IS_TEST_BUILD) {
                 PlatformDep = new NullPlatfrom();
                 return;
@@ -1099,6 +1113,139 @@ namespace CloudStreamForms.Droid
         }
 
 
+        #region ================================================ PICTURE IN PICTURE ================================================
+
+        //https://github.com/bobby5892/235AM-Android/blob/dda3cc85f8345902cf96ccf437ba7fc3001a04e6/Xam-Examples/android-o/PictureInPicture/PictureInPicture/MainActivity.cs
+
+        public static bool isPictureInPictureSupported = false;
+
+        PictureInPictureParams.Builder pictureInPictureParamsBuilder = new PictureInPictureParams.Builder();
+
+        public bool ShouldShowPictureInPicture()
+        {
+            return isPictureInPictureSupported && currentVideoStatus.isInVideoplayer && currentVideoStatus.isLoaded;
+        }
+
+        void UpdatePipVideostatus()
+        {
+            if (App.IsPictureInPicture) {
+                if (App.currentVideoStatus.isPaused) {
+                    UpdatePictureInPictureActions(Resource.Drawable.netflixPlay128v2, "Play", (int)App.PlayerEventType.Play, Constants.REQUEST_PLAY);
+
+                }
+                else {
+                    UpdatePictureInPictureActions(Resource.Drawable.netflixPause128v2, "Pause", (int)App.PlayerEventType.Pause, Constants.REQUEST_PAUSE);
+                }
+            }
+        }
+
+
+        private void EnterPipMode()
+        {
+            if (!ShouldShowPictureInPicture()) return;
+
+            try {
+                if (Build.VERSION.SdkInt >= BuildVersionCodes.N && PackageManager.HasSystemFeature(PackageManager.FeaturePictureInPicture)) {
+                    if (Build.VERSION.SdkInt >= BuildVersionCodes.O) {
+                        //Rational rational = new Rational(450, 250);
+                        PictureInPictureParams.Builder builder = new PictureInPictureParams.Builder();
+                        //builder.SetAspectRatio(rational);
+                        EnterPictureInPictureMode(builder.Build());
+                    }
+                    else {
+                        var param = new PictureInPictureParams.Builder().Build();
+                        EnterPictureInPictureMode(param);
+                    }
+
+                    new Handler().PostDelayed(CheckPipPermission, 30);
+                }
+            }
+            catch (Exception e) {
+                error(e);
+            }
+        }
+        private bool IsPipModeEnabled = true;
+
+        private void CheckPipPermission()
+        {
+            IsPipModeEnabled = IsInPictureInPictureMode;
+            if (!IsInPictureInPictureMode) {
+                OnBackPressed();
+            }
+        }
+
+        public void ShowPictureInPicture()
+        {
+            EnterPipMode();
+        }
+
+        BroadcastReceiver receiver;
+
+        /// <summary>Updat
+        /// Update the state of pause/resume action item in Picture-in-Picture mode.
+        /// </summary>
+        /// <param name="iconId">The icon to be used.</param>
+        /// <param name="title">The title text.</param>
+        /// <param name="controlType">The type of action.</param>
+        /// <param name="requestCode">The request code for the pending intent.</param>
+        public void UpdatePictureInPictureActions([DrawableRes] int iconId, string title,   int controlType, int requestCode)
+        {
+            var actions = new List<RemoteAction>();
+
+            // This is the PendingIntent that is invoked when a user clicks on the action item.
+            // You need to use distinct request codes for play and pause, or the PendingIntent won't
+            // be properly updated.
+            PendingIntent intent = PendingIntent.GetBroadcast(this, requestCode, new Intent(Constants.ACTION_MEDIA_CONTROL)
+                                                              .PutExtra(Constants.EXTRA_CONTROL_TYPE, controlType), 0);
+            Icon icon = Icon.CreateWithResource(this, iconId);
+            actions.Add(new RemoteAction(icon, title, title, intent));
+
+            // Another action item. This is a fixed action.
+
+            /*actions.Add(new RemoteAction(
+                Icon.CreateWithResource(this, Resource.Drawable.ic_info_24dp),
+                GetString(Resource.String.info), GetString(Resource.String.info_description),
+                PendingIntent.GetActivity(this, Constants.REQUEST_INFO,
+                                          new Intent(Intent.ActionView, Android.Net.Uri.Parse(GetString(Resource.String.info_uri))), 0)));
+            */
+
+            pictureInPictureParamsBuilder.SetActions(actions).Build();
+
+            // This is how you can update action items (or aspect ratio) for Picture-in-Picture mode.
+            // Note this call can happen even when the app is not in PiP mode. In that case, the
+            // arguments will be used for at the next call of #enterPictureInPictureMode.
+            SetPictureInPictureParams(pictureInPictureParamsBuilder.Build());
+        }
+
+        public override void OnPictureInPictureModeChanged(bool isInPictureInPictureMode, Configuration newConfig)
+        {
+            base.OnPictureInPictureModeChanged(isInPictureInPictureMode, newConfig);
+            App.IsPictureInPicture = isInPictureInPictureMode;
+
+            if (!isInPictureInPictureMode) {
+                // Android.App.Application.Context.StartActivity(new Intent(MainActivity.activity.ApplicationContext, typeof(MainActivity)).AddFlags(ActivityFlags.ReorderToFront | ActivityFlags.NewTask));
+
+            }
+
+            //https://docs.microsoft.com/en-us/samples/xamarin/monodroid-samples/android-o-pictureinpicture/
+            if (isInPictureInPictureMode) {
+                UpdatePipVideostatus();
+                // Starts receiving events from action items in PiP mode.
+                receiver = new PIPBroadcastReceiver(this);
+                RegisterReceiver(receiver, new IntentFilter(Constants.ACTION_MEDIA_CONTROL));
+            }
+            else {
+                //  We are out of PiP mode. We can stop receiving events from it.
+                UnregisterReceiver(receiver);
+                receiver = null;
+
+                //   Show the video controls if the video is not playing
+                /*if (PIPMovieView != null && !PIPMovieView.IsPlaying) {
+                    PIPMovieView.ShowControls();
+                 }*/
+            }
+        }
+        #endregion
 
         private static void trustEveryone()
         {
@@ -1142,7 +1289,15 @@ namespace CloudStreamForms.Droid
 
         protected override void OnStop()
         {
+            /*
+            if (MainActivity.activity.ShouldShowPictureInPicture()) {
+                activity.ShowPictureInPicture();
+            }
+            else {*/
+            //     }
+            //if (!App.IsPictureInPicture) {
             App.OnAppNotInForground?.Invoke(null, EventArgs.Empty);
+            //}
             base.OnStop();
         }
 
@@ -1151,16 +1306,30 @@ namespace CloudStreamForms.Droid
             base.OnPause();
         }
 
+        protected override void OnUserLeaveHint()
+        {
+            base.OnUserLeaveHint();
+            /*  if (MainActivity.activity.ShouldShowPictureInPicture()) {
+                  activity.ShowPictureInPicture();
+              }*/
+        }
+
         protected override void OnRestart()
         {
             base.OnRestart();
-            App.OnAppReopen?.Invoke(null, EventArgs.Empty);
+            //  if (!App.IsPictureInPicture) {
+            if (!App.IsPictureInPicture) {
+                App.OnAppReopen?.Invoke(null, EventArgs.Empty);
+            }
+            //  }
         }
 
         protected override void OnResume()
         {
             base.OnResume();
-            OnAppResume?.Invoke(null, EventArgs.Empty);
+            if (!App.IsPictureInPicture) {
+                OnAppResume?.Invoke(null, EventArgs.Empty);
+            }
         }
 
 
@@ -1255,6 +1424,16 @@ namespace CloudStreamForms.Droid
 
     public class MainDroid : App.IPlatformDep
     {
+        public void PictureInPicture()
+        {
+            MainActivity.activity.ShowPictureInPicture();
+            //.SetActions(new List<RemoteAction>() { new RemoteAction() { } })
+            // TESTING STUFF
+            //  var _b = new PictureInPictureParams.Builder().Build();
+            //  MainActivity.activity.EnterPictureInPictureMode(_b);
+        }
+
+
         /*
         BluetoothAdapter bluetoothAdapter = BluetoothAdapter.DefaultAdapter;
         BluetoothServiceListener bluetoothServiceListener = new BluetoothServiceListener();
@@ -2921,6 +3100,11 @@ namespace CloudStreamForms.Droid
 
         public void NormalOrientation()
         {
+        }
+
+        public void PictureInPicture()
+        {
+            throw new NotImplementedException();
         }
 
         public void PlayExternalApp(VideoPlayer player)
