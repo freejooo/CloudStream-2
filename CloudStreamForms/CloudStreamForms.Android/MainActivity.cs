@@ -910,7 +910,7 @@ namespace CloudStreamForms.Droid
 
     [Activity(Label = "CloudStream 2", Icon = "@drawable/bicon9", Theme = "@style/MainTheme.Splash", MainLauncher = true, LaunchMode = LaunchMode.SingleTop,
         ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation | ConfigChanges.SmallestScreenSize | ConfigChanges.ScreenLayout  // MUST HAVE FOR PIP MODE OR ELSE IT WILL TRIGGER ONCREATE
-        , SupportsPictureInPicture = true),
+        , SupportsPictureInPicture = true, ResizeableActivity = true),
         IntentFilter(new[] { Intent.ActionView }, DataScheme = "cloudstreamforms", Categories = new[] { Intent.CategoryDefault, Intent.CategoryBrowsable }),
         IntentFilter(new[] { Intent.ActionView }, DataScheme = "https", DataPathPrefix = "/title", DataHost = "www.imdb.com", Categories = new[] { Intent.CategoryDefault, Intent.CategoryBrowsable })  // STUFF NOT WORKING
         ]
@@ -1148,7 +1148,7 @@ namespace CloudStreamForms.Droid
 
         public bool ShouldShowPictureInPicture()
         {
-            return isPictureInPictureSupported && currentVideoStatus.isInVideoplayer && currentVideoStatus.isLoaded;
+            return isPictureInPictureSupported && currentVideoStatus.isInVideoplayer; // && currentVideoStatus.isLoaded;
         }
 
         void UpdatePipVideostatus()
@@ -1232,14 +1232,21 @@ namespace CloudStreamForms.Droid
             Icon icon = Icon.CreateWithResource(this, iconId);
 
             var context = Application.Context;
-            actions.Add(new RemoteAction(Icon.CreateWithResource(context, Resource.Drawable.netflixSkipMobileBackEmpty), "Back", "Seek Back", GetPen((int)App.PlayerEventType.SeekBack)));
-            actions.Add(new RemoteAction(icon, title, title, intent));
+            if (App.currentVideoStatus.isLoaded) {
+                actions.Add(new RemoteAction(Icon.CreateWithResource(context, Resource.Drawable.netflixSkipMobileBackEmpty), "Back", "Seek Back", GetPen((int)App.PlayerEventType.SeekBack)));
+                actions.Add(new RemoteAction(icon, title, title, intent));
 
-            if (App.currentVideoStatus.shouldSkip) {
-                actions.Add(new RemoteAction(Icon.CreateWithResource(context, Resource.Drawable.baseline_skip_next_white_48dp), "Skip", "Skip", GetPen((int)App.PlayerEventType.SkipCurrentChapter)));
+                if (App.currentVideoStatus.shouldSkip) {
+                    actions.Add(new RemoteAction(Icon.CreateWithResource(context, Resource.Drawable.baseline_skip_next_white_48dp), "Skip", "Skip", GetPen((int)App.PlayerEventType.SkipCurrentChapter)));
+                }
+                else {
+                    actions.Add(new RemoteAction(Icon.CreateWithResource(context, Resource.Drawable.netflixSkipMobileEmpty), "Forward", "Seek Forward", GetPen((int)App.PlayerEventType.SeekForward)));
+                }
             }
             else {
-                actions.Add(new RemoteAction(Icon.CreateWithResource(context, Resource.Drawable.netflixSkipMobileEmpty), "Forward", "Seek Forward", GetPen((int)App.PlayerEventType.SeekForward)));
+                actions.Add(new RemoteAction(Icon.CreateWithResource(context, Resource.Drawable.baseline_skip_previous_white_48dp), "Previous Mirror", "Previous Mirror", GetPen((int)App.PlayerEventType.PrevMirror)));
+                //actions.Add(new RemoteAction(Icon.CreateWithResource(context, Resource.Drawable.baseline_stop_white_48dp), "Stop", "Stop", GetPen((int)App.PlayerEventType.Stop)));
+                actions.Add(new RemoteAction(Icon.CreateWithResource(context, Resource.Drawable.baseline_skip_next_white_48dp), "Next Mirror", "Next Mirror", GetPen((int)App.PlayerEventType.NextMirror)));
             }
             // MAX 3 ACTIONS
             /*if (App.currentVideoStatus.hasNextEpisode) {
