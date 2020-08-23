@@ -910,7 +910,11 @@ namespace CloudStreamForms.Droid
 
     [Activity(Label = "CloudStream 2", Icon = "@drawable/bicon9", Theme = "@style/MainTheme.Splash", MainLauncher = true, LaunchMode = LaunchMode.SingleTop,
         ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation | ConfigChanges.SmallestScreenSize | ConfigChanges.ScreenLayout  // MUST HAVE FOR PIP MODE OR ELSE IT WILL TRIGGER ONCREATE
-        , SupportsPictureInPicture = true), IntentFilter(new[] { Intent.ActionView }, DataScheme = "cloudstreamforms", Categories = new[] { Intent.CategoryDefault, Intent.CategoryBrowsable })]
+        , SupportsPictureInPicture = true),
+        IntentFilter(new[] { Intent.ActionView }, DataScheme = "cloudstreamforms", Categories = new[] { Intent.CategoryDefault, Intent.CategoryBrowsable }),
+        IntentFilter(new[] { Intent.ActionView }, DataScheme = "https", DataPathPrefix = "/title", DataHost = "www.imdb.com", Categories = new[] { Intent.CategoryDefault, Intent.CategoryBrowsable })  // STUFF NOT WORKING
+        ]
+
     public class MainActivity : global::Xamarin.Forms.Platform.Android.FormsAppCompatActivity
     {
         public static MainDroid mainDroid;
@@ -1024,7 +1028,11 @@ namespace CloudStreamForms.Droid
             App.OnVideoStatusChanged += (o, e) => {
                 UpdatePipVideostatus();
             };
-
+            /*F
+            if (!CanDrawOverlays(this)) {
+                Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:" + getPackageName()));
+                startActivityForResult(intent, 0);
+            }*/
 
             if (Settings.IS_TEST_BUILD) {
                 PlatformDep = new NullPlatfrom();
@@ -1038,12 +1046,29 @@ namespace CloudStreamForms.Droid
 
                 //Typeface.CreateFromAsset(Application.Context.Assets, "Times-New-Roman.ttf");
 
-
                 if (Intent.DataString != null) {
                     print("GOT NON NULL DATA");
                     if (Intent.DataString != "") {
                         print("INTENTDATA::::" + Intent.DataString);
-                        MainPage.PushPageFromUrlAndName(Intent.DataString);
+                        if (Intent.DataString.Contains("www.imdb.com")) {
+                            string id = FindHTML(Intent.DataString + "/", "title/", "/");
+                            //  var _thread = mainCore.CreateThread(2);
+                            mainCore.StartThread("IMDb Thread", async () => {
+                                string json = mainCore.DownloadString($"https://v2.sg.media-imdb.com/suggestion/t/{id}.json");
+                                //  await Task.Delay(1000);
+                                Device.BeginInvokeOnMainThread(() => {
+                                    if (json != "") {
+                                        MainPage.PushPageFromUrlAndName(id, FindHTML(json, "\"l\":\"", "\"")); ;
+                                    }
+                                    else {
+                                        App.ShowToast("Error loading imdb");
+                                    }
+                                });
+                            });
+                        }
+                        else {
+                            MainPage.PushPageFromUrlAndName(Intent.DataString);
+                        }
                     }
                 }
                 RequestPermission(this);
@@ -1209,14 +1234,20 @@ namespace CloudStreamForms.Droid
             var context = Application.Context;
             actions.Add(new RemoteAction(Icon.CreateWithResource(context, Resource.Drawable.netflixSkipMobileBackEmpty), "Back", "Seek Back", GetPen((int)App.PlayerEventType.SeekBack)));
             actions.Add(new RemoteAction(icon, title, title, intent));
-            actions.Add(new RemoteAction(Icon.CreateWithResource(context, Resource.Drawable.netflixSkipMobileEmpty), "Forward", "Seek Forward", GetPen((int)App.PlayerEventType.SeekForward)));
+
+            if (App.currentVideoStatus.shouldSkip) {
+                actions.Add(new RemoteAction(Icon.CreateWithResource(context, Resource.Drawable.baseline_skip_next_white_48dp), "Skip", "Skip", GetPen((int)App.PlayerEventType.SkipCurrentChapter)));
+            }
+            else {
+                actions.Add(new RemoteAction(Icon.CreateWithResource(context, Resource.Drawable.netflixSkipMobileEmpty), "Forward", "Seek Forward", GetPen((int)App.PlayerEventType.SeekForward)));
+            }
             // MAX 3 ACTIONS
             /*if (App.currentVideoStatus.hasNextEpisode) {
                 actions.Add(new RemoteAction(Icon.CreateWithResource(context, Resource.Drawable.baseline_skip_next_white_48dp), "Next", "Next Episode", GetPen((int)App.PlayerEventType.NextEpisode)));
             }*/
-             
+
             pictureInPictureParamsBuilder.SetActions(actions).Build();
-             
+
             SetPictureInPictureParams(pictureInPictureParamsBuilder.Build());
         }
 
@@ -1348,7 +1379,7 @@ namespace CloudStreamForms.Droid
         {
             try {
                 List<string> requests = new List<string>() {
-                Manifest.Permission.WriteExternalStorage, Manifest.Permission.RequestInstallPackages,Manifest.Permission.InstallPackages,Manifest.Permission.WriteSettings, //Manifest.Permission.Bluetooth
+                Manifest.Permission.WriteExternalStorage, Manifest.Permission.RequestInstallPackages,Manifest.Permission.InstallPackages,Manifest.Permission.WriteSettings,  //Manifest.Permission.Bluetooth
             };
 
                 for (int i = 0; i < requests.Count; i++) {
@@ -1904,133 +1935,6 @@ namespace CloudStreamForms.Droid
             }
         }
 
-
-        /// <summary>
-        /// Show a local notification
-        /// </summary>
-        /// <param name="title">Title of the notification</param>
-        /// <param name="body">Body or description of the notification</param>
-        /// <param name="id">Id of the notification</param>
-        public async void Show(string title, string body, int id = 0)
-        {
-            return;
-            var builder = new Notification.Builder(Application.Context);
-            builder.SetContentTitle(title);
-            builder.SetContentText(body);
-            builder.SetAutoCancel(true);
-
-
-            builder.SetSmallIcon(LocalNotificationIconId);
-
-
-
-            if (Build.VERSION.SdkInt >= BuildVersionCodes.O) {
-                var channelId = $"{_packageName}.general";
-                var channel = new NotificationChannel(channelId, "General", NotificationImportance.Default);
-
-                _manager.CreateNotificationChannel(channel);
-
-                builder.SetChannelId(channelId);
-                //https://m.media-amazon.com/images/M/MV5BMTczNTI2ODUwOF5BMl5BanBnXkFtZTcwMTU0NTIzMw@@._V1_UX182_CR0,0,182,268_AL_.jpg
-                var bitmap = await GetImageBitmapFromUrl("https://m.media-amazon.com/images/M/MV5BMTczNTI2ODUwOF5BMl5BanBnXkFtZTcwMTU0NTIzMw@@._V1_UX182_CR0,0,182,268_AL_.jpg");
-                if (bitmap != null) {
-                    builder.SetLargeIcon(bitmap);
-                }
-                var context = MainActivity.activity.ApplicationContext;
-
-
-                MediaSession mediaSession = new MediaSession(context, "tag");
-
-                builder.SetStyle(new Notification.MediaStyle().SetMediaSession(mediaSession.SessionToken).SetShowActionsInCompactView(0, 1, 2)); // NICER IMAGE
-
-
-                // mediaSession.SetPlaybackState(PlaybackState.)
-
-                bool isPaused = true;
-
-                List<string> actionNames = new List<string>() { "-30s", isPaused ? "Play" : "Pause", "+30s", "Stop" };
-                List<int> sprites = new List<int>() { Resource.Drawable.netflixGoBack128, isPaused ? Resource.Drawable.netflixPlay128v2 : Resource.Drawable.netflixPause128v2, Resource.Drawable.netflixGoForward128, Resource.Drawable.netflixStop128v2 };
-                List<string> actionIntent = new List<string>() { "goback", isPaused ? "play" : "pause", "goforward", "stop" }; // next
-
-                List<Notification.Action> actions = new List<Notification.Action>();
-
-                for (int i = 0; i < sprites.Count; i++) {
-                    var _resultIntent = new Intent(context, typeof(DemoIntentService));
-                    // _resultIntent.SetAction("com.CloudStreamForms.CloudStreamForms.pause");
-                    // _resultIntent.AddFlags(ActivityFlags.IncludeStoppedPackages);
-                    _resultIntent.PutExtra("data", actionIntent[i]);
-                    // _resultIntent.AddFlags(ActivityFlags.ReceiverForeground);
-
-                    //PendingIntent.GetActivity
-                    //GetBroadcast
-                    //GetService
-                    var pending = PendingIntent.GetService(context, 1337 + i,
-                     _resultIntent,
-                    //PendingIntentFlags.CancelCurrent
-                    PendingIntentFlags.UpdateCurrent
-                     );
-
-                    actions.Add(new Notification.Action(sprites[i], actionNames[i], pending));
-                }
-                builder.SetActions(actions.ToArray());
-
-                //builder.SetColorized(true);
-                //  builder.SetColor(Resource.Color.colorPrimary);
-                /*
-                var context = MainActivity.activity.ApplicationContext;
-                var _resultIntent = new Intent(context, typeof(MainActivity));
-                //_resultIntent.SetFlags(ActivityFlags.NewTask | ActivityFlags.ClearTask);
-
-                var da = Android.Net.Uri.Parse("cloudstreamforms:tt0371746Name=Iron man=EndAll");
-                _resultIntent.SetData(da);
-                _resultIntent.PutExtra("data", da);
-                _resultIntent.AddFlags(ActivityFlags.SingleTop | ActivityFlags.ClearTop);
-
-                print("PDATA::::" + _resultIntent.DataString);
-                var pending = PendingIntent.GetActivity(context, 0,
-                    _resultIntent,
-                   //PendingIntentFlags.CancelCurrent
-                   PendingIntentFlags.UpdateCurrent
-                    );
-
-                // SET AFTER THO 
-                //RemoteViews remoteViews = new RemoteViews(Application.Context.PackageName, Resource.Xml.PausePlay);
-                // remoteViews.SetImageViewResource(R.id.notifAddDriverIcon, R.drawable.my_trips_new);
-                // builder.SetCustomContentView(remoteViews);
-
-                builder.SetShowWhen(false);
-                builder.SetContentIntent(pending);
-                builder.SetFullScreenIntent(pending, true);
-                */
-
-                /*
-                Intent notificationIntent = new Intent(context, typeof(MainActivity));
-                notificationIntent.PutExtra("NotificationMessage", "YEET");
-                notificationIntent.AddFlags(ActivityFlags.SingleTop | ActivityFlags.ClearTop);
-                PendingIntent pendingNotificationIntent = PendingIntent.GetActivity(context, 1337, notificationIntent,PendingIntentFlags.UpdateCurrent);
-
-                notification.setLatestEventInfo(getApplicationContext(), notificationTitle, notificationMessage, pendingNotificationIntent);*/
-                //  builder.SetProgress(100, 51, false); // PROGRESSBAR
-                //  builder.SetLargeIcon(Android.Graphics.Drawables.Icon.CreateWithResource(context, Resource.Drawable.bicon)); // POSTER
-                // builder.SetActions(new Notification.Action(Resource.Drawable.design_bottom_navigation_item_background, "Hello", pending)); // IDK TEXT PRESS
-            }
-
-            var resultIntent = GetLauncherActivity();
-            resultIntent.SetFlags(ActivityFlags.NewTask | ActivityFlags.ClearTask);
-
-            var _da = Android.Net.Uri.Parse("cloudstreamforms:tt0371746Name=Iron man=EndAll");
-            resultIntent.SetData(_da);
-
-            var stackBuilder = Android.Support.V4.App.TaskStackBuilder.Create(Application.Context);
-            stackBuilder.AddNextIntent(resultIntent);
-            var resultPendingIntent =
-                stackBuilder.GetPendingIntent(0, (int)PendingIntentFlags.UpdateCurrent);
-
-
-            builder.SetContentIntent(resultPendingIntent);
-
-            _manager.Notify(id, builder.Build());
-        }
         public static Intent GetLauncherActivity(string pgName = null)
         {
             var packageName = pgName ?? Application.Context.PackageName;
@@ -2380,13 +2284,9 @@ namespace CloudStreamForms.Droid
 
         public void Test()
         {
-            return;
-            Show("Test", "test");
-            print("HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH");
-
         }
 
-        static Java.Lang.Thread downloadThread;
+        // static Java.Lang.Thread downloadThread;
         public static void DownloadFromLink(string url, string title, string toast = "", string ending = "", bool openFile = false, string descripts = "")
         {
             try {
@@ -2410,12 +2310,9 @@ namespace CloudStreamForms.Droid
 
                 long downloadId = manager.Enqueue(request);
 
-
-
-
                 // AUTO OPENS FILE WHEN DONE DOWNLOADING
                 if (openFile || toast != "") {
-                    downloadThread = new Java.Lang.Thread(() => {
+                    Java.Lang.Thread downloadThread = new Java.Lang.Thread(() => {
                         try {
                             bool exists = false;
                             while (!exists) {
@@ -2426,24 +2323,18 @@ namespace CloudStreamForms.Droid
                                 catch (System.Exception) {
                                     Java.Lang.Thread.Sleep(100);
                                 }
-
                             }
                             Java.Lang.Thread.Sleep(1000);
                             if (toast != "") {
                                 App.ShowToast(toast);
                             }
                             if (openFile) {
-
                                 print("OPEN FILE");
-                                //            
-                                string truePath = ("file://" + Android.OS.Environment.ExternalStorageDirectory + "/" + fullPath);
-
+                                string truePath = (Android.OS.Environment.ExternalStorageDirectory + "/" + fullPath);
                                 OpenFile(truePath);
                             }
                         }
-                        finally {
-                            downloadThread.Join();
-                        }
+                        catch { }
                     });
                     downloadThread.Start();
                 }
@@ -2454,36 +2345,18 @@ namespace CloudStreamForms.Droid
         }
         public static void OpenFile(string link)
         {
-            //  Android.Net.Uri uri = Android.Net.Uri.Parse(link);//link);
-            try {
-                Java.IO.File file = new Java.IO.File(Java.Net.URI.Create(link));
-                print("Path:" + file.Path);
-
-                Android.Net.Uri photoURI = FileProvider.GetUriForFile(MainActivity.activity.ApplicationContext, (MainActivity.activity.ApplicationContext.PackageName + ".provider.FileProvider"), file);
-                Intent promptInstall = new Intent(Intent.ActionView).SetDataAndType(photoURI, "application/vnd.android.package-archive"); //vnd.android.package-archive
-                promptInstall.AddFlags(ActivityFlags.NewTask);
+            var file = new Java.IO.File(link);
+            var promptInstall = new Intent(Intent.ActionView).AddFlags(ActivityFlags.ClearTop | ActivityFlags.NewTask);
+            if ((int)Build.VERSION.SdkInt >= (int)Android.OS.BuildVersionCodes.N) {
                 promptInstall.AddFlags(ActivityFlags.GrantReadUriPermission);
-                promptInstall.AddFlags(ActivityFlags.NoHistory);
-                promptInstall.AddFlags(ActivityFlags.ClearWhenTaskReset | ActivityFlags.NewTask);
-                Android.App.Application.Context.StartActivity(promptInstall);
+                var _uri = GenericFileProvider.GetUriForFile(activity.ApplicationContext, activity.ApplicationContext.ApplicationInfo.PackageName + ".provider.storage", file);
+                promptInstall.SetDataAndType(_uri, "application/vnd.android.package-archive");
             }
-            catch (Exception _ex) {
-                error(_ex);
+            else {
+                promptInstall.SetDataAndType(Android.Net.Uri.FromFile(file), "application/vnd.android.package-archive");
             }
-            /*
-            Intent promptInstall = new Intent(Intent.ActionView).SetData(uri);//.SetDataAndType(uri, "application/vnd.android.package-archive");
-            //   promptInstall.AddFlags(ActivityFlags.NewTask);
-            promptInstall.AddFlags(ActivityFlags.GrantReadUriPermission);
-            promptInstall.AddFlags(ActivityFlags.GrantWriteUriPermission);
-            promptInstall.AddFlags(ActivityFlags.GrantPrefixUriPermission);
-            promptInstall.AddFlags(ActivityFlags.GrantPersistableUriPermission);
 
-            promptInstall.AddFlags(ActivityFlags.NewTask);*/
-
-
-            // Android.App.Application.Context.ApplicationContext.start
-            //Android.App.Application.Context.StartService(intent);
-            // Android.App.Application.Context.StartActivity(promptInstall);
+            activity.ApplicationContext.StartActivity(promptInstall);
         }
 
 
@@ -2892,7 +2765,7 @@ namespace CloudStreamForms.Droid
                 string downloadLink = "https://github.com/LagradOst/CloudStream-2/releases/download/" + update + $"/{version}com.CloudStreamForms.CloudStreamForms.apk";
                 App.ShowToast("Download started!");
                 //  DownloadUrl(downloadLink, "com.CloudStreamForms.CloudStreamForms.apk", true, "", "Download complete!");
-                DownloadFromLink(downloadLink, "com.CloudStreamForms.CloudStreamForms.apk", "Download complete!", "", false, "");
+                DownloadFromLink(downloadLink, "com.CloudStreamForms.CloudStreamForms.apk", "Download complete!", "", true, "");
             }
             catch (Exception _ex) {
                 error(_ex);

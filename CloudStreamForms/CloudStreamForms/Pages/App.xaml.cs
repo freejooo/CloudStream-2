@@ -110,7 +110,7 @@ namespace CloudStreamForms
             public void PictureInPicture();
         }
 
-        public static VideoPlayerStatus currentVideoStatus = new VideoPlayerStatus() { isInVideoplayer = false, isLoaded = false, isPaused = false, hasNextEpisode = false };
+        public static VideoPlayerStatus currentVideoStatus = new VideoPlayerStatus() { isInVideoplayer = false, isLoaded = false, isPaused = false, hasNextEpisode = false, shouldSkip = false };
 
         private static bool _IsPictureInPicture = false;
         public static bool IsPictureInPicture { set { _IsPictureInPicture = value; OnPictureInPictureModeChanged?.Invoke(null, value); } get { return _IsPictureInPicture; } }
@@ -122,6 +122,7 @@ namespace CloudStreamForms
             public bool isPaused;
             public bool isLoaded;
             public bool hasNextEpisode;
+            public bool shouldSkip;
         }
 
         [Serializable]

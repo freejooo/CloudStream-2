@@ -484,6 +484,8 @@ namespace CloudStreamForms
 
         long skipToEnd;
 
+        bool isShowingSmallSkip = false;
+
         public void PlayerTimeChanged(long time)
         {
             if (!isShown) return;
@@ -492,7 +494,20 @@ namespace CloudStreamForms
                 return;
             }
             if (!isShowingSkip) {
-                var skip = skips.Where(t => t.timestamp < time).Where(t => t.timestamp + t.duration > time).Where(t => !t.hasShown).ToArray();
+                var _baseSkips = skips.Where(t => t.timestamp < time).Where(t => t.timestamp + t.duration > time);
+                if (_baseSkips.Count() > 0) {
+                    if (!App.currentVideoStatus.shouldSkip) {
+                        App.currentVideoStatus.shouldSkip = true;
+                        UpdateVideoStatus();
+                    }
+                }
+                else if (App.currentVideoStatus.shouldSkip) {
+                    App.currentVideoStatus.shouldSkip = false;
+                    UpdateVideoStatus();
+                }
+
+
+                var skip = _baseSkips.Where(t => !t.hasShown).ToArray();
                 if (skip.Length > 0) {
                     var _skip = skip[0];
                     isShowingSkip = true;
@@ -500,6 +515,7 @@ namespace CloudStreamForms
                     Device.InvokeOnMainThreadAsync(async () => {
                         skipToEnd = _skip.timestamp + _skip.duration;
                         SkipSomething.IsEnabled = true;
+                        SkipSomething.IsVisible = !App.IsPictureInPicture || _skip.forceSkip;
                         SkipSomething.Text = _skip.name.ToUpper();
                         await Task.Delay(100);
 
@@ -512,11 +528,14 @@ namespace CloudStreamForms
                         SkipSomething.LayoutTo(skipBounds, easing: Easing.SinOut);
 
                         if (!_skip.forceSkip) {
+
+
                             int delay = Math.Max((int)Math.Min(5000, _skip.duration), 300);
                             for (int i = 0; i < delay / 100; i++) {
                                 if (GetPlayerTime() > skipToEnd || GetPlayerTime() < _skip.timestamp) break;
                                 await Task.Delay(100);
                             }
+
                         }
                         else {
                             HandleVideoAction(App.PlayerEventType.SkipCurrentChapter);
@@ -856,7 +875,7 @@ namespace CloudStreamForms
                         if (info.source == currentVideo.headerId) {
                             if (info.episode == currentVideo.episode + 1 && info.season == currentVideo.season) {
                                 NextEpisodeTap.IsVisible = true;
-                                
+
                                 NextEpisodeClicked = async () => {
                                     await Navigation.PopModalAsync(true);
                                     Download.PlayDownloadedFile(info, false);
@@ -974,17 +993,19 @@ namespace CloudStreamForms
 
                 void SetIsPausedUI(bool paused)
                 {
-                    PausePlayBtt.Source = paused ? PLAY_IMAGE : PAUSE_IMAGE;//App.GetImageSource(paused ? PLAY_IMAGE : PAUSE_IMAGE);
-                    PausePlayBtt.Opacity = 1;
-                    LoadingCir.IsVisible = false;
-                    BufferLabel.IsVisible = false;
-                    isPaused = paused;
-                    App.currentVideoStatus.isPaused = paused;
-                    UpdateVideoStatus();
+                    Device.BeginInvokeOnMainThread(() => {
+                        PausePlayBtt.Source = paused ? PLAY_IMAGE : PAUSE_IMAGE;//App.GetImageSource(paused ? PLAY_IMAGE : PAUSE_IMAGE);
+                        PausePlayBtt.Opacity = 1;
+                        LoadingCir.IsVisible = false;
+                        BufferLabel.IsVisible = false;
+                        isPaused = paused;
+                        App.currentVideoStatus.isPaused = paused;
+                        UpdateVideoStatus();
 
-                    if (!isPaused) {
-                        UpdateAudioDelay(App.GetDelayAudio());
-                    }
+                        if (!isPaused) {
+                            UpdateAudioDelay(App.GetDelayAudio());
+                        }
+                    }); 
                 }
 
                 Player.Paused += (o, e) => {
@@ -1139,8 +1160,8 @@ namespace CloudStreamForms
                 }
                 print("Videoplage Start 13");
 
-
                 App.currentVideoStatus.hasNextEpisode = NextEpisodeClicked != null;
+                App.currentVideoStatus.shouldSkip = false;
                 UpdateVideoStatus();
             }
             catch (Exception _ex) {
@@ -1183,7 +1204,6 @@ namespace CloudStreamForms
         {
             App.ToggleRealFullScreen(true);
         }
-
 
         public async void HandleAppExit(object o, EventArgs e)
         {
