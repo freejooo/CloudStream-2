@@ -791,8 +791,8 @@ namespace CloudStreamForms
 
                 LibVLCSharp.Shared.Core.Initialize();
                 lockElements = new VisualElement[] { NextMirror, NextMirrorBtt, BacktoMain, GoBackBtt, EpisodeLabel, PausePlayClickBtt, PausePlayBtt, SkipForward, SkipForwardBtt, SkipForwardImg, SkipForwardSmall, SkipBack, SkipBackBtt, SkipBackImg, SkipBackSmall };
-                settingsElements = new VisualElement[] { EpisodesTap, MirrorsTap, DelayTap, SubTap, NextEpisodeTap, };
-                VisualElement[] pressIcons = new VisualElement[] { LockTap, EpisodesTap, MirrorsTap, DelayTap, SubTap, NextEpisodeTap };
+                settingsElements = new VisualElement[] { EpisodesTap, MirrorsTap, DelayTap, GoPipModeTap, SubTap, NextEpisodeTap, };
+                VisualElement[] pressIcons = new VisualElement[] { LockTap, EpisodesTap, MirrorsTap, DelayTap, GoPipModeTap, SubTap, NextEpisodeTap };
 
                 void SetIsLocked()
                 {
@@ -987,10 +987,10 @@ namespace CloudStreamForms
                     print("DAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAdddddddddddAAAAAAAA");
                     HandleVideoAction(App.PlayerEventType.Stop);
                 }));
-                /*
-                Commands.SetTap(GoPipMode, new Command(() => {
+                
+                Commands.SetTap(GoPipModeTap, new Command(() => {
                     GoIntoPipMode();
-                }));*/
+                }));
 
                 void SetIsPausedUI(bool paused)
                 {
@@ -1145,12 +1145,13 @@ namespace CloudStreamForms
                     error(_libVLC.LastLibVLCError);
                     print("ERROR LOADING MDDD: ");
                     ErrorWhenLoading();
-                };
-
+                }; 
 
                 SelectMirror(currentVideo.preferedMirror);
                 ShowNextMirror();
 
+                GoPipModeTap.IsEnabled = Settings.PictureInPicture && App.FullPictureInPictureSupport; 
+                GoPipModeTap.IsVisible = GoPipModeTap.IsEnabled; 
 
                 int columCount = 0;
                 for (int i = 0; i < pressIcons.Length; i++) {

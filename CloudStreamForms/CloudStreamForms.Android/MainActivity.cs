@@ -984,9 +984,7 @@ namespace CloudStreamForms.Droid
         protected override void OnCreate(Bundle savedInstanceState)
         {
             print("ON CREATED:::::!!!!!!!!!");
-
-            isPictureInPictureSupported = Settings.PictureInPicture;
-
+             
             SetTheme(Resource.Style.MainTheme_NonSplash);
 
             PublicNot = Resource.Drawable.bicon;
@@ -1142,13 +1140,17 @@ namespace CloudStreamForms.Droid
 
         //https://github.com/bobby5892/235AM-Android/blob/dda3cc85f8345902cf96ccf437ba7fc3001a04e6/Xam-Examples/android-o/PictureInPicture/PictureInPicture/MainActivity.cs
 
-        public static bool isPictureInPictureSupported = false;
 
         PictureInPictureParams.Builder pictureInPictureParamsBuilder = new PictureInPictureParams.Builder();
 
         public bool ShouldShowPictureInPicture()
         {
-            return isPictureInPictureSupported && currentVideoStatus.isInVideoplayer; // && currentVideoStatus.isLoaded;
+            return Settings.PictureInPicture && currentVideoStatus.isInVideoplayer; // && currentVideoStatus.isLoaded;
+        }
+
+        public bool CanShowPictureInPicture()
+        {
+            return Build.VERSION.SdkInt >= BuildVersionCodes.N && PackageManager.HasSystemFeature(PackageManager.FeaturePictureInPicture);
         }
 
         void UpdatePipVideostatus()
@@ -1161,15 +1163,14 @@ namespace CloudStreamForms.Droid
                     UpdatePictureInPictureActions(Resource.Drawable.netflixPause128v2, "Pause", (int)App.PlayerEventType.Pause);
                 }
             }
-        }
-
+        } 
 
         private void EnterPipMode()
         {
             if (!ShouldShowPictureInPicture()) return;
 
             try {
-                if (Build.VERSION.SdkInt >= BuildVersionCodes.N && PackageManager.HasSystemFeature(PackageManager.FeaturePictureInPicture)) {
+                if (CanShowPictureInPicture()) {
                     App.OnPictureInPictureModeChanged?.Invoke(null, true);
 
                     if (Build.VERSION.SdkInt >= BuildVersionCodes.O) {
@@ -2566,7 +2567,7 @@ namespace CloudStreamForms.Droid
         {
             try {
                 System.Net.ServicePointManager.DefaultConnectionLimit = 999;
-
+                App.FullPictureInPictureSupport = activity.CanShowPictureInPicture();
                 App.PlatformDep = this;
                 myAudioFocusListener = new MyAudioFocusListener();
                 myAudioFocusListener.FocusChanged += ((sender, b) => {
@@ -2593,12 +2594,10 @@ namespace CloudStreamForms.Droid
                 error(_ex);
             }
             mainS.Start();
-    //  MainDelayTest();
+            //  MainDelayTest();
             // long delay = getDelay();
 
-            //  print("MAIN DELAYYYY::: " + delay);
-
-
+            //  print("MAIN DELAYYYY::: " + delay); 
         }
 
         readonly static Stopwatch mainS = new Stopwatch();

@@ -115,6 +115,8 @@ namespace CloudStreamForms
         private static bool _IsPictureInPicture = false;
         public static bool IsPictureInPicture { set { _IsPictureInPicture = value; OnPictureInPictureModeChanged?.Invoke(null, value); } get { return _IsPictureInPicture; } }
 
+        public static bool FullPictureInPictureSupport = false;
+
         [Serializable]
         public struct VideoPlayerStatus
         {

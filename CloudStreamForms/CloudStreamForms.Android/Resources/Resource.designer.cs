@@ -18738,100 +18738,103 @@ namespace CloudStreamForms.Droid
 			public const int pip_white = 2131165560;
 			
 			// aapt resource value: 0x7F070179
-			public const int playlist_play = 2131165561;
+			public const int pip_white_sharp = 2131165561;
 			
 			// aapt resource value: 0x7F07017A
-			public const int plugin_lc_smallicon = 2131165562;
+			public const int playlist_play = 2131165562;
 			
 			// aapt resource value: 0x7F07017B
-			public const int public_globe = 2131165563;
-			
-			// aapt resource value: 0x7F070187
-			public const int roundedbg = 2131165575;
-			
-			// aapt resource value: 0x7F070188
-			public const int roundedbgdark = 2131165576;
+			public const int plugin_lc_smallicon = 2131165563;
 			
 			// aapt resource value: 0x7F07017C
-			public const int round_cast_white_48dp2_0 = 2131165564;
+			public const int public_globe = 2131165564;
 			
-			// aapt resource value: 0x7F07017D
-			public const int round_cast_white_48dp2_4 = 2131165565;
-			
-			// aapt resource value: 0x7F07017E
-			public const int round_close_white_18 = 2131165566;
-			
-			// aapt resource value: 0x7F07017F
-			public const int round_close_white_24 = 2131165567;
-			
-			// aapt resource value: 0x7F070180
-			public const int round_close_white_36 = 2131165568;
-			
-			// aapt resource value: 0x7F070181
-			public const int round_close_white_48 = 2131165569;
-			
-			// aapt resource value: 0x7F070182
-			public const int round_menu_white_48dp = 2131165570;
-			
-			// aapt resource value: 0x7F070183
-			public const int round_tv_white_18 = 2131165571;
-			
-			// aapt resource value: 0x7F070184
-			public const int round_tv_white_24 = 2131165572;
-			
-			// aapt resource value: 0x7F070185
-			public const int round_tv_white_36 = 2131165573;
-			
-			// aapt resource value: 0x7F070186
-			public const int round_tv_white_48 = 2131165574;
+			// aapt resource value: 0x7F070188
+			public const int roundedbg = 2131165576;
 			
 			// aapt resource value: 0x7F070189
-			public const int searchIcon = 2131165577;
+			public const int roundedbgdark = 2131165577;
+			
+			// aapt resource value: 0x7F07017D
+			public const int round_cast_white_48dp2_0 = 2131165565;
+			
+			// aapt resource value: 0x7F07017E
+			public const int round_cast_white_48dp2_4 = 2131165566;
+			
+			// aapt resource value: 0x7F07017F
+			public const int round_close_white_18 = 2131165567;
+			
+			// aapt resource value: 0x7F070180
+			public const int round_close_white_24 = 2131165568;
+			
+			// aapt resource value: 0x7F070181
+			public const int round_close_white_36 = 2131165569;
+			
+			// aapt resource value: 0x7F070182
+			public const int round_close_white_48 = 2131165570;
+			
+			// aapt resource value: 0x7F070183
+			public const int round_menu_white_48dp = 2131165571;
+			
+			// aapt resource value: 0x7F070184
+			public const int round_tv_white_18 = 2131165572;
+			
+			// aapt resource value: 0x7F070185
+			public const int round_tv_white_24 = 2131165573;
+			
+			// aapt resource value: 0x7F070186
+			public const int round_tv_white_36 = 2131165574;
+			
+			// aapt resource value: 0x7F070187
+			public const int round_tv_white_48 = 2131165575;
 			
 			// aapt resource value: 0x7F07018A
-			public const int settingsIcon = 2131165578;
+			public const int searchIcon = 2131165578;
 			
 			// aapt resource value: 0x7F07018B
-			public const int share_white_48dp = 2131165579;
+			public const int settingsIcon = 2131165579;
 			
 			// aapt resource value: 0x7F07018C
-			public const int sharp_get_app_white_48dp = 2131165580;
+			public const int share_white_48dp = 2131165580;
 			
 			// aapt resource value: 0x7F07018D
-			public const int sharp_home_white_48dp = 2131165581;
+			public const int sharp_get_app_white_48dp = 2131165581;
 			
 			// aapt resource value: 0x7F07018E
-			public const int sharp_settings_white_48dp = 2131165582;
+			public const int sharp_home_white_48dp = 2131165582;
 			
 			// aapt resource value: 0x7F07018F
-			public const int skip_next = 2131165583;
+			public const int sharp_settings_white_48dp = 2131165583;
 			
 			// aapt resource value: 0x7F070190
-			public const int splash_background = 2131165584;
+			public const int skip_next = 2131165584;
 			
 			// aapt resource value: 0x7F070191
-			public const int splash_background_remove = 2131165585;
+			public const int splash_background = 2131165585;
 			
 			// aapt resource value: 0x7F070192
-			public const int subtitles = 2131165586;
+			public const int splash_background_remove = 2131165586;
 			
 			// aapt resource value: 0x7F070193
-			public const int subtitles_off = 2131165587;
+			public const int subtitles = 2131165587;
 			
 			// aapt resource value: 0x7F070194
-			public const int tooltip_frame_dark = 2131165588;
+			public const int subtitles_off = 2131165588;
 			
 			// aapt resource value: 0x7F070195
-			public const int tooltip_frame_light = 2131165589;
+			public const int tooltip_frame_dark = 2131165589;
 			
 			// aapt resource value: 0x7F070196
-			public const int upButton = 2131165590;
+			public const int tooltip_frame_light = 2131165590;
 			
 			// aapt resource value: 0x7F070197
-			public const int visibility = 2131165591;
+			public const int upButton = 2131165591;
 			
 			// aapt resource value: 0x7F070198
-			public const int visibility_off = 2131165592;
+			public const int visibility = 2131165592;
+			
+			// aapt resource value: 0x7F070199
+			public const int visibility_off = 2131165593;
 			
 			static Drawable()
 			{
