@@ -119,11 +119,17 @@ namespace CloudStreamForms.Core
 
         public static bool IsChromeDevicesOnNetwork {
             get {
-                if (allChromeDevices == null) { return false; }
-                foreach (IReceiver r in allChromeDevices) {
-                    return true;
+                try {
+                    if (allChromeDevices == null) { return false; }
+                    foreach (IReceiver r in allChromeDevices) {
+                        return true;
+                    }
+                    return false;
                 }
-                return false;
+                catch (Exception) {
+                    return false;
+                }
+                
             }
         }
 

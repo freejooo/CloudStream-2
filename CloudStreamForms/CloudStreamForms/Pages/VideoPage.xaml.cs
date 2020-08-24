@@ -7,6 +7,7 @@ using SubtitlesParser.Classes;
 using SubtitlesParser.Classes.Parsers;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Numerics;
@@ -90,7 +91,6 @@ namespace CloudStreamForms
             StartTxt.Text = CloudStreamCore.ConvertTimeToString((GetPlayerLenght() / 1000) * time);
             EndTxt.Text = CloudStreamCore.ConvertTimeToString(((GetPlayerLenght()) / 1000) - (GetPlayerLenght() / 1000) * time);
         }
-
 
         /// <summary>
         /// Holds info about the current video
@@ -487,7 +487,7 @@ namespace CloudStreamForms
         bool isShowingSmallSkip = false;
 
         public void PlayerTimeChanged(long time)
-        {
+        {  
             if (!isShown) return;
 
             if (Player == null) {
@@ -987,9 +987,10 @@ namespace CloudStreamForms
                     print("DAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAdddddddddddAAAAAAAA");
                     HandleVideoAction(App.PlayerEventType.Stop);
                 }));
+                /*
                 Commands.SetTap(GoPipMode, new Command(() => {
                     GoIntoPipMode();
-                }));
+                }));*/
 
                 void SetIsPausedUI(bool paused)
                 {
@@ -1005,7 +1006,7 @@ namespace CloudStreamForms
                         if (!isPaused) {
                             UpdateAudioDelay(App.GetDelayAudio());
                         }
-                    }); 
+                    });
                 }
 
                 Player.Paused += (o, e) => {
@@ -1783,21 +1784,30 @@ namespace CloudStreamForms
         TouchTracking.TouchTrackingPoint cursorPosition;
         TouchTracking.TouchTrackingPoint startCursorPosition;
 
-
         const uint fadeTime = 100;
         const int timeUntilFade = 3500;
         const bool CAN_FADE_WHEN_PAUSED = false;
         const bool WILL_AUTO_FADE_WHEN_PAUSED = false;
+        double _fade = -1;
+        bool isInAnimation = false;
         async void FadeEverything(bool disable, bool overridePaused = false)
         {
+            if (isInAnimation) return;
+            double fade = disable ? 0 : 1;
+
+            if (_fade == fade) return;
+
+            //Device.InvokeOnMainThreadAsync(async () => {
             if (isPaused && !overridePaused && CAN_FADE_WHEN_PAUSED) { // CANT FADE WHEN PAUSED
                 return;
             }
             await Task.Delay(100);
-            double fade = disable ? 0 : 1;
-            if (AllButtons.Opacity == fade) return;
-
+            isInAnimation = true;
             print("FADETO: " + disable);
+            AllButtons.IsEnabled = !disable;
+            _fade = 1;
+            BlackBg.FadeTo(fade * 0.3);
+
             VideoSliderAndSettings.AbortAnimation("TranslateTo");
             VideoSliderAndSettings.TranslateTo(VideoSliderAndSettings.TranslationX, disable ? 80 : 0, fadeTime, Easing.Linear);
             EpisodeLabel.AbortAnimation("TranslateTo");
@@ -1808,18 +1818,20 @@ namespace CloudStreamForms
             SubHolder.TranslateTo(EpisodeLabel.TranslationX, disable ? 0 : -90, fadeTime, Easing.Linear);
 
             AllButtons.AbortAnimation("FadeTo");
-            AllButtons.IsEnabled = !disable;
-            //    await Task.Delay((int)fadeTime);
-
-            AllButtons.Opacity = 1;
-            BlackBg.FadeTo(fade * 0.3);
+            AllButtons.FadeTo(fade, fadeTime);
+            /*
             foreach (var item in AllButtons.Children) {
                 if (item.ClassId != "NOFADE") {
+                    item.AbortAnimation("FadeTo");
                     item.FadeTo(fade, fadeTime);
                 }
             }
+            */
             await Task.Delay((int)fadeTime);
-            AllButtons.Opacity = fade;
+            isInAnimation = false;
+
+            _fade = fade;
+            //  });
 
             //    await AllButtons.FadeTo(, fadeTime, Easing.Linear);
         }
