@@ -1408,13 +1408,9 @@ namespace CloudStreamForms.Core
                                 if (ToLowerAndReplace(ms.synonyms[s]) == ToLowerAndReplace(animeTitle)) {
                                     containsSyno = true;
                                 }
-                                //  print("SYNO: " + ms.synonyms[s]);
                             }
 
-                            //  print(animeTitle.ToLower() + "|" + ms.name.ToLower() + "|" + ms.engName.ToLower() + "|" + ___year + "___" + ___year2 + "|" + containsSyno);
-                            print("COMPARE: " + "SEASON:::" + i + "|ELDA:" + q + "| " + compareName + " | " + animeTitle);
                             if (ToLowerAndReplace(compareName) == ToLowerAndReplace(animeTitle) || ToLowerAndReplace(ms.engName.Replace(" ", "")) == ToLowerAndReplace(animeTitle) || containsSyno) { //|| (animeTitle.ToLower().Replace(compareName.ToLower(), "").Length / (float)animeTitle.Length) < 0.3f) { // OVER 70 MATCH
-                                print("FINISHED:::::" + slug);
 
                                 string _d = DownloadString(slug);
                                 // print(d);
@@ -1422,11 +1418,6 @@ namespace CloudStreamForms.Core
 
                                 int slugCount = Regex.Matches(_d, _lookfor).Count;
                                 string[] episodes = new string[slugCount];
-                                print("SLIGCOUNT:::DA" + slugCount);
-                                //  Stopwatch s = new Stopwatch();
-                                //  s.Start();
-
-
 
                                 while (_d.Contains(_lookfor)) {
                                     try {
@@ -5243,11 +5234,11 @@ namespace CloudStreamForms.Core
                     episodeData = "[" + episodeData + "]";
                     var allEpisodes = JsonConvert.DeserializeObject<LookSeasonEpisode[]>(episodeData);
                     for (int i = 0; i < allEpisodes.Length; i++) {
-                        if(allEpisodes[i].season == season.ToString() && allEpisodes[i].episode == episode.ToString()) {
+                        if (allEpisodes[i].season == season.ToString() && allEpisodes[i].episode == episode.ToString()) {
                             mId = allEpisodes[i].id_episode.ToString();
                             break;
                         }
-                    } 
+                    }
                 }
                 else {
                     mId = FindHTML(d, "id_movie: ", ",");
@@ -5263,7 +5254,7 @@ namespace CloudStreamForms.Core
                 string _masterUrl = isMovie ? $"https://lookmovie.ag/manifests/movies/json/{mId}/{exp}/{token}/master.m3u8" : $"https://lookmovie.ag/manifests/shows/json/{token}/{exp}/{mId}/master.m3u8";
 
 
-                string _masterM3u8 = DownloadString(_masterUrl); 
+                string _masterM3u8 = DownloadString(_masterUrl);
 
                 print("MASTERURL: " + _masterM3u8);
 
@@ -5272,7 +5263,7 @@ namespace CloudStreamForms.Core
                 int prio = 10;
                 for (int i = 0; i < labels.Length; i++) {
                     string _link = FindHTML(_masterM3u8, $"\"{labels[i]}\":\"", "\"");
-                    if(_link == "") _link = FindHTML(_masterM3u8, $"\"{labels[i]}p\":\"", "\"");
+                    if (_link == "") _link = FindHTML(_masterM3u8, $"\"{labels[i]}p\":\"", "\"");
                     if (_link != "") {
                         AddPotentialLink(normalEpisode, _link, "LookMovie", prio, labels[i]);
                     }
@@ -6137,13 +6128,10 @@ namespace CloudStreamForms.Core
             string trueUrl = $"https://www.imdb.com/search/title/?title_type=feature,tv_series,tv_miniseries&num_votes={(isAnime ? "1500" : "25000")},&genres=" + orders + (top100 ? "&sort=user_rating,desc" : "") + "&start=" + start + "&ref_=adv_nxt&count=" + count + (isAnime ? "&keywords=anime" : "");
             print("TRUEURL:" + trueUrl);
             string d = GetHTML(trueUrl, true);
-            print("FALSEURL:" + trueUrl);
 
             const string lookFor = "s=\"lo";//"class=\"loadlate\"";
             int place = start - 1;
-            int counter = 0;
-            Stopwatch s = new Stopwatch();
-            s.Start();
+            int counter = 0; 
 
             while (d.Contains(lookFor)) {
                 place++;
@@ -6159,7 +6147,7 @@ namespace CloudStreamForms.Core
                 topLists[counter] = (new IMDbTopList() { descript = descript, genres = _genres, id = id, img = img, name = name, place = place, rating = rating, runtime = runtime });
                 counter++;
             }
-            print("------------------------------------ DONE! ------------------------------------" + s.ElapsedMilliseconds);
+            print("------------------------------------ DONE! ------------------------------------");
             return topLists.ToList();
         }
 
@@ -6463,15 +6451,11 @@ namespace CloudStreamForms.Core
                     async Task FetchAniList()
                     {
                         try {
-                            Api api = new Api();
-                            System.Diagnostics.Stopwatch s = new System.Diagnostics.Stopwatch();
-                            s.Start();
+                            Api api = new Api(); 
                             CancellationTokenSource cancelSource = new CancellationTokenSource();
                             var media = await api.GetMedia(activeMovie.title.name, cancelSource.Token);
 
                             if (media.Count > 0) {
-                                print("ANILIST::: " + s.ElapsedMilliseconds);
-
                                 static string ToMalUrl(int? id)
                                 {
                                     return id == null ? "" : $"https://myanimelist.net/anime/{id}/";
@@ -6787,9 +6771,7 @@ namespace CloudStreamForms.Core
             }
             return _inp;
         }
-
-
-
+         
         public Stopwatch mainS = new Stopwatch();
         public void GetImdbTitle(Poster imdb, bool purgeCurrentTitleThread = true, bool autoSearchTrailer = true, bool cacheData = true)
         {
@@ -6822,8 +6804,6 @@ namespace CloudStreamForms.Core
             // TurnNullMovieToActive(movie);
             TempThread tempThred = CreateThread(2);
             StartThread("Imdb", () => {
-                Stopwatch s = new Stopwatch();
-                s.Start();
                 try {
                     string d = "";
                     List<string> keyWords = new List<string>();
@@ -6914,7 +6894,7 @@ namespace CloudStreamForms.Core
                                     ogName = ogName,
                                     hdPosterUrl = hdPosterUrl,
                                     fmoviesMetaData = new List<FMoviesData>(),
-                                    watchSeriesHdMetaData = new List<WatchSeriesHdMetaData>(), 
+                                    watchSeriesHdMetaData = new List<WatchSeriesHdMetaData>(),
                                 };
 
                                 activeMovie.title.trailers.Add(new Trailer() { Url = trailerUrl, PosterUrl = trailerImg, Name = trailerName });
@@ -6975,9 +6955,6 @@ namespace CloudStreamForms.Core
                                 App.SetKey("CacheImdb", __id, activeMovie);
                             }
                         }
-                        long f = s.ElapsedMilliseconds;
-                        print("MAIN2: " + mainS.ElapsedMilliseconds);
-
                         titleLoaded?.Invoke(null, activeMovie);
                     }
                 }
@@ -7081,9 +7058,7 @@ namespace CloudStreamForms.Core
         }
 
         public void GetImdbEpisodes(int season = 1, bool purgeCurrentSeasonThread = true)
-        {
-            Stopwatch _s = new Stopwatch();
-
+        { 
             if (purgeCurrentSeasonThread) {
                 PurgeThreads(6);
             }
@@ -7109,10 +7084,8 @@ namespace CloudStreamForms.Core
                             for (int i = 0; i < years.Count; i++) {
                                 //https://www.imdb.com/title/tt0388629/episodes/?year=2020
                                 string partURL = "https://www.imdb.com/title/" + activeMovie.title.id + "/episodes/_ajax?year=" + years[i];
-                                print("PARTURLL:::" + partURL);
                                 d += DownloadString(partURL);
-                            }
-                            //<label for="byYear">Year:</label>
+                            } 
                         }
                         if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
 
@@ -7189,8 +7162,7 @@ namespace CloudStreamForms.Core
                 Episode ep = new Episode() { name = activeMovie.title.name };
                 activeMovie.episodes = new List<Episode> {
                     ep
-                };
-                _s.Stop();
+                }; 
 
                 episodeLoaded?.Invoke(null, activeMovie.episodes);
             }
@@ -7957,7 +7929,6 @@ namespace CloudStreamForms.Core
                     JoinThred(tempThred);
                 }
             });
-
         }
 
         void GetVidNode(string _d, int normalEpisode, string urlName = "Vidstreaming", string extra = "")
@@ -7978,13 +7949,6 @@ namespace CloudStreamForms.Core
 
                 if (CheckIfURLIsValid(link)) {
                     prio++;
-                    /*
-                    Episode ep = activeMovie.episodes[normalEpisode];
-                    if (ep.links == null) {
-                        activeMovie.episodes[normalEpisode] = new Episode() { links = new List<Link>(), date = ep.date, description = ep.description, name = ep.name, posterUrl = ep.posterUrl, rating = ep.rating, id = ep.id };
-                    }
-                    activeMovie.episodes[normalEpisode].links.Add(new Link() { priority = prio, url = link, name = name }); // [MIRRORCOUNTER] IS LATER REPLACED WITH A NUMBER TO MAKE IT EASIER TO SEPERATE THEM, CAN'T DO IT HERE BECAUSE IT MUST BE ABLE TO RUN SEPARETE THREADS AT THE SAME TIME
-                    linkAdded?.Invoke(null, 1);*/
                     AddPotentialLink(normalEpisode, link, name + extra, prio);
                 }
                 linkContext = RemoveOne(linkContext, lookFor);
@@ -8049,7 +8013,6 @@ namespace CloudStreamForms.Core
         public static double GetFileSize(string url, string referer = "")
         {
             try {
-                //   var webRequest = HttpWebRequest.Create(new System.Uri(url));
                 HttpWebRequest webRequest = (HttpWebRequest)HttpWebRequest.Create(url);
                 webRequest.UserAgent = USERAGENT;
                 webRequest.Accept = "*/*";
@@ -8060,15 +8023,11 @@ namespace CloudStreamForms.Core
                 if (GetRequireCert(url)) { webRequest.ServerCertificateValidationCallback = delegate { return true; }; }
 
                 webRequest.Method = "HEAD";
-                print("RESPONSEGET:");
                 webRequest.Timeout = 10000;
                 using var webResponse = webRequest.GetResponse();
                 try {
-                    print("RESPONSE:");
                     var fileSize = webResponse.Headers.Get("Content-Length");
                     var fileSizeInMegaByte = Math.Round(Convert.ToDouble(fileSize) / Math.Pow((double)App.GetSizeOfJumpOnSystem(), 2.0), 2);
-                    print("GETFILESIZE: " + fileSizeInMegaByte);
-
                     return fileSizeInMegaByte;
                 }
                 catch (Exception _ex) {
@@ -8124,28 +8083,6 @@ namespace CloudStreamForms.Core
             }
         }
 
-        /* ------------------------------------------------ EXAMPLE THRED ------------------------------------------------
-
-            TempThread tempThred = new TempThread();
-            tempThred.typeId = 1; // MAKE SURE THIS IS BEFORE YOU CREATE THE THRED
-            tempThred.Thread = new System.Threading.Thread(() =>
-            {
-                try {
-
-
-                    if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
-
-                }
-                finally {
-                    JoinThred(tempThred);
-                }
-            });
-            tempThred.Thread.Name = "QuickSearch";
-            tempThred.Thread.Start();
-
-
-            */
-
         public static string ConvertIMDbImagesToHD(string nonHDImg, int? pwidth = null, int? pheight = null, double multi = 1)
         {
 #if DEBUG
@@ -8199,14 +8136,8 @@ namespace CloudStreamForms.Core
                 }
                 else {
                     using Stream stream = response.GetResponseStream();
-                    // print("res" + response.StatusCode);
-                    foreach (string e in response.Headers) {
-                        // print("Head: " + e);
-                    }
-                    // print("LINK:" + response.GetResponseHeader("Set-Cookie"));
                     using StreamReader reader = new StreamReader(stream, Encoding.UTF8);
                     string result = reader.ReadToEnd();
-                    print("RESSSS::: :" + result);
                     return result;
                 }
             }
@@ -8227,20 +8158,6 @@ namespace CloudStreamForms.Core
 
             try {
                 HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
-                // List<string> heads = new List<string>(); // HEADERS
-                /*
-                heads = HeadAdd("");
-                for (int i = 0; i < heads.Count; i++) {
-                    try {
-                        request.Headers.Add(HeadToRes(heads[i], 0), HeadToRes(heads[i], 1));
-                        print("PRO:" + HeadToRes(heads[i], 0) + ": " + HeadToRes(heads[i], 1));
-
-                    }
-                    catch (Exception) {
-
-                    }
-                }
-                */
                 WebHeaderCollection myWebHeaderCollection = request.Headers;
                 if (en) {
                     myWebHeaderCollection.Add("Accept-Language", "en;q=0.8");
@@ -8370,7 +8287,6 @@ namespace CloudStreamForms.Core
             public VerifiedLink verifiedLink;
             public bool canNotRunInVideoplayer;
         }
-
 
         /// <summary>
         /// LinkHolder is generated when a link is added
@@ -8539,7 +8455,6 @@ namespace CloudStreamForms.Core
                         ep = activeMovie.episodes[normalEpisode];
                     }*/
 
-
                     return true;
 
                 }
@@ -8556,12 +8471,9 @@ namespace CloudStreamForms.Core
         public DubbedAnimeEpisode GetDubbedAnimeEpisode(string slug, int? eps = null)
         {
             string url = "https://bestdubbedanime.com/" + (eps == null ? "movies/jsonMovie" : "xz/v3/jsonEpi") + ".php?slug=" + slug + (eps != null ? ("/" + eps) : "") + "&_=" + UnixTime;
-            //https://bestdubbedanime.com/movies/jsonMovie.php?slug=Patema-Inverted&_=.....
             string d = DownloadString(url);
-            print("GOTEPFROMDDV:" + d);
             var f = JsonConvert.DeserializeObject<DubbedAnimeSearchRootObject>(d, new JsonSerializerSettings() { NullValueHandling = NullValueHandling.Ignore });
             if (f.result.error) {
-                print("RETURNOS:ERROR");
                 return new DubbedAnimeEpisode();
             }
             else {
@@ -8569,60 +8481,12 @@ namespace CloudStreamForms.Core
                     return f.result.anime[0];
                 }
                 catch (Exception) {
-                    print("RETURNOS:ERROR");
                     return new DubbedAnimeEpisode();
                 }
             }
-            /* print(d);
-
-             const string smallAdd = "\": \"";
-             string FastFind(string name)
-             {
-                 if (d.Contains(name + smallAdd + "\": null,")) {
-                     return "";
-                 }
-                 string _f = FindHTML(d, name + smallAdd, "\",");
-                 if (_f == "") {
-                     _f = FindHTML(d, name + "\":", ",");
-                 }
-                 return _f;
-             }
-             int FastId(string name)
-             {
-                 try {
-                     return int.Parse(FastFind(name));
-                 }
-                 catch (Exception) {
-                     return -1;
-                 }
-             }
-
-             DubbedAnimeEpisode e = new DubbedAnimeEpisode();
-             try {
-                 e.serversHTML = FastFind(nameof(e.serversHTML));
-
-                 e.ep = FastId(nameof(e.ep));
-                 e.Epviews = FastId(nameof(e.Epviews));
-                 e.rowid = FastId(nameof(e.ep));
-                 e.totalEp = FastId(nameof(e.totalEp));
-                 e.year = FastId(nameof(e.year));
-                 e.showid = FastId(nameof(e.showid));
-                 e.TotalViews = FastId(nameof(e.TotalViews));
-
-                 e.desc = FastFind(nameof(e.desc));
-                 e.title = FastFind(nameof(e.title));
-                 e.slug = FastFind(nameof(e.slug));
-                 e.status = FastFind(nameof(e.status));
-             }
-             catch (Exception) {
-                 print("!!!!!!DubbedAnimeEpisodeERROR");
-             }
-             return e;*/
         }
 
         public static int UnixTime { get { return (int)(DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1))).TotalSeconds; } }
-
-
 
         /// <summary>
         /// GET IF URL IS VALID, null and "" will return false
@@ -8744,7 +8608,6 @@ namespace CloudStreamForms.Core
         /// <returns></returns>
         public static string ToDown(string text, bool toLower = true, string replaceSpace = " ")
         {
-            //   print("TODOWND SIZE: " + text.Length);
 #if DEBUG
             int _s = GetStopwatchNum();
 #endif
@@ -8972,7 +8835,6 @@ namespace CloudStreamForms.Core
             }
 
             //https://v16.viduplayer.com/vxokfmpswoalavf4eqnivlo2355co6iwwgaawrhe7je3fble4vtvcgek2jha/v.mp4
-            //100||vxokfmpswoalavf4eqnivlo2355co6iwwgaawrhe7je3fsxmxsx2ovpk34ua|1000
             if (inter.Length <= 5) {
                 inter = FindHTML(source, "100|", "|1000");
             }
@@ -8987,38 +8849,12 @@ namespace CloudStreamForms.Core
         }
 
         /// <summary>
-        /// Do links contants inp
-        /// </summary>
-        /// <param name="links"></param>
-        /// <param name="inp"></param>
-        /// <returns></returns>
-        /*
-        public static bool LinkListContainsString(List<Link> links, string inp)
-        {
-            if (links == null) {
-                return false;
-            }
-            else {
-                try {
-                    foreach (Link link in links) {
-                        if (link.url == inp) { return true; }
-                    }
-                }
-                catch {
-                    return false;
-                }
-            }
-
-            return false;
-        }
-        */
-        /// <summary>
         /// Simple funct to download a sites fist page as string
         /// </summary>
         /// <param name="url"></param>
         /// <param name="UTF8Encoding"></param>
         /// <returns></returns>
-        public string DownloadString(string url, TempThread? tempThred = null, int repeats = 2, int waitTime = 1000, string referer = "", Encoding encoding = null, string[] headerName = null, string[] headerValue = null)
+        public string DownloadString(string url, TempThread? tempThred = null, int repeats = 2, int waitTime = 10000, string referer = "", Encoding encoding = null, string[] headerName = null, string[] headerValue = null)
         {
 #if DEBUG
             int _s = GetStopwatchNum();
@@ -9060,8 +8896,6 @@ namespace CloudStreamForms.Core
                     }
                 }
 
-                //    string _s = "";
-                //  bool done = false;
                 print("REQUEST::: " + url);
 
                 using (var webResponse = webRequest.GetResponse()) {
@@ -9070,8 +8904,6 @@ namespace CloudStreamForms.Core
                         try {
                             if (tempThred != null) { if (!GetThredActive((TempThread)tempThred)) { return ""; }; } //  done = true; 
                             return httpWebStreamReader.ReadToEnd();
-                            //   _s = httpWebStreamReader.ReadToEnd();
-                            //  done = true;
                         }
                         catch (Exception _ex) {
                             print("FATAL ERROR DLOAD3: " + _ex + "|" + url);
@@ -9083,58 +8915,6 @@ namespace CloudStreamForms.Core
 
                 }
                 return "";
-
-                /*
-                try {
-
-                webRequest.BeginGetResponse(
-
-                    new AsyncCallback((IAsyncResult _callbackResult) => {
-                    HttpWebRequest _request = (HttpWebRequest)_callbackResult.AsyncState;
-                    HttpWebResponse response = (HttpWebResponse)_request.EndGetResponse(_callbackResult);
-                    try {
-                        using (StreamReader httpWebStreamReader = new StreamReader(response.GetResponseStream(), Encoding.UTF8)) {
-                            try {
-                                if (tempThred != null) { if (!GetThredActive((TempThread)tempThred)) { done = true; return; }; }
-                                _s = httpWebStreamReader.ReadToEnd();
-                                done = true;
-                            }
-                            catch (Exception _ex) {
-                                print("FATAL ERROR DLOAD3: " + _ex + "|" + url); 
-                            }
-
-                        }
-                    }
-                    catch (Exception _ex) {
-                        print("FATAL ERROR DLOAD2: " + _ex + "|" + url);
-                    }
-
-                }), webRequest);
-
-                }
-                catch (Exception _ex) {
-                    print("FATAL ERROR DLOAD4: " + _ex + "|" + url);
-                }
-                */
-                /*
-                for (int i = 0; i < waitTime; i++) {
-                    Thread.Sleep(10);
-                    try {
-                        if (tempThred != null) {
-                            if (!GetThredActive((TempThread)tempThred)) {
-                                return "";
-                            }
-                        }
-                    }
-                    catch (Exception) { }
-
-                    if (done) {
-                        //print(_s);
-                        print(">>" + i);
-                        return _s;
-                    }
-                }
-                return "";*/
             }
             catch (Exception _ex) {
                 error("FATAL ERROR DLOAD: \n" + url + "\n============================================\n" + _ex + "\n============================================");
@@ -9904,17 +9684,13 @@ idMal
                         }
 
                     }
-                    bool toAdd = false;
-                    System.Diagnostics.Stopwatch _s = new System.Diagnostics.Stopwatch();
-                    _s.Start();
+                    bool toAdd = false; 
                     if (await Equals_check.Compare_strings(media.title.romaji, title, cancellationToken)) {
                         toAdd = true;
                     }
                     else if (await Equals_check.Compare_strings(media.title.english, title, cancellationToken)) {
                         toAdd = true;
-
-                    }
-                    Console.WriteLine(">>>>> " + _s.ElapsedMilliseconds);
+                    } 
                     if (toAdd) {
                         await Add(media);
                     }
