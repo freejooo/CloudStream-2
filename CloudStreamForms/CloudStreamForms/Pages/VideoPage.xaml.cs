@@ -1789,14 +1789,13 @@ namespace CloudStreamForms
         const int timeUntilFade = 3500;
         const bool CAN_FADE_WHEN_PAUSED = false;
         const bool WILL_AUTO_FADE_WHEN_PAUSED = false;
-        double _fade = -1;
         bool isInAnimation = false;
         async void FadeEverything(bool disable, bool overridePaused = false)
         {
             if (isInAnimation) return;
             double fade = disable ? 0 : 1;
 
-            if (_fade == fade) return;
+            if (TotalOpasity == fade) return;
 
             //Device.InvokeOnMainThreadAsync(async () => {
             if (isPaused && !overridePaused && CAN_FADE_WHEN_PAUSED) { // CANT FADE WHEN PAUSED
@@ -1806,7 +1805,7 @@ namespace CloudStreamForms
             isInAnimation = true;
             print("FADETO: " + disable);
             AllButtons.IsEnabled = !disable;
-            _fade = 1;
+            TotalOpasity = 1;
             BlackBg.FadeTo(fade * 0.3);
 
             VideoSliderAndSettings.AbortAnimation("TranslateTo");
@@ -1818,20 +1817,21 @@ namespace CloudStreamForms
             SubHolder.AbortAnimation("TranslateTo");
             SubHolder.TranslateTo(EpisodeLabel.TranslationX, disable ? 0 : -90, fadeTime, Easing.Linear);
 
+            /*
             AllButtons.AbortAnimation("FadeTo");
             AllButtons.FadeTo(fade, fadeTime);
-            /*
+            */
             foreach (var item in AllButtons.Children) {
                 if (item.ClassId != "NOFADE") {
                     item.AbortAnimation("FadeTo");
                     item.FadeTo(fade, fadeTime);
                 }
             }
-            */
+            
             await Task.Delay((int)fadeTime);
             isInAnimation = false;
 
-            _fade = fade;
+            TotalOpasity = fade;
             //  });
 
             //    await AllButtons.FadeTo(, fadeTime, Easing.Linear);
@@ -1852,7 +1852,7 @@ namespace CloudStreamForms
 
         bool isLocked = false;
 
-        double TotalOpasity { get { return AllButtons.Opacity; } }
+        double TotalOpasity { get; set; } = 1;//AllButtons.Opacity; } }
 
         DateTime lastRelease = DateTime.MinValue;
         DateTime startPressTime = DateTime.MinValue;

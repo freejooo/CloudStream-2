@@ -1,6 +1,7 @@
 ﻿using AniListAPI;
 using AniListAPI.Model;
 using CloudStreamForms.Core.AnimeProviders;
+using HtmlAgilityPack.CssSelectors.NetCore;
 using Jint;
 using Newtonsoft.Json;
 using System;
@@ -54,7 +55,9 @@ namespace CloudStreamForms.Core
                 new Movies123Provider(this),
                 new DubbedAnimeMovieProvider(this),
                 new TheMovieMovieProvider(this),
-                new KickassMovieProvider(this) };
+                new KickassMovieProvider(this),
+                new LookmovieProvider(this)
+            };
         }
 
         public static object mainPage;
@@ -493,6 +496,7 @@ namespace CloudStreamForms.Core
             public List<Poster> recomended;
 
             public Movies123MetaData movies123MetaData;
+            public string lookmovieMetadata;
             public List<YesmoviessSeasonData> yesmoviessSeasonDatas; // NOT SORTED; MAKE SURE TO SEARCH ALL
 
             public List<WatchSeriesHdMetaData> watchSeriesHdMetaData;// NOT SORTED; MAKE SURE TO SEARCH ALL
@@ -917,7 +921,7 @@ namespace CloudStreamForms.Core
         {
             public readonly CloudStreamCore core;
             public Movie activeMovie { set { core.activeMovie = value; } get { return core.activeMovie; } }
-            public string DownloadString(string url, TempThread? tempThred = null, int repeats = 2, int waitTime = 1000, string referer = "", Encoding encoding = null) => core.DownloadString(url, tempThred, repeats, waitTime, referer, encoding);
+            public string DownloadString(string url, TempThread? tempThred = null, int repeats = 2, int waitTime = 10000, string referer = "", Encoding encoding = null) => core.DownloadString(url, tempThred, repeats, waitTime, referer, encoding);
             public bool GetThredActive(TempThread temp) => core.GetThredActive(temp);
             public void AddEpisodesFromMirrors(TempThread tempThred, string d, int normalEpisode, string extraId = "", string extra = "") => core.AddEpisodesFromMirrors(tempThred, d, normalEpisode, extraId, extra);
             public bool LookForFembedInString(TempThread tempThred, int normalEpisode, string d, string extra = "") => core.LookForFembedInString(tempThred, normalEpisode, d, extra);
@@ -1659,7 +1663,7 @@ namespace CloudStreamForms.Core
                                 AddEpisodesFromMirrors(tempThred, dEr, normalEpisode, "", extra);
                             }
                             else {
-                                UrlDecoder(DownloadString(subEr, repeats: 2, waitTime: 100), subEr);
+                                UrlDecoder(DownloadString(subEr, repeats: 2, waitTime: 1000), subEr);
                             }
                         }
                     }
@@ -2330,8 +2334,8 @@ namespace CloudStreamForms.Core
 
             string d = DownloadString(dload);
             // op = FindHTML(d, "name=\"op\" value=\"", "\""); 
-           // string usr_login = FindHTML(d, "name=\"usr_login\" value=\"", "\"");
-           // string _id = FindHTML(d, "name=\"id\" value=\"", "\""); //
+            // string usr_login = FindHTML(d, "name=\"usr_login\" value=\"", "\"");
+            // string _id = FindHTML(d, "name=\"id\" value=\"", "\""); //
             /*string fname = FindHTML(d, "name=\"fname\" value=\"", "\"");
             if (fname == "") {
                 fname = FindHTML(d, "filename\">", "<");
@@ -3628,7 +3632,7 @@ namespace CloudStreamForms.Core
             public override void FishMainLink(string year, TempThread tempThred, MALData malData)
             {
                 try {
-                    string result = DownloadString("https://animeflix.io/api/search?q=" + malData.firstName, waitTime: 600, repeats: 2);//activeMovie.title.name);
+                    string result = DownloadString("https://animeflix.io/api/search?q=" + malData.firstName, waitTime: 6000, repeats: 2);//activeMovie.title.name);
                     print("FLIX::::" + result);
                     if (result == "") return;
                     if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
@@ -4127,28 +4131,8 @@ namespace CloudStreamForms.Core
                     seasonData.Reverse();
                     if (MovieType.TVSeries == activeMovie.title.movieType) {
                         Title t = activeMovie.title;
-                        core.activeMovie.title = new Title() {
-                            description = t.description,
-                            MALData = t.MALData,
-                            genres = t.genres,
-                            id = t.id,
-                            movieType = t.movieType,
-                            name = t.name,
-                            ogName = t.ogName,
-                            posterUrl = t.posterUrl,
-                            rating = t.rating,
-                            recomended = t.recomended,
-                            runtime = t.runtime,
-                            seasons = t.seasons,
-                            trailers = t.trailers,
-                            year = t.year,
-                            hdPosterUrl = t.hdPosterUrl,
-                            shortEpView = t.shortEpView,
-                            fmoviesMetaData = t.fmoviesMetaData,
-                            movies123MetaData = new Movies123MetaData() { movieLink = "", seasonData = seasonData },
-                            yesmoviessSeasonDatas = t.yesmoviessSeasonDatas,
-                            watchSeriesHdMetaData = t.watchSeriesHdMetaData,
-                        };
+                        t.movies123MetaData = new Movies123MetaData() { movieLink = "", seasonData = seasonData };
+                        core.activeMovie.title = t;
                     }
 
                     core.movie123FishingDone?.Invoke(null, activeMovie);
@@ -5230,6 +5214,110 @@ namespace CloudStreamForms.Core
             return targ;
         }
 
+        class LookmovieProvider : BaseMovieProvier
+        {
+            public override string Name => "LookMovie";
+            public LookmovieProvider(CloudStreamCore _core) : base(_core) { }
+
+            [System.Serializable]
+            public struct LookSeasonEpisode
+            {
+                public string title;
+                public string episode;
+                public int id_episode;
+                public string season;
+            }
+
+            public override void LoadLinksTSync(int episode, int season, int normalEpisode, bool isMovie, TempThread tempThred)
+            {
+                string _href = activeMovie.title.lookmovieMetadata;
+                if (!_href.IsClean()) return;
+
+                string d = DownloadString("https://lookmovie.ag" + _href);
+
+                string mId = "";
+                string slug = "";
+                if (!isMovie) {
+                    slug = FindHTML(d, "slug: \'", "\'");
+                    string episodeData = FindHTML(d, "seasons: [", "]").Replace('\'', '\"').Replace("title:", "\"title\":").Replace("id_episode:", "\"id_episode\":").Replace("episode:", "\"episode\":").Replace("season:", "\"season\":");
+                    episodeData = "[" + episodeData + "]";
+                    var allEpisodes = JsonConvert.DeserializeObject<LookSeasonEpisode[]>(episodeData);
+                    for (int i = 0; i < allEpisodes.Length; i++) {
+                        if(allEpisodes[i].season == season.ToString() && allEpisodes[i].episode == episode.ToString()) {
+                            mId = allEpisodes[i].id_episode.ToString();
+                            break;
+                        }
+                    } 
+                }
+                else {
+                    mId = FindHTML(d, "id_movie: ", ",");
+                }
+                // 
+                string _d = DownloadString(isMovie ? $"https://false-promise.lookmovie.ag/api/v1/storage/movies?id_movie={mId}" : $"https://false-promise.lookmovie.ag/api/v1/storage/shows/?slug={slug}");
+                //                         
+
+                string token = FindHTML(_d, "accessToken\":\"", "\"");
+                string exp = FindHTML(_d, "expires\":", ",");
+                //                AddPotentialLink(normalEpisode, $"https://lookmovie.ag/manifests/movies/{mId}/{exp}/{token}/master.m3u8", "LookMovie", 12, "Auto");
+
+                string _masterUrl = isMovie ? $"https://lookmovie.ag/manifests/movies/json/{mId}/{exp}/{token}/master.m3u8" : $"https://lookmovie.ag/manifests/shows/json/{token}/{exp}/{mId}/master.m3u8";
+
+
+                string _masterM3u8 = DownloadString(_masterUrl); 
+
+                print("MASTERURL: " + _masterM3u8);
+
+                string[] labels = { "360", "480", "720", "1080", };
+
+                int prio = 10;
+                for (int i = 0; i < labels.Length; i++) {
+                    string _link = FindHTML(_masterM3u8, $"\"{labels[i]}\":\"", "\"");
+                    if(_link == "") _link = FindHTML(_masterM3u8, $"\"{labels[i]}p\":\"", "\"");
+                    if (_link != "") {
+                        AddPotentialLink(normalEpisode, _link, "LookMovie", prio, labels[i]);
+                    }
+                    prio++;
+                }
+            }
+
+            public override void FishMainLinkTSync(TempThread tempThread)
+            {
+                try {
+                    string search = activeMovie.title.name;
+                    string year = activeMovie.title.year[0..4];
+
+                    string searchResults = DownloadString($"https://lookmovie.ag/{(activeMovie.title.IsMovie ? "movies" : "shows")}/search/?q={search}");
+                    var doc = new HtmlAgilityPack.HtmlDocument();
+                    doc.LoadHtml(searchResults);
+                    var _res = doc.QuerySelectorAll("div");
+                    foreach (var div in _res) {
+                        var q = div.QuerySelector(" > div > h6 > a");
+                        if (q != null) {
+                            string _name = q.InnerText.Replace("  ", " ").Replace("\n", "").Replace("  ", "");
+                            if (_name.StartsWith(" ")) {
+                                _name = _name[1..];
+                            }
+
+                            var _title = div.QuerySelectorAll(" > div > a")[1];
+                            string _href = _title.GetAttributeValue("href", "");
+                            string _year = _title.QuerySelectorAll(" > p")[1].InnerText.Replace("  ", " ").Replace("\n", " ").Replace("  ", "");
+
+                            if (_year == year && ToDown(_name) == ToDown(search)) {
+                                core.activeMovie.title.lookmovieMetadata = _href;
+                                return;
+                            }
+
+                            print(_href + "|" + _year + " | " + _name);
+                        }
+                    }
+                }
+                catch (Exception) {
+
+                }
+            }
+
+        }
+
         class FMoviesUpdatedProvider : BaseMovieProvier
         {
             public override string Name => "FMovies";
@@ -5315,7 +5403,6 @@ namespace CloudStreamForms.Core
                 catch (Exception _ex) {
 
                 }
-
             }
 
             public override void LoadLinksTSync(int episode, int season, int normalEpisode, bool isMovie, TempThread tempThred)
@@ -6827,8 +6914,7 @@ namespace CloudStreamForms.Core
                                     ogName = ogName,
                                     hdPosterUrl = hdPosterUrl,
                                     fmoviesMetaData = new List<FMoviesData>(),
-                                    watchSeriesHdMetaData = new List<WatchSeriesHdMetaData>(),
-
+                                    watchSeriesHdMetaData = new List<WatchSeriesHdMetaData>(), 
                                 };
 
                                 activeMovie.title.trailers.Add(new Trailer() { Url = trailerUrl, PosterUrl = trailerImg, Name = trailerName });
@@ -8095,7 +8181,7 @@ namespace CloudStreamForms.Core
 
                 request.Headers.Add("TE", "Trailers");
 
-                using HttpWebResponse response = (HttpWebResponse)request.GetResponse(); 
+                using HttpWebResponse response = (HttpWebResponse)request.GetResponse();
                 if (br) {
                     /*
                     using (BrotliStream bs = new BrotliStream(response.GetResponseStream(), System.IO.Compression.CompressionMode.Decompress)) {
@@ -8441,7 +8527,7 @@ namespace CloudStreamForms.Core
                             typeName = _type,
                             label = label,
                             priority = _priority,
-                            mirror = holder.links.Where(t => t.name == _name).Count()
+                            mirror = holder.links.Where(t => t.name + t.label == _name + label).Count()
                             //holder.links = holder.links.OrderBy(t => t.priority).ToList();
                         });
                     }
@@ -8784,7 +8870,7 @@ namespace CloudStreamForms.Core
                         // BEGIN RESPONSE
 
                         _webRequest.BeginGetResponse(new AsyncCallback((IAsyncResult _callbackResult) => {
-                            try { 
+                            try {
                                 HttpWebRequest request = (HttpWebRequest)_callbackResult.AsyncState;
                                 HttpWebResponse response = (HttpWebResponse)request.EndGetResponse(_callbackResult);
                                 if (_tempThred != null) {
@@ -8951,7 +9037,7 @@ namespace CloudStreamForms.Core
         }
 
 
-        public string DownloadStringWithCert(string url, TempThread? tempThred = null, int waitTime = 1000, string requestBody = "", string referer = "", Encoding encoding = null, string[] headerName = null, string[] headerValue = null)
+        public string DownloadStringWithCert(string url, TempThread? tempThred = null, int waitTime = 10000, string requestBody = "", string referer = "", Encoding encoding = null, string[] headerName = null, string[] headerValue = null)
         {
             if (!url.IsClean()) return "";
             url = url.Replace("http://", "https://");
@@ -8960,9 +9046,9 @@ namespace CloudStreamForms.Core
                 HttpWebRequest webRequest = (HttpWebRequest)HttpWebRequest.Create(url);
                 if (GetRequireCert(url)) { webRequest.ServerCertificateValidationCallback = delegate { return true; }; }
                 webRequest.Method = "GET";
-                webRequest.Timeout = waitTime * 10;
-                webRequest.ReadWriteTimeout = waitTime * 10;
-                webRequest.ContinueTimeout = waitTime * 10;
+                webRequest.Timeout = waitTime;
+                webRequest.ReadWriteTimeout = waitTime;
+                webRequest.ContinueTimeout = waitTime;
                 webRequest.Referer = referer;
                 if (encoding == null) {
                     encoding = Encoding.UTF8;
