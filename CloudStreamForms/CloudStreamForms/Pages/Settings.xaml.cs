@@ -267,6 +267,7 @@ namespace CloudStreamForms
         public static int BlackBgType {
             set {
                 App.SetKey("Settings", nameof(BlackBgType), value);
+                UpdateItemBgColor();
             }
             get {
                 return App.GetKey("Settings", nameof(BlackBgType), 1);
@@ -438,6 +439,19 @@ namespace CloudStreamForms
             }
         }
 
+        public static Color ItemBackGroundColor = GetItemBgColor();
+
+        static Color GetItemBgColor()
+        {
+            var _color = Settings.BlackColor + 5;
+            return Color.FromRgb(_color, _color, _color);
+        }
+
+        static void UpdateItemBgColor()
+        {
+            ItemBackGroundColor = GetItemBgColor();
+        }
+
         public string MainColor { get { return Device.RuntimePlatform == Device.UWP ? "#303F9F" : "#515467"; } }
         private static String HexConverter(Color c)
         {
@@ -484,7 +498,7 @@ namespace CloudStreamForms
             new GlobalFont() {
                 Name = "Gotham",
                 FontSpacing = 1.2f,
-                FontSize = 14,
+             //   FontSize = 14,
             },
             new GlobalFont() {
                 Name = "Trebuchet MS",
@@ -494,32 +508,32 @@ namespace CloudStreamForms
             new GlobalFont() {
                 Name = "Open Sans",
                 FontSpacing = 1f,
-                FontSize = 14,
+              //  FontSize = 14,
             },
             new GlobalFont() {
                 Name = "Google Sans",
                 FontSpacing = 1f,
-                FontSize = 14,
+              //  FontSize = 14,
             },
             new GlobalFont() {
                 Name = "Lucida Grande",
                 FontSpacing = 1f,
-                FontSize = 14,
+              //  FontSize = 14,
             },
             new GlobalFont() {
                 Name = "Futura",
                 FontSpacing = 1f,
-                FontSize = 14,
+              //  FontSize = 14,
             },
             new GlobalFont() {
                 Name = "STIXGeneral",
                 FontSpacing = 1f,
-                FontSize = 15,
+             //   FontSize = 15,
             },
             new GlobalFont() {
                 Name = "Times New Roman",
                 FontSpacing = 1f,
-                FontSize = 14,
+               // FontSize = 14,
             },
         };
 
@@ -556,6 +570,7 @@ namespace CloudStreamForms
         {
             CachedPauseHis = PauseHistory;
             _IgnoreSSLCert = IgnoreSSLCert;
+            UpdateItemBgColor();
         }
 
         public Settings()

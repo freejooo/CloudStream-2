@@ -205,20 +205,19 @@ xmlns:ffTransformations="clr-namespace:FFImageLoading.Transformations;assembly=F
                             <RowDefinition Height="Auto" /> 
                         </Grid.RowDefinitions>
 
-                        <Grid x:Name="EpPickers" Grid.Row="1"  Grid.Column="0" Margin="10,10,0,0">
+                        <Grid x:Name="EpPickers" Grid.Row="1"  Grid.Column="0" Margin="5,10,0,0" HorizontalOptions="Fill">
                             <Grid.ColumnDefinitions >
-                                <ColumnDefinition Width="Auto"></ColumnDefinition>
                                 <ColumnDefinition Width="Auto"></ColumnDefinition>
                                 <ColumnDefinition Width="Auto"></ColumnDefinition>
                                 <ColumnDefinition Width="Auto"></ColumnDefinition>
                             </Grid.ColumnDefinitions>
                             <!--   <StackLayout Orientation="Horizontal" TranslationX="10" >-->
-                            <Button x:Name="SeasonBtt" Grid.Column="0" InputTransparent="False" Opacity="0" BackgroundColor="#333333" Text="Season 1" TextColor="#e7e7e7" FontAttributes="Bold" FontSize="Body" CornerRadius="5" HeightRequest="37" ></Button>
+                            <Button x:Name="SeasonBtt" Grid.Column="0" InputTransparent="False" Opacity="0" BackgroundColor="#252525" Text="Season 1" TextColor="#e7e7e7" FontAttributes="Bold" FontSize="Body" CornerRadius="5" HeightRequest="37" ></Button>
                             <!--   <Picker x:Name="SeasonPicker"  TranslationX="13" TextColor="Transparent" IsVisible="False" VerticalOptions="Center" HorizontalOptions="Start"  FontAttributes="Bold" FontSize="Body" ></Picker> -->
 
-                            <Button x:Name="DubBtt" Grid.Column="1" InputTransparent="False" BackgroundColor="#333333" Text="Dub" TextColor="#e7e7e7" FontAttributes="Bold" FontSize="Body" CornerRadius="5" HeightRequest="37" WidthRequest="60" ></Button>
-                            <Button x:Name="FromToBtt" Grid.Column="2" InputTransparent="False" IsVisible="False" IsEnabled="False" BackgroundColor="#333333" Text="Test" TextColor="#e7e7e7" FontAttributes="Bold" FontSize="Body" CornerRadius="5" HeightRequest="37" WidthRequest="80" ></Button>
-                            <Button x:Name="BatchDownloadBtt" Grid.Column="3" InputTransparent="False" Opacity="0" IsEnabled="False" BackgroundColor="#333333" Text="Download All" TextColor="#e7e7e7" FontAttributes="Bold" FontSize="Body" CornerRadius="5" HeightRequest="37" WidthRequest="100" ></Button>
+                            <Button x:Name="DubBtt" Grid.Column="1" InputTransparent="False" BackgroundColor="#252525" Text="Dub" TextColor="#e7e7e7" FontAttributes="Bold" FontSize="Body" CornerRadius="5" HeightRequest="37" WidthRequest="60" ></Button>
+                            <Button x:Name="FromToBtt" Grid.Column="2" InputTransparent="False" IsVisible="False" IsEnabled="False" BackgroundColor="#252525" Text="Test" TextColor="#e7e7e7" FontAttributes="Bold" FontSize="Body" CornerRadius="5" HeightRequest="37" WidthRequest="80" ></Button>
+                            <Button x:Name="BatchDownloadBtt" Grid.Column="3" InputTransparent="False" Opacity="0" IsEnabled="False" BackgroundColor="#252525" Text="Download All" TextColor="#e7e7e7" FontAttributes="Bold" FontSize="Body" CornerRadius="5" HeightRequest="37" TranslationX="-5" WidthRequest="110" HorizontalOptions="Start" ></Button>
 
 <!--
                             <ffs:SvgCachedImage x:Name="NotificationImg" Grid.Column="3" VerticalOptions="Center" HorizontalOptions="End" ></ffs:SvgCachedImage>
@@ -228,7 +227,7 @@ xmlns:ffTransformations="clr-namespace:FFImageLoading.Transformations;assembly=F
                             
                             <!--   <Picker x:Name="DubPicker" IsVisible="False" VerticalOptions="Center" HorizontalOptions="Start"  FontAttributes="Bold" FontSize="Body" TextColor="Transparent" TranslationX="13"></Picker> -->
                             <!-- </StackLayout>-->
-                            <Button x:Name="SkipAnimeBtt" IsEnabled="False" Grid.Row="0" Grid.Column="1" HorizontalOptions="Center" VerticalOptions="Center" IsVisible="False" InputTransparent="False" BackgroundColor="#333333" Text="Skip Loading" TextColor="#e7e7e7" FontAttributes="Bold" FontSize="Body" CornerRadius="5" HeightRequest="37" WidthRequest="100" ></Button>
+                            <Button x:Name="SkipAnimeBtt" IsEnabled="False" Grid.Row="0" Grid.Column="1" HorizontalOptions="Center" VerticalOptions="Center" IsVisible="False" InputTransparent="False" BackgroundColor="#252525" Text="Skip Loading" TextColor="#e7e7e7" FontAttributes="Bold" FontSize="Body" CornerRadius="5" HeightRequest="37" WidthRequest="100" ></Button>
 
                         </Grid>
 
@@ -282,7 +281,10 @@ xmlns:ffTransformations="clr-namespace:FFImageLoading.Transformations;assembly=F
                                 <ListView.ItemTemplate>
                                     <DataTemplate>
                                         <ViewCell Tapped="ViewCell_Tapped" >
-                                            <Grid RowSpacing="0"  Padding="0"  HorizontalOptions="Fill" VerticalOptions="FillAndExpand">
+                                            <Grid>
+                                                <BoxView BackgroundColor="{Binding ExtraColor}" VerticalOptions="FillAndExpand" Margin="5,5" CornerRadius="5"></BoxView>
+
+                                                <Grid RowSpacing="0"  Padding="0"  HorizontalOptions="Fill" VerticalOptions="FillAndExpand" Margin="4">
                                                 <!--SizeChanged="ViewCell_SizeChanged"-->
                                                 <Grid.RowDefinitions >
                                                     <RowDefinition Height="Auto" />
@@ -366,7 +368,7 @@ xmlns:ffTransformations="clr-namespace:FFImageLoading.Transformations;assembly=F
                                                 <Label Text="{Binding Description}"  TextColor="{Binding MainDarkTextColor}" LineHeight="1"  TranslationY="-5"  MaxLines="4" Grid.Row="1" Grid.Column="0" HorizontalOptions="Fill" VerticalOptions="Fill"  Padding="0,0,0,0" Margin="10,0" />
                                             </Grid>
 
-
+                                            </Grid>
                                             <!--
                                             <ff:CachedImage PropertyChanging="ImageGetGradient" InputTransparent="True" ScaleX="300" TranslationY="2" HeightRequest="10" Rotation="180" VerticalOptions="End" BackgroundColor="Transparent">
 

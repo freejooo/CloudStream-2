@@ -39,7 +39,7 @@ namespace CloudStreamForms
 
         public Poster mainPoster;
         public string trailerUrl = "";
- 
+
         //  public static List<Movie> lastMovie;
         List<Poster> RecomendedPosters { get { return currentMovie.title.recomended; } }  //= new List<Poster>();
 
@@ -53,7 +53,7 @@ namespace CloudStreamForms
         bool isMovie = false;
         Movie currentMovie { get { return core.activeMovie; } }
         bool isDub = true;
-       // bool RunningWindows { get { return Xamarin.Essentials.DeviceInfo.Platform == DevicePlatform.UWP; } }
+        // bool RunningWindows { get { return Xamarin.Essentials.DeviceInfo.Platform == DevicePlatform.UWP; } }
         string CurrentMalLink {
             get {
 
@@ -500,14 +500,14 @@ namespace CloudStreamForms
                         firstEp = Math.Clamp(firstEp, 1, lastEp);
 
                         App.ShowToast($"Downloading Episodes {firstEp}-{lastEp}");
-                        for (int i = firstEp - 1; i < lastEp; i++) {  
+                        for (int i = firstEp - 1; i < lastEp; i++) {
                             var ep = episodes[i];
                             string imdbId = ep.IMDBEpisodeId;
                             CloudStreamCore.Title titleName = (Title)coreCopy.activeMovie.title.Clone();
 
                             coreCopy.GetEpisodeLink(coreCopy.activeMovie.title.IsMovie ? -1 : (ep.Id + 1), _currentSeason, false, false, _isDub);
 
-                            int epId = GetCorrectId(ep,coreCopy.activeMovie);
+                            int epId = GetCorrectId(ep, coreCopy.activeMovie);
                             await Task.Delay(10000); // WAIT 10 Sec
                             try {
                                 BasicLink[] info = null;
@@ -890,6 +890,7 @@ namespace CloudStreamForms
         {
             episodeResult.OgTitle = episodeResult.Title;
             SetColor(episodeResult);
+            episodeResult.ExtraColor = Settings.ItemBackGroundColor.ToHex();
             episodeResult.Season = currentSeason;
 
             /*if (episodeResult.Rating != "") {
@@ -1241,7 +1242,7 @@ namespace CloudStreamForms
                     string posterURL = ConvertIMDbImagesToHD(p.posterUrl, 76, 113, 1.75); //.Replace(",76,113_AL", "," + pwidth + "," + pheight + "_AL").Replace("UY113", "UY" + pheight).Replace("UX76", "UX" + pwidth);
                     if (CheckIfURLIsValid(posterURL)) {
                         Grid stackLayout = new Grid() { VerticalOptions = LayoutOptions.Start };
-                        Button imageButton = new Button() { HeightRequest = RecPosterHeight, WidthRequest = RecPosterWith, BackgroundColor = Color.Transparent, VerticalOptions = LayoutOptions.Start };
+                        // Button imageButton = new Button() { HeightRequest = RecPosterHeight, WidthRequest = RecPosterWith, BackgroundColor = Color.Transparent, VerticalOptions = LayoutOptions.Start,CornerRadius=10 };
                         var ff = new FFImageLoading.Forms.CachedImage {
                             Source = posterURL,
                             HeightRequest = RecPosterHeight,
@@ -1250,7 +1251,7 @@ namespace CloudStreamForms
                             VerticalOptions = LayoutOptions.Start,
                             Transformations = {
                             //  new FFImageLoading.Transformations.RoundedTransformation(10,1,1.5,10,"#303F9F")
-                            new FFImageLoading.Transformations.RoundedTransformation(1, 1, 1.5, 0, "#303F9F")
+                            new FFImageLoading.Transformations.RoundedTransformation(3, 1, 1.5, 0, "#303F9F")
                         },
                             InputTransparent = true,
                         };
@@ -1271,9 +1272,9 @@ namespace CloudStreamForms
                             //do something
                         }));
                         Commands.SetTapParameter(stackLayout, i);
- 
+
                         stackLayout.Children.Add(ff);
-                        stackLayout.Children.Add(imageButton);
+                        //stackLayout.Children.Add(imageButton);
 
                         Recommendations.Children.Add(stackLayout);
                     }
@@ -1396,6 +1397,11 @@ namespace CloudStreamForms
 
                 //bool isLocalMovie = false;
                 bool isAnime = currentMovie.title.movieType == MovieType.Anime;
+
+                if (currentMovie.title.IsMovie) {
+                    EpPickers.IsVisible = false;
+                    EpPickers.IsEnabled = false;
+                }
 
                 if (currentMovie.title.movieType != MovieType.Movie && currentMovie.title.movieType != MovieType.AnimeMovie) { // SEASON ECT
                     print("MAXEPS:::" + CurrentEpisodes.Count);
@@ -1554,7 +1560,7 @@ namespace CloudStreamForms
                     string p = e[i].PosterUrl;
                     if (CheckIfURLIsValid(p)) {
                         Grid stackLayout = new Grid();
-                        Label textLb = new Label() { Text = e[i].Name, TextColor = Color.FromHex("#e7e7e7"), FontAttributes = FontAttributes.Bold, FontSize = 15, TranslationX = 10 };
+                        Label textLb = new Label() { Text = e[i].Name, TextColor = Color.FromHex("#e7e7e7"), FontAttributes = FontAttributes.Bold, FontSize = 15, TranslationX = 10, Margin = new Thickness(0, 0, 0, 20) };
                         Image playBtt = new Image() { Source = GetImageSource("nexflixPlayBtt.png"), VerticalOptions = LayoutOptions.Center, HorizontalOptions = LayoutOptions.Center, Scale = 0.5, InputTransparent = true };
                         var ff = new FFImageLoading.Forms.CachedImage {
                             Source = p,
@@ -1563,15 +1569,16 @@ namespace CloudStreamForms
                             Aspect = Aspect.AspectFill,
                             HorizontalOptions = LayoutOptions.Fill,
                             Transformations = {
-                            new FFImageLoading.Transformations.RoundedTransformation(1, 1.7, 1, 0, "#303F9F")
-
+                            new FFImageLoading.Transformations.RoundedTransformation(3, 1.7, 1, 0, "#303F9F")
                         },
                             InputTransparent = true,
                         };
 
                         int _sel = int.Parse(i.ToString());
+                        stackLayout.Children.Add(new BoxView() { BackgroundColor = Settings.ItemBackGroundColor, CornerRadius = 5, Margin = new Thickness(-20, -20, -20, -50) });
                         stackLayout.Children.Add(ff);
                         stackLayout.Children.Add(playBtt);
+
                         trailerView.Children.Add(stackLayout);
                         trailerView.Children.Add(textLb);
 
@@ -1828,7 +1835,7 @@ namespace CloudStreamForms
             Device.BeginInvokeOnMainThread(() => {
                 if (core == null) return;
                 epView.MyEpisodeResultCollection.Clear();
-                for (int i = 0; i < _e.Count; i++) { 
+                for (int i = 0; i < _e.Count; i++) {
                     epView.MyEpisodeResultCollection.Add(UpdateLoad((EpisodeResult)_e[i].Clone(), checkColor));
                 }
             });

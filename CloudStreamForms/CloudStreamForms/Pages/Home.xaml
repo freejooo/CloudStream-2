@@ -57,7 +57,7 @@
 
             <!--<BoxView  HeightRequest="3" Color="#303F9F" TranslationY="10"></BoxView>-->
 
-            <Grid x:Name="Top100Stack" IsEnabled="False" IsVisible="False" HorizontalOptions="Fill" VerticalOptions="Fill">
+            <Grid x:Name="Top100Stack" IsEnabled="True" IsVisible="True" HorizontalOptions="Fill" VerticalOptions="Fill">
         
 
                 <!--        <ScrollView x:Name="ImageScroller">
@@ -74,19 +74,21 @@
 
                 <ListView ItemsSource="{Binding MyEpisodeResultCollection}" 
                              CachingStrategy="RecycleElement" 
-                ItemTapped="episodeView_ItemTapped" RowHeight="100"
+                ItemTapped="episodeView_ItemTapped" RowHeight="105"
                     x:Name="episodeView"  SeparatorColor="Transparent"  VerticalOptions="Start" VerticalScrollBarVisibility="Never"     >
                     <ListView.ItemTemplate>
                         <DataTemplate     >
                             <cloudstreamforms:CustomCell Tapped="ViewCell_Tapped"   >
-                                <Grid RowSpacing="0"  Padding="0"  HorizontalOptions="Fill"  HeightRequest="98" >
+                                <Grid RowSpacing="0"  Padding="0"  HorizontalOptions="Fill"  HeightRequest="98" VerticalOptions="Center">
                                     <Grid.RowDefinitions >
                                         <RowDefinition Height="Auto" />
                                         <RowDefinition Height="Auto" />
                                         <RowDefinition Height="Auto" />
                                     </Grid.RowDefinitions>
+                                    <BoxView CornerRadius="5" BackgroundColor="{Binding ExtraColor}" Margin="7,0" HeightRequest="98" VerticalOptions="Center">
 
-                                    <Grid Grid.Row="0" Grid.Column="0" HorizontalOptions="Fill">
+                                    </BoxView>
+                                    <Grid Grid.Row="0" Grid.Column="0" HorizontalOptions="Fill" VerticalOptions="Center">
                                         <Grid  RowSpacing="0"  Padding="0" >
                                             <Grid.RowDefinitions >
                                                 <RowDefinition Height="Auto" />
@@ -100,12 +102,12 @@
                                                 <ColumnDefinition Width="Auto" />
                                             </Grid.ColumnDefinitions>
 
-                                            <Grid Grid.Row="0"  Grid.Column="1"  WidthRequest="67" TranslationY="{Binding TranslateYOffsetVertical}" >
+                                            <Grid Grid.Row="0"  Grid.Column="1"  WidthRequest="68" TranslationY="{Binding TranslateYOffsetVertical}" >
 
-                                                <ff:CachedImage WidthRequest="67" HeightRequest="96" Source="{Binding PosterUrl}" InputTransparent="True" >
+                                                <ff:CachedImage WidthRequest="68" HeightRequest="98" Source="{Binding PosterUrl}" InputTransparent="True"  >
 
                                                     <ff:CachedImage.Transformations>
-                                                        <ffTransformations:RoundedTransformation BorderSize="0" Radius="1" BorderHexColor="#303F9F" CropWidthRatio="0.7" >
+                                                        <ffTransformations:RoundedTransformation BorderSize="0" Radius="7" BorderHexColor="#303F9F" CropWidthRatio="0.7" >
 
                                                         </ffTransformations:RoundedTransformation>
                                                     </ff:CachedImage.Transformations>
@@ -114,18 +116,19 @@
                                                     <ff:CachedImage PropertyChanging="Image_PropertyChanging" InputTransparent="True" BackgroundColor="Transparent">
 
                                                     </ff:CachedImage>-->
-                                                <Grid  xe:TouchEffect.Color="White" Opacity="0.5" BackgroundColor="Transparent" xe:EffectsConfig.ChildrenInputTransparent="False" BindingContextChanged="Grid_BindingContextChanged" >
+                                                <xe:BorderView  xe:TouchEffect.Color="White" Opacity="0.5" CornerRadius="1.2" BackgroundColor="Transparent" xe:EffectsConfig.ChildrenInputTransparent="False" xe:Commands.Tap="{Binding TapCom}" >
                                                     <!-- xe:Commands.Tap="{Binding TapCommand}"-->
                                                     <!--   <ImageButton Clicked="ImageButton_Clicked" BackgroundColor="Transparent" InputTransparent="False" ></ImageButton  > -->
 
-                                                </Grid>
+                                                </xe:BorderView>
 
                                             </Grid>
+                                            <!--
                                             <Grid  Grid.Row="0"  Grid.Column="0">
                                                 <BoxView WidthRequest="3" HeightRequest="10" Color="#303F9F"></BoxView>
-                                            </Grid>
+                                            </Grid>-->
 
-                                            <Grid  Grid.Row="0"  Grid.Column="2">
+                                            <Grid  Grid.Row="0"  Grid.Column="2" Padding="0,3">
                                                 <Grid RowSpacing="0" Padding="0" >
                                                     <Grid.RowDefinitions >
                                                         <RowDefinition Height="Auto" />
@@ -137,7 +140,7 @@
                                                         <ColumnDefinition Width="Auto" />
                                                         <ColumnDefinition Width="Auto" />
                                                     </Grid.ColumnDefinitions>
-                                                    <Grid Grid.Row="0"  Grid.Column="0" >
+                                                    <Grid Grid.Row="0"  Grid.Column="0" Padding="0,3">
                                                         <Label Text="{Binding Title}" TextColor="{Binding MainTextColor}" FontAttributes="Bold" FontSize="13"/>
                                                     </Grid>
                                                     <Grid Grid.Row="1"  Grid.Column="0" >
@@ -148,10 +151,11 @@
                                         </Grid>
 
                                     </Grid>
-
+                                   
+<!--
                                     <Grid Grid.Row="0" Grid.Column="0" HorizontalOptions="Fill" TranslationY="95">
                                         <ProgressBar Progress="{Binding ExtraProgress}" IsVisible="{Binding DownloadNotDone}" IsEnabled="{Binding DownloadNotDone}" HeightRequest="5"  VerticalOptions="Start"/>
-                                    </Grid>
+                                    </Grid>-->
                                     <!--
                             <Grid Grid.Row="1" x:Name="PBar"  Grid.Column="0" VerticalOptions="Center">
                                 <ContentView VerticalOptions="Center">
@@ -166,7 +170,7 @@
                         </DataTemplate>
                     </ListView.ItemTemplate>
                 </ListView>
-                <Button    x:Name="MovieTypePickerBtt"  VerticalOptions="End" HorizontalOptions="End" InputTransparent="False" Margin="10" WidthRequest="100" Text="Sci-Fi" TextColor="#e7e7e7" FontAttributes="Bold" FontSize="Body" CornerRadius="5" HeightRequest="40" BackgroundColor="#333333" ></Button>
+                <Button    x:Name="MovieTypePickerBtt"  VerticalOptions="End" HorizontalOptions="End" InputTransparent="False" Margin="10" WidthRequest="100" Text="Sci-Fi" TextColor="#e7e7e7" FontAttributes="Bold" FontSize="Body" CornerRadius="5" HeightRequest="40" BackgroundColor="#252525" ></Button>
                     <ProgressBar   x:Name="LoadingIndicator"  HorizontalOptions="Fill" ClassId="id" HeightRequest="15" VerticalOptions="Start" InputTransparent="True"></ProgressBar>
 
 

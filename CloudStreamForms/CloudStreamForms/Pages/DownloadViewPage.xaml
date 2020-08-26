@@ -39,7 +39,7 @@
                 <!-- <ProgressBar Progress="0.5"></ProgressBar>  ItemTapped="episodeView_ItemTapped" Tapped="ViewCell_Tapped"-->
                 <ListView ItemsSource="{Binding MyEpisodeResultCollection}"
                              CachingStrategy="RecycleElement"  
-                RowHeight="100"
+                RowHeight="100" Opacity="0"
                     x:Name="episodeView"  SeparatorColor="Transparent"    > 
 
                     <ListView.ItemTemplate>
@@ -55,6 +55,7 @@
                                     </Grid.RowDefinitions>
 
                                     <Grid Grid.Row="0" Grid.Column="0" HorizontalOptions="Fill" >
+                                            <BoxView BackgroundColor="{Binding ExtraColor}" Margin="5,4" CornerRadius="5"></BoxView>
                                         <Grid  RowSpacing="0"  Padding="10" >
                                             <Grid.RowDefinitions >
                                                 <RowDefinition Height="Auto" />
@@ -82,8 +83,8 @@
                                                             </ffTransformations:RoundedTransformation>
                                                         </ff:CachedImage.Transformations>
                                                     </ff:CachedImage>
-                                                    <ProgressBar IsVisible="{Binding HasProgress}" Progress="{Binding Progress}" ProgressColor="#829eff" VerticalOptions="End" HeightRequest="3" TranslationY="-4"></ProgressBar>
-
+                                                    <!--<ProgressBar IsVisible="{Binding HasProgress}" Progress="{Binding Progress}" ProgressColor="#829eff" VerticalOptions="End" HeightRequest="3" TranslationY="-4"></ProgressBar>
+-->
                                                     <!--PropertyChanging="Image_PropertyChanging" -->
 
                                                     <ff:CachedImage InputTransparent="True" BackgroundColor="Transparent" Source="{Binding DownloadPlayBttSource}" Scale="0.5">
@@ -98,7 +99,7 @@
 
                                                 <!-- Source="{Binding PosterUrl}"-->
                                             </Grid>
-                                            <Grid  Grid.Row="0"  Grid.Column="1">
+                                            <Grid  Grid.Row="0"  Grid.Column="1" Margin="0,2.5,0,0">
                                                 <Grid RowSpacing="0" Padding="0" >
                                                     <Grid.RowDefinitions >
                                                         <RowDefinition Height="Auto" />

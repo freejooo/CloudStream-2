@@ -14,6 +14,7 @@ using System.Numerics;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Windows.Services.Maps;
 using Xamarin.Forms;
 using Xamarin.Forms.Internals;
 using Xamarin.Forms.Markup;
@@ -487,7 +488,7 @@ namespace CloudStreamForms
         bool isShowingSmallSkip = false;
 
         public void PlayerTimeChanged(long time)
-        {  
+        {
             if (!isShown) return;
 
             if (Player == null) {
@@ -987,7 +988,7 @@ namespace CloudStreamForms
                     print("DAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAdddddddddddAAAAAAAA");
                     HandleVideoAction(App.PlayerEventType.Stop);
                 }));
-                
+
                 Commands.SetTap(GoPipModeTap, new Command(() => {
                     GoIntoPipMode();
                 }));
@@ -1145,13 +1146,14 @@ namespace CloudStreamForms
                     error(_libVLC.LastLibVLCError);
                     print("ERROR LOADING MDDD: ");
                     ErrorWhenLoading();
-                }; 
+                };
 
-                SelectMirror(currentVideo.preferedMirror);
+                    SelectMirror(currentVideo.preferedMirror);
+
                 ShowNextMirror();
 
-                GoPipModeTap.IsEnabled = Settings.PictureInPicture && App.FullPictureInPictureSupport; 
-                GoPipModeTap.IsVisible = GoPipModeTap.IsEnabled; 
+                GoPipModeTap.IsEnabled = Settings.PictureInPicture && App.FullPictureInPictureSupport;
+                GoPipModeTap.IsVisible = GoPipModeTap.IsEnabled;
 
                 int columCount = 0;
                 for (int i = 0; i < pressIcons.Length; i++) {
@@ -1355,13 +1357,15 @@ namespace CloudStreamForms
 
         bool isFirstLoadedMirror = true;
         Media disMedia;
-        public void SelectMirror(int mirror)
+        public async Task SelectMirror(int mirror)
         {
             if (!isShown) return;
             if (AllMirrorsUrls.Count <= mirror || mirror < 0) { // VALIDATE INPUT
                 mirror = 0;
-            }
+            } 
 
+            await Task.Delay(1);
+             
             isPausable = false;
             isSeekeble = false;
 
@@ -1827,7 +1831,7 @@ namespace CloudStreamForms
                     item.FadeTo(fade, fadeTime);
                 }
             }
-            
+
             await Task.Delay((int)fadeTime);
             isInAnimation = false;
 

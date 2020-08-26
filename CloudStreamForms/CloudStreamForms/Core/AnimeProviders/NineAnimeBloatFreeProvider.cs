@@ -22,9 +22,9 @@ namespace CloudStreamForms.Core.AnimeProviders
         }
 
         const string NineAnimeSite = "https://www10.9anime.to";
-        public override void LoadLink(string episodeLink, int episode, int normalEpisode, TempThread tempThred, object extraData,bool isDub)
+        public override void LoadLink(string episodeLink, int episode, int normalEpisode, TempThread tempThred, object extraData, bool isDub)
         {
-            string request = episodeLink.Replace(NineAnimeSite+"/watch/", "") + "/"; // /xrrj358";
+            string request = episodeLink.Replace(NineAnimeSite + "/watch/", "") + "/"; // /xrrj358";
             string url = NineAnimeSite + "/watch/" + request;
             string d = DownloadString(url);
             string key = core.GetMcloudKey(url);
@@ -98,7 +98,7 @@ namespace CloudStreamForms.Core.AnimeProviders
             }
 
             try {
-                core.AddMCloud(MyCloud[normalEpisode].id, key, dataTs, NineAnimeSite, normalEpisode, url); 
+                core.AddMCloud(MyCloud[normalEpisode].id, key, dataTs, NineAnimeSite, normalEpisode, url);
             }
             catch (Exception) {
 
@@ -152,7 +152,7 @@ namespace CloudStreamForms.Core.AnimeProviders
         {
             List<NineAnimeDataSearch> searchData = new List<NineAnimeDataSearch>();
 
-            string url = NineAnimeSite+"/search?keyword=" + search;
+            string url = NineAnimeSite + "/search?keyword=" + search;
             string d = DownloadString(url);
             if (!d.IsClean()) return null;
             var doc = new HtmlAgilityPack.HtmlDocument();
@@ -164,7 +164,7 @@ namespace CloudStreamForms.Core.AnimeProviders
                 string dataTip = item.GetAttributeValue("data-tip", "");
 
                 if (dataTip != "") {
-                    string _d = DownloadString(NineAnimeSite + dataTip, referer: url);
+                    string _d = DownloadString((NineAnimeSite + "/" + dataTip), referer: url);
                     int.TryParse(FindHTML(_d, "Episode ", "/"), out int maxEp);
                     if (maxEp != 0) { // IF NOT MOVIE 
                         string otherNames = FindHTML(_d, "<label>Other names:</label>\n            <span>", "<").Replace("  ", "").Replace("\n", "").Replace(";", "");

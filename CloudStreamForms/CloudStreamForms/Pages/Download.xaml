@@ -87,7 +87,7 @@
 						<!-- <ProgressBar Progress="0.5"></ProgressBar> -->
 						<ListView ItemsSource="{Binding MyEpisodeResultCollection}"
                              CachingStrategy="RecycleElement" 
-                ItemTapped="episodeView_ItemTapped" RowHeight="104" 
+                ItemTapped="episodeView_ItemTapped" RowHeight="104" Opacity="0"
                     x:Name="episodeView"  SeparatorColor="Transparent"  
          >
 
@@ -105,9 +105,9 @@
 												<RowDefinition Height="Auto" />
 												<RowDefinition Height="Auto" />
 											</Grid.RowDefinitions>
-
+                                            <BoxView BackgroundColor="{Binding ExtraColor}" CornerRadius="5" Margin="7,5"></BoxView>
 											<Grid Grid.Row="0" Grid.Column="0" HorizontalOptions="Fill" >
-												<Grid  RowSpacing="0"  Padding="10" >
+												<Grid  RowSpacing="0"  Padding="3.3,5" >
 													<Grid.RowDefinitions >
 														<RowDefinition Height="Auto" />
 														<RowDefinition Height="Auto" />
@@ -121,14 +121,14 @@
 														<ColumnDefinition Width="*" />
 														<ColumnDefinition Width="Auto" />
 													</Grid.ColumnDefinitions>
-													<Grid Grid.Row="0"  Grid.Column="0"  WidthRequest="70" HeightRequest="104" TranslationY="{Binding TranslateYOffset}" BindingContextChanged="Grid_BindingContextChanged">
+													<Grid Grid.Row="0"  Grid.Column="0"  WidthRequest="70" HeightRequest="104" TranslationY="{Binding TranslateYOffset}"  >
 
-														<ImageButton Clicked="ImageButton_Clicked" BackgroundColor="Transparent" WidthRequest="70"></ImageButton>
+														<!--<ImageButton Clicked="ImageButton_Clicked" BackgroundColor="Transparent" WidthRequest="70"></ImageButton>-->
 														<!--PosterUrl-->
 														<ff:CachedImage WidthRequest="70" HeightRequest="104" Source="{Binding ImageSource}" InputTransparent="True"   >
 
 															<ff:CachedImage.Transformations>
-																<ffTransformations:RoundedTransformation BorderSize="0" Radius="1" BorderHexColor="#303F9F" CropHeightRatio="0.66"  >
+																<ffTransformations:RoundedTransformation BorderSize="0" Radius="7" BorderHexColor="#303F9F" CropHeightRatio="1.5"  >
 
 																</ffTransformations:RoundedTransformation>
 															</ff:CachedImage.Transformations>

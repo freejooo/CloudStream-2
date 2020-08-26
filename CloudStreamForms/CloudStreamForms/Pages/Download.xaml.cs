@@ -191,9 +191,9 @@ namespace CloudStreamForms
         void OnAppear()
         {
             try {
-                BackgroundColor = Settings.BlackRBGColor; 
+                BackgroundColor = Settings.BlackRBGColor;
                 UpdateDownloaded();
-                ChangeStorage(); 
+                ChangeStorage();
                 episodeView.VerticalScrollBarVisibility = Settings.ScrollBarVisibility;
             }
             catch (Exception _ex) {
@@ -359,6 +359,7 @@ namespace CloudStreamForms
                             }
 
                             EpisodeResult ep = new EpisodeResult() { Title = val.name, PosterUrl = val.hdPosterUrl, Description = App.ConvertBytesToAny(helper.TotalBytes, 0, 2) + " MB", Id = key };
+                            ep.ExtraColor = Settings.ItemBackGroundColor.ToHex();
 
                             if (val.movieType == MovieType.TVSeries || val.movieType == MovieType.Anime || val.movieType == MovieType.YouTube) {
                                 int count = helper.infoIds.Count;
@@ -419,8 +420,6 @@ namespace CloudStreamForms
 
                         var _epres = ((EpisodeResult[])epres.Clone()).OrderBy(t => t.Episode).ToArray(); // MOVIE -> ANIMEMOVIE -> TV-SERIES -> ANIME -> YOUTUBE
 
-
-
                         App.SetKey("Settings", "hasDownloads", _epres.Length != 0);
 
                         bool noDownloads = _epres.Length == 0;
@@ -437,6 +436,7 @@ namespace CloudStreamForms
                                     error("FATAL EX: " + _ex);
                                 }
                             }
+                            episodeView.FadeTo(noDownloads ? 0 : 1, 200, Easing.SinOut);
 
                             // episodeView.Opacity = 0;
                             // episodeView.FadeTo(1, 200);
@@ -613,7 +613,6 @@ namespace CloudStreamForms
             //App.PlayVLCWithSingleUrl(file, name, overrideSelectVideo: false);
         }
 
-
         public static DownloadEpisodeInfo chromeDownload;
         public static async Task HandleEpisodeTapped(int key, Page p)
         {
@@ -707,12 +706,13 @@ namespace CloudStreamForms
 
         private void Grid_BindingContextChanged(object sender, EventArgs e)
         {
+            /*
             var c = ((FFImageLoading.Forms.CachedImage)((Grid)sender).Children[1]);
 
             c.Transformations.Clear();
             var ep = ((EpisodeResult)c.BindingContext);
             c.Transformations = new List<FFImageLoading.Work.ITransformation>() { new FFImageLoading.Transformations.RoundedTransformation() { BorderHexColor = ep.ExtraColor, BorderSize = 0, Radius = 1, CropHeightRatio = 1.5 } }; //1.77
-
+            */
         }
     }
 

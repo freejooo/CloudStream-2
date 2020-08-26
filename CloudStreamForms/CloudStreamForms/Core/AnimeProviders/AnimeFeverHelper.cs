@@ -79,18 +79,18 @@ namespace CloudStreamForms.Core.AnimeProviders
 
         public struct AnimeFeverSearchInfo
         {
-            public int current_page;
+            public int? current_page;
             public List<AnimeFeverSearchDatum> data;
             public string first_page_url;
-            public int from;
-            public int last_page;
+            public int? from;
+            public int? last_page;
             public string last_page_url;
             public object next_page_url;
             public string path;
-            public int per_page;
+            public int? per_page;
             public object prev_page_url;
-            public int to;
-            public int total;
+            public int? to;
+            public int? total;
         }
          
         public struct AnimeFeverEpisodeImage

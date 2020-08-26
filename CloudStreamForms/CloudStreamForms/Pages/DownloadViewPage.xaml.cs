@@ -167,6 +167,7 @@ namespace CloudStreamForms
 
                             activeEpisodes.Add(new EpisodeResult() {
                                 OgTitle = info.info.name,
+                                ExtraColor = Settings.ItemBackGroundColor.ToHex(),
                                 ExtraDescription = $"{Download.GetExtraString(info.state.state)}{((info.state.state == App.DownloadState.Downloaded || dloaded == -1) ? "" : extra)}",
                                 Title = (ep != -1 ? $"S{ss}:E{ep} " : "") + info.info.name,
                                 Description = info.info.description,
@@ -191,6 +192,8 @@ namespace CloudStreamForms
                 for (int i = 0; i < activeEpisodes.Count; i++) {
                     MyEpisodeResultCollection.Add(activeEpisodes[i]);
                 }
+
+                episodeView.FadeTo(1, 200, Easing.SinOut);
             }
             catch (Exception _ex) {
                 print("EXUpdateDEpisodes::: " + _ex);
@@ -220,10 +223,10 @@ namespace CloudStreamForms
             UpdateEpisodes();
 
             ImgChromeCastBtt.Source = App.GetImageSource(MainChrome.CurrentImageSource);
-          
+
             UpdateVisual();
             MainChrome.OnChromeImageChanged += MainChrome_OnChromeImageChanged;
-             
+
             print("CONTAINS::: " + MainChrome.IsChromeDevicesOnNetwork);
             void ChromeUpdate()
             {
@@ -236,7 +239,7 @@ namespace CloudStreamForms
                 ChromeUpdate();
             };
 
-           // MainChrome.GetAllChromeDevices();
+            // MainChrome.GetAllChromeDevices();
 
             App.ForceUpdateVideo += ForceUpdateAppearing;
 

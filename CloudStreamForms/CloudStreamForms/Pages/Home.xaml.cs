@@ -128,7 +128,7 @@ namespace CloudStreamForms
             TempThread tempThred = mainCore.CreateThread(21);
             mainCore.StartThread("FethTop100", () => {
                 try {
-                    var f = FetchTop100(new List<string>() { genres[MovieTypePicker.SelectedIndex] }, start, top100: IsTop100, isAnime:Settings.Top100Anime);
+                    var f = FetchTop100(new List<string>() { genres[MovieTypePicker.SelectedIndex] }, start, top100: IsTop100, isAnime: Settings.Top100Anime);
                     if (!mainCore.GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
 
                     iMDbTopList.AddRange(f);
@@ -383,9 +383,18 @@ namespace CloudStreamForms
             await Task.Delay(delay);
         }
 
+
         void AddEpisode(EpisodeResult episodeResult, bool setHeight = true)
         {
+            episodeResult.ExtraColor =Settings.ItemBackGroundColor.ToHex();
+
+
+            episodeResult.TapCom = new Command((s) => {
+                PushPageFromUrlAndName(FindShortend(episodeResult.extraInfo, "Id"), FindShortend(episodeResult.extraInfo, "Name"));
+                PushPage(episodeResult);
+            }); 
             epView.MyEpisodeResultCollection.Add(episodeResult);
+
             if (setHeight) {
                 SetHeight();
             }
@@ -539,7 +548,7 @@ namespace CloudStreamForms
         }
 
         void UpdateBookmarks()
-        {
+        {    
             try {
                 int height = 150;
                 Bookmarks.HeightRequest = height;
@@ -594,10 +603,10 @@ namespace CloudStreamForms
 
                                 bookmarkPosters.Add(_b);
 
-                                var _color = Settings.BlackColor + 5;
+                               // var _color = Settings.BlackColor + 5;
 
                                 BoxView boxView = new BoxView() {
-                                    BackgroundColor = Color.FromRgb(_color, _color, _color),
+                                    BackgroundColor = Settings.ItemBackGroundColor,// Color.FromRgb(_color, _color, _color),
                                     InputTransparent = true,
                                     CornerRadius = 10,
                                     HeightRequest = RecPosterHeight + bookmarkLabelTransY,
@@ -610,7 +619,7 @@ namespace CloudStreamForms
                                 stackLayout.Children.Add(new Label() { Text = name, VerticalOptions = LayoutOptions.Start, VerticalTextAlignment = TextAlignment.Center, HorizontalTextAlignment = TextAlignment.Center, HorizontalOptions = LayoutOptions.Center, Padding = 1, TextColor = Color.White, MaxLines = 2, ClassId = "OUTLINE", TranslationY = RecPosterHeight });
                                 stackLayout.Children.Add(brView);
                                 stackLayout.Opacity = 0;
-                                 
+
                                 async void WaitUntillComplete()
                                 {
                                     stackLayout.Opacity = 0;
