@@ -55,6 +55,7 @@ namespace CloudStreamForms.Core
                 new Movies123Provider(this),
                 new DubbedAnimeMovieProvider(this),
                 new TheMovieMovieProvider(this),
+                new MonkeystreamMovieProvider(this),
                 new KickassMovieProvider(this),
                 new LookmovieProvider(this)
             };
@@ -508,7 +509,9 @@ namespace CloudStreamForms.Core
             public Dictionary<int, string> watchMovieSeasonsData;
             // USED FOR ANIMEMOVIES
             public string kickassSubUrl;
-            public string kickassDubUrl { set; get; }
+            public string kickassDubUrl ;
+            public string monkeyStreamMetadata;
+
 
             public string shortEpView;
 
@@ -5809,6 +5812,68 @@ namespace CloudStreamForms.Core
             }
         }
 
+        public class MonkeystreamMovieProvider : BaseMovieProvier
+        {
+            public override string Name => "Monkeystream";
+            public MonkeystreamMovieProvider(CloudStreamCore _core) : base(_core) { }
+            public override void FishMainLinkTSync(TempThread tempThread)
+            {
+                if (!activeMovie.title.IsMovie) return;
+                try {
+
+                    string search = activeMovie.title.name;
+                    string year = activeMovie.title.year[0..4];
+                    string d = DownloadString("https://www.monkeystream.net/search?q=" + search);
+                    const string lookFor = "<div class=\"movie-title\">";
+                    while (d.Contains(lookFor)) {
+                        d = RemoveOne(d, lookFor);
+                        string _href = FindHTML(d, "href=\"", "\"");
+                        d = RemoveOne(d, "title=\"");
+                        string _title = FindHTML(d, "\">", "<");
+                        string _year = FindHTML(d, "movie-item\">", "<");
+                        if(_year == year && _title == search) { 
+                            core.activeMovie.title.monkeyStreamMetadata = _href;
+                            return;
+                        }
+                    } 
+                }
+                catch {
+
+                }
+            }
+
+            public override void LoadLinksTSync(int episode, int season, int normalEpisode, bool isMovie, TempThread tempThred)
+            {
+                if (!activeMovie.title.IsMovie) return;
+                string mainUrl = activeMovie.title.monkeyStreamMetadata;
+                if (!mainUrl.IsClean()) return;
+                string d = DownloadString(mainUrl, referer: "https://www.monkeystream.net/search?q=" + activeMovie.title.name,tempThred:tempThred);
+                const string lookFor = "?key=";
+                while (d.Contains(lookFor)) {
+                    string key = FindHTML(d, lookFor, "\"");
+                    d = RemoveOne(d, lookFor);
+                    string title = FindHTML(d, "server mr10\">", "<");
+                    print(title + "||" + key);
+
+                    if (title.Contains("MonkeyEmbed")) {
+                        string _d = DownloadString(mainUrl + "?key=" + key, referer: "https://www.monkeystream.net/search?q=iron+man", tempThred: tempThred);
+
+                        string apiSource = FindHTML(_d, "https://www.monkeyembed.xyz/v/", "\"");
+                        if (apiSource != "") {
+                            string apiPost = core.PostRequest("https://www.monkeyembed.xyz/api/source/" + apiSource, "https://www.monkeyembed.xyz/v/" + apiSource, $"r={mainUrl}&d=www.monkeyembed.xyz");
+                            const string _lookFor = "\"file\":\"";
+                            while (apiPost.Contains(_lookFor)) {
+                                string file = FindHTML(apiPost, _lookFor, "\"").Replace("\\", "");
+                                apiPost = RemoveOne(apiPost, _lookFor);
+                                string label = FindHTML(apiPost, "\"label\":\"", "\"");
+                                AddPotentialLink(normalEpisode, file, "MonkeyEmbed", 5, label);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         public class TheMovieMovieProvider : BaseMovieProvier
         {
             public override string Name => "TheMovie";
@@ -6131,7 +6196,7 @@ namespace CloudStreamForms.Core
 
             const string lookFor = "s=\"lo";//"class=\"loadlate\"";
             int place = start - 1;
-            int counter = 0; 
+            int counter = 0;
 
             while (d.Contains(lookFor)) {
                 place++;
@@ -6451,7 +6516,7 @@ namespace CloudStreamForms.Core
                     async Task FetchAniList()
                     {
                         try {
-                            Api api = new Api(); 
+                            Api api = new Api();
                             CancellationTokenSource cancelSource = new CancellationTokenSource();
                             var media = await api.GetMedia(activeMovie.title.name, cancelSource.Token);
 
@@ -6771,7 +6836,7 @@ namespace CloudStreamForms.Core
             }
             return _inp;
         }
-         
+
         public Stopwatch mainS = new Stopwatch();
         public void GetImdbTitle(Poster imdb, bool purgeCurrentTitleThread = true, bool autoSearchTrailer = true, bool cacheData = true)
         {
@@ -7058,7 +7123,7 @@ namespace CloudStreamForms.Core
         }
 
         public void GetImdbEpisodes(int season = 1, bool purgeCurrentSeasonThread = true)
-        { 
+        {
             if (purgeCurrentSeasonThread) {
                 PurgeThreads(6);
             }
@@ -7085,7 +7150,7 @@ namespace CloudStreamForms.Core
                                 //https://www.imdb.com/title/tt0388629/episodes/?year=2020
                                 string partURL = "https://www.imdb.com/title/" + activeMovie.title.id + "/episodes/_ajax?year=" + years[i];
                                 d += DownloadString(partURL);
-                            } 
+                            }
                         }
                         if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
 
@@ -7162,7 +7227,7 @@ namespace CloudStreamForms.Core
                 Episode ep = new Episode() { name = activeMovie.title.name };
                 activeMovie.episodes = new List<Episode> {
                     ep
-                }; 
+                };
 
                 episodeLoaded?.Invoke(null, activeMovie.episodes);
             }
@@ -9684,13 +9749,13 @@ idMal
                         }
 
                     }
-                    bool toAdd = false; 
+                    bool toAdd = false;
                     if (await Equals_check.Compare_strings(media.title.romaji, title, cancellationToken)) {
                         toAdd = true;
                     }
                     else if (await Equals_check.Compare_strings(media.title.english, title, cancellationToken)) {
                         toAdd = true;
-                    } 
+                    }
                     if (toAdd) {
                         await Add(media);
                     }
