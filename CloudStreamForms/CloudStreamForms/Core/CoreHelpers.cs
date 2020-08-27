@@ -19,6 +19,63 @@ namespace CloudStreamForms.Core
             public object extraData;
         }
 
+        public class BloatFreeMovieProvider : BaseMovieProvier
+        {
+            public BloatFreeMovieProvider(CloudStreamCore _core) : base(_core) { }
+
+            static object metadataLock = new object();
+
+            public override void FishMainLinkTSync(TempThread tempThread)
+            {
+                if (!TypeCheck()) return;
+                object storedData = StoreData(activeMovie.title.IsMovie, tempThread);
+                if (storedData == null) return;
+                lock (metadataLock) {
+                    if (activeMovie.title.movieMetadata == null) {
+                        core.activeMovie.title.movieMetadata = new List<MovieMetadata>();
+                    }
+                    core.activeMovie.title.movieMetadata.Add(new MovieMetadata() { name = Name, metadata = storedData });
+                }
+            }
+
+            public override void LoadLinksTSync(int episode, int season, int normalEpisode, bool isMovie, TempThread tempThred)
+            {
+                if (!TypeCheck()) return;
+                object data = GetData(activeMovie.title, out bool suc);
+                if (suc) {
+                    LoadLink(data, episode, season, normalEpisode, activeMovie.title.IsMovie, tempThred);
+                }
+            }
+
+            bool TypeCheck()
+            {
+                return (activeMovie.title.movieType == MovieType.AnimeMovie && HasAnimeMovie) || (activeMovie.title.movieType == MovieType.Movie && HasMovie) || (activeMovie.title.movieType == MovieType.TVSeries && HasTvSeries);
+            }
+
+            public virtual bool HasMovie => true;
+            public virtual bool HasTvSeries => true;
+            public virtual bool HasAnimeMovie => true;
+
+            object GetData(Title data, out bool suc)
+            {
+                var list = data.movieMetadata.Where(t => t.name == Name).ToList();
+                suc = list.Count > 0;
+                return (suc ? list[0] : new MovieMetadata()).metadata;
+            }
+
+            public virtual void LoadLink(object metadata, int episode, int season, int normalEpisode, bool isMovie, TempThread tempThred)
+            {
+                throw new NotImplementedException();
+            }
+
+            public virtual object StoreData(bool isMovie, TempThread tempThred)
+            {
+                throw new NotImplementedException();
+            }
+
+        }
+
+
         public class BloatFreeBaseAnimeProvider : BaseAnimeProvider
         {
             public BloatFreeBaseAnimeProvider(CloudStreamCore _core) : base(_core) { }
@@ -35,8 +92,8 @@ namespace CloudStreamForms.Core
                                 List<string> episodes = isDub ? ms.dubEpisodes : ms.subEpisodes;
                                 int maxCount = 0;
                                 for (int i = 0; i < episodes.Count; i++) {
-                                    if(episodes[i].IsClean()) {
-                                        maxCount = i+1;
+                                    if (episodes[i].IsClean()) {
+                                        maxCount = i + 1;
                                     }
                                 }
 
@@ -83,6 +140,7 @@ namespace CloudStreamForms.Core
             public override void FishMainLink(string year, TempThread tempThred, MALData malData)
             {
                 object storedData = StoreData(year, tempThred, malData);
+                if (storedData == null) return;
                 for (int i = 0; i < activeMovie.title.MALData.seasonData.Count; i++) {
                     for (int q = 0; q < activeMovie.title.MALData.seasonData[i].seasons.Count; q++) {
                         try {
@@ -123,12 +181,12 @@ namespace CloudStreamForms.Core
                 for (int q = 0; q < activeMovie.title.MALData.seasonData[season].seasons.Count; q++) {
                     var ms = GetData(activeMovie.title.MALData.seasonData[season].seasons[q], out bool suc);
                     if (suc) {
-                        int subEp = normalEpisode - currentep;
+                        int subEp = episode - currentep;
                         currentep += isDub ? ms.dubEpisodes.Count : ms.subEpisodes.Count;
                         if (currentep > episode) {
                             try {
                                 print("LOADING LINK FOR: " + Name);
-                                LoadLink(isDub ? ms.dubEpisodes[subEp] : ms.subEpisodes[subEp], subEp, normalEpisode, tempThred, ms.extraData,isDub);
+                                LoadLink(isDub ? ms.dubEpisodes[subEp] : ms.subEpisodes[subEp], subEp, normalEpisode, tempThred, ms.extraData, isDub);
                             }
                             catch (Exception _ex) { print("FATAL EX IN Load: " + Name + " | " + _ex); }
                         }
