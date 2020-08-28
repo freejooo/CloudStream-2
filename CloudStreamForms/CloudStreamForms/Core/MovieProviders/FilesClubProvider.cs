@@ -10,6 +10,33 @@ namespace CloudStreamForms.Core.MovieProviders
         public override bool NullMetadata => true;
         public FilesClubProvider(CloudStreamCore _core) : base(_core) { }
 
+        public static string GetFileFromEvalData(string d)
+        {
+            const string _lookFor = "eval(function";
+            string code = "";
+            while (d.Contains(_lookFor)) {
+                code = _lookFor + FindHTML(d, _lookFor, "</script");
+                if (code.Contains("jwplayer")) break;
+                d = RemoveOne(d, _lookFor);
+            }
+            return FindHTML(GetEval(code), "file:\'", "\'");
+        }
+
+        public static string GetEval(string code)
+        {
+            Jint.Engine e = new Jint.Engine().SetValue("log_alert", new Action<string>((a) => {
+                if (a.Contains("log_alert")) {
+                    a = a.Replace("log_alert", "eval");
+                }
+                code = a;
+            }));
+            while (code.StartsWith("eval")) {
+                code = code.Replace("eval", "log_alert");
+                e.Execute(code);
+            }
+
+            return code;
+        }
 
         public override void LoadLink(object metadata, int episode, int season, int normalEpisode, bool isMovie, TempThread tempThred)
         {
@@ -29,6 +56,39 @@ namespace CloudStreamForms.Core.MovieProviders
 
             string request = (isMovie ? "https://123files.club/imdb/play/?id=" : "https://123files.club/imdb/tv/?id=") + imdbId + year + (isMovie ? "" : $"&s={season}&e={episode}");
             string d = core.PostRequest(request, request, data, tempThred, $"multipart/form-data; boundary={bound}");
+
+            var _thread = core.CreateThread(3);
+            core.StartThread(Name + " ExtraThread", () => {
+                string __d = (string)d.Clone();
+                const string _lookFor = "data-id=\"";
+                while (__d.Contains(_lookFor)) {
+                    string _ref = FindHTML(__d, _lookFor, "\"");
+
+                    void EvalRef(string __ref)
+                    {
+                        string _ev = DownloadString("https://123files.club" + __ref, referer: request, tempThred: _thread);
+                        if (_ev == "") return;
+
+                        string evalData = GetFileFromEvalData(_ev);
+
+                        if (evalData == "") {
+                            string realSite = FindHTML(_ev, "src=\"", "\"");
+                            if (realSite != "" && !realSite.StartsWith("http")) {
+                                EvalRef(realSite);
+                            }
+                        }
+                        else {
+                            evalData = evalData.Replace("#", "");
+                            if (evalData.Length > 10) {
+                                AddPotentialLink(normalEpisode, evalData, "FilesClub", 5);
+                            }
+                        }
+                    }
+                    EvalRef(_ref);
+
+                    __d = RemoveOne(__d, _lookFor);
+                }
+            });
 
             string _downloadLink = FindHTML(d, "<a href=\"/download/", "\"");
             if (_downloadLink != "") {
