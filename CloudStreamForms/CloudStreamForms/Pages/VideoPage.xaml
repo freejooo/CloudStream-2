@@ -63,17 +63,20 @@
         <Grid x:Name="AllButtons" >
             <Button BackgroundColor="Black" Opacity="0.3" x:Name="BlackBg" ClassId="NOFADE" InputTransparent="True" HorizontalOptions="FillAndExpand" VerticalOptions="FillAndExpand"></Button>
 
-            <xe:BorderView  x:Name="PausePlayClickBtt" xe:TouchEffect.Color="White"  Opacity="0.6" VerticalOptions="Center" WidthRequest="80" HeightRequest="80" CornerRadius="40" HorizontalOptions="Center" BackgroundColor="Transparent">
 
+
+            <Grid InputTransparent="True">
+                <Image x:Name="PausePlayBtt" VerticalOptions="Center" WidthRequest="70" HeightRequest="70" HorizontalOptions="Center" BackgroundColor="Transparent" InputTransparent="True"></Image>
+            </Grid>
+            <xe:BorderView  x:Name="PausePlayClickBtt" BackgroundColor="Transparent" xe:TouchEffect.Color="White"  Opacity="0.6" VerticalOptions="Center" WidthRequest="80" HeightRequest="80" CornerRadius="40" HorizontalOptions="Center"  >
             </xe:BorderView>
-
-            <Image x:Name="PausePlayBtt" VerticalOptions="Center" WidthRequest="70" HeightRequest="70" HorizontalOptions="Center" BackgroundColor="Transparent" InputTransparent="True"></Image>
 
             <Label x:Name="SkipForward" ClassId="NOFADE" Text="+10" IsVisible="False" Opacity="0" VerticalOptions="Center" HorizontalOptions="Center" TranslationX="200" AbsoluteLayout.LayoutFlags="All" FontSize="24" TextColor="White" />
             <Label x:Name="SkipForwardSmall" Text="10" VerticalOptions="Center" HorizontalOptions="Center" TranslationX="200" AbsoluteLayout.LayoutFlags="All" FontSize="20" TextColor="White" />
             <Image x:Name="SkipForwardImg"   VerticalOptions="Center" HorizontalOptions="Center" TranslationX="200" AbsoluteLayout.LayoutFlags="All" WidthRequest="50" HeightRequest="50" />
 
-            <xe:BorderView  x:Name="SkipForwardBtt" xe:TouchEffect.Color="White"  TranslationX="100" Opacity="0.6" VerticalOptions="Center" WidthRequest="34" HeightRequest="34" CornerRadius="17" HorizontalOptions="Center" BackgroundColor="Transparent">
+
+            <xe:BorderView  x:Name="SkipForwardBtt" xe:TouchEffect.Color="White"  Scale="1.05"   TranslationX="100" Opacity="0.6" VerticalOptions="Center" WidthRequest="34" HeightRequest="34" CornerRadius="17" HorizontalOptions="Center" BackgroundColor="Transparent">
             </xe:BorderView>
             <ffs:SvgCachedImage x:Name="BacktoMain" HorizontalOptions="Start" VerticalOptions="Start" TranslationX="4" TranslationY="4" InputTransparent="True" Source="chevron_left.svg" BackgroundColor="Transparent" HeightRequest="38" WidthRequest="38"></ffs:SvgCachedImage>
             <xe:BorderView  x:Name="GoBackBtt" xe:TouchEffect.Color="White"  VerticalOptions="Start" TranslationX="-3" TranslationY="-3" Opacity="0.6" WidthRequest="54" HeightRequest="54" CornerRadius="27" Scale="1" HorizontalOptions="Start" BackgroundColor="Transparent">
@@ -90,7 +93,7 @@
             <Label x:Name="SkipBack" ClassId="NOFADE" Text="-10" IsVisible="False" Opacity="0" VerticalOptions="Center" HorizontalOptions="Center" TranslationX="-200" AbsoluteLayout.LayoutFlags="All" FontSize="24" TextColor="White" />
             <Label x:Name="SkipBackSmall"   Text="10" VerticalOptions="Center" HorizontalOptions="Center" TranslationX="-200" AbsoluteLayout.LayoutFlags="All" FontSize="20" TextColor="White" />
             <Image x:Name="SkipBackImg" VerticalOptions="Center" HorizontalOptions="Center" TranslationX="-200" AbsoluteLayout.LayoutFlags="All" WidthRequest="50" HeightRequest="50" />
-            <xe:BorderView  x:Name="SkipBackBtt" xe:TouchEffect.Color="White"  TranslationX="-100" Opacity="0.6" VerticalOptions="Center" WidthRequest="34" HeightRequest="34" CornerRadius="17" HorizontalOptions="Center" BackgroundColor="Transparent">
+            <xe:BorderView  x:Name="SkipBackBtt" xe:TouchEffect.Color="White"  TranslationX="-100" Opacity="0.6" VerticalOptions="Center" WidthRequest="34" HeightRequest="34" Scale="1.05" CornerRadius="17" HorizontalOptions="Center" BackgroundColor="Transparent">
             </xe:BorderView>
 
             <Label x:Name="SkiptimeLabel" Text="" WidthRequest="1000" HorizontalTextAlignment="Center" TextColor="White" FontSize="25" VerticalOptions="Center" HorizontalOptions="Center" TranslationY="-60"></Label>
@@ -241,8 +244,8 @@
 
                         </Grid>
                     </xe:BorderView>
-                     
-                                <xe:BorderView x:Name="GoPipModeTap" Grid.Column="4"  Margin="-10,0"
+
+                    <xe:BorderView x:Name="GoPipModeTap" Grid.Column="4"  Margin="-10,0"
                                     HeightRequest="35"
                                     WidthRequest="100"
                                     xe:TouchEffect.Color="White" 
@@ -253,17 +256,17 @@
                                     BorderColor="Transparent"
                                     BorderWidth="0">
 
-                                    <Grid Grid.Column="0" HorizontalOptions="Center" ColumnSpacing="0" >
-                                        <Grid.ColumnDefinitions >
-                                            <ColumnDefinition Width="Auto" />
-                                            <ColumnDefinition Width="Auto" />
-                                        </Grid.ColumnDefinitions>
+                        <Grid Grid.Column="0" HorizontalOptions="Center" ColumnSpacing="0" >
+                            <Grid.ColumnDefinitions >
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
                             <ffs:SvgCachedImage x:Name="PipImg" Grid.Column="0" VerticalOptions="Center" TranslationX="-5"  InputTransparent="True" BackgroundColor="Transparent" WidthRequest="26" HeightRequest="26" Source="pip_white.svg" Aspect="AspectFill"></ffs:SvgCachedImage>
-                                        <Label Text="Minimize"  Grid.Column="1" VerticalOptions="Center" TextColor="White"></Label>
+                            <Label Text="Minimize"  Grid.Column="1" VerticalOptions="Center" TextColor="White"></Label>
 
-                                    </Grid>
-                                </xe:BorderView>
- 
+                        </Grid>
+                    </xe:BorderView>
+
                     <xe:BorderView x:Name="NextEpisodeTap" Grid.Column="5"  Margin="-10,0"
                                     HeightRequest="35"
                                     WidthRequest="120"
