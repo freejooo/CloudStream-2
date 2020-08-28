@@ -46,6 +46,7 @@ namespace CloudStreamForms.Core
                 new NineAnimeBloatFreeProvider(this),
                 new FourAnimeBloatFreeProvider(this)};
             movieProviders = new IMovieProvider[] {
+                new FilesClubProvider(this),
                 new DirectVidsrcProvider(this),
                 new WatchTVBFProvider(this),
                 new LiveMovies123BFProvider(this),
@@ -8469,7 +8470,7 @@ namespace CloudStreamForms.Core
             return "";
         }
 
-        public string PostRequest(string myUri, string referer = "", string _requestBody = "", TempThread? _tempThred = null)
+        public string PostRequest(string myUri, string referer = "", string _requestBody = "", TempThread? _tempThred = null, string _contentType = "application/x-www-form-urlencoded; charset=UTF-8")
         {
             try {
                 HttpWebRequest webRequest = (HttpWebRequest)HttpWebRequest.Create(myUri);
@@ -8484,7 +8485,7 @@ namespace CloudStreamForms.Core
                 webRequest.Headers.Add("Pragma", "Trailers");
                 webRequest.ContentType = "application/x-www-form-urlencoded";
                 webRequest.Referer = referer;
-                webRequest.ContentType = "application/x-www-form-urlencoded; charset=UTF-8";
+                webRequest.ContentType = _contentType;
                 // webRequest.Headers.Add("Host", "trollvid.net");
                 webRequest.UserAgent = USERAGENT;
                 webRequest.Headers.Add("Accept-Language", "en-US,en;q=0.5");
