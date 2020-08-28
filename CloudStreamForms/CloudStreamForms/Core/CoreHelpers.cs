@@ -28,8 +28,8 @@ namespace CloudStreamForms.Core
             public override void FishMainLinkTSync(TempThread tempThread)
             {
                 if (!TypeCheck()) return;
-                object storedData = StoreData(activeMovie.title.IsMovie, tempThread);
-                if (storedData == null) return;
+                object storedData = NullMetadata ? null : StoreData(activeMovie.title.IsMovie, tempThread);
+                if (storedData == null && !NullMetadata) return;
                 lock (metadataLock) {
                     if (activeMovie.title.movieMetadata == null) {
                         core.activeMovie.title.movieMetadata = new List<MovieMetadata>();
@@ -55,6 +55,7 @@ namespace CloudStreamForms.Core
             public virtual bool HasMovie => true;
             public virtual bool HasTvSeries => true;
             public virtual bool HasAnimeMovie => true;
+            public virtual bool NullMetadata => false;
 
             object GetData(Title data, out bool suc)
             {

@@ -47,12 +47,12 @@ namespace CloudStreamForms.Core
                 new FourAnimeBloatFreeProvider(this)};
             movieProviders = new IMovieProvider[] {
                 new DirectVidsrcProvider(this),
-                new WatchTVProvider(this),
-                new LiveMovies123Provider(this),
+                new WatchTVBFProvider(this),
+                new LiveMovies123BFProvider(this),
                 new TheMovies123Provider(this),
                // new YesMoviesBFProvider(this),
                 new WatchSeriesProvider(this),
-                new GomoStreamProvider(this),
+                new GomoStreamBFProvider(this),
                 new Movies123Provider(this),
                 new DubbedAnimeMovieProvider(this),
                 new TheMovieMovieBFProvider(this),
@@ -519,7 +519,7 @@ namespace CloudStreamForms.Core
             public Dictionary<int, string> watchMovieSeasonsData;
             // USED FOR ANIMEMOVIES
             public string kickassSubUrl;
-            public string kickassDubUrl ;
+            public string kickassDubUrl;
             public string monkeyStreamMetadata;
 
 
@@ -3822,7 +3822,6 @@ namespace CloudStreamForms.Core
                     catch (Exception _ex) {
                         return "";
                     }
-
                 }
                 catch (Exception) {
                     return "";
@@ -3873,47 +3872,6 @@ namespace CloudStreamForms.Core
                 catch (Exception _ex) {
                     print("PROVIDER ERROR: " + _ex);
                 }
-            }
-        }
-
-        class WatchTVProvider : BaseMovieProvier
-        {
-            public override string Name => "WatchTv";
-
-            public WatchTVProvider(CloudStreamCore _core) : base(_core) { }
-
-            public override void FishMainLinkTSync(TempThread tempThread) { }
-
-            public override void LoadLinksTSync(int episode, int season, int normalEpisode, bool isMovie, TempThread tempThred)
-            {
-                try {
-                    if (isMovie) return;
-                    /*  
-
-                      TempThread tempThred = new TempThread();
-                      tempThred.typeId = 1; // MAKE SURE THIS IS BEFORE YOU CREATE THE THRED
-                      tempThred.Thread = new System.Threading.Thread(() => {
-                          try {*/
-                    string url = "https://www.tvseries.video/series/" + ToDown(activeMovie.title.name, replaceSpace: "-") + "/" + "season-" + season + "-episode-" + episode;
-
-                    string d = DownloadString(url);
-                    string vidId = FindHTML(d, " data-vid=\"", "\"");
-                    if (vidId != "") {
-                        d = DownloadString("https://www.tvseries.video" + vidId);
-                        print("ADADADADADAD: https://www.tvseries.video" + vidId);
-                        AddEpisodesFromMirrors(tempThred, d, normalEpisode);
-                    }
-                }
-                catch (Exception _ex) {
-                    print("PROVIDER ERROR: " + _ex);
-                }
-                /*  }
-                  finally {
-                      JoinThred(tempThred);
-                  }
-              });
-              tempThred.Thread.Name = "FishWatch";
-              tempThred.Thread.Start();*/
             }
         }
 
@@ -5705,7 +5663,7 @@ namespace CloudStreamForms.Core
                 return titles;
             }
         }
-         
+
         #endregion
 
         static void GetSeasonAndPartFromName(string name, out int season, out int part)
@@ -7923,7 +7881,7 @@ namespace CloudStreamForms.Core
         }
 
         // -------------------- METHODS --------------------
-        static string HTMLGet(string uri, string referer, bool br = false)
+        public static string HTMLGet(string uri, string referer, bool br = false)
         {
             try {
                 HttpWebRequest request = (HttpWebRequest)WebRequest.Create(uri);
@@ -8606,7 +8564,7 @@ namespace CloudStreamForms.Core
         /// </summary>
         /// <param name="source"></param>
         /// <returns></returns>
-        static string GetViduplayerUrl(string source)
+        public static string GetViduplayerUrl(string source)
         {
             source = source.Replace("||||", "|");
             source = source.Replace("|||", "|");
