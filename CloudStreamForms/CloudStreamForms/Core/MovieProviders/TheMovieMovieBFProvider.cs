@@ -12,6 +12,8 @@ namespace CloudStreamForms.Core.MovieProviders
         public override string Name => "TheMovie";
         public TheMovieMovieBFProvider(CloudStreamCore _core) : base(_core) { }
 
+        //public override bool HasAnimeMovie => false;
+
         public override object StoreData(bool isMovie, TempThread tempThred)
         {
             try {
@@ -22,7 +24,8 @@ namespace CloudStreamForms.Core.MovieProviders
                 var watchMovieSeasonsData = new Dictionary<int, string>();
 
                 if (mType.IsMovie()) {
-                    string mustContain = mType == MovieType.AnimeMovie ? "/anime-info/" : "/series/";
+                    //string mustContain = mType == MovieType.AnimeMovie ? "/anime-info/" : "/series/";
+                    string mustContain = isMovie ? "/movie/" : "/series/";
                     TheMovieHelper.TheMovieTitle[] matching = list.Where(t => ToDown(t.name, true, "") == compare && t.season == -1 && t.href.Contains(mustContain)).ToArray();
                     if (matching.Length > 0) {
                         TheMovieHelper.TheMovieTitle title = matching[0];
@@ -31,7 +34,7 @@ namespace CloudStreamForms.Core.MovieProviders
                         string d = DownloadString(title.href);
                         int maxEp = TheMovieHelper.GetMaxEp(d, title.href);
                         if (maxEp == 0 || maxEp == 1) {
-                            string rEp = title.href + "-episode-" + maxEp;
+                            string rEp = title.href + "/" + (maxEp-1); //+ "-episode-" + maxEp;
                             watchMovieSeasonsData[-1] = rEp;
                             print("LOADED:::::::::-->>>2 " + rEp);
                         }
@@ -55,20 +58,21 @@ namespace CloudStreamForms.Core.MovieProviders
                 var watchMovieSeasonsData = (Dictionary<int, string>)metadata;
                 void GetFromUrl(string url)
                 {
-                    string d = DownloadString(url,tempThred);
+                    string _url = url.Replace("/movie/", "/watch/").Replace("/series/", "/watch/");
+                    string d = DownloadString(_url, tempThred);
                     if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
-                    AddEpisodesFromMirrors(tempThred, d, normalEpisode, "Watch", "");
+                    AddEpisodesFromMirrors(tempThred, d, normalEpisode);
                     LookForFembedInString(tempThred, normalEpisode, d);
                 }
 
                 if (isMovie) {
                     if (watchMovieSeasonsData.ContainsKey(-1)) {
-                        GetFromUrl(watchMovieSeasonsData[-1].Replace("/anime-info/", "/anime/"));
+                        GetFromUrl(watchMovieSeasonsData[-1]); //.Replace("/anime-info/", "/anime/"));
                     }
                 }
                 else {
                     if (watchMovieSeasonsData.ContainsKey(season)) {
-                        GetFromUrl(watchMovieSeasonsData[season].Replace("/anime-info/", "/anime/") + "-episode-" + episode);
+                        GetFromUrl(watchMovieSeasonsData[season] + "/" + (episode-1));//.Replace("/anime-info/", "/anime/") + "-episode-" + episode);
                     }
                 }
             }

@@ -5627,11 +5627,23 @@ namespace CloudStreamForms.Core
 
             public static int GetMaxEp(string d, string href)
             {
+                /*
                 string ending = FindHTML(href + "|", "watchmovie.movie", "|");
-                return int.Parse(FindHTML(d, ending.Replace("-info", "") + "-episode-", "\""));
+                return int.Parse(FindHTML(d, ending.Replace("-info", "") + "-episode-", "\""));*/
+                const string lookFor = "<b>Episode ";
+                int _episode = 0;
+                while (d.Contains(lookFor)) {
+                    try {
+                        _episode = int.Parse(FindHTML(d, lookFor, "<"));
+                    }
+                    catch (Exception) {
+                    }
+                    d = RemoveOne(d, lookFor);
+                }
+                return _episode;
             }
 
-            const string watchMovieSite = "https://www11.watchmovie.movie";
+            const string watchMovieSite = "https://watchseriesfree.co";//"https://www11.watchmovie.movie";
             /// <summary>
             /// BLOCKING SEARCH QRY, NOT SORTED OR FILTERED
             /// </summary>
@@ -5644,9 +5656,12 @@ namespace CloudStreamForms.Core
                 string d = core.DownloadString(watchMovieSite + "/search.html?keyword=" + search);
                 string lookFor = "<div class=\"video_image_container sdimg\">";
                 while (d.Contains(lookFor)) {
+                    d = RemoveOne(d, "<div class=\"home_video_title\">");
+                    string altTitle = FindHTML(d, "<div>", "</div>");
                     d = RemoveOne(d, lookFor);
                     string href = watchMovieSite + FindHTML(d, "<a href=\"", "\""); // as /series/castaways-season-1
                     string name = FindHTML(d, "title=\"", "\"");
+                    if (name == "") name = altTitle;
 
                     int season = -1;
                     if (name.Contains("- Season")) {
@@ -5657,6 +5672,9 @@ namespace CloudStreamForms.Core
                     name = name.Replace("- Season " + season, "").Replace("(Dub)", "").Replace("(English Audio)", "").Replace("  ", "");
                     if (name.EndsWith(" ")) {
                         name = name[0..^1];
+                    }
+                    if (name.StartsWith(" ")) {
+                        name = name[1..];
                     }
 
                     titles.Add(new TheMovieTitle() { href = href, isDub = isDub, name = name, season = season });
