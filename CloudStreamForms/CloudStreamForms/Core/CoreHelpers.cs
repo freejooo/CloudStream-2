@@ -183,13 +183,15 @@ namespace CloudStreamForms.Core
                     var ms = GetData(activeMovie.title.MALData.seasonData[season].seasons[q], out bool suc);
                     if (suc) {
                         int subEp = episode - currentep;
-                        currentep += isDub ? ms.dubEpisodes.Count : ms.subEpisodes.Count;
-                        if (currentep > episode) {
-                            try {
-                                print("LOADING LINK FOR: " + Name);
-                                LoadLink(isDub ? ms.dubEpisodes[subEp] : ms.subEpisodes[subEp], subEp, normalEpisode, tempThred, ms.extraData, isDub);
+                        if ((isDub ? ms.dubEpisodes : ms.subEpisodes) != null) {
+                            currentep += isDub ? ms.dubEpisodes.Count : ms.subEpisodes.Count;
+                            if (currentep > episode) {
+                                try {
+                                    print("LOADING LINK FOR: " + Name);
+                                    LoadLink(isDub ? ms.dubEpisodes[subEp] : ms.subEpisodes[subEp], subEp, normalEpisode, tempThred, ms.extraData, isDub);
+                                }
+                                catch (Exception _ex) { print("FATAL EX IN Load: " + Name + " | " + _ex); }
                             }
-                            catch (Exception _ex) { print("FATAL EX IN Load: " + Name + " | " + _ex); }
                         }
                     }
                 }

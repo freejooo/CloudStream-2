@@ -53,7 +53,6 @@ namespace CloudStreamForms.Core.AnimeProviders
             const string streamtapeId = "40";
             const string mp4uploadId = "35";
 
-
             foreach (var subData in data) {
 
                 string name = subData.GetAttributeValue("ndata-id", "");
@@ -151,30 +150,34 @@ namespace CloudStreamForms.Core.AnimeProviders
         List<NineAnimeDataSearch> Search(string search)
         {
             List<NineAnimeDataSearch> searchData = new List<NineAnimeDataSearch>();
+            try {
+                string url = NineAnimeSite + "/search?keyword=" + search;
+                string d = DownloadString(url);
+                if (!d.IsClean()) return null;
+                var doc = new HtmlAgilityPack.HtmlDocument();
+                doc.LoadHtml(d);
+                var data = doc.QuerySelector("div.film-list");
+                if (data == null) return searchData;
+                var items = data.QuerySelectorAll("div.item > div.inner > a");
+                if (items == null) return searchData;
+                foreach (var item in items) {
+                    string href = item.GetAttributeValue("href", "");
+                    string dataTip = item.GetAttributeValue("data-tip", "");
 
-            string url = NineAnimeSite + "/search?keyword=" + search;
-            string d = DownloadString(url);
-            if (!d.IsClean()) return null;
-            var doc = new HtmlAgilityPack.HtmlDocument();
-            doc.LoadHtml(d);
-            var data = doc.QuerySelector("div.film-list");
-            var items = data.QuerySelectorAll("div.item > div.inner > a");
-            foreach (var item in items) {
-                string href = item.GetAttributeValue("href", "");
-                string dataTip = item.GetAttributeValue("data-tip", "");
-
-                if (dataTip != "") {
-                    string _d = DownloadString((NineAnimeSite + "/" + dataTip), referer: url);
-                    int.TryParse(FindHTML(_d, "Episode ", "/"), out int maxEp);
-                    if (maxEp != 0) { // IF NOT MOVIE 
-                        string otherNames = FindHTML(_d, "<label>Other names:</label>\n            <span>", "<").Replace("  ", "").Replace("\n", "").Replace(";", "");
-                        string title = FindHTML(_d, "data-jtitle=\"", "\"");
-                        print(maxEp + "|" + title + "|" + otherNames.FString());
-                        bool isDub = title.Contains("(Dub)");
-                        searchData.Add(new NineAnimeDataSearch() { isDub = isDub, maxEp = maxEp, href = href, names = otherNames, title = title.Replace(" (Dub)", "").Replace("  ", "") });
+                    if (dataTip != "") {
+                        string _d = DownloadString((NineAnimeSite + "/" + dataTip), referer: url);
+                        int.TryParse(FindHTML(_d, "Episode ", "/"), out int maxEp);
+                        if (maxEp != 0) { // IF NOT MOVIE 
+                            string otherNames = FindHTML(_d, "<label>Other names:</label>\n            <span>", "<").Replace("  ", "").Replace("\n", "").Replace(";", "");
+                            string title = FindHTML(_d, "data-jtitle=\"", "\"");
+                            print(maxEp + "|" + title + "|" + otherNames.FString());
+                            bool isDub = title.Contains("(Dub)");
+                            searchData.Add(new NineAnimeDataSearch() { isDub = isDub, maxEp = maxEp, href = href, names = otherNames, title = title.Replace(" (Dub)", "").Replace("  ", "") });
+                        }
                     }
                 }
             }
+            catch (Exception) {  }
             return searchData;
         }
     }

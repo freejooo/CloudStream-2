@@ -1018,7 +1018,7 @@ namespace CloudStreamForms.Core
         {
             public override string Name => "GogoAnime";
             public GogoAnimeProvider(CloudStreamCore _core) : base(_core) { }
-
+            const string MainSite = "https://www1.gogoanime.movie/";
             public override void GetHasDubSub(MALSeason data, out bool dub, out bool sub)
             {
                 dub = data.gogoData.dubExists;
@@ -1030,7 +1030,7 @@ namespace CloudStreamForms.Core
                 print("start");
                 if (activeMovie.title.MALData.japName != "error") {
                     print("DOWNLOADING");
-                    string d = DownloadString("https://www9.gogoanime.io/search.html?keyword=" + activeMovie.title.MALData.japName.Substring(0, Math.Min(5, activeMovie.title.MALData.japName.Length)), tempThred);
+                    string d = DownloadString($"{MainSite}/search.html?keyword=" + activeMovie.title.MALData.japName.Substring(0, Math.Min(5, activeMovie.title.MALData.japName.Length)), tempThred);
                     if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
                     string look = "<p class=\"name\"><a href=\"/category/";
 
@@ -1152,7 +1152,7 @@ namespace CloudStreamForms.Core
                     for (int i = 0; i < baseUrls.Count; i++) {
                         string dstring = baseUrls[i];
                         dstring = dstring.Replace("-dub", "") + (isDub ? "-dub" : "");
-                        string d = DownloadString("https://www9.gogoanime.io/category/" + dstring);
+                        string d = DownloadString($"{MainSite}/category/" + dstring);
                         if (d != "") {
                             if (tempThred != null) {
                                 if (!GetThredActive((TempThread)tempThred)) { return 0; }; // COPY UPDATE PROGRESS
