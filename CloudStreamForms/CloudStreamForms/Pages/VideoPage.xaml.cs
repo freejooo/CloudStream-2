@@ -628,7 +628,7 @@ namespace CloudStreamForms
 
         readonly Func<Task> NextEpisodeClicked;
         public static PlayVideo lastVideo;
-
+        
         /// <summary>
         /// Subtitles are in full
         /// </summary>

@@ -83,8 +83,8 @@
                                                             </ffTransformations:RoundedTransformation>
                                                         </ff:CachedImage.Transformations>
                                                     </ff:CachedImage>
-                                                    <!--<ProgressBar IsVisible="{Binding HasProgress}" Progress="{Binding Progress}" ProgressColor="#829eff" VerticalOptions="End" HeightRequest="3" TranslationY="-4"></ProgressBar>
--->
+                                                    <ProgressBar IsVisible="{Binding HasProgress}" Progress="{Binding Progress}" ProgressColor="#829eff" VerticalOptions="End" HeightRequest="3" TranslationY="-4"></ProgressBar>
+
                                                     <!--PropertyChanging="Image_PropertyChanging" -->
 
                                                     <ff:CachedImage InputTransparent="True" BackgroundColor="Transparent" Source="{Binding DownloadPlayBttSource}" Scale="0.5">
