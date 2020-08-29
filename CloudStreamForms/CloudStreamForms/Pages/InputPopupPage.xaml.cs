@@ -155,7 +155,7 @@ namespace CloudStreamForms
         {
             text = txt ?? InputF.Text;
             isDone = true;
-            await Task.Delay(100);
+            await Task.Delay(30);
             await PopupNavigation.PopAsync(true);
         }
 

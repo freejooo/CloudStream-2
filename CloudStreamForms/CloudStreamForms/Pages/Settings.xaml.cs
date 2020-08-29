@@ -9,6 +9,7 @@ using System.Net;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Windows.Networking;
 using Xamarin.Forms;
 using Xamarin.Forms.Internals;
 using Xamarin.Forms.Xaml;
@@ -826,14 +827,35 @@ namespace CloudStreamForms
                 string subaction = await ActionPopup.DisplayEntry(InputPopupPage.InputPopupResult.password, "Password", "Encrypt data", autoPaste: false, confirmText: "Encrypt");
 
                 if (subaction != "Cancel") {
-                    string text = Script.SyncWrapper.GenerateTextFile(action == "Export Everything");
-                    if (subaction != "") {
-                        text = CloudStreamForms.Cryptography.StringCipher.Encrypt(text, subaction);
+                    await Task.Delay(200);
+                    await ActionPopup.StartIndeterminateLoadinbar("Encrypting data");
+
+                    string text = "";
+                    string fileloc = "";
+                    bool done = false;
+                    Thread t = new Thread(() => {
+                        try {
+                            text = Script.SyncWrapper.GenerateTextFile(action == "Export Everything");
+                            if (subaction != "") {
+                                text = CloudStreamForms.Cryptography.StringCipher.Encrypt(text, subaction);
+                            }
+                            fileloc = App.DownloadFile(text, App.DATA_FILENAME, true);
+                        }
+                        finally {
+                            done = true;
+                        }
+                    });
+                    t.Start();
+
+                    while (!done) {
+                        await Task.Delay(100);
                     }
-                    string fileloc = App.DownloadFile(text, App.DATA_FILENAME, true);
+
                     if (fileloc != "") {
                         App.ShowToast($"Saved data to {fileloc}");
                     }
+
+                    await ActionPopup.StopIndeterminateLoadinbar();
                 }
             }
             else if (action == "Import data") {
