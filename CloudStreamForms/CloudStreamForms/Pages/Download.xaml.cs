@@ -169,8 +169,8 @@ namespace CloudStreamForms
 
                         SpaceProgress.Progress = d.UsedProcentage;
 
-                        FreeSpace.Text = "Free Space · " + App.ConvertBytesToGB(d.FreeSpace) + "GB";
-                        UsedSpace.Text = "Used Space · " + App.ConvertBytesToGB(d.UsedSpace) + "GB";
+                        FreeSpace.Text = "Free · " + App.ConvertBytesToGB(d.FreeSpace) + "GB";
+                        UsedSpace.Text = "Used · " + App.ConvertBytesToGB(d.UsedSpace) + "GB";
                         if (Device.RuntimePlatform == Device.UWP) {
                             OffBar.IsVisible = false;
                             OffBar.IsEnabled = false;

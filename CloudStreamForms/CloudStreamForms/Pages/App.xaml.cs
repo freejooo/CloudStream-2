@@ -73,6 +73,7 @@ namespace CloudStreamForms
             void ShowToast(string message, double duration);
             string DownloadFile(string file, string fileName, bool mainPath, string extraPath);
             string ReadFile(string fileName, bool mainPath, string extraPath);
+            string ReadFile(string path);
             string DownloadUrl(string url, string fileName, bool mainPath, string extraPath, string toast = "", bool isNotification = false, string body = "");
             bool DeleteFile(string path);
             void DownloadUpdate(string update, string version);
@@ -249,6 +250,11 @@ namespace CloudStreamForms
                 MovieType.YouTube => "YouTube",
                 _ => "Error",
             };
+        }
+
+        public static string ReadFile(string path)
+        {
+            return PlatformDep.ReadFile(path);
         }
 
         public static string ReadFile(string fileName, bool mainPath, string extraPath)
@@ -562,13 +568,17 @@ namespace CloudStreamForms
 
             }*/
 
-            int set = Settings.BackCurrentGlobalFont;
-            if (set != -1) {
-                Settings.CurrentGlobalFont = set;
-                Settings.BackCurrentGlobalFont = -1;
-            }
+            try {
+                int set = Settings.BackCurrentGlobalFont;
+                if (set != -1) {
+                    Settings.CurrentGlobalFont = set;
+                    Settings.BackCurrentGlobalFont = -1;
+                }
 
-            MainPage = new MainPage();
+                MainPage = new MainPage();
+            }
+            catch (Exception) {
+            }
         }
 
 

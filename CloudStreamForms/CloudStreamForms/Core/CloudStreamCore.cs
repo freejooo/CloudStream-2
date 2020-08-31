@@ -1251,7 +1251,7 @@ namespace CloudStreamForms.Core
                             print("DSTRING:>> " + dstring);
                             string d = DownloadString(dstring, tempThred);
 
-                            AddEpisodesFromMirrors(tempThred, d, normalEpisode);
+                            AddEpisodesFromMirrors(tempThred, d, normalEpisode, " GoGo", " GoGo");
                         }
                     }
                 }
@@ -6041,6 +6041,11 @@ namespace CloudStreamForms.Core
             return System.Net.WebUtility.HtmlDecode(inp);
         }
 
+        public static string RemoveHtmlUrl(string inp)
+        {
+            return WebUtility.UrlDecode(inp);
+        }
+
         /// <summary>
         /// NOTE, CANT BE PLAYED IN VLC, JUST EXTRACTS THE STREAM, THAT CAN BE DOWNLOADED W REFERER:  https://hydrax.net/watch?v= [SLUG]
         /// </summary>
@@ -7881,7 +7886,7 @@ namespace CloudStreamForms.Core
             }
         }
 
-        public static string ConvertIMDbImagesToHD(string nonHDImg, int? pwidth = null, int? pheight = null, double multi = 1)
+        public static string ConvertIMDbImagesToHD(string nonHDImg, int? pwidth = null, int? pheight = null, double multi = 1, bool simpleScale = true, bool cropByX = true)
         {
 #if DEBUG
             int _s = GetStopwatchNum();
@@ -7892,7 +7897,15 @@ namespace CloudStreamForms.Core
             pheight = App.ConvertDPtoPx((int)pheight);
             pwidth = App.ConvertDPtoPx((int)pwidth);
             if (pwidth == 0 && pheight == 0) return nonHDImg;
-            img += "." + (pheight > 0 ? "_UY" + pheight : "") + (pwidth > 0 ? "UX" + pwidth : "") + "_.jpg";
+            if (simpleScale) {
+                img += "." + (pheight > 0 ? "_UY" + pheight : "") + (pwidth > 0 ? "UX" + pwidth : "") + "_.jpg";
+            }
+            else if (cropByX) {
+                img += $".UX{pwidth}_CR0,0,{pwidth},{pheight}_AL_.jpg";
+            }
+            else {
+                img += $".UY{pheight}_CR,0,{pwidth},{pheight}_AL_.jpg";
+            }
 #if DEBUG
             EndStopwatchNum(_s, nameof(FindHTML));
 #endif

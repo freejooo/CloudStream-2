@@ -165,49 +165,44 @@ namespace CloudStreamForms
         {
             InitializeComponent();
 
-            App.OnAppReopen += async (o, e) => {
-                if (VideoPage.CanReopen) {
-                    VideoPage.CanReopen = false;
-                    LoadVideoPage();
+            try {
+                App.OnAppReopen += (o, e) => {
+                    if (VideoPage.CanReopen) {
+                        VideoPage.CanReopen = false;
+                        LoadVideoPage();
+                    }
+                };
+
+                App.OnAppNotInForground += (o, e) => {
+                    App.SaveData();
+                };
+
+                mainPage = this; CloudStreamCore.mainPage = mainPage;
+
+                System.AppDomain.CurrentDomain.UnhandledException += UnhandledExceptionTrapper; 
+
+                if (IS_TEST_VIDEO) {
+                    Page p = new VideoPage(new VideoPage.PlayVideo() { descript = "", name = "Black Bunny", episode = -1, season = -1, MirrorNames = new List<string>() { "Googlevid" }, MirrorUrls = new List<string>() { "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" } });//new List<string>() { "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" }, new List<string>() { "Black" }, new List<string>() { });// { mainPoster = mainPoster };
+                    mainPage.Navigation.PushModalAsync(p, false);
+                    print("PUST: ::: :");
+                } 
+                if (IS_EMTY_BUILD) return;
+
+
+                List<string> names = new List<string>() { "Home", "Search", "Downloads", "Settings" };
+                //List<string> icons = new List<string>() { "homeIcon.png", "searchIcon.png", "downloadIcon.png", "baseline_settings_applications_white_48dp_inverted_big.png" };
+                List<Page> pages = new List<Page>() { new Home(), new Search(), new Download(), new SettingsPage(), };
+
+                for (int i = 0; i < pages.Count; i++) {
+                    Children.Add(pages[i]);
+                    Children[i].Title = names[i];
+                    Children[i].IconImageSource = baseIcons[i];
                 }
-            };
-
-            App.OnAppNotInForground += (o, e) => {
-                App.SaveData();
-            };
-
-            mainPage = this; CloudStreamCore.mainPage = mainPage;
-
-            System.AppDomain.CurrentDomain.UnhandledException += UnhandledExceptionTrapper;
-            //Application. += MYThreadHandler;
-            //throw new Exception("Kaboom");
-
-            if (IS_TEST_VIDEO) {
-                Page p = new VideoPage(new VideoPage.PlayVideo() { descript = "", name = "Black Bunny", episode = -1, season = -1, MirrorNames = new List<string>() { "Googlevid" }, MirrorUrls = new List<string>() { "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" } });//new List<string>() { "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" }, new List<string>() { "Black" }, new List<string>() { });// { mainPoster = mainPoster };
-                mainPage.Navigation.PushModalAsync(p, false);
-                print("PUST: ::: :");
+                On<Xamarin.Forms.PlatformConfiguration.Android>().SetToolbarPlacement(ToolbarPlacement.Bottom);
+                LateCheck();
             }
-
-            // Page _p = new ChromeCastPage();// { mainPoster = mainPoster };
-            // Navigation.PushModalAsync(_p, false);
-            // print("TEXTFILE:\n" + CloudStreamForms.Script.SyncWrapper.GenerateTextFile());
-            // Script.SyncWrapper.SetKeysFromTextFile(Script.SyncWrapper.GenerateTextFile());
-
-            if (IS_EMTY_BUILD) return;
-
-
-            List<string> names = new List<string>() { "Home", "Search", "Downloads", "Settings" };
-            //List<string> icons = new List<string>() { "homeIcon.png", "searchIcon.png", "downloadIcon.png", "baseline_settings_applications_white_48dp_inverted_big.png" };
-            List<Page> pages = new List<Page>() { new Home(), new Search(), new Download(), new SettingsPage(), };
-
-            for (int i = 0; i < pages.Count; i++) {
-                Children.Add(pages[i]);
-                Children[i].Title = names[i];
-                Children[i].IconImageSource = baseIcons[i];
+            catch (Exception) {
             }
-            On<Xamarin.Forms.PlatformConfiguration.Android>().SetToolbarPlacement(ToolbarPlacement.Bottom);
-            LateCheck();
-
             /*
             if (Settings.IS_TEST_BUILD) {
                 return;
@@ -252,7 +247,7 @@ namespace CloudStreamForms
         async void LateCheck()
         {
             await Task.Delay(5000);
-         //   App.PlatformDep.PictureInPicture();
+            //   App.PlatformDep.PictureInPicture();
             try {
                 CheckGitHubUpdate();
                 MainChrome.StartImageChanger();

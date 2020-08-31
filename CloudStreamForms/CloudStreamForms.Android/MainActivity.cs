@@ -984,48 +984,53 @@ namespace CloudStreamForms.Droid
         protected override void OnCreate(Bundle savedInstanceState)
         {
             print("ON CREATED:::::!!!!!!!!!");
-             
-            SetTheme(Resource.Style.MainTheme_NonSplash);
-
-            PublicNot = Resource.Drawable.bicon;
-
-            TabLayoutResource = Resource.Layout.Tabbar;
-            ToolbarResource = Resource.Layout.Toolbar;
-
-            base.OnCreate(savedInstanceState);
-
-            System.AppDomain.CurrentDomain.UnhandledException += MainPage.UnhandledExceptionTrapper;
-
-            string data = Intent?.Data?.EncodedAuthority;
 
             try {
-                MainPage.intentData = data;
+                SetTheme(Resource.Style.MainTheme_NonSplash);
+
+                PublicNot = Resource.Drawable.bicon;
+
+                TabLayoutResource = Resource.Layout.Tabbar;
+                ToolbarResource = Resource.Layout.Toolbar;
+
+                base.OnCreate(savedInstanceState);
+
+                System.AppDomain.CurrentDomain.UnhandledException += MainPage.UnhandledExceptionTrapper;
+
+                string data = Intent?.Data?.EncodedAuthority;
+
+                try {
+                    MainPage.intentData = data;
+                }
+                catch (Exception) { }
+
+                // int intHeight = (int)(Resources.DisplayMetrics.HeightPixels / Resources.DisplayMetrics.Density);
+                //int intWidth = (int)(Resources.DisplayMetrics.WidthPixels / Resources.DisplayMetrics.Density);
+
+
+                // ======================================= INIT =======================================
+
+                FFImageLoading.Forms.Platform.CachedImageRenderer.Init(enableFastRenderer: true);
+                Rg.Plugins.Popup.Popup.Init(this, savedInstanceState);
+                UserDialogs.Init(this);
+                LibVLCSharpFormsRenderer.Init();
+                XamEffects.Droid.Effects.Init();
+
+                Xamarin.Essentials.Platform.Init(this, savedInstanceState);
+                global::Xamarin.Forms.Forms.Init(this, savedInstanceState);
+                LocalNotificationsImplementation.NotificationIconId = PublicNot;
+                MainDroid.NotificationIconId = PublicNot;
+
+                trustEveryone();
+                LoadApplication(new App());
+
+                App.OnVideoStatusChanged += (o, e) => {
+                    UpdatePipVideostatus();
+                };
             }
-            catch (Exception) { }
-
-            // int intHeight = (int)(Resources.DisplayMetrics.HeightPixels / Resources.DisplayMetrics.Density);
-            //int intWidth = (int)(Resources.DisplayMetrics.WidthPixels / Resources.DisplayMetrics.Density);
-
-
-            // ======================================= INIT =======================================
-
-            FFImageLoading.Forms.Platform.CachedImageRenderer.Init(enableFastRenderer: true);
-            Rg.Plugins.Popup.Popup.Init(this, savedInstanceState);
-            UserDialogs.Init(this);
-            LibVLCSharpFormsRenderer.Init();
-            XamEffects.Droid.Effects.Init();
-
-            Xamarin.Essentials.Platform.Init(this, savedInstanceState);
-            global::Xamarin.Forms.Forms.Init(this, savedInstanceState);
-            LocalNotificationsImplementation.NotificationIconId = PublicNot;
-            MainDroid.NotificationIconId = PublicNot;
-
-            trustEveryone();
-            LoadApplication(new App());
-
-            App.OnVideoStatusChanged += (o, e) => {
-                UpdatePipVideostatus();
-            };
+            catch (Exception _ex) {
+                App.ShowToast("Error Loading App: " + _ex);
+            }
             /*F
             if (!CanDrawOverlays(this)) {
                 Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:" + getPackageName()));
@@ -1141,7 +1146,7 @@ namespace CloudStreamForms.Droid
         //https://github.com/bobby5892/235AM-Android/blob/dda3cc85f8345902cf96ccf437ba7fc3001a04e6/Xam-Examples/android-o/PictureInPicture/PictureInPicture/MainActivity.cs
 
 
-        PictureInPictureParams.Builder pictureInPictureParamsBuilder = new PictureInPictureParams.Builder();
+        readonly PictureInPictureParams.Builder pictureInPictureParamsBuilder = new PictureInPictureParams.Builder();
 
         public bool ShouldShowPictureInPicture()
         {
@@ -1150,20 +1155,29 @@ namespace CloudStreamForms.Droid
 
         public bool CanShowPictureInPicture()
         {
-            return Build.VERSION.SdkInt >= BuildVersionCodes.N && PackageManager.HasSystemFeature(PackageManager.FeaturePictureInPicture);
+            try {
+                return Build.VERSION.SdkInt >= BuildVersionCodes.N && PackageManager.HasSystemFeature(PackageManager.FeaturePictureInPicture);
+            }
+            catch (Exception) {
+                return false;
+            }
         }
 
         void UpdatePipVideostatus()
         {
-            if (App.IsPictureInPicture) {
-                if (App.currentVideoStatus.isPaused) {
-                    UpdatePictureInPictureActions(Resource.Drawable.netflixPlay128v2, "Play", (int)App.PlayerEventType.Play);
-                }
-                else {
-                    UpdatePictureInPictureActions(Resource.Drawable.netflixPause128v2, "Pause", (int)App.PlayerEventType.Pause);
+            try {
+                if (App.IsPictureInPicture) {
+                    if (App.currentVideoStatus.isPaused) {
+                        UpdatePictureInPictureActions(Resource.Drawable.netflixPlay128v2, "Play", (int)App.PlayerEventType.Play);
+                    }
+                    else {
+                        UpdatePictureInPictureActions(Resource.Drawable.netflixPause128v2, "Pause", (int)App.PlayerEventType.Pause);
+                    }
                 }
             }
-        } 
+            catch (Exception) {
+            }
+        }
 
         private void EnterPipMode()
         {
@@ -1191,20 +1205,24 @@ namespace CloudStreamForms.Droid
                 error(e);
             }
         }
-        private bool IsPipModeEnabled = true;
 
         private void CheckPipPermission()
         {
-            IsPipModeEnabled = IsInPictureInPictureMode;
-            if (!IsInPictureInPictureMode) {
-                App.OnPictureInPictureModeChanged?.Invoke(null, false);
-                OnBackPressed();
+            try {
+                if (!IsInPictureInPictureMode) {
+                    App.OnPictureInPictureModeChanged?.Invoke(null, false);
+                    OnBackPressed();
+                }
             }
+            catch (Exception) { }
         }
 
         public void ShowPictureInPicture()
         {
-            EnterPipMode();
+            try {
+                EnterPipMode();
+            }
+            catch (Exception) { }
         }
 
         BroadcastReceiver receiver;
@@ -1218,73 +1236,81 @@ namespace CloudStreamForms.Droid
         /// <param name="requestCode">The request code for the pending intent.</param>
         public void UpdatePictureInPictureActions([DrawableRes] int iconId, string title, int controlType)
         {
-            var actions = new List<RemoteAction>();
+            try {
+                var actions = new List<RemoteAction>();
 
-            // This is the PendingIntent that is invoked when a user clicks on the action item.
-            // You need to use distinct request codes for play and pause, or the PendingIntent won't
-            // be properly updated.
-            PendingIntent GetPen(int code)
-            {
-                return PendingIntent.GetBroadcast(this, code, new Intent(Constants.ACTION_MEDIA_CONTROL).PutExtra(Constants.EXTRA_CONTROL_TYPE, code), 0);
-            }
+                // This is the PendingIntent that is invoked when a user clicks on the action item.
+                // You need to use distinct request codes for play and pause, or the PendingIntent won't
+                // be properly updated.
+                PendingIntent GetPen(int code)
+                {
+                    return PendingIntent.GetBroadcast(this, code, new Intent(Constants.ACTION_MEDIA_CONTROL).PutExtra(Constants.EXTRA_CONTROL_TYPE, code), 0);
+                }
 
-            PendingIntent intent = GetPen(controlType);
+                PendingIntent intent = GetPen(controlType);
 
-            Icon icon = Icon.CreateWithResource(this, iconId);
+                Icon icon = Icon.CreateWithResource(this, iconId);
 
-            var context = Application.Context;
-            if (App.currentVideoStatus.isLoaded) {
-                actions.Add(new RemoteAction(Icon.CreateWithResource(context, Resource.Drawable.netflixSkipMobileBackEmpty), "Back", "Seek Back", GetPen((int)App.PlayerEventType.SeekBack)));
-                actions.Add(new RemoteAction(icon, title, title, intent));
+                var context = Application.Context;
+                if (App.currentVideoStatus.isLoaded) {
+                    actions.Add(new RemoteAction(Icon.CreateWithResource(context, Resource.Drawable.netflixSkipMobileBackEmpty), "Back", "Seek Back", GetPen((int)App.PlayerEventType.SeekBack)));
+                    actions.Add(new RemoteAction(icon, title, title, intent));
 
-                if (App.currentVideoStatus.shouldSkip) {
-                    actions.Add(new RemoteAction(Icon.CreateWithResource(context, Resource.Drawable.baseline_skip_next_white_48dp), "Skip", "Skip", GetPen((int)App.PlayerEventType.SkipCurrentChapter)));
+                    if (App.currentVideoStatus.shouldSkip) {
+                        actions.Add(new RemoteAction(Icon.CreateWithResource(context, Resource.Drawable.baseline_skip_next_white_48dp), "Skip", "Skip", GetPen((int)App.PlayerEventType.SkipCurrentChapter)));
+                    }
+                    else {
+                        actions.Add(new RemoteAction(Icon.CreateWithResource(context, Resource.Drawable.netflixSkipMobileEmpty), "Forward", "Seek Forward", GetPen((int)App.PlayerEventType.SeekForward)));
+                    }
                 }
                 else {
-                    actions.Add(new RemoteAction(Icon.CreateWithResource(context, Resource.Drawable.netflixSkipMobileEmpty), "Forward", "Seek Forward", GetPen((int)App.PlayerEventType.SeekForward)));
+                    actions.Add(new RemoteAction(Icon.CreateWithResource(context, Resource.Drawable.baseline_skip_previous_white_48dp), "Previous Mirror", "Previous Mirror", GetPen((int)App.PlayerEventType.PrevMirror)));
+                    //actions.Add(new RemoteAction(Icon.CreateWithResource(context, Resource.Drawable.baseline_stop_white_48dp), "Stop", "Stop", GetPen((int)App.PlayerEventType.Stop)));
+                    actions.Add(new RemoteAction(Icon.CreateWithResource(context, Resource.Drawable.baseline_skip_next_white_48dp), "Next Mirror", "Next Mirror", GetPen((int)App.PlayerEventType.NextMirror)));
                 }
-            }
-            else {
-                actions.Add(new RemoteAction(Icon.CreateWithResource(context, Resource.Drawable.baseline_skip_previous_white_48dp), "Previous Mirror", "Previous Mirror", GetPen((int)App.PlayerEventType.PrevMirror)));
-                //actions.Add(new RemoteAction(Icon.CreateWithResource(context, Resource.Drawable.baseline_stop_white_48dp), "Stop", "Stop", GetPen((int)App.PlayerEventType.Stop)));
-                actions.Add(new RemoteAction(Icon.CreateWithResource(context, Resource.Drawable.baseline_skip_next_white_48dp), "Next Mirror", "Next Mirror", GetPen((int)App.PlayerEventType.NextMirror)));
-            }
-            // MAX 3 ACTIONS
-            /*if (App.currentVideoStatus.hasNextEpisode) {
-                actions.Add(new RemoteAction(Icon.CreateWithResource(context, Resource.Drawable.baseline_skip_next_white_48dp), "Next", "Next Episode", GetPen((int)App.PlayerEventType.NextEpisode)));
-            }*/
+                // MAX 3 ACTIONS
+                /*if (App.currentVideoStatus.hasNextEpisode) {
+                    actions.Add(new RemoteAction(Icon.CreateWithResource(context, Resource.Drawable.baseline_skip_next_white_48dp), "Next", "Next Episode", GetPen((int)App.PlayerEventType.NextEpisode)));
+                }*/
 
-            pictureInPictureParamsBuilder.SetActions(actions).Build();
+                pictureInPictureParamsBuilder.SetActions(actions).Build();
 
-            SetPictureInPictureParams(pictureInPictureParamsBuilder.Build());
+                SetPictureInPictureParams(pictureInPictureParamsBuilder.Build());
+            }
+            catch (Exception) {
+            }
         }
 
         public override void OnPictureInPictureModeChanged(bool isInPictureInPictureMode, Configuration newConfig)
         {
             base.OnPictureInPictureModeChanged(isInPictureInPictureMode, newConfig);
-            App.IsPictureInPicture = isInPictureInPictureMode;
+            try {
+                App.IsPictureInPicture = isInPictureInPictureMode;
 
-            if (!isInPictureInPictureMode) {
-                // Android.App.Application.Context.StartActivity(new Intent(MainActivity.activity.ApplicationContext, typeof(MainActivity)).AddFlags(ActivityFlags.ReorderToFront | ActivityFlags.NewTask));
+                if (!isInPictureInPictureMode) {
+                    // Android.App.Application.Context.StartActivity(new Intent(MainActivity.activity.ApplicationContext, typeof(MainActivity)).AddFlags(ActivityFlags.ReorderToFront | ActivityFlags.NewTask));
 
+                }
+
+                //https://docs.microsoft.com/en-us/samples/xamarin/monodroid-samples/android-o-pictureinpicture/
+                if (isInPictureInPictureMode) {
+                    UpdatePipVideostatus();
+                    // Starts receiving events from action items in PiP mode.
+                    receiver = new PIPBroadcastReceiver(this);
+                    RegisterReceiver(receiver, new IntentFilter(Constants.ACTION_MEDIA_CONTROL));
+                }
+                else {
+                    //  We are out of PiP mode. We can stop receiving events from it.
+                    UnregisterReceiver(receiver);
+                    receiver = null;
+
+                    //   Show the video controls if the video is not playing
+                    /*if (PIPMovieView != null && !PIPMovieView.IsPlaying) {
+                        PIPMovieView.ShowControls();
+                     }*/
+                }
             }
-
-            //https://docs.microsoft.com/en-us/samples/xamarin/monodroid-samples/android-o-pictureinpicture/
-            if (isInPictureInPictureMode) {
-                UpdatePipVideostatus();
-                // Starts receiving events from action items in PiP mode.
-                receiver = new PIPBroadcastReceiver(this);
-                RegisterReceiver(receiver, new IntentFilter(Constants.ACTION_MEDIA_CONTROL));
-            }
-            else {
-                //  We are out of PiP mode. We can stop receiving events from it.
-                UnregisterReceiver(receiver);
-                receiver = null;
-
-                //   Show the video controls if the video is not playing
-                /*if (PIPMovieView != null && !PIPMovieView.IsPlaying) {
-                    PIPMovieView.ShowControls();
-                 }*/
+            catch (Exception) {
             }
         }
         #endregion
@@ -2567,8 +2593,10 @@ namespace CloudStreamForms.Droid
         {
             try {
                 System.Net.ServicePointManager.DefaultConnectionLimit = 999;
+
                 App.FullPictureInPictureSupport = activity.CanShowPictureInPicture();
                 App.PlatformDep = this;
+
                 myAudioFocusListener = new MyAudioFocusListener();
                 myAudioFocusListener.FocusChanged += ((sender, b) => {
                     OnAudioFocusChanged?.Invoke(this, b);
@@ -2822,6 +2850,28 @@ namespace CloudStreamForms.Droid
             }
         }
 
+        public string ReadFile(string path)
+        {
+            try {
+                path = path.Replace("file://", "").Replace("content://", "");
+                Java.IO.File _file = new Java.IO.File(path);
+                Java.IO.FileReader reader = new Java.IO.FileReader(_file);
+                char[] data = new char[1024];
+                int count = 0;
+                StringBuilder builder = new StringBuilder();
+                while ((count = reader.Read(data, 0, data.Length)) != -1) {
+                    for (int i = 0; i < count; i++) {
+                        builder.Append(data[i]);
+                    }
+                }
+
+                return builder.ToString();
+            }
+            catch (Exception _ex) {
+                return "";
+            }
+        }
+
         public string ReadFile(string fileName, bool mainPath, string extraPath)
         {
             try {
@@ -2998,6 +3048,11 @@ namespace CloudStreamForms.Droid
         public string ReadFile(string fileName, bool mainPath, string extraPath)
         {
             throw new NotImplementedException();
+        }
+
+        public string ReadFile(string path)
+        {
+            return "";
         }
 
         public void ReleaseAudioFocus()

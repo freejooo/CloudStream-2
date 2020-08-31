@@ -119,23 +119,28 @@ namespace CloudStreamForms
 
         private void StarBttClicked(object sender, EventArgs e)
         {
-            Home.UpdateIsRequired = true;
+            try {
+                Home.UpdateIsRequired = true;
 
-            bool keyExists = App.KeyExists(App.BOOKMARK_DATA, currentMovie.title.id);
-            if (keyExists) {
-                App.RemoveKey(App.BOOKMARK_DATA, currentMovie.title.id);
-            }
-            else {
-                if (currentMovie.title.name == null) {
-                    App.SetKey(App.BOOKMARK_DATA, currentMovie.title.id, "Name=" + currentMovie.title.name + "|||Id=" + currentMovie.title.id + "|||");
-
-                    setKey = true;
+                bool keyExists = App.KeyExists(App.BOOKMARK_DATA, currentMovie.title.id);
+                if (keyExists) {
+                    App.RemoveKey(App.BOOKMARK_DATA, currentMovie.title.id);
                 }
                 else {
-                    SetKey();
+                    if (currentMovie.title.name == null) {
+                        App.SetKey(App.BOOKMARK_DATA, currentMovie.title.id, "Name=" + currentMovie.title.name + "|||Id=" + currentMovie.title.id + "|||");
+
+                        setKey = true;
+                    }
+                    else {
+                        SetKey();
+                    }
                 }
+                ChangeStar(!keyExists);
             }
-            ChangeStar(!keyExists);
+            catch (Exception _ex) {
+                App.ShowToast("Error bookmarking: " + _ex);
+            }
         }
 
         private void SubtitleBttClicked(object sender, EventArgs e)
@@ -241,22 +246,30 @@ namespace CloudStreamForms
         void ChangeStar(bool? overrideBool = null, string key = null)
         {
             if (core == null) return;
-
-            bool keyExists = false;
-            if (key == null) {
-                key = currentMovie.title.id;
+            try {
+                bool keyExists = false;
+                if (key == null) {
+                    key = currentMovie.title.id;
+                }
+                if (overrideBool == null) {
+                    keyExists = App.KeyExists(App.BOOKMARK_DATA, key);
+                    print("KEYEXISTS:" + keyExists + "|" + currentMovie.title.id);
+                }
+                else {
+                    keyExists = (bool)overrideBool;
+                }
+                Device.BeginInvokeOnMainThread(() => {
+                    try {
+                        StarBtt.Source = keyExists ? "bookmark.svg" : "bookmark_off.svg";//GetImageSource(());
+                        StarBtt.Transformations = new List<FFImageLoading.Work.ITransformation>() { (new FFImageLoading.Transformations.TintTransformation(keyExists ? DARK_BLUE_COLOR : LIGHT_LIGHT_BLACK_COLOR)) };
+                    }
+                    catch (Exception) {
+                    }
+                });
             }
-            if (overrideBool == null) {
-                keyExists = App.KeyExists(App.BOOKMARK_DATA, key);
-                print("KEYEXISTS:" + keyExists + "|" + currentMovie.title.id);
+            catch (Exception _ex) {
+                App.ShowToast("Error bookmarking: " + _ex);
             }
-            else {
-                keyExists = (bool)overrideBool;
-            }
-            StarBtt.Source = keyExists ? "bookmark.svg" : "bookmark_off.svg";//GetImageSource(());
-            Device.BeginInvokeOnMainThread(() => {
-                StarBtt.Transformations = new List<FFImageLoading.Work.ITransformation>() { (new FFImageLoading.Transformations.TintTransformation(keyExists ? DARK_BLUE_COLOR : LIGHT_LIGHT_BLACK_COLOR)) };
-            });
         }
 
         void ChangeSubtitle(bool? overrideBool = null)

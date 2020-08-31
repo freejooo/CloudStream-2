@@ -340,84 +340,88 @@ namespace CloudStreamForms
         bool lastType = false;
         public void SubtitleLoop()
         {
-            if (subtitleIndex == -1 || currentSubtitles[subtitleIndex].subtitles.Length <= 3) {
-                // await Task.Delay(50);
-                subtitleText2 = "";
-                subtitleText1 = "";
-                UpdateSubtitles();
-                return;
-            }
+            try {
+                if (subtitleIndex == -1 || currentSubtitles[subtitleIndex].subtitles.Length <= 3) {
+                    // await Task.Delay(50);
+                    subtitleText2 = "";
+                    subtitleText1 = "";
+                    UpdateSubtitles();
+                    return;
+                }
 
-            bool done = false;
-            var Subtrack = currentSubtitles[subtitleIndex].subtitles;
-            while (!done) {
-                try {
-                    var track = Subtrack[currentSubtitleIndexInCurrent];
-                    // SET CORRECT TIME
-                    bool IsTooHigh()
-                    {
-                        //  print("::::::>>>>>" + currentSubtitleIndexInCurrent + "|" + currentTime + "<>" + track.fromMilisec);
-                        return currentTime < Subtrack[currentSubtitleIndexInCurrent].StartTime + subtitleDelay && currentSubtitleIndexInCurrent > 0;
-                    }
-
-                    bool IsTooLow()
-                    {
-                        return currentTime > Subtrack[currentSubtitleIndexInCurrent + 1].StartTime + subtitleDelay && currentSubtitleIndexInCurrent < Subtrack.Length - 1;
-                    }
-
-                    if (IsTooHigh()) {
-                        while (IsTooHigh()) {
-                            currentSubtitleIndexInCurrent--;
+                bool done = false;
+                var Subtrack = currentSubtitles[subtitleIndex].subtitles;
+                while (!done) {
+                    try {
+                        var track = Subtrack[currentSubtitleIndexInCurrent];
+                        // SET CORRECT TIME
+                        bool IsTooHigh()
+                        {
+                            //  print("::::::>>>>>" + currentSubtitleIndexInCurrent + "|" + currentTime + "<>" + track.fromMilisec);
+                            return currentTime < Subtrack[currentSubtitleIndexInCurrent].StartTime + subtitleDelay && currentSubtitleIndexInCurrent > 0;
                         }
-                        print("SKIPP::1");
-                        continue;
-                    }
 
-                    if (IsTooLow()) {
-                        while (IsTooLow()) {
-                            currentSubtitleIndexInCurrent++;
+                        bool IsTooLow()
+                        {
+                            return currentTime > Subtrack[currentSubtitleIndexInCurrent + 1].StartTime + subtitleDelay && currentSubtitleIndexInCurrent < Subtrack.Length - 1;
                         }
-                        print("SKIPP::2");
-                        continue;
-                    }
 
-
-                    if (currentTime < track.EndTime + subtitleDelay && currentTime > track.StartTime + subtitleDelay) {
-                        if (last != currentSubtitleIndexInCurrent) {
-                            var lines = track.Lines;
-                            if (lines.Count > 0) {
-                                if (lines.Count == 1) {
-                                    subtitleText1 = "";//lines[1].line;
-                                    subtitleText2 = lines[0];
-                                }
-                                else {
-                                    subtitleText1 = lines[0];
-                                    subtitleText2 = lines[1];
-                                }
+                        if (IsTooHigh()) {
+                            while (IsTooHigh()) {
+                                currentSubtitleIndexInCurrent--;
                             }
-                            UpdateSubtitles();
-                            print("SETSUB:" + track.StartTime + "|" + currentTime + "|" + subtitleDelay);
-                            lastType = false;
+                            print("SKIPP::1");
+                            continue;
                         }
-                    }
-                    else {
-                        if (!lastType) {
-                            subtitleText1 = "";
-                            subtitleText2 = "";
-                            UpdateSubtitles();
-                            lastType = true;
-                        }
-                    }
-                    done = true;
 
-                    last = currentSubtitleIndexInCurrent;
-                    print("DELAY!::: " + currentSubtitleIndexInCurrent);
-                    //  await Task.Delay(30);
-                }
-                catch (Exception _ex) {
-                    done = true;
-                    print("EX::X:X::X:X: " + _ex);
-                }
+                        if (IsTooLow()) {
+                            while (IsTooLow()) {
+                                currentSubtitleIndexInCurrent++;
+                            }
+                            print("SKIPP::2");
+                            continue;
+                        }
+
+
+                        if (currentTime < track.EndTime + subtitleDelay && currentTime > track.StartTime + subtitleDelay) {
+                            if (last != currentSubtitleIndexInCurrent) {
+                                var lines = track.Lines;
+                                if (lines.Count > 0) {
+                                    if (lines.Count == 1) {
+                                        subtitleText1 = "";//lines[1].line;
+                                        subtitleText2 = lines[0];
+                                    }
+                                    else {
+                                        subtitleText1 = lines[0];
+                                        subtitleText2 = lines[1];
+                                    }
+                                }
+                                UpdateSubtitles();
+                                print("SETSUB:" + track.StartTime + "|" + currentTime + "|" + subtitleDelay);
+                                lastType = false;
+                            }
+                        }
+                        else {
+                            if (!lastType) {
+                                subtitleText1 = "";
+                                subtitleText2 = "";
+                                UpdateSubtitles();
+                                lastType = true;
+                            }
+                        }
+                        done = true;
+
+                        last = currentSubtitleIndexInCurrent;
+                        print("DELAY!::: " + currentSubtitleIndexInCurrent);
+                        //  await Task.Delay(30);
+                    }
+                    catch (Exception _ex) {
+                        done = true;
+                        print("EX::X:X::X:X: " + _ex);
+                    }
+                } 
+            }
+            catch (Exception) {
             }
         }
 
@@ -480,6 +484,14 @@ namespace CloudStreamForms
         public void PlayerTimeChanged(long time)
         {
             if (!isShown) return;
+
+
+            try {
+                SubtitleLoop();
+            }
+            catch (Exception _ex) {
+                print("SUBLOOP FAILED:D" + _ex);
+            }
 
             if (Player == null) {
                 return;
@@ -563,13 +575,6 @@ namespace CloudStreamForms
                 }
             }
 
-            try {
-                SubtitleLoop();
-            }
-            catch (Exception _ex) {
-                print("SUBLOOP FAILED:D" + _ex);
-            }
-
             Device.BeginInvokeOnMainThread(() => {
                 try {
                     if (Player == null) {
@@ -628,7 +633,7 @@ namespace CloudStreamForms
 
         readonly Func<Task> NextEpisodeClicked;
         public static PlayVideo lastVideo;
-        
+
         /// <summary>
         /// Subtitles are in full
         /// </summary>
@@ -1013,8 +1018,38 @@ namespace CloudStreamForms
                     UpdateVideoStatus();
                 };
 
+                bool hasAddedSubtitles = false;
                 Player.Playing += (o, e) => {
                     SetIsPausedUI(false);
+
+                    var slaves = Player.Media.Slaves;
+                    if (slaves != null && slaves.Length > 0 && !hasAddedSubtitles) {
+                        for (int i = 0; i < slaves.Length; i++) {
+                            var slave = slaves[i];
+                            if (slave.Type == MediaSlaveType.Subtitle) {
+                                if (slave.Uri.StartsWith("file://") || slave.Uri.StartsWith("content://")) {
+                                    string sub = App.ReadFile(CloudStreamCore.RemoveHtmlUrl(slave.Uri));
+                                    if (sub.IsClean()) {
+                                        hasAddedSubtitles = true;
+                                        int internals = currentSubtitles.Where(t => t.name.StartsWith("Internal")).Count();
+                                        currentSubtitles.Add(new VideoSubtitle() { subtitles = MainChrome.ParseSubtitles(sub).ToArray(), name = $"Internal{ (internals == 0 ? "" : " " + (internals + 1))}" });
+                                    }
+                                }
+                            }
+                        }
+                        /*
+                        Task.Run(async () => {
+                            await Task.Delay(1000);
+                            Device.BeginInvokeOnMainThread(() => {*/
+                        /*if (_mediaPlayer.SpuCount > 1) {
+                            bool succ = _mediaPlayer.SetSpu(0);
+                            print(succ);
+                        }*/
+                        /*});
+                    });*/
+                    }
+
+
                     // Player.NextFrame(); // GRAY FIX?
                     App.currentVideoStatus.isLoaded = true;
                     UpdateVideoStatus();
@@ -1138,7 +1173,7 @@ namespace CloudStreamForms
                     ErrorWhenLoading();
                 };
 
-                    SelectMirror(currentVideo.preferedMirror);
+                SelectMirror(currentVideo.preferedMirror);
 
                 ShowNextMirror();
 
@@ -1352,14 +1387,16 @@ namespace CloudStreamForms
             if (!isShown) return;
             if (AllMirrorsUrls.Count <= mirror || mirror < 0) { // VALIDATE INPUT
                 mirror = 0;
-            } 
+            }
 
             await Task.Delay(1);
-             
+
             isPausable = false;
             isSeekeble = false;
 
             List<string> options = new List<string>();
+            options.Add($"sub-track-id={int.MaxValue}");
+
             long pos;
             bool startTimeSet = false;
             if (isFirstLoadedMirror) { // THIS IS TO MAKE IT USE DURATION KEY OVER LAST PLAYER POS
