@@ -1,7 +1,4 @@
 ﻿using CloudStreamForms.Core;
-using Plugin.LocalNotifications;
-using Plugin.Settings;
-using Plugin.Settings.Abstractions;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -947,6 +944,7 @@ namespace CloudStreamForms
         }
 
 
+        /*
         public static void ShowNotification(string title, string body)
         {
             CrossLocalNotifications.Current.Show(title, body);
@@ -966,10 +964,8 @@ namespace CloudStreamForms
         {
             CrossLocalNotifications.Current.Cancel(id);
             PlatformDep.CancelNot(id);
-        }
-
-        private static ISettings AppSettings =>
-    CrossSettings.Current;
+        }*/
+         
         public static ImageSource GetImageSource(string inp)
         {
             return ImageSource.FromResource("CloudStreamForms.Resource." + inp, Assembly.GetExecutingAssembly());

@@ -25,8 +25,7 @@ using Java.Net;
 using Javax.Net.Ssl;
 using LibVLCSharp.Forms.Shared;
 using Newtonsoft.Json;
-using Org.Videolan.Libvlc.Utils;
-using Plugin.LocalNotifications;
+using Org.Videolan.Libvlc.Utils; 
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -1018,7 +1017,7 @@ namespace CloudStreamForms.Droid
 
                 Xamarin.Essentials.Platform.Init(this, savedInstanceState);
                 global::Xamarin.Forms.Forms.Init(this, savedInstanceState);
-                LocalNotificationsImplementation.NotificationIconId = PublicNot;
+                //LocalNotificationsImplementation.NotificationIconId = PublicNot;
                 MainDroid.NotificationIconId = PublicNot;
 
                 trustEveryone();
@@ -1714,25 +1713,7 @@ namespace CloudStreamForms.Droid
         /// </summary>
         public static int NotificationIconId { get; set; }
         static string _packageName => Application.Context.PackageName;
-
-
-
-        int LocalNotificationIconId {
-            get {
-                if (NotificationIconId != 0) {
-                    return NotificationIconId;
-                }
-                else {
-                    return Resource.Drawable.plugin_lc_smallicon;
-                }
-            }
-        }
-
-
-
-
-
-
+          
         public static void CancelFutureNotification(int id)
         {
             var context = MainActivity.activity.ApplicationContext;
@@ -1745,9 +1726,7 @@ namespace CloudStreamForms.Droid
                     );
             alarmManager.Cancel(pending);
         }
-
-
-
+         
         public void ShowNotIntentAsync(string title, string body, int id, string titleId, string titleName, DateTime? time = null, string bigIconUrl = "")
         {
 
@@ -1793,10 +1772,7 @@ namespace CloudStreamForms.Droid
                 var pending = PendingIntent.GetBroadcast(context, id,
                      _resultIntent,
                     PendingIntentFlags.CancelCurrent
-                     );
-
-
-
+                     ); 
 
                 var triggerTime = CurrentTimeMillis(((DateTime)time).Add(DateTime.UtcNow.Subtract(DateTime.Now)));// NotifyTimeInMilliseconds((DateTime)time);
                 var alarmManager = GetAlarmManager();
@@ -2770,7 +2746,7 @@ namespace CloudStreamForms.Droid
                 wc.DownloadFileCompleted += (o, e) => {
                     if (toast != "") {
                         if (isNotification) {
-                            App.ShowNotification(toast, body);
+                            App.ShowNotIntent(toast,body,rng.Next(0,100000),"","");
                         }
                         else {
                             App.ShowToast(toast);
