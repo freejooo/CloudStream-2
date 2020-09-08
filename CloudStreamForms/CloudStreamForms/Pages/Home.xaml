@@ -22,16 +22,16 @@
                 <ColumnDefinition Width="*"></ColumnDefinition>
                 <ColumnDefinition Width="*"></ColumnDefinition>
             </Grid.ColumnDefinitions>
-            <xe:BorderView xe:TouchEffect.Color="White" CornerRadius="5" x:Name="HomeBtt">
+			<xe:BorderView xe:TouchEffect.Color="#0FFFFFFF" CornerRadius="5" x:Name="HomeBtt">
                 <Label Text="Home" FontSize="17" VerticalOptions="Center" Scale="1.2" FontAttributes="Bold" MinimumHeightRequest="50"  HorizontalTextAlignment="Center" TextColor="White" x:Name="HomeLbl"></Label>
             </xe:BorderView>
-            <xe:BorderView Grid.Column="1" xe:TouchEffect.Color="White" CornerRadius="5" x:Name="RelatedBtt">
+			<xe:BorderView Grid.Column="1" xe:TouchEffect.Color="#0FFFFFFF" CornerRadius="5" x:Name="RelatedBtt">
                 <Label Text="Related" FontSize="17" VerticalOptions="Center"  Scale="0.9"  HorizontalTextAlignment="Center" MinimumHeightRequest="50"  TextColor="White" x:Name="RelatedLbl"></Label>
             </xe:BorderView>
-            <xe:BorderView Grid.Column="2" xe:TouchEffect.Color="White" CornerRadius="5" x:Name="TopBtt">
-                <Label Text="Top 100" FontSize="17" VerticalOptions="Center" Scale="0.9" HorizontalTextAlignment="Center" MinimumHeightRequest="50" TextColor="White" x:Name="TopLbl"></Label>
+			<xe:BorderView Grid.Column="2" xe:TouchEffect.Color="#0FFFFFFF" CornerRadius="5" x:Name="TopBtt">
+                <Label Text="Top IMDb" FontSize="17" VerticalOptions="Center" Scale="0.9" HorizontalTextAlignment="Center" MinimumHeightRequest="50" TextColor="White" x:Name="TopLbl"></Label>
             </xe:BorderView>
-            <xe:BorderView Grid.Column="3" xe:TouchEffect.Color="White" CornerRadius="5" x:Name="TrendingBtt">
+			<xe:BorderView Grid.Column="3" xe:TouchEffect.Color="#0FFFFFFF" CornerRadius="5" x:Name="TrendingBtt">
                 <Label Text="Trending" FontSize="17" VerticalOptions="Center" Scale="0.9"  HorizontalTextAlignment="Center" MinimumHeightRequest="50" TextColor="White" x:Name="TrendingLbl"></Label>
             </xe:BorderView>
 
@@ -171,10 +171,8 @@
                     </ListView.ItemTemplate>
                 </ListView>
                 <Button    x:Name="MovieTypePickerBtt"  VerticalOptions="End" HorizontalOptions="End" InputTransparent="False" Margin="10" WidthRequest="100" Text="Sci-Fi" TextColor="#e7e7e7" FontAttributes="Bold" FontSize="Body" CornerRadius="5" HeightRequest="40" BackgroundColor="#252525" ></Button>
-                    <ProgressBar   x:Name="LoadingIndicator"  HorizontalOptions="Fill" ClassId="id" HeightRequest="15" VerticalOptions="Start" InputTransparent="True"></ProgressBar>
-
-
-            </Grid>
+				<ProgressBar   x:Name="LoadingIndicator"  HorizontalOptions="Fill" ClassId="id" HeightRequest="15" TranslationY="-8" VerticalOptions="Start" InputTransparent="True"></ProgressBar>
+			</Grid>
             <Image x:Name="OffBar" Grid.Row="0" InputTransparent="True" VerticalOptions="Start" TranslationY="0"></Image>
 
         </Grid>

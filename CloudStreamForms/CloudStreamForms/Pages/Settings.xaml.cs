@@ -1,5 +1,4 @@
-﻿using AngleSharp.Html;
-using CloudStreamForms.Core;
+﻿using CloudStreamForms.Core;
 using CloudStreamForms.Cryptography;
 using System;
 using System.Collections.Generic;
@@ -9,7 +8,6 @@ using System.Net;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Windows.Networking;
 using Xamarin.Forms;
 using Xamarin.Forms.Internals;
 using Xamarin.Forms.Xaml;

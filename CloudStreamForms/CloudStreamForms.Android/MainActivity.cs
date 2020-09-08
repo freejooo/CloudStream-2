@@ -25,7 +25,7 @@ using Java.Net;
 using Javax.Net.Ssl;
 using LibVLCSharp.Forms.Shared;
 using Newtonsoft.Json;
-using Org.Videolan.Libvlc.Utils; 
+using Org.Videolan.Libvlc.Utils;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -46,280 +46,280 @@ using AudioTrack = Android.Media.AudioTrack;
 
 namespace CloudStreamForms.Droid
 {
-    // THIS IS USED TO SAVE ALL PROGRESS WHEN THE APP IS KILLED
-    [Service]
-    public class OnKilledService : Service
-    {
-        public override IBinder OnBind(Intent intent)
-        {
-            return null;
-        }
-        [return: GeneratedEnum]
-        public override StartCommandResult OnStartCommand(Intent intent, [GeneratedEnum] StartCommandFlags flags, int startId)
-        {
-            return StartCommandResult.Sticky;
-        }
+	// THIS IS USED TO SAVE ALL PROGRESS WHEN THE APP IS KILLED
+	[Service]
+	public class OnKilledService : Service
+	{
+		public override IBinder OnBind(Intent intent)
+		{
+			return null;
+		}
+		[return: GeneratedEnum]
+		public override StartCommandResult OnStartCommand(Intent intent, [GeneratedEnum] StartCommandFlags flags, int startId)
+		{
+			return StartCommandResult.Sticky;
+		}
 
-        public override void OnDestroy()
-        {
-            base.OnDestroy();
-        }
+		public override void OnDestroy()
+		{
+			base.OnDestroy();
+		}
 
-        public override void OnTaskRemoved(Intent rootIntent)
-        {
-            MainActivity.activity.Killed();
-            StopSelf();
-            // base.OnTaskRemoved(rootIntent);
-        }
-    }
+		public override void OnTaskRemoved(Intent rootIntent)
+		{
+			MainActivity.activity.Killed();
+			StopSelf();
+			// base.OnTaskRemoved(rootIntent);
+		}
+	}
 
-    [Service]
-    public class DemoIntentService : IntentService
-    {
-        public DemoIntentService() : base("DemoIntentService")
-        {
-        }
+	[Service]
+	public class DemoIntentService : IntentService
+	{
+		public DemoIntentService() : base("DemoIntentService")
+		{
+		}
 
-        protected override void OnHandleIntent(Android.Content.Intent intent)
-        {
-            print("perform some long running work");
-            System.Console.WriteLine("work complete");
+		protected override void OnHandleIntent(Android.Content.Intent intent)
+		{
+			print("perform some long running work");
+			System.Console.WriteLine("work complete");
 
-            print("HANDLE" + intent.Extras.GetString("data"));
-        }
-    }
+			print("HANDLE" + intent.Extras.GetString("data"));
+		}
+	}
 
-    [Service]
-    public class MainIntentService : IntentService
-    {
-        public MainIntentService() : base("MainIntentService")
-        {
+	[Service]
+	public class MainIntentService : IntentService
+	{
+		public MainIntentService() : base("MainIntentService")
+		{
 
-        }
+		}
 
-        protected override void OnHandleIntent(Android.Content.Intent intent)
-        {
-            string data = intent.Extras.GetString("data");
+		protected override void OnHandleIntent(Android.Content.Intent intent)
+		{
+			string data = intent.Extras.GetString("data");
 
-            if (data.StartsWith("handleDownload")) {
-                int id = int.Parse(FindHTML(data, $"{nameof(id)}=", "|||")); //intent.Extras.GetInt("downloadId");
-                int dType = int.Parse(FindHTML(data, $"{nameof(dType)}=", "|||"));
-                var manager = Application.Context.GetSystemService(Context.NotificationService) as NotificationManager;
-                manager.Cancel(id);
-                DownloadHandle.isPaused[id] = dType;
-                DownloadHandle.changedPause?.Invoke(null, id);
-            }
-        }
-    }
-
-
-    [Service]
-    public class ChromeCastIntentService : IntentService
-    {
-        public ChromeCastIntentService() : base("ChromeCastIntentService")
-        {
-
-        }
-
-        protected override void OnHandleIntent(Android.Content.Intent intent)
-        {
-            string data = intent.Extras.GetString("data");
-            //play" : "pause", "goforward", "stop
-            print("HANDLE [" + data + "]");
-
-            switch (data) {
-                case "play":
-                    MainChrome.PauseAndPlay(false);
-                    break;
-                case "pause":
-                    MainChrome.PauseAndPlay(true);
-                    break;
-                case "goforward":
-                    MainChrome.SeekMedia(30);
-                    break;
-                case "goback":
-                    MainChrome.SeekMedia(-30);
-                    break;
-                case "stop":
-                    //  MainChrome.StopCast();
-                    MainChrome.JustStopVideo();
-                    break;
-                default:
-                    break;
-            }
-
-        }
-    }
-
-    [System.Serializable]
-    public class LocalAction
-    {
-        public string action;
-        public string name;
-        public int sprite;
-    }
-
-    [System.Serializable]
-    public class LocalNot
-    {
-        public string title;
-        public string body;
-        public int id;
-        public bool autoCancel = true;
-        public bool showWhen = true;
-        public int smallIcon = PublicNot;
-        public string bigIcon = "";
-        public bool mediaStyle = true;
-        public string data = "";
-        public bool onGoing = false;
-        public int progress = -1;
-        public DateTime? when = null;
-        public List<LocalAction> actions = new List<LocalAction>();
-
-        public int notificationImportance = (int)NotificationImportance.Default;
+			if (data.StartsWith("handleDownload")) {
+				int id = int.Parse(FindHTML(data, $"{nameof(id)}=", "|||")); //intent.Extras.GetInt("downloadId");
+				int dType = int.Parse(FindHTML(data, $"{nameof(dType)}=", "|||"));
+				var manager = Application.Context.GetSystemService(Context.NotificationService) as NotificationManager;
+				manager.Cancel(id);
+				DownloadHandle.isPaused[id] = dType;
+				DownloadHandle.changedPause?.Invoke(null, id);
+			}
+		}
+	}
 
 
-        public static NotificationManager _manager => (NotificationManager)Application.Context.GetSystemService(Context.NotificationService);
-        public static Dictionary<string, Bitmap> cachedBitmaps = new Dictionary<string, Bitmap>(); // TO ADD PREFORMACE WHEN ADDING NOTIFICATION W SAME IMAGE
+	[Service]
+	public class ChromeCastIntentService : IntentService
+	{
+		public ChromeCastIntentService() : base("ChromeCastIntentService")
+		{
 
-        public static async Task<Bitmap> GetImageBitmapFromUrl(string url)
-        {
-            if (cachedBitmaps.ContainsKey(url)) {
-                return cachedBitmaps[url];
-            }
+		}
 
-            try {
-                Bitmap imageBitmap = null;
+		protected override void OnHandleIntent(Android.Content.Intent intent)
+		{
+			string data = intent.Extras.GetString("data");
+			//play" : "pause", "goforward", "stop
+			print("HANDLE [" + data + "]");
 
-                using (var webClient = new WebClient()) {
-                    var imageBytes = await webClient.DownloadDataTaskAsync(url);
-                    if (imageBytes != null && imageBytes.Length > 0) {
-                        imageBitmap = BitmapFactory.DecodeByteArray(imageBytes, 0, imageBytes.Length);
-                    }
-                }
-                cachedBitmaps.Add(url, imageBitmap);
-                return imageBitmap;
-            }
-            catch (Exception) {
-                return null;
-            }
+			switch (data) {
+				case "play":
+					MainChrome.PauseAndPlay(false);
+					break;
+				case "pause":
+					MainChrome.PauseAndPlay(true);
+					break;
+				case "goforward":
+					MainChrome.SeekMedia(30);
+					break;
+				case "goback":
+					MainChrome.SeekMedia(-30);
+					break;
+				case "stop":
+					//  MainChrome.StopCast();
+					MainChrome.JustStopVideo();
+					break;
+				default:
+					break;
+			}
 
-        }
+		}
+	}
 
-        public static long CurrentTimeMillis(DateTime time)
-        {
-            return (long)(time - Jan1st1970).TotalMilliseconds;
-        }
+	[System.Serializable]
+	public class LocalAction
+	{
+		public string action;
+		public string name;
+		public int sprite;
+	}
 
-        private static readonly DateTime Jan1st1970 = new DateTime
-    (1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+	[System.Serializable]
+	public class LocalNot
+	{
+		public string title;
+		public string body;
+		public int id;
+		public bool autoCancel = true;
+		public bool showWhen = true;
+		public int smallIcon = PublicNot;
+		public string bigIcon = "";
+		public bool mediaStyle = true;
+		public string data = "";
+		public bool onGoing = false;
+		public int progress = -1;
+		public DateTime? when = null;
+		public List<LocalAction> actions = new List<LocalAction>();
 
-        public static PendingIntent GetCurrentPending(string data = "")
-        {
-            Intent _resultIntent = new Intent(Application.Context, typeof(MainActivity));
-            _resultIntent.SetAction(Intent.ActionMain);
-            _resultIntent.AddCategory(Intent.CategoryLauncher);
-            if (data != "") {
-                _resultIntent.PutExtra("data", data);
-            }
-            PendingIntent pendingIntent = PendingIntent.GetActivity(activity, 0,
-       _resultIntent, 0);
-            return pendingIntent;
-        }
+		public int notificationImportance = (int)NotificationImportance.Default;
 
-        public static async void ShowLocalNot(LocalNot not, Context context = null)
-        {
-            var cc = context ?? Application.Context;
-            var builder = new Notification.Builder(cc);
-            builder.SetContentTitle(not.title);
 
-            bool containsMultiLine = not.body.Contains("\n");
+		public static NotificationManager _manager => (NotificationManager)Application.Context.GetSystemService(Context.NotificationService);
+		public static Dictionary<string, Bitmap> cachedBitmaps = new Dictionary<string, Bitmap>(); // TO ADD PREFORMACE WHEN ADDING NOTIFICATION W SAME IMAGE
 
-            if (Build.VERSION.SdkInt < BuildVersionCodes.O || !containsMultiLine) {
-                builder.SetContentText(not.body);
-            }
-            builder.SetSmallIcon(not.smallIcon);
-            builder.SetAutoCancel(not.autoCancel);
-            builder.SetOngoing(not.onGoing);
+		public static async Task<Bitmap> GetImageBitmapFromUrl(string url)
+		{
+			if (cachedBitmaps.ContainsKey(url)) {
+				return cachedBitmaps[url];
+			}
 
-            if (not.progress != -1) {
-                builder.SetProgress(100, not.progress, false);
-            }
+			try {
+				Bitmap imageBitmap = null;
 
-            builder.SetVisibility(NotificationVisibility.Public);
-            builder.SetOnlyAlertOnce(true);
+				using (var webClient = new WebClient()) {
+					var imageBytes = await webClient.DownloadDataTaskAsync(url);
+					if (imageBytes != null && imageBytes.Length > 0) {
+						imageBitmap = BitmapFactory.DecodeByteArray(imageBytes, 0, imageBytes.Length);
+					}
+				}
+				cachedBitmaps.Add(url, imageBitmap);
+				return imageBitmap;
+			}
+			catch (Exception) {
+				return null;
+			}
 
-            if (Build.VERSION.SdkInt >= BuildVersionCodes.O) {
-                var channelId = $"{cc.PackageName}.general";
-                var channel = new NotificationChannel(channelId, "General", (NotificationImportance)not.notificationImportance);
-                _manager.CreateNotificationChannel(channel);
+		}
 
-                builder.SetChannelId(channelId);
+		public static long CurrentTimeMillis(DateTime time)
+		{
+			return (long)(time - Jan1st1970).TotalMilliseconds;
+		}
 
-                if (not.bigIcon != null) {
-                    if (not.bigIcon != "") {
-                        var bitmap = await GetImageBitmapFromUrl(not.bigIcon);
-                        if (bitmap != null) {
-                            builder.SetLargeIcon(bitmap);
-                            if (not.mediaStyle) {
-                                builder.SetStyle(new Notification.MediaStyle()); // NICER IMAGE
-                            }
-                        }
-                    }
-                }
+		private static readonly DateTime Jan1st1970 = new DateTime
+	(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
 
-                if (containsMultiLine) {
-                    var b = new Notification.BigTextStyle();
-                    b.BigText(not.body);
-                    builder.SetStyle(b); // Text
-                                         // builder.SetContentText(not.body);
-                }
+		public static PendingIntent GetCurrentPending(string data = "")
+		{
+			Intent _resultIntent = new Intent(Application.Context, typeof(MainActivity));
+			_resultIntent.SetAction(Intent.ActionMain);
+			_resultIntent.AddCategory(Intent.CategoryLauncher);
+			if (data != "") {
+				_resultIntent.PutExtra("data", data);
+			}
+			PendingIntent pendingIntent = PendingIntent.GetActivity(activity, 0,
+	   _resultIntent, 0);
+			return pendingIntent;
+		}
 
-                if (not.actions.Count > 0) {
-                    List<Notification.Action> actions = new List<Notification.Action>();
+		public static async void ShowLocalNot(LocalNot not, Context context = null)
+		{
+			var cc = context ?? Application.Context;
+			var builder = new Notification.Builder(cc);
+			builder.SetContentTitle(not.title);
 
-                    for (int i = 0; i < not.actions.Count; i++) {
-                        var _resultIntent = new Intent(context, typeof(MainIntentService));
-                        _resultIntent.PutExtra("data", not.actions[i].action);
-                        var pending = PendingIntent.GetService(context, 3337 + i + not.id,
-                         _resultIntent,
-                        PendingIntentFlags.UpdateCurrent
-                         );
+			bool containsMultiLine = not.body.Contains("\n");
 
-                        actions.Add(new Notification.Action(not.actions[i].sprite, not.actions[i].name, pending));
-                    }
+			if (Build.VERSION.SdkInt < BuildVersionCodes.O || !containsMultiLine) {
+				builder.SetContentText(not.body);
+			}
+			builder.SetSmallIcon(not.smallIcon);
+			builder.SetAutoCancel(not.autoCancel);
+			builder.SetOngoing(not.onGoing);
 
-                    builder.SetActions(actions.ToArray());
-                }
-            }
+			if (not.progress != -1) {
+				builder.SetProgress(100, not.progress, false);
+			}
 
-            builder.SetShowWhen(not.showWhen);
-            if (not.when != null) {
-                builder.SetWhen(CurrentTimeMillis((DateTime)not.when));
-            }
-            var stackBuilder = Android.Support.V4.App.TaskStackBuilder.Create(cc);
+			builder.SetVisibility(NotificationVisibility.Public);
+			builder.SetOnlyAlertOnce(true);
 
-            var resultIntent = GetLauncherActivity(cc);
-            if (not.data != "") {
+			if (Build.VERSION.SdkInt >= BuildVersionCodes.O) {
+				var channelId = $"{cc.PackageName}.general";
+				var channel = new NotificationChannel(channelId, "General", (NotificationImportance)not.notificationImportance);
+				_manager.CreateNotificationChannel(channel);
 
-                resultIntent.SetFlags(ActivityFlags.NewTask | ActivityFlags.ClearTask);
-                var _data = Android.Net.Uri.Parse(not.data);//"cloudstreamforms:tt0371746Name=Iron man=EndAll");
-                resultIntent.SetData(_data);
-                stackBuilder.AddNextIntent(resultIntent);
-                var resultPendingIntent =
-              stackBuilder.GetPendingIntent(not.id, (int)PendingIntentFlags.UpdateCurrent);
-                builder.SetContentIntent(resultPendingIntent);
-            }
-            else {
-                //Intent resultIntent = new Intent(context, typeof(MainActivity));
-                //  stackBuilder.AddParentStack(activity.Class);
-                // resultIntent.SetFlags(ActivityFlags.NewTask | ActivityFlags.ResetTaskIfNeeded );
-                /* resultIntent.SetAction(Intent.ActionMain);
+				builder.SetChannelId(channelId);
+
+				if (not.bigIcon != null) {
+					if (not.bigIcon != "") {
+						var bitmap = await GetImageBitmapFromUrl(not.bigIcon);
+						if (bitmap != null) {
+							builder.SetLargeIcon(bitmap);
+							if (not.mediaStyle) {
+								builder.SetStyle(new Notification.MediaStyle()); // NICER IMAGE
+							}
+						}
+					}
+				}
+
+				if (containsMultiLine) {
+					var b = new Notification.BigTextStyle();
+					b.BigText(not.body);
+					builder.SetStyle(b); // Text
+										 // builder.SetContentText(not.body);
+				}
+
+				if (not.actions.Count > 0) {
+					List<Notification.Action> actions = new List<Notification.Action>();
+
+					for (int i = 0; i < not.actions.Count; i++) {
+						var _resultIntent = new Intent(context, typeof(MainIntentService));
+						_resultIntent.PutExtra("data", not.actions[i].action);
+						var pending = PendingIntent.GetService(context, 3337 + i + not.id,
+						 _resultIntent,
+						PendingIntentFlags.UpdateCurrent
+						 );
+
+						actions.Add(new Notification.Action(not.actions[i].sprite, not.actions[i].name, pending));
+					}
+
+					builder.SetActions(actions.ToArray());
+				}
+			}
+
+			builder.SetShowWhen(not.showWhen);
+			if (not.when != null) {
+				builder.SetWhen(CurrentTimeMillis((DateTime)not.when));
+			}
+			var stackBuilder = Android.Support.V4.App.TaskStackBuilder.Create(cc);
+
+			var resultIntent = GetLauncherActivity(cc);
+			if (not.data != "") {
+
+				resultIntent.SetFlags(ActivityFlags.NewTask | ActivityFlags.ClearTask);
+				var _data = Android.Net.Uri.Parse(not.data);//"cloudstreamforms:tt0371746Name=Iron man=EndAll");
+				resultIntent.SetData(_data);
+				stackBuilder.AddNextIntent(resultIntent);
+				var resultPendingIntent =
+			  stackBuilder.GetPendingIntent(not.id, (int)PendingIntentFlags.UpdateCurrent);
+				builder.SetContentIntent(resultPendingIntent);
+			}
+			else {
+				//Intent resultIntent = new Intent(context, typeof(MainActivity));
+				//  stackBuilder.AddParentStack(activity.Class);
+				// resultIntent.SetFlags(ActivityFlags.NewTask | ActivityFlags.ResetTaskIfNeeded );
+				/* resultIntent.SetAction(Intent.ActionMain);
                  resultIntent.AddCategory(Intent.CategoryLauncher);*/
-                stackBuilder.AddNextIntent(resultIntent);
+				stackBuilder.AddNextIntent(resultIntent);
 
-                builder.SetContentIntent(GetCurrentPending());
-                /*
+				builder.SetContentIntent(GetCurrentPending());
+				/*
                 var _resultIntent = new Intent(context, typeof(TrampolineActivity));
               //  _resultIntent.SetFlags(ActivityFlags.NewTask | ActivityFlags.ClearTask);
 
@@ -333,84 +333,82 @@ namespace CloudStreamForms.Droid
 
 
 
-                // resultIntent.SetFlags(ActivityFlags.task);
-            }
+				// resultIntent.SetFlags(ActivityFlags.task);
+			}
 
-            //   print("NOTIFY::: " + not.id);
-            try {
-                _manager.Notify(not.id, builder.Build());
-            }
-            catch (Exception _ex) {
-                print("ED MANGAER::: " + _ex);
-            }
+			//   print("NOTIFY::: " + not.id);
+			try {
+				_manager.Notify(not.id, builder.Build());
+			}
+			catch (Exception _ex) {
+				print("ED MANGAER::: " + _ex);
+			}
 
-        }
-        public static Intent GetLauncherActivity(Context context = null)
-        {
-            var cc = context ?? Application.Context;
-            var packageName = cc.PackageName;
-            return cc.PackageManager.GetLaunchIntentForPackage(packageName).SetPackage(null);
-        }
-    }
+		}
+		public static Intent GetLauncherActivity(Context context = null)
+		{
+			var cc = context ?? Application.Context;
+			var packageName = cc.PackageName;
+			return cc.PackageManager.GetLaunchIntentForPackage(packageName).SetPackage(null);
+		}
+	}
 
-    [Service]
-    public class NotifyAtTime : IntentService
-    {
-        public NotifyAtTime() : base("NotifyAtTime")
-        {
-        }
+	[Service]
+	public class NotifyAtTime : IntentService
+	{
+		public NotifyAtTime() : base("NotifyAtTime")
+		{
+		}
 
-        protected override void OnHandleIntent(Android.Content.Intent intent)
-        {
-            ToastLength toastLength = ToastLength.Short;
+		protected override void OnHandleIntent(Android.Content.Intent intent)
+		{
+			ToastLength toastLength = ToastLength.Short;
 
-            Toast.MakeText(Android.App.Application.Context, "Hello world", toastLength).Show();
+			Toast.MakeText(Android.App.Application.Context, "Hello world", toastLength).Show();
 
-        }
-    }
+		}
+	}
 
-    [BroadcastReceiver]
-    public class AlertReceiver : BroadcastReceiver
-    {
-        public override void OnReceive(Context context, Intent intent)
-        {
-            LocalNot localNot = new LocalNot();
-            foreach (var prop in typeof(LocalNot).GetFields()) {
-                if (prop.FieldType == typeof(string)) {
-                    prop.SetValue(localNot, intent.Extras.GetString(prop.Name));
-                }
-                if (prop.FieldType == typeof(int)) {
-                    prop.SetValue(localNot, intent.Extras.GetInt(prop.Name));
-                }
-                if (prop.FieldType == typeof(float)) {
-                    prop.SetValue(localNot, intent.Extras.GetFloat(prop.Name));
-                }
-                if (prop.FieldType == typeof(DateTime)) {
-                    prop.SetValue(localNot, DateTime.Parse(intent.Extras.GetString(prop.Name)));
-                }
-                if (prop.FieldType == typeof(bool)) {
-                    prop.SetValue(localNot, intent.Extras.GetBoolean(prop.Name));
-                }
-            }
+	[BroadcastReceiver]
+	public class AlertReceiver : BroadcastReceiver
+	{
+		public override void OnReceive(Context context, Intent intent)
+		{
+			LocalNot localNot = new LocalNot();
+			foreach (var prop in typeof(LocalNot).GetFields()) {
+				if (prop.FieldType == typeof(string)) {
+					prop.SetValue(localNot, intent.Extras.GetString(prop.Name));
+				}
+				if (prop.FieldType == typeof(int)) {
+					prop.SetValue(localNot, intent.Extras.GetInt(prop.Name));
+				}
+				if (prop.FieldType == typeof(float)) {
+					prop.SetValue(localNot, intent.Extras.GetFloat(prop.Name));
+				}
+				if (prop.FieldType == typeof(DateTime)) {
+					prop.SetValue(localNot, DateTime.Parse(intent.Extras.GetString(prop.Name)));
+				}
+				if (prop.FieldType == typeof(bool)) {
+					prop.SetValue(localNot, intent.Extras.GetBoolean(prop.Name));
+				}
+			}
 
-            //  Toast.MakeText(Android.App.Application.Context, "da:" + localNot.title, toastLength).Show();
-            ShowLocalNot(localNot);
-        }
-    }
+			//  Toast.MakeText(Android.App.Application.Context, "da:" + localNot.title, toastLength).Show();
+			ShowLocalNot(localNot);
+		}
+	}
 
+	public static class DownloadHandle
+	{
 
+		readonly static Dictionary<int, long> progressDownloads = new Dictionary<int, long>();
+		const string DOWNLOAD_KEY = "DownloadProgress";
+		const string DOWNLOAD_KEY_INTENT = "DownloadProgressIntent";
 
-    public static class DownloadHandle
-    {
-
-        readonly static Dictionary<int, long> progressDownloads = new Dictionary<int, long>();
-        const string DOWNLOAD_KEY = "DownloadProgress";
-        const string DOWNLOAD_KEY_INTENT = "DownloadProgressIntent";
-
-        public static void OnKilled()
-        {
-            try {
-                /*
+		public static void OnKilled()
+		{
+			try {
+				/*
                 foreach (var path in App.GetKeysPath(DOWNLOAD_KEY_INTENT)) {
                     //  App.GetKey<long>(DOWNLOAD_KEY, path, 0);
                     string data = App.GetKey<string>(path, null);
@@ -418,667 +416,698 @@ namespace CloudStreamForms.Droid
                     App.CancelNotifaction(id);
                 }*/
 
-                foreach (var id in DownloadHandle.activeIds) {
-                    var manager = Application.Context.GetSystemService(Context.NotificationService) as NotificationManager;
-                    manager.Cancel(id);
-                    //  App.CancelNotifaction(id);
-                }
-                foreach (var key in outputStreams.Keys) {
-                    var outp = outputStreams[key];
-                    var inpp = inputStreams[key];
-                    outp.Flush();
-                    outp.Close();
-                    inpp.Close();
-                }
-                foreach (var key in progressDownloads.Keys) {
-                    print("SAVED KEY:" + key);
-                    App.SetKey(DOWNLOAD_KEY, key.ToString(), progressDownloads[key]);
-                }
-            }
-            catch (Exception _ex) {
-                print("EXEPTION WHEN DESTROYED: " + _ex);
-            }
-        }
-
-        public static void ResumeIntents()
-        {
-            try {
-                int downloadResumes = 0;
-                foreach (var path in App.GetKeysPath(DOWNLOAD_KEY_INTENT)) {
-                    //  App.GetKey<long>(DOWNLOAD_KEY, path, 0);
-                    downloadResumes++;
-                    try {
-                        string data = App.GetKey<string>(path, null);
-                        HandleIntent(data);
-                    }
-                    catch (Exception) {
-
-                    }
-                }
-
-                if (downloadResumes == 1) {
-                    App.ShowToast("Resumed Download");
-                }
-                else if (downloadResumes != 0) {
-                    App.ShowToast($"Resumed {downloadResumes} downloads");
-                }
-            }
-            catch (Exception _ex) {
-                App.ShowToast("Error resuming download");
-            }
-        }
-
-        readonly static Dictionary<int, OutputStream> outputStreams = new Dictionary<int, OutputStream>();
-        readonly static Dictionary<int, InputStream> inputStreams = new Dictionary<int, InputStream>();
-        public static List<int> activeIds = new List<int>();
-        /// <summary>
-        /// 0 = download, 1 = Pause, 2 = remove
-        /// </summary>
-        public static Dictionary<int, int> isPaused = new Dictionary<int, int>();
-
-        public static Dictionary<int, bool> isStartProgress = new Dictionary<int, bool>();
-
-        public static EventHandler<int> changedPause;
-
-        [System.Serializable]
-        public struct DownloadHandleNot
-        {
-            public int id;
-            public List<BasicMirrorInfo> mirrors;
-            public int mirror;
-            public string title;
-            public string path;
-            public string poster;
-            public string fileName;
-            public string beforeTxt;
-            public bool openWhenDone;
-            public bool showNotificaion;
-            public bool showDoneNotificaion;
-            public bool showDoneAsToast;
-        }
-
-        public static void HandleIntent(string data)
-        {
-            try {
-                DownloadHandleNot d = JsonConvert.DeserializeObject<DownloadHandleNot>(data);
-                HandleIntent(d.id, d.mirrors, d.mirror, d.title, d.path, d.poster, d.fileName, d.beforeTxt, d.openWhenDone, d.showNotificaion, d.showDoneNotificaion, d.showDoneAsToast, true);
-
-            }
-            catch (Exception) {
-
-            }
-        }
-        public static bool ExecuteWithTimeLimit(TimeSpan timeSpan, Action codeBlock)
-        {
-            try {
-                Task task = Task.Factory.StartNew(() => codeBlock());
-                task.Wait(timeSpan);
-                return task.IsCompleted;
-            }
-            catch (AggregateException ae) {
-                throw ae.InnerExceptions[0];
-            }
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="id"></param>
-        /// <param name="mirrorNames"></param>
-        /// <param name="mirrorUrls"></param>
-        /// <param name="mirror"></param>
-        /// <param name="title"></param>
-        /// <param name="path">NOT FULL PATH, just subpath, filname will handle the rest</param>
-        /// <param name="poster"></param>
-        /// <param name="fileName"></param>
-        /// <param name="beforeTxt"></param>
-        /// <param name="openWhenDone"></param>
-        /// <param name="showNotificaion"></param>
-        /// <param name="showDoneNotificaion"></param>
-        /// <param name="showDoneAsToast"></param>
-        /// <param name="resumeIntent"></param>
-        public static void HandleIntent(int id, List<BasicMirrorInfo> mirrors, int mirror, string title, string path, string poster, string fileName, string beforeTxt, bool openWhenDone, bool showNotificaion, bool showDoneNotificaion, bool showDoneAsToast, bool resumeIntent)
-        {
-            const int UPDATE_TIME = 1;
-
-            try {
-                fileName = CensorFilename(fileName);
-
-                isStartProgress[id] = true;
-                print("START DLOAD::: " + id);
-                if (isPaused.ContainsKey(id)) {
-                    //if (isPaused[id] == 2) {
-                    //  isPaused.Remove(id);
-                    //    print("YEET DELETED KEEEE");
-                    return;
-                    //  }
-                }
-                var context = Application.Context;
-
-                //$"{nameof(id)}={id}|||{nameof(title)}={title}|||{nameof(path)}={path}|||{nameof(poster)}={poster}|||{nameof(fileName)}={fileName}|||{nameof(beforeTxt)}={beforeTxt}|||{nameof(openWhenDone)}={openWhenDone}|||{nameof(showDoneNotificaion)}={showDoneNotificaion}|||{nameof(showDoneAsToast)}={showDoneAsToast}|||");
-
-                int progress = 0;
-
-                int bytesPerSec = 0;
-
-                void UpdateDloadNot(string progressTxt)
-                {
-                    //poster != ""
-                    if (!isPaused.ContainsKey(id)) {
-                        isPaused[id] = 0;
-                    }
-                    try {
-                        int isPause = isPaused[id];
-                        bool canPause = isPause == 0;
-                        if (isPause != 2) {
-                            ShowLocalNot(new LocalNot() { actions = new List<LocalAction>() { new LocalAction() { action = $"handleDownload|||id={id}|||dType={(canPause ? 1 : 0)}|||", name = canPause ? "Pause" : "Resume" }, new LocalAction() { action = $"handleDownload|||id={id}|||dType=2|||", name = "Stop" } }, mediaStyle = false, bigIcon = poster, title = $"{title} - {ConvertBytesToAny(bytesPerSec / UPDATE_TIME, 2, 2)} MB/s", autoCancel = false, showWhen = false, onGoing = canPause, id = id, smallIcon = PublicNot, progress = progress, body = progressTxt }, context); //canPause
-                        }
-                    }
-                    catch (Exception _ex) {
-                        print("ERRORLOADING PROGRESS:::" + _ex);
-                    }
-
-                }
-
-                void ShowDone(bool succ, string overrideText = null)
-                {
-                    print("DAAAAAAAAAASHOW DONE" + succ);
-                    if (showDoneNotificaion) {
-                        print("DAAAAAAAAAASHOW DONE!!!!");
-                        Device.BeginInvokeOnMainThread(() => {
-                            try {
-                                print("DAAAAAAAAAASHOW DONE222");
-                                ShowLocalNot(new LocalNot() { mediaStyle = poster != "", bigIcon = poster, title = title, autoCancel = true, onGoing = false, id = id, smallIcon = PublicNot, body = overrideText ?? (succ ? "Download done!" : "Download Failed") }, context); // ((e.Cancelled || e.Error != null) ? "Download Failed!"
-                            }
-                            catch (Exception _ex) {
-                                print("SUPERFATALEX: " + _ex);
-                            }
-                        });
-                        //await Task.Delay(1000); // 100% sure that it is downloaded
-                        OnSomeDownloadFinished?.Invoke(null, EventArgs.Empty);
-                    }
-                    else {
-                        print("DONT SHOW WHEN DONE");
-                    }
-                    // Toast.MakeText(context, "PG DONE!!!", ToastLength.Long).Show(); 
-                }
-
-
-
-                print("START DLOADING");
-                void StartT()
-                {
-                    isStartProgress[id] = true;
-                    if (isPaused.ContainsKey(id)) {
-                        //if (isPaused[id] == 2) {
-                        //    isPaused.Remove(id);
-                        return;
-                        //  }
-                    }
-
-                    Thread t = new Thread(() => {
-                        print("START:::");
-                        string json = JsonConvert.SerializeObject(new DownloadHandleNot() { id = id, mirrors = mirrors, fileName = fileName, showDoneAsToast = showDoneAsToast, openWhenDone = openWhenDone, showDoneNotificaion = showDoneNotificaion, beforeTxt = beforeTxt, mirror = mirror, path = path, poster = poster, showNotificaion = showNotificaion, title = title });
-
-                        App.SetKey(DOWNLOAD_KEY_INTENT, id.ToString(), json);
-
-                        var mirr = mirrors[mirror];
-                        string url = mirr.mirror;
-                        string urlName = mirr.name;
-                        string referer = mirr.referer ?? "";
-
-                        if ((int)Android.OS.Build.VERSION.SdkInt > 9) {
-                            StrictMode.ThreadPolicy policy = new
-                            StrictMode.ThreadPolicy.Builder().PermitAll().Build();
-                            StrictMode.SetThreadPolicy(policy);
-                        }
-                        long total = 0;
-                        int fileLength = 0;
-                        print("START:::2");
-
-                        void UpdateProgress()
-                        {
-                            UpdateDloadNot($"{beforeTxt.Replace("{name}", urlName)}{progress} % ({ConvertBytesToAny(total, 1, 2)} MB/{ConvertBytesToAny(fileLength, 1, 2)} MB)");
-                        }
-
-                        void UpdateFromId(object sender, int _id)
-                        {
-                            if (_id == id) {
-                                UpdateProgress();
-                            }
-                        }
-
-                        print("START:::3" + path);
-                        bool removeKeys = true;
-                        var rFile = new Java.IO.File(path, fileName);
-                        print("START:::4");
-
-                        try {
-                            // CREATED DIRECTORY IF NEEDED
-                            try {
-                                Java.IO.File __file = new Java.IO.File(path);
-                                __file.Mkdirs();
-                            }
-                            catch (Exception _ex) {
-                                print("FAILED:::" + _ex);
-                            }
-                            print("START:::5");
-
-                            //  fileName = CensorFilename(fileName);
-                            // string rpath = path + "/" + fileName;
-                            //   print("PATH=====" + rpath + "|" + fileName);
-
-                            print("OPEN URL:L::" + url);
-                            URL _url = new URL(url);
-
-                            URLConnection connection = _url.OpenConnection();
-
-                            print("SET CONNECT ::");
-                            if (!rFile.Exists()) {
-                                print("FILE DOSENT EXITS");
-                                rFile.CreateNewFile();
-                            }
-                            else {
-                                if (resumeIntent) {
-                                    total = rFile.Length();
-                                    connection.SetRequestProperty("Range", "bytes=" + rFile.Length() + "-");
-                                }
-                                else {
-                                    rFile.Delete();
-                                    rFile.CreateNewFile();
-                                }
-                            }
-                            print("SET CONNECT ::2");
-                            connection.SetRequestProperty("Accept-Encoding", "identity");
-                            if (referer != "") {
-                                connection.SetRequestProperty("Referer", referer);
-                            }
-                            int clen = 0;
-
-                            bool Completed = ExecuteWithTimeLimit(TimeSpan.FromMilliseconds(10000), () => {
-                                connection.Connect();
-                                clen = connection.ContentLength;
-                                if (clen < 5000000 && !path.Contains("/YouTube/")) { // min of 5 MB 
-                                    clen = 0;
-                                }
-                                //
-                                // Write your time bounded code here
-                                // 
-                            });
-                            if (!Completed) {
-                                print("FAILED MASS");
-                                clen = 0;
-                            }
-                            print("SET CONNECT ::3");
-
-
-                            print("TOTALLLLL::: " + clen);
-
-                            if (clen == 0) {
-                                if (isStartProgress.ContainsKey(id)) {
-                                    isStartProgress.Remove(id);
-                                }
-                                if (mirror < mirrors.Count - 1 && progress < 2 && rFile.Length() < 1000000) { // HAVE MIRRORS LEFT
-                                    mirror++;
-                                    removeKeys = false;
-                                    resumeIntent = false;
-                                    rFile.Delete();
-
-                                    print("DELETE;;;");
-                                }
-                                else {
-                                    ShowDone(false);
-                                }
-                            }
-                            else {
-                                fileLength = clen + (int)total;
-                                print("FILELEN:::: " + fileLength);
-                                App.SetKey("dlength", "id" + id, fileLength);
-                                String fileExtension = MimeTypeMap.GetFileExtensionFromUrl(url);
-                                InputStream input = new BufferedInputStream(connection.InputStream);
-
-                                //long skip = App.GetKey<long>(DOWNLOAD_KEY, id.ToString(), 0);
-
-                                OutputStream output = new FileOutputStream(rFile, true);
-
-                                outputStreams[id] = output;
-                                inputStreams[id] = input;
-
-                                if (isPaused.ContainsKey(id)) {
-                                    //if (isPaused[id] == 2) {
-                                    //    isPaused.Remove(id);
-                                    return;
-                                    //  }
-                                }
-
-                                isPaused[id] = 0;
-                                activeIds.Add(id);
-
-                                int cProgress()
-                                {
-                                    return (int)(total * 100 / fileLength);
-                                }
-                                progress = cProgress();
-
-                                byte[] data = new byte[1024];
-                                // skip;
-                                int count;
-                                int previousProgress = 0;
-                                UpdateDloadNot(total == 0 ? "Download starting" : "Download resuming");
-
-                                System.DateTime lastUpdateTime = System.DateTime.Now;
-                                long lastTotal = total;
-
-                                changedPause += UpdateFromId;
-
-                                if (isStartProgress.ContainsKey(id)) {
-                                    isStartProgress.Remove(id);
-                                }
-
-                                bool showDone = true;
-                                while ((count = input.Read(data)) != -1) {
-                                    total += count;
-                                    bytesPerSec += count;
-
-                                    output.Write(data, 0, count);
-                                    progressDownloads[id] = total;
-                                    progress = cProgress();
-
-
-                                    if (isPaused[id] == 1) {
-                                        print("PAUSEDOWNLOAD");
-                                        UpdateProgress();
-                                        while (isPaused[id] == 1) {
-                                            Thread.Sleep(100);
-                                        }
-                                        if (isPaused[id] != 2) {
-                                            UpdateProgress();
-                                        }
-                                    }
-                                    if (isPaused[id] == 2) { // DELETE FILE
-                                        print("DOWNLOAD STOPPED");
-                                        ShowDone(false, "Download Stopped");
-                                        //  Thread.Sleep(100);
-                                        output.Flush();
-                                        output.Close();
-                                        input.Close();
-                                        outputStreams.Remove(id);
-                                        inputStreams.Remove(id);
-                                        isPaused.Remove(id);
-                                        // Thread.Sleep(100);
-                                        rFile.Delete();
-                                        App.RemoveKey(DOWNLOAD_KEY, id.ToString());
-                                        App.RemoveKey(DOWNLOAD_KEY_INTENT, id.ToString());
-                                        App.RemoveKey(App.hasDownloadedFolder, id.ToString());
-                                        App.RemoveKey("dlength", "id" + id);
-                                        App.RemoveKey("DownloadIds", id.ToString());
-                                        changedPause -= UpdateFromId;
-                                        activeIds.Remove(id);
-                                        removeKeys = true;
-                                        OnSomeDownloadFailed?.Invoke(null, EventArgs.Empty);
-                                        Thread.Sleep(100);
-                                        return;
-                                    }
-
-                                    if (DateTime.Now.Subtract(lastUpdateTime).TotalSeconds > UPDATE_TIME) {
-                                        lastUpdateTime = DateTime.Now;
-                                        long diff = total - lastTotal;
-                                        //  UpdateDloadNot($"{ConvertBytesToAny(diff/UPDATE_TIME, 2,2)}MB/s | {progress}%");
-                                        //{ConvertBytesToAny(diff / UPDATE_TIME, 2, 2)}MB/s | 
-                                        if (progress >= 100) {
-                                            print("DLOADPG DONE!");
-                                            ShowDone(true);
-                                        }
-                                        else {
-                                            UpdateProgress();
-                                            // UpdateDloadNot(progress + "%");
-                                        }
-                                        bytesPerSec = 0;
-
-                                        lastTotal = total;
-                                    }
-
-                                    if (progress >= 100 || progress > previousProgress) {
-                                        // Only post progress event if we've made progress.
-                                        previousProgress = progress;
-                                        if (progress >= 100) {
-                                            print("DLOADPG DONE!");
-                                            ShowDone(true);
-                                            showDone = false;
-                                        }
-                                        else {
-                                            // UpdateProgress();
-                                            // UpdateDloadNot(progress + "%");
-                                        }
-                                    }
-                                }
-
-                                if (showDone) {
-                                    ShowDone(true);
-                                }
-                                output.Flush();
-                                output.Close();
-                                input.Close();
-                                outputStreams.Remove(id);
-                                inputStreams.Remove(id);
-                                activeIds.Remove(id);
-                            }
-                        }
-                        catch (Exception _ex) {
-                            print("DOWNLOADURL: " + url);
-                            print("DOWNLOAD FAILED BC: " + _ex);
-                            if (mirror < mirrors.Count - 1 && progress < 2) { // HAVE MIRRORS LEFT
-                                mirror++;
-                                removeKeys = false;
-                                resumeIntent = false;
-                                rFile.Delete();
-                            }
-                            else {
-                                ShowDone(false);
-                            }
-                        }
-                        finally {
-                            changedPause -= UpdateFromId;
-                            isPaused.Remove(id);
-                            if (isStartProgress.ContainsKey(id)) {
-                                isStartProgress.Remove(id);
-                            }
-                            if (removeKeys) {
-                                App.RemoveKey(DOWNLOAD_KEY, id.ToString());
-                                App.RemoveKey(DOWNLOAD_KEY_INTENT, id.ToString());
-                            }
-                            else {
-                                StartT();
-                            }
-                        }
-                    });
-                    t.Start();
-                }
-                StartT();
-
-
-            }
-            catch (Exception) {
-
-                throw;
-            }
-        }
-    }
-
-
-
-    [Activity(Label = "CloudStream 2", Icon = "@drawable/bicon9", Theme = "@style/MainTheme.Splash", MainLauncher = true, LaunchMode = LaunchMode.SingleTop,
-        ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation | ConfigChanges.SmallestScreenSize | ConfigChanges.ScreenLayout  // MUST HAVE FOR PIP MODE OR ELSE IT WILL TRIGGER ONCREATE
-        , SupportsPictureInPicture = true, ResizeableActivity = true),
-        IntentFilter(new[] { Intent.ActionView }, DataScheme = "cloudstreamforms", Categories = new[] { Intent.CategoryDefault, Intent.CategoryBrowsable }),
-        IntentFilter(new[] { Intent.ActionView }, DataScheme = "https", DataPathPrefix = "/title", DataHost = "www.imdb.com", Categories = new[] { Intent.CategoryDefault, Intent.CategoryBrowsable })  // STUFF NOT WORKING
-        ]
-
-    public class MainActivity : global::Xamarin.Forms.Platform.Android.FormsAppCompatActivity
-    {
-        public static MainDroid mainDroid;
-        public static MainActivity activity;
-
-        public const int REQUEST_CODE = 42;
-        public const string EXTRA_POSITION_OUT = "extra_position";
-        public const string EXTRA_DURATION_OUT = "extra_duration";
-
-        public static string lastId = "";
-
-        protected override void OnActivityResult(int requestCode, Result resultCode, Intent data)
-        {
-            if (REQUEST_CODE == requestCode) {
-                if (resultCode == Result.Ok) {
-                    long pos = data.GetLongExtra(EXTRA_POSITION_OUT, -1);//Last position in media when player exited
-                    if (pos > -1) {
-                        App.SetViewPos(lastId, pos);
-                        print("ViewHistoryTimePos SET TO: " + lastId + "|" + pos);
-                    }
-                    long dur = data.GetLongExtra(EXTRA_DURATION_OUT, -1);//	long	Total duration of the media
-                    if (dur > -1) {
-                        App.SetViewDur(lastId, dur);
-                        print("ViewHistoryTimeDur SET TO: " + lastId + "|" + dur);
-                    }
-                }
-            }
-            App.ForceUpdateVideo?.Invoke(null, EventArgs.Empty);
-            base.OnActivityResult(requestCode, resultCode, data);
-        }
-
-        protected override void OnNewIntent(Intent intent)
-        {
-            if (Settings.IS_TEST_BUILD) {
-                return;
-            }
-
-            //App.ShowToast("ON NEW INTENT");
-            //print("DA:::.2132131");
-            if (intent.DataString != null) {
-                print("INTENTNADADA:::" + intent.DataString);
-                print("GOT NON NULL DATA");
-                if (Intent.DataString != "" && Intent.DataString.Contains("cloudstreamforms:")) {
-                    print("INTENTDATA::::" + Intent.DataString);
-                    MainPage.PushPageFromUrlAndName(Intent.DataString);
-                }
-            }
-            Bundle extras = intent.Extras;
-            if (extras != null) {
-                if (extras.ContainsKey("data")) {
-                    // extract the extra-data in the Notification
-                    string msg = extras.GetString("data");
-
-                    if (msg == "openchrome") {
-                        MovieResult.OpenChrome();
-                    }
-
-                    print("DADADA:D:A:D:AD:A:D:A:D:A" + msg);
-                }
-            }
-
-            base.OnNewIntent(intent);
-        }
-
-        public static int PublicNot;
-
-        protected override void OnCreate(Bundle savedInstanceState)
-        {
-            print("ON CREATED:::::!!!!!!!!!");
-
-            try {
-                SetTheme(Resource.Style.MainTheme_NonSplash);
-
-                PublicNot = Resource.Drawable.bicon;
-
-                TabLayoutResource = Resource.Layout.Tabbar;
-                ToolbarResource = Resource.Layout.Toolbar;
-
-                base.OnCreate(savedInstanceState);
-
-                System.AppDomain.CurrentDomain.UnhandledException += MainPage.UnhandledExceptionTrapper;
-
-                string data = Intent?.Data?.EncodedAuthority;
-
-                try {
-                    MainPage.intentData = data;
-                }
-                catch (Exception) { }
-
-                // int intHeight = (int)(Resources.DisplayMetrics.HeightPixels / Resources.DisplayMetrics.Density);
-                //int intWidth = (int)(Resources.DisplayMetrics.WidthPixels / Resources.DisplayMetrics.Density);
-
-
-                // ======================================= INIT =======================================
-
-                FFImageLoading.Forms.Platform.CachedImageRenderer.Init(enableFastRenderer: true);
-                Rg.Plugins.Popup.Popup.Init(this, savedInstanceState);
-                UserDialogs.Init(this);
-                LibVLCSharpFormsRenderer.Init();
-                XamEffects.Droid.Effects.Init();
-
-                Xamarin.Essentials.Platform.Init(this, savedInstanceState);
-                global::Xamarin.Forms.Forms.Init(this, savedInstanceState);
-                //LocalNotificationsImplementation.NotificationIconId = PublicNot;
-                MainDroid.NotificationIconId = PublicNot;
-
-                trustEveryone();
-                LoadApplication(new App());
-
-                App.OnVideoStatusChanged += (o, e) => {
-                    UpdatePipVideostatus();
-                };
-            }
-            catch (Exception _ex) {
-                App.ShowToast("Error Loading App: " + _ex);
-            }
-            /*F
+				foreach (var id in DownloadHandle.activeIds) {
+					var manager = Application.Context.GetSystemService(Context.NotificationService) as NotificationManager;
+					manager.Cancel(id);
+					//  App.CancelNotifaction(id);
+				}
+				foreach (var key in outputStreams.Keys) {
+					var outp = outputStreams[key];
+					var inpp = inputStreams[key];
+					outp.Flush();
+					outp.Close();
+					inpp.Close();
+				}
+				foreach (var key in progressDownloads.Keys) {
+					print("SAVED KEY:" + key);
+					App.SetKey(DOWNLOAD_KEY, key.ToString(), progressDownloads[key]);
+				}
+			}
+			catch (Exception _ex) {
+				print("EXEPTION WHEN DESTROYED: " + _ex);
+			}
+		}
+
+		public static void ResumeIntents()
+		{
+			activity.LogFile("Resuming intents");
+
+			try {
+				int downloadResumes = 0;
+				foreach (var path in App.GetKeysPath(DOWNLOAD_KEY_INTENT)) {
+					//  App.GetKey<long>(DOWNLOAD_KEY, path, 0);
+					downloadResumes++;
+					try {
+						string data = App.GetKey<string>(path, null);
+						HandleIntent(data);
+					}
+					catch (Exception) {
+
+					}
+				}
+
+				if (downloadResumes == 1) {
+					App.ShowToast("Resumed Download");
+				}
+				else if (downloadResumes != 0) {
+					App.ShowToast($"Resumed {downloadResumes} downloads");
+				}
+			}
+			catch (Exception _ex) {
+				activity.LogFile("Resume Intents Failed: " + _ex);
+				App.ShowToast("Error resuming download");
+			}
+			finally {
+				activity.LogFile("Resuming intents done");
+			}
+		}
+
+		readonly static Dictionary<int, OutputStream> outputStreams = new Dictionary<int, OutputStream>();
+		readonly static Dictionary<int, InputStream> inputStreams = new Dictionary<int, InputStream>();
+		public static List<int> activeIds = new List<int>();
+		/// <summary>
+		/// 0 = download, 1 = Pause, 2 = remove
+		/// </summary>
+		public static Dictionary<int, int> isPaused = new Dictionary<int, int>();
+
+		public static Dictionary<int, bool> isStartProgress = new Dictionary<int, bool>();
+
+		public static EventHandler<int> changedPause;
+
+		[System.Serializable]
+		public struct DownloadHandleNot
+		{
+			public int id;
+			public List<BasicMirrorInfo> mirrors;
+			public int mirror;
+			public string title;
+			public string path;
+			public string poster;
+			public string fileName;
+			public string beforeTxt;
+			public bool openWhenDone;
+			public bool showNotificaion;
+			public bool showDoneNotificaion;
+			public bool showDoneAsToast;
+		}
+
+		public static void HandleIntent(string data)
+		{
+			try {
+				DownloadHandleNot d = JsonConvert.DeserializeObject<DownloadHandleNot>(data);
+				HandleIntent(d.id, d.mirrors, d.mirror, d.title, d.path, d.poster, d.fileName, d.beforeTxt, d.openWhenDone, d.showNotificaion, d.showDoneNotificaion, d.showDoneAsToast, true);
+
+			}
+			catch (Exception) {
+
+			}
+		}
+		public static bool ExecuteWithTimeLimit(TimeSpan timeSpan, Action codeBlock)
+		{
+			try {
+				Task task = Task.Factory.StartNew(() => codeBlock());
+				task.Wait(timeSpan);
+				return task.IsCompleted;
+			}
+			catch (AggregateException ae) {
+				throw ae.InnerExceptions[0];
+			}
+		}
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="id"></param>
+		/// <param name="mirrorNames"></param>
+		/// <param name="mirrorUrls"></param>
+		/// <param name="mirror"></param>
+		/// <param name="title"></param>
+		/// <param name="path">NOT FULL PATH, just subpath, filname will handle the rest</param>
+		/// <param name="poster"></param>
+		/// <param name="fileName"></param>
+		/// <param name="beforeTxt"></param>
+		/// <param name="openWhenDone"></param>
+		/// <param name="showNotificaion"></param>
+		/// <param name="showDoneNotificaion"></param>
+		/// <param name="showDoneAsToast"></param>
+		/// <param name="resumeIntent"></param>
+		public static void HandleIntent(int id, List<BasicMirrorInfo> mirrors, int mirror, string title, string path, string poster, string fileName, string beforeTxt, bool openWhenDone, bool showNotificaion, bool showDoneNotificaion, bool showDoneAsToast, bool resumeIntent)
+		{
+			const int UPDATE_TIME = 1;
+
+			try {
+				fileName = CensorFilename(fileName);
+
+				isStartProgress[id] = true;
+				print("START DLOAD::: " + id);
+				if (isPaused.ContainsKey(id)) {
+					//if (isPaused[id] == 2) {
+					//  isPaused.Remove(id);
+					//    print("YEET DELETED KEEEE");
+					return;
+					//  }
+				}
+				var context = Application.Context;
+
+				//$"{nameof(id)}={id}|||{nameof(title)}={title}|||{nameof(path)}={path}|||{nameof(poster)}={poster}|||{nameof(fileName)}={fileName}|||{nameof(beforeTxt)}={beforeTxt}|||{nameof(openWhenDone)}={openWhenDone}|||{nameof(showDoneNotificaion)}={showDoneNotificaion}|||{nameof(showDoneAsToast)}={showDoneAsToast}|||");
+
+				int progress = 0;
+
+				int bytesPerSec = 0;
+
+				void UpdateDloadNot(string progressTxt)
+				{
+					//poster != ""
+					if (!isPaused.ContainsKey(id)) {
+						isPaused[id] = 0;
+					}
+					try {
+						int isPause = isPaused[id];
+						bool canPause = isPause == 0;
+						if (isPause != 2) {
+							ShowLocalNot(new LocalNot() { actions = new List<LocalAction>() { new LocalAction() { action = $"handleDownload|||id={id}|||dType={(canPause ? 1 : 0)}|||", name = canPause ? "Pause" : "Resume" }, new LocalAction() { action = $"handleDownload|||id={id}|||dType=2|||", name = "Stop" } }, mediaStyle = false, bigIcon = poster, title = $"{title} - {ConvertBytesToAny(bytesPerSec / UPDATE_TIME, 2, 2)} MB/s", autoCancel = false, showWhen = false, onGoing = canPause, id = id, smallIcon = PublicNot, progress = progress, body = progressTxt }, context); //canPause
+						}
+					}
+					catch (Exception _ex) {
+						print("ERRORLOADING PROGRESS:::" + _ex);
+					}
+
+				}
+
+				void ShowDone(bool succ, string overrideText = null)
+				{
+					print("DAAAAAAAAAASHOW DONE" + succ);
+					if (showDoneNotificaion) {
+						print("DAAAAAAAAAASHOW DONE!!!!");
+						Device.BeginInvokeOnMainThread(() => {
+							try {
+								print("DAAAAAAAAAASHOW DONE222");
+								ShowLocalNot(new LocalNot() { mediaStyle = poster != "", bigIcon = poster, title = title, autoCancel = true, onGoing = false, id = id, smallIcon = PublicNot, body = overrideText ?? (succ ? "Download done!" : "Download Failed") }, context); // ((e.Cancelled || e.Error != null) ? "Download Failed!"
+							}
+							catch (Exception _ex) {
+								print("SUPERFATALEX: " + _ex);
+							}
+						});
+						//await Task.Delay(1000); // 100% sure that it is downloaded
+						OnSomeDownloadFinished?.Invoke(null, EventArgs.Empty);
+					}
+					else {
+						print("DONT SHOW WHEN DONE");
+					}
+					// Toast.MakeText(context, "PG DONE!!!", ToastLength.Long).Show(); 
+				}
+
+
+
+				print("START DLOADING");
+				void StartT()
+				{
+					isStartProgress[id] = true;
+					if (isPaused.ContainsKey(id)) {
+						//if (isPaused[id] == 2) {
+						//    isPaused.Remove(id);
+						return;
+						//  }
+					}
+
+					Thread t = new Thread(() => {
+						print("START:::");
+						string json = JsonConvert.SerializeObject(new DownloadHandleNot() { id = id, mirrors = mirrors, fileName = fileName, showDoneAsToast = showDoneAsToast, openWhenDone = openWhenDone, showDoneNotificaion = showDoneNotificaion, beforeTxt = beforeTxt, mirror = mirror, path = path, poster = poster, showNotificaion = showNotificaion, title = title });
+
+						App.SetKey(DOWNLOAD_KEY_INTENT, id.ToString(), json);
+
+						var mirr = mirrors[mirror];
+						string url = mirr.mirror;
+						string urlName = mirr.name;
+						string referer = mirr.referer ?? "";
+
+						if ((int)Android.OS.Build.VERSION.SdkInt > 9) {
+							StrictMode.ThreadPolicy policy = new
+							StrictMode.ThreadPolicy.Builder().PermitAll().Build();
+							StrictMode.SetThreadPolicy(policy);
+						}
+						long total = 0;
+						int fileLength = 0;
+						print("START:::2");
+
+						void UpdateProgress()
+						{
+							UpdateDloadNot($"{beforeTxt.Replace("{name}", urlName)}{progress} % ({ConvertBytesToAny(total, 1, 2)} MB/{ConvertBytesToAny(fileLength, 1, 2)} MB)");
+						}
+
+						void UpdateFromId(object sender, int _id)
+						{
+							if (_id == id) {
+								UpdateProgress();
+							}
+						}
+
+						print("START:::3" + path);
+						bool removeKeys = true;
+						var rFile = new Java.IO.File(path, fileName);
+						print("START:::4");
+
+						try {
+							// CREATED DIRECTORY IF NEEDED
+							try {
+								Java.IO.File __file = new Java.IO.File(path);
+								__file.Mkdirs();
+							}
+							catch (Exception _ex) {
+								print("FAILED:::" + _ex);
+							}
+							print("START:::5");
+
+							//  fileName = CensorFilename(fileName);
+							// string rpath = path + "/" + fileName;
+							//   print("PATH=====" + rpath + "|" + fileName);
+
+							print("OPEN URL:L::" + url);
+							URL _url = new URL(url);
+
+							URLConnection connection = _url.OpenConnection();
+
+							print("SET CONNECT ::");
+							if (!rFile.Exists()) {
+								print("FILE DOSENT EXITS");
+								rFile.CreateNewFile();
+							}
+							else {
+								if (resumeIntent) {
+									total = rFile.Length();
+									connection.SetRequestProperty("Range", "bytes=" + rFile.Length() + "-");
+								}
+								else {
+									rFile.Delete();
+									rFile.CreateNewFile();
+								}
+							}
+							print("SET CONNECT ::2");
+							connection.SetRequestProperty("Accept-Encoding", "identity");
+							if (referer != "") {
+								connection.SetRequestProperty("Referer", referer);
+							}
+							int clen = 0;
+
+							bool Completed = ExecuteWithTimeLimit(TimeSpan.FromMilliseconds(10000), () => {
+								connection.Connect();
+								clen = connection.ContentLength;
+								if (clen < 5000000 && !path.Contains("/YouTube/")) { // min of 5 MB 
+									clen = 0;
+								}
+								//
+								// Write your time bounded code here
+								// 
+							});
+							if (!Completed) {
+								print("FAILED MASS");
+								clen = 0;
+							}
+							print("SET CONNECT ::3");
+
+
+							print("TOTALLLLL::: " + clen);
+
+							if (clen == 0) {
+								if (isStartProgress.ContainsKey(id)) {
+									isStartProgress.Remove(id);
+								}
+								if (mirror < mirrors.Count - 1 && progress < 2 && rFile.Length() < 1000000) { // HAVE MIRRORS LEFT
+									mirror++;
+									removeKeys = false;
+									resumeIntent = false;
+									rFile.Delete();
+
+									print("DELETE;;;");
+								}
+								else {
+									ShowDone(false);
+								}
+							}
+							else {
+								fileLength = clen + (int)total;
+								print("FILELEN:::: " + fileLength);
+								App.SetKey("dlength", "id" + id, fileLength);
+								String fileExtension = MimeTypeMap.GetFileExtensionFromUrl(url);
+								InputStream input = new BufferedInputStream(connection.InputStream);
+
+								//long skip = App.GetKey<long>(DOWNLOAD_KEY, id.ToString(), 0);
+
+								OutputStream output = new FileOutputStream(rFile, true);
+
+								outputStreams[id] = output;
+								inputStreams[id] = input;
+
+								if (isPaused.ContainsKey(id)) {
+									//if (isPaused[id] == 2) {
+									//    isPaused.Remove(id);
+									return;
+									//  }
+								}
+
+								isPaused[id] = 0;
+								activeIds.Add(id);
+
+								int cProgress()
+								{
+									return (int)(total * 100 / fileLength);
+								}
+								progress = cProgress();
+
+								byte[] data = new byte[1024];
+								// skip;
+								int count;
+								int previousProgress = 0;
+								UpdateDloadNot(total == 0 ? "Download starting" : "Download resuming");
+
+								System.DateTime lastUpdateTime = System.DateTime.Now;
+								long lastTotal = total;
+
+								changedPause += UpdateFromId;
+
+								if (isStartProgress.ContainsKey(id)) {
+									isStartProgress.Remove(id);
+								}
+
+								bool showDone = true;
+								while ((count = input.Read(data)) != -1) {
+									total += count;
+									bytesPerSec += count;
+
+									output.Write(data, 0, count);
+									progressDownloads[id] = total;
+									progress = cProgress();
+
+
+									if (isPaused[id] == 1) {
+										print("PAUSEDOWNLOAD");
+										UpdateProgress();
+										while (isPaused[id] == 1) {
+											Thread.Sleep(100);
+										}
+										if (isPaused[id] != 2) {
+											UpdateProgress();
+										}
+									}
+									if (isPaused[id] == 2) { // DELETE FILE
+										print("DOWNLOAD STOPPED");
+										ShowDone(false, "Download Stopped");
+										//  Thread.Sleep(100);
+										output.Flush();
+										output.Close();
+										input.Close();
+										outputStreams.Remove(id);
+										inputStreams.Remove(id);
+										isPaused.Remove(id);
+										// Thread.Sleep(100);
+										rFile.Delete();
+										App.RemoveKey(DOWNLOAD_KEY, id.ToString());
+										App.RemoveKey(DOWNLOAD_KEY_INTENT, id.ToString());
+										App.RemoveKey(App.hasDownloadedFolder, id.ToString());
+										App.RemoveKey("dlength", "id" + id);
+										App.RemoveKey("DownloadIds", id.ToString());
+										changedPause -= UpdateFromId;
+										activeIds.Remove(id);
+										removeKeys = true;
+										OnSomeDownloadFailed?.Invoke(null, EventArgs.Empty);
+										Thread.Sleep(100);
+										return;
+									}
+
+									if (DateTime.Now.Subtract(lastUpdateTime).TotalSeconds > UPDATE_TIME) {
+										lastUpdateTime = DateTime.Now;
+										long diff = total - lastTotal;
+										//  UpdateDloadNot($"{ConvertBytesToAny(diff/UPDATE_TIME, 2,2)}MB/s | {progress}%");
+										//{ConvertBytesToAny(diff / UPDATE_TIME, 2, 2)}MB/s | 
+										if (progress >= 100) {
+											print("DLOADPG DONE!");
+											ShowDone(true);
+										}
+										else {
+											UpdateProgress();
+											// UpdateDloadNot(progress + "%");
+										}
+										bytesPerSec = 0;
+
+										lastTotal = total;
+									}
+
+									if (progress >= 100 || progress > previousProgress) {
+										// Only post progress event if we've made progress.
+										previousProgress = progress;
+										if (progress >= 100) {
+											print("DLOADPG DONE!");
+											ShowDone(true);
+											showDone = false;
+										}
+										else {
+											// UpdateProgress();
+											// UpdateDloadNot(progress + "%");
+										}
+									}
+								}
+
+								if (showDone) {
+									ShowDone(true);
+								}
+								output.Flush();
+								output.Close();
+								input.Close();
+								outputStreams.Remove(id);
+								inputStreams.Remove(id);
+								activeIds.Remove(id);
+							}
+						}
+						catch (Exception _ex) {
+							print("DOWNLOADURL: " + url);
+							print("DOWNLOAD FAILED BC: " + _ex);
+							if (mirror < mirrors.Count - 1 && progress < 2) { // HAVE MIRRORS LEFT
+								mirror++;
+								removeKeys = false;
+								resumeIntent = false;
+								rFile.Delete();
+							}
+							else {
+								ShowDone(false);
+							}
+						}
+						finally {
+							changedPause -= UpdateFromId;
+							isPaused.Remove(id);
+							if (isStartProgress.ContainsKey(id)) {
+								isStartProgress.Remove(id);
+							}
+							if (removeKeys) {
+								App.RemoveKey(DOWNLOAD_KEY, id.ToString());
+								App.RemoveKey(DOWNLOAD_KEY_INTENT, id.ToString());
+							}
+							else {
+								StartT();
+							}
+						}
+					});
+					t.Start();
+				}
+				StartT();
+
+
+			}
+			catch (Exception) {
+
+				throw;
+			}
+		}
+	}
+
+
+
+	[Activity(Label = "CloudStream 2", Icon = "@drawable/bicon9", Theme = "@style/MainTheme.Splash", MainLauncher = true, LaunchMode = LaunchMode.SingleTop,
+		ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation | ConfigChanges.SmallestScreenSize | ConfigChanges.ScreenLayout  // MUST HAVE FOR PIP MODE OR ELSE IT WILL TRIGGER ONCREATE
+		, SupportsPictureInPicture = true, ResizeableActivity = true),
+		IntentFilter(new[] { Intent.ActionView }, DataScheme = "cloudstreamforms", Categories = new[] { Intent.CategoryDefault, Intent.CategoryBrowsable }),
+		IntentFilter(new[] { Intent.ActionView }, DataScheme = "https", DataPathPrefix = "/title", DataHost = "www.imdb.com", Categories = new[] { Intent.CategoryDefault, Intent.CategoryBrowsable })  // STUFF NOT WORKING
+		]
+
+	public class MainActivity : global::Xamarin.Forms.Platform.Android.FormsAppCompatActivity
+	{
+		public static MainDroid mainDroid;
+		public static MainActivity activity;
+
+		public const int REQUEST_CODE = 42;
+		public const string EXTRA_POSITION_OUT = "extra_position";
+		public const string EXTRA_DURATION_OUT = "extra_duration";
+		public const bool LOG_STARTUP_DATA = false;
+
+		public static string lastId = "";
+
+		protected override void OnActivityResult(int requestCode, Result resultCode, Intent data)
+		{
+			if (REQUEST_CODE == requestCode) {
+				if (resultCode == Result.Ok) {
+					long pos = data.GetLongExtra(EXTRA_POSITION_OUT, -1);//Last position in media when player exited
+					if (pos > -1) {
+						App.SetViewPos(lastId, pos);
+						print("ViewHistoryTimePos SET TO: " + lastId + "|" + pos);
+					}
+					long dur = data.GetLongExtra(EXTRA_DURATION_OUT, -1);//	long	Total duration of the media
+					if (dur > -1) {
+						App.SetViewDur(lastId, dur);
+						print("ViewHistoryTimeDur SET TO: " + lastId + "|" + dur);
+					}
+				}
+			}
+			App.ForceUpdateVideo?.Invoke(null, EventArgs.Empty);
+			base.OnActivityResult(requestCode, resultCode, data);
+		}
+
+		protected override void OnNewIntent(Intent intent)
+		{
+			if (Settings.IS_TEST_BUILD) {
+				return;
+			}
+
+			//App.ShowToast("ON NEW INTENT");
+			//print("DA:::.2132131");
+			if (intent.DataString != null) {
+				print("INTENTNADADA:::" + intent.DataString);
+				print("GOT NON NULL DATA");
+				if (Intent.DataString != "" && Intent.DataString.Contains("cloudstreamforms:")) {
+					print("INTENTDATA::::" + Intent.DataString);
+					MainPage.PushPageFromUrlAndName(Intent.DataString);
+				}
+			}
+			Bundle extras = intent.Extras;
+			if (extras != null) {
+				if (extras.ContainsKey("data")) {
+					// extract the extra-data in the Notification
+					string msg = extras.GetString("data");
+
+					if (msg == "openchrome") {
+						MovieResult.OpenChrome();
+					}
+
+					print("DADADA:D:A:D:AD:A:D:A:D:A" + msg);
+				}
+			}
+
+			base.OnNewIntent(intent);
+		}
+
+		public static int PublicNot;
+
+		protected override void OnCreate(Bundle savedInstanceState)
+		{
+			LogFile($"============================== ON CREATE AT {UnixTime} ==============================");
+			print("ON CREATED:::::!!!!!!!!!");
+
+			try {
+				SetTheme(Resource.Style.MainTheme_NonSplash);
+				LogFile("SetTheme Done");
+
+				PublicNot = Resource.Drawable.bicon;
+
+				TabLayoutResource = Resource.Layout.Tabbar;
+				ToolbarResource = Resource.Layout.Toolbar;
+
+				LogFile("Setup Done 1/2");
+				base.OnCreate(savedInstanceState);
+				LogFile("Setup Done 2/2");
+
+				System.AppDomain.CurrentDomain.UnhandledException += MainPage.UnhandledExceptionTrapper;
+
+				string data = Intent?.Data?.EncodedAuthority;
+
+				try {
+					MainPage.intentData = data;
+				}
+				catch (Exception) { }
+
+				// int intHeight = (int)(Resources.DisplayMetrics.HeightPixels / Resources.DisplayMetrics.Density);
+				//int intWidth = (int)(Resources.DisplayMetrics.WidthPixels / Resources.DisplayMetrics.Density);
+
+
+				// ======================================= INIT =======================================
+
+				LogFile("Starting Init");
+
+				FFImageLoading.Forms.Platform.CachedImageRenderer.Init(enableFastRenderer: true);
+				Rg.Plugins.Popup.Popup.Init(this, savedInstanceState);
+				UserDialogs.Init(this);
+				LibVLCSharpFormsRenderer.Init();
+				XamEffects.Droid.Effects.Init();
+
+				Xamarin.Essentials.Platform.Init(this, savedInstanceState);
+				global::Xamarin.Forms.Forms.Init(this, savedInstanceState);
+
+				LogFile("Completed Init");
+
+				//LocalNotificationsImplementation.NotificationIconId = PublicNot;
+				MainDroid.NotificationIconId = PublicNot;
+
+				trustEveryone();
+
+				LogFile("Start Application");
+				LoadApplication(new App());
+				LogFile("Completed Startup");
+
+				App.OnVideoStatusChanged += (o, e) => {
+					UpdatePipVideostatus();
+				};
+				LogFile("Completed PIP");
+
+			}
+			catch (Exception _ex) {
+				LogFile("ERROR LOADING APP: " + _ex);
+				App.ShowToast("Error Loading App: " + _ex);
+			}
+			/*F
             if (!CanDrawOverlays(this)) {
                 Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:" + getPackageName()));
                 startActivityForResult(intent, 0);
             }*/
 
-            if (Settings.IS_TEST_BUILD) {
-                PlatformDep = new NullPlatfrom();
-                return;
-            }
-            try {
-                activity = this;
+			if (Settings.IS_TEST_BUILD) {
+				PlatformDep = new NullPlatfrom();
+				return;
+			}
+			try {
+				LogFile("Creating activity");
 
-                mainDroid = new MainDroid();
-                mainDroid.Awake();
+				activity = this;
 
-                //Typeface.CreateFromAsset(Application.Context.Assets, "Times-New-Roman.ttf");
+				mainDroid = new MainDroid();
+				LogFile("Creating Maindroid");
 
-                if (Intent.DataString != null) {
-                    print("GOT NON NULL DATA");
-                    if (Intent.DataString != "") {
-                        print("INTENTDATA::::" + Intent.DataString);
-                        if (Intent.DataString.Contains("www.imdb.com")) {
-                            string id = FindHTML(Intent.DataString + "/", "title/", "/");
-                            //  var _thread = mainCore.CreateThread(2);
-                            mainCore.StartThread("IMDb Thread", async () => {
-                                string json = mainCore.DownloadString($"https://v2.sg.media-imdb.com/suggestion/t/{id}.json");
-                                //  await Task.Delay(1000);
-                                Device.BeginInvokeOnMainThread(() => {
-                                    if (json != "") {
-                                        MainPage.PushPageFromUrlAndName(id, FindHTML(json, "\"l\":\"", "\"")); ;
-                                    }
-                                    else {
-                                        App.ShowToast("Error loading imdb");
-                                    }
-                                });
-                            });
-                        }
-                        else {
-                            MainPage.PushPageFromUrlAndName(Intent.DataString);
-                        }
-                    }
-                }
-                RequestPermission(this);
+				mainDroid.Awake();
+				LogFile("Completed Awake");
 
-                //App.ShowToast("ON CREATE");
+				//Typeface.CreateFromAsset(Application.Context.Assets, "Times-New-Roman.ttf");
 
-                //mainDroid.Test();
-                /*
+				if (Intent.DataString != null) {
+					print("GOT NON NULL DATA");
+					if (Intent.DataString != "") {
+						print("INTENTDATA::::" + Intent.DataString);
+						if (Intent.DataString.Contains("www.imdb.com")) {
+							string id = FindHTML(Intent.DataString + "/", "title/", "/");
+							//  var _thread = mainCore.CreateThread(2);
+							mainCore.StartThread("IMDb Thread", async () => {
+								string json = mainCore.DownloadString($"https://v2.sg.media-imdb.com/suggestion/t/{id}.json");
+								//  await Task.Delay(1000);
+								Device.BeginInvokeOnMainThread(() => {
+									if (json != "") {
+										MainPage.PushPageFromUrlAndName(id, FindHTML(json, "\"l\":\"", "\"")); ;
+									}
+									else {
+										App.ShowToast("Error loading imdb");
+									}
+								});
+							});
+						}
+						else {
+							MainPage.PushPageFromUrlAndName(Intent.DataString);
+						}
+					}
+				}
+
+				LogFile("Calling RequestPermission");
+
+				RequestPermission(this);
+				LogFile("Permissions Loaded");
+
+				//App.ShowToast("ON CREATE");
+
+				//mainDroid.Test();
+				/*
                 MessagingCenter.Subscribe<VideoPage>(this, "allowLandScapePortrait", sender =>
                 {
                     RequestedOrientation = ScreenOrientation.Unspecified;
@@ -1087,10 +1116,10 @@ namespace CloudStreamForms.Droid
                 {
                     RequestedOrientation = ScreenOrientation.Portrait;
                 });*/
-                // Window.DecorView.SetBackgroundResource(Resource.Drawable.splash_background_remove);//Resources.GetDrawable(Resource.Drawable.splash_background_remove);
+				// Window.DecorView.SetBackgroundResource(Resource.Drawable.splash_background_remove);//Resources.GetDrawable(Resource.Drawable.splash_background_remove);
 
 
-                /*
+				/*
                 var alarm = Application.Context.GetSystemService(Context.AlarmService) as AlarmManager;
                 var context = ApplicationContext;
                 var _testIntent = new Intent(context, typeof(AlertReceiver));
@@ -1099,409 +1128,431 @@ namespace CloudStreamForms.Droid
 
                 alarm.SetExactAndAllowWhileIdle(AlarmType.RtcWakeup, MainDroid.CurrentTimeMillis(DateTime.UtcNow.AddSeconds(5)), pending);*/
 
-                MainChrome.OnDisconnected += (o, e) => {
-                    MainDroid.CancelChromecast();
-                };
+				MainChrome.OnDisconnected += (o, e) => {
+					MainDroid.CancelChromecast();
+				};
 
-                MainChrome.OnNotificationChanged += (o, e) => {
-                    try {
-                        print("CHROMECAST CHANGED::: ");
-                        print("ID=====================" + e.isCasting + "|" + e.isPlaying + "|" + e.isPaused);
-                        if (!e.isCasting) {// || !e.isPlaying) {
-                            MainDroid.CancelChromecast();
-                        }
-                        else {
-                            MainDroid.UpdateChromecastNotification(e.title, e.body, e.isPaused, e.posterUrl);
-                        }
-                    }
-                    catch (Exception _ex) {
-                        print("EX NOT CHANGED::: " + _ex);
-                    }
-                };
-
-                ResumeIntentData();
-                StartService(new Intent(BaseContext, typeof(OnKilledService)));
-
-                Window.SetSoftInputMode(Android.Views.SoftInput.AdjustNothing);
-            }
-            catch (Exception _ex) {
-                error(_ex);
-            }
-
-            // TaskScheduler.UnobservedTaskException += TaskSchedulerOnUnobservedTaskException;
-            //  Android.Renderscripts.ta
-            // var bar = new Xamarin.Forms.Platform.Android.TabbedRenderer();//.Platform.Android.
-
-            //ShowBlackToast("Yeet", 3);
-            // DownloadHandle.ResumeIntents();
-            //   ShowLocalNot(new LocalNot() { mediaStyle = false, title = "yeet", data = "", progress = -1, showWhen = false, autoCancel = true, onGoing = false, id = 1234, smallIcon = Resource.Drawable.bicon, body = "Download ddddd" }, Application.Context);
-
-            // ShowLocalNot(new LocalNot() { mediaStyle = false, title = "yeet", autoCancel = true, onGoing = false, id = 123545, smallIcon = Resource.Drawable.bicon, body = "Download Failed!",showWhen=false }); // ((e.Cancelled || e.Error != null) ? "Download Failed!"
-        }
+				MainChrome.OnNotificationChanged += (o, e) => {
+					try {
+						print("CHROMECAST CHANGED::: ");
+						print("ID=====================" + e.isCasting + "|" + e.isPlaying + "|" + e.isPaused);
+						if (!e.isCasting) {// || !e.isPlaying) {
+							MainDroid.CancelChromecast();
+						}
+						else {
+							MainDroid.UpdateChromecastNotification(e.title, e.body, e.isPaused, e.posterUrl);
+						}
+					}
+					catch (Exception _ex) {
+						print("EX NOT CHANGED::: " + _ex);
+					}
+				};
+				LogFile("OnLoad Completed");
 
 
-        #region ================================================ PICTURE IN PICTURE ================================================
+				ResumeIntentData();
+				LogFile("Resume intents completed");
 
-        //https://github.com/bobby5892/235AM-Android/blob/dda3cc85f8345902cf96ccf437ba7fc3001a04e6/Xam-Examples/android-o/PictureInPicture/PictureInPicture/MainActivity.cs
+				StartService(new Intent(BaseContext, typeof(OnKilledService)));
+				LogFile("OnKilled completed");
+
+				Window.SetSoftInputMode(Android.Views.SoftInput.AdjustNothing);
+				LogFile("OnSetsoft completed");
+			}
+			catch (Exception _ex) {
+				LogFile("FATAL ERROR : " + _ex);
+				error(_ex);
+			}
+			LogFile($"============================== STARTUP DONE AT {UnixTime} ==============================");
+
+			// TaskScheduler.UnobservedTaskException += TaskSchedulerOnUnobservedTaskException;
+			//  Android.Renderscripts.ta
+			// var bar = new Xamarin.Forms.Platform.Android.TabbedRenderer();//.Platform.Android.
+
+			//ShowBlackToast("Yeet", 3);
+			// DownloadHandle.ResumeIntents();
+			//   ShowLocalNot(new LocalNot() { mediaStyle = false, title = "yeet", data = "", progress = -1, showWhen = false, autoCancel = true, onGoing = false, id = 1234, smallIcon = Resource.Drawable.bicon, body = "Download ddddd" }, Application.Context);
+
+			// ShowLocalNot(new LocalNot() { mediaStyle = false, title = "yeet", autoCancel = true, onGoing = false, id = 123545, smallIcon = Resource.Drawable.bicon, body = "Download Failed!",showWhen=false }); // ((e.Cancelled || e.Error != null) ? "Download Failed!"
+		}
 
 
-        readonly PictureInPictureParams.Builder pictureInPictureParamsBuilder = new PictureInPictureParams.Builder();
+		#region ================================================ PICTURE IN PICTURE ================================================
 
-        public bool ShouldShowPictureInPicture()
-        {
-            return Settings.PictureInPicture && currentVideoStatus.isInVideoplayer; // && currentVideoStatus.isLoaded;
-        }
+		//https://github.com/bobby5892/235AM-Android/blob/dda3cc85f8345902cf96ccf437ba7fc3001a04e6/Xam-Examples/android-o/PictureInPicture/PictureInPicture/MainActivity.cs
 
-        public bool CanShowPictureInPicture()
-        {
-            try {
-                return Build.VERSION.SdkInt >= BuildVersionCodes.N && PackageManager.HasSystemFeature(PackageManager.FeaturePictureInPicture);
-            }
-            catch (Exception) {
-                return false;
-            }
-        }
 
-        void UpdatePipVideostatus()
-        {
-            try {
-                if (App.IsPictureInPicture) {
-                    if (App.currentVideoStatus.isPaused) {
-                        UpdatePictureInPictureActions(Resource.Drawable.netflixPlay128v2, "Play", (int)App.PlayerEventType.Play);
-                    }
-                    else {
-                        UpdatePictureInPictureActions(Resource.Drawable.netflixPause128v2, "Pause", (int)App.PlayerEventType.Pause);
-                    }
-                }
-            }
-            catch (Exception) {
-            }
-        }
+		readonly PictureInPictureParams.Builder pictureInPictureParamsBuilder = new PictureInPictureParams.Builder();
 
-        private void EnterPipMode()
-        {
-            if (!ShouldShowPictureInPicture()) return;
+		public bool ShouldShowPictureInPicture()
+		{
+			return Settings.PictureInPicture && currentVideoStatus.isInVideoplayer; // && currentVideoStatus.isLoaded;
+		}
 
-            try {
-                if (CanShowPictureInPicture()) {
-                    App.OnPictureInPictureModeChanged?.Invoke(null, true);
+		public bool CanShowPictureInPicture()
+		{
+			try {
+				return Build.VERSION.SdkInt >= BuildVersionCodes.N && PackageManager.HasSystemFeature(PackageManager.FeaturePictureInPicture);
+			}
+			catch (Exception) {
+				return false;
+			}
+		}
 
-                    if (Build.VERSION.SdkInt >= BuildVersionCodes.O) {
-                        //Rational rational = new Rational(450, 250);
-                        PictureInPictureParams.Builder builder = new PictureInPictureParams.Builder();
-                        //builder.SetAspectRatio(rational);
-                        EnterPictureInPictureMode(builder.Build());
-                    }
-                    else {
-                        var param = new PictureInPictureParams.Builder().Build();
-                        EnterPictureInPictureMode(param);
-                    }
+		void UpdatePipVideostatus()
+		{
+			try {
+				if (App.IsPictureInPicture) {
+					if (App.currentVideoStatus.isPaused) {
+						UpdatePictureInPictureActions(Resource.Drawable.netflixPlay128v2, "Play", (int)App.PlayerEventType.Play);
+					}
+					else {
+						UpdatePictureInPictureActions(Resource.Drawable.netflixPause128v2, "Pause", (int)App.PlayerEventType.Pause);
+					}
+				}
+			}
+			catch (Exception) {
+			}
+		}
 
-                    new Handler().PostDelayed(CheckPipPermission, 30);
-                }
-            }
-            catch (Exception e) {
-                error(e);
-            }
-        }
+		private void EnterPipMode()
+		{
+			if (!ShouldShowPictureInPicture()) return;
 
-        private void CheckPipPermission()
-        {
-            try {
-                if (!IsInPictureInPictureMode) {
-                    App.OnPictureInPictureModeChanged?.Invoke(null, false);
-                    OnBackPressed();
-                }
-            }
-            catch (Exception) { }
-        }
+			try {
+				if (CanShowPictureInPicture()) {
+					App.OnPictureInPictureModeChanged?.Invoke(null, true);
 
-        public void ShowPictureInPicture()
-        {
-            try {
-                EnterPipMode();
-            }
-            catch (Exception) { }
-        }
+					if (Build.VERSION.SdkInt >= BuildVersionCodes.O) {
+						//Rational rational = new Rational(450, 250);
+						PictureInPictureParams.Builder builder = new PictureInPictureParams.Builder();
+						//builder.SetAspectRatio(rational);
+						EnterPictureInPictureMode(builder.Build());
+					}
+					else {
+						var param = new PictureInPictureParams.Builder().Build();
+						EnterPictureInPictureMode(param);
+					}
 
-        BroadcastReceiver receiver;
+					new Handler().PostDelayed(CheckPipPermission, 30);
+				}
+			}
+			catch (Exception e) {
+				error(e);
+			}
+		}
 
-        /// <summary>Updat
-        /// Update the state of pause/resume action item in Picture-in-Picture mode.
-        /// </summary>
-        /// <param name="iconId">The icon to be used.</param>
-        /// <param name="title">The title text.</param>
-        /// <param name="controlType">The type of action.</param>
-        /// <param name="requestCode">The request code for the pending intent.</param>
-        public void UpdatePictureInPictureActions([DrawableRes] int iconId, string title, int controlType)
-        {
-            try {
-                var actions = new List<RemoteAction>();
+		private void CheckPipPermission()
+		{
+			try {
+				if (!IsInPictureInPictureMode) {
+					App.OnPictureInPictureModeChanged?.Invoke(null, false);
+					OnBackPressed();
+				}
+			}
+			catch (Exception) { }
+		}
 
-                // This is the PendingIntent that is invoked when a user clicks on the action item.
-                // You need to use distinct request codes for play and pause, or the PendingIntent won't
-                // be properly updated.
-                PendingIntent GetPen(int code)
-                {
-                    return PendingIntent.GetBroadcast(this, code, new Intent(Constants.ACTION_MEDIA_CONTROL).PutExtra(Constants.EXTRA_CONTROL_TYPE, code), 0);
-                }
+		public void ShowPictureInPicture()
+		{
+			try {
+				EnterPipMode();
+			}
+			catch (Exception) { }
+		}
 
-                PendingIntent intent = GetPen(controlType);
+		BroadcastReceiver receiver;
 
-                Icon icon = Icon.CreateWithResource(this, iconId);
+		/// <summary>Updat
+		/// Update the state of pause/resume action item in Picture-in-Picture mode.
+		/// </summary>
+		/// <param name="iconId">The icon to be used.</param>
+		/// <param name="title">The title text.</param>
+		/// <param name="controlType">The type of action.</param>
+		/// <param name="requestCode">The request code for the pending intent.</param>
+		public void UpdatePictureInPictureActions([DrawableRes] int iconId, string title, int controlType)
+		{
+			try {
+				var actions = new List<RemoteAction>();
 
-                var context = Application.Context;
-                if (App.currentVideoStatus.isLoaded) {
-                    actions.Add(new RemoteAction(Icon.CreateWithResource(context, Resource.Drawable.netflixSkipMobileBackEmpty), "Back", "Seek Back", GetPen((int)App.PlayerEventType.SeekBack)));
-                    actions.Add(new RemoteAction(icon, title, title, intent));
+				// This is the PendingIntent that is invoked when a user clicks on the action item.
+				// You need to use distinct request codes for play and pause, or the PendingIntent won't
+				// be properly updated.
+				PendingIntent GetPen(int code)
+				{
+					return PendingIntent.GetBroadcast(this, code, new Intent(Constants.ACTION_MEDIA_CONTROL).PutExtra(Constants.EXTRA_CONTROL_TYPE, code), 0);
+				}
 
-                    if (App.currentVideoStatus.shouldSkip) {
-                        actions.Add(new RemoteAction(Icon.CreateWithResource(context, Resource.Drawable.baseline_skip_next_white_48dp), "Skip", "Skip", GetPen((int)App.PlayerEventType.SkipCurrentChapter)));
-                    }
-                    else {
-                        actions.Add(new RemoteAction(Icon.CreateWithResource(context, Resource.Drawable.netflixSkipMobileEmpty), "Forward", "Seek Forward", GetPen((int)App.PlayerEventType.SeekForward)));
-                    }
-                }
-                else {
-                    actions.Add(new RemoteAction(Icon.CreateWithResource(context, Resource.Drawable.baseline_skip_previous_white_48dp), "Previous Mirror", "Previous Mirror", GetPen((int)App.PlayerEventType.PrevMirror)));
-                    //actions.Add(new RemoteAction(Icon.CreateWithResource(context, Resource.Drawable.baseline_stop_white_48dp), "Stop", "Stop", GetPen((int)App.PlayerEventType.Stop)));
-                    actions.Add(new RemoteAction(Icon.CreateWithResource(context, Resource.Drawable.baseline_skip_next_white_48dp), "Next Mirror", "Next Mirror", GetPen((int)App.PlayerEventType.NextMirror)));
-                }
-                // MAX 3 ACTIONS
-                /*if (App.currentVideoStatus.hasNextEpisode) {
+				PendingIntent intent = GetPen(controlType);
+
+				Icon icon = Icon.CreateWithResource(this, iconId);
+
+				var context = Application.Context;
+				if (App.currentVideoStatus.isLoaded) {
+					actions.Add(new RemoteAction(Icon.CreateWithResource(context, Resource.Drawable.netflixSkipMobileBackEmpty), "Back", "Seek Back", GetPen((int)App.PlayerEventType.SeekBack)));
+					actions.Add(new RemoteAction(icon, title, title, intent));
+
+					if (App.currentVideoStatus.shouldSkip) {
+						actions.Add(new RemoteAction(Icon.CreateWithResource(context, Resource.Drawable.baseline_skip_next_white_48dp), "Skip", "Skip", GetPen((int)App.PlayerEventType.SkipCurrentChapter)));
+					}
+					else {
+						actions.Add(new RemoteAction(Icon.CreateWithResource(context, Resource.Drawable.netflixSkipMobileEmpty), "Forward", "Seek Forward", GetPen((int)App.PlayerEventType.SeekForward)));
+					}
+				}
+				else {
+					actions.Add(new RemoteAction(Icon.CreateWithResource(context, Resource.Drawable.baseline_skip_previous_white_48dp), "Previous Mirror", "Previous Mirror", GetPen((int)App.PlayerEventType.PrevMirror)));
+					//actions.Add(new RemoteAction(Icon.CreateWithResource(context, Resource.Drawable.baseline_stop_white_48dp), "Stop", "Stop", GetPen((int)App.PlayerEventType.Stop)));
+					actions.Add(new RemoteAction(Icon.CreateWithResource(context, Resource.Drawable.baseline_skip_next_white_48dp), "Next Mirror", "Next Mirror", GetPen((int)App.PlayerEventType.NextMirror)));
+				}
+				// MAX 3 ACTIONS
+				/*if (App.currentVideoStatus.hasNextEpisode) {
                     actions.Add(new RemoteAction(Icon.CreateWithResource(context, Resource.Drawable.baseline_skip_next_white_48dp), "Next", "Next Episode", GetPen((int)App.PlayerEventType.NextEpisode)));
                 }*/
 
-                pictureInPictureParamsBuilder.SetActions(actions).Build();
+				pictureInPictureParamsBuilder.SetActions(actions).Build();
 
-                SetPictureInPictureParams(pictureInPictureParamsBuilder.Build());
-            }
-            catch (Exception) {
-            }
-        }
+				SetPictureInPictureParams(pictureInPictureParamsBuilder.Build());
+			}
+			catch (Exception) {
+			}
+		}
 
-        public override void OnPictureInPictureModeChanged(bool isInPictureInPictureMode, Configuration newConfig)
-        {
-            base.OnPictureInPictureModeChanged(isInPictureInPictureMode, newConfig);
-            try {
-                App.IsPictureInPicture = isInPictureInPictureMode;
+		public override void OnPictureInPictureModeChanged(bool isInPictureInPictureMode, Configuration newConfig)
+		{
+			base.OnPictureInPictureModeChanged(isInPictureInPictureMode, newConfig);
+			try {
+				App.IsPictureInPicture = isInPictureInPictureMode;
 
-                if (!isInPictureInPictureMode) {
-                    // Android.App.Application.Context.StartActivity(new Intent(MainActivity.activity.ApplicationContext, typeof(MainActivity)).AddFlags(ActivityFlags.ReorderToFront | ActivityFlags.NewTask));
+				if (!isInPictureInPictureMode) {
+					// Android.App.Application.Context.StartActivity(new Intent(MainActivity.activity.ApplicationContext, typeof(MainActivity)).AddFlags(ActivityFlags.ReorderToFront | ActivityFlags.NewTask));
 
-                }
+				}
 
-                //https://docs.microsoft.com/en-us/samples/xamarin/monodroid-samples/android-o-pictureinpicture/
-                if (isInPictureInPictureMode) {
-                    UpdatePipVideostatus();
-                    // Starts receiving events from action items in PiP mode.
-                    receiver = new PIPBroadcastReceiver(this);
-                    RegisterReceiver(receiver, new IntentFilter(Constants.ACTION_MEDIA_CONTROL));
-                }
-                else {
-                    //  We are out of PiP mode. We can stop receiving events from it.
-                    UnregisterReceiver(receiver);
-                    receiver = null;
+				//https://docs.microsoft.com/en-us/samples/xamarin/monodroid-samples/android-o-pictureinpicture/
+				if (isInPictureInPictureMode) {
+					UpdatePipVideostatus();
+					// Starts receiving events from action items in PiP mode.
+					receiver = new PIPBroadcastReceiver(this);
+					RegisterReceiver(receiver, new IntentFilter(Constants.ACTION_MEDIA_CONTROL));
+				}
+				else {
+					//  We are out of PiP mode. We can stop receiving events from it.
+					UnregisterReceiver(receiver);
+					receiver = null;
 
-                    //   Show the video controls if the video is not playing
-                    /*if (PIPMovieView != null && !PIPMovieView.IsPlaying) {
+					//   Show the video controls if the video is not playing
+					/*if (PIPMovieView != null && !PIPMovieView.IsPlaying) {
                         PIPMovieView.ShowControls();
                      }*/
-                }
-            }
-            catch (Exception) {
-            }
-        }
-        #endregion
+				}
+			}
+			catch (Exception) {
+			}
+		}
+		#endregion
 
-        private static void trustEveryone()
-        {
-            /*
+		private static void trustEveryone()
+		{
+			/*
             HttpsURLConnection.DefaultHostnameVerifier =
                     new Org.Apache.Http.Conn.Ssl.AllowAllHostnameVerifier();
             */
-        }
+		}
 
-        async void ResumeIntentData()
-        {
-            await Task.Delay(1000);
-            print("STARTINTENT");
-            DownloadHandle.ResumeIntents();
-        }
+		async void ResumeIntentData()
+		{
+			await Task.Delay(1000);
+			print("STARTINTENT");
+			DownloadHandle.ResumeIntents();
+		}
 
-        /*
+		public void LogFile(string data, bool nextLine = true)
+		{
+			if (!LOG_STARTUP_DATA) return;
+			string path = GetPath(true, "/cloudstreamlog.txt");
+			var file = new Java.IO.File(path);
+			if (!file.Exists()) {
+				file.CreateNewFile();
+			}
+			Java.IO.FileWriter writer = new Java.IO.FileWriter(file, true);
+			writer.Write(data + (nextLine ? "\n" : ""));
+			writer.Flush();
+			writer.Close();
+		}
+
+		/*
         private static void TaskSchedulerOnUnobservedTaskException(object sender, UnobservedTaskExceptionEventArgs unobservedTaskExceptionEventArgs)
         {
             var newExc = new Exception("TaskSchedulerOnUnobservedTaskException", unobservedTaskExceptionEventArgs.Exception);
             App.ShowNotification("Error", newExc.Message);
         }*/
 
-        public void Killed()
-        {
-            // App.ShowToast("KILLED");
-            //ShowNotification("finish", "Yeet");
+		public void Killed()
+		{
+			// App.ShowToast("KILLED");
+			//ShowNotification("finish", "Yeet");
 #if DEBUG
-            EndDebugging();
+			EndDebugging();
 #endif
-            MainDroid.CancelChromecast(); // TO REMOVE IT, CANT INTERACT WITHOUT THE CORE
-            DownloadHandle.OnKilled();
-            App.OnAppKilled?.Invoke(null, EventArgs.Empty);
-        }
+			MainDroid.CancelChromecast(); // TO REMOVE IT, CANT INTERACT WITHOUT THE CORE
+			DownloadHandle.OnKilled();
+			App.OnAppKilled?.Invoke(null, EventArgs.Empty);
+		}
 
-        protected override void OnDestroy()
-        {
-            Killed();
-            base.OnDestroy();
-        }
+		protected override void OnDestroy()
+		{
+			Killed();
+			base.OnDestroy();
+		}
 
-        protected override void OnStop()
-        {
-            /*
+		protected override void OnStop()
+		{
+			/*
             if (MainActivity.activity.ShouldShowPictureInPicture()) {
                 activity.ShowPictureInPicture();
             }
             else {*/
-            //     }
-            //if (!App.IsPictureInPicture) {
-            App.OnAppNotInForground?.Invoke(null, EventArgs.Empty);
-            //}
-            base.OnStop();
-        }
+			//     }
+			//if (!App.IsPictureInPicture) {
+			App.OnAppNotInForground?.Invoke(null, EventArgs.Empty);
+			//}
+			base.OnStop();
+		}
 
-        protected override void OnPause()
-        {
-            base.OnPause();
-        }
+		protected override void OnPause()
+		{
+			base.OnPause();
+		}
 
-        protected override void OnUserLeaveHint()
-        {
-            base.OnUserLeaveHint();
-            /*  if (MainActivity.activity.ShouldShowPictureInPicture()) {
+		protected override void OnUserLeaveHint()
+		{
+			base.OnUserLeaveHint();
+			/*  if (MainActivity.activity.ShouldShowPictureInPicture()) {
                   activity.ShowPictureInPicture();
               }*/
-        }
+		}
 
-        protected override void OnRestart()
-        {
-            base.OnRestart();
-            //  if (!App.IsPictureInPicture) {
-            if (!App.IsPictureInPicture) {
-                App.OnAppReopen?.Invoke(null, EventArgs.Empty);
-            }
-            //  }
-        }
+		protected override void OnRestart()
+		{
+			base.OnRestart();
+			//  if (!App.IsPictureInPicture) {
+			if (!App.IsPictureInPicture) {
+				App.OnAppReopen?.Invoke(null, EventArgs.Empty);
+			}
+			//  }
+		}
 
-        protected override void OnResume()
-        {
-            base.OnResume();
-            if (!App.IsPictureInPicture) {
-                OnAppResume?.Invoke(null, EventArgs.Empty);
-            }
-        }
+		protected override void OnResume()
+		{
+			base.OnResume();
+			if (!App.IsPictureInPicture) {
+				OnAppResume?.Invoke(null, EventArgs.Empty);
+			}
+		}
 
 
-        public override void OnRequestPermissionsResult(int requestCode, string[] permissions, [GeneratedEnum] Android.Content.PM.Permission[] grantResults)
-        {
-            Xamarin.Essentials.Platform.OnRequestPermissionsResult(requestCode, permissions, grantResults);
+		public override void OnRequestPermissionsResult(int requestCode, string[] permissions, [GeneratedEnum] Android.Content.PM.Permission[] grantResults)
+		{
+			Xamarin.Essentials.Platform.OnRequestPermissionsResult(requestCode, permissions, grantResults);
 
-            base.OnRequestPermissionsResult(requestCode, permissions, grantResults);
-        }
+			base.OnRequestPermissionsResult(requestCode, permissions, grantResults);
+		}
 
-        public static int REQUEST_START = 112;
-        private static void RequestPermission(Activity context)
-        {
-            try {
-                List<string> requests = new List<string>() {
-                Manifest.Permission.WriteExternalStorage, Manifest.Permission.RequestInstallPackages,Manifest.Permission.InstallPackages,Manifest.Permission.WriteSettings,  //Manifest.Permission.Bluetooth
+		public static int REQUEST_START = 112;
+		private static void RequestPermission(Activity context)
+		{
+			try {
+				List<string> requests = new List<string>() {
+				Manifest.Permission.WriteExternalStorage, Manifest.Permission.RequestInstallPackages,Manifest.Permission.InstallPackages,Manifest.Permission.WriteSettings,  //Manifest.Permission.Bluetooth
             };
 
-                for (int i = 0; i < requests.Count; i++) {
-                    bool hasPermission = (ContextCompat.CheckSelfPermission(context, requests[i]) == Permission.Granted);
-                    if (!hasPermission) {
-                        ActivityCompat.RequestPermissions(context,
-                           new string[] { requests[i] },
-                         REQUEST_START + i);
-                    }
-                }
-            }
-            catch (Exception _ex) {
-                error(_ex);
-            }
-        }
-    }
+				for (int i = 0; i < requests.Count; i++) {
+					bool hasPermission = (ContextCompat.CheckSelfPermission(context, requests[i]) == Permission.Granted);
+					if (!hasPermission) {
+						ActivityCompat.RequestPermissions(context,
+						   new string[] { requests[i] },
+						 REQUEST_START + i);
+					}
+				}
+			}
+			catch (Exception _ex) {
+				error(_ex);
+			}
+		}
+	}
 
 
-    public static class MainHelper
-    {
-        public static AlarmManager GetAlarmManager()
-        {
-            var alarmManager = Application.Context.GetSystemService(Context.AlarmService) as AlarmManager;
-            return alarmManager;
-        }
+	public static class MainHelper
+	{
+		public static AlarmManager GetAlarmManager()
+		{
+			var alarmManager = Application.Context.GetSystemService(Context.AlarmService) as AlarmManager;
+			return alarmManager;
+		}
 
-        public static string GetPath(bool mainPath, string extraPath)
-        {
-            return (mainPath ? (Android.OS.Environment.ExternalStorageDirectory + "/" + Android.OS.Environment.DirectoryDownloads) : (Android.OS.Environment.ExternalStorageDirectory + "/" + Android.OS.Environment.DirectoryDownloads + "/Extra")) + extraPath;
-        }
+		public static string GetPath(bool mainPath, string extraPath)
+		{
+			return (mainPath ? (Android.OS.Environment.ExternalStorageDirectory + "/" + Android.OS.Environment.DirectoryDownloads) : (Android.OS.Environment.ExternalStorageDirectory + "/" + Android.OS.Environment.DirectoryDownloads + "/Extra")) + extraPath;
+		}
 
-        public static void ShowBlackToast(string msg, double duration)
-        {
-            Device.BeginInvokeOnMainThread(() => {
-                ToastLength toastLength = ToastLength.Short;
-                if (duration >= 3) {
-                    toastLength = ToastLength.Long;
-                }
-                Toast toast = Toast.MakeText(Application.Context, Html.FromHtml("<font color='#ffffff' >" + msg + "</font>"), toastLength);
-                toast.SetGravity(GravityFlags.CenterHorizontal | GravityFlags.Top, 0, 0);
-                var view = toast.View;
-                //Gets the actual oval background of the Toast then sets the colour filter
-                view.SetBackgroundColor(new Android.Graphics.Color(0, 0, 0, 10));//.SetColorFilter(Resource.dtra, PorterDuff.Mode.SRC_IN);
-                toast.Show();
-            });
-        }
-    }
-
-
-    public class BluetoothServiceListener : Java.Lang.Object
-        , IBluetoothProfileServiceListener
-    {
-        public BluetoothHeadset btHeadset;
-        public void TryToDispose()
-        {
-            print("TRYIGNT O DISPOSE");
-            //  throw new NotImplementedException();
-        }
-
-        public void OnServiceConnected(ProfileType profile, IBluetoothProfile proxy)
-        {
-            print("ON CONNECTED");
-            if (profile == ProfileType.Headset) {
-                btHeadset = (BluetoothHeadset)proxy;
-            }
-        }
-
-        public void OnServiceDisconnected(ProfileType profile)
-        {
-            print("ON DISSSS:S::S:S:");
-            if (profile == ProfileType.Headset) {
-                btHeadset = null;
-            }
-        }
-    }
-
-    public class MainDroid : App.IPlatformDep
-    {
-        public void PictureInPicture()
-        {
-            MainActivity.activity.ShowPictureInPicture();
-            //.SetActions(new List<RemoteAction>() { new RemoteAction() { } })
-            // TESTING STUFF
-            //  var _b = new PictureInPictureParams.Builder().Build();
-            //  MainActivity.activity.EnterPictureInPictureMode(_b);
-        }
+		public static void ShowBlackToast(string msg, double duration)
+		{
+			Device.BeginInvokeOnMainThread(() => {
+				ToastLength toastLength = ToastLength.Short;
+				if (duration >= 3) {
+					toastLength = ToastLength.Long;
+				}
+				Toast toast = Toast.MakeText(Application.Context, Html.FromHtml("<font color='#ffffff' >" + msg + "</font>"), toastLength);
+				toast.SetGravity(GravityFlags.CenterHorizontal | GravityFlags.Top, 0, 0);
+				var view = toast.View;
+				//Gets the actual oval background of the Toast then sets the colour filter
+				view.SetBackgroundColor(new Android.Graphics.Color(0, 0, 0, 10));//.SetColorFilter(Resource.dtra, PorterDuff.Mode.SRC_IN);
+				toast.Show();
+			});
+		}
+	}
 
 
-        /*
+	public class BluetoothServiceListener : Java.Lang.Object
+		, IBluetoothProfileServiceListener
+	{
+		public BluetoothHeadset btHeadset;
+		public void TryToDispose()
+		{
+			print("TRYIGNT O DISPOSE");
+			//  throw new NotImplementedException();
+		}
+
+		public void OnServiceConnected(ProfileType profile, IBluetoothProfile proxy)
+		{
+			print("ON CONNECTED");
+			if (profile == ProfileType.Headset) {
+				btHeadset = (BluetoothHeadset)proxy;
+			}
+		}
+
+		public void OnServiceDisconnected(ProfileType profile)
+		{
+			print("ON DISSSS:S::S:S:");
+			if (profile == ProfileType.Headset) {
+				btHeadset = null;
+			}
+		}
+	}
+
+	public class MainDroid : App.IPlatformDep
+	{
+		public void PictureInPicture()
+		{
+			MainActivity.activity.ShowPictureInPicture();
+			//.SetActions(new List<RemoteAction>() { new RemoteAction() { } })
+			// TESTING STUFF
+			//  var _b = new PictureInPictureParams.Builder().Build();
+			//  MainActivity.activity.EnterPictureInPictureMode(_b);
+		}
+
+
+		/*
         BluetoothAdapter bluetoothAdapter = BluetoothAdapter.DefaultAdapter;
         BluetoothServiceListener bluetoothServiceListener = new BluetoothServiceListener();
 
@@ -1529,257 +1580,257 @@ namespace CloudStreamForms.Droid
         }*/
 
 
-        public void UpdateDownload(int id, int state)
-        {
-            if (state == -1) {
-                if (DownloadHandle.isPaused.ContainsKey(id)) {
-                    DownloadHandle.isPaused.Remove(id);
-                }
-            }
-            else {
-                try {
-                    DownloadHandle.isPaused[id] = state;
-                }
-                catch (Exception _ex) {
-                    error(_ex);
-                }
-            }
-        }
-        /**
+		public void UpdateDownload(int id, int state)
+		{
+			if (state == -1) {
+				if (DownloadHandle.isPaused.ContainsKey(id)) {
+					DownloadHandle.isPaused.Remove(id);
+				}
+			}
+			else {
+				try {
+					DownloadHandle.isPaused[id] = state;
+				}
+				catch (Exception _ex) {
+					error(_ex);
+				}
+			}
+		}
+		/**
   * The audio latency has not been estimated yet
   */
-        private const long AUDIO_LATENCY_NOT_ESTIMATED = long.MinValue + 1;
+		private const long AUDIO_LATENCY_NOT_ESTIMATED = long.MinValue + 1;
 
-        /**
+		/**
          * The audio latency default value if we cannot estimate it
          */
-        private const long DEFAULT_AUDIO_LATENCY = 100L * 1000L * 1000L; // 100ms
+		private const long DEFAULT_AUDIO_LATENCY = 100L * 1000L * 1000L; // 100ms
 
-        private static long FramesToNanoSeconds(long frames)
-        {
-            return frames * 1000000000L / 16000;
-        }
+		private static long FramesToNanoSeconds(long frames)
+		{
+			return frames * 1000000000L / 16000;
+		}
 
-        private static long NanoTime()
-        {
-            long nano = 10000L * Stopwatch.GetTimestamp();
-            nano /= TimeSpan.TicksPerMillisecond;
-            nano *= 100L;
-            return nano;
-        }
+		private static long NanoTime()
+		{
+			long nano = 10000L * Stopwatch.GetTimestamp();
+			nano /= TimeSpan.TicksPerMillisecond;
+			nano *= 100L;
+			return nano;
+		}
 
-        // Source: https://stackoverflow.com/a/52559996/497368
-        private long GetDelay()
-        {
-            long estimatedAudioLatency = AUDIO_LATENCY_NOT_ESTIMATED;
-            long audioFramesWritten = 0;
-            var outputBufferSize = AudioTrack.GetMinBufferSize(16000, ChannelOut.Stereo, Android.Media.Encoding.Pcm16bit);
+		// Source: https://stackoverflow.com/a/52559996/497368
+		private long GetDelay()
+		{
+			long estimatedAudioLatency = AUDIO_LATENCY_NOT_ESTIMATED;
+			long audioFramesWritten = 0;
+			var outputBufferSize = AudioTrack.GetMinBufferSize(16000, ChannelOut.Stereo, Android.Media.Encoding.Pcm16bit);
 
-            AudioTrack track = new AudioTrack(Android.Media.Stream.Music, 16000, ChannelOut.Mono, Android.Media.Encoding.Pcm16bit, outputBufferSize, AudioTrackMode.Stream);//AudioManager.USE_DEFAULT_STREAM_TYPE, 16000, AudioFormat.CHANNEL_OUT_MONO, AudioFormat.ENCODING_PCM_16BIT, outputBufferSize, AudioTrack.MODE_STREAM);
+			AudioTrack track = new AudioTrack(Android.Media.Stream.Music, 16000, ChannelOut.Mono, Android.Media.Encoding.Pcm16bit, outputBufferSize, AudioTrackMode.Stream);//AudioManager.USE_DEFAULT_STREAM_TYPE, 16000, AudioFormat.CHANNEL_OUT_MONO, AudioFormat.ENCODING_PCM_16BIT, outputBufferSize, AudioTrack.MODE_STREAM);
 
-            // First method. SDK >= 19.
-            if ((int)Build.VERSION.SdkInt >= 19 && track != null) {
+			// First method. SDK >= 19.
+			if ((int)Build.VERSION.SdkInt >= 19 && track != null) {
 
-                AudioTimestamp audioTimestamp = new AudioTimestamp();
-                if (track.GetTimestamp(audioTimestamp)) {
+				AudioTimestamp audioTimestamp = new AudioTimestamp();
+				if (track.GetTimestamp(audioTimestamp)) {
 
-                    // Calculate the number of frames between our known frame and the write index
-                    long frameIndexDelta = audioFramesWritten - audioTimestamp.FramePosition;
+					// Calculate the number of frames between our known frame and the write index
+					long frameIndexDelta = audioFramesWritten - audioTimestamp.FramePosition;
 
-                    // Calculate the time which the next frame will be presented
-                    long frameTimeDelta = FramesToNanoSeconds(frameIndexDelta);
-                    long nextFramePresentationTime = audioTimestamp.NanoTime + frameTimeDelta;
+					// Calculate the time which the next frame will be presented
+					long frameTimeDelta = FramesToNanoSeconds(frameIndexDelta);
+					long nextFramePresentationTime = audioTimestamp.NanoTime + frameTimeDelta;
 
-                    // Assume that the next frame will be written at the current time
-                    long nextFrameWriteTime = NanoTime();
+					// Assume that the next frame will be written at the current time
+					long nextFrameWriteTime = NanoTime();
 
-                    // Calculate the latency
-                    estimatedAudioLatency = nextFramePresentationTime - nextFrameWriteTime;
-                }
-            }
+					// Calculate the latency
+					estimatedAudioLatency = nextFramePresentationTime - nextFrameWriteTime;
+				}
+			}
 
-            // Second method. SDK >= 18.
-            if (estimatedAudioLatency == AUDIO_LATENCY_NOT_ESTIMATED && (int)Build.VERSION.SdkInt >= 18) {
-                System.Reflection.MethodInfo getLatencyMethod;
-                try {
-                    getLatencyMethod = typeof(AudioTrack).GetMethod("getLatency");
-                    estimatedAudioLatency = (int)getLatencyMethod.Invoke(track, (Object[])null) * 1000000L;
-                }
-                catch (Exception ignored) {
-                    print("IGNORED:::2222::: " + ignored);
-                }
-            }
+			// Second method. SDK >= 18.
+			if (estimatedAudioLatency == AUDIO_LATENCY_NOT_ESTIMATED && (int)Build.VERSION.SdkInt >= 18) {
+				System.Reflection.MethodInfo getLatencyMethod;
+				try {
+					getLatencyMethod = typeof(AudioTrack).GetMethod("getLatency");
+					estimatedAudioLatency = (int)getLatencyMethod.Invoke(track, (Object[])null) * 1000000L;
+				}
+				catch (Exception ignored) {
+					print("IGNORED:::2222::: " + ignored);
+				}
+			}
 
-            // If no method has successfully gave us a value, let's try a third method
-            if (estimatedAudioLatency == AUDIO_LATENCY_NOT_ESTIMATED) {
-                AudioManager audioManager = Application.Context.GetSystemService(Context.AudioService) as AudioManager;
-                try {
-                    System.Reflection.MethodInfo getOutputLatencyMethod = typeof(AudioManager).GetMethod("getOutputLatency");
-                    estimatedAudioLatency = (int)getOutputLatencyMethod.Invoke(audioManager, new object[] { AudioContentType.Music }) * 1000000L;
-                }
-                catch (Exception ignored) {
-                    print("IGNORED::: " + ignored);
-                }
-            }
+			// If no method has successfully gave us a value, let's try a third method
+			if (estimatedAudioLatency == AUDIO_LATENCY_NOT_ESTIMATED) {
+				AudioManager audioManager = Application.Context.GetSystemService(Context.AudioService) as AudioManager;
+				try {
+					System.Reflection.MethodInfo getOutputLatencyMethod = typeof(AudioManager).GetMethod("getOutputLatency");
+					estimatedAudioLatency = (int)getOutputLatencyMethod.Invoke(audioManager, new object[] { AudioContentType.Music }) * 1000000L;
+				}
+				catch (Exception ignored) {
+					print("IGNORED::: " + ignored);
+				}
+			}
 
-            // No method gave us a value. Let's use a default value. Better than nothing.
-            if (estimatedAudioLatency == AUDIO_LATENCY_NOT_ESTIMATED) {
-                print("DEF LATENCY");
-                estimatedAudioLatency = DEFAULT_AUDIO_LATENCY;
-            }
+			// No method gave us a value. Let's use a default value. Better than nothing.
+			if (estimatedAudioLatency == AUDIO_LATENCY_NOT_ESTIMATED) {
+				print("DEF LATENCY");
+				estimatedAudioLatency = DEFAULT_AUDIO_LATENCY;
+			}
 
-            return estimatedAudioLatency;
-        }
+			return estimatedAudioLatency;
+		}
 
-        public DownloadProgressInfo GetDownloadProgressInfo(int id, string fileUrl)
-        {
-            //  return new DownloadProgressInfo() { bytesDownloaded = 10, totalBytes = 100, state = DownloadState.Downloading };
-            //  Stopwatch s = new Stopwatch();
-            try {
-                DownloadProgressInfo progressInfo = new DownloadProgressInfo();
+		public DownloadProgressInfo GetDownloadProgressInfo(int id, string fileUrl)
+		{
+			//  return new DownloadProgressInfo() { bytesDownloaded = 10, totalBytes = 100, state = DownloadState.Downloading };
+			//  Stopwatch s = new Stopwatch();
+			try {
+				DownloadProgressInfo progressInfo = new DownloadProgressInfo();
 
-                bool downloadingOrPaused = DownloadHandle.isPaused.ContainsKey(id);
+				bool downloadingOrPaused = DownloadHandle.isPaused.ContainsKey(id);
 
-                var file = new Java.IO.File(fileUrl);
+				var file = new Java.IO.File(fileUrl);
 
-                //  s.Start();
-                bool exists = file.Exists();
+				//  s.Start();
+				bool exists = file.Exists();
 
-                if (downloadingOrPaused) {
-                    int paused = DownloadHandle.isPaused[id];
-                    progressInfo.state = paused == 1 ? DownloadState.Paused : DownloadState.Downloading;
-                }
-                else {
-                    //file.Length()
-                    progressInfo.state = exists ? DownloadState.Downloaded : DownloadState.NotDownloaded;
-                }
+				if (downloadingOrPaused) {
+					int paused = DownloadHandle.isPaused[id];
+					progressInfo.state = paused == 1 ? DownloadState.Paused : DownloadState.Downloading;
+				}
+				else {
+					//file.Length()
+					progressInfo.state = exists ? DownloadState.Downloaded : DownloadState.NotDownloaded;
+				}
 
-                if (progressInfo.bytesDownloaded < progressInfo.totalBytes - 10 && progressInfo.state == DownloadState.Downloaded) {
-                    progressInfo.state = DownloadState.NotDownloaded;
-                }
-                print("CONTAINS ::>>" + DownloadHandle.isStartProgress.ContainsKey(id));
-                progressInfo.bytesDownloaded = (exists ? (file.Length()) : 0) + (DownloadHandle.isStartProgress.ContainsKey(id) ? 1 : 0);
+				if (progressInfo.bytesDownloaded < progressInfo.totalBytes - 10 && progressInfo.state == DownloadState.Downloaded) {
+					progressInfo.state = DownloadState.NotDownloaded;
+				}
+				print("CONTAINS ::>>" + DownloadHandle.isStartProgress.ContainsKey(id));
+				progressInfo.bytesDownloaded = (exists ? (file.Length()) : 0) + (DownloadHandle.isStartProgress.ContainsKey(id) ? 1 : 0);
 
-                //                        App.SetKey("dlength", "id" + id, fileLength);
+				//                        App.SetKey("dlength", "id" + id, fileLength);
 
-                progressInfo.totalBytes = exists ? App.GetKey<int>("dlength", "id" + id, 0) : 0;
-                print("STATE:::::==" + progressInfo.totalBytes + "|" + progressInfo.bytesDownloaded);
+				progressInfo.totalBytes = exists ? App.GetKey<int>("dlength", "id" + id, 0) : 0;
+				print("STATE:::::==" + progressInfo.totalBytes + "|" + progressInfo.bytesDownloaded);
 
-                //  s.Stop();
-                //  print("STIME: " + s.ElapsedMilliseconds);
+				//  s.Stop();
+				//  print("STIME: " + s.ElapsedMilliseconds);
 
-                if (!exists) {
-                    return progressInfo;
-                }
+				if (!exists) {
+					return progressInfo;
+				}
 
-                if (progressInfo.bytesDownloaded >= progressInfo.totalBytes - 10) {
-                    progressInfo.state = DownloadState.Downloaded;
-                }
-                else if (progressInfo.state == DownloadState.Downloaded) {
-                    progressInfo.state = DownloadState.NotDownloaded;
-                }
+				if (progressInfo.bytesDownloaded >= progressInfo.totalBytes - 10) {
+					progressInfo.state = DownloadState.Downloaded;
+				}
+				else if (progressInfo.state == DownloadState.Downloaded) {
+					progressInfo.state = DownloadState.NotDownloaded;
+				}
 
-                if (progressInfo.bytesDownloaded < 0 || progressInfo.totalBytes < 0) {
-                    progressInfo.state = DownloadState.NotDownloaded;
-                    progressInfo.totalBytes = 0;
-                }
+				if (progressInfo.bytesDownloaded < 0 || progressInfo.totalBytes < 0) {
+					progressInfo.state = DownloadState.NotDownloaded;
+					progressInfo.totalBytes = 0;
+				}
 
-                return progressInfo;
-
-
-            }
-            catch (Exception _ex) {
-                error(_ex);
-                return new DownloadProgressInfo();
-            }
-        }
-
-        public void SetBrightness(double opacity)
-        {
-            Android.Provider.Settings.System.PutInt(MainActivity.activity.ContentResolver, Android.Provider.Settings.System.ScreenBrightness, (int)(opacity * 255));
-        }
-
-        public double GetBrightness()
-        {
-            return Android.Provider.Settings.System.GetInt(MainActivity.activity.ContentResolver, Android.Provider.Settings.System.ScreenBrightness) / 255.0;
-        }
+				return progressInfo;
 
 
-        // FROM https://github.com/edsnider/localnotificationsplugin/blob/master/src/Plugin.LocalNotifications.Android/LocalNotificationsImplementation.cs
+			}
+			catch (Exception _ex) {
+				error(_ex);
+				return new DownloadProgressInfo();
+			}
+		}
+
+		public void SetBrightness(double opacity)
+		{
+			Android.Provider.Settings.System.PutInt(MainActivity.activity.ContentResolver, Android.Provider.Settings.System.ScreenBrightness, (int)(opacity * 255));
+		}
+
+		public double GetBrightness()
+		{
+			return Android.Provider.Settings.System.GetInt(MainActivity.activity.ContentResolver, Android.Provider.Settings.System.ScreenBrightness) / 255.0;
+		}
 
 
-        /// <summary>
-        /// Get or Set Resource Icon to display
-        /// </summary>
-        public static int NotificationIconId { get; set; }
-        static string _packageName => Application.Context.PackageName;
-          
-        public static void CancelFutureNotification(int id)
-        {
-            var context = MainActivity.activity.ApplicationContext;
-
-            var alarmManager = GetAlarmManager();
-            var _resultIntent = new Intent(context, typeof(AlertReceiver));
-            var pending = PendingIntent.GetBroadcast(context, id,
-                    _resultIntent,
-                   PendingIntentFlags.CancelCurrent
-                    );
-            alarmManager.Cancel(pending);
-        }
-         
-        public void ShowNotIntentAsync(string title, string body, int id, string titleId, string titleName, DateTime? time = null, string bigIconUrl = "")
-        {
-
-            var localNot = new LocalNot() { title = title, body = body, id = id, data = titleId == "-1" ? ("cloudstreamforms:" + titleId + "Name=" + titleName + "=EndAll") : null, bigIcon = bigIconUrl, autoCancel = true, mediaStyle = true, notificationImportance = (int)NotificationImportance.Default, showWhen = true, when = time, smallIcon = PublicNot };
+		// FROM https://github.com/edsnider/localnotificationsplugin/blob/master/src/Plugin.LocalNotifications.Android/LocalNotificationsImplementation.cs
 
 
-            if (time == null) {
-                ShowLocalNot(localNot);
-            }
-            else {
-                print("SHOWS NOTIFICATION== " + body + " in " + ((DateTime)time).Subtract(DateTime.UtcNow).TotalSeconds);
-                var context = MainActivity.activity.ApplicationContext;
+		/// <summary>
+		/// Get or Set Resource Icon to display
+		/// </summary>
+		public static int NotificationIconId { get; set; }
+		static string _packageName => Application.Context.PackageName;
 
-                var _resultIntent = new Intent(context, typeof(AlertReceiver));
-                //  _resultIntent.PutExtra("data", App.ConvertToString(localNot));
+		public static void CancelFutureNotification(int id)
+		{
+			var context = MainActivity.activity.ApplicationContext;
 
+			var alarmManager = GetAlarmManager();
+			var _resultIntent = new Intent(context, typeof(AlertReceiver));
+			var pending = PendingIntent.GetBroadcast(context, id,
+					_resultIntent,
+				   PendingIntentFlags.CancelCurrent
+					);
+			alarmManager.Cancel(pending);
+		}
 
-                // IF NOT BITSERALIZER IS AVALIBLE
-                foreach (var prop in typeof(LocalNot).GetFields()) {
-                    if (prop.FieldType == typeof(int)) {
-                        _resultIntent.PutExtra(prop.Name, (int)prop.GetValue(localNot));//(int)prop.GetValue(localNot));
-                    }
-                    if (prop.FieldType == typeof(float)) {
-                        _resultIntent.PutExtra(prop.Name, (float)prop.GetValue(localNot));//(int)prop.GetValue(localNot));
-                    }
-                    if (prop.FieldType == typeof(bool)) {
-                        _resultIntent.PutExtra(prop.Name, (bool)prop.GetValue(localNot));//(int)prop.GetValue(localNot));
-                    }
-                    if (prop.FieldType == typeof(string)) {
-                        _resultIntent.PutExtra(prop.Name, (string)prop.GetValue(localNot));//(int)prop.GetValue(localNot));
-                    }
-                    if (prop.FieldType == typeof(DateTime)) {
-                        _resultIntent.PutExtra(prop.Name, ((DateTime)prop.GetValue(localNot)).ToLongDateString());//(int)prop.GetValue(localNot));
-                    }
-                    if (prop.FieldType.IsEnum) {
-                        _resultIntent.PutExtra(prop.Name, (int)prop.GetValue(localNot));//(int)prop.GetValue(localNot));
-                    }
-                }
+		public void ShowNotIntentAsync(string title, string body, int id, string titleId, string titleName, DateTime? time = null, string bigIconUrl = "")
+		{
+
+			var localNot = new LocalNot() { title = title, body = body, id = id, data = titleId == "-1" ? ("cloudstreamforms:" + titleId + "Name=" + titleName + "=EndAll") : null, bigIcon = bigIconUrl, autoCancel = true, mediaStyle = true, notificationImportance = (int)NotificationImportance.Default, showWhen = true, when = time, smallIcon = PublicNot };
 
 
-                _resultIntent.PutExtra("title", localNot.title);
+			if (time == null) {
+				ShowLocalNot(localNot);
+			}
+			else {
+				print("SHOWS NOTIFICATION== " + body + " in " + ((DateTime)time).Subtract(DateTime.UtcNow).TotalSeconds);
+				var context = MainActivity.activity.ApplicationContext;
 
-                var pending = PendingIntent.GetBroadcast(context, id,
-                     _resultIntent,
-                    PendingIntentFlags.CancelCurrent
-                     ); 
+				var _resultIntent = new Intent(context, typeof(AlertReceiver));
+				//  _resultIntent.PutExtra("data", App.ConvertToString(localNot));
 
-                var triggerTime = CurrentTimeMillis(((DateTime)time).Add(DateTime.UtcNow.Subtract(DateTime.Now)));// NotifyTimeInMilliseconds((DateTime)time);
-                var alarmManager = GetAlarmManager();
 
-                alarmManager.SetExactAndAllowWhileIdle(AlarmType.RtcWakeup, triggerTime, pending);
+				// IF NOT BITSERALIZER IS AVALIBLE
+				foreach (var prop in typeof(LocalNot).GetFields()) {
+					if (prop.FieldType == typeof(int)) {
+						_resultIntent.PutExtra(prop.Name, (int)prop.GetValue(localNot));//(int)prop.GetValue(localNot));
+					}
+					if (prop.FieldType == typeof(float)) {
+						_resultIntent.PutExtra(prop.Name, (float)prop.GetValue(localNot));//(int)prop.GetValue(localNot));
+					}
+					if (prop.FieldType == typeof(bool)) {
+						_resultIntent.PutExtra(prop.Name, (bool)prop.GetValue(localNot));//(int)prop.GetValue(localNot));
+					}
+					if (prop.FieldType == typeof(string)) {
+						_resultIntent.PutExtra(prop.Name, (string)prop.GetValue(localNot));//(int)prop.GetValue(localNot));
+					}
+					if (prop.FieldType == typeof(DateTime)) {
+						_resultIntent.PutExtra(prop.Name, ((DateTime)prop.GetValue(localNot)).ToLongDateString());//(int)prop.GetValue(localNot));
+					}
+					if (prop.FieldType.IsEnum) {
+						_resultIntent.PutExtra(prop.Name, (int)prop.GetValue(localNot));//(int)prop.GetValue(localNot));
+					}
+				}
 
-                /*
+
+				_resultIntent.PutExtra("title", localNot.title);
+
+				var pending = PendingIntent.GetBroadcast(context, id,
+					 _resultIntent,
+					PendingIntentFlags.CancelCurrent
+					 );
+
+				var triggerTime = CurrentTimeMillis(((DateTime)time).Add(DateTime.UtcNow.Subtract(DateTime.Now)));// NotifyTimeInMilliseconds((DateTime)time);
+				var alarmManager = GetAlarmManager();
+
+				alarmManager.SetExactAndAllowWhileIdle(AlarmType.RtcWakeup, triggerTime, pending);
+
+				/*
                 var alarm = Application.Context.GetSystemService(Context.AlarmService) as AlarmManager;
                 var _testIntent = new Intent(context, typeof(AlertReceiver));
 
@@ -1787,9 +1838,9 @@ namespace CloudStreamForms.Droid
 
                 alarm.SetExactAndAllowWhileIdle(AlarmType.RtcWakeup, MainDroid.CurrentTimeMillis(DateTime.UtcNow.AddSeconds(5)), pending);*/
 
-            }
+			}
 
-            /*var builder = new Notification.Builder(Application.Context);
+			/*var builder = new Notification.Builder(Application.Context);
             builder.SetContentTitle(title);
             builder.SetContentText(body);
             builder.SetAutoCancel(true);
@@ -1867,160 +1918,160 @@ namespace CloudStreamForms.Droid
 
                 _manager.Notify(id, builder.Build());
             }*/
-        }
+		}
 
 
-        public void ShowNotIntent(string title, string body, int id, string titleId, string titleName, DateTime? time = null, string bigIconUrl = "")
-        {
-            ShowNotIntentAsync(title, body, id, titleId, titleName, time, bigIconUrl);
-        }
+		public void ShowNotIntent(string title, string body, int id, string titleId, string titleName, DateTime? time = null, string bigIconUrl = "")
+		{
+			ShowNotIntentAsync(title, body, id, titleId, titleName, time, bigIconUrl);
+		}
 
-        public const int CHROME_CAST_NOTIFICATION_ID = 1337;
+		public const int CHROME_CAST_NOTIFICATION_ID = 1337;
 
-        public static void CancelChromecast()
-        {
-            _manager.Cancel(CHROME_CAST_NOTIFICATION_ID);
-        }
+		public static void CancelChromecast()
+		{
+			_manager.Cancel(CHROME_CAST_NOTIFICATION_ID);
+		}
 
-        readonly static MediaSession mediaSession = new MediaSession(Application.Context, "Chromecast");
+		readonly static MediaSession mediaSession = new MediaSession(Application.Context, "Chromecast");
 
-        public static async void UpdateChromecastNotification(string title, string body, bool isPaused, string poster)
-        {
-            try {
-                var builder = new Notification.Builder(Application.Context);
-                builder.SetContentTitle(title);
-                builder.SetContentText(body);
-                builder.SetAutoCancel(false);
+		public static async void UpdateChromecastNotification(string title, string body, bool isPaused, string poster)
+		{
+			try {
+				var builder = new Notification.Builder(Application.Context);
+				builder.SetContentTitle(title);
+				builder.SetContentText(body);
+				builder.SetAutoCancel(false);
 
-                builder.SetSmallIcon(Resource.Drawable.biconWhite2);//LocalNotificationIconId);
-                builder.SetOngoing(true);
+				builder.SetSmallIcon(Resource.Drawable.biconWhite2);//LocalNotificationIconId);
+				builder.SetOngoing(true);
 
 
-                var context = MainActivity.activity.ApplicationContext;
-                if (Build.VERSION.SdkInt >= BuildVersionCodes.O) {
-                    var channelId = $"{_packageName}.general";
-                    var channel = new NotificationChannel(channelId, "General", NotificationImportance.Default);
+				var context = MainActivity.activity.ApplicationContext;
+				if (Build.VERSION.SdkInt >= BuildVersionCodes.O) {
+					var channelId = $"{_packageName}.general";
+					var channel = new NotificationChannel(channelId, "General", NotificationImportance.Default);
 
-                    _manager.CreateNotificationChannel(channel);
+					_manager.CreateNotificationChannel(channel);
 
-                    builder.SetChannelId(channelId);
-                    //https://m.media-amazon.com/images/M/MV5BMTczNTI2ODUwOF5BMl5BanBnXkFtZTcwMTU0NTIzMw@@._V1_UX182_CR0,0,182,268_AL_.jpg
-                    var bitmap = await GetImageBitmapFromUrl(poster);//"https://m.media-amazon.com/images/M/MV5BMTczNTI2ODUwOF5BMl5BanBnXkFtZTcwMTU0NTIzMw@@._V1_UX182_CR0,0,182,268_AL_.jpg");
-                    if (bitmap != null) {
-                        builder.SetLargeIcon(bitmap);
-                    }
+					builder.SetChannelId(channelId);
+					//https://m.media-amazon.com/images/M/MV5BMTczNTI2ODUwOF5BMl5BanBnXkFtZTcwMTU0NTIzMw@@._V1_UX182_CR0,0,182,268_AL_.jpg
+					var bitmap = await GetImageBitmapFromUrl(poster);//"https://m.media-amazon.com/images/M/MV5BMTczNTI2ODUwOF5BMl5BanBnXkFtZTcwMTU0NTIzMw@@._V1_UX182_CR0,0,182,268_AL_.jpg");
+					if (bitmap != null) {
+						builder.SetLargeIcon(bitmap);
+					}
 
-                    builder.SetStyle(new Notification.MediaStyle().SetMediaSession(mediaSession.SessionToken).SetShowActionsInCompactView(0, 1, 2)); // NICER IMAGE
+					builder.SetStyle(new Notification.MediaStyle().SetMediaSession(mediaSession.SessionToken).SetShowActionsInCompactView(0, 1, 2)); // NICER IMAGE
 
-                    List<string> actionNames = new List<string>() { "-30s", isPaused ? "Play" : "Pause", "+30s", "Stop" };
-                    List<int> sprites = new List<int>() { Resource.Drawable.netflixGoBack128, isPaused ? Resource.Drawable.netflixPlay128v2 : Resource.Drawable.netflixPause128v2, Resource.Drawable.netflixGoForward128, Resource.Drawable.netflixStop128v2 };
-                    List<string> actionIntent = new List<string>() { "goback", isPaused ? "play" : "pause", "goforward", "stop" }; // next
+					List<string> actionNames = new List<string>() { "-30s", isPaused ? "Play" : "Pause", "+30s", "Stop" };
+					List<int> sprites = new List<int>() { Resource.Drawable.netflixGoBack128, isPaused ? Resource.Drawable.netflixPlay128v2 : Resource.Drawable.netflixPause128v2, Resource.Drawable.netflixGoForward128, Resource.Drawable.netflixStop128v2 };
+					List<string> actionIntent = new List<string>() { "goback", isPaused ? "play" : "pause", "goforward", "stop" }; // next
 
-                    List<Notification.Action> actions = new List<Notification.Action>();
+					List<Notification.Action> actions = new List<Notification.Action>();
 
-                    for (int i = 0; i < sprites.Count; i++) {
-                        var _resultIntent = new Intent(context, typeof(ChromeCastIntentService));
-                        _resultIntent.PutExtra("data", actionIntent[i]);
-                        var _pending = PendingIntent.GetService(context, 2337 + i,
-                         _resultIntent,
-                        PendingIntentFlags.UpdateCurrent
-                         );
+					for (int i = 0; i < sprites.Count; i++) {
+						var _resultIntent = new Intent(context, typeof(ChromeCastIntentService));
+						_resultIntent.PutExtra("data", actionIntent[i]);
+						var _pending = PendingIntent.GetService(context, 2337 + i,
+						 _resultIntent,
+						PendingIntentFlags.UpdateCurrent
+						 );
 
-                        actions.Add(new Notification.Action(sprites[i], actionNames[i], _pending));
-                    }
-                    builder.SetActions(actions.ToArray());
-                }
+						actions.Add(new Notification.Action(sprites[i], actionNames[i], _pending));
+					}
+					builder.SetActions(actions.ToArray());
+				}
 
-                builder.SetContentIntent(GetCurrentPending("openchrome"));
-                try {
-                    _manager.Notify(CHROME_CAST_NOTIFICATION_ID, builder.Build());
+				builder.SetContentIntent(GetCurrentPending("openchrome"));
+				try {
+					_manager.Notify(CHROME_CAST_NOTIFICATION_ID, builder.Build());
 
-                }
-                catch (Exception _ex) {
-                    print("EX NOTTIFY;; " + _ex);
-                }
-            }
-            catch (Exception _ex) {
-                error(_ex);
-            }
-        }
+				}
+				catch (Exception _ex) {
+					print("EX NOTTIFY;; " + _ex);
+				}
+			}
+			catch (Exception _ex) {
+				error(_ex);
+			}
+		}
 
-        public static Intent GetLauncherActivity(string pgName = null)
-        {
-            var packageName = pgName ?? Application.Context.PackageName;
-            return Application.Context.PackageManager.GetLaunchIntentForPackage(packageName);
-        }
+		public static Intent GetLauncherActivity(string pgName = null)
+		{
+			var packageName = pgName ?? Application.Context.PackageName;
+			return Application.Context.PackageManager.GetLaunchIntentForPackage(packageName);
+		}
 
-        private long NotifyTimeInMilliseconds(DateTime notifyTime)
-        {
-            var utcTime = TimeZoneInfo.ConvertTimeToUtc(notifyTime);
-            var epochDifference = (new DateTime(1970, 1, 1) - DateTime.MinValue).TotalSeconds;
+		private long NotifyTimeInMilliseconds(DateTime notifyTime)
+		{
+			var utcTime = TimeZoneInfo.ConvertTimeToUtc(notifyTime);
+			var epochDifference = (new DateTime(1970, 1, 1) - DateTime.MinValue).TotalSeconds;
 
-            var utcAlarmTimeInMillis = utcTime.AddSeconds(-epochDifference).Ticks / 10000;
-            return utcAlarmTimeInMillis;
-        }
+			var utcAlarmTimeInMillis = utcTime.AddSeconds(-epochDifference).Ticks / 10000;
+			return utcAlarmTimeInMillis;
+		}
 
-        // static bool hidden = false;
-        // static int baseShow = 0;
+		// static bool hidden = false;
+		// static int baseShow = 0;
 
-        public void UpdateBackground(int color)
-        {
-            print("SET NON TRANSPARENT!");
-            try {
-                Window window = MainActivity.activity.Window;
+		public void UpdateBackground(int color)
+		{
+			print("SET NON TRANSPARENT!");
+			try {
+				Window window = MainActivity.activity.Window;
 
-                int uiOptions = (int)window.DecorView.SystemUiVisibility;
-                uiOptions &= ~(int)SystemUiFlags.LayoutHideNavigation;
-                window.DecorView.SystemUiVisibility = (StatusBarVisibility)uiOptions;
-                // window.NavigationBarDividerColor
-                window.SetNavigationBarColor(Android.Graphics.Color.Rgb(color, color, color));
+				int uiOptions = (int)window.DecorView.SystemUiVisibility;
+				uiOptions &= ~(int)SystemUiFlags.LayoutHideNavigation;
+				window.DecorView.SystemUiVisibility = (StatusBarVisibility)uiOptions;
+				// window.NavigationBarDividerColor
+				window.SetNavigationBarColor(Android.Graphics.Color.Rgb(color, color, color));
 
-            }
-            catch (Exception _ex) {
-                error(_ex);
-            }
-            /*
+			}
+			catch (Exception _ex) {
+				error(_ex);
+			}
+			/*
             Window window = MainActivity.activity.Window;
             int color = Settings.BlackColor - 5;
             if(color > 255) { color = 255; }
             if(color < 0) { color = 0; }
             window.SetNavigationBarColor(Android.Graphics.Color.Rgb(color, color, color));*/
-        }
+		}
 
-        public void UpdateBackground()
-        {
-            try {
-                Window window = MainActivity.activity.Window;
-                print("SET TRANSPARENT!");
+		public void UpdateBackground()
+		{
+			try {
+				Window window = MainActivity.activity.Window;
+				print("SET TRANSPARENT!");
 
-                int uiOptions = (int)window.DecorView.SystemUiVisibility;
-                uiOptions |= (int)SystemUiFlags.LayoutHideNavigation;
-                window.DecorView.SystemUiVisibility = (StatusBarVisibility)uiOptions;
+				int uiOptions = (int)window.DecorView.SystemUiVisibility;
+				uiOptions |= (int)SystemUiFlags.LayoutHideNavigation;
+				window.DecorView.SystemUiVisibility = (StatusBarVisibility)uiOptions;
 
-                window.SetNavigationBarColor(Android.Graphics.Color.Transparent);
-            }
-            catch (Exception _ex) {
-                error(_ex);
-            }
-        }
+				window.SetNavigationBarColor(Android.Graphics.Color.Transparent);
+			}
+			catch (Exception _ex) {
+				error(_ex);
+			}
+		}
 
-        public void UpdateStatusBar()
-        {
-            // Window window = MainActivity.activity.Window;
-            try {
-                ToggleFullscreen(!Settings.HasStatusBar);
-                if (Settings.HasStatusBar) {
-                    ShowStatusBar();
-                }
-                else {
-                    HideStatusBar();
-                }
-            }
-            catch (Exception _ex) {
-                error(_ex);
-            }
+		public void UpdateStatusBar()
+		{
+			// Window window = MainActivity.activity.Window;
+			try {
+				ToggleFullscreen(!Settings.HasStatusBar);
+				if (Settings.HasStatusBar) {
+					ShowStatusBar();
+				}
+				else {
+					HideStatusBar();
+				}
+			}
+			catch (Exception _ex) {
+				error(_ex);
+			}
 
-            /*
+			/*
             if (!Settings.HasStatusBar) {
                 print("REMOVE STATUS BAR::::");
                 window.AddFlags(WindowManagerFlags.Fullscreen); // REMOVES STATUS BAR
@@ -2028,161 +2079,161 @@ namespace CloudStreamForms.Droid
             else {
                 window.ClearFlags(WindowManagerFlags.Fullscreen); // ADD STATUS BAR
             }*/
-        }
+		}
 
-        public void ToggleFullscreen(bool fullscreen)
-        {
-            try {
-                Window window = MainActivity.activity.Window;
+		public void ToggleFullscreen(bool fullscreen)
+		{
+			try {
+				Window window = MainActivity.activity.Window;
 
-                if (fullscreen) {
-                    window.AddFlags(WindowManagerFlags.Fullscreen); // REMOVES STATUS BAR
-                }
-                else {
-                    window.ClearFlags(WindowManagerFlags.Fullscreen);
-                }
-            }
-            catch (Exception _ex) {
-                error(_ex);
-            }
+				if (fullscreen) {
+					window.AddFlags(WindowManagerFlags.Fullscreen); // REMOVES STATUS BAR
+				}
+				else {
+					window.ClearFlags(WindowManagerFlags.Fullscreen);
+				}
+			}
+			catch (Exception _ex) {
+				error(_ex);
+			}
 
-        }
+		}
 
-        public void ToggleRealFullScreen(bool fullscreen)
-        {
-            try {
-                Window window = MainActivity.activity.Window;
-                print("TOGGLE" + fullscreen);
+		public void ToggleRealFullScreen(bool fullscreen)
+		{
+			try {
+				Window window = MainActivity.activity.Window;
+				print("TOGGLE" + fullscreen);
 
-                var uiOptions = (int)window.DecorView.SystemUiVisibility;
-                // uiOptions |= (int)SystemUiFlags.LowProfile;
-                // uiOptions |= (int)SystemUiFlags.Fullscreen;
+				var uiOptions = (int)window.DecorView.SystemUiVisibility;
+				// uiOptions |= (int)SystemUiFlags.LowProfile;
+				// uiOptions |= (int)SystemUiFlags.Fullscreen;
 
 
-                //var attrs = window.Attributes;
+				//var attrs = window.Attributes;
 
-                if (fullscreen) {
-                    uiOptions |= (int)SystemUiFlags.HideNavigation;
-                    //uiOptions |= (int)SystemUiFlags.ImmersiveSticky;
-                    uiOptions |= (int)SystemUiFlags.Fullscreen;
-                    //uiOptions |= (int)SystemUiFlags.LayoutStable;
-                    //uiOptions |= (int)SystemUiFlags.LayoutHideNavigation;
-                    //uiOptions |= (int)SystemUiFlags.LayoutFullscreen;
-                    //    uiOptions |= (int)SystemUiFlags.LowProfile;
+				if (fullscreen) {
+					uiOptions |= (int)SystemUiFlags.HideNavigation;
+					//uiOptions |= (int)SystemUiFlags.ImmersiveSticky;
+					uiOptions |= (int)SystemUiFlags.Fullscreen;
+					//uiOptions |= (int)SystemUiFlags.LayoutStable;
+					//uiOptions |= (int)SystemUiFlags.LayoutHideNavigation;
+					//uiOptions |= (int)SystemUiFlags.LayoutFullscreen;
+					//    uiOptions |= (int)SystemUiFlags.LowProfile;
 
-                    window.AddFlags(WindowManagerFlags.TurnScreenOn);
-                    window.AddFlags(WindowManagerFlags.KeepScreenOn);
-                    window.AddFlags(WindowManagerFlags.Fullscreen); // REMOVES STATUS BAR
+					window.AddFlags(WindowManagerFlags.TurnScreenOn);
+					window.AddFlags(WindowManagerFlags.KeepScreenOn);
+					window.AddFlags(WindowManagerFlags.Fullscreen); // REMOVES STATUS BAR
 
-                    //   attrs.Flags |= Android.Views.WindowManagerFlags.Fullscreen;
+					//   attrs.Flags |= Android.Views.WindowManagerFlags.Fullscreen;
 
-                    //   window.AddFlags(WindowManagerFlags.Fullscreen);
-                    // window.ClearFlags(WindowManagerFlags.ForceNotFullscreen);
-                }
-                else {
-                    uiOptions &= ~(int)SystemUiFlags.HideNavigation;
-                    //     uiOptions &= ~(int)SystemUiFlags.ImmersiveSticky;
-                    uiOptions &= ~(int)SystemUiFlags.Fullscreen;
-                    //   uiOptions &= ~(int)SystemUiFlags.LayoutStable;
-                    //   uiOptions &= ~(int)SystemUiFlags.LayoutHideNavigation;
-                    //  uiOptions &= ~(int)SystemUiFlags.LayoutFullscreen;
-                    //   uiOptions &= ~(int)SystemUiFlags.LowProfile;
+					//   window.AddFlags(WindowManagerFlags.Fullscreen);
+					// window.ClearFlags(WindowManagerFlags.ForceNotFullscreen);
+				}
+				else {
+					uiOptions &= ~(int)SystemUiFlags.HideNavigation;
+					//     uiOptions &= ~(int)SystemUiFlags.ImmersiveSticky;
+					uiOptions &= ~(int)SystemUiFlags.Fullscreen;
+					//   uiOptions &= ~(int)SystemUiFlags.LayoutStable;
+					//   uiOptions &= ~(int)SystemUiFlags.LayoutHideNavigation;
+					//  uiOptions &= ~(int)SystemUiFlags.LayoutFullscreen;
+					//   uiOptions &= ~(int)SystemUiFlags.LowProfile;
 
-                    window.ClearFlags(WindowManagerFlags.TurnScreenOn);
-                    window.ClearFlags(WindowManagerFlags.KeepScreenOn);
-                    window.ClearFlags(WindowManagerFlags.Fullscreen);
+					window.ClearFlags(WindowManagerFlags.TurnScreenOn);
+					window.ClearFlags(WindowManagerFlags.KeepScreenOn);
+					window.ClearFlags(WindowManagerFlags.Fullscreen);
 
-                    // window.AddFlags(WindowManagerFlags.ForceNotFullscreen);
-                    // window.ClearFlags(WindowManagerFlags.Fullscreen);
+					// window.AddFlags(WindowManagerFlags.ForceNotFullscreen);
+					// window.ClearFlags(WindowManagerFlags.Fullscreen);
 
-                    //  attrs.Flags &= ~Android.Views.WindowManagerFlags.Fullscreen;
-                }
+					//  attrs.Flags &= ~Android.Views.WindowManagerFlags.Fullscreen;
+				}
 
-                //   window.Attributes = attrs;
+				//   window.Attributes = attrs;
 
-                window.DecorView.SystemUiVisibility = (StatusBarVisibility)uiOptions;
+				window.DecorView.SystemUiVisibility = (StatusBarVisibility)uiOptions;
 
-                if (!fullscreen) {
-                    UpdateStatusBar();
-                }
-            }
-            catch (Exception _ex) {
-                error(_ex);
-            }
-        }
+				if (!fullscreen) {
+					UpdateStatusBar();
+				}
+			}
+			catch (Exception _ex) {
+				error(_ex);
+			}
+		}
 
-        public void LandscapeOrientation()
-        {
-            try {
-                MainActivity.activity.RequestedOrientation = ScreenOrientation.Landscape;
-            }
-            catch (Exception _ex) {
-                error(_ex);
-            }
-        }
+		public void LandscapeOrientation()
+		{
+			try {
+				MainActivity.activity.RequestedOrientation = ScreenOrientation.Landscape;
+			}
+			catch (Exception _ex) {
+				error(_ex);
+			}
+		}
 
-        public void NormalOrientation()
-        {
-            try {
-                MainActivity.activity.RequestedOrientation = ScreenOrientation.Unspecified;
-            }
-            catch (Exception _ex) {
-                error(_ex);
-            }
-        }
+		public void NormalOrientation()
+		{
+			try {
+				MainActivity.activity.RequestedOrientation = ScreenOrientation.Unspecified;
+			}
+			catch (Exception _ex) {
+				error(_ex);
+			}
+		}
 
-        public void ShowStatusBar()
-        {
-            //  if (!hidden) return;
-            try {
-                Window window = MainActivity.activity.Window;
-                // window.ClearFlags(WindowManagerFlags.TurnScreenOn);
-                //window.ClearFlags(WindowManagerFlags.KeepScreenOn);
-                //ToggleFullscreen(!Settings.HasStatusBar);
+		public void ShowStatusBar()
+		{
+			//  if (!hidden) return;
+			try {
+				Window window = MainActivity.activity.Window;
+				// window.ClearFlags(WindowManagerFlags.TurnScreenOn);
+				//window.ClearFlags(WindowManagerFlags.KeepScreenOn);
+				//ToggleFullscreen(!Settings.HasStatusBar);
 
-                //if (Settings.HasStatusBar) {
-                window.ClearFlags(WindowManagerFlags.Fullscreen);
-                //}
+				//if (Settings.HasStatusBar) {
+				window.ClearFlags(WindowManagerFlags.Fullscreen);
+				//}
 
-                int uiOptions = (int)window.DecorView.SystemUiVisibility;
-                //  baseShow = uiOptions;
+				int uiOptions = (int)window.DecorView.SystemUiVisibility;
+				//  baseShow = uiOptions;
 
-                //  uiOptions &= ~(int)SystemUiFlags.LowProfile;
-                uiOptions &= ~(int)SystemUiFlags.Fullscreen;
-                //   uiOptions &= ~(int)SystemUiFlags.HideNavigation;
-                uiOptions &= ~(int)SystemUiFlags.ImmersiveSticky;
+				//  uiOptions &= ~(int)SystemUiFlags.LowProfile;
+				uiOptions &= ~(int)SystemUiFlags.Fullscreen;
+				//   uiOptions &= ~(int)SystemUiFlags.HideNavigation;
+				uiOptions &= ~(int)SystemUiFlags.ImmersiveSticky;
 
-                window.DecorView.SystemUiVisibility = (StatusBarVisibility)uiOptions;
-            }
-            catch (Exception _ex) {
-                error(_ex);
-            }
-        }
+				window.DecorView.SystemUiVisibility = (StatusBarVisibility)uiOptions;
+			}
+			catch (Exception _ex) {
+				error(_ex);
+			}
+		}
 
-        public void HideStatusBar()
-        {
-            try {
-                //if (hidden) return;
-                //hidden = true;
+		public void HideStatusBar()
+		{
+			try {
+				//if (hidden) return;
+				//hidden = true;
 
-                Window window = MainActivity.activity.Window;
-                //  window.AddFlags(WindowManagerFlags.TurnScreenOn);
-                // window.AddFlags(WindowManagerFlags.KeepScreenOn);
+				Window window = MainActivity.activity.Window;
+				//  window.AddFlags(WindowManagerFlags.TurnScreenOn);
+				// window.AddFlags(WindowManagerFlags.KeepScreenOn);
 
-                if (Settings.HasStatusBar) {
-                    window.AddFlags(WindowManagerFlags.Fullscreen);
-                }
+				if (Settings.HasStatusBar) {
+					window.AddFlags(WindowManagerFlags.Fullscreen);
+				}
 
-                int uiOptions = (int)window.DecorView.SystemUiVisibility;
-                //  baseShow = uiOptions;
+				int uiOptions = (int)window.DecorView.SystemUiVisibility;
+				//  baseShow = uiOptions;
 
-                // uiOptions |= (int)SystemUiFlags.LowProfile;
-                uiOptions |= (int)SystemUiFlags.Fullscreen;
-                // uiOptions |= (int)SystemUiFlags.HideNavigation;
-                uiOptions |= (int)SystemUiFlags.ImmersiveSticky;
+				// uiOptions |= (int)SystemUiFlags.LowProfile;
+				uiOptions |= (int)SystemUiFlags.Fullscreen;
+				// uiOptions |= (int)SystemUiFlags.HideNavigation;
+				uiOptions |= (int)SystemUiFlags.ImmersiveSticky;
 
-                window.DecorView.SystemUiVisibility = (StatusBarVisibility)uiOptions;
-                /*
+				window.DecorView.SystemUiVisibility = (StatusBarVisibility)uiOptions;
+				/*
                 var activity = (Activity)Forms.Context;
                 var window = activity.Window;
                 var attrs = window.Attributes;
@@ -2207,80 +2258,80 @@ namespace CloudStreamForms.Droid
                 window.DecorView.SystemUiVisibility = StatusBarVisibility.Hidden;*/
 
 
-            }
-            catch (Exception _ex) {
-                error(_ex);
-            }
-        }
-        public StorageInfo GetStorageInformation(string path = "")
-        {
-            try {
-                StorageInfo storageInfo = new StorageInfo();
+			}
+			catch (Exception _ex) {
+				error(_ex);
+			}
+		}
+		public StorageInfo GetStorageInformation(string path = "")
+		{
+			try {
+				StorageInfo storageInfo = new StorageInfo();
 
-                long totalSpaceBytes = 0;
-                long freeSpaceBytes = 0;
-                long availableSpaceBytes = 0;
+				long totalSpaceBytes = 0;
+				long freeSpaceBytes = 0;
+				long availableSpaceBytes = 0;
 
-                /*
+				/*
                   We have to do the check for the Android version, because the OS calls being made have been deprecated for older versions. 
                   The ‘old style’, pre Android level 18 didn’t use the Long suffixes, so if you try and call use those on 
                   anything below Android 4.3, it’ll crash on you, telling you that that those methods are unavailable. 
                   http://blog.wislon.io/posts/2014/09/28/xamarin-and-android-how-to-use-your-external-removable-sd-card/
                  */
-                if (path == "") {
-                    totalSpaceBytes = Android.OS.Environment.ExternalStorageDirectory.TotalSpace;
-                    freeSpaceBytes = Android.OS.Environment.ExternalStorageDirectory.FreeSpace;
-                    availableSpaceBytes = Android.OS.Environment.ExternalStorageDirectory.UsableSpace;
-                }
-                else {
-                    StatFs stat = new StatFs(path); //"/storage/sdcard1"
+				if (path == "") {
+					totalSpaceBytes = Android.OS.Environment.ExternalStorageDirectory.TotalSpace;
+					freeSpaceBytes = Android.OS.Environment.ExternalStorageDirectory.FreeSpace;
+					availableSpaceBytes = Android.OS.Environment.ExternalStorageDirectory.UsableSpace;
+				}
+				else {
+					StatFs stat = new StatFs(path); //"/storage/sdcard1"
 
-                    if (Build.VERSION.SdkInt >= BuildVersionCodes.JellyBeanMr2) {
-
-
-                        long blockSize = stat.BlockSizeLong;
-                        totalSpaceBytes = stat.BlockCountLong * stat.BlockSizeLong;
-                        availableSpaceBytes = stat.AvailableBlocksLong * stat.BlockSizeLong;
-                        freeSpaceBytes = stat.FreeBlocksLong * stat.BlockSizeLong;
-
-                    }
-                    else {
-                        totalSpaceBytes = (long)stat.BlockCount * (long)stat.BlockSize;
-                        availableSpaceBytes = (long)stat.AvailableBlocks * (long)stat.BlockSize;
-                        freeSpaceBytes = (long)stat.FreeBlocks * (long)stat.BlockSize;
-                    }
-                }
-
-                storageInfo.TotalSpace = totalSpaceBytes;
-                storageInfo.AvailableSpace = availableSpaceBytes;
-                storageInfo.FreeSpace = freeSpaceBytes;
-                return storageInfo;
-            }
-            catch (Exception _ex) {
-                error(_ex);
-                return new StorageInfo() {
-                    AvailableSpace = 0,
-                    FreeSpace = 0,
-                    TotalSpace = 0,
-                };
-            }
-        }
+					if (Build.VERSION.SdkInt >= BuildVersionCodes.JellyBeanMr2) {
 
 
-        public bool DeleteFile(string path)
-        {
-            //Context context = Android.App.Application.Context;
-            try {
-                Java.IO.File file = new Java.IO.File(path);
-                if (file.Exists()) {
-                    file.Delete();
-                }
-                return true;
-            }
-            catch (Exception) {
-                return false;
-            }
-            /*
+						long blockSize = stat.BlockSizeLong;
+						totalSpaceBytes = stat.BlockCountLong * stat.BlockSizeLong;
+						availableSpaceBytes = stat.AvailableBlocksLong * stat.BlockSizeLong;
+						freeSpaceBytes = stat.FreeBlocksLong * stat.BlockSizeLong;
+
+					}
+					else {
+						totalSpaceBytes = (long)stat.BlockCount * (long)stat.BlockSize;
+						availableSpaceBytes = (long)stat.AvailableBlocks * (long)stat.BlockSize;
+						freeSpaceBytes = (long)stat.FreeBlocks * (long)stat.BlockSize;
+					}
+				}
+
+				storageInfo.TotalSpace = totalSpaceBytes;
+				storageInfo.AvailableSpace = availableSpaceBytes;
+				storageInfo.FreeSpace = freeSpaceBytes;
+				return storageInfo;
+			}
+			catch (Exception _ex) {
+				error(_ex);
+				return new StorageInfo() {
+					AvailableSpace = 0,
+					FreeSpace = 0,
+					TotalSpace = 0,
+				};
+			}
+		}
+
+
+		public bool DeleteFile(string path)
+		{
+			//Context context = Android.App.Application.Context;
+			try {
+				Java.IO.File file = new Java.IO.File(path);
+				if (file.Exists()) {
+					file.Delete();
+				}
+				return true;
+			}
+			catch (Exception) {
+				return false;
+			}
+			/*
 
             string where = MediaStore.MediaColumns.Data + "=?";
             string[] selectionArgs = new string[] { file.AbsolutePath };
@@ -2290,229 +2341,229 @@ namespace CloudStreamForms.Droid
             if (file.Exists()) {
                 contentResolver.Delete(filesUri, where, selectionArgs);
             }*/
-        }
+		}
 
-        public void Test()
-        {
-        }
+		public void Test()
+		{
+		}
 
-        // static Java.Lang.Thread downloadThread;
-        public static void DownloadFromLink(string url, string title, string toast = "", string ending = "", bool openFile = false, string descripts = "")
-        {
-            try {
-                print("DOWNLOADING: " + url);
+		// static Java.Lang.Thread downloadThread;
+		public static void DownloadFromLink(string url, string title, string toast = "", string ending = "", bool openFile = false, string descripts = "")
+		{
+			try {
+				print("DOWNLOADING: " + url);
 
-                DownloadManager.Request request = new DownloadManager.Request(Android.Net.Uri.Parse(url));
-                request.SetTitle(title);
-                request.SetDescription(descripts);
-                string mainPath = Android.OS.Environment.DirectoryDownloads;
-                string subPath = title + ending;
-                string fullPath = mainPath + "/" + subPath;
+				DownloadManager.Request request = new DownloadManager.Request(Android.Net.Uri.Parse(url));
+				request.SetTitle(title);
+				request.SetDescription(descripts);
+				string mainPath = Android.OS.Environment.DirectoryDownloads;
+				string subPath = title + ending;
+				string fullPath = mainPath + "/" + subPath;
 
-                print("PATH: " + fullPath);
+				print("PATH: " + fullPath);
 
-                request.SetDestinationInExternalPublicDir(mainPath, subPath);
-                request.SetVisibleInDownloadsUi(true);
-                request.SetNotificationVisibility(DownloadVisibility.VisibleNotifyCompleted);
+				request.SetDestinationInExternalPublicDir(mainPath, subPath);
+				request.SetVisibleInDownloadsUi(true);
+				request.SetNotificationVisibility(DownloadVisibility.VisibleNotifyCompleted);
 
-                DownloadManager manager;
-                manager = (DownloadManager)MainActivity.activity.GetSystemService(Context.DownloadService);
+				DownloadManager manager;
+				manager = (DownloadManager)MainActivity.activity.GetSystemService(Context.DownloadService);
 
-                long downloadId = manager.Enqueue(request);
+				long downloadId = manager.Enqueue(request);
 
-                // AUTO OPENS FILE WHEN DONE DOWNLOADING
-                if (openFile || toast != "") {
-                    Java.Lang.Thread downloadThread = new Java.Lang.Thread(() => {
-                        try {
-                            bool exists = false;
-                            while (!exists) {
-                                try {
-                                    string p = manager.GetUriForDownloadedFile(downloadId).Path;
-                                    exists = true;
-                                }
-                                catch (System.Exception) {
-                                    Java.Lang.Thread.Sleep(100);
-                                }
-                            }
-                            Java.Lang.Thread.Sleep(1000);
-                            if (toast != "") {
-                                App.ShowToast(toast);
-                            }
-                            if (openFile) {
-                                print("OPEN FILE");
-                                string truePath = (Android.OS.Environment.ExternalStorageDirectory + "/" + fullPath);
-                                OpenFile(truePath);
-                            }
-                        }
-                        catch { }
-                    });
-                    downloadThread.Start();
-                }
-            }
-            catch (Exception _ex) {
-                error(_ex);
-            }
-        }
-        public static void OpenFile(string link)
-        {
-            var file = new Java.IO.File(link);
-            var promptInstall = new Intent(Intent.ActionView).AddFlags(ActivityFlags.ClearTop | ActivityFlags.NewTask);
-            if ((int)Build.VERSION.SdkInt >= (int)Android.OS.BuildVersionCodes.N) {
-                promptInstall.AddFlags(ActivityFlags.GrantReadUriPermission);
-                var _uri = GenericFileProvider.GetUriForFile(activity.ApplicationContext, activity.ApplicationContext.ApplicationInfo.PackageName + ".provider.storage", file);
-                promptInstall.SetDataAndType(_uri, "application/vnd.android.package-archive");
-            }
-            else {
-                promptInstall.SetDataAndType(Android.Net.Uri.FromFile(file), "application/vnd.android.package-archive");
-            }
+				// AUTO OPENS FILE WHEN DONE DOWNLOADING
+				if (openFile || toast != "") {
+					Java.Lang.Thread downloadThread = new Java.Lang.Thread(() => {
+						try {
+							bool exists = false;
+							while (!exists) {
+								try {
+									string p = manager.GetUriForDownloadedFile(downloadId).Path;
+									exists = true;
+								}
+								catch (System.Exception) {
+									Java.Lang.Thread.Sleep(100);
+								}
+							}
+							Java.Lang.Thread.Sleep(1000);
+							if (toast != "") {
+								App.ShowToast(toast);
+							}
+							if (openFile) {
+								print("OPEN FILE");
+								string truePath = (Android.OS.Environment.ExternalStorageDirectory + "/" + fullPath);
+								OpenFile(truePath);
+							}
+						}
+						catch { }
+					});
+					downloadThread.Start();
+				}
+			}
+			catch (Exception _ex) {
+				error(_ex);
+			}
+		}
+		public static void OpenFile(string link)
+		{
+			var file = new Java.IO.File(link);
+			var promptInstall = new Intent(Intent.ActionView).AddFlags(ActivityFlags.ClearTop | ActivityFlags.NewTask);
+			if ((int)Build.VERSION.SdkInt >= (int)Android.OS.BuildVersionCodes.N) {
+				promptInstall.AddFlags(ActivityFlags.GrantReadUriPermission);
+				var _uri = GenericFileProvider.GetUriForFile(activity.ApplicationContext, activity.ApplicationContext.ApplicationInfo.PackageName + ".provider.storage", file);
+				promptInstall.SetDataAndType(_uri, "application/vnd.android.package-archive");
+			}
+			else {
+				promptInstall.SetDataAndType(Android.Net.Uri.FromFile(file), "application/vnd.android.package-archive");
+			}
 
-            activity.ApplicationContext.StartActivity(promptInstall);
-        }
-
-
-        public static Java.IO.File WriteFile(string name, string basePath, string write)
-        {
-            try {
-                System.IO.File.Delete(basePath + "/" + name);
-            }
-            catch (System.Exception) {
-
-            }
-            //name = Regex.Replace(name, @"[^A-Za-z0-9\.]+", String.Empty);
-            //name.Replace(" ", "");
-            //  name = name.ToLower();
-
-            try {
-                Java.IO.File file = new Java.IO.File(basePath, name);
-                Java.IO.File _file = new Java.IO.File(basePath);
-                CloudStreamCore.print("PATH: " + basePath + "/" + name);
-                _file.Mkdirs();
-                file.CreateNewFile();
-                Java.IO.FileWriter writer = new Java.IO.FileWriter(file);
-                // Writes the content to the file
-                writer.Write(write);
-                writer.Flush();
-                writer.Close();
-                return file;
-
-            }
-            catch (Exception _ex) {
-                error("MAIN EX IN WriteFile: " + _ex);
-                return null;
-            }
-        }
-
-        static void OpenStore(string applicationPackageName)
-        {
-            Intent intent = new Intent(Intent.ActionView, Android.Net.Uri.Parse("market://details?id=" + applicationPackageName));
-            intent.AddFlags(ActivityFlags.NewTask);
-
-            activity.ApplicationContext.StartActivity(intent);
-        }
-
-        public const string VLC_PACKAGE = "org.videolan.vlc";
-        public const string VLC_INTENT_ACTION_RESULT = "org.videolan.vlc.player.result";
-        public static ComponentName VLC_COMPONENT = new ComponentName(VLC_PACKAGE, "org.videolan.vlc.gui.video.VideoPlayerActivity");
+			activity.ApplicationContext.StartActivity(promptInstall);
+		}
 
 
-        public static bool IsAppInstalled(string packageName)
-        {
-            try {
-                PackageManager pm = activity.PackageManager;
-                pm.GetPackageInfo(packageName, PackageInfoFlags.Activities);
-                return true;
-            }
-            catch (PackageManager.NameNotFoundException e) {
-                return false;
-            }
-        }
+		public static Java.IO.File WriteFile(string name, string basePath, string write)
+		{
+			try {
+				System.IO.File.Delete(basePath + "/" + name);
+			}
+			catch (System.Exception) {
 
-        public static void OpenVlc(Activity _activity, int requestId, Android.Net.Uri uri, long time, String title, string subfile = "")
-        {
-            Intent vlcIntent = new Intent(VLC_INTENT_ACTION_RESULT);
+			}
+			//name = Regex.Replace(name, @"[^A-Za-z0-9\.]+", String.Empty);
+			//name.Replace(" ", "");
+			//  name = name.ToLower();
 
-            vlcIntent.SetPackage(VLC_PACKAGE);
-            vlcIntent.SetDataAndTypeAndNormalize(uri, "video/*");
+			try {
+				Java.IO.File file = new Java.IO.File(basePath, name);
+				Java.IO.File _file = new Java.IO.File(basePath);
+				CloudStreamCore.print("PATH: " + basePath + "/" + name);
+				_file.Mkdirs();
+				file.CreateNewFile();
+				Java.IO.FileWriter writer = new Java.IO.FileWriter(file);
+				// Writes the content to the file
+				writer.Write(write);
+				writer.Flush();
+				writer.Close();
+				return file;
 
-            long position = time;
-            if (time == FROM_START) {
-                position = 1;
-            }
-            else if (time == FROM_PROGRESS) {
-                position = 0;
-            }
+			}
+			catch (Exception _ex) {
+				error("MAIN EX IN WriteFile: " + _ex);
+				return null;
+			}
+		}
 
-            vlcIntent.PutExtra("position", position);
-            vlcIntent.PutExtra("title", title);
-            vlcIntent.SetComponent(VLC_COMPONENT);
-            subfile = "/sdcard/Download/subtitles.srt";
-            if (subfile != "") {
-                var sfile = Android.Net.Uri.FromFile(new Java.IO.File(subfile));  //"content://" + Android.Net.Uri.Parse(subfile);
-                print("SUBFILE::::" + subfile + "|" + sfile.Path);
-                //  print(sfile.Path);
-                vlcIntent.PutExtra("subtitles_location", subfile);//"/sdcard/Download/subtitles.srt");//sfile);//Android.Net.Uri.FromFile(subFile));
-                                                                  // intent.PutExtra("subtitles_location", );//Android.Net.Uri.FromFile(subFile));
-            }
-            _activity.StartActivityForResult(vlcIntent, requestId);
+		static void OpenStore(string applicationPackageName)
+		{
+			Intent intent = new Intent(Intent.ActionView, Android.Net.Uri.Parse("market://details?id=" + applicationPackageName));
+			intent.AddFlags(ActivityFlags.NewTask);
 
-        }
+			activity.ApplicationContext.StartActivity(intent);
+		}
 
-        public void RequestVlc(List<string> urls, List<string> names, string episodeName, string episodeId, long startId = -2, string subtitleFull = "", VideoPlayer preferedPlayer = VideoPlayer.VLC)
-        {
-            if (preferedPlayer == VideoPlayer.None) { App.ShowToast("No videoplayer installed"); };
-            try {
-                string absolutePath = Android.OS.Environment.ExternalStorageDirectory + "/" + Android.OS.Environment.DirectoryDownloads;
-                subtitleFull ??= "";
-                bool subtitlesEnabled = subtitleFull != "";
-                string writeData = CloudStreamForms.App.ConvertPathAndNameToM3U8(urls, names, subtitlesEnabled, "content://" + absolutePath + "/");
-                WriteFile(CloudStreamForms.App.baseM3u8Name, absolutePath, writeData);
+		public const string VLC_PACKAGE = "org.videolan.vlc";
+		public const string VLC_INTENT_ACTION_RESULT = "org.videolan.vlc.player.result";
+		public static ComponentName VLC_COMPONENT = new ComponentName(VLC_PACKAGE, "org.videolan.vlc.gui.video.VideoPlayerActivity");
 
-                Java.IO.File subFile = null;
-                if (subtitlesEnabled) {
-                    print("WRITING SUBFILE: " + absolutePath + "|" + baseSubtitleName + "|" + subtitleFull + "|" + (subtitleFull == "") + "|" + (subtitleFull == null));
-                    subFile = WriteFile(CloudStreamForms.App.baseSubtitleName, absolutePath, subtitleFull);
-                }
 
-                string _bpath = absolutePath + "/" + CloudStreamForms.App.baseM3u8Name;
+		public static bool IsAppInstalled(string packageName)
+		{
+			try {
+				PackageManager pm = activity.PackageManager;
+				pm.GetPackageInfo(packageName, PackageInfoFlags.Activities);
+				return true;
+			}
+			catch (PackageManager.NameNotFoundException e) {
+				return false;
+			}
+		}
 
-                if (!GetPlayerInstalled(preferedPlayer)) {
-                    App.ShowToast("Videoplayer not installed");
-                    return;
-                }
+		public static void OpenVlc(Activity _activity, int requestId, Android.Net.Uri uri, long time, String title, string subfile = "")
+		{
+			Intent vlcIntent = new Intent(VLC_INTENT_ACTION_RESULT);
 
-                string package = GetVideoPlayerPackage(preferedPlayer);
-                Android.Net.Uri uri = Android.Net.Uri.Parse(urls.Count == 1 ? urls[0] : _bpath);
+			vlcIntent.SetPackage(VLC_PACKAGE);
+			vlcIntent.SetDataAndTypeAndNormalize(uri, "video/*");
 
-                switch (preferedPlayer) {
-                    case VideoPlayer.VLC:
+			long position = time;
+			if (time == FROM_START) {
+				position = 1;
+			}
+			else if (time == FROM_PROGRESS) {
+				position = 0;
+			}
 
-                        Intent vlcIntent = new Intent(VLC_INTENT_ACTION_RESULT);
+			vlcIntent.PutExtra("position", position);
+			vlcIntent.PutExtra("title", title);
+			vlcIntent.SetComponent(VLC_COMPONENT);
+			subfile = "/sdcard/Download/subtitles.srt";
+			if (subfile != "") {
+				var sfile = Android.Net.Uri.FromFile(new Java.IO.File(subfile));  //"content://" + Android.Net.Uri.Parse(subfile);
+				print("SUBFILE::::" + subfile + "|" + sfile.Path);
+				//  print(sfile.Path);
+				vlcIntent.PutExtra("subtitles_location", subfile);//"/sdcard/Download/subtitles.srt");//sfile);//Android.Net.Uri.FromFile(subFile));
+																  // intent.PutExtra("subtitles_location", );//Android.Net.Uri.FromFile(subFile));
+			}
+			_activity.StartActivityForResult(vlcIntent, requestId);
 
-                        vlcIntent.SetPackage(VLC_PACKAGE);
-                        vlcIntent.SetDataAndTypeAndNormalize(uri, "video/*");
+		}
 
-                        long position = startId;
-                        if (startId == FROM_START) {
-                            position = 1;
-                        }
-                        else if (startId == FROM_PROGRESS) {
-                            position = 0;
-                        }
+		public void RequestVlc(List<string> urls, List<string> names, string episodeName, string episodeId, long startId = -2, string subtitleFull = "", VideoPlayer preferedPlayer = VideoPlayer.VLC)
+		{
+			if (preferedPlayer == VideoPlayer.None) { App.ShowToast("No videoplayer installed"); };
+			try {
+				string absolutePath = Android.OS.Environment.ExternalStorageDirectory + "/" + Android.OS.Environment.DirectoryDownloads;
+				subtitleFull ??= "";
+				bool subtitlesEnabled = subtitleFull != "";
+				string writeData = CloudStreamForms.App.ConvertPathAndNameToM3U8(urls, names, subtitlesEnabled, "content://" + absolutePath + "/");
+				WriteFile(CloudStreamForms.App.baseM3u8Name, absolutePath, writeData);
 
-                        vlcIntent.PutExtra("position", position);
-                        vlcIntent.PutExtra("title", episodeName);
+				Java.IO.File subFile = null;
+				if (subtitlesEnabled) {
+					print("WRITING SUBFILE: " + absolutePath + "|" + baseSubtitleName + "|" + subtitleFull + "|" + (subtitleFull == "") + "|" + (subtitleFull == null));
+					subFile = WriteFile(CloudStreamForms.App.baseSubtitleName, absolutePath, subtitleFull);
+				}
 
-                        if (subFile != null) {
-                            var sfile = Android.Net.Uri.FromFile(subFile);
-                            vlcIntent.PutExtra("subtitles_location", sfile);
-                        }
+				string _bpath = absolutePath + "/" + CloudStreamForms.App.baseM3u8Name;
 
-                        vlcIntent.SetComponent(VLC_COMPONENT);
+				if (!GetPlayerInstalled(preferedPlayer)) {
+					App.ShowToast("Videoplayer not installed");
+					return;
+				}
 
-                        lastId = episodeId;
-                        activity.StartActivityForResult(vlcIntent, REQUEST_CODE);
-                        break;
-                    /*  case VideoPlayer.MPV:
+				string package = GetVideoPlayerPackage(preferedPlayer);
+				Android.Net.Uri uri = Android.Net.Uri.Parse(urls.Count == 1 ? urls[0] : _bpath);
+
+				switch (preferedPlayer) {
+					case VideoPlayer.VLC:
+
+						Intent vlcIntent = new Intent(VLC_INTENT_ACTION_RESULT);
+
+						vlcIntent.SetPackage(VLC_PACKAGE);
+						vlcIntent.SetDataAndTypeAndNormalize(uri, "video/*");
+
+						long position = startId;
+						if (startId == FROM_START) {
+							position = 1;
+						}
+						else if (startId == FROM_PROGRESS) {
+							position = 0;
+						}
+
+						vlcIntent.PutExtra("position", position);
+						vlcIntent.PutExtra("title", episodeName);
+
+						if (subFile != null) {
+							var sfile = Android.Net.Uri.FromFile(subFile);
+							vlcIntent.PutExtra("subtitles_location", sfile);
+						}
+
+						vlcIntent.SetComponent(VLC_COMPONENT);
+
+						lastId = episodeId;
+						activity.StartActivityForResult(vlcIntent, REQUEST_CODE);
+						break;
+					/*  case VideoPlayer.MPV:
                           Intent mpvIntent = new Intent().SetPackage(package).SetAction(Intent.ActionView);// GetLauncherActivity(package);// new Intent();
                        //   mpvIntent.SetPackage(package);
                           mpvIntent.SetDataAndTypeAndNormalize(uri, "video/m3u8");
@@ -2526,24 +2577,24 @@ namespace CloudStreamForms.Droid
 
                           activity.StartActivity(mpvIntent);
                           break;*/
-                    case VideoPlayer.MXPlayer:
-                        Intent MXIntent = new Intent();
-                        MXIntent.SetPackage(package);
-                        MXIntent.SetDataAndTypeAndNormalize(uri, "video/m3u8");
+					case VideoPlayer.MXPlayer:
+						Intent MXIntent = new Intent();
+						MXIntent.SetPackage(package);
+						MXIntent.SetDataAndTypeAndNormalize(uri, "video/m3u8");
 
-                        MXIntent.AddFlags(ActivityFlags.GrantReadUriPermission);
-                        MXIntent.AddFlags(ActivityFlags.GrantWriteUriPermission);
-                        MXIntent.AddFlags(ActivityFlags.GrantPrefixUriPermission);
-                        MXIntent.AddFlags(ActivityFlags.GrantPersistableUriPermission);
+						MXIntent.AddFlags(ActivityFlags.GrantReadUriPermission);
+						MXIntent.AddFlags(ActivityFlags.GrantWriteUriPermission);
+						MXIntent.AddFlags(ActivityFlags.GrantPrefixUriPermission);
+						MXIntent.AddFlags(ActivityFlags.GrantPersistableUriPermission);
 
-                        MXIntent.AddFlags(ActivityFlags.NewTask);
-                        Android.App.Application.Context.StartActivity(MXIntent);
-                        break;
-                    default:
-                        break;
-                }
+						MXIntent.AddFlags(ActivityFlags.NewTask);
+						Android.App.Application.Context.StartActivity(MXIntent);
+						break;
+					default:
+						break;
+				}
 
-                /*
+				/*
                     Intent intent = new Intent(Intent.ActionView);
                     intent.SetDataAndTypeAndNormalize(Android.Net.Uri.Parse(_bpath), "video/*");
                     intent.AddFlags(ActivityFlags.GrantReadUriPermission);
@@ -2555,536 +2606,536 @@ namespace CloudStreamForms.Droid
                     Android.App.Application.Context.StartActivity(intent);
                  */
 
-            }
-            catch (Exception _ex) {
-                error("MAIN EX IN REQUEST VLC: " + _ex);
-            }
-        }
+			}
+			catch (Exception _ex) {
+				error("MAIN EX IN REQUEST VLC: " + _ex);
+			}
+		}
 
-        public static Random rng = new Random();
+		public static Random rng = new Random();
 
-        public EventHandler<bool> OnAudioFocusChanged { set; get; }
+		public EventHandler<bool> OnAudioFocusChanged { set; get; }
 
-        public void Awake()
-        {
-            try {
-                System.Net.ServicePointManager.DefaultConnectionLimit = 999;
+		public void Awake()
+		{
+			try {
+				System.Net.ServicePointManager.DefaultConnectionLimit = 999;
 
-                App.FullPictureInPictureSupport = activity.CanShowPictureInPicture();
-                App.PlatformDep = this;
+				App.FullPictureInPictureSupport = activity.CanShowPictureInPicture();
+				App.PlatformDep = this;
 
-                myAudioFocusListener = new MyAudioFocusListener();
-                myAudioFocusListener.FocusChanged += ((sender, b) => {
-                    OnAudioFocusChanged?.Invoke(this, b);
-                    if (b) {
-                        // play stuff
-                    }
-                    else {
-                        // stop playing stuff
-                    }
-                });
-                var playbackAttributes = new AudioAttributes.Builder()
-                      .SetUsage(AudioUsageKind.Media)
-                      .SetContentType(AudioContentType.Movie)
-                      .Build();
+				myAudioFocusListener = new MyAudioFocusListener();
+				myAudioFocusListener.FocusChanged += ((sender, b) => {
+					OnAudioFocusChanged?.Invoke(this, b);
+					if (b) {
+						// play stuff
+					}
+					else {
+						// stop playing stuff
+					}
+				});
+				var playbackAttributes = new AudioAttributes.Builder()
+					  .SetUsage(AudioUsageKind.Media)
+					  .SetContentType(AudioContentType.Movie)
+					  .Build();
 
-                CurrentAudioFocusRequest = new AudioFocusRequestClass.Builder(AudioFocus.Gain)
-                    .SetAudioAttributes(playbackAttributes)
-                    .SetAcceptsDelayedFocusGain(true)
-                    .SetOnAudioFocusChangeListener(myAudioFocusListener, handler)
-                    .Build();
-            }
-            catch (Exception _ex) {
-                error(_ex);
-            }
-            mainS.Start();
-            //  MainDelayTest();
-            // long delay = getDelay();
+				CurrentAudioFocusRequest = new AudioFocusRequestClass.Builder(AudioFocus.Gain)
+					.SetAudioAttributes(playbackAttributes)
+					.SetAcceptsDelayedFocusGain(true)
+					.SetOnAudioFocusChangeListener(myAudioFocusListener, handler)
+					.Build();
+			}
+			catch (Exception _ex) {
+				error(_ex);
+			}
+			mainS.Start();
+			//  MainDelayTest();
+			// long delay = getDelay();
 
-            //  print("MAIN DELAYYYY::: " + delay); 
-        }
+			//  print("MAIN DELAYYYY::: " + delay); 
+		}
 
-        readonly static Stopwatch mainS = new Stopwatch();
-        async void MainDelayTest()
-        {
-            await Task.Delay(250);
-            long f1 = mainS.ElapsedMilliseconds;
-            Device.BeginInvokeOnMainThread(() => {
-                long f2 = mainS.ElapsedMilliseconds;
-                App.ShowToast("SHOW: " + (f2 - f1));
-            });
-            MainDelayTest();
-        }
-
-
-        MyAudioFocusListener myAudioFocusListener;
-
-        public class MyAudioFocusListener
-        : Java.Lang.Object
-        , AudioManager.IOnAudioFocusChangeListener
-        {
-            public event EventHandler<bool> FocusChanged;
-
-            public void OnAudioFocusChange(AudioFocus focusChange)
-            {
-                print("AUDIOFOCUS CHANGED:::: " + focusChange.ToString() + "|" + (int)focusChange);
-                switch (focusChange) {
-                    case AudioFocus.GainTransient:
-                        FocusChanged?.Invoke(this, true);
-                        break;
-                    case AudioFocus.LossTransient:
-                        FocusChanged?.Invoke(this, false);
-                        break;
-                    case AudioFocus.Loss:
-                        FocusChanged?.Invoke(this, false);
-                        break;
-                    case AudioFocus.GainTransientExclusive:
-                        FocusChanged?.Invoke(this, true);
-                        break;
-                    case AudioFocus.Gain:
-                        FocusChanged?.Invoke(this, true);
-                        break;
-                }
-            }
-        }
-        private Handler handler = new Handler();
-
-        AudioManager AudioManager => Application.Context.GetSystemService(Context.AudioService) as AudioManager;
+		readonly static Stopwatch mainS = new Stopwatch();
+		async void MainDelayTest()
+		{
+			await Task.Delay(250);
+			long f1 = mainS.ElapsedMilliseconds;
+			Device.BeginInvokeOnMainThread(() => {
+				long f2 = mainS.ElapsedMilliseconds;
+				App.ShowToast("SHOW: " + (f2 - f1));
+			});
+			MainDelayTest();
+		}
 
 
-        AudioFocusRequestClass CurrentAudioFocusRequest;
-        public bool GainAudioFocus()
-        {
-            // AudioManager.IOnAudioFocusChangeListener afChangeListener;
-            // AudioFocusRequestClass.Builder audioBuilder = new AudioFocusRequestClass.Builder();
-            try {
-                AudioFocusRequest audio = AudioManager.RequestAudioFocus(CurrentAudioFocusRequest);
-                return audio == AudioFocusRequest.Granted;
-            }
-            catch (Exception) {
-                return false;
-            }
-        }
+		MyAudioFocusListener myAudioFocusListener;
+
+		public class MyAudioFocusListener
+		: Java.Lang.Object
+		, AudioManager.IOnAudioFocusChangeListener
+		{
+			public event EventHandler<bool> FocusChanged;
+
+			public void OnAudioFocusChange(AudioFocus focusChange)
+			{
+				print("AUDIOFOCUS CHANGED:::: " + focusChange.ToString() + "|" + (int)focusChange);
+				switch (focusChange) {
+					case AudioFocus.GainTransient:
+						FocusChanged?.Invoke(this, true);
+						break;
+					case AudioFocus.LossTransient:
+						FocusChanged?.Invoke(this, false);
+						break;
+					case AudioFocus.Loss:
+						FocusChanged?.Invoke(this, false);
+						break;
+					case AudioFocus.GainTransientExclusive:
+						FocusChanged?.Invoke(this, true);
+						break;
+					case AudioFocus.Gain:
+						FocusChanged?.Invoke(this, true);
+						break;
+				}
+			}
+		}
+		private Handler handler = new Handler();
+
+		AudioManager AudioManager => Application.Context.GetSystemService(Context.AudioService) as AudioManager;
 
 
-        public void ReleaseAudioFocus()
-        {
-            try {
-                AudioFocusRequest audio = AudioManager.AbandonAudioFocusRequest(CurrentAudioFocusRequest);
-            }
-            catch (Exception _ex) {
-                error(_ex);
-            }
-        }
+		AudioFocusRequestClass CurrentAudioFocusRequest;
+		public bool GainAudioFocus()
+		{
+			// AudioManager.IOnAudioFocusChangeListener afChangeListener;
+			// AudioFocusRequestClass.Builder audioBuilder = new AudioFocusRequestClass.Builder();
+			try {
+				AudioFocusRequest audio = AudioManager.RequestAudioFocus(CurrentAudioFocusRequest);
+				return audio == AudioFocusRequest.Granted;
+			}
+			catch (Exception) {
+				return false;
+			}
+		}
 
 
-        public void ShowToast(string message, double duration)
-        {
-            Device.BeginInvokeOnMainThread(() => {
-                try {
-                    ToastLength toastLength = ToastLength.Short;
-                    if (duration >= 3) {
-                        toastLength = ToastLength.Long;
-                    }
-                    Toast.MakeText(Android.App.Application.Context, message, toastLength).Show();
-                }
-                catch (Exception _ex) {
-                    error(_ex);
-                }
-            });
-        }
+		public void ReleaseAudioFocus()
+		{
+			try {
+				AudioFocusRequest audio = AudioManager.AbandonAudioFocusRequest(CurrentAudioFocusRequest);
+			}
+			catch (Exception _ex) {
+				error(_ex);
+			}
+		}
 
-        public string DownloadFile(string file, string fileName, bool mainPath, string extraPath)
-        {
-            try {
-                return WriteFile(CensorFilename(fileName), GetPath(mainPath, extraPath), file).Path;
-            }
-            catch (Exception _ex) {
-                error(_ex);
-                return "";
-            }
-        }
 
-        public string DownloadHandleIntent(int id, List<BasicMirrorInfo> mirrors, string fileName, string titleName, bool mainPath, string extraPath, bool showNotification = true, bool showNotificationWhenDone = true, bool openWhenDone = false, string poster = "", string beforeTxt = "")//, int mirror, string title, string path, string poster, string fileName, string beforeTxt, bool openWhenDone, bool showNotificaion, bool showDoneNotificaion, bool showDoneAsToast, bool resumeIntent)
-        {
-            try {
-                string path = GetPath(mainPath, extraPath);
-                string full = path + "/" + CensorFilename(fileName);
-                DownloadHandle.HandleIntent(id, mirrors, 0, titleName, path, poster, fileName, beforeTxt, openWhenDone, showNotification, showNotification, false, false);
-                return full;
-            }
-            catch (Exception _ex) {
-                error(_ex);
-                return "";
-            }
-        }
+		public void ShowToast(string message, double duration)
+		{
+			Device.BeginInvokeOnMainThread(() => {
+				try {
+					ToastLength toastLength = ToastLength.Short;
+					if (duration >= 3) {
+						toastLength = ToastLength.Long;
+					}
+					Toast.MakeText(Android.App.Application.Context, message, toastLength).Show();
+				}
+				catch (Exception _ex) {
+					error(_ex);
+				}
+			});
+		}
 
-        public string DownloadUrl(string url, string fileName, bool mainPath, string extraPath, string toast = "", bool isNotification = false, string body = "")
-        {
-            try {
+		public string DownloadFile(string file, string fileName, bool mainPath, string extraPath)
+		{
+			try {
+				return WriteFile(CensorFilename(fileName), GetPath(mainPath, extraPath), file).Path;
+			}
+			catch (Exception _ex) {
+				error(_ex);
+				return "";
+			}
+		}
 
-                string basePath = GetPath(mainPath, extraPath);
-                CloudStreamCore.print(basePath);
-                Java.IO.File _file = new Java.IO.File(basePath);
+		public string DownloadHandleIntent(int id, List<BasicMirrorInfo> mirrors, string fileName, string titleName, bool mainPath, string extraPath, bool showNotification = true, bool showNotificationWhenDone = true, bool openWhenDone = false, string poster = "", string beforeTxt = "")//, int mirror, string title, string path, string poster, string fileName, string beforeTxt, bool openWhenDone, bool showNotificaion, bool showDoneNotificaion, bool showDoneAsToast, bool resumeIntent)
+		{
+			try {
+				string path = GetPath(mainPath, extraPath);
+				string full = path + "/" + CensorFilename(fileName);
+				DownloadHandle.HandleIntent(id, mirrors, 0, titleName, path, poster, fileName, beforeTxt, openWhenDone, showNotification, showNotification, false, false);
+				return full;
+			}
+			catch (Exception _ex) {
+				error(_ex);
+				return "";
+			}
+		}
 
-                _file.Mkdirs();
-                basePath += "/" + CensorFilename(fileName);
-                CloudStreamCore.print(basePath);
-                //webClient.DownloadFile(url, basePath);
-                using WebClient wc = new WebClient();
-                wc.DownloadProgressChanged += (o, e) => {
+		public string DownloadUrl(string url, string fileName, bool mainPath, string extraPath, string toast = "", bool isNotification = false, string body = "")
+		{
+			try {
 
-                    App.OnDownloadProgressChanged(basePath, e);
+				string basePath = GetPath(mainPath, extraPath);
+				CloudStreamCore.print(basePath);
+				Java.IO.File _file = new Java.IO.File(basePath);
 
-                    /*
+				_file.Mkdirs();
+				basePath += "/" + CensorFilename(fileName);
+				CloudStreamCore.print(basePath);
+				//webClient.DownloadFile(url, basePath);
+				using WebClient wc = new WebClient();
+				wc.DownloadProgressChanged += (o, e) => {
+
+					App.OnDownloadProgressChanged(basePath, e);
+
+					/*
                     if (e.ProgressPercentage == 100) {
                         App.ShowToast("Download Successful");
                         //OpenFile(basePath);
                     }*/
-                    // print(e.ProgressPercentage + "|" + basePath);
-                };
-                wc.DownloadFileCompleted += (o, e) => {
-                    if (toast != "") {
-                        if (isNotification) {
-                            App.ShowNotIntent(toast,body,rng.Next(0,100000),"","");
-                        }
-                        else {
-                            App.ShowToast(toast);
-                        }
-                    }
-                };
-                wc.DownloadFileAsync(
-                    // Param1 = Link of file
-                    new System.Uri(url),
-                    // Param2 = Path to save
-                    basePath
-                );
+					// print(e.ProgressPercentage + "|" + basePath);
+				};
+				wc.DownloadFileCompleted += (o, e) => {
+					if (toast != "") {
+						if (isNotification) {
+							App.ShowNotIntent(toast, body, rng.Next(0, 100000), "", "");
+						}
+						else {
+							App.ShowToast(toast);
+						}
+					}
+				};
+				wc.DownloadFileAsync(
+					// Param1 = Link of file
+					new System.Uri(url),
+					// Param2 = Path to save
+					basePath
+				);
 
-            }
-            catch (Exception) {
-                App.ShowToast("Download Failed");
-                return "";
-            }
+			}
+			catch (Exception) {
+				App.ShowToast("Download Failed");
+				return "";
+			}
 
-            return GetPath(mainPath, extraPath) + "/" + CensorFilename(fileName);
-        }
+			return GetPath(mainPath, extraPath) + "/" + CensorFilename(fileName);
+		}
 
-        public void DownloadUpdate(string update, string version)
-        {
-            try {
-                string downloadLink = "https://github.com/LagradOst/CloudStream-2/releases/download/" + update + $"/{version}com.CloudStreamForms.CloudStreamForms.apk";
-                App.ShowToast("Download started!");
-                //  DownloadUrl(downloadLink, "com.CloudStreamForms.CloudStreamForms.apk", true, "", "Download complete!");
-                DownloadFromLink(downloadLink, "com.CloudStreamForms.CloudStreamForms.apk", "Download complete!", "", true, "");
-            }
-            catch (Exception _ex) {
-                error(_ex);
-            }
-        }
+		public void DownloadUpdate(string update, string version)
+		{
+			try {
+				string downloadLink = "https://github.com/LagradOst/CloudStream-2/releases/download/" + update + $"/{version}com.CloudStreamForms.CloudStreamForms.apk";
+				App.ShowToast("Download started!");
+				//  DownloadUrl(downloadLink, "com.CloudStreamForms.CloudStreamForms.apk", true, "", "Download complete!");
+				DownloadFromLink(downloadLink, "com.CloudStreamForms.CloudStreamForms.apk", "Download complete!", "", true, "");
+			}
+			catch (Exception _ex) {
+				error(_ex);
+			}
+		}
 
-        public string GetDownloadPath(string path, string extraFolder)
-        {
-            try {
-                return GetPath(true, extraFolder + "/" + CensorFilename(path, false));
-            }
-            catch (Exception _ex) {
-                error(_ex);
-                return "";
-            }
-        }
+		public string GetDownloadPath(string path, string extraFolder)
+		{
+			try {
+				return GetPath(true, extraFolder + "/" + CensorFilename(path, false));
+			}
+			catch (Exception _ex) {
+				error(_ex);
+				return "";
+			}
+		}
 
-        public string GetExternalStoragePath()
-        {
-            try {
-                return Android.OS.Environment.ExternalStorageDirectory.Path;
-            }
-            catch (Exception _ex) {
-                return "";
-                error(_ex);
-            }
-        }
+		public string GetExternalStoragePath()
+		{
+			try {
+				return Android.OS.Environment.ExternalStorageDirectory.Path;
+			}
+			catch (Exception _ex) {
+				return "";
+				error(_ex);
+			}
+		}
 
-        public int ConvertDPtoPx(int dp)
-        {
-            try {
-                return (int)(dp * MainActivity.activity.ApplicationContext.Resources.DisplayMetrics.Density);
+		public int ConvertDPtoPx(int dp)
+		{
+			try {
+				return (int)(dp * MainActivity.activity.ApplicationContext.Resources.DisplayMetrics.Density);
 
-            }
-            catch (Exception _ex) {
-                error(_ex);
-                return 1;
-            }
-        }
+			}
+			catch (Exception _ex) {
+				error(_ex);
+				return 1;
+			}
+		}
 
-        public void CancelNot(int id)
-        {
-            try {
-                CancelFutureNotification(id);
-            }
-            catch (Exception _ex) {
-                error(_ex);
-            }
-        }
+		public void CancelNot(int id)
+		{
+			try {
+				CancelFutureNotification(id);
+			}
+			catch (Exception _ex) {
+				error(_ex);
+			}
+		}
 
-        public string ReadFile(string path)
-        {
-            try {
-                path = path.Replace("file://", "").Replace("content://", "");
-                Java.IO.File _file = new Java.IO.File(path);
-                Java.IO.FileReader reader = new Java.IO.FileReader(_file);
-                char[] data = new char[1024];
-                int count = 0;
-                StringBuilder builder = new StringBuilder();
-                while ((count = reader.Read(data, 0, data.Length)) != -1) {
-                    for (int i = 0; i < count; i++) {
-                        builder.Append(data[i]);
-                    }
-                }
+		public string ReadFile(string path)
+		{
+			try {
+				path = path.Replace("file://", "").Replace("content://", "");
+				Java.IO.File _file = new Java.IO.File(path);
+				Java.IO.FileReader reader = new Java.IO.FileReader(_file);
+				char[] data = new char[1024];
+				int count = 0;
+				StringBuilder builder = new StringBuilder();
+				while ((count = reader.Read(data, 0, data.Length)) != -1) {
+					for (int i = 0; i < count; i++) {
+						builder.Append(data[i]);
+					}
+				}
 
-                return builder.ToString();
-            }
-            catch (Exception _ex) {
-                return "";
-            }
-        }
+				return builder.ToString();
+			}
+			catch (Exception _ex) {
+				return "";
+			}
+		}
 
-        public string ReadFile(string fileName, bool mainPath, string extraPath)
-        {
-            try {
-                string basePath = GetPath(mainPath, extraPath);
-                Java.IO.File _file = new Java.IO.File(basePath, fileName);
-                Java.IO.FileReader reader = new Java.IO.FileReader(_file);
-                char[] data = new char[1024];
-                int count = 0;
-                StringBuilder builder = new StringBuilder();
-                while ((count = reader.Read(data, 0, data.Length)) != -1) {
-                    for (int i = 0; i < count; i++) {
-                        builder.Append(data[i]);
-                    }
-                }
+		public string ReadFile(string fileName, bool mainPath, string extraPath)
+		{
+			try {
+				string basePath = GetPath(mainPath, extraPath);
+				Java.IO.File _file = new Java.IO.File(basePath, fileName);
+				Java.IO.FileReader reader = new Java.IO.FileReader(_file);
+				char[] data = new char[1024];
+				int count = 0;
+				StringBuilder builder = new StringBuilder();
+				while ((count = reader.Read(data, 0, data.Length)) != -1) {
+					for (int i = 0; i < count; i++) {
+						builder.Append(data[i]);
+					}
+				}
 
-                return builder.ToString();
-            }
-            catch (Exception) {
-                return "";
-            }
-        }
+				return builder.ToString();
+			}
+			catch (Exception) {
+				return "";
+			}
+		}
 
-        static string GetVideoPlayerPackage(VideoPlayer player)
-        {
-            return player switch
-            {
-                // VideoPlayer.MPV => "is.xyz.mpv",
-                VideoPlayer.MXPlayer => "com.mxtech.videoplayer.ad",
-                VideoPlayer.VLC => "org.videolan.vlc",
-                _ => "",
-            };
-        }
+		static string GetVideoPlayerPackage(VideoPlayer player)
+		{
+			return player switch
+			{
+				// VideoPlayer.MPV => "is.xyz.mpv",
+				VideoPlayer.MXPlayer => "com.mxtech.videoplayer.ad",
+				VideoPlayer.VLC => "org.videolan.vlc",
+				_ => "",
+			};
+		}
 
-        public bool GetPlayerInstalled(VideoPlayer player)
-        {
-            if (player == VideoPlayer.None) {
-                return false;
-            }
-            return IsAppInstalled(GetVideoPlayerPackage(player));
-        }
+		public bool GetPlayerInstalled(VideoPlayer player)
+		{
+			if (player == VideoPlayer.None) {
+				return false;
+			}
+			return IsAppInstalled(GetVideoPlayerPackage(player));
+		}
 
-        //https://stackoverflow.com/questions/37112544/how-to-identify-processor-architecture-in-xamarin-android
-        public int GetArchitecture()
-        {
-            IList<string> abis = Android.OS.Build.SupportedAbis;
-            foreach (var item in abis) { // arm64-v8a armeabi-v7a armeabi x86 x86_64
-                if (item == "arm64-v8a") {
-                    return (int)App.AndroidVersionArchitecture.arm64_v8a;
-                }
-                else if (item == "armeabi-v7a") {
-                    return (int)App.AndroidVersionArchitecture.armeabi_v7a;
-                }
-                else if (item == "x86") {
-                    return (int)App.AndroidVersionArchitecture.x86;
-                }
-                else if (item == "x86_64") {
-                    return (int)App.AndroidVersionArchitecture.x86_64;
-                }
-            }
-            return 0;
-        }
-    }
+		//https://stackoverflow.com/questions/37112544/how-to-identify-processor-architecture-in-xamarin-android
+		public int GetArchitecture()
+		{
+			IList<string> abis = Android.OS.Build.SupportedAbis;
+			foreach (var item in abis) { // arm64-v8a armeabi-v7a armeabi x86 x86_64
+				if (item == "arm64-v8a") {
+					return (int)App.AndroidVersionArchitecture.arm64_v8a;
+				}
+				else if (item == "armeabi-v7a") {
+					return (int)App.AndroidVersionArchitecture.armeabi_v7a;
+				}
+				else if (item == "x86") {
+					return (int)App.AndroidVersionArchitecture.x86;
+				}
+				else if (item == "x86_64") {
+					return (int)App.AndroidVersionArchitecture.x86_64;
+				}
+			}
+			return 0;
+		}
+	}
 
-    public class NullPlatfrom : App.IPlatformDep
-    {
-        public EventHandler<bool> OnAudioFocusChanged { get; set; }
+	public class NullPlatfrom : App.IPlatformDep
+	{
+		public EventHandler<bool> OnAudioFocusChanged { get; set; }
 
-        public void CancelNot(int id)
-        {
-        }
+		public void CancelNot(int id)
+		{
+		}
 
-        public int ConvertDPtoPx(int dp)
-        {
-            return 1;
-        }
+		public int ConvertDPtoPx(int dp)
+		{
+			return 1;
+		}
 
-        public bool DeleteFile(string path)
-        {
-            return true;
-        }
+		public bool DeleteFile(string path)
+		{
+			return true;
+		}
 
-        public string DownloadFile(string file, string fileName, bool mainPath, string extraPath)
-        {
-            return "";
-        }
-        public string DownloadHandleIntent(int id, List<BasicMirrorInfo> mirrors, string fileName, string titleName, bool mainPath, string extraPath, bool showNotification = true, bool showNotificationWhenDone = true, bool openWhenDone = false, string poster = "", string beforeTxt = "")
-        {
-            return "";
-        }
+		public string DownloadFile(string file, string fileName, bool mainPath, string extraPath)
+		{
+			return "";
+		}
+		public string DownloadHandleIntent(int id, List<BasicMirrorInfo> mirrors, string fileName, string titleName, bool mainPath, string extraPath, bool showNotification = true, bool showNotificationWhenDone = true, bool openWhenDone = false, string poster = "", string beforeTxt = "")
+		{
+			return "";
+		}
 
-        public void DownloadUpdate(string update)
-        {
-        }
+		public void DownloadUpdate(string update)
+		{
+		}
 
-        public void DownloadUpdate(string update, string version)
-        {
-            throw new NotImplementedException();
-        }
+		public void DownloadUpdate(string update, string version)
+		{
+			throw new NotImplementedException();
+		}
 
-        public string DownloadUrl(string url, string fileName, bool mainPath, string extraPath, string toast = "", bool isNotification = false, string body = "")
-        {
-            return "";
-        }
+		public string DownloadUrl(string url, string fileName, bool mainPath, string extraPath, string toast = "", bool isNotification = false, string body = "")
+		{
+			return "";
+		}
 
-        public bool GainAudioFocus()
-        {
-            return true;
-        }
+		public bool GainAudioFocus()
+		{
+			return true;
+		}
 
-        public int GetArchitecture()
-        {
-            throw new NotImplementedException();
-        }
+		public int GetArchitecture()
+		{
+			throw new NotImplementedException();
+		}
 
-        /*
+		/*
         public BluetoothDeviceID[] GetBluetoothDevices()
         {
             return null;
         }*/
 
-        public double GetBrightness()
-        {
-            return 1;
-        }
+		public double GetBrightness()
+		{
+			return 1;
+		}
 
-        public string GetDownloadPath(string path, string extraFolder)
-        {
-            return "";
-        }
+		public string GetDownloadPath(string path, string extraFolder)
+		{
+			return "";
+		}
 
-        public DownloadProgressInfo GetDownloadProgressInfo(int id, string fileUrl)
-        {
-            return null;
-        }
+		public DownloadProgressInfo GetDownloadProgressInfo(int id, string fileUrl)
+		{
+			return null;
+		}
 
-        public string GetExternalStoragePath()
-        {
-            return "";
-        }
+		public string GetExternalStoragePath()
+		{
+			return "";
+		}
 
-        public bool GetPlayerInstalled(VideoPlayer player)
-        {
-            return false;
-        }
+		public bool GetPlayerInstalled(VideoPlayer player)
+		{
+			return false;
+		}
 
-        public StorageInfo GetStorageInformation(string path = "")
-        {
-            return null;
-        }
+		public StorageInfo GetStorageInformation(string path = "")
+		{
+			return null;
+		}
 
-        public void HideStatusBar()
-        {
-        }
+		public void HideStatusBar()
+		{
+		}
 
-        public void LandscapeOrientation()
-        {
-        }
+		public void LandscapeOrientation()
+		{
+		}
 
-        public void NormalOrientation()
-        {
-        }
+		public void NormalOrientation()
+		{
+		}
 
-        public void PictureInPicture()
-        {
-            throw new NotImplementedException();
-        }
+		public void PictureInPicture()
+		{
+			throw new NotImplementedException();
+		}
 
-        public void PlayExternalApp(VideoPlayer player)
-        {
-            throw new NotImplementedException();
-        }
+		public void PlayExternalApp(VideoPlayer player)
+		{
+			throw new NotImplementedException();
+		}
 
 
-        public string ReadFile(string fileName, bool mainPath, string extraPath)
-        {
-            throw new NotImplementedException();
-        }
+		public string ReadFile(string fileName, bool mainPath, string extraPath)
+		{
+			throw new NotImplementedException();
+		}
 
-        public string ReadFile(string path)
-        {
-            return "";
-        }
+		public string ReadFile(string path)
+		{
+			return "";
+		}
 
-        public void ReleaseAudioFocus()
-        {
-        }
+		public void ReleaseAudioFocus()
+		{
+		}
 
-        public void RequestVlc(List<string> urls, List<string> names, string episodeName, string episodeId, long startId = -2, string subtitleFull = "", VideoPlayer preferedPlayer = VideoPlayer.VLC)
-        {
-        }
+		public void RequestVlc(List<string> urls, List<string> names, string episodeName, string episodeId, long startId = -2, string subtitleFull = "", VideoPlayer preferedPlayer = VideoPlayer.VLC)
+		{
+		}
 
-        public void SearchBluetoothDevices()
-        {
-        }
+		public void SearchBluetoothDevices()
+		{
+		}
 
-        public void SetBrightness(double opacity)
-        {
-        }
+		public void SetBrightness(double opacity)
+		{
+		}
 
-        public void ShowNotIntent(string title, string body, int id, string titleId, string titleName, DateTime? time = null, string bigIconUrl = "")
-        {
-        }
+		public void ShowNotIntent(string title, string body, int id, string titleId, string titleName, DateTime? time = null, string bigIconUrl = "")
+		{
+		}
 
-        public void ShowStatusBar()
-        {
-        }
+		public void ShowStatusBar()
+		{
+		}
 
-        public void ShowToast(string message, double duration)
-        {
-        }
+		public void ShowToast(string message, double duration)
+		{
+		}
 
-        public void Test()
-        {
-        }
+		public void Test()
+		{
+		}
 
-        public void ToggleFullscreen(bool fullscreen)
-        {
-        }
+		public void ToggleFullscreen(bool fullscreen)
+		{
+		}
 
-        public void ToggleRealFullScreen(bool fullscreen)
-        {
-        }
+		public void ToggleRealFullScreen(bool fullscreen)
+		{
+		}
 
-        public void UpdateBackground(int color)
-        {
-        }
+		public void UpdateBackground(int color)
+		{
+		}
 
-        public void UpdateBackground()
-        {
-        }
+		public void UpdateBackground()
+		{
+		}
 
-        public void UpdateDownload(int id, int state)
-        {
-        }
+		public void UpdateDownload(int id, int state)
+		{
+		}
 
-        public void UpdateStatusBar()
-        {
-        }
-    }
+		public void UpdateStatusBar()
+		{
+		}
+	}
 }
