@@ -97,6 +97,7 @@
     <Compile Include="CustomSwitchCellRenderer.cs" />
     <Compile Include="CustomSearchBarRenderer.cs" />
     <Compile Include="CustomPickerRenderer.cs" />
+    <Compile Include="DownloadHandle.cs" />
     <Compile Include="GenericFileProvider.cs" />
     <Compile Include="MainActivity.cs" />
     <Compile Include="PIPBroadcastReceiver.cs" />
