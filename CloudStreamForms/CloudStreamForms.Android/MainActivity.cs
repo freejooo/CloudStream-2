@@ -15,22 +15,17 @@ using Android.Support.Annotation;
 using Android.Support.V4.App;
 using Android.Support.V4.Content;
 using Android.Text;
-using Android.Util;
 using Android.Views;
 using Android.Webkit;
 using Android.Widget;
 using CloudStreamForms.Core;
 using Java.IO;
 using Java.Net;
-using Javax.Net.Ssl;
 using LibVLCSharp.Forms.Shared;
 using Newtonsoft.Json;
-using Org.Videolan.Libvlc.Utils;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
-using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading;
@@ -76,9 +71,7 @@ namespace CloudStreamForms.Droid
 	[Service]
 	public class DemoIntentService : IntentService
 	{
-		public DemoIntentService() : base("DemoIntentService")
-		{
-		}
+		public DemoIntentService() : base("DemoIntentService") { }
 
 		protected override void OnHandleIntent(Android.Content.Intent intent)
 		{
@@ -92,10 +85,7 @@ namespace CloudStreamForms.Droid
 	[Service]
 	public class MainIntentService : IntentService
 	{
-		public MainIntentService() : base("MainIntentService")
-		{
-
-		}
+		public MainIntentService() : base("MainIntentService") { }
 
 		protected override void OnHandleIntent(Android.Content.Intent intent)
 		{
@@ -178,7 +168,6 @@ namespace CloudStreamForms.Droid
 
 		public int notificationImportance = (int)NotificationImportance.Default;
 
-
 		public static NotificationManager _manager => (NotificationManager)Application.Context.GetSystemService(Context.NotificationService);
 		public static Dictionary<string, Bitmap> cachedBitmaps = new Dictionary<string, Bitmap>(); // TO ADD PREFORMACE WHEN ADDING NOTIFICATION W SAME IMAGE
 
@@ -203,7 +192,6 @@ namespace CloudStreamForms.Droid
 			catch (Exception) {
 				return null;
 			}
-
 		}
 
 		public static long CurrentTimeMillis(DateTime time)
@@ -512,6 +500,7 @@ namespace CloudStreamForms.Droid
 
 			}
 		}
+
 		public static bool ExecuteWithTimeLimit(TimeSpan timeSpan, Action codeBlock)
 		{
 			try {
@@ -1946,7 +1935,6 @@ namespace CloudStreamForms.Droid
 				builder.SetSmallIcon(Resource.Drawable.biconWhite2);//LocalNotificationIconId);
 				builder.SetOngoing(true);
 
-
 				var context = MainActivity.activity.ApplicationContext;
 				if (Build.VERSION.SdkInt >= BuildVersionCodes.O) {
 					var channelId = $"{_packageName}.general";
@@ -1984,8 +1972,7 @@ namespace CloudStreamForms.Droid
 
 				builder.SetContentIntent(GetCurrentPending("openchrome"));
 				try {
-					_manager.Notify(CHROME_CAST_NOTIFICATION_ID, builder.Build());
-
+					_manager.Notify(CHROME_CAST_NOTIFICATION_ID, builder.Build()); 
 				}
 				catch (Exception _ex) {
 					print("EX NOTTIFY;; " + _ex);

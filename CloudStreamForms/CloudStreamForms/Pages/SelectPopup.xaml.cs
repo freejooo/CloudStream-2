@@ -41,7 +41,7 @@ namespace CloudStreamForms
         public static async Task DisplayLoadingBar(int loadingTime, string title = "Loading")
         {
             await PopupNavigation.Instance.PushAsync(new LoadingPopupPage(loadingTime, title));
-            await Task.Delay(loadingTime);
+            await Task.Delay(loadingTime + 100);
         }
 
         static LoadingPopupPage currentLoading;
