@@ -61,6 +61,33 @@ namespace CloudStreamForms
             }
         }
 
+        public static string VideoDownloadLocation {
+            set {
+                App.SetKey("Settings", nameof(VideoDownloadLocation), value);
+            }
+            get {
+                return App.GetKey("Settings", nameof(VideoDownloadLocation), "Download/{type}/");
+            }
+        }
+
+        public static string VideoDownloadTvSeries {
+            set {
+                App.SetKey("Settings", nameof(VideoDownloadTvSeries), value);
+            }
+            get {
+                return App.GetKey("Settings", nameof(VideoDownloadTvSeries), "{titlename}/S{season}:E{episode} {name}");
+            }
+        }
+
+        public static string VideoDownloadMovie {
+            set {
+                App.SetKey("Settings", nameof(VideoDownloadMovie), value);
+            }
+            get {
+                return App.GetKey("Settings", nameof(VideoDownloadMovie), "{name}");
+            }
+        }
+
         public static bool VideoPlayerSponsorblock {
             set {
                 App.SetKey("Settings", nameof(VideoPlayerSponsorblock), value);

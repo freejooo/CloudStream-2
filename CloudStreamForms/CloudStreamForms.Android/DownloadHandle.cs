@@ -106,7 +106,6 @@ namespace CloudStreamForms.Droid
 			public string title;
 			public string path;
 			public string poster;
-			public string fileName;
 			public string beforeTxt;
 			public bool openWhenDone;
 			public bool showNotificaion;
@@ -118,8 +117,7 @@ namespace CloudStreamForms.Droid
 		{
 			try {
 				DownloadHandleNot d = JsonConvert.DeserializeObject<DownloadHandleNot>(data);
-				HandleIntent(d.id, d.mirrors, d.mirror, d.title, d.path, d.poster, d.fileName, d.beforeTxt, d.openWhenDone, d.showNotificaion, d.showDoneNotificaion, d.showDoneAsToast, true);
-
+				HandleIntent(d.id, d.mirrors, d.mirror, d.title, d.path, d.poster, d.beforeTxt, d.openWhenDone, d.showNotificaion, d.showDoneNotificaion, d.showDoneAsToast, true);
 			}
 			catch (Exception) { }
 		}
@@ -246,7 +244,7 @@ namespace CloudStreamForms.Droid
 		/// <param name="mirrorUrls"></param>
 		/// <param name="mirror"></param>
 		/// <param name="title"></param>
-		/// <param name="path">NOT FULL PATH, just subpath, filname will handle the rest</param>
+		/// <param name="path">FULL PATH</param>
 		/// <param name="poster"></param>
 		/// <param name="fileName"></param>
 		/// <param name="beforeTxt"></param>
@@ -255,12 +253,11 @@ namespace CloudStreamForms.Droid
 		/// <param name="showDoneNotificaion"></param>
 		/// <param name="showDoneAsToast"></param>
 		/// <param name="resumeIntent"></param>
-		public static void HandleIntent(int id, List<BasicMirrorInfo> mirrors, int mirror, string title, string path, string poster, string fileName, string beforeTxt, bool openWhenDone, bool showNotificaion, bool showDoneNotificaion, bool showDoneAsToast, bool resumeIntent)
+		public static void HandleIntent(int id, List<BasicMirrorInfo> mirrors, int mirror, string title, string path, string poster, string beforeTxt, bool openWhenDone, bool showNotificaion, bool showDoneNotificaion, bool showDoneAsToast, bool resumeIntent)
 		{
 			const int UPDATE_TIME = 1;
 
 			try {
-				fileName = CensorFilename(fileName);
 
 				isStartProgress[id] = true;
 				print("START DLOAD::: " + id);
@@ -335,7 +332,7 @@ namespace CloudStreamForms.Droid
 
 					Thread t = new Thread(() => {
 						print("START:::");
-						string json = JsonConvert.SerializeObject(new DownloadHandleNot() { id = id, mirrors = mirrors, fileName = fileName, showDoneAsToast = showDoneAsToast, openWhenDone = openWhenDone, showDoneNotificaion = showDoneNotificaion, beforeTxt = beforeTxt, mirror = mirror, path = path, poster = poster, showNotificaion = showNotificaion, title = title });
+						string json = JsonConvert.SerializeObject(new DownloadHandleNot() { id = id, mirrors = mirrors, showDoneAsToast = showDoneAsToast, openWhenDone = openWhenDone, showDoneNotificaion = showDoneNotificaion, beforeTxt = beforeTxt, mirror = mirror, path = path, poster = poster, showNotificaion = showNotificaion, title = title });
 
 						App.SetKey(DOWNLOAD_KEY_INTENT, id.ToString(), json);
 
@@ -367,7 +364,7 @@ namespace CloudStreamForms.Droid
 						}
 
 						bool removeKeys = true;
-						var rFile = new Java.IO.File(path, fileName);
+						var rFile = new Java.IO.File(path);
 
 						try {
 							// CREATED DIRECTORY IF NEEDED
@@ -492,7 +489,7 @@ namespace CloudStreamForms.Droid
 								}
 								bool showDone = true;
 
-								void WriteData()
+								bool WriteDataUpdate()
 								{
 									progressDownloads[id] = total;
 									progress = cProgress();
@@ -510,14 +507,12 @@ namespace CloudStreamForms.Droid
 									if (isPaused[id] == 2) { // DELETE FILE
 										print("DOWNLOAD STOPPED");
 										ShowDone(false, "Download Stopped");
-										//  Thread.Sleep(100);
 										output.Flush();
 										output.Close();
 										input.Close();
 										outputStreams.Remove(id);
 										inputStreams.Remove(id);
 										isPaused.Remove(id);
-										// Thread.Sleep(100);
 										rFile.Delete();
 										App.RemoveKey(DOWNLOAD_KEY, id.ToString());
 										App.RemoveKey(DOWNLOAD_KEY_INTENT, id.ToString());
@@ -529,7 +524,7 @@ namespace CloudStreamForms.Droid
 										removeKeys = true;
 										OnSomeDownloadFailed?.Invoke(null, EventArgs.Empty);
 										Thread.Sleep(100);
-										return;
+										return true;
 									}
 
 									if (DateTime.Now.Subtract(lastUpdateTime).TotalSeconds > UPDATE_TIME) {
@@ -563,7 +558,7 @@ namespace CloudStreamForms.Droid
 											// UpdateDloadNot(progress + "%");
 										}
 									}
-
+									return false;
 								}
 
 
@@ -571,23 +566,33 @@ namespace CloudStreamForms.Droid
 									var links = ParseM3u8(url, referer);
 									int counter = 0;
 									byte[] buffer;
-									while ((buffer = CloudStreamCore.DownloadByteArrayFromUrl(links[counter], referer)) != null) {
-										counter++;
-										m3u8Progress = counter * 100 / links.Length;
-										count = buffer.Length;
-										total += count;
-										bytesPerSec += count;
-										output.Write(buffer, 0, count);
-										WriteData();
+									try {
+										while ((buffer = CloudStreamCore.DownloadByteArrayFromUrl(links[counter], referer)) != null) {
+											counter++;
+											m3u8Progress = counter * 100 / links.Length;
+											count = buffer.Length;
+											total += count;
+											bytesPerSec += count;
+											output.Write(buffer, 0, count);
+											if (WriteDataUpdate()) return;
+										}
+									}
+									catch (Exception) {
+										if (WriteDataUpdate()) return;
 									}
 								}
 								else {
-									while ((count = input.Read(data)) != -1) {
-										total += count;
-										bytesPerSec += count;
+									try {
+										while ((count = input.Read(data)) != -1) {
+											total += count;
+											bytesPerSec += count;
 
-										output.Write(data, 0, count);
-										WriteData();
+											output.Write(data, 0, count);
+											if (WriteDataUpdate()) return;
+										}
+									}
+									catch (Exception) {
+										if (WriteDataUpdate()) return;
 									}
 								}
 
@@ -633,12 +638,8 @@ namespace CloudStreamForms.Droid
 					t.Start();
 				}
 				StartT();
-
-
 			}
 			catch (Exception) {
-
-				throw;
 			}
 		}
 	}
