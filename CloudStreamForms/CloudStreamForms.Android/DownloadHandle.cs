@@ -235,6 +235,13 @@ namespace CloudStreamForms.Droid
 			//}
 		}
 
+		public static bool ResumeDownload(int id)
+		{
+			string data = App.GetKey<string>(DOWNLOAD_KEY_INTENT, id.ToString(), null);
+			if (data == null) return false;
+			HandleIntent(data);
+			return true;
+		}
 
 		/// <summary>
 		/// 
@@ -298,6 +305,10 @@ namespace CloudStreamForms.Droid
 				void ShowDone(bool succ, string overrideText = null)
 				{
 					print("DAAAAAAAAAASHOW DONE" + succ);
+					if (succ) {
+						App.RemoveKey(DOWNLOAD_KEY, id.ToString());
+						App.RemoveKey(DOWNLOAD_KEY_INTENT, id.ToString());
+					}
 					if (showDoneNotificaion) {
 						print("DAAAAAAAAAASHOW DONE!!!!");
 						Device.BeginInvokeOnMainThread(() => {
@@ -562,6 +573,12 @@ namespace CloudStreamForms.Droid
 								}
 
 
+								void OnError()
+								{
+									showDone = false;
+									ShowDone(false, "Download Failed");
+								}
+
 								if (isM3u8) {
 									var links = ParseM3u8(url, referer);
 									int counter = 0;
@@ -578,7 +595,7 @@ namespace CloudStreamForms.Droid
 										}
 									}
 									catch (Exception) {
-										if (WriteDataUpdate()) return;
+										OnError();
 									}
 								}
 								else {
@@ -592,7 +609,7 @@ namespace CloudStreamForms.Droid
 										}
 									}
 									catch (Exception) {
-										if (WriteDataUpdate()) return;
+										OnError();
 									}
 								}
 
@@ -627,8 +644,8 @@ namespace CloudStreamForms.Droid
 								isStartProgress.Remove(id);
 							}
 							if (removeKeys) {
-								App.RemoveKey(DOWNLOAD_KEY, id.ToString());
-								App.RemoveKey(DOWNLOAD_KEY_INTENT, id.ToString());
+								//App.RemoveKey(DOWNLOAD_KEY, id.ToString());
+								//App.RemoveKey(DOWNLOAD_KEY_INTENT, id.ToString());
 							}
 							else {
 								StartT();

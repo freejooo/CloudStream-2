@@ -626,6 +626,9 @@ namespace CloudStreamForms
 			List<string> actions = new List<string>() {
 				 "Play in App","Delete File", "Open Source"
 			};
+			if (info.state.state == DownloadState.NotDownloaded && info.state.ProcentageDownloaded < 99) {
+				actions.Add("Resume Download");
+			}
 			if (App.CanPlayExternalPlayer()) {
 				actions.Insert(1, "Play External App");
 			}
@@ -689,36 +692,16 @@ namespace CloudStreamForms
 					PushPageFromUrlAndName(info.info.source, header.name);
 				}
 			}
-
-			// info.info.fileUrl
+			else if (action == "Resume Download") {
+				bool suc = App.ResumeDownload(info.info.id);
+				App.ShowToast(suc ? "Download Resumed" : "Download Failed");
+			}
 		}
-
-		/*
-        public static void PlayFile(string keyData, string title = "")
-        {
-            string moviePath = FindHTML(keyData, "_dpath=", "|||");
-            App.PlayVLCWithSingleUrl(moviePath, title);
-        }*/
-
 
 		private async void ImageButton_Clicked(object sender, EventArgs e)
 		{
 			EpisodeResult episodeResult = ((EpisodeResult)((ImageButton)sender).BindingContext);
 			await HandleEpisodeAsync(episodeResult);
-			//HandleEpisode(episodeResult, this);
-			//PlayEpisode(episodeResult);
-		}
-
-
-		private void Grid_BindingContextChanged(object sender, EventArgs e)
-		{
-			/*
-            var c = ((FFImageLoading.Forms.CachedImage)((Grid)sender).Children[1]);
-
-            c.Transformations.Clear();
-            var ep = ((EpisodeResult)c.BindingContext);
-            c.Transformations = new List<FFImageLoading.Work.ITransformation>() { new FFImageLoading.Transformations.RoundedTransformation() { BorderHexColor = ep.ExtraColor, BorderSize = 0, Radius = 1, CropHeightRatio = 1.5 } }; //1.77
-            */
 		}
 	}
 

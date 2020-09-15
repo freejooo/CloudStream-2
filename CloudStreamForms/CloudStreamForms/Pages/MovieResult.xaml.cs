@@ -2014,7 +2014,7 @@ namespace CloudStreamForms
 									double fileSize = CloudStreamCore.GetFileSize(link.baseUrl, link.referer ?? "");
 									//    UserDialogs.Instance.HideLoading();
 									await ActionPopup.StopIndeterminateLoadinbar();
-									if (true) {//fileSize > 1) {
+									if (fileSize > 1) {
 										print("DSUZE:::::" + episodeResult.Episode);
 
 										// ImageService.Instance.LoadUrl(episodeResult.PosterUrl, TimeSpan.FromDays(30)); // CASHE IMAGE

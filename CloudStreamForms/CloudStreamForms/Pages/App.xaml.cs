@@ -102,9 +102,8 @@ namespace CloudStreamForms
 			/*  BluetoothDeviceID[] GetBluetoothDevices();
               void SearchBluetoothDevices();*/
 			void RequestVlc(List<string> urls, List<string> names, string episodeName, string episodeId, long startId = FROM_PROGRESS, string subtitleFull = "", VideoPlayer preferedPlayer = VideoPlayer.VLC);
-
 			public int GetArchitecture();
-
+			public bool ResumeDownload(int id); 
 			public void PictureInPicture();
 		}
 
@@ -233,8 +232,7 @@ namespace CloudStreamForms
 				VideoPlayer.MXPlayer => "MX Player",
 				_ => "",
 			};
-		}
-
+		} 
 
 		public static string GetPathFromType(MovieType t)
 		{
@@ -354,8 +352,11 @@ namespace CloudStreamForms
 				PlatformDep.RequestVlc(urls, names, episodeName, episodeId, startId, subtitleFull, (VideoPlayer)Settings.PreferedVideoPlayer);
 			}
 			isRequestingVLC = false;
+		}
 
-
+		public static bool ResumeDownload(int id)
+		{
+			return PlatformDep.ResumeDownload(id);
 		}
 
 		public static string CensorFilename(string name, bool toLower = false)

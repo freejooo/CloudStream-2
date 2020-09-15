@@ -629,7 +629,7 @@ namespace CloudStreamForms.Droid
 				LogFile("OnLoad Completed");
 
 
-				ResumeIntentData();
+				//ResumeIntentData();
 				LogFile("Resume intents completed");
 
 				StartService(new Intent(BaseContext, typeof(OnKilledService)));
@@ -2448,6 +2448,11 @@ namespace CloudStreamForms.Droid
 			}
 			return 0;
 		}
+
+		public bool ResumeDownload(int id)
+		{
+			return DownloadHandle.ResumeDownload(id);
+		}
 	}
 
 	public class NullPlatfrom : App.IPlatformDep
@@ -2576,6 +2581,11 @@ namespace CloudStreamForms.Droid
 
 		public void RequestVlc(List<string> urls, List<string> names, string episodeName, string episodeId, long startId = -2, string subtitleFull = "", VideoPlayer preferedPlayer = VideoPlayer.VLC)
 		{
+		}
+
+		public bool ResumeDownload(int id)
+		{
+			throw new NotImplementedException();
 		}
 
 		public void SearchBluetoothDevices()
