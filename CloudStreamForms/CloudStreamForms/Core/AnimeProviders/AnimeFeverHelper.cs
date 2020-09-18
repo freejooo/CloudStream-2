@@ -48,11 +48,14 @@ namespace CloudStreamForms.Core.AnimeProviders
 
         public struct AnimeFeverSearchDatum
         {
-            public int id;
-            public string uid;
-            public object anilist_id;
             public string name;
             public string alt_name;
+            public int id;
+            public string slug;
+
+            /*
+            public string uid;
+            public object anilist_id;
             public string description;
             public object trailer;
             public string status;
@@ -67,20 +70,21 @@ namespace CloudStreamForms.Core.AnimeProviders
             public string created_at;
             public string updated_at;
             public int episodes_count;
-            public string slug;
             public bool is_collected;
-            public object collection_status;
+            public object collection_status;*/
             public List<AnimeFeverSearchPoster> posters;
+            /*
             public object backgrounds;
             public AnimeFeverSearchPoster2 poster;
             public AnimeFeverSearchLogo logo;
-            public object background;
+            public object background;*/
         }
 
         public struct AnimeFeverSearchInfo
         {
-            public int? current_page;
+            //public int? current_page;
             public List<AnimeFeverSearchDatum> data;
+            /*
             public string first_page_url;
             public int? from;
             public int? last_page;
@@ -90,11 +94,12 @@ namespace CloudStreamForms.Core.AnimeProviders
             public int? per_page;
             public object prev_page_url;
             public int? to;
-            public int? total;
+            public int? total;*/
         }
-         
+
         public struct AnimeFeverEpisodeImage
         {
+            /*
             public int id;
             public string disk_name;
             public int file_size;
@@ -106,7 +111,7 @@ namespace CloudStreamForms.Core.AnimeProviders
             public string created_at;
             public string updated_at;
             public string path;
-            public string extension;
+            public string extension;*/
         }
 
         public struct AnimeFeverEpisodeVideoMeta
@@ -119,35 +124,39 @@ namespace CloudStreamForms.Core.AnimeProviders
         public struct AnimeFeverEpisodeDatum
         {
             public int id;
-            public string title;
+            //public string title;
             public string slug;
             public string number;
+            public AnimeFeverEpisodeVideoMeta video_meta;
+
+            /*
             public int duration;
             public AnimeFeverEpisodeImage image;
-            public AnimeFeverEpisodeVideoMeta video_meta;
             public int is_filler;
             public int is_recap;
             public bool watched;
-            public object progress;
+            public object progress;*/
         }
 
         public struct AnimeFeverEpisodeLinks
         {
+            /*
             public string first;
             public string last;
             public object prev;
-            public object next;
+            public object next;*/
         }
 
         public struct AnimeFeverEpisodeMeta
         {
+            /*
             public int current_page;
             public int from;
             public int last_page;
             public string path;
             public int per_page;
             public int to;
-            public int total;
+            public int total;*/
         }
 
         public struct AnimeFeverEpisodeInfo

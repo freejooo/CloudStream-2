@@ -21,7 +21,7 @@ namespace CloudStreamForms.Core.AnimeProviders
             public string id;
         }
 
-        const string NineAnimeSite = "https://www10.9anime.to";
+        const string NineAnimeSite = "https://www12.9anime.to";
         public override void LoadLink(string episodeLink, int episode, int normalEpisode, TempThread tempThred, object extraData, bool isDub)
         {
             string request = episodeLink.Replace(NineAnimeSite + "/watch/", "") + "/"; // /xrrj358";
@@ -165,7 +165,7 @@ namespace CloudStreamForms.Core.AnimeProviders
                     string dataTip = item.GetAttributeValue("data-tip", "");
 
                     if (dataTip != "") {
-                        string _d = DownloadString((NineAnimeSite + "/" + dataTip), referer: url);
+                        string _d = DownloadString((NineAnimeSite + ("/" + dataTip).Replace("//", "/")), referer: url);
                         int.TryParse(FindHTML(_d, "Episode ", "/"), out int maxEp);
                         if (maxEp != 0) { // IF NOT MOVIE 
                             string otherNames = FindHTML(_d, "<label>Other names:</label>\n            <span>", "<").Replace("  ", "").Replace("\n", "").Replace(";", "");
