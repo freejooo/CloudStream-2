@@ -118,6 +118,19 @@ namespace CloudStreamForms.Core
 			public string url;
 		}
 
+		[System.Serializable]
+		public struct NextAiringEpisodeData
+		{
+			public int airingAt;
+			public int episode;
+			public AirDateType source;
+			public int refreshId; // Used to refresh when new episode is released
+		}
+
+		[Serializable]
+		public enum AirDateType { AniList = 0, MAL = 1, Moe = 2 }
+
+
 		[Serializable]
 		public enum MovieType { Movie, TVSeries, Anime, AnimeMovie, YouTube }
 
@@ -443,7 +456,6 @@ namespace CloudStreamForms.Core
 		}
 
 		[Serializable]
-
 		public struct DubbedAnimeData
 		{
 			public bool dubExists;
@@ -6074,6 +6086,28 @@ namespace CloudStreamForms.Core
 								"Dec",
 							};
 
+		public async Task<NextAiringEpisodeData?> RefreshNextEpisodeData(NextAiringEpisodeData data)
+		{
+			try {
+				if (data.source == AirDateType.AniList) {
+					var newData = await Api.GetNextAiringAsync(data.refreshId);
+					if (!newData.HasValue) return null;
+					var _val = newData.Value;
+					return new NextAiringEpisodeData() {
+						airingAt = _val.airingAt,
+						episode = _val.episode,
+						refreshId = data.refreshId,
+						source = data.source,
+					};
+				}
+				return null;
+			}
+			catch (Exception) {
+				return null;
+			}
+
+		}
+
 		public void GetMALData(bool cacheData = true)
 		{
 			bool fetchData = true;
@@ -6257,7 +6291,6 @@ namespace CloudStreamForms.Core
 							Api api = new Api();
 							CancellationTokenSource cancelSource = new CancellationTokenSource();
 							var media = await api.GetMedia(activeMovie.title.name, cancelSource.Token);
-
 							if (media.Count > 0) {
 								static string ToMalUrl(int? id)
 								{
@@ -6273,7 +6306,6 @@ namespace CloudStreamForms.Core
 								{
 									try {
 										return $"{shortdates[(int)(month) - 1]} {day}, {year}";
-
 									}
 									catch (Exception) {
 										return $"{shortdates[0]} {0}, {0}";
@@ -6294,6 +6326,14 @@ namespace CloudStreamForms.Core
 										string currentName = title.title.english;
 										string _eng = title.title.english;
 										string _jap = title.title.native;
+
+										var nextAir = Api.GetNextAiring(title.nextAiringEpisode);
+										if (nextAir.HasValue) {
+											App.SetKey(App.NEXT_AIRING, activeMovie.title.id.ToString(), new NextAiringEpisodeData() { airingAt = nextAir.Value.airingAt, episode = nextAir.Value.episode, source = AirDateType.AniList, refreshId = title.id });
+
+											print("NEXT AIRING" + nextAir.Value.airingAt);
+										}
+
 										List<string> _synos = title.synonyms == null ? new List<string>() : title.synonyms.Where(t => t != null).Select(t => t.ToString()).ToList();
 										string _malLink = ToMalUrl(title.idMal);
 										string _aniListLink = ToAniListUrl(title.id);
@@ -6306,7 +6346,7 @@ namespace CloudStreamForms.Core
 											data.Add(new MALSeasonData() {
 												seasons = new List<MALSeason>() { new MALSeason() { aniListUrl = _aniListLink, name = currentName, engName = _eng, japName = _jap, synonyms = _synos, malUrl = _malLink, startDate = _startDate, endDate = _endDate } },
 												malUrl = _malLink,
-												aniListUrl = _aniListLink
+												aniListUrl = _aniListLink,
 											});
 										}
 									}
@@ -7013,12 +7053,24 @@ namespace CloudStreamForms.Core
 				if (subtitleUrl != subAdd) {
 					print("HTMLGETSUB: " + subtitleUrl + "|" + _url);
 					string s = DownloadStringWithCert(subtitleUrl, referer: "https://www.opensubtitles.org", encoding: Encoding.UTF7);
+
 					if (BAN_SUBTITLE_ADS) {
 						List<string> bannedLines = new List<string>() { "Support us and become VIP member", "to remove all ads from www.OpenSubtitles.org", "to remove all ads from OpenSubtitles.org", "Advertise your product or brand here", "contact www.OpenSubtitles.org today" }; // No advertisement
 						foreach (var banned in bannedLines) {
 							s = s.Replace(banned, "");
 						}
+
+						// JUST IN CASE
+						var _slit = s.Split('\n');
+						s = "";
+						for (int i = 0; i < _slit.Length; i++) {
+							var _line = _slit[i];
+							if (!_line.ToLower().Contains("opensubtitles")) {
+								s += _line + "\n";
+							}
+						}
 					}
+
 					s = s.Replace("\n\n", "");
 					if (showToast) {
 						App.ShowToast("Subtitles Downloaded");
@@ -9219,6 +9271,11 @@ query ($query: String, $type: MediaType) {
       season
       hashtag
       isAdult
+	  nextAiringEpisode {
+			airingAt
+			timeUntilAiring
+			episode
+      } 
       startDate {
         year
         month
@@ -9240,7 +9297,33 @@ idMal
     }
   }
 }&variables={ ""query"":""{0}"",""type"":""ANIME""}";
-		public string AniList_anime_link = @"https://graphql.anilist.co/api/v2?query=query($id: Int!, $type: MediaType) {
+
+		public const string AniList_anime_airing = @"https://graphql.anilist.co/api/v2?query=query($id: Int!, $type: MediaType) {
+	Media(id: $id, type: $type) {
+		id 
+		startDate {
+		    year
+		    month
+			day
+		}
+		endDate {
+		    year
+		    month
+			day
+		}  
+		type
+		status
+		episodes 
+		season  
+		nextAiringEpisode {
+			airingAt
+			timeUntilAiring
+			episode
+		} 
+    }
+    }&variables={ ""id"":""{0}"",""type"":""ANIME""}";
+
+		public const string AniList_anime_link = @"https://graphql.anilist.co/api/v2?query=query($id: Int!, $type: MediaType) {
   Media(id: $id, type: $type)
         {
             id
@@ -9474,6 +9557,7 @@ idMal
 			List<Medium> medias = new List<Medium>();
 
 			RootObject WebContent = await WebRequestAPI(SearchLink.Replace("{0}", title));
+			 
 			foreach (Medium media in WebContent.data.Page.media) {
 				//get id
 
@@ -9642,7 +9726,7 @@ idMal
 		/// <summary>
 		/// GET website content from the link
 		/// </summary>
-		public async Task<RootObject> WebRequestAPI(string link)
+		public static async Task<RootObject> WebRequestAPI(string link)
 		{
 			string _strContent = "";
 			using (WebClient client = new WebClient()) {
@@ -9658,6 +9742,29 @@ idMal
 
 			return data;
 		}
+
+		public static NextAiring? GetNextAiring(object data)
+		{
+			if (data == null) return null;
+			try {
+				return JsonConvert.DeserializeObject<NextAiring?>(data.ToString());
+			}
+			catch (Exception) {
+				return null;
+			}
+		}
+
+		public static async Task<NextAiring?> GetNextAiringAsync(int id)
+		{
+			try {
+				RootObject root = await WebRequestAPI(AniList_anime_airing.Replace("{0}", id.ToString()));
+				return GetNextAiring(root.data.Media.nextAiringEpisode);
+			}
+			catch (Exception) {
+				return null;
+			}
+		}
+
 	}
 }
 namespace AniListAPI
@@ -9698,6 +9805,13 @@ namespace AniListAPI
 			public int? year;
 			public int? month;
 			public int? day;
+		}
+
+		public struct NextAiring
+		{
+			public int airingAt;
+			public int timeUntilAiring;
+			public int episode;
 		}
 
 		public struct Medium
@@ -9883,6 +9997,14 @@ namespace AniListAPI
 				return true;
 			if (await Core_compare(b, a, cancellationToken))
 				return true;
+			Regex rex = new Regex("[^a-zA-Z0-9]");
+			string _a = rex.Replace(a, "");
+			string _b = rex.Replace(b, "");
+			if (await Core_compare(_a, _b, cancellationToken))
+				return true;
+			if (await Core_compare(_b, _a, cancellationToken))
+				return true;
+
 
 			return false;
 		}

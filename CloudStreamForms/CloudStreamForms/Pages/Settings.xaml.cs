@@ -79,6 +79,15 @@ namespace CloudStreamForms
             }
         }
 
+        public static bool ShowNextEpisodeReleaseDate {
+            set {
+                App.SetKey("Settings", nameof(ShowNextEpisodeReleaseDate), value);
+            }
+            get {
+                return App.GetKey("Settings", nameof(ShowNextEpisodeReleaseDate), true);
+            }
+        }
+
         public static string VideoDownloadMovie {
             set {
                 App.SetKey("Settings", nameof(VideoDownloadMovie), value);

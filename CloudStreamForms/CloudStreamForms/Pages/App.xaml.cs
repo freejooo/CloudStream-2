@@ -25,6 +25,7 @@ namespace CloudStreamForms
 
 		public const string VIEW_TIME_POS = "ViewHistoryTimePos";
 		public const string VIEW_TIME_DUR = "ViewHistoryTimeDur";
+		public const string NEXT_AIRING = "NextAiringEpisode";
 		public const string BOOKMARK_DATA = "BookmarkData";
 		public const string VIEW_HISTORY = "ViewHistory";
 		public const string DATA_FILENAME = "CloudStreamData.txt";

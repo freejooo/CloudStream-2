@@ -1160,6 +1160,8 @@ namespace CloudStreamForms
 			if (loadedTitle) return;
 			if (e.title.name != mainPoster.name) return;
 
+
+
 			loadedTitle = true;
 			isMovie = (e.title.movieType == MovieType.Movie || e.title.movieType == MovieType.AnimeMovie);
 
@@ -1396,6 +1398,45 @@ namespace CloudStreamForms
 		private void EpisodesLoaded(object sender, List<Episode> e)
 		{
 			if (core == null) return;
+
+			// ======================================== UI VISUAL NEXT EP RELASE ========================================
+			if (Settings.ShowNextEpisodeReleaseDate) {
+				void UpdateNextEpisodeInfoUI(NextAiringEpisodeData nextAir)
+				{
+					Device.InvokeOnMainThreadAsync(() => {
+						NextEpisodeInfoBtt.Opacity = 0;
+						NextEpisodeInfoBtt.IsVisible = true;
+						NextEpisodeInfoBtt.IsEnabled = true;
+						NextEpisodeInfoBtt.FadeTo(1, easing: Easing.SinIn);
+						NextEpisodeInfoBtt.Text = $"Next Episode {nextAir.episode}: {ConvertUnixTimeToString(nextAir.airingAt)}";
+					});
+				}
+
+				var tId = currentMovie.title.id.ToString();
+				CloudStreamCore.NextAiringEpisodeData? data = App.GetKey<NextAiringEpisodeData?>(App.NEXT_AIRING, tId, null);
+				if (data.HasValue) {
+					var nextAir = data.Value;
+					if (nextAir.airingAt > UnixTime) {
+						UpdateNextEpisodeInfoUI(nextAir);
+					}
+					else {
+						Task.Run(async () => {
+							var _next = await core.RefreshNextEpisodeData(nextAir);
+							if (_next.HasValue) {
+								if (_next.Value.airingAt > UnixTime) { // JUST IN CASE SOMEONE HAS MESSED W TIME
+									App.SetKey(App.NEXT_AIRING, tId, _next);
+									UpdateNextEpisodeInfoUI(_next.Value);
+								}
+							}
+							else {
+								App.RemoveKey(App.NEXT_AIRING, tId);
+								Home.UpdateIsRequired = true;
+							}
+						});
+					}
+				}
+			}
+			// =============================================================================================================
 
 			Device.BeginInvokeOnMainThread(() => {
 				print("GOT RESULTS; LETS GO");
