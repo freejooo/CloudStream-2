@@ -135,6 +135,8 @@ namespace CloudStreamForms.Pages
 				new SettingsItem() { img= "sponsorblock.png",mainTxt="Autoskip YouTube ads",descriptTxt="" ,VarName = nameof(Settings.VideoPlayerSponsorblockAutoSkipAds) },
 
 				new SettingsItem() { img= "baseline_ondemand_video_white_48dp.png",mainTxt="Use in app videoplayer",descriptTxt="" ,VarName = nameof( Settings.UseVideoPlayer)},
+
+
 				new SettingsList("baseline_ondemand_video_white_48dp.png","Current Videoplayer","External videoplayer",() => { return App.GetVideoPlayerName((App.VideoPlayer)Settings.PreferedVideoPlayer); }, async () => {
 					List<string> videoOptions = new List<string>() { App.GetVideoPlayerName(App.VideoPlayer.None) };
 					List<App.VideoPlayer> avalibePlayers = new List<App.VideoPlayer>() { App.VideoPlayer.None };
@@ -309,14 +311,33 @@ namespace CloudStreamForms.Pages
 		public static SettingsHolder AdvancedSettings = new SettingsHolder() {
 			header = "Advanced Settings",
 			settings = new SettingsItem[] {
-				 new SettingsList("baseline_report_problem_white_48dp.png","Tapjack protection (Requires restart)","Disable this if you cant press certain things", () => { return $"{(Settings.TapjackProtectionButton ? 1 : 0) + (Settings.TapjackProtectionPicker ? 1 : 0) + (Settings.TapjackProtectionSearch ? 1 : 0)}/3 Active"; },async () => {
-					 List<bool> res = await ActionPopup.DisplaySwitchList(new List<string>() { "Search","Buttons","Picker" }, new List<bool>() { Settings.TapjackProtectionSearch,Settings.TapjackProtectionButton,Settings.TapjackProtectionPicker},"Tapjack protection");
-					 Settings.TapjackProtectionSearch = res[0];
-					 Settings.TapjackProtectionButton = res[1];
-					 Settings.TapjackProtectionPicker = res[2];
-				 }),
-				 new SettingsItem() { img = "baseline_report_problem_white_48dp.png", mainTxt = "Ignore SSL Certificate", descriptTxt = "If you disable this, some sites cant be reached", VarName = nameof(Settings.IgnoreSSLCert) },
-			 },
+				new SettingsList("baseline_report_problem_white_48dp.png","Tapjack protection (Requires restart)","Disable this if you cant press certain things", () => { return $"{(Settings.TapjackProtectionButton ? 1 : 0) + (Settings.TapjackProtectionPicker ? 1 : 0) + (Settings.TapjackProtectionSearch ? 1 : 0)}/3 Active"; },async () => {
+				 List<bool> res = await ActionPopup.DisplaySwitchList(new List<string>() { "Search","Buttons","Picker" }, new List<bool>() { Settings.TapjackProtectionSearch,Settings.TapjackProtectionButton,Settings.TapjackProtectionPicker},"Tapjack protection");
+				 Settings.TapjackProtectionSearch = res[0];
+				 Settings.TapjackProtectionButton = res[1];
+				 Settings.TapjackProtectionPicker = res[2];
+				}),
+				new SettingsItem() { img = "baseline_report_problem_white_48dp.png", mainTxt = "Ignore SSL Certificate", descriptTxt = "If you disable this, some sites cant be reached", VarName = nameof(Settings.IgnoreSSLCert) },
+				
+				new SettingsList("outline_get_app_white_48dp.png","Main","Download location",() => { return Settings.VideoDownloadLocation; }, async () => {
+					string loc = await ActionPopup.DisplayEntry(InputPopupPage.InputPopupResult.plainText,Settings.VideoDownloadLocation,"Download location",-1,false,Settings.VideoDownloadLocation,"Set Location");
+					if(loc.IsClean() && loc != "Cancel") {
+						Settings.VideoDownloadLocation = loc;
+					}
+				}),
+				new SettingsList("outline_get_app_white_48dp.png","Movie","Download location",() => { return Settings.VideoDownloadMovie; }, async () => {
+					string loc = await ActionPopup.DisplayEntry(InputPopupPage.InputPopupResult.plainText,Settings.VideoDownloadMovie,"Download location",-1,false,Settings.VideoDownloadMovie,"Set Location");
+					if(loc.IsClean() && loc != "Cancel") {
+						Settings.VideoDownloadMovie = loc;
+					}
+				}),
+				new SettingsList("outline_get_app_white_48dp.png","Tv-Series","Download location",() => { return Settings.VideoDownloadTvSeries; }, async () => {
+					string loc = await ActionPopup.DisplayEntry(InputPopupPage.InputPopupResult.plainText,Settings.VideoDownloadTvSeries,"Download location",-1,false,Settings.VideoDownloadTvSeries,"Set Location");
+					if(loc.IsClean() && loc != "Cancel") {
+						Settings.VideoDownloadTvSeries = loc;
+					}
+				}),
+			},
 		};
 
 		public static SettingsHolder BuildSettings = new SettingsHolder() {

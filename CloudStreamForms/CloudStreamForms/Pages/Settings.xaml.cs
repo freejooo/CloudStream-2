@@ -75,7 +75,16 @@ namespace CloudStreamForms
                 App.SetKey("Settings", nameof(VideoDownloadTvSeries), value);
             }
             get {
-                return App.GetKey("Settings", nameof(VideoDownloadTvSeries), "{titlename}/S{season}:E{episode} {name}");
+                return App.GetKey("Settings", nameof(VideoDownloadTvSeries), "{tname}/S{se}:E{ep} {name}");
+            }
+        }
+
+        public static string VideoDownloadMovie {
+            set {
+                App.SetKey("Settings", nameof(VideoDownloadMovie), value);
+            }
+            get {
+                return App.GetKey("Settings", nameof(VideoDownloadMovie), "{name}");
             }
         }
 
@@ -88,14 +97,7 @@ namespace CloudStreamForms
             }
         }
 
-        public static string VideoDownloadMovie {
-            set {
-                App.SetKey("Settings", nameof(VideoDownloadMovie), value);
-            }
-            get {
-                return App.GetKey("Settings", nameof(VideoDownloadMovie), "{name}");
-            }
-        }
+        
 
         public static bool VideoPlayerSponsorblock {
             set {

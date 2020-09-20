@@ -376,10 +376,10 @@ namespace CloudStreamForms
 			{
 				return input
 					.Replace("{type}", GetPathFromType(movieType))
-					.Replace("{titlename}", titleName)
+					.Replace("{tname}", titleName)
 					.Replace("{name}", episodeName)
-					.Replace("{episode}", episode.ToString())
-					.Replace("{season}", season.ToString());
+					.Replace("{ep}", episode.ToString())
+					.Replace("{se}", season.ToString());
 			}
 
 			string path = ConvertToRealPath(Settings.VideoDownloadLocation) + ConvertToRealPath(movieType.IsMovie() ? Settings.VideoDownloadMovie : Settings.VideoDownloadTvSeries) + ".mp4";
