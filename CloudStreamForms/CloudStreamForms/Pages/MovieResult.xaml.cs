@@ -1395,48 +1395,12 @@ namespace CloudStreamForms
 			BatchDownloadBtt.FadeTo(canBatchDownload ? 1 : 0);
 		}
 
+		bool nextEpTimeShouldBeDisplayed = false;
+
 		private void EpisodesLoaded(object sender, List<Episode> e)
 		{
 			if (core == null) return;
-
-			// ======================================== UI VISUAL NEXT EP RELASE ========================================
-			if (Settings.ShowNextEpisodeReleaseDate) {
-				void UpdateNextEpisodeInfoUI(NextAiringEpisodeData nextAir)
-				{
-					Device.InvokeOnMainThreadAsync(() => {
-						NextEpisodeInfoBtt.Opacity = 0;
-						NextEpisodeInfoBtt.IsVisible = true;
-						NextEpisodeInfoBtt.IsEnabled = true;
-						NextEpisodeInfoBtt.FadeTo(1, easing: Easing.SinIn);
-						NextEpisodeInfoBtt.Text = $"Next Episode {nextAir.episode}: {ConvertUnixTimeToString(nextAir.airingAt)}";
-					});
-				}
-
-				var tId = currentMovie.title.id.ToString();
-				CloudStreamCore.NextAiringEpisodeData? data = App.GetKey<NextAiringEpisodeData?>(App.NEXT_AIRING, tId, null);
-				if (data.HasValue) {
-					var nextAir = data.Value;
-					if (nextAir.airingAt > UnixTime) {
-						UpdateNextEpisodeInfoUI(nextAir);
-					}
-					else {
-						Task.Run(async () => {
-							var _next = await core.RefreshNextEpisodeData(nextAir);
-							if (_next.HasValue) {
-								if (_next.Value.airingAt > UnixTime) { // JUST IN CASE SOMEONE HAS MESSED W TIME
-									App.SetKey(App.NEXT_AIRING, tId, _next);
-									UpdateNextEpisodeInfoUI(_next.Value);
-								}
-							}
-							else {
-								App.RemoveKey(App.NEXT_AIRING, tId);
-								Home.UpdateIsRequired = true;
-							}
-						});
-					}
-				}
-			}
-			// =============================================================================================================
+			var tId = currentMovie.title.id.ToString();
 
 			Device.BeginInvokeOnMainThread(() => {
 				print("GOT RESULTS; LETS GO");
@@ -1461,8 +1425,22 @@ namespace CloudStreamForms
 					print("MAXEPS:::" + CurrentEpisodes.Count);
 					epView.AllEpisodes = new EpisodeResult[CurrentEpisodes.Count];
 					maxEpisodes = epView.AllEpisodes.Length;
+					bool dateAdded = isAnime;
 					for (int i = 0; i < CurrentEpisodes.Count; i++) {
 						AddEpisode(new EpisodeResult() { Episode = i + 1, IMDBEpisodeId = CurrentEpisodes[i].id, Title = CurrentEpisodes[i].name, Id = i, Description = CurrentEpisodes[i].description.Replace("\n", "").Replace("  ", ""), PosterUrl = CurrentEpisodes[i].posterUrl, Rating = CurrentEpisodes[i].rating, Progress = 0, epVis = false, }, i);
+						var _date = CurrentEpisodes[i].date;
+						if (!dateAdded && _date.IsClean()) {
+							try {
+								var unixReleaseTime = DateTimeOffset.Parse(_date).ToUnixTimeSeconds();
+								if (unixReleaseTime > UnixTime) {
+									dateAdded = true;
+									App.SetKey(App.NEXT_AIRING, tId, new NextAiringEpisodeData { airingAt = unixReleaseTime, source = AirDateType.IMDb, episode = i + 1, refreshId = -1 });
+								}
+							}
+							catch (Exception _ex) {
+								error(_ex);
+							}
+						}
 					}
 					if (!isAnime) {
 						SetEpisodeFromTo(0);
@@ -1522,6 +1500,48 @@ namespace CloudStreamForms
 				DubPicker.IsVisible = DubPicker.ItemsSource.Count > 0;
 				DubPicker.button.FadeTo(DubPicker.IsVisible ? 1 : 0, FATE_TIME_MS);
 				// ForceUpdate();
+
+				// ======================================== UI VISUAL NEXT EP RELASE ========================================
+				if (Settings.ShowNextEpisodeReleaseDate) {
+					void UpdateNextEpisodeInfoUI(NextAiringEpisodeData nextAir)
+					{
+						Device.InvokeOnMainThreadAsync(() => {
+							NextEpisodeInfoBtt.Opacity = 0;
+							nextEpTimeShouldBeDisplayed = true;
+							if (showState == 0) {
+								NextEpisodeInfoBtt.IsVisible = true;
+								NextEpisodeInfoBtt.IsEnabled = true;
+							}
+
+							NextEpisodeInfoBtt.FadeTo(1, easing: Easing.SinIn);
+							NextEpisodeInfoBtt.Text = $"Next Episode {nextAir.episode}: {ConvertUnixTimeToString(nextAir.airingAt)}";
+						});
+					}
+
+					CloudStreamCore.NextAiringEpisodeData? data = App.GetKey<NextAiringEpisodeData?>(App.NEXT_AIRING, tId, null);
+					if (data.HasValue) {
+						var nextAir = data.Value;
+						if (nextAir.airingAt > UnixTime) {
+							UpdateNextEpisodeInfoUI(nextAir);
+						}
+						else {
+							Task.Run(async () => {
+								var _next = await core.RefreshNextEpisodeData(nextAir);
+								if (_next.HasValue) {
+									if (_next.Value.airingAt > UnixTime) { // JUST IN CASE SOMEONE HAS MESSED W TIME
+										App.SetKey(App.NEXT_AIRING, tId, _next);
+										UpdateNextEpisodeInfoUI(_next.Value);
+									}
+								}
+								else {
+									App.RemoveKey(App.NEXT_AIRING, tId);
+									Home.UpdateIsRequired = true;
+								}
+							});
+						}
+					}
+				}
+				// ==========================================================================================================
 			});
 		}
 
@@ -2313,6 +2333,9 @@ namespace CloudStreamForms
 				Recommendations.IsEnabled = state == 1;
 				Recommendations.InputTransparent = state != 1;
 
+				NextEpisodeInfoBtt.IsVisible = state == 0 && nextEpTimeShouldBeDisplayed;
+				NextEpisodeInfoBtt.IsEnabled = NextEpisodeInfoBtt.IsVisible;
+
 				SetHeight(state != 0);
 				//SetTrailerRec(state == 2);
 
@@ -2370,6 +2393,7 @@ namespace CloudStreamForms
 		private void ScrollView_Scrolled(object sender, ScrolledEventArgs e)
 		{
 			TrailerBtt.TranslationY = -e.ScrollY / 15.0;
+			TrailerBtt.Opacity = 1 - (e.ScrollY / 100.0);
 			// PlayBttGradient.TranslationY = -e.ScrollY / 15.0;
 		}
 	}

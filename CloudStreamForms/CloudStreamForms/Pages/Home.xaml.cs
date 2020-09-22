@@ -214,8 +214,10 @@ namespace CloudStreamForms
 		{
 			UpdateNoBookmarks();
 			for (int i = 0; i < selectTabItems.Length; i++) {
-				selectTabLabels[i].ScaleTo(selectedTabItem == i ? 1.2 : 0.9, 150, Easing.SinOut);
-				selectTabLabels[i].FontAttributes = selectedTabItem == i ? FontAttributes.Bold : FontAttributes.None;
+				bool sel = selectedTabItem == i;
+				selectTabLabels[i].ScaleTo(sel ? 1.1 : 0.9, 150, Easing.SinOut);
+				selectTabLabels[i].FontAttributes = sel ? FontAttributes.Bold : FontAttributes.None;
+				selectTabLabels[i].TextColor = sel ? Color.FromHex("#FFF") : Color.FromHex("#c9c9c9");
 			}
 			bool bookmarkVis = selectedTabItem == 0;
 			SetHeight();
@@ -614,8 +616,6 @@ namespace CloudStreamForms
 									WidthRequest = RecPosterWith,
 								};
 
-
-
 								stackLayout.Children.Add(boxView);
 								stackLayout.Children.Add(ff);
 								stackLayout.Children.Add(imageButton);
@@ -627,7 +627,25 @@ namespace CloudStreamForms
 									if (nextData.HasValue) {
 										var nextAir = nextData.Value;
 										string nextTxt = nextAir.airingAt > UnixTime ? $"{CoreHelpers.ConvertUnixTimeToString(nextAir.airingAt)}" : "NEW!";
-										stackLayout.Children.Add(new Button() { BackgroundColor = new Color(0.188, 0.247, 0.623, 0.8), Text = nextTxt, ClassId = "CUST", TextColor = Color.White, InputTransparent = true, HeightRequest = 20, FontSize = 11, VerticalOptions = LayoutOptions.Start, HorizontalOptions = LayoutOptions.End, CornerRadius = 2, Padding = 0, Margin = 0, Scale = 1, TranslationX = 1, WidthRequest = 60 });
+										stackLayout.Children.Add(new Button() {
+											//BackgroundColor = new Color(0.188, 0.247, 0.623, 0.8)
+											BackgroundColor = new Color(0, 0, 0, 0.4)
+											,
+											Text = nextTxt,
+											ClassId = "CUST",
+											TextColor = Color.White,
+											InputTransparent = true,
+											HeightRequest = 20,
+											FontSize = 11,
+											VerticalOptions = LayoutOptions.Start,
+											HorizontalOptions = LayoutOptions.End,
+											CornerRadius = 1,
+											Padding = 2,
+											Margin = 0,
+											Scale = 1,
+											TranslationX = 1,
+											WidthRequest = 60
+										});
 									}
 								}
 

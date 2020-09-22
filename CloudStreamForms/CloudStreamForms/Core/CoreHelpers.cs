@@ -201,7 +201,7 @@ namespace CloudStreamForms.Core
 
 	public static class CoreHelpers
 	{
-		public static string ConvertUnixTimeToString(int time)
+		public static string ConvertUnixTimeToString(long time)
 		{
 			return ConvertDateTimeToString(DateTimeOffset.FromUnixTimeSeconds(time).DateTime);
 		}

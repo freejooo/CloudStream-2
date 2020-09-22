@@ -121,14 +121,14 @@ namespace CloudStreamForms.Core
 		[System.Serializable]
 		public struct NextAiringEpisodeData
 		{
-			public int airingAt;
+			public long airingAt;
 			public int episode;
 			public AirDateType source;
 			public int refreshId; // Used to refresh when new episode is released
 		}
 
 		[Serializable]
-		public enum AirDateType { AniList = 0, MAL = 1, Moe = 2 }
+		public enum AirDateType { AniList = 0, MAL = 1, Moe = 2, IMDb = 3 }
 
 
 		[Serializable]

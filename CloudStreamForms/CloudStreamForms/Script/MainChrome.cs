@@ -801,6 +801,7 @@ namespace CloudStreamForms.Core
         public static async void ShowLogo()
         {
             CurrentChromeMedia = await CurrentChannel.LoadAsync(new MediaInformation() { ContentId = "https://cdn.discordapp.com/attachments/551382684560261121/730169809408622702/ChromecastLogo6.png", StreamType = StreamType.None, ContentType = "image/jpeg" });
+          //  CurrentChromeMedia = await CurrentChannel.LoadAsync(new MediaInformation() { ContentId = "https://cdn.discordapp.com/attachments/288759480613732353/757352069689638912/csintro.mp4", StreamType = StreamType.Buffered, ContentType = "video/mp4",Metadata = new GenericMediaMetadata() { } });
         }
 
         public static async void ConnectToChromeDevice(string name)

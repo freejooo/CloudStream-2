@@ -22,16 +22,16 @@
                 <ColumnDefinition Width="*"></ColumnDefinition>
                 <ColumnDefinition Width="*"></ColumnDefinition>
             </Grid.ColumnDefinitions>
-			<xe:BorderView xe:TouchEffect.Color="#0FFFFFFF" CornerRadius="5" x:Name="HomeBtt">
+			<xe:BorderView xe:TouchEffect.Color="#0FFFFFFF" CornerRadius="0" x:Name="HomeBtt">
                 <Label Text="Home" FontSize="17" VerticalOptions="Center" Scale="1.2" FontAttributes="Bold" MinimumHeightRequest="50"  HorizontalTextAlignment="Center" TextColor="White" x:Name="HomeLbl"></Label>
             </xe:BorderView>
-			<xe:BorderView Grid.Column="1" xe:TouchEffect.Color="#0FFFFFFF" CornerRadius="5" x:Name="RelatedBtt">
+			<xe:BorderView Grid.Column="1" xe:TouchEffect.Color="#0FFFFFFF" CornerRadius="0" x:Name="RelatedBtt">
                 <Label Text="Related" FontSize="17" VerticalOptions="Center"  Scale="0.9"  HorizontalTextAlignment="Center" MinimumHeightRequest="50"  TextColor="White" x:Name="RelatedLbl"></Label>
             </xe:BorderView>
-			<xe:BorderView Grid.Column="2" xe:TouchEffect.Color="#0FFFFFFF" CornerRadius="5" x:Name="TopBtt">
+			<xe:BorderView Grid.Column="2" xe:TouchEffect.Color="#0FFFFFFF" CornerRadius="0" x:Name="TopBtt">
                 <Label Text="Top IMDb" FontSize="17" VerticalOptions="Center" Scale="0.9" HorizontalTextAlignment="Center" MinimumHeightRequest="50" TextColor="White" x:Name="TopLbl"></Label>
             </xe:BorderView>
-			<xe:BorderView Grid.Column="3" xe:TouchEffect.Color="#0FFFFFFF" CornerRadius="5" x:Name="TrendingBtt">
+			<xe:BorderView Grid.Column="3" xe:TouchEffect.Color="#0FFFFFFF" CornerRadius="0" x:Name="TrendingBtt">
                 <Label Text="Trending" FontSize="17" VerticalOptions="Center" Scale="0.9"  HorizontalTextAlignment="Center" MinimumHeightRequest="50" TextColor="White" x:Name="TrendingLbl"></Label>
             </xe:BorderView>
 
