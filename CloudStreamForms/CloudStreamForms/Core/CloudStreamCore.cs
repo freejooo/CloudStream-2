@@ -922,7 +922,7 @@ namespace CloudStreamForms.Core
 			public int currentProgress;
 		}
 
-		public static event EventHandler<FishLoaded> fishProgressLoaded;
+		public event EventHandler<FishLoaded> fishProgressLoaded;
 		//public static event EventHandler<Movie> yesmovieFishingDone;
 
 		public static Random rng = new Random();
@@ -6473,7 +6473,7 @@ namespace CloudStreamForms.Core
 				}
 			});
 		}
-		public static bool shouldSkipAnimeLoading = false;
+		public bool shouldSkipAnimeLoading = false;
 		[Serializable]
 		public struct AnimeNotTitle
 		{

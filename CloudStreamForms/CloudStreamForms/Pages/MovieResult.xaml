@@ -215,8 +215,8 @@ xmlns:ffTransformations="clr-namespace:FFImageLoading.Transformations;assembly=F
                             <Button x:Name="SeasonBtt" Grid.Column="0" InputTransparent="False" Opacity="0" BackgroundColor="#252525" Text="Season 1" TextColor="#e7e7e7" FontAttributes="Bold" FontSize="Body" CornerRadius="5" HeightRequest="37" ></Button>
                             <!--   <Picker x:Name="SeasonPicker"  TranslationX="13" TextColor="Transparent" IsVisible="False" VerticalOptions="Center" HorizontalOptions="Start"  FontAttributes="Bold" FontSize="Body" ></Picker> -->
 
-                            <Button x:Name="DubBtt" Grid.Column="1" InputTransparent="False" BackgroundColor="#252525" Text="Dub" TextColor="#e7e7e7" FontAttributes="Bold" FontSize="Body" CornerRadius="5" HeightRequest="37" WidthRequest="60" ></Button>
-                            <Button x:Name="FromToBtt" Grid.Column="2" InputTransparent="False" IsVisible="False" IsEnabled="False" BackgroundColor="#252525" Text="Test" TextColor="#e7e7e7" FontAttributes="Bold" FontSize="Body" CornerRadius="5" HeightRequest="37" WidthRequest="80" ></Button>
+                            <Button x:Name="DubBtt" Grid.Column="1" Opacity="0" InputTransparent="False" BackgroundColor="#252525" Text="Dub" TextColor="#e7e7e7" FontAttributes="Bold" FontSize="Body" CornerRadius="5" HeightRequest="37" WidthRequest="60" ></Button>
+							<Button x:Name="FromToBtt" Grid.Column="2" Opacity="0" InputTransparent="False" IsVisible="False" IsEnabled="False" BackgroundColor="#252525" Text="Test" TextColor="#e7e7e7" FontAttributes="Bold" FontSize="Body" CornerRadius="5" HeightRequest="37" WidthRequest="80" ></Button>
                             <Button x:Name="BatchDownloadBtt" Grid.Column="3" InputTransparent="False" Opacity="0" IsEnabled="False" BackgroundColor="#252525" Text="Download All" TextColor="#e7e7e7" FontAttributes="Bold" FontSize="Body" CornerRadius="5" HeightRequest="37" TranslationX="-5" WidthRequest="110" HorizontalOptions="Start" ></Button>
 
 <!--
@@ -227,7 +227,7 @@ xmlns:ffTransformations="clr-namespace:FFImageLoading.Transformations;assembly=F
                             
                             <!--   <Picker x:Name="DubPicker" IsVisible="False" VerticalOptions="Center" HorizontalOptions="Start"  FontAttributes="Bold" FontSize="Body" TextColor="Transparent" TranslationX="13"></Picker> -->
                             <!-- </StackLayout>-->
-                            <Button x:Name="SkipAnimeBtt" IsEnabled="False" Grid.Row="0" Grid.Column="1" HorizontalOptions="Center" VerticalOptions="Center" IsVisible="False" InputTransparent="False" BackgroundColor="#252525" Text="Skip Loading" TextColor="#e7e7e7" FontAttributes="Bold" FontSize="Body" CornerRadius="5" HeightRequest="37" WidthRequest="100" ></Button>
+							<Button x:Name="SkipAnimeBtt" Opacity="0" IsEnabled="False" Grid.Row="0" Grid.Column="1" HorizontalOptions="Center" VerticalOptions="Center" IsVisible="True" InputTransparent="False" BackgroundColor="#252525" Text="Skip Loading" TextColor="#e7e7e7" FontAttributes="Bold" FontSize="Body" CornerRadius="5" HeightRequest="37" WidthRequest="100" ></Button>
 
                         </Grid>
 
@@ -449,7 +449,7 @@ xmlns:ffTransformations="clr-namespace:FFImageLoading.Transformations;assembly=F
 
             </StackLayout>
             <StackLayout AbsoluteLayout.LayoutBounds="0, 0, 1, 1" AbsoluteLayout.LayoutFlags="All" InputTransparent="True"  >
-                <ProgressBar HorizontalOptions="Fill"  x:Name="RecomendationLoaded" InputTransparent="True"  IsVisible="True" IsEnabled="True" ClassId="id" TranslationY="-7" ></ProgressBar>
+                <ProgressBar HorizontalOptions="Fill"  x:Name="RecomendationLoaded" InputTransparent="False"  IsVisible="False" IsEnabled="True" ClassId="id" TranslationY="-7" ></ProgressBar>
 
             </StackLayout>
         </AbsoluteLayout> 

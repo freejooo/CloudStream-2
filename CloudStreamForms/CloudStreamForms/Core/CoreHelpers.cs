@@ -176,24 +176,30 @@ namespace CloudStreamForms.Core
 
 			public override void LoadLinksTSync(int episode, int season, int normalEpisode, bool isDub, TempThread tempThred)
 			{
-				if ((isDub && !HasDub) || (!isDub && !HasSub)) return;
+				try {
+					if ((isDub && !HasDub) || (!isDub && !HasSub)) return;
 
-				int currentep = 0;
-				for (int q = 0; q < activeMovie.title.MALData.seasonData[season].seasons.Count; q++) {
-					var ms = GetData(activeMovie.title.MALData.seasonData[season].seasons[q], out bool suc);
-					if (suc) {
-						int subEp = episode - currentep;
-						if ((isDub ? ms.dubEpisodes : ms.subEpisodes) != null) {
-							currentep += isDub ? ms.dubEpisodes.Count : ms.subEpisodes.Count;
-							if (currentep > episode) {
-								try {
-									print("LOADING LINK FOR: " + Name);
-									LoadLink(isDub ? ms.dubEpisodes[subEp] : ms.subEpisodes[subEp], subEp, normalEpisode, tempThred, ms.extraData, isDub);
+					int currentep = 0;
+					print("DS::::: " + activeMovie.title.MALData.seasonData[season].seasons.Count);
+					for (int q = 0; q < activeMovie.title.MALData.seasonData[season].seasons.Count; q++) {
+						var ms = GetData(activeMovie.title.MALData.seasonData[season].seasons[q], out bool suc);
+						if (suc) {
+							int subEp = episode - currentep;
+							if ((isDub ? ms.dubEpisodes : ms.subEpisodes) != null) {
+								currentep += isDub ? ms.dubEpisodes.Count : ms.subEpisodes.Count;
+								if (currentep > episode) {
+									try {
+										print("LOADING LINK FOR: " + Name);
+										LoadLink(isDub ? ms.dubEpisodes[subEp] : ms.subEpisodes[subEp], subEp, normalEpisode, tempThred, ms.extraData, isDub);
+									}
+									catch (Exception _ex) { print("FATAL EX IN Load: " + Name + " | " + _ex); }
 								}
-								catch (Exception _ex) { print("FATAL EX IN Load: " + Name + " | " + _ex); }
 							}
 						}
 					}
+				}
+				catch (Exception _ex) {
+					error(_ex);
 				}
 			}
 		}

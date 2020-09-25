@@ -96,7 +96,11 @@ namespace CloudStreamForms
         bool _IsVisible = true;
         public bool IsVisible { get { return _IsVisible; } set { _IsVisible = value; button.IsVisible = value; } }
         public int SelectedIndex { set { _SelectedIndex = value; SelectedIndexChanged?.Invoke(this, value); } get { return _SelectedIndex; } }
-
+        
+        public void SetIndexWithoutChange(int val)
+		{
+            _SelectedIndex = val;
+        }
         // public List<string> Items { get { return ItemsSource; } }
 
         readonly Color bgColor;

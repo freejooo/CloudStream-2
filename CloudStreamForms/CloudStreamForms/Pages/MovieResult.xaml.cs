@@ -17,6 +17,9 @@ using static CloudStreamForms.Core.CloudStreamCore;
 using static CloudStreamForms.MainPage;
 using static CloudStreamForms.Settings;
 using static CloudStreamForms.Core.CoreHelpers;
+using CloudStreamForms.InterfacePages;
+using static CloudStreamForms.InterfacePages.MovieResultHolder;
+using Xamarin.Forms.Markup;
 
 namespace CloudStreamForms
 {
@@ -25,7 +28,8 @@ namespace CloudStreamForms
 	{
 		const uint FATE_TIME_MS = 500;
 
-		CloudStreamCore core;
+		MovieResultHolder controller = new MovieResultHolder();
+		CloudStreamCore core { get { return controller.core; } }
 
 		public int SmallFontSize { get; set; } = 11;
 		public int WithSize { get; set; } = 50;
@@ -44,7 +48,7 @@ namespace CloudStreamForms
 		List<Poster> RecomendedPosters { get { return currentMovie.title.recomended; } }  //= new List<Poster>();
 
 		bool loadedTitle = false;
-		int currentSeason = 0;
+		int currentSeason { get { return controller.currentSeason; } }
 		//ListView episodeView;
 		public const int heightRequestPerEpisode = 120;
 		public const int heightRequestAddEpisode = 40;
@@ -52,7 +56,7 @@ namespace CloudStreamForms
 
 		bool isMovie = false;
 		Movie currentMovie { get { return core.activeMovie; } }
-		bool isDub = true;
+		bool isDub { get { return controller.isDub; } }
 		// bool RunningWindows { get { return Xamarin.Essentials.DeviceInfo.Platform == DevicePlatform.UWP; } }
 		string CurrentMalLink {
 			get {
@@ -413,19 +417,193 @@ namespace CloudStreamForms
 		public MovieResult()
 		{
 			InitializeComponent();
-			core = new CloudStreamCore();
 
 			mainPoster = Search.mainPoster;
 
+			controller.OnDateAdded += (object o, ReleaseDateEvent e) => {
+				Device.InvokeOnMainThreadAsync(() => {
+					NextEpisodeInfoBtt.Opacity = 0;
+					nextEpTimeShouldBeDisplayed = true;
+					if (showState == 0) {
+						NextEpisodeInfoBtt.IsVisible = true;
+						NextEpisodeInfoBtt.IsEnabled = true;
+					}
+
+					NextEpisodeInfoBtt.FadeTo(1, easing: Easing.SinIn);
+					NextEpisodeInfoBtt.Text = e.FormatedDate;
+				});
+			};
+
+			controller.OnExposedEpisodesChanged += (object o, EpisodeData[] e) => {
+				Device.BeginInvokeOnMainThread(() => {
+					episodeView.Opacity = 0;
+					epView.MyEpisodeResultCollection.Clear();
+					for (int i = 0; i < e.Length; i++) {
+						var c = e[i];
+						var _ep = ChangeEpisode(new EpisodeResult() { Episode = c.Episode, Season = c.Season, Description = c.Description, Rating = c.Rating, PosterUrl = c.PosterUrl, IMDBEpisodeId = c.IMDBEpisodeId, Id = c.Id, Title = c.Title });
+						epView.MyEpisodeResultCollection.Add(_ep);
+					}
+					SetHeight();
+					episodeView.FadeTo(1, FATE_TIME_MS);
+				});
+			};
+
+			controller.titleLoaded += (o, e) => {
+				if (setKey) {
+					SetKey();
+				}
+
+				DubPicker.SelectedIndexChanged += (o, e) => {
+					controller.DubPickerSelectIndex("Dub" == DubPicker.ItemsSource[DubPicker.SelectedIndex]); 
+				};
+				SeasonPicker.SelectedIndexChanged += (o, e) => {
+					controller.SeasonPickerSelectIndex(e);
+				};
+
+				Device.BeginInvokeOnMainThread(() => {
+					EPISODES.Text = isMovie ? "MOVIE" : "EPISODES";
+					Recommendations.Children.Clear();
+					for (int i = 0; i < RecomendedPosters.Count; i++) {
+						Poster p = e.title.recomended[i];
+						string posterURL = ConvertIMDbImagesToHD(p.posterUrl, 76, 113, 1.75); //.Replace(",76,113_AL", "," + pwidth + "," + pheight + "_AL").Replace("UY113", "UY" + pheight).Replace("UX76", "UX" + pwidth);
+						if (CheckIfURLIsValid(posterURL)) {
+							Grid stackLayout = new Grid() { VerticalOptions = LayoutOptions.Start };
+							// Button imageButton = new Button() { HeightRequest = RecPosterHeight, WidthRequest = RecPosterWith, BackgroundColor = Color.Transparent, VerticalOptions = LayoutOptions.Start,CornerRadius=10 };
+							var ff = new FFImageLoading.Forms.CachedImage {
+								Source = posterURL,
+								HeightRequest = RecPosterHeight,
+								WidthRequest = RecPosterWith,
+								BackgroundColor = Color.Transparent,
+								VerticalOptions = LayoutOptions.Start,
+								Transformations = {
+                            //  new FFImageLoading.Transformations.RoundedTransformation(10,1,1.5,10,"#303F9F")
+									new FFImageLoading.Transformations.RoundedTransformation(3, 1, 1.5, 0, "#303F9F")
+								},
+								InputTransparent = true,
+							};
+
+							// ================================================================ RECOMMENDATIONS CLICKED ================================================================
+							stackLayout.SetValue(XamEffects.TouchEffect.ColorProperty, Color.White);
+							Commands.SetTap(stackLayout, new Command((o) => {
+								int z = (int)o;
+								if (Search.mainPoster.url != RecomendedPosters[z].url) {
+									/*if (lastMovie == null) {
+										lastMovie = new List<Movie>();
+									}
+									lastMovie.Add(core.activeMovie);*/
+									Search.mainPoster = RecomendedPosters[z];
+									Page _p = new MovieResult();// { mainPoster = mainPoster };
+									Navigation.PushModalAsync(_p);
+								}
+								//do something
+							}));
+							Commands.SetTapParameter(stackLayout, i);
+
+							stackLayout.Children.Add(ff);
+							//stackLayout.Children.Add(imageButton);
+
+							Recommendations.Children.Add(stackLayout);
+						}
+					}
+
+					SetRecs();
+				});
+			};
+
+			controller.OnBackgroundChanged += (o, e) => {
+				Device.BeginInvokeOnMainThread(() => {
+					TrailerBtt.Opacity = 0;
+					TrailerBtt.FadeTo(1);
+					if (e.posterUrl == null) {
+						TrailerBtt.Source = ImageSource.FromResource("CloudStreamForms.Resource.gradient.png", Assembly.GetExecutingAssembly());
+					}
+					else {
+						TrailerBtt.Source = ConvertIMDbImagesToHD(e.posterUrl, 356, 200);
+					}
+				});
+			};
+
+			controller.OnRunningChanged += (o, e) => {
+				Device.BeginInvokeOnMainThread(() => {
+					RecomendationLoaded.IsVisible = false;
+				});
+			};
+
+			controller.OnTextChanged += (object o, LabelInfo e) => {
+				Label label = e.label switch
+				{
+					LabelType.NameLabel => NameLabel,
+					LabelType.YearLabel => RatingLabel,
+					LabelType.RatingLabel => RatingLabelRating,
+					LabelType.DescriptionLabel => DescriptionLabel,
+					_ => null,
+				};
+				if (label == null) return;
+				Device.BeginInvokeOnMainThread(() => {
+					label.IsVisible = e.isVisible;
+					label.Text = e.text;
+					if (label.Opacity == 0 && e.isVisible) {
+						label.FadeTo(1, FATE_TIME_MS);
+					}
+					else if (label.Opacity == 1 && !e.isVisible) {
+						label.FadeTo(0, FATE_TIME_MS);
+					}
+				});
+			};
+
+			controller.OnPickerChanged += (object o, PickerInfo e) => {
+				LabelList labelList = e.picker switch
+				{
+					PickerType.SeasonPicker => SeasonPicker,
+					PickerType.DubPicker => DubPicker,
+					PickerType.EpisodeFromToPicker => FromToPicker,
+					_ => null,
+				};
+				if (labelList == null) return;
+				labelList.ItemsSource = e.source;
+				Device.InvokeOnMainThreadAsync(() => {
+					var btt = labelList.button;
+					btt.IsVisible = true;
+					if (btt.Opacity == 0 && e.isVisible) {
+						btt.FadeTo(1, FATE_TIME_MS);
+					}
+					else if (btt.Opacity == 1 && !e.isVisible) {
+						btt.FadeTo(0, FATE_TIME_MS);
+					}
+					if(labelList.SelectedIndex == -1) {
+						labelList.SetIndexWithoutChange(e.index);
+					}
+					btt.Text = e.Text;
+					btt.IsEnabled = e.isVisible;
+				});
+			};
+
+			controller.OnBttChanged += (object o, ButtonInfo e) => {
+				Button btt = e.button switch
+				{
+					ButtonType.BatchDownloadPicker => BatchDownloadBtt,
+					ButtonType.SkipAnimeBtt => SkipAnimeBtt,
+					_ => null,
+				};
+
+				if (btt == null) return;
+				Device.BeginInvokeOnMainThread(() => {
+					btt.IsEnabled = e.isVisible;
+					btt.IsVisible = e.isVisible;
+					if (btt.Opacity == 0 && e.isVisible) {
+						btt.FadeTo(1, FATE_TIME_MS);
+					}
+					else if (btt.Opacity == 1 && !e.isVisible) {
+						btt.FadeTo(0, FATE_TIME_MS);
+					}
+					btt.Text = e.text;
+				});
+			};
+
+			controller.Init(mainPoster.url, mainPoster.name, mainPoster.year);
+
 			Gradient.Source = GetGradient();
 			Gradient.HeightRequest = 200;
-
-			//   IMDbBtt.Source = GetImageSource("IMDbWhite.png");//"imdbIcon.png");
-			//   MALBtt.Source = GetImageSource("MALWhite.png");//"MALIcon.png");
-			//   ShareBtt.Source = GetImageSource("baseline_share_white_48dp.png");//GetImageSource("round_reply_white_48dp_inverted.png");
-			//  StarBtt.Source = GetImageSource("notBookmarkedBtt.png");
-			//   SubtitleBtt.Source = GetImageSource("outline_subtitles_white_48dp.png"); //GetImageSource("round_subtitles_white_48dp.png");
-			//  IMDbBlue.Source = GetImageSource("IMDbBlue.png"); //GetImageSource("round_subtitles_white_48dp.png");
 
 			ReviewLabel.Clicked += (o, e) => {
 				if (!ReviewPage.isOpen) {
@@ -485,11 +663,7 @@ namespace CloudStreamForms
 			NameLabel.Text = mainPoster.name;
 			RatingLabel.Text = mainPoster.year;
 
-			core.titleLoaded += MovieResult_titleLoaded;
 			core.trailerLoaded += MovieResult_trailerLoaded;
-			core.episodeLoaded += EpisodesLoaded;
-			core.episodeHalfLoaded += EpisodesHalfLoaded;
-
 
 			// TrailerBtt.Clicked += TrailerBtt_Clicked;
 			TrailerBtt.Clicked += TrailerBtt_Clicked;
@@ -557,14 +731,6 @@ namespace CloudStreamForms
 			BackgroundColor = Settings.BlackRBGColor;
 			BgColorSet.BackgroundColor = Settings.BlackRBGColor;
 
-			/*
-            MALB.IsVisible = false;
-            MALB.IsEnabled = false;
-            MALA.IsVisible = false;
-            MALA.IsEnabled = false;
-            Grid.SetColumn(MALB, 0);
-            Grid.SetColumn(MALA, 0);*/
-
 			DubBtt.IsVisible = false;
 			SeasonBtt.IsVisible = false;
 
@@ -582,7 +748,6 @@ namespace CloudStreamForms
 				Navigation.PopModalAsync(false);
 				PushPageFromUrlAndName(currentMovie.title.id, mainPoster.name);
 				Dispose();
-
 			};
 			ReloadAllBtt.Source = GetImageSource("round_refresh_white_48dp.png");
 
@@ -599,19 +764,22 @@ namespace CloudStreamForms
             */
 
 			SkipAnimeBtt.Clicked += (o, e) => {
+				controller.SkipAnimeLoading();
 				// Grid.SetColumn(SkipAnimeBtt, 0);
-				Device.BeginInvokeOnMainThread(() => {
-					shouldSkipAnimeLoading = true;
+				/*Device.BeginInvokeOnMainThread(() => {
+					core.shouldSkipAnimeLoading = true;
 					SkipAnimeBtt.IsVisible = false;
 					SkipAnimeBtt.IsEnabled = false;
 					hasSkipedLoading = true;
-				});
+				});*/
 			};
 
-			fishProgressLoaded += (o, e) => {
+			core.fishProgressLoaded += (o, e) => {
 				if (core == null) return;
 
 				Device.BeginInvokeOnMainThread(() => {
+
+					/*
 					SkipAnimeBtt.Text = $"Skip - {e.currentProgress} of {e.maxProgress}"; // {(int)(e.progressProcentage * 100)}%
 
 					if (e.progressProcentage > 0) {
@@ -628,7 +796,7 @@ namespace CloudStreamForms
 						//  Grid.SetColumn(SkipAnimeBtt, 0);
 						SkipAnimeBtt.IsVisible = false;
 						SkipAnimeBtt.IsEnabled = false;
-					}
+					}*/
 
 					/*
                    if (e.progress >= 1 && (!FishProgress.IsVisible || FishProgress.Progress >= 1)) return;
@@ -1216,7 +1384,7 @@ namespace CloudStreamForms
 				SeasonPicker.IsVisible = haveSeasons;
 				FadeTitles(haveSeasons);
 
-				DubPicker.SelectedIndexChanged += DubPicker_SelectedIndexChanged;
+			//	DubPicker.SelectedIndexChanged += DubPicker_SelectedIndexChanged;
 				if (haveSeasons) {
 					List<string> season = new List<string>();
 					for (int i = 1; i <= e.title.seasons; i++) {
@@ -1232,17 +1400,17 @@ namespace CloudStreamForms
 						SeasonPicker.SelectedIndex = 0; // JUST IN CASE
 					}
 
-					currentSeason = SeasonPicker.SelectedIndex + 1;
+				//	currentSeason = SeasonPicker.SelectedIndex + 1;
 
 
 					print("GetImdbEpisodes>>>>>>>>>>>>>>><<");
 					core.GetImdbEpisodes(currentSeason);
 				}
 				else {
-					currentSeason = 0; // MOVIES
+			//		currentSeason = 0; // MOVIES
 					core.GetImdbEpisodes();
 				}
-				SeasonPicker.SelectedIndexChanged += SeasonPicker_SelectedIndexChanged;
+			//	SeasonPicker.SelectedIndexChanged += SeasonPicker_SelectedIndexChanged;
 
 				// ---------------------------- RECOMMENDATIONS ----------------------------
 
@@ -1321,6 +1489,7 @@ namespace CloudStreamForms
 			});
 		}
 
+		/*
 		private void DubPicker_SelectedIndexChanged(object sender, int e)
 		{
 			if (core == null) return;
@@ -1346,7 +1515,7 @@ namespace CloudStreamForms
 			App.SetKey("SeasonIndex", core.activeMovie.title.id, SeasonPicker.SelectedIndex);
 
 			core.GetImdbEpisodes(currentSeason);
-		}
+		}*/
 
 		void SetChangeTo(int maxEp = -1)
 		{
@@ -1461,7 +1630,7 @@ namespace CloudStreamForms
 				if (isAnime) {
 					core.GetSubDub(currentSeason, out bool subExists, out bool dubExists);
 
-					isDub = dubExists;
+				//	isDub = dubExists;
 
 					if (Settings.DefaultDub) {
 						if (dubExists) {
@@ -1666,7 +1835,6 @@ namespace CloudStreamForms
 						Commands.SetTapParameter(stackLayout, _sel);
 						Grid.SetRow(stackLayout, (i + 1) * 2 - 2);
 						Grid.SetRow(textLb, (i + 1) * 2 - 1);
-
 					}
 				}
 			});
@@ -1828,7 +1996,7 @@ namespace CloudStreamForms
 
 		void Dispose()
 		{
-			core = null;
+			controller.Dispose();
 		}
 
 		static bool isRequestingPlayEpisode = false;
