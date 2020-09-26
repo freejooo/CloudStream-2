@@ -2010,6 +2010,17 @@ namespace CloudStreamForms.Droid
 				Android.Net.Uri uri = Android.Net.Uri.Parse(urls.Count == 1 ? urls[0] : _bpath);
 
 				switch (preferedPlayer) {
+					case VideoPlayer.Auto:
+						Intent intent = new Intent(Intent.ActionView);
+						intent.SetDataAndTypeAndNormalize(Android.Net.Uri.Parse(_bpath), "video/*");
+						intent.AddFlags(ActivityFlags.GrantReadUriPermission);
+						intent.AddFlags(ActivityFlags.GrantWriteUriPermission);
+						intent.AddFlags(ActivityFlags.GrantPrefixUriPermission);
+						intent.AddFlags(ActivityFlags.GrantPersistableUriPermission);
+
+						intent.AddFlags(ActivityFlags.NewTask);
+						Application.Context.StartActivity(intent);
+						break;
 					case VideoPlayer.VLC:
 
 						Intent vlcIntent = new Intent(VLC_INTENT_ACTION_RESULT);
@@ -2422,9 +2433,9 @@ namespace CloudStreamForms.Droid
 
 		public bool GetPlayerInstalled(VideoPlayer player)
 		{
-			if (player == VideoPlayer.None) {
-				return false;
-			}
+			if (player == VideoPlayer.None) return false;
+			if (player == VideoPlayer.Auto) return true;
+
 			return IsAppInstalled(GetVideoPlayerPackage(player));
 		}
 

@@ -10,6 +10,8 @@ namespace CloudStreamForms.InterfacePages
 {
 	class MovieResultHolder
 	{
+		bool IsDead { get { return core == null; } }
+
 		public int MaxTrailers = 4;
 		public enum PickerType { SeasonPicker = 0, DubPicker = 1, EpisodeFromToPicker = 2, }
 		public enum LabelType { NameLabel = 0, YearLabel = 1, RatingLabel = 2, DescriptionLabel = 3 }
@@ -163,7 +165,7 @@ namespace CloudStreamForms.InterfacePages
 			ChangeText(LabelType.YearLabel, year);
 
 			core.fishProgressLoaded += (o, e) => {
-				if (core == null) return;
+				if (IsDead) return;
 				if (!hasSkipedLoading) {
 					ChangeText(ButtonType.SkipAnimeBtt, $"Skip - {e.currentProgress} of {e.maxProgress}");
 					if (e.progressProcentage >= 1) {
@@ -207,8 +209,7 @@ namespace CloudStreamForms.InterfacePages
 
 		void SetEpisodeFromTo(int segment, int max = -1)
 		{
-			if (core == null) return;
-
+			if (IsDead) return;
 			int start = MovieResultMainEpisodeView.MAX_EPS_PER * segment;
 			if (max == -1) {
 				max = allEpisodes.Length;
@@ -243,6 +244,7 @@ namespace CloudStreamForms.InterfacePages
 
 		private void Core_episodeLoaded(object sender, List<Episode> e)
 		{
+			if (IsDead) return;
 			if (e == null || e.Count == 0) {
 				ChangeRunning(false);
 				return;
@@ -317,11 +319,10 @@ namespace CloudStreamForms.InterfacePages
 			TempThread tempThred = core.CreateThread(6);
 			core.StartThread("Set SUB/DUB", () => {
 				try {
-					if (core == null) return;
+					if (IsDead) return;
 					int max = core.GetMaxEpisodesInAnimeSeason(currentSeason, isDub, tempThred);
 					if (max > 0) {
-						if (core == null) return;
-
+						if (IsDead) return;
 						maxEpisodes = max;
 
 						SetEpisodeFromTo(0, max);
@@ -378,6 +379,8 @@ namespace CloudStreamForms.InterfacePages
 
 		public void SeasonPickerSelectIndex(int index)
 		{
+			ChangeRunning(true);
+
 			currentSeason = index + 1;
 			FadePicker(PickerType.DubPicker, false);
 			ChangeText(ButtonType.BatchDownloadPicker, null);
@@ -396,7 +399,7 @@ namespace CloudStreamForms.InterfacePages
 
 		private void Core_titleLoaded(object sender, Movie e)
 		{
-			if (core == null) return;
+			if (IsDead) return;
 			isMovie = (e.title.movieType == MovieType.Movie || e.title.movieType == MovieType.AnimeMovie);
 			titleLoaded?.Invoke(null, e);
 
@@ -490,7 +493,6 @@ namespace CloudStreamForms.InterfacePages
 
 		public string CurrentMalLink {
 			get {
-
 				try {
 					string s = currentMovie.title.MALData.seasonData[currentSeason].malUrl;
 					if (s != "https://myanimelist.net") {
@@ -507,7 +509,6 @@ namespace CloudStreamForms.InterfacePages
 		}
 		public string CurrentAniListLink {
 			get {
-
 				try {
 					string s = currentMovie.title.MALData.seasonData[currentSeason].aniListUrl;
 					if (s.IsClean()) {

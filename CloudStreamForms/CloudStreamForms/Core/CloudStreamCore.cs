@@ -6411,17 +6411,21 @@ namespace CloudStreamForms.Core
 					Thread t = new Thread(() => {
 						try {
 							int count = 0;
+							object threadLock = new object();
 
 							Parallel.For(0, animeProviders.Length, (int i) => {
 								print("STARTEDANIME: " + animeProviders[i].ToString() + "|" + i);
-								fishProgressLoaded?.Invoke(null, new FishLoaded() { name = animeProviders[i].Name, progressProcentage = ((double)count) / animeProviders.Length, maxProgress = animeProviders.Length, currentProgress = count });
+								lock (threadLock) {
+									fishProgressLoaded?.Invoke(null, new FishLoaded() { name = animeProviders[i].Name, progressProcentage = ((double)count) / animeProviders.Length, maxProgress = animeProviders.Length, currentProgress = count });
+								}
 								if (Settings.IsProviderActive(animeProviders[i].Name)) {
 									animeProviders[i].FishMainLink(currentSelectedYear, tempThred, activeMovie.title.MALData);
 								}
-
-								count++;
-								fishProgressLoaded?.Invoke(null, new FishLoaded() { name = animeProviders[i].Name, progressProcentage = ((double)count) / animeProviders.Length, maxProgress = animeProviders.Length, currentProgress = count });
-								print("COUNT INCRESED < -------------------------------- " + count);
+								lock (threadLock) {
+									count++;
+									fishProgressLoaded?.Invoke(null, new FishLoaded() { name = animeProviders[i].Name, progressProcentage = ((double)count) / animeProviders.Length, maxProgress = animeProviders.Length, currentProgress = count });
+									print("COUNT INCRESED < -------------------------------- " + count);
+								}
 								//if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
 							});
 						}
@@ -9039,14 +9043,7 @@ namespace CloudStreamForms.Core
 		public static void error(object o)
 		{
 #if DEBUG
-			print(o);
-
-			if (o != null) {
-				Console.WriteLine(o.ToString());
-			}
-			else {
-				Console.WriteLine("Null");
-			}
+			print("FATAL EX; ERROR:: " + o);
 #endif
 			/*
             if (o != null) { // TODO TEMOVE THIS
@@ -9557,7 +9554,7 @@ idMal
 			List<Medium> medias = new List<Medium>();
 
 			RootObject WebContent = await WebRequestAPI(SearchLink.Replace("{0}", title));
-			 
+
 			foreach (Medium media in WebContent.data.Page.media) {
 				//get id
 

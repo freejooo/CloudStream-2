@@ -52,8 +52,8 @@ xmlns:ffTransformations="clr-namespace:FFImageLoading.Transformations;assembly=F
 
 
 
-								<Label Grid.Column="0"  x:Name="RatingLabelRating" Text="" FontAttributes="Bold" HorizontalOptions="Start" VerticalOptions="Center" TranslationX="10" FontSize="18"   TextColor="#4257d8"></Label>
-								<Label Grid.Column="1" x:Name="RatingLabel"   Text=""  HorizontalOptions="Start" TranslationX="10" VerticalOptions="Center"   TextColor="#646464"></Label>
+								<Label Grid.Column="0"  Opacity="0" x:Name="RatingLabelRating" Text="" FontAttributes="Bold" HorizontalOptions="Start" VerticalOptions="Center" TranslationX="10" FontSize="18"   TextColor="#4257d8"></Label>
+								<Label Grid.Column="1" Opacity="0" x:Name="RatingLabel"   Text=""  HorizontalOptions="Start" TranslationX="10" VerticalOptions="Center"   TextColor="#646464"></Label>
 								<Button Grid.Column="2" x:Name="ReviewLabel"  BackgroundColor="Transparent" HorizontalOptions="End" TranslationX="10" VerticalOptions="Center" Text="Reviews" HeightRequest="30" WidthRequest="70" Margin="25,0" ClassId="CUST" TextColor="White" BorderWidth="2" CornerRadius="5" BorderColor="#303F9F" Opacity="0"></Button>
 							</Grid>
                         </Grid>
@@ -62,13 +62,12 @@ xmlns:ffTransformations="clr-namespace:FFImageLoading.Transformations;assembly=F
 
 							</ff:CachedImage>
 							<ImageButton x:Name="ChromeCastBtt" BackgroundColor="Transparent" Clicked="ChromeCastBtt_Clicked"  WidthRequest="40" HeightRequest="40"  VerticalOptions="Center" HorizontalOptions="Start"></ImageButton>
-                            <Label x:Name="NameLabel" FontSize="Title" Text="Iron Man" FontAttributes="Bold" HorizontalOptions="Start" Margin="0,5,5,5"  TranslationX="-5.5" TranslationY="0" TextColor="#e7e7e7" InputTransparent="True"></Label>
+							<Label Opacity="0" x:Name="NameLabel" FontSize="Title" Text="Iron Man" FontAttributes="Bold" HorizontalOptions="StartAndExpand" Margin="0,5,5,5"  TranslationX="-5.5" TranslationY="0" TextColor="#e7e7e7" InputTransparent="True"></Label>
 						</Grid>
 
 						<Grid Grid.Row="3"  Grid.Column="0" InputTransparent="True">
-                            <Label x:Name="DescriptionLabel" Text="" HorizontalOptions="Fill" VerticalOptions="Start" Margin="10,0,10,0" MinimumHeightRequest="0" TranslationY="-20" FontSize="14" TextColor="#dadada"></Label>
-
-                        </Grid>
+							<Label x:Name="DescriptionLabel" Opacity="0" Text="" HorizontalOptions="Fill" VerticalOptions="Start" Margin="10,0,10,0" MinimumHeightRequest="0" TranslationY="-20" FontSize="14" TextColor="#dadada"></Label>
+						</Grid>
 
                         <!-- <Grid Grid.Row="4"  Grid.Column="0" x:Name="ChromeRow" Margin="10,10,0,0">
                         <Grid  Grid.Column="0" VerticalOptions="Start" HorizontalOptions="Start" WidthRequest="100">
@@ -278,7 +277,7 @@ xmlns:ffTransformations="clr-namespace:FFImageLoading.Transformations;assembly=F
                             <ListView ItemsSource="{Binding MyEpisodeResultCollection}" VerticalOptions="Fill" 
                                  CachingStrategy="RecycleElement" 
                   RowHeight="200" HasUnevenRows="false"
-                        x:Name="episodeView" SeparatorColor="Transparent" VerticalScrollBarVisibility="Never" ItemAppearing="episodeView_ItemAppearing">
+                        x:Name="episodeView" SeparatorColor="Transparent" VerticalScrollBarVisibility="Never" HeightRequest="0">
 								<ListView.ItemTemplate>
 									<DataTemplate>
 										<ViewCell Tapped="ViewCell_Tapped" >
@@ -449,7 +448,7 @@ xmlns:ffTransformations="clr-namespace:FFImageLoading.Transformations;assembly=F
 
             </StackLayout>
             <StackLayout AbsoluteLayout.LayoutBounds="0, 0, 1, 1" AbsoluteLayout.LayoutFlags="All" InputTransparent="True"  >
-                <ProgressBar HorizontalOptions="Fill"  x:Name="RecomendationLoaded" InputTransparent="False"  IsVisible="False" IsEnabled="True" ClassId="id" TranslationY="-7" ></ProgressBar>
+                <ProgressBar HorizontalOptions="Fill"  x:Name="RecomendationLoaded" InputTransparent="False"  IsVisible="True" IsEnabled="True" ClassId="id" TranslationY="-7" ></ProgressBar>
 
             </StackLayout>
         </AbsoluteLayout> 

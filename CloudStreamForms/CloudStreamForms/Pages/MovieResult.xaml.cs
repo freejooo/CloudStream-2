@@ -19,7 +19,6 @@ using static CloudStreamForms.Settings;
 using static CloudStreamForms.Core.CoreHelpers;
 using CloudStreamForms.InterfacePages;
 using static CloudStreamForms.InterfacePages.MovieResultHolder;
-using Xamarin.Forms.Markup;
 
 namespace CloudStreamForms
 {
@@ -28,12 +27,9 @@ namespace CloudStreamForms
 	{
 		const uint FATE_TIME_MS = 500;
 
+		bool IsDead { get { return core == null; } }
 		MovieResultHolder controller = new MovieResultHolder();
 		CloudStreamCore core { get { return controller.core; } }
-
-		public int SmallFontSize { get; set; } = 11;
-		public int WithSize { get; set; } = 50;
-		List<Episode> CurrentEpisodes { get { return currentMovie.episodes; } }
 
 		public MovieResultMainEpisodeView epView;
 
@@ -47,49 +43,24 @@ namespace CloudStreamForms
 		//  public static List<Movie> lastMovie;
 		List<Poster> RecomendedPosters { get { return currentMovie.title.recomended; } }  //= new List<Poster>();
 
-		bool loadedTitle = false;
 		int currentSeason { get { return controller.currentSeason; } }
 		//ListView episodeView;
 		public const int heightRequestPerEpisode = 120;
 		public const int heightRequestAddEpisode = 40;
 		public const int heightRequestAddEpisodeAndroid = 0;
 
-		bool isMovie = false;
+		bool isMovie { get { return currentMovie.title.IsMovie; } }
 		Movie currentMovie { get { return core.activeMovie; } }
 		bool isDub { get { return controller.isDub; } }
 		// bool RunningWindows { get { return Xamarin.Essentials.DeviceInfo.Platform == DevicePlatform.UWP; } }
 		string CurrentMalLink {
 			get {
-
-				try {
-					string s = currentMovie.title.MALData.seasonData[currentSeason].malUrl;
-					if (s != "https://myanimelist.net") {
-						return s;
-					}
-					else {
-						return "";
-					}
-				}
-				catch (Exception) {
-					return "";
-				}
+				return controller.CurrentAniListLink;
 			}
 		}
 		string CurrentAniListLink {
 			get {
-
-				try {
-					string s = currentMovie.title.MALData.seasonData[currentSeason].aniListUrl;
-					if (s.IsClean()) {
-						return s;
-					}
-					else {
-						return "";
-					}
-				}
-				catch (Exception) {
-					return "";
-				}
+				return controller.CurrentAniListLink;
 			}
 		}
 
@@ -98,20 +69,11 @@ namespace CloudStreamForms
 			if (ActionPopup.isOpen) return true;
 
 			Search.mainPoster = new Poster();
-			/*if (lastMovie != null) {
-                if (lastMovie.Count > 1) {
-                    core.activeMovie = lastMovie[lastMovie.Count - 1];
-                    lastMovie.RemoveAt(lastMovie.Count - 1);
-                }
-            }*/
 			if (setKey) {
 				App.RemoveKey(App.BOOKMARK_DATA, currentMovie.title.id);
 			}
 			Dispose();
 			return base.OnBackButtonPressed();
-
-			//     Navigation.PopModalAsync(false);
-			//     return true;
 		}
 
 		bool setKey = false;
@@ -324,11 +286,7 @@ namespace CloudStreamForms
 				hasAppeared = true;
 				ForceUpdateVideo += ForceUpdateAppearing;
 			}
-
-			print("APPEARING;::");
-			//FadeAppear();
 			SetChromeCast(MainChrome.IsChromeDevicesOnNetwork);
-
 		}
 
 		public void OnHandleDownload(object sender, EventArgs arg)
@@ -373,8 +331,6 @@ namespace CloudStreamForms
 			}
 			if (!ChromeCastPage.isActive) {
 				OpenChrome(false);
-				//      Page p = new ChromeCastPage() { episodeResult = chromeResult, chromeMovieResult = chromeMovieResult };
-				//    Navigation.PushModalAsync(p, false);
 			}
 		}
 
@@ -392,7 +348,7 @@ namespace CloudStreamForms
 			else {
 				List<string> names = MainChrome.GetChromeDevicesNames();
 				if (MainChrome.IsConnectedToChromeDevice) { names.Add("Disconnect"); }
-				string a = await ActionPopup.DisplayActionSheet("Cast to", names.ToArray());//await DisplayActionSheet("Cast to", "Cancel", MainChrome.IsConnectedToChromeDevice ? "Disconnect" : null, names.ToArray());
+				string a = await ActionPopup.DisplayActionSheet("Cast to", names.ToArray());
 				if (a != "Cancel") {
 					MainChrome.ConnectToChromeDevice(a);
 				}
@@ -401,18 +357,8 @@ namespace CloudStreamForms
 
 		public static ImageSource GetGradient()
 		{
-			return GetImageSource("gradient" + Settings.BlackColor + ".png");//BlackBg ? "gradient.png" : "gradientGray.png");
+			return GetImageSource("gradient" + Settings.BlackColor + ".png");
 		}
-
-		/*
-        async void FadeAppear()
-        {
-            NormalStack.Opacity = 0;
-            NormalStack.Scale = 0.7;
-            await Task.Delay(100);
-            NormalStack.FadeTo(1);
-            NormalStack.ScaleTo(1);
-        }*/
 
 		public MovieResult()
 		{
@@ -421,6 +367,7 @@ namespace CloudStreamForms
 			mainPoster = Search.mainPoster;
 
 			controller.OnDateAdded += (object o, ReleaseDateEvent e) => {
+				if (IsDead) return;
 				Device.InvokeOnMainThreadAsync(() => {
 					NextEpisodeInfoBtt.Opacity = 0;
 					nextEpTimeShouldBeDisplayed = true;
@@ -435,8 +382,10 @@ namespace CloudStreamForms
 			};
 
 			controller.OnExposedEpisodesChanged += (object o, EpisodeData[] e) => {
-				Device.BeginInvokeOnMainThread(() => {
-					episodeView.Opacity = 0;
+				if (IsDead) return;
+				Device.InvokeOnMainThreadAsync(async () => {
+					FadeEpisodes.AbortAnimation("FadeTo");
+					FadeEpisodes.Opacity = 0;
 					epView.MyEpisodeResultCollection.Clear();
 					for (int i = 0; i < e.Length; i++) {
 						var c = e[i];
@@ -444,11 +393,15 @@ namespace CloudStreamForms
 						epView.MyEpisodeResultCollection.Add(_ep);
 					}
 					SetHeight();
-					episodeView.FadeTo(1, FATE_TIME_MS);
+					await Task.Delay(100); 
+					await FadeEpisodes.FadeTo(1, FATE_TIME_MS);
 				});
 			};
 
 			controller.titleLoaded += (o, e) => {
+				try {
+				if (IsDead) return;
+
 				if (setKey) {
 					SetKey();
 				}
@@ -458,9 +411,12 @@ namespace CloudStreamForms
 				};
 				SeasonPicker.SelectedIndexChanged += (o, e) => {
 					controller.SeasonPickerSelectIndex(e);
+					FadeEpisodes.FadeTo(0);
 				};
 
 				Device.BeginInvokeOnMainThread(() => {
+					if (IsDead) return;
+
 					EPISODES.Text = isMovie ? "MOVIE" : "EPISODES";
 					Recommendations.Children.Clear();
 					for (int i = 0; i < RecomendedPosters.Count; i++) {
@@ -508,9 +464,15 @@ namespace CloudStreamForms
 
 					SetRecs();
 				});
+
+				}
+				catch (Exception _ex ) {
+					error(_ex);
+				}
 			};
 
 			controller.OnBackgroundChanged += (o, e) => {
+				if (IsDead) return;
 				Device.BeginInvokeOnMainThread(() => {
 					TrailerBtt.Opacity = 0;
 					TrailerBtt.FadeTo(1);
@@ -523,13 +485,17 @@ namespace CloudStreamForms
 				});
 			};
 
-			controller.OnRunningChanged += (o, e) => {
+			controller.OnRunningChanged += (object o, bool e) => {
+				if (IsDead) return;
 				Device.BeginInvokeOnMainThread(() => {
-					RecomendationLoaded.IsVisible = false;
+					RecomendationLoaded.IsVisible = e;
+					RecomendationLoaded.IsEnabled = e;
 				});
 			};
 
 			controller.OnTextChanged += (object o, LabelInfo e) => {
+				if (IsDead) return;
+
 				Label label = e.label switch
 				{
 					LabelType.NameLabel => NameLabel,
@@ -552,6 +518,8 @@ namespace CloudStreamForms
 			};
 
 			controller.OnPickerChanged += (object o, PickerInfo e) => {
+				if (IsDead) return;
+
 				LabelList labelList = e.picker switch
 				{
 					PickerType.SeasonPicker => SeasonPicker,
@@ -579,6 +547,8 @@ namespace CloudStreamForms
 			};
 
 			controller.OnBttChanged += (object o, ButtonInfo e) => {
+				if (IsDead) return;
+
 				Button btt = e.button switch
 				{
 					ButtonType.BatchDownloadPicker => BatchDownloadBtt,
@@ -654,8 +624,6 @@ namespace CloudStreamForms
 				SetRecs();
 			};
 
-
-			//ViewToggle.Source = GetImageSource("viewOnState.png");
 			ChangeViewToggle();
 			ChangeSubtitle();
 
@@ -764,69 +732,9 @@ namespace CloudStreamForms
             */
 
 			SkipAnimeBtt.Clicked += (o, e) => {
-				controller.SkipAnimeLoading();
-				// Grid.SetColumn(SkipAnimeBtt, 0);
-				/*Device.BeginInvokeOnMainThread(() => {
-					core.shouldSkipAnimeLoading = true;
-					SkipAnimeBtt.IsVisible = false;
-					SkipAnimeBtt.IsEnabled = false;
-					hasSkipedLoading = true;
-				});*/
+				controller.SkipAnimeLoading(); 
 			};
-
-			core.fishProgressLoaded += (o, e) => {
-				if (core == null) return;
-
-				Device.BeginInvokeOnMainThread(() => {
-
-					/*
-					SkipAnimeBtt.Text = $"Skip - {e.currentProgress} of {e.maxProgress}"; // {(int)(e.progressProcentage * 100)}%
-
-					if (e.progressProcentage > 0) {
-						if (!SkipAnimeBtt.IsVisible && !hasSkipedLoading) {
-							SkipAnimeBtt.Opacity = 0;
-							// Grid.SetColumn(SkipAnimeBtt, 1);
-							SkipAnimeBtt.IsVisible = true;
-							SkipAnimeBtt.IsEnabled = true;
-							SkipAnimeBtt.FadeTo(1);
-						}
-					}
-					if (e.progressProcentage >= 1) {
-						hasSkipedLoading = true;
-						//  Grid.SetColumn(SkipAnimeBtt, 0);
-						SkipAnimeBtt.IsVisible = false;
-						SkipAnimeBtt.IsEnabled = false;
-					}*/
-
-					/*
-                   if (e.progress >= 1 && (!FishProgress.IsVisible || FishProgress.Progress >= 1)) return;
-                   FishProgress.IsVisible = true;
-                   FishProgress.IsEnabled = true;
-                   FishProgressTxt.IsVisible = true;
-                   FishProgressTxt.IsEnabled = true;
-                   if (FishProgress.Opacity == 0) {
-                       FishProgress.FadeTo(1);
-                   }
-
-                   // FishProgressTxt.Text = e.name;
-                   await FishProgress.ProgressTo(e.progress, 250, Easing.SinIn);
-                   if (e.progress >= 1) {
-
-                       FishProgressTxt.IsVisible = false;
-                       FishProgressTxt.IsEnabled = false;
-
-                       await FishProgress.FadeTo(0);
-                       FishProgress.IsVisible = false;
-                       FishProgress.IsEnabled = false;
-                   }*/
-				});
-
-			};
-
-		}
-
-
-		bool hasSkipedLoading = false;
+		} 
 
 		// NOTIFICATIONS
 		/*
@@ -938,7 +846,6 @@ namespace CloudStreamForms
             });*/
 		}
 
-
 		public void SetColor(EpisodeResult episodeResult)
 		{
 			if (core == null) return;
@@ -971,79 +878,10 @@ namespace CloudStreamForms
 				}
 				print("SETCOLOR::: " + state);
 
-				/*
-                if (App.KeyExists("dlength", "id" + GetCorrectId(episodeResult))) {
-                    try {
-                        DownloadState state = App.GetDownloadInfo(GetCorrectId(episodeResult)).state.state;
-                        switch (state) {
-                            case DownloadState.Downloading:
-                                episodeResult.downloadState = 2;
-                                break;
-                            case DownloadState.Downloaded:
-                                episodeResult.downloadState = 1;
-                                break;
-                            case DownloadState.NotDownloaded:
-                                episodeResult.downloadState = 1;
-                                break;
-                            case DownloadState.Paused:
-                                episodeResult.downloadState = 3;
-                                break;
-                            default:
-                                break;
-                        }
-                        print("STATE:::: " + episodeResult.downloadState + "|" + state);
-                      //  color = 2;
-                    }
-                    catch (Exception _ex) {
-                        print("EX:::" + _ex);
-                    }
-
-                } else {
-                    episodeResult.downloadState = 0;
-                }*/
-
 				episodeResult.MainTextColor = hexColors[color];
 				episodeResult.MainDarkTextColor = darkHexColors[color];
 			}
-		}
-
-
-		async void SetEpisodeFromTo(int segment, int max = -1)
-		{
-			if (core == null) return;
-
-			epView.MyEpisodeResultCollection.Clear();
-
-			int start = MovieResultMainEpisodeView.MAX_EPS_PER * segment;
-			if (max == -1) {
-				max = epView.AllEpisodes.Length;
-			}
-			else {
-				max = Math.Min(max, epView.AllEpisodes.Length);
-			}
-
-			int end = Math.Min(MovieResultMainEpisodeView.MAX_EPS_PER * (segment + 1), max);
-			SetHeight(null, end - start);
-			RecomendationLoaded.IsVisible = false;
-
-			FadeEpisodes.Opacity = 0;
-			for (int i = start; i < end; i++) {
-				// await Task.Delay(30);
-				epView.MyEpisodeResultCollection.Add(epView.AllEpisodes[i]);
-			}
-			await Task.Delay(100);
-			await FadeEpisodes.FadeTo(1);
-
-		}
-
-		int maxEpisodes = 1;
-		public void AddEpisode(EpisodeResult episodeResult, int index)
-		{
-			if (core == null) return;
-
-			var _episode = ChangeEpisode(episodeResult);
-			epView.AllEpisodes[index] = _episode;
-		}
+		} 
 
 		EpisodeResult UpdateLoad(EpisodeResult episodeResult, bool checkColor = false)
 		{
@@ -1192,37 +1030,12 @@ namespace CloudStreamForms
 					var _episodeResult = (EpisodeResult)episodeResult.Clone();
 					await Task.Delay(10000); // WAIT 10 Sec
 					try {
-						// if (!SameAsActiveMovie()) return;
-
-						/*
-                        Movie _currentMovie = coreCopy.activeMovie;
-
-
-                        var l = 
-                        for (int i = 0; i < l.Length; i++) {
-                            print(l[i].name + "<<<<<<<LD");
-                        }*/
 						BasicLink[] info = null;
 						bool hasMirrors = false;
 						var baseLinks = CloudStreamCore.GetCachedLink(imdbId);
 						if (baseLinks.HasValue) {
 							info = baseLinks.Value.links.Where(t => t.CanBeDownloaded).ToList().OrderHDLinks().ToArray();
 							hasMirrors = info.Length > 0;
-
-							/*.Where(t => {
-                                return !t.isAdvancedLink;
-                            });*/
-
-							/*.ToList();
-                            hasMirrors = _links.Count > 0;
-
-                            List<string> mirrorUrls = new List<string>();
-                            List<string> mirrorNames = new List<string>();
-                            foreach (var link in _links) {
-                                mirrorNames.Add(link.PublicName);
-                                mirrorUrls.Add(link.baseUrl);
-                            }
-                            info = SortToHdMirrors(epRes.mirrosUrls, epRes.Mirros);*/
 						}
 
 						if (hasMirrors && info != null) {
@@ -1256,7 +1069,7 @@ namespace CloudStreamForms
 
 		public void ClearEpisodes()
 		{
-			if (core == null) return;
+			if (IsDead) return;
 
 			episodeView.ItemsSource = null;
 			epView.MyEpisodeResultCollection.Clear();
@@ -1271,7 +1084,7 @@ namespace CloudStreamForms
 			if (core == null) return;
 
 			episodeView.RowHeight = Settings.EpDecEnabled ? 170 : 100;
-			Device.BeginInvokeOnMainThread(() => episodeView.HeightRequest = ((setNull ?? showState != 0) ? 0 : ((overrideCount ?? epView.MyEpisodeResultCollection.Count) * (episodeView.RowHeight) + 40)));
+			Device.BeginInvokeOnMainThread(() => episodeView.HeightRequest = (((setNull ?? showState != 0) || epView.MyEpisodeResultCollection.Count == 0) ? 0 : ((overrideCount ?? epView.MyEpisodeResultCollection.Count) * (episodeView.RowHeight) + 40 + Settings.TransparentAddPaddingEnd)));
 		}
 
 		private async void TrailerBtt_Clicked(object sender, EventArgs e)
@@ -1308,163 +1121,7 @@ namespace CloudStreamForms
 			}
 		}
 
-		/*
-        public async void AnimateInTrailer()
-        {
-            
-            await Task.Delay(5000);
-            TrailerBtt.HeightRequest = 200;
-            Gradient.HeightRequest = 200;
-            TrailerBtt.Opacity = 0;
-            TrailerBtt.FadeTo(1);
-            NormalStack.TranslateTo(0, 200,500);
-        }*/
-
 		bool setFirstEpAsFade = false;
-		private void MovieResult_titleLoaded(object sender, Movie e)
-		{
-			if (core == null) return;
-
-			if (loadedTitle) return;
-			if (e.title.name != mainPoster.name) return;
-
-
-
-			loadedTitle = true;
-			isMovie = (e.title.movieType == MovieType.Movie || e.title.movieType == MovieType.AnimeMovie);
-
-			if (setKey) {
-				SetKey();
-			}
-			MainThread.BeginInvokeOnMainThread(() => {
-				//App.ShowNotIntent("NEW EPISODE - " + currentMovie.title.name, currentMovie.title.name, 1337, currentMovie.title.id, currentMovie.title.name, bigIconUrl: currentMovie.title.hdPosterUrl, time: DateTime.UtcNow.AddSeconds(1));//ShowNotification("NEW EPISODE - " + currentMovie.title.name, setNotificationsTimes[i].episodeName, _id, i * 10);
-
-				EPISODES.Text = isMovie ? "MOVIE" : "EPISODES";
-				setFirstEpAsFade = true;
-
-				try {
-					string souceUrl = e.title.trailers.First().PosterUrl;
-					if (CheckIfURLIsValid(souceUrl)) {
-						TrailerBtt.Opacity = 0;
-						TrailerBtt.FadeTo(1);
-						TrailerBtt.Source = souceUrl;
-						setFirstEpAsFade = false;
-					}
-					else {
-						TrailerBtt.Source = ImageSource.FromResource("CloudStreamForms.Resource.gradient.png", Assembly.GetExecutingAssembly());
-					}
-				}
-				catch (Exception) {
-					TrailerBtt.Source = ImageSource.FromResource("CloudStreamForms.Resource.gradient.png", Assembly.GetExecutingAssembly());
-				}
-
-				ChangeStar();
-
-				string extra = "";
-				bool haveSeasons = e.title.seasons != 0;
-
-				if (haveSeasons) {
-					extra = e.title.seasons + " Season" + (e.title.seasons == 1 ? "" : "s") + " | ";
-				}
-
-				string rYear = mainPoster.year;
-				if (rYear == null || rYear == "") {
-					rYear = e.title.year;
-				}
-				RatingLabel.Text = ((rYear + " | " + e.title.runtime).Replace("|  |", "|")).Replace("|", "  "); //+ " | " + extra + "★ " + e.title.rating).Replace("|  |", "|")).Replace("|", "  ");
-				RatingLabelRating.Text = "Rated: " + e.title.rating;
-				DescriptionLabel.Text = Settings.MovieDecEnabled ? CloudStreamCore.RemoveHtmlChars(e.title.description) : "";
-				if (e.title.description == "") {
-					DescriptionLabel.HeightRequest = 0;
-				}
-
-				// ---------------------------- SEASONS ----------------------------
-
-
-				SeasonPicker.IsVisible = haveSeasons;
-				FadeTitles(haveSeasons);
-
-			//	DubPicker.SelectedIndexChanged += DubPicker_SelectedIndexChanged;
-				if (haveSeasons) {
-					List<string> season = new List<string>();
-					for (int i = 1; i <= e.title.seasons; i++) {
-						season.Add("Season " + i);
-					}
-					SeasonPicker.ItemsSource = season;
-
-					int selIndex = App.GetKey<int>("SeasonIndex", core.activeMovie.title.id, 0);
-					try {
-						SeasonPicker.SelectedIndex = Math.Min(selIndex, SeasonPicker.ItemsSource.Count - 1);
-					}
-					catch (Exception) {
-						SeasonPicker.SelectedIndex = 0; // JUST IN CASE
-					}
-
-				//	currentSeason = SeasonPicker.SelectedIndex + 1;
-
-
-					print("GetImdbEpisodes>>>>>>>>>>>>>>><<");
-					core.GetImdbEpisodes(currentSeason);
-				}
-				else {
-			//		currentSeason = 0; // MOVIES
-					core.GetImdbEpisodes();
-				}
-			//	SeasonPicker.SelectedIndexChanged += SeasonPicker_SelectedIndexChanged;
-
-				// ---------------------------- RECOMMENDATIONS ----------------------------
-
-				/*
-                foreach (var item in Recommendations.Children) { // SETUP
-                    Grid.SetColumn(item, 0);
-                    Grid.SetRow(item, 0);
-                }*/
-				Recommendations.Children.Clear();
-				for (int i = 0; i < RecomendedPosters.Count; i++) {
-					Poster p = e.title.recomended[i];
-					string posterURL = ConvertIMDbImagesToHD(p.posterUrl, 76, 113, 1.75); //.Replace(",76,113_AL", "," + pwidth + "," + pheight + "_AL").Replace("UY113", "UY" + pheight).Replace("UX76", "UX" + pwidth);
-					if (CheckIfURLIsValid(posterURL)) {
-						Grid stackLayout = new Grid() { VerticalOptions = LayoutOptions.Start };
-						// Button imageButton = new Button() { HeightRequest = RecPosterHeight, WidthRequest = RecPosterWith, BackgroundColor = Color.Transparent, VerticalOptions = LayoutOptions.Start,CornerRadius=10 };
-						var ff = new FFImageLoading.Forms.CachedImage {
-							Source = posterURL,
-							HeightRequest = RecPosterHeight,
-							WidthRequest = RecPosterWith,
-							BackgroundColor = Color.Transparent,
-							VerticalOptions = LayoutOptions.Start,
-							Transformations = {
-                            //  new FFImageLoading.Transformations.RoundedTransformation(10,1,1.5,10,"#303F9F")
-                            new FFImageLoading.Transformations.RoundedTransformation(3, 1, 1.5, 0, "#303F9F")
-						},
-							InputTransparent = true,
-						};
-
-						// ================================================================ RECOMMENDATIONS CLICKED ================================================================
-						stackLayout.SetValue(XamEffects.TouchEffect.ColorProperty, Color.White);
-						Commands.SetTap(stackLayout, new Command((o) => {
-							int z = (int)o;
-							if (Search.mainPoster.url != RecomendedPosters[z].url) {
-								/*if (lastMovie == null) {
-                                    lastMovie = new List<Movie>();
-                                }
-                                lastMovie.Add(core.activeMovie);*/
-								Search.mainPoster = RecomendedPosters[z];
-								Page _p = new MovieResult();// { mainPoster = mainPoster };
-								Navigation.PushModalAsync(_p);
-							}
-							//do something
-						}));
-						Commands.SetTapParameter(stackLayout, i);
-
-						stackLayout.Children.Add(ff);
-						//stackLayout.Children.Add(imageButton);
-
-						Recommendations.Children.Add(stackLayout);
-					}
-				}
-				SetRecs();
-			});
-		}
 
 		const double _RecPosterMulit = 1.75;
 		const int _RecPosterHeight = 100;
@@ -1485,292 +1142,13 @@ namespace CloudStreamForms
 					Grid.SetRow(Recommendations.Children[i], (int)Math.Floor(i / (double)perCol));
 				}
 				// Recommendations.HeightRequest = (RecPosterHeight + Recommendations.RowSpacing) * (total / perCol);
-				Recommendations.HeightRequest = (RecPosterHeight + Recommendations.RowSpacing) * (total / perCol) - 7 + Recommendations.RowSpacing;
+				Recommendations.HeightRequest = (RecPosterHeight + Recommendations.RowSpacing) * (total / perCol) - 7 + Recommendations.RowSpacing; // + + Settings.TransparentAddPaddingEnd
 			});
-		}
-
-		/*
-		private void DubPicker_SelectedIndexChanged(object sender, int e)
-		{
-			if (core == null) return;
-
-			print("DUBCHANGED::");
-			try {
-				isDub = "Dub" == DubPicker.ItemsSource[DubPicker.SelectedIndex];
-				SetDubExist();
-			}
-			catch (Exception _ex) {
-				print("EXPECTION:" + _ex);
-			}
-		}
-
-		private void SeasonPicker_SelectedIndexChanged(object sender, int e)
-		{
-			ClearEpisodes();
-			//  epView.MyEpisodeResultCollection.Clear();
-			ChangeBatchDownload();
-
-			DubPicker.button.FadeTo(0, FATE_TIME_MS);
-			currentSeason = SeasonPicker.SelectedIndex + 1;
-			App.SetKey("SeasonIndex", core.activeMovie.title.id, SeasonPicker.SelectedIndex);
-
-			core.GetImdbEpisodes(currentSeason);
-		}*/
-
-		void SetChangeTo(int maxEp = -1)
-		{
-			Device.BeginInvokeOnMainThread(() => {
-				if (maxEp == -1) {
-					maxEp = maxEpisodes;
-				}
-				var source = new List<string>();
-
-				int times = (int)Math.Ceiling((decimal)epView.AllEpisodes.Length / (decimal)MovieResultMainEpisodeView.MAX_EPS_PER);
-
-				for (int i = 0; i < times; i++) {
-					int fromTo = maxEp - i * MovieResultMainEpisodeView.MAX_EPS_PER;
-					string f = (i * MovieResultMainEpisodeView.MAX_EPS_PER + 1) + "-" + ((i) * MovieResultMainEpisodeView.MAX_EPS_PER + Math.Min(fromTo, MovieResultMainEpisodeView.MAX_EPS_PER));
-					source.Add(f);
-				}
-
-				FromToPicker = new LabelList(FromToBtt, source, "Select Episode") {
-					SelectedIndex = 0//.IsVisible = FromToPicker.ItemsSource.Count > 1;           
-				};//.IsVisible = FromToPicker.ItemsSource.Count > 1;                
-				FromToPicker.IsVisible = FromToPicker.ItemsSource.Count > 1;
-				FromToPicker.button.IsEnabled = FromToPicker.ItemsSource.Count > 1;
-				FromToPicker.SelectedIndexChanged += (o, e) => {
-					SetEpisodeFromTo(e, maxEpisodes);
-				};
-			});
-		}
-
-		private void EpisodesHalfLoaded(object sender, List<Episode> e)
-		{
-			if (e.Count > 0) {
-				if (setFirstEpAsFade) {
-					Device.BeginInvokeOnMainThread(() => {
-						TrailerBtt.Source = CloudStreamCore.ConvertIMDbImagesToHD(e[0].posterUrl, 356, 200);
-						TrailerBtt.Opacity = 0;
-						TrailerBtt.FadeTo(1);
-					});
-				}
-			}
-		}
-
-		void ChangeBatchDownload()
-		{
-			bool canBatchDownload = epView.MyEpisodeResultCollection.Count > 1;
-			BatchDownloadBtt.IsEnabled = canBatchDownload;
-			BatchDownloadBtt.FadeTo(canBatchDownload ? 1 : 0);
 		}
 
 		bool nextEpTimeShouldBeDisplayed = false;
 
-		private void EpisodesLoaded(object sender, List<Episode> e)
-		{
-			if (core == null) return;
-			var tId = currentMovie.title.id.ToString();
-
-			Device.BeginInvokeOnMainThread(() => {
-				print("GOT RESULTS; LETS GO");
-
-				if (e == null || e.Count == 0) {
-					RecomendationLoaded.IsVisible = false;
-					return;
-				};
-				print("episodes loaded");
-
-				ClearEpisodes();
-
-				//bool isLocalMovie = false;
-				bool isAnime = currentMovie.title.movieType == MovieType.Anime;
-
-				if (currentMovie.title.IsMovie) {
-					EpPickers.IsVisible = false;
-					EpPickers.IsEnabled = false;
-				}
-
-				if (currentMovie.title.movieType != MovieType.Movie && currentMovie.title.movieType != MovieType.AnimeMovie) { // SEASON ECT
-					print("MAXEPS:::" + CurrentEpisodes.Count);
-					epView.AllEpisodes = new EpisodeResult[CurrentEpisodes.Count];
-					maxEpisodes = epView.AllEpisodes.Length;
-					bool dateAdded = isAnime;
-					for (int i = 0; i < CurrentEpisodes.Count; i++) {
-						AddEpisode(new EpisodeResult() { Episode = i + 1, IMDBEpisodeId = CurrentEpisodes[i].id, Title = CurrentEpisodes[i].name, Id = i, Description = CurrentEpisodes[i].description.Replace("\n", "").Replace("  ", ""), PosterUrl = CurrentEpisodes[i].posterUrl, Rating = CurrentEpisodes[i].rating, Progress = 0, epVis = false, }, i);
-						var _date = CurrentEpisodes[i].date;
-						if (!dateAdded && _date.IsClean()) {
-							try {
-								var unixReleaseTime = DateTimeOffset.Parse(_date).ToUnixTimeSeconds();
-								if (unixReleaseTime > UnixTime) {
-									dateAdded = true;
-									App.SetKey(App.NEXT_AIRING, tId, new NextAiringEpisodeData { airingAt = unixReleaseTime, source = AirDateType.IMDb, episode = i + 1, refreshId = -1 });
-								}
-							}
-							catch (Exception _ex) {
-								error(_ex);
-							}
-						}
-					}
-					if (!isAnime) {
-						SetEpisodeFromTo(0);
-						SetChangeTo();
-					}
-				}
-				else { // MOVE
-					maxEpisodes = 1;
-					epView.AllEpisodes = new EpisodeResult[1];
-					AddEpisode(new EpisodeResult() { Title = currentMovie.title.name, IMDBEpisodeId = currentMovie.title.id, Description = currentMovie.title.description, Id = 0, PosterUrl = "", Progress = 0, Rating = "", epVis = false }, 0);
-					SetEpisodeFromTo(0);
-				}
-				ChangeBatchDownload();
-
-				DubPicker.ItemsSource.Clear();
-
-				// SET DUB SUB
-				if (isAnime) {
-					core.GetSubDub(currentSeason, out bool subExists, out bool dubExists);
-
-				//	isDub = dubExists;
-
-					if (Settings.DefaultDub) {
-						if (dubExists) {
-							DubPicker.ItemsSource.Add("Dub");
-						}
-					}
-					if (subExists) {
-						DubPicker.ItemsSource.Add("Sub");
-					}
-					if (!Settings.DefaultDub) {
-						if (dubExists) {
-							DubPicker.ItemsSource.Add("Dub");
-						}
-					}
-
-					if (DubPicker.ItemsSource.Count > 0) {
-						DubPicker.SelectedIndex = 0;
-					}
-					DubPicker.OnUpdateList();
-					SetDubExist();
-				}
-
-				bool enabled = currentMovie.title.movieType == MovieType.Anime; //CurrentMalLink != "";
-				print("SETACTIVE::: " + enabled);
-
-				/*
-                MALB.IsVisible = enabled;
-                MALB.IsEnabled = enabled;
-                MALA.IsVisible = enabled;
-                MALA.IsEnabled = enabled;
-
-                Grid.SetColumn(MALB, enabled ? 5 : 0);
-                Grid.SetColumn(MALA, enabled ? 5 : 0);*/
-
-				DubPicker.button.Opacity = 0;
-				DubPicker.IsVisible = DubPicker.ItemsSource.Count > 0;
-				DubPicker.button.FadeTo(DubPicker.IsVisible ? 1 : 0, FATE_TIME_MS);
-				// ForceUpdate();
-
-				// ======================================== UI VISUAL NEXT EP RELASE ========================================
-				if (Settings.ShowNextEpisodeReleaseDate) {
-					void UpdateNextEpisodeInfoUI(NextAiringEpisodeData nextAir)
-					{
-						Device.InvokeOnMainThreadAsync(() => {
-							NextEpisodeInfoBtt.Opacity = 0;
-							nextEpTimeShouldBeDisplayed = true;
-							if (showState == 0) {
-								NextEpisodeInfoBtt.IsVisible = true;
-								NextEpisodeInfoBtt.IsEnabled = true;
-							}
-
-							NextEpisodeInfoBtt.FadeTo(1, easing: Easing.SinIn);
-							NextEpisodeInfoBtt.Text = $"Next Episode {nextAir.episode}: {ConvertUnixTimeToString(nextAir.airingAt)}";
-						});
-					}
-
-					CloudStreamCore.NextAiringEpisodeData? data = App.GetKey<NextAiringEpisodeData?>(App.NEXT_AIRING, tId, null);
-					if (data.HasValue) {
-						var nextAir = data.Value;
-						if (nextAir.airingAt > UnixTime) {
-							UpdateNextEpisodeInfoUI(nextAir);
-						}
-						else {
-							Task.Run(async () => {
-								var _next = await core.RefreshNextEpisodeData(nextAir);
-								if (_next.HasValue) {
-									if (_next.Value.airingAt > UnixTime) { // JUST IN CASE SOMEONE HAS MESSED W TIME
-										App.SetKey(App.NEXT_AIRING, tId, _next);
-										UpdateNextEpisodeInfoUI(_next.Value);
-									}
-								}
-								else {
-									App.RemoveKey(App.NEXT_AIRING, tId);
-									Home.UpdateIsRequired = true;
-								}
-							});
-						}
-					}
-				}
-				// ==========================================================================================================
-			});
-		}
-
 		readonly static Dictionary<string, bool> GetLatestDub = new Dictionary<string, bool>();
-
-		void SetDubExist()
-		{
-			print("SETDUB:::");
-			print("SETDUB:::SET");
-
-			TempThread tempThred = core.CreateThread(6);
-			core.StartThread("Set SUB/DUB", () => {
-				try {
-					if (core == null) return;
-					int max = core.GetMaxEpisodesInAnimeSeason(currentSeason, isDub, tempThred);
-					if (max > 0) {
-						print("CLEAR AND ADD");
-						MainThread.BeginInvokeOnMainThread(() => {
-							if (core == null) return;
-
-							maxEpisodes = max;
-							print("MAXUSsssss" + maxEpisodes + "|" + max + "|" + (int)Math.Ceiling((double)max / (double)MovieResultMainEpisodeView.MAX_EPS_PER));
-
-							SetEpisodeFromTo(0, max);
-							SetChangeTo(max);
-
-							// CLEAR EPISODES SO SWITCHING SUB DUB 
-							if (GetLatestDub.ContainsKey(currentMovie.title.id)) {
-								if (GetLatestDub[currentMovie.title.id] != isDub) {
-									try {
-										for (int i = 0; i < epView.MyEpisodeResultCollection.Count; i++) {
-											if (epView.MyEpisodeResultCollection[i].GetHasLoadedLinks()) {
-												print("CLEAR OS : " + i);
-												epView.MyEpisodeResultCollection[i].ClearMirror();
-											}
-										}
-									}
-									catch (Exception _ex) {
-										print("MAIN ERROR IN CLEAR: " + _ex);
-									}
-								}
-							}
-							GetLatestDub[currentMovie.title.id] = isDub;
-							ChangeBatchDownload();
-						});
-					}
-					else {
-						Device.BeginInvokeOnMainThread(() => {
-							RecomendationLoaded.IsVisible = false;
-						});
-					}
-				}
-				finally {
-					if (core != null) {
-						core.JoinThred(tempThred);
-					}
-				}
-			});
-		}
-
 
 		private void MovieResult_trailerLoaded(object sender, List<Trailer> e)
 		{
@@ -1873,10 +1251,6 @@ namespace CloudStreamForms
 				await App.OpenBrowser(CurrentAniListLink);
 			}
 		}
-		private void MAL_Clicked(object sender, EventArgs e)
-		{
-			//   if (!SameAsActiveMovie()) return;
-		}
 
 		void PlayDownloadedEp(EpisodeResult episodeResult, string data = null)
 		{
@@ -1887,27 +1261,6 @@ namespace CloudStreamForms
 			//  Download.PlayVLCFile(downloadKeyData, episodeResult.Title, GetCorrectId(episodeResult).ToString());
 		}
 
-		/*
-        void PlayEpisodeRes(EpisodeResult episodeResult)
-        {
-            string hasDownloadedFile = App.GetKey("Download", GetId(episodeResult), "");
-            if (hasDownloadedFile != "") {
-                Download.PlayFile(hasDownloadedFile, episodeResult.Title);
-            }
-            else {
-                LoadLinksForEpisode(episodeResult);
-            }
-        }*/
-
-		/*
-    private void ImageButton_Clicked(object sender, EventArgs e) // LOAD
-    {
-        if (!SameAsActiveMovie()) return;
-        EpisodeResult episodeResult = ((EpisodeResult)((ImageButton)sender).BindingContext);
-        PlayEpisodeRes(episodeResult);
-
-        episodeView.SelectedItem = null;
-    }*/
 
 		bool loadingLinks = false;
 
@@ -1933,12 +1286,6 @@ namespace CloudStreamForms
 						else {
 							await Task.Delay(LoadingMiliSec);
 						}
-
-						/*
-						UserDialogs.Instance.ShowLoading("Loading links...", MaskType.Gradient);
-						await Task.Delay(LoadingMiliSec);
-						UserDialogs.Instance.HideLoading();*/
-
 					}
 					catch (Exception) {
 
@@ -1950,8 +1297,6 @@ namespace CloudStreamForms
 					int errorCount = 0;
 					const int maxErrorcount = 1;
 					bool gotError = false;
-				//NormalStack.IsEnabled = true;
-				// NormalStack.Opacity = 1f;
 				checkerror:;
 					if (episodeResult == null) {
 						gotError = true;
@@ -2045,8 +1390,6 @@ namespace CloudStreamForms
 				VideoPage.canLoad = (t) => {
 					return CanLoadLinkFrom(t, out int index);
 				};
-
-				VideoPage.maxEpisodeForLoading = maxEpisodes;
 			}
 			await App.RequestVlc(episodeResult.GetMirrosUrls(), episodeResult.GetMirros(), episodeResult.OgTitle, episodeResult.IMDBEpisodeId, episode: episodeResult.Episode, season: currentSeason, subtitleFull: currentMovie.subtitles.Select(t => t.data).FirstOrDefault(), descript: episodeResult.Description, overrideSelectVideo: overrideSelectVideo, startId: (int)episodeResult.ProgressState, headerId: currentMovie.title.id, isFromIMDB: true);// startId: FROM_PROGRESS); //  (int)episodeResult.ProgressState																																																																													  //App.PlayVLCWithSingleUrl(episodeResult.mirrosUrls, episodeResult.Mirros, currentMovie.subtitles.Select(t => t.data).ToList(), currentMovie.subtitles.Select(t => t.name).ToList(), currentMovie.title.name, episodeResult.Episode, currentSeason, overrideSelectVideo);
 			isRequestingPlayEpisode = false;
@@ -2434,18 +1777,6 @@ namespace CloudStreamForms
 			}
 		}
 
-
-
-		// ============================== USED FOR SMALL VIDEO PLAY ==============================
-		/*  private void Grid_LayoutChanged(object sender, EventArgs e)
-          {
-              var s = ((Grid)sender);
-              Commands.SetTap(s, new Command((o) => {
-                  var episodeResult = (EpisodeResult)s.BindingContext;
-                  PlayEpisodeRes(episodeResult);
-              }));
-          }*/
-
 		// ============================== SHOW SETTINGS OF VIDEO ==============================
 		private async void ViewCell_Tapped(object sender, EventArgs e)
 		{
@@ -2466,8 +1797,6 @@ namespace CloudStreamForms
 				canTapEpisode = true;
 			}
 		}
-
-
 
 		#region ===================================================== MOVE RECOMENDATION ECT BAR  =====================================================
 		/// <summary>
@@ -2546,18 +1875,6 @@ namespace CloudStreamForms
 
 		#endregion
 
-
-		private void episodeView_ItemAppearing(object sender, ItemVisibilityEventArgs e)
-		{
-			//  episodeView.Style = TabsStyle.
-
-		}
-
-		private void RecomendationLoaded_SizeChanged(object sender, EventArgs e)
-		{
-
-		}
-
 		private void ScrollView_Scrolled(object sender, ScrolledEventArgs e)
 		{
 			TrailerBtt.TranslationY = -e.ScrollY / 15.0;
@@ -2585,8 +1902,3 @@ public class MovieResultMainEpisodeView
 		CurrentTrailers = new ObservableCollection<Trailer>();
 	}
 }
-
-
-
-
-

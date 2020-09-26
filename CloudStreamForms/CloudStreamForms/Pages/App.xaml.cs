@@ -104,7 +104,7 @@ namespace CloudStreamForms
               void SearchBluetoothDevices();*/
 			void RequestVlc(List<string> urls, List<string> names, string episodeName, string episodeId, long startId = FROM_PROGRESS, string subtitleFull = "", VideoPlayer preferedPlayer = VideoPlayer.VLC);
 			public int GetArchitecture();
-			public bool ResumeDownload(int id); 
+			public bool ResumeDownload(int id);
 			public void PictureInPicture();
 		}
 
@@ -213,6 +213,7 @@ namespace CloudStreamForms
 			VLC = 0,
 			//MPV = 1,
 			MXPlayer = 2,
+			Auto = -2,
 		}
 
 		public static List<TEnum> GetEnumList<TEnum>() where TEnum : Enum
@@ -231,9 +232,10 @@ namespace CloudStreamForms
 				VideoPlayer.VLC => "VLC",
 				// VideoPlayer.MPV => "MPV",
 				VideoPlayer.MXPlayer => "MX Player",
+				VideoPlayer.Auto => "Auto",
 				_ => "",
 			};
-		} 
+		}
 
 		public static string GetPathFromType(MovieType t)
 		{
@@ -402,7 +404,7 @@ namespace CloudStreamForms
 			App.SetKey(nameof(DownloadHeader), "id" + header.RealId, header);
 
 			App.SetKey("DownloadIds", id.ToString(), id);
-			string fileUrl = DownloadHandleIntent(title.movieType, season, episode, name,title.name, id, mirrors, true, true, false, poster, isMovie ? "{name}\n" : ($"S{season}:E{episode} - " + "{name}\n"));//PlatformDep.DownloadHandleIntent(id, mirrors, downloadTitle, name, true, extraPath, true, true, false, poster, isMovie ? "{name}\n" : ($"S{season}:E{episode} - " + "{name}\n"));
+			string fileUrl = DownloadHandleIntent(title.movieType, season, episode, name, title.name, id, mirrors, true, true, false, poster, isMovie ? "{name}\n" : ($"S{season}:E{episode} - " + "{name}\n"));//PlatformDep.DownloadHandleIntent(id, mirrors, downloadTitle, name, true, extraPath, true, true, false, poster, isMovie ? "{name}\n" : ($"S{season}:E{episode} - " + "{name}\n"));
 			App.SetKey(nameof(DownloadEpisodeInfo), "id" + id, new DownloadEpisodeInfo() { dtype = DownloadType.Normal, source = header.id, description = description, downloadHeader = header.RealId, episode = episode, season = season, fileUrl = fileUrl, id = id, name = name, hdPosterUrl = poster, episodeIMDBId = episodeIMDBId });
 
 			return fileUrl;
@@ -525,8 +527,12 @@ namespace CloudStreamForms
 				color = Math.Max(0, Settings.BlackColor - 5); // Settings.BlackColor;//
 			}
 			CloudStreamForms.MainPage.mainPage.BarBackgroundColor = new Color(color / 255.0, color / 255.0, color / 255.0, 1);
-
-			PlatformDep.UpdateBackground(isOnMainPage ? color : Settings.BlackColor);
+			if (isOnMainPage || !Settings.IsTransparentNonMain) {
+				PlatformDep.UpdateBackground(isOnMainPage ? color : Settings.BlackColor);
+			}
+			else {
+				UpdateToTransparentBg();
+			}
 		}
 
 		public static void UpdateToTransparentBg()
@@ -553,10 +559,6 @@ namespace CloudStreamForms
 		{
 			PlatformDep.NormalOrientation();
 		}
-
-		public string AppFont { get; set; } = "Gotham.ttf#Google Sans";
-		public int AppFontSize { get; set; } = 50;
-
 
 		public static App instance;
 		public App()

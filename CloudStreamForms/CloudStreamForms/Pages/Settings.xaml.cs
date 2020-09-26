@@ -133,6 +133,11 @@ namespace CloudStreamForms
             "None", "Dropshadow", "Outline", "Outline + dropshadow"
         };
 
+        public static bool IsTransparentNonMain = false;
+        public static int TransparentAddPaddingEnd {
+            get { return (Settings.IsTransparentNonMain ? 40 : 0); }
+		}
+
         /// <summary>
         /// 0 = None, 1 = Dropshadow, 2 = Outline, 3 = Outline + dropshadow 
         /// </summary>

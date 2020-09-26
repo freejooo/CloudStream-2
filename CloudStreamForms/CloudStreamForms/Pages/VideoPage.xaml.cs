@@ -37,7 +37,6 @@ namespace CloudStreamForms
 		/// If header is correct
 		/// </summary>
 		public static string loadLinkValidForHeader = "";
-		public static int maxEpisodeForLoading = 0;
 
 		bool isPaused = false;
 
