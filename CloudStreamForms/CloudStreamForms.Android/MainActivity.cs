@@ -390,11 +390,11 @@ namespace CloudStreamForms.Droid
 
 
 
-	[Activity(Label = "CloudStream 2", Icon = "@drawable/bicon9", Theme = "@style/MainTheme.Splash", MainLauncher = true, LaunchMode = LaunchMode.SingleTop,
+	[Activity(Label = "CloudStream 2", Icon = "@drawable/bicon512", Theme = "@style/MainTheme.Splash", MainLauncher = true, LaunchMode = LaunchMode.SingleTop,
 		ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation | ConfigChanges.SmallestScreenSize | ConfigChanges.ScreenLayout  // MUST HAVE FOR PIP MODE OR ELSE IT WILL TRIGGER ONCREATE
 		, SupportsPictureInPicture = true, ResizeableActivity = true),
 		IntentFilter(new[] { Intent.ActionView }, DataScheme = "cloudstreamforms", Categories = new[] { Intent.CategoryDefault, Intent.CategoryBrowsable }),
-		IntentFilter(new[] { Intent.ActionView }, DataScheme = "https", DataPathPrefix = "/title", DataHost = "www.imdb.com", Categories = new[] { Intent.CategoryDefault, Intent.CategoryBrowsable })  // STUFF NOT WORKING
+		IntentFilter(new[] { Intent.ActionView }, DataScheme = "https", DataPathPrefix = "/title", DataHost = "www.imdb.com", Categories = new[] { Intent.CategoryDefault, Intent.CategoryBrowsable }) 
 		]
 
 	public class MainActivity : global::Xamarin.Forms.Platform.Android.FormsAppCompatActivity
@@ -473,7 +473,7 @@ namespace CloudStreamForms.Droid
 				SetTheme(Resource.Style.MainTheme_NonSplash);
 				LogFile("SetTheme Done");
 
-				PublicNot = Resource.Drawable.bicon;
+				PublicNot = Resource.Drawable.bicon512;
 
 				TabLayoutResource = Resource.Layout.Tabbar;
 				ToolbarResource = Resource.Layout.Toolbar;
@@ -1420,7 +1420,7 @@ namespace CloudStreamForms.Droid
 				builder.SetContentText(body);
 				builder.SetAutoCancel(false);
 
-				builder.SetSmallIcon(Resource.Drawable.biconWhite2);//LocalNotificationIconId);
+				builder.SetSmallIcon(Resource.Drawable.biconWhite512);//LocalNotificationIconId);
 				builder.SetOngoing(true);
 
 				var context = MainActivity.activity.ApplicationContext;
