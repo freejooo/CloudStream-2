@@ -421,7 +421,6 @@ namespace CloudStreamForms
 						if (IsDead) return;
 
 						EPISODES.Text = isMovie ? "MOVIE" : "EPISODES";
-						EpPickers.IsVisible = !isMovie;
 
 						//	epView.MyGenres.Clear();
 						var genr = currentMovie.title.genres;
@@ -1388,12 +1387,8 @@ namespace CloudStreamForms
 
 		static bool isRequestingPlayEpisode = false;
 
-		// ============================== PLAY VIDEO ==============================
-		async void PlayEpisode(EpisodeResult episodeResult, bool? overrideSelectVideo = null)
-		{
-			if (isRequestingPlayEpisode) return;
-			isRequestingPlayEpisode = true;
-
+		void SetAsViewed(EpisodeResult episodeResult)
+		{ 
 			string id = episodeResult.IMDBEpisodeId;
 			if (id != "") {
 				if (ViewHistory) {
@@ -1403,6 +1398,15 @@ namespace CloudStreamForms
 					ForceUpdate(episodeResult.Id);
 				}
 			}
+		}
+
+
+		// ============================== PLAY VIDEO ==============================
+		async void PlayEpisode(EpisodeResult episodeResult, bool? overrideSelectVideo = null)
+		{
+			if (isRequestingPlayEpisode) return;
+			isRequestingPlayEpisode = true;
+			SetAsViewed(episodeResult);
 
 			/*
             string _sub = "";
@@ -1564,10 +1568,11 @@ namespace CloudStreamForms
 					}
 				}
 				else if (action == "Chromecast") { // ============================== CHROMECAST ==============================
+					SetAsViewed(episodeResult);
 					ChromecastAt(0);
-					print("CASTOS");
 				}
 				else if (action == "Chromecast mirror") {
+					SetAsViewed(episodeResult);
 					string subMirror = await ActionPopup.DisplayActionSheet("Cast Mirror", episodeResult.GetMirros().ToArray());//await DisplayActionSheet("Copy Link", "Cancel", null, episodeResult.Mirros.ToArray());
 					ChromecastAt(episodeResult.GetMirros().IndexOf(subMirror));
 				}
@@ -1863,9 +1868,10 @@ namespace CloudStreamForms
 				trailerStack.InputTransparent = state != 2;
 				// trailerView.HeightRequest = state == 2 ? Math.Min(epView.CurrentTrailers.Count, 4) * 350 : 0;
 
-				EpPickers.IsEnabled = state == 0;
-				EpPickers.Scale = state == 0 ? 1 : 0;
-				EpPickers.IsVisible = state == 0;
+				bool epVis = state == 0 && !isMovie;
+				EpPickers.IsEnabled = epVis;
+				EpPickers.Scale = epVis ? 1 : 0;
+				EpPickers.IsVisible = epVis;
 
 				Recommendations.Scale = state == 1 ? 1 : 0;
 				Recommendations.IsVisible = state == 1;
