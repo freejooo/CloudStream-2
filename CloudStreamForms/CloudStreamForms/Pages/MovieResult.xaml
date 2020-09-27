@@ -56,7 +56,8 @@ xmlns:ffTransformations="clr-namespace:FFImageLoading.Transformations;assembly=F
 								<Label Grid.Column="1" Opacity="0" x:Name="RatingLabel"   Text=""  HorizontalOptions="Start" TranslationX="10" VerticalOptions="Center"   TextColor="#646464"></Label>
 								<Button Grid.Column="2" x:Name="ReviewLabel"  BackgroundColor="Transparent" HorizontalOptions="End" TranslationX="10" VerticalOptions="Center" Text="Reviews" HeightRequest="30" WidthRequest="70" Margin="25,0" ClassId="CUST" TextColor="White" BorderWidth="2" CornerRadius="5" BorderColor="#303F9F" Opacity="0"></Button>
 							</Grid>
-                        </Grid>
+							<Label x:Name="GenreLabel" Grid.Row="1" TextColor="#bababa" Padding="10,0,0,0"></Label>
+						</Grid>
 						<Grid Grid.Row="1"  Grid.Column="0" VerticalOptions="Center" >
 							<ff:CachedImage x:Name="ImgChromeCastBtt" BackgroundColor="Transparent" WidthRequest="40" HeightRequest="40" VerticalOptions="Center" HorizontalOptions="Start" Scale="0.7" TranslationX="4.6" >
 
@@ -65,10 +66,9 @@ xmlns:ffTransformations="clr-namespace:FFImageLoading.Transformations;assembly=F
 							<Label Opacity="0" x:Name="NameLabel" FontSize="Title" Text="Iron Man" FontAttributes="Bold" HorizontalOptions="StartAndExpand" Margin="0,5,5,5"  TranslationX="-5.5" TranslationY="0" TextColor="#e7e7e7" InputTransparent="True"></Label>
 						</Grid>
 
-						<Grid Grid.Row="3"  Grid.Column="0" InputTransparent="True">
+						<Grid Grid.Row="3"  Grid.Column="0" InputTransparent="True" Margin="0,-10,0,0">
 							<Label x:Name="DescriptionLabel" Opacity="0" Text="" HorizontalOptions="Fill" VerticalOptions="Start" Margin="10,0,10,0" MinimumHeightRequest="0" TranslationY="-20" FontSize="14" TextColor="#dadada"></Label>
-						</Grid>
-
+						</Grid> 
                         <!-- <Grid Grid.Row="4"  Grid.Column="0" x:Name="ChromeRow" Margin="10,10,0,0">
                         <Grid  Grid.Column="0" VerticalOptions="Start" HorizontalOptions="Start" WidthRequest="100">
                             <Grid.ColumnDefinitions>
@@ -199,12 +199,12 @@ xmlns:ffTransformations="clr-namespace:FFImageLoading.Transformations;assembly=F
 
                     </Grid>
 
-                    <Grid Margin="0,-13,0,-5"  >
+                    <Grid Margin="0,-13,0,-5" >
                         <Grid.RowDefinitions >
                             <RowDefinition Height="Auto" /> 
                         </Grid.RowDefinitions>
 
-                        <Grid x:Name="EpPickers" Grid.Row="1"  Grid.Column="0" Margin="5,10,0,0" HorizontalOptions="Fill">
+                        <Grid x:Name="EpPickers" Grid.Row="1"  Grid.Column="0" Margin="5,10,0,0" HorizontalOptions="Fill" >
                             <Grid.ColumnDefinitions >
                                 <ColumnDefinition Width="Auto"></ColumnDefinition>
                                 <ColumnDefinition Width="Auto"></ColumnDefinition>
@@ -215,7 +215,7 @@ xmlns:ffTransformations="clr-namespace:FFImageLoading.Transformations;assembly=F
                             <!--   <Picker x:Name="SeasonPicker"  TranslationX="13" TextColor="Transparent" IsVisible="False" VerticalOptions="Center" HorizontalOptions="Start"  FontAttributes="Bold" FontSize="Body" ></Picker> -->
 
                             <Button x:Name="DubBtt" Grid.Column="1" Opacity="0" InputTransparent="False" BackgroundColor="#252525" Text="Dub" TextColor="#e7e7e7" FontAttributes="Bold" FontSize="Body" CornerRadius="5" HeightRequest="37" WidthRequest="60" ></Button>
-							<Button x:Name="FromToBtt" Grid.Column="2" Opacity="0" InputTransparent="False" IsVisible="False" IsEnabled="False" BackgroundColor="#252525" Text="Test" TextColor="#e7e7e7" FontAttributes="Bold" FontSize="Body" CornerRadius="5" HeightRequest="37" WidthRequest="80" ></Button>
+							<Button x:Name="FromToBtt" Grid.Column="2" Opacity="0" InputTransparent="False" IsVisible="False" IsEnabled="False" BackgroundColor="#252525" Text="Test" TextColor="#e7e7e7" FontAttributes="Bold" FontSize="Body" CornerRadius="5" HeightRequest="37" WidthRequest="80" Margin="0,0,5,0"></Button>
                             <Button x:Name="BatchDownloadBtt" Grid.Column="3" InputTransparent="False" Opacity="0" IsEnabled="False" BackgroundColor="#252525" Text="Download All" TextColor="#e7e7e7" FontAttributes="Bold" FontSize="Body" CornerRadius="5" HeightRequest="37" TranslationX="-5" WidthRequest="110" HorizontalOptions="Start" ></Button>
 
 <!--
@@ -232,7 +232,7 @@ xmlns:ffTransformations="clr-namespace:FFImageLoading.Transformations;assembly=F
 
                         
 
-                        <Grid Grid.Row="0"  Grid.Column="0">
+                        <Grid Grid.Row="0"  Grid.Column="0" >    
                             <!--
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"></RowDefinition>
@@ -243,7 +243,7 @@ xmlns:ffTransformations="clr-namespace:FFImageLoading.Transformations;assembly=F
                             <Image x:Name="OffBar" InputTransparent="True" VerticalOptions="Start"></Image>
 
 
-                            <StackLayout Orientation="Horizontal" HorizontalOptions="Start" VerticalOptions="Start" TranslationY="-8" Margin="0,5">
+                            <StackLayout Orientation="Horizontal" HorizontalOptions="Start" VerticalOptions="Start" TranslationY="-8" Margin="0,5" HeightRequest="45">
                                 <Grid >
 
                                     <ProgressBar x:Name="EPISODESBar" ScaleX="0" Progress="1.0" ProgressColor="#303F9F" BackgroundColor="Transparent" InputTransparent="True" TranslationY="-8"></ProgressBar>
@@ -406,7 +406,7 @@ xmlns:ffTransformations="clr-namespace:FFImageLoading.Transformations;assembly=F
                         </StackLayout>
                     
                         <StackLayout  x:Name="trailerStack">
-                            <Grid x:Name="trailerView" VerticalOptions="Start" HorizontalOptions="CenterAndExpand" Margin="10" RowSpacing="10" >
+                            <Grid x:Name="trailerView" VerticalOptions="Start" HorizontalOptions="CenterAndExpand" Margin="10" RowSpacing="10">
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="Auto" />
                                     <RowDefinition Height="Auto" />
@@ -436,7 +436,7 @@ xmlns:ffTransformations="clr-namespace:FFImageLoading.Transformations;assembly=F
                             <!--  <Label x:Name="RText" Text="Recommendations" FontAttributes="Bold" TranslationX="10" VerticalOptions="Start" FontSize="Medium" TextColor="White"></Label>-->
                       <!--  <ScrollView Orientation="Vertical" x:Name="RecStack" VerticalOptions="Fill"  Padding="0,10,0,0" HorizontalScrollBarVisibility="Never">-->
                                 <!--<StackLayout>-->
-                                    <Grid x:Name="Recommendations" VerticalOptions="Fill" HorizontalOptions="FillAndExpand" HeightRequest="130" RowSpacing="5" Padding="0,0,0,40">
+						<Grid x:Name="Recommendations"  IsVisible="False" VerticalOptions="Fill" HorizontalOptions="FillAndExpand" HeightRequest="130" RowSpacing="5" Padding="0,0,0,40">
 
                                     </Grid>
                               <!--  </StackLayout>-->

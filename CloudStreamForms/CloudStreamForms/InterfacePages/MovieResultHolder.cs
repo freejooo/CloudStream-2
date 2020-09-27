@@ -231,7 +231,7 @@ namespace CloudStreamForms.InterfacePages
 			}
 			var source = new List<string>();
 
-			int times = (int)Math.Ceiling((decimal)allEpisodes.Length / (decimal)MovieResultMainEpisodeView.MAX_EPS_PER);
+			int times = (int)Math.Ceiling((decimal)maxEp / (decimal)MovieResultMainEpisodeView.MAX_EPS_PER);
 
 			for (int i = 0; i < times; i++) {
 				int fromTo = maxEp - i * MovieResultMainEpisodeView.MAX_EPS_PER;
@@ -323,7 +323,7 @@ namespace CloudStreamForms.InterfacePages
 					int max = core.GetMaxEpisodesInAnimeSeason(currentSeason, isDub, tempThred);
 					if (max > 0) {
 						if (IsDead) return;
-						maxEpisodes = max;
+						max = Math.Min(max, maxEpisodes);
 
 						SetEpisodeFromTo(0, max);
 						SetChangeTo(max);
@@ -395,6 +395,11 @@ namespace CloudStreamForms.InterfacePages
 		{
 			isDub = _isDub;
 			SetDubExist();
+		}
+
+		public void SelFromToPickerSelectIndex(int index)
+		{
+			SetEpisodeFromTo(index);
 		}
 
 		private void Core_titleLoaded(object sender, Movie e)

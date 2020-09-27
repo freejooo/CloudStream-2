@@ -179,7 +179,9 @@ namespace CloudStreamForms
 
                 mainPage = this; CloudStreamCore.mainPage = mainPage;
 
+#if DEBUG
                 System.AppDomain.CurrentDomain.UnhandledException += UnhandledExceptionTrapper; 
+#endif
 
                 if (IS_TEST_VIDEO) {
                     Page p = new VideoPage(new VideoPage.PlayVideo() { descript = "", name = "Black Bunny", episode = -1, season = -1, MirrorNames = new List<string>() { "Googlevid" }, MirrorUrls = new List<string>() { "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" } });//new List<string>() { "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" }, new List<string>() { "Black" }, new List<string>() { });// { mainPoster = mainPoster };

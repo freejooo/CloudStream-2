@@ -6949,7 +6949,7 @@ namespace CloudStreamForms.Core
 						}
 						//episodeLoaded?.Invoke(null, activeMovie.episodes);
 
-						activeMovie.episodes = new List<Episode>();
+						activeMovie.episodes = new List<Episode>(); 
 
 						for (int q = 1; q <= eps; q++) {
 							string lookFor = "?ref_=ttep_ep" + q;

@@ -10,7 +10,7 @@
              xmlns:ffTransformations="clr-namespace:FFImageLoading.Transformations;assembly=FFImageLoading.Transformations"
              x:Class="CloudStreamForms.Pages.SettingsPage">
     <ContentPage.Content >
-        <ScrollView>
+        <ScrollView VerticalScrollBarVisibility="Never">
 
             <StackLayout >
                 <Label Margin="3,5,3,5" Text="Settings" HorizontalOptions="Center"  FontSize="25"  TranslationY="3" TextColor="#ffffff" ></Label>

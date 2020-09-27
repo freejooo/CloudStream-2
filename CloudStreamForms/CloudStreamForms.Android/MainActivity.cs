@@ -389,7 +389,8 @@ namespace CloudStreamForms.Droid
 
 
 
-
+	/*
+	[Activity(Label = "CloudStream 2", Icon = "@drawable/bicon512", Theme = "@style/MainTheme.Splash", MainLauncher = true, LaunchMode = LaunchMode.SingleTop, ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation), IntentFilter(new[] { Intent.ActionView }, DataScheme = "cloudstreamforms", Categories = new[] { Intent.CategoryDefault, Intent.CategoryBrowsable })]*/
 	[Activity(Label = "CloudStream 2", Icon = "@drawable/bicon512", Theme = "@style/MainTheme.Splash", MainLauncher = true, LaunchMode = LaunchMode.SingleTop,
 		ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation | ConfigChanges.SmallestScreenSize | ConfigChanges.ScreenLayout  // MUST HAVE FOR PIP MODE OR ELSE IT WILL TRIGGER ONCREATE
 		, SupportsPictureInPicture = true, ResizeableActivity = true),
@@ -481,9 +482,10 @@ namespace CloudStreamForms.Droid
 				LogFile("Setup Done 1/2");
 				base.OnCreate(savedInstanceState);
 				LogFile("Setup Done 2/2");
+#if DEBUG
 
 				System.AppDomain.CurrentDomain.UnhandledException += MainPage.UnhandledExceptionTrapper;
-
+#endif
 				string data = Intent?.Data?.EncodedAuthority;
 
 				try {
@@ -656,7 +658,7 @@ namespace CloudStreamForms.Droid
 		}
 
 
-		#region ================================================ PICTURE IN PICTURE ================================================
+#region ================================================ PICTURE IN PICTURE ================================================
 
 		//https://github.com/bobby5892/235AM-Android/blob/dda3cc85f8345902cf96ccf437ba7fc3001a04e6/Xam-Examples/android-o/PictureInPicture/PictureInPicture/MainActivity.cs
 
@@ -828,7 +830,7 @@ namespace CloudStreamForms.Droid
 			catch (Exception) {
 			}
 		}
-		#endregion
+#endregion
 
 		private static void trustEveryone()
 		{
