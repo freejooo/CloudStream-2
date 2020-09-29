@@ -156,17 +156,19 @@ namespace CloudStreamForms.Core.AnimeProviders
                 if (!d.IsClean()) return null;
                 var doc = new HtmlAgilityPack.HtmlDocument();
                 doc.LoadHtml(d);
-                var data = doc.QuerySelector("div.film-list");
+                print("9anime:" + d);
+                var data = doc.QuerySelector("ul.anime-list");
                 if (data == null) return searchData;
-                var items = data.QuerySelectorAll("div.item > div.inner > a");
+                var items = data.QuerySelectorAll("> li > a");
                 if (items == null) return searchData;
                 foreach (var item in items) {
                     string href = item.GetAttributeValue("href", "");
                     string dataTip = item.GetAttributeValue("data-tip", "");
 
                     if (dataTip != "") {
-                        string _d = DownloadString((NineAnimeSite + ("/" + dataTip).Replace("//", "/")), referer: url);
-                        int.TryParse(FindHTML(_d, "Episode ", "/"), out int maxEp);
+                        string _d = DownloadString((NineAnimeSite + ("/ajax/anime/tooltip/" + dataTip).Replace("//", "/")), referer: url);
+                        string _ep = FindHTML(_d, "Episode", "/");
+                        int.TryParse(_ep, out int maxEp);
                         if (maxEp != 0) { // IF NOT MOVIE 
                             string otherNames = FindHTML(_d, "<label>Other names:</label>\n            <span>", "<").Replace("  ", "").Replace("\n", "").Replace(";", "");
                             string title = FindHTML(_d, "data-jtitle=\"", "\"");

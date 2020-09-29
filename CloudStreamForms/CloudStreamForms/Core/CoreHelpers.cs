@@ -140,6 +140,8 @@ namespace CloudStreamForms.Core
 
 			public override void FishMainLink(string year, TempThread tempThred, MALData malData)
 			{
+				print("FF:::: <>>");
+				print("NDNDNDNND;;; " + Name + "|" + year + "|" + malData.engName);
 				object storedData = StoreData(year, tempThred, malData);
 				if (storedData == null) return;
 				for (int i = 0; i < activeMovie.title.MALData.seasonData.Count; i++) {
@@ -184,13 +186,13 @@ namespace CloudStreamForms.Core
 					for (int q = 0; q < activeMovie.title.MALData.seasonData[season].seasons.Count; q++) {
 						var ms = GetData(activeMovie.title.MALData.seasonData[season].seasons[q], out bool suc);
 						if (suc) {
-							int subEp = episode - currentep;
+							int subEp = episode - currentep; //episode - currentep;
 							if ((isDub ? ms.dubEpisodes : ms.subEpisodes) != null) {
 								currentep += isDub ? ms.dubEpisodes.Count : ms.subEpisodes.Count;
 								if (currentep > episode) {
 									try {
 										print("LOADING LINK FOR: " + Name);
-										LoadLink(isDub ? ms.dubEpisodes[subEp] : ms.subEpisodes[subEp], subEp, normalEpisode, tempThred, ms.extraData, isDub);
+										LoadLink(isDub ? ms.dubEpisodes[subEp-1] : ms.subEpisodes[subEp-1], subEp, normalEpisode, tempThred, ms.extraData, isDub);
 									}
 									catch (Exception _ex) { print("FATAL EX IN Load: " + Name + " | " + _ex); }
 								}

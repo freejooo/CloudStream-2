@@ -39,7 +39,7 @@ namespace CloudStreamForms.Core
 				new AnimeFlixProvider(this),
 				new AnimekisaProvider(this),
 				new KissFreeAnimeProvider(this),
-				new AnimeSimpleProvider(this),
+				new AnimeSimpleBloatFreeProvider(this),
 				new VidstreamingAnimeProvider(this),
 				new TheMovieBloatFreeProvider(this),
              //   new AnimeVibeBloatFreeProvider(this), // HCaptcha ??
@@ -2181,7 +2181,6 @@ namespace CloudStreamForms.Core
 			int GetLinkCount(int currentSeason, bool isDub)
 			{
 				int count = 0;
-				error("CURRENfSTSfEASON:::" + currentSeason + "|" + isDub + "|" + activeMovie.title.MALData.seasonData.Count);
 				try {
 					for (int q = 0; q < activeMovie.title.MALData.seasonData[currentSeason].seasons.Count; q++) {
 						var ms = activeMovie.title.MALData.seasonData[currentSeason].seasons[q].kissanimefreeData;

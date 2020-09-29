@@ -164,7 +164,7 @@ namespace CloudStreamForms
             return App.GetKey("ProviderActive", name, true);
         }
 
-        public static readonly List<string> GlobalFonts = new List<string>() { "App default", "Gotham", "Trebuchet MS", "Open Sans", "Google Sans", "Lucida Grande", "Verdana", "Futura", "STIXGeneral", "Times New Roman", }; //ARIAL IS TO BIG
+        public static readonly List<string> GlobalFonts = new List<string>() { "App default", "Gotham", "Trebuchet MS", "Open Sans", "Google Sans", "Lucida Grande", "Verdana", "Futura", "STIXGeneral", "Times New Roman" }; //ARIAL IS TO BIG
 
         public static string GlobalSubtitleFont {
             set {

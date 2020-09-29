@@ -741,7 +741,7 @@ namespace CloudStreamForms
 			};
 			ReloadAllBtt.Source = GetImageSource("round_refresh_white_48dp.png");
 
-			core.GetImdbTitle(mainPoster);
+			//core.GetImdbTitle(mainPoster);
 			ChangeStar();
 
 			ChangedRecState(0, true);
