@@ -52,12 +52,13 @@ namespace CloudStreamForms
 		bool isMovie { get { return currentMovie.title.IsMovie; } }
 		Movie currentMovie { get { return core.activeMovie; } }
 		bool isDub { get { return controller.isDub; } }
-		// bool RunningWindows { get { return Xamarin.Essentials.DeviceInfo.Platform == DevicePlatform.UWP; } }
+		
 		string CurrentMalLink {
 			get {
-				return controller.CurrentAniListLink;
+				return controller.CurrentMalLink;
 			}
 		}
+
 		string CurrentAniListLink {
 			get {
 				return controller.CurrentAniListLink;

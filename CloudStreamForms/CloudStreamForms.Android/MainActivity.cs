@@ -395,7 +395,7 @@ namespace CloudStreamForms.Droid
 		ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation | ConfigChanges.SmallestScreenSize | ConfigChanges.ScreenLayout  // MUST HAVE FOR PIP MODE OR ELSE IT WILL TRIGGER ONCREATE
 		, SupportsPictureInPicture = true, ResizeableActivity = true),
 		IntentFilter(new[] { Intent.ActionView }, DataScheme = "cloudstreamforms", Categories = new[] { Intent.CategoryDefault, Intent.CategoryBrowsable }),
-		IntentFilter(new[] { Intent.ActionView }, DataScheme = "https", DataPathPrefix = "/title", DataHost = "www.imdb.com", Categories = new[] { Intent.CategoryDefault, Intent.CategoryBrowsable }) 
+		IntentFilter(new[] { Intent.ActionView }, DataScheme = "https", DataPathPrefix = "/title", DataHost = "www.imdb.com", Categories = new[] { Intent.CategoryDefault, Intent.CategoryBrowsable })
 		]
 
 	public class MainActivity : global::Xamarin.Forms.Platform.Android.FormsAppCompatActivity
@@ -658,25 +658,30 @@ namespace CloudStreamForms.Droid
 		}
 
 
-#region ================================================ PICTURE IN PICTURE ================================================
+		#region ================================================ PICTURE IN PICTURE ================================================
 
 		//https://github.com/bobby5892/235AM-Android/blob/dda3cc85f8345902cf96ccf437ba7fc3001a04e6/Xam-Examples/android-o/PictureInPicture/PictureInPicture/MainActivity.cs
 
 
-		readonly PictureInPictureParams.Builder pictureInPictureParamsBuilder = new PictureInPictureParams.Builder();
+		public PictureInPictureParams.Builder pictureInPictureParamsBuilder;
 
 		public bool ShouldShowPictureInPicture()
 		{
 			return Settings.PictureInPicture && currentVideoStatus.isInVideoplayer; // && currentVideoStatus.isLoaded;
 		}
 
+		//https://stackoverflow.com/questions/52594181/how-to-know-if-user-has-disabled-picture-in-picture-feature-permission
+		//https://developer.android.com/guide/topics/ui/picture-in-picture
 		public bool CanShowPictureInPicture()
 		{
 			try {
-				return Build.VERSION.SdkInt >= BuildVersionCodes.N && PackageManager.HasSystemFeature(PackageManager.FeaturePictureInPicture);
+				var appMang = Application.Context.GetSystemService(Context.AppOpsService) as AppOpsManager;
+				return Build.VERSION.SdkInt >= BuildVersionCodes.O &&  // ANDROID OVER PIP UPDATE
+					PackageManager.HasSystemFeature(PackageManager.FeaturePictureInPicture) && // HAS FEATURE, MIGHT BE BLOCKED DUE TO PROWER DRAIN
+					appMang.CheckOp(AppOpsManager.OpstrPictureInPicture, Android.OS.Process.MyUid(), PackageName) == AppOpsManagerMode.Allowed; // CHECK IF FEATURE IS ENABLED IN SETTINGS
 			}
 			catch (Exception) {
-				return false;
+				return false; // JUST IN CASE (CheckOp)
 			}
 		}
 
@@ -701,7 +706,7 @@ namespace CloudStreamForms.Droid
 			if (!ShouldShowPictureInPicture()) return;
 
 			try {
-				if (CanShowPictureInPicture()) {
+				if (App.FullPictureInPictureSupport) {
 					App.OnPictureInPictureModeChanged?.Invoke(null, true);
 
 					if (Build.VERSION.SdkInt >= BuildVersionCodes.O) {
@@ -830,7 +835,7 @@ namespace CloudStreamForms.Droid
 			catch (Exception) {
 			}
 		}
-#endregion
+		#endregion
 
 		private static void trustEveryone()
 		{
@@ -2110,6 +2115,10 @@ namespace CloudStreamForms.Droid
 				System.Net.ServicePointManager.DefaultConnectionLimit = 999;
 
 				App.FullPictureInPictureSupport = activity.CanShowPictureInPicture();
+				if (App.FullPictureInPictureSupport) {
+					activity.pictureInPictureParamsBuilder = new PictureInPictureParams.Builder();
+				}
+
 				App.PlatformDep = this;
 
 				myAudioFocusListener = new MyAudioFocusListener();

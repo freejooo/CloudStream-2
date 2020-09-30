@@ -2197,7 +2197,6 @@ namespace CloudStreamForms.Core
 				return count;
 			}
 
-
 			public override int GetLinkCount(int currentSeason, bool isDub, TempThread? tempThred)
 			{
 				return GetLinkCount(currentSeason, isDub);

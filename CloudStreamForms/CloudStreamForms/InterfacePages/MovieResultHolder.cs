@@ -512,6 +512,7 @@ namespace CloudStreamForms.InterfacePages
 				}
 			}
 		}
+
 		public string CurrentAniListLink {
 			get {
 				try {
