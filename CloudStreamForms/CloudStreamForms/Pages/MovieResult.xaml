@@ -28,15 +28,13 @@ xmlns:ffTransformations="clr-namespace:FFImageLoading.Transformations;assembly=F
                             <RowDefinition Height="Auto" />
                             <RowDefinition Height="Auto" />
                         </Grid.RowDefinitions>
- 
-                        <Grid Grid.Row="0"  Grid.Column="0" HeightRequest="150">
 
-                            <ImageButton x:Name="TrailerBtt" BackgroundColor="Transparent"   HeightRequest="150" Aspect="AspectFill" ></ImageButton>
+						<Grid Grid.Row="0"  Grid.Column="0" HeightRequest="150">
+							<ImageButton x:Name="TrailerBtt" BackgroundColor="Transparent"   HeightRequest="150" Aspect="AspectFill" ></ImageButton>
                             <ff:CachedImage x:Name="Gradient" WidthRequest="2000" HorizontalOptions="Fill" Aspect="AspectFill" VerticalOptions="End" InputTransparent="True" Rotation="180" Opacity="1" BackgroundColor="Transparent"></ff:CachedImage>
                             <ff:CachedImage x:Name="PlayBttGradient" HorizontalOptions="Center" VerticalOptions="Center"  Scale="1.8" WidthRequest="40" HeightRequest="40" Opacity="1"  BackgroundColor="Transparent" InputTransparent="True"></ff:CachedImage>
-                            <ImageButton x:Name="ReloadAllBtt" BackgroundColor="Transparent" HorizontalOptions="End" HeightRequest="30" WidthRequest="30" VerticalOptions="Start" TranslationX="-10" TranslationY="10"></ImageButton>
-
-                            <!--  <Image x:Name="FakePlayBtt"  WidthRequest="100" VerticalOptions="Start"  TranslationY="75"></Image> -->
+							<ImageButton x:Name="ReloadAllBtt" BackgroundColor="Transparent" HorizontalOptions="End" HeightRequest="30" WidthRequest="30" VerticalOptions="Start" TranslationX="-10" TranslationY="10"></ImageButton>
+							<!--  <Image x:Name="FakePlayBtt"  WidthRequest="100" VerticalOptions="Start"  TranslationY="75"></Image> -->
                         </Grid>
  
                         <Grid Grid.Row="2"  Grid.Column="0" TranslationY="-20" x:Name="ResBg">
@@ -49,8 +47,6 @@ xmlns:ffTransformations="clr-namespace:FFImageLoading.Transformations;assembly=F
                                 </Grid.ColumnDefinitions>
                                 <!--<Button Grid.Column="0" Text="IMDb" BackgroundColor="Transparent" BorderColor="#303F9F" BorderWidth="2" WidthRequest="60" HeightRequest="40"></Button>
                             <Button Grid.Column="1" Text="MAL" BackgroundColor="Transparent" BorderColor="#303F9F" BorderWidth="2" WidthRequest="60" HeightRequest="40"></Button>-->
-
-
 
 								<Label Grid.Column="0"  Opacity="0" x:Name="RatingLabelRating" Text="" FontAttributes="Bold" HorizontalOptions="Start" VerticalOptions="Center" TranslationX="10" FontSize="18"   TextColor="#4257d8"></Label>
 								<Label Grid.Column="1" Opacity="0" x:Name="RatingLabel"   Text=""  HorizontalOptions="Start" TranslationX="10" VerticalOptions="Center"   TextColor="#646464"></Label>
@@ -204,7 +200,7 @@ xmlns:ffTransformations="clr-namespace:FFImageLoading.Transformations;assembly=F
                             <RowDefinition Height="Auto" /> 
                         </Grid.RowDefinitions>
 
-                        <Grid x:Name="EpPickers" Grid.Row="1"  Grid.Column="0" Margin="5,10,0,0" HorizontalOptions="Fill" >
+                        <Grid x:Name="EpPickers" Grid.Row="1"  Grid.Column="0" Margin="5,10,0,0" HorizontalOptions="Fill" HeightRequest="40">
                             <Grid.ColumnDefinitions >
                                 <ColumnDefinition Width="Auto"></ColumnDefinition>
                                 <ColumnDefinition Width="Auto"></ColumnDefinition>

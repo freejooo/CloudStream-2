@@ -520,14 +520,19 @@ namespace CloudStreamForms
 			if (lastHeight != height || lastWidth != width) {
 				lastWidth = width;
 				lastHeight = height;
-				SetRecs();
+				SetRecs(true, (int)height, (int)width);
 			}
 		}
 
-		void SetRecs()
+		async void SetRecs(bool isFromSizeChange = false, int? height = null, int? width = null)
 		{
-			Device.BeginInvokeOnMainThread(() => {
-				int perCol = (Application.Current.MainPage.Width < Application.Current.MainPage.Height) ? 3 : 6;
+			if (isFromSizeChange) {
+				Bookmarks.Opacity = 0;
+			}
+
+			await Device.InvokeOnMainThreadAsync(async () => {
+				
+				int perCol = ((width ?? Application.Current.MainPage.Width) < (height ?? Application.Current.MainPage.Height)) ? 3 : 6;
 
 				for (int i = 0; i < Bookmarks.Children.Count; i++) { // GRID
 					Grid.SetColumn(Bookmarks.Children[i], i % perCol);
@@ -536,6 +541,11 @@ namespace CloudStreamForms
 				// int row = (int)Math.Floor((Bookmarks.Children.Count - 1) / (double)perCol);
 				// Recommendations.HeightRequest = (RecPosterHeight + Recommendations.RowSpacing) * (total / perCol);
 				Bookmarks.HeightRequest = (bookmarkLabelTransY + RecPosterHeight + Bookmarks.RowSpacing) * (((Bookmarks.Children.Count - 1) / perCol) + 1) - 7 + Bookmarks.RowSpacing;
+				if (isFromSizeChange) {
+					await Task.Delay(100);
+					Bookmarks.FadeTo(1, 75);
+				}
+
 			});
 		}
 

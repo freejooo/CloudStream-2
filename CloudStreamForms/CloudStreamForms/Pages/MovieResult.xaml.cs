@@ -49,10 +49,11 @@ namespace CloudStreamForms
 		public const int heightRequestAddEpisode = 40;
 		public const int heightRequestAddEpisodeAndroid = 0;
 
-		bool isMovie { get { return currentMovie.title.IsMovie; } }
+		bool isLoaded = false; // BY DEAFULT IT IS TV SERIES
+		bool isMovie { get { return isLoaded ? currentMovie.title.IsMovie : false; } }
 		Movie currentMovie { get { return core.activeMovie; } }
 		bool isDub { get { return controller.isDub; } }
-		
+
 		string CurrentMalLink {
 			get {
 				return controller.CurrentMalLink;
@@ -365,6 +366,11 @@ namespace CloudStreamForms
 		{
 			InitializeComponent();
 
+
+			SeasonPicker = new LabelList(SeasonBtt, new List<string>());
+			DubPicker = new LabelList(DubBtt, new List<string>());
+			FromToPicker = new LabelList(FromToBtt, new List<string>());
+
 			mainPoster = Search.mainPoster;
 
 			controller.OnDateAdded += (object o, ReleaseDateEvent e) => {
@@ -401,6 +407,7 @@ namespace CloudStreamForms
 
 			controller.titleLoaded += (o, e) => {
 				try {
+					isLoaded = true;
 					if (IsDead) return;
 
 					if (setKey) {
@@ -422,6 +429,10 @@ namespace CloudStreamForms
 						if (IsDead) return;
 
 						EPISODES.Text = isMovie ? "MOVIE" : "EPISODES";
+						if (isMovie) { // FORCE UPDATE WHEN INITAL LOAD MOVIE
+							EpPickers.IsVisible = false;
+							EpPickers.IsEnabled = false;
+						}
 
 						//	epView.MyGenres.Clear();
 						var genr = currentMovie.title.genres;
@@ -551,7 +562,7 @@ namespace CloudStreamForms
 					if (labelList.SelectedIndex == -1) {
 						labelList.SetIndexWithoutChange(e.index);
 					}
-					if(e.picker != PickerType.EpisodeFromToPicker) {
+					if (e.picker != PickerType.EpisodeFromToPicker) {
 						btt.IsVisible = true;
 					}
 					btt.Text = e.Text;
@@ -564,7 +575,7 @@ namespace CloudStreamForms
 					}
 					if (e.picker == PickerType.EpisodeFromToPicker) {
 						btt.IsVisible = e.isVisible;
-					} 
+					}
 				});
 			};
 
@@ -603,11 +614,6 @@ namespace CloudStreamForms
 					MainPage.mainPage.Navigation.PushModalAsync(_p);
 				}
 			};
-
-			SeasonPicker = new LabelList(SeasonBtt, new List<string>());
-			DubPicker = new LabelList(DubBtt, new List<string>());
-			FromToPicker = new LabelList(FromToBtt, new List<string>());
-
 
 			// -------------- CHROMECASTING THINGS --------------
 
@@ -714,8 +720,7 @@ namespace CloudStreamForms
 					}
 				}
 			};
-			//  core.linkAdded += MovieResult_linkAdded;
-
+			//  core.linkAdded += MovieResult_linkAdded; 
 
 			core.moeDone += MovieResult_moeDone;
 
@@ -1160,11 +1165,11 @@ namespace CloudStreamForms
 			if (lastHeight != height || lastWidth != width) {
 				lastWidth = width;
 				lastHeight = height;
-				SetRecs(true);
+				SetRecs(true, (int)height, (int)width);
 			}
 		}
 
-		void SetRecs(bool isFromSizeChange = false)
+		void SetRecs(bool isFromSizeChange = false, int? height = null, int? width = null)
 		{
 			if (core == null) return;
 			if (isFromSizeChange) {
@@ -1172,7 +1177,7 @@ namespace CloudStreamForms
 			}
 			Device.BeginInvokeOnMainThread(() => {
 				const int total = 12;
-				int perCol = (Application.Current.MainPage.Width < Application.Current.MainPage.Height) ? 3 : 6;
+				int perCol = ((width ?? Application.Current.MainPage.Width) < (height ?? Application.Current.MainPage.Height)) ? 3 : 6;
 
 				for (int i = 0; i < Recommendations.Children.Count; i++) { // GRID
 					Grid.SetColumn(Recommendations.Children[i], i % perCol);
@@ -1389,7 +1394,7 @@ namespace CloudStreamForms
 		static bool isRequestingPlayEpisode = false;
 
 		void SetAsViewed(EpisodeResult episodeResult)
-		{ 
+		{
 			string id = episodeResult.IMDBEpisodeId;
 			if (id != "") {
 				if (ViewHistory) {
@@ -1858,7 +1863,7 @@ namespace CloudStreamForms
 			if (state == showState && !overrideCheck) return;
 			showState = state;
 			Device.BeginInvokeOnMainThread(() => {
-				Grid.SetRow(EpPickers, (state == 0) ? 1 : 0);
+				Grid.SetRow(EpPickers, (state == 0) ? 1 : 0); // RECOMENATIONS
 
 				FadeEpisodes.Scale = (state == 0) ? 1 : 0;
 				//episodeView.IsEnabled = state == 0;

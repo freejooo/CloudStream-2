@@ -22,7 +22,71 @@ namespace CloudStreamForms.Core.AnimeProviders
         }
 
         const string NineAnimeSite = "https://www12.9anime.to";
+
         public override void LoadLink(string episodeLink, int episode, int normalEpisode, TempThread tempThred, object extraData, bool isDub)
+        {
+            //string _id = FindHTML(episodeLink.Replace("https://www12.9anime.to/watch/",""))
+            /*
+            print("EPLINK: " +  episodeLink);
+            string _id = FindHTML(episodeLink + "|||", ".", "|||");
+            string serverResponse = DownloadString($"https://www12.9anime.to/ajax/anime/servers?id={_id}&ep=&episode={episode}");
+            //        https://www12.9anime.to/ajax/anime/servers?id=o35&ep=&episode=1
+            //https://www12.9anime.to/ajax/anime/episode?id=cf9327e25d861f94b949461c01e637429fae1b4e7bcf3748e670d9a6e5faa99a&mcloud=73915
+
+            string real = FindHTML(serverResponse, "{\"html\":\"", "\"}");
+            // real = real.Substring(0, real.Length - 2);
+            print(real);
+
+            var doc = new HtmlAgilityPack.HtmlDocument();
+            doc.LoadHtml(real);
+            var data = doc.QuerySelectorAll("div.server");
+
+            List<NineAnimeEpisodeData> Streamtape = new List<NineAnimeEpisodeData>();
+            List<NineAnimeEpisodeData> Mp4upload = new List<NineAnimeEpisodeData>();
+            List<NineAnimeEpisodeData> MyCloud = new List<NineAnimeEpisodeData>();
+            const string myCloudId = "28";
+            const string streamtapeId = "40";
+            const string mp4uploadId = "35";
+
+            foreach (var subData in data) {
+
+                string name = subData.GetAttributeValue("ndata-id", "");
+
+                foreach (var selectors in subData.QuerySelectorAll("ul > li > a")) {
+                    string subId = selectors.GetAttributeValue("ndata-id", "");
+                    string subEp = selectors.GetAttributeValue("ndata-base", "");
+                    string href = selectors.GetAttributeValue("nnhref", "");
+                    int realEp = int.Parse(selectors.InnerText);
+                    var storeData = new NineAnimeEpisodeData() {
+                        ep = realEp,
+                        href = href,
+                        id = subId,
+                    };
+
+                    if (name == myCloudId) {
+                        MyCloud.Add(storeData);
+                    }
+                    else if (name == streamtapeId) {
+                        Streamtape.Add(storeData);
+                    }
+                    else if (name == mp4uploadId) {
+                        Mp4upload.Add(storeData);
+                    }
+
+                }
+            }
+
+            try {
+                string target = core.GetTarget(Mp4upload[normalEpisode].id, key, dataTs, NineAnimeSite, url);
+                AddMp4(FindHTML(target, "embed-", "."), normalEpisode, tempThred);
+            }
+            catch (Exception) {
+
+            }*/
+            //https://mcloud.to/info/jwk993?key=de4a9ac8a73cd053b7feafaceaefef71d1ced4534285f32435edea5b6a4f3aba&site=www12.9anime.to&autostart=true
+        }
+
+        public void LoadLink2(string episodeLink, int episode, int normalEpisode, TempThread tempThred, object extraData, bool isDub)
         {
             string request = episodeLink.Replace(NineAnimeSite + "/watch/", "") + "/"; // /xrrj358";
             string url = NineAnimeSite + "/watch/" + request;
@@ -120,7 +184,7 @@ namespace CloudStreamForms.Core.AnimeProviders
             print("START:::: " + data.FString());
             NonBloatSeasonData setData = new NonBloatSeasonData() { dubEpisodes = new List<string>(), subEpisodes = new List<string>() };
             foreach (var subData in data) {
-                if (subData.names.Split(' ').Contains(ms.japName)) {
+                if (subData.names.Split(' ').Contains(ms.japName) || subData.title == ms.engName) {
                     bool isDub = subData.isDub;
                     if (isDub && !setData.dubExists) {
                         for (int i = 1; i <= subData.maxEp; i++) {

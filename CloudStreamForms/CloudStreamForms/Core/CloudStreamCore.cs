@@ -43,7 +43,7 @@ namespace CloudStreamForms.Core
 				new VidstreamingAnimeProvider(this),
 				new TheMovieBloatFreeProvider(this),
              //   new AnimeVibeBloatFreeProvider(this), // HCaptcha ??
-                new NineAnimeBloatFreeProvider(this),
+              //  new NineAnimeBloatFreeProvider(this), // Link extraction
 				new FourAnimeBloatFreeProvider(this)};
 			movieProviders = new IMovieProvider[] {
 				new FilesClubProvider(this),
@@ -3775,19 +3775,25 @@ namespace CloudStreamForms.Core
 							int id = ms.animeFlixData.EpisodesUrls[normalEpisode].id;
 
 							print("DLOAD:===" + id);
-							string main = DownloadString("https://animeflix.io/api/videos?episode_id=" + id);
+							string main = DownloadString("https://animeflix.io/api/videos?episode_id=" + id,referer: "https://animeflix.io");
 							if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
 							var epData = JsonConvert.DeserializeObject<List<AnimeFlixRawEpisode>>(main);
 
 							for (int i = 0; i < epData.Count; i++) {
 								if ((epData[i].lang == "dub" && isDub) || (epData[i].lang == "sub" && !isDub)) {
-									AddPotentialLink(normalEpisode, epData[i].file, "Animeflix " + epData[i].provider, 10, epData[i].resolution);
+									bool isApi = epData[i].file.StartsWith("/api");
+									string _name = "Animeflix " + epData[i].provider;
+									if (!isApi) {
+										AddPotentialLink(normalEpisode,  epData[i].file, _name, 10, epData[i].resolution);
+									}
+									else {
+										AddPotentialLink(normalEpisode, new BasicLink() { baseUrl = "https://animeflix.io" + epData[i].file, name = _name, referer = "https://animeflix.io", isAdvancedLink = true, priority = 10 });
+									}
 								}
 							}
 							return;
 						}
 						//var ms = activeMovie.title.MALData.seasonData[season].seasons[q].animeFlixData;
-
 					}
 				}
 
@@ -8329,8 +8335,7 @@ namespace CloudStreamForms.Core
 #if DEBUG
 				EndStopwatchNum(_s, nameof(AddPotentialLink));
 #endif
-			}
-			return false;
+			} 
 		}
 
 		public DubbedAnimeEpisode GetDubbedAnimeEpisode(string slug, int? eps = null)
