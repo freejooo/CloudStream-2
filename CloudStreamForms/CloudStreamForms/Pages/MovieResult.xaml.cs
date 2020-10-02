@@ -943,10 +943,9 @@ namespace CloudStreamForms
 			/*if (episodeResult.Rating != "") {
                 episodeResult.Title += " | ★ " + episodeResult.Rating;
             }*/
-			if (episodeResult.Rating == "") {
+			/*if (episodeResult.Rating == "") {
 				episodeResult.Rating = currentMovie.title.rating;
-			}
-
+			}*/ 
 			if (!isMovie) {
 				episodeResult.Title = episodeResult.Episode + ". " + episodeResult.Title;
 				print("ADDMOVIE:___" + episodeResult.Episode + "|" + episodeResult.Title);
