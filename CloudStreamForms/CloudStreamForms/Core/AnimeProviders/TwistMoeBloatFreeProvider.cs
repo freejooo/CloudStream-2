@@ -328,10 +328,7 @@ namespace CloudStreamForms.Core.AnimeProviders
 
         public override string Name => "Twist";
         public override bool HasDub => false;
-        public override object StoreData(string year, TempThread tempThred, MALData malData)
-        {
-            return null;
-        }
+		public override bool NullMetadata => true; 
 
         public override NonBloatSeasonData GetSeasonData(MALSeason ms, TempThread tempThread, string year, object storedData)
         {

@@ -79,6 +79,8 @@ namespace CloudStreamForms.Core
 
 		public class BloatFreeBaseAnimeProvider : BaseAnimeProvider
 		{
+			public virtual bool NullMetadata => false;
+
 			public BloatFreeBaseAnimeProvider(CloudStreamCore _core) : base(_core) { }
 
 			public override int GetLinkCount(int currentSeason, bool isDub, TempThread? tempThred)
@@ -142,8 +144,8 @@ namespace CloudStreamForms.Core
 			{
 				print("FF:::: <>>");
 				print("NDNDNDNND;;; " + Name + "|" + year + "|" + malData.engName);
-				object storedData = StoreData(year, tempThred, malData);
-				if (storedData == null) return;
+				object storedData = NullMetadata ? null : StoreData(year, tempThred, malData);
+				if (storedData == null && !NullMetadata) return;
 				for (int i = 0; i < activeMovie.title.MALData.seasonData.Count; i++) {
 					for (int q = 0; q < activeMovie.title.MALData.seasonData[i].seasons.Count; q++) {
 						try {
@@ -192,7 +194,7 @@ namespace CloudStreamForms.Core
 								if (currentep > episode) {
 									try {
 										print("LOADING LINK FOR: " + Name);
-										LoadLink(isDub ? ms.dubEpisodes[subEp-1] : ms.subEpisodes[subEp-1], subEp, normalEpisode, tempThred, ms.extraData, isDub);
+										LoadLink(isDub ? ms.dubEpisodes[subEp - 1] : ms.subEpisodes[subEp - 1], subEp, normalEpisode, tempThred, ms.extraData, isDub);
 									}
 									catch (Exception _ex) { print("FATAL EX IN Load: " + Name + " | " + _ex); }
 								}
@@ -327,7 +329,7 @@ namespace CloudStreamForms.Core
 		{
 			return "";
 #if RELEASE
-            return "";
+			return "";
 #endif
 #if DEBUG
 			if (o == null) {

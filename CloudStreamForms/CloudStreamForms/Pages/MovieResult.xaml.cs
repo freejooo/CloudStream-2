@@ -559,9 +559,9 @@ namespace CloudStreamForms
 				labelList.ItemsSource = e.source;
 				Device.InvokeOnMainThreadAsync(async () => {
 					var btt = labelList.button;
-					if (labelList.SelectedIndex == -1) {
-						labelList.SetIndexWithoutChange(e.index);
-					}
+					//if (labelList.SelectedIndex == -1) {
+					labelList.SetIndexWithoutChange(e.index);
+					//}
 					if (e.picker != PickerType.EpisodeFromToPicker) {
 						btt.IsVisible = true;
 					}
@@ -1156,8 +1156,8 @@ namespace CloudStreamForms
 		int RecPosterHeight { get { return (int)Math.Round(_RecPosterHeight * _RecPosterMulit); } }
 		int RecPosterWith { get { return (int)Math.Round(_RecPosterWith * _RecPosterMulit); } }
 
-		static double lastWidth = -1;
-		static double lastHeight = -1;
+		double lastWidth = -1;
+		double lastHeight = -1;
 		protected override void OnSizeAllocated(double width, double height)
 		{
 			base.OnSizeAllocated(width, height);
@@ -1512,10 +1512,11 @@ namespace CloudStreamForms
 				bool hasDownloadedFile = App.KeyExists("dlength", "id" + GetCorrectId(episodeResult));
 				string downloadKeyData = "";
 
-				List<string> actions = new List<string>() { "Play in App", "Play in Browser", "Auto Download", "Download", "Download Subtitles", "Copy Link", "Reload" }; // "Remove Link",
+				List<string> actions = new List<string>() { "Play in App", "Play in Browser",  "Auto Download", "Download", "Download Subtitles", "Copy Link", "Reload" }; // "Remove Link",
 
 				if (App.CanPlayExternalPlayer()) {
 					actions.Insert(1, "Play External App");
+					actions.Insert(2, "Play Single Mirror");
 				}
 
 				if (hasDownloadedFile) {
@@ -1586,6 +1587,15 @@ namespace CloudStreamForms
 				}
 				else if (action == "Play External App") {
 					PlayEpisode(episodeResult, false);
+				}
+				else if (action == "Play Single Mirror") {
+					string copy = await ActionPopup.DisplayActionSheet("Copy Link", episodeResult.GetMirros().ToArray());//await DisplayActionSheet("Copy Link", "Cancel", null, episodeResult.Mirros.ToArray());
+					for (int i = 0; i < episodeResult.GetMirros().Count; i++) {
+						if (episodeResult.GetMirros()[i] == copy) {
+							await App.RequestVlc(new List<string> { episodeResult.GetMirrosUrls()[i] }, new List<string> { episodeResult.GetMirros()[i] }, episodeResult.OgTitle, episodeResult.IMDBEpisodeId, episode: episodeResult.Episode, season: currentSeason, subtitleFull: currentMovie.subtitles.Select(t => t.data).FirstOrDefault(), descript: episodeResult.Description, overrideSelectVideo: false, startId: (int)episodeResult.ProgressState, headerId: currentMovie.title.id, isFromIMDB: true,generateM3u8:false);// startId: FROM_PROGRESS); //  (int)episodeResult.ProgressState																																																																													  //App.PlayVLCWithSingleUrl(episodeResult.mirrosUrls, episodeResult.Mirros, currentMovie.subtitles.Select(t => t.data).ToList(), currentMovie.subtitles.Select(t => t.name).ToList(), currentMovie.title.name, episodeResult.Episode, currentSeason, overrideSelectVideo);
+							break;
+						}
+					}
 				}
 				else if (action == "Play in App") {
 					PlayEpisode(episodeResult, true);

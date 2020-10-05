@@ -1990,23 +1990,30 @@ namespace CloudStreamForms.Droid
 
 		}
 
-		public void RequestVlc(List<string> urls, List<string> names, string episodeName, string episodeId, long startId = -2, string subtitleFull = "", VideoPlayer preferedPlayer = VideoPlayer.VLC)
+		public void RequestVlc(List<string> urls, List<string> names, string episodeName, string episodeId, long startId = -2, string subtitleFull = "", VideoPlayer preferedPlayer = VideoPlayer.VLC, bool generateM3u8 = true)
 		{
 			if (preferedPlayer == VideoPlayer.None) { App.ShowToast("No videoplayer installed"); };
 			try {
-				string absolutePath = Android.OS.Environment.ExternalStorageDirectory + "/" + Android.OS.Environment.DirectoryDownloads;
-				subtitleFull ??= "";
-				bool subtitlesEnabled = subtitleFull != "";
-				string writeData = CloudStreamForms.App.ConvertPathAndNameToM3U8(urls, names, subtitlesEnabled, "content://" + absolutePath + "/");
-				WriteFile(CloudStreamForms.App.baseM3u8Name, absolutePath, writeData);
-
+				string _bpath = "";
 				Java.IO.File subFile = null;
-				if (subtitlesEnabled) {
-					print("WRITING SUBFILE: " + absolutePath + "|" + baseSubtitleName + "|" + subtitleFull + "|" + (subtitleFull == "") + "|" + (subtitleFull == null));
-					subFile = WriteFile(CloudStreamForms.App.baseSubtitleName, absolutePath, subtitleFull);
-				}
 
-				string _bpath = absolutePath + "/" + CloudStreamForms.App.baseM3u8Name;
+				if (generateM3u8) {
+					string absolutePath = Android.OS.Environment.ExternalStorageDirectory + "/" + Android.OS.Environment.DirectoryDownloads;
+					subtitleFull ??= "";
+					bool subtitlesEnabled = subtitleFull != "";
+					string writeData = CloudStreamForms.App.ConvertPathAndNameToM3U8(urls, names, subtitlesEnabled, "content://" + absolutePath + "/");
+					WriteFile(CloudStreamForms.App.baseM3u8Name, absolutePath, writeData);
+
+					if (subtitlesEnabled) {
+						print("WRITING SUBFILE: " + absolutePath + "|" + baseSubtitleName + "|" + subtitleFull + "|" + (subtitleFull == "") + "|" + (subtitleFull == null));
+						subFile = WriteFile(CloudStreamForms.App.baseSubtitleName, absolutePath, subtitleFull);
+					}
+
+					_bpath = absolutePath + "/" + CloudStreamForms.App.baseM3u8Name;
+				}
+				else {
+					_bpath = urls[0];
+				}
 
 				if (!GetPlayerInstalled(preferedPlayer)) {
 					App.ShowToast("Videoplayer not installed");
@@ -2101,6 +2108,7 @@ namespace CloudStreamForms.Droid
 
 			}
 			catch (Exception _ex) {
+				App.ShowToast("Error Loading Videoplayer");
 				error("MAIN EX IN REQUEST VLC: " + _ex);
 			}
 		}
@@ -2146,23 +2154,40 @@ namespace CloudStreamForms.Droid
 				error(_ex);
 			}
 			mainS.Start();
+#if DEBUG
 			TestAwake();
-			//  MainDelayTest();
+#endif
+			MainDelayTest();
 			// long delay = getDelay();
 
 			//  print("MAIN DELAYYYY::: " + delay); 
 		}
 
+#if DEBUG
+		ActivityManager activityManager => Application.Context.GetSystemService(Context.ActivityService) as ActivityManager;
+#endif
 		readonly static Stopwatch mainS = new Stopwatch();
 		async void MainDelayTest()
 		{
-			await Task.Delay(250);
+#if DEBUG
+
+			await Task.Delay(5000);
+			ActivityManager.MemoryInfo? mi = new ActivityManager.MemoryInfo();
+			activityManager.GetMemoryInfo(mi);
+			double availableMegs = mi.AvailMem / 0x100000L;
+
+			//Percentage can be calculated for API 16+
+			double percentAvail = mi.AvailMem / (double)mi.TotalMem * 100.0;
 			long f1 = mainS.ElapsedMilliseconds;
+			App.ShowToast("GG: " + (int)percentAvail + "MEGS: " + availableMegs + " | " );
+			/*
 			Device.BeginInvokeOnMainThread(() => {
+
 				long f2 = mainS.ElapsedMilliseconds;
 				App.ShowToast("SHOW: " + (f2 - f1));
-			});
-			MainDelayTest();
+			});*/
+			//MainDelayTest();
+#endif
 		}
 
 		async void TestAwake()
@@ -2601,7 +2626,7 @@ namespace CloudStreamForms.Droid
 		{
 		}
 
-		public void RequestVlc(List<string> urls, List<string> names, string episodeName, string episodeId, long startId = -2, string subtitleFull = "", VideoPlayer preferedPlayer = VideoPlayer.VLC)
+		public void RequestVlc(List<string> urls, List<string> names, string episodeName, string episodeId, long startId = -2, string subtitleFull = "", VideoPlayer preferedPlayer = VideoPlayer.VLC, bool generateM3u8 = true)
 		{
 		}
 

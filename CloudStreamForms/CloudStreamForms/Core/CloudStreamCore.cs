@@ -984,8 +984,6 @@ namespace CloudStreamForms.Core
 
 			public virtual bool HasSub => true;
 			public virtual bool HasDub => true;
-
-
 			public virtual string Name => throw new NotImplementedException();
 
 			public virtual void FishMainLink(string year, TempThread tempThred, MALData malData)
