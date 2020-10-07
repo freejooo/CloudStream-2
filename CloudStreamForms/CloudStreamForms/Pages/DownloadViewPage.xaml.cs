@@ -164,6 +164,7 @@ namespace CloudStreamForms
                                     print("SET PROGRES:::" + "|" + _progress);
                                 }
                             }
+                            var dPlaySource = App.GetImageSource("nexflixPlayBtt.png");
 
                             activeEpisodes.Add(new EpisodeResult() {
                                 OgTitle = info.info.name,
@@ -182,7 +183,7 @@ namespace CloudStreamForms
                                     //Download.PlayDownloadedFile(fileUrl, fileName, info.info.episode, info.info.season, info.info.episodeIMDBId, info.info.source);
                                     // Download.PlayVLCFile(fileUrl, fileName, info.info.id.ToString()); 
                                 }),
-                                DownloadPlayBttSource = App.GetImageSource("nexflixPlayBtt.png")
+                                DownloadPlayBttSource = dPlaySource
                             });
                         }
                     }

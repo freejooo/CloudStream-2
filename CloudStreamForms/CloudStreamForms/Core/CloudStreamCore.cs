@@ -7101,9 +7101,14 @@ namespace CloudStreamForms.Core
 				int currentMax = 0;
 				for (int i = 0; i < animeProviders.Length; i++) {
 					if (Settings.IsProviderActive(animeProviders[i].Name)) {
-						int cmax = animeProviders[i].GetLinkCount(currentSeason, isDub, tempThred);
-						if (cmax > currentMax) {
-							currentMax = cmax;
+						try {
+							int cmax = animeProviders[i].GetLinkCount(currentSeason, isDub, tempThred);
+							if (cmax > currentMax) {
+								currentMax = cmax;
+							}
+						}
+						catch (Exception _ex) {
+							error(_ex);
 						}
 					}
 				}

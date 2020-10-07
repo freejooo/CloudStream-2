@@ -2157,7 +2157,7 @@ namespace CloudStreamForms.Droid
 #if DEBUG
 			TestAwake();
 #endif
-			MainDelayTest();
+			//MainDelayTest();
 			// long delay = getDelay();
 
 			//  print("MAIN DELAYYYY::: " + delay); 
