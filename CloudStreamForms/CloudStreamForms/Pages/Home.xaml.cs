@@ -38,6 +38,9 @@ namespace CloudStreamForms
 		public bool IsPopular { get { return MovieIndex == 2; } }
 
 		public int currentImageCount = 0;
+
+		//static readonly ImageSource empty = App.GetImageSource("emtyPoster.png");
+
 		public void LoadMoreImages(bool setHeight = true)
 		{
 			if (!Settings.Top100Enabled) return;

@@ -85,6 +85,7 @@
     <None Remove="Resource\bookmark_off.svg" />
     <None Remove="Resource\Discord-Logo-White.png" />
     <None Remove="Resource\dropdown.png" />
+    <None Remove="Resource\empty.png" />
     <None Remove="Resource\emtyPoster.png" />
     <None Remove="Resource\faded.png" />
     <None Remove="Resource\GitHub-Mark-Light-120px-plus.png" />
@@ -241,6 +242,7 @@
     <EmbeddedResource Include="Resource\bookmark_off.svg" />
     <EmbeddedResource Include="Resource\Discord-Logo-White.png" />
     <EmbeddedResource Include="Resource\dropdown.png" />
+    <EmbeddedResource Include="Resource\empty.png" />
     <EmbeddedResource Include="Resource\emtyPoster.png" />
     <EmbeddedResource Include="Resource\faded.png" />
     <EmbeddedResource Include="Resource\GitHub-Mark-Light-120px-plus.png" />

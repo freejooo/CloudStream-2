@@ -16,19 +16,14 @@ using Android.Support.V4.App;
 using Android.Support.V4.Content;
 using Android.Text;
 using Android.Views;
-using Android.Webkit;
 using Android.Widget;
 using CloudStreamForms.Core;
-using Java.IO;
-using Java.Net;
 using LibVLCSharp.Forms.Shared;
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Net;
 using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 using Xamarin.Forms;
 using static CloudStreamForms.App;
@@ -38,7 +33,6 @@ using static CloudStreamForms.Droid.MainActivity;
 using static CloudStreamForms.Droid.MainHelper;
 using Application = Android.App.Application;
 using AudioTrack = Android.Media.AudioTrack;
-using CloudStreamForms.Droid;
 
 namespace CloudStreamForms.Droid
 {
@@ -428,6 +422,18 @@ namespace CloudStreamForms.Droid
 			}
 			App.ForceUpdateVideo?.Invoke(null, EventArgs.Empty);
 			base.OnActivityResult(requestCode, resultCode, data);
+		}
+
+		public override void OnLowMemory()
+		{
+			try {
+				App.SaveData();
+				MainPage.mainPage.Navigation.PopToRootAsync();
+				cachedBitmaps.Clear();
+			}
+			catch (Exception) { }
+
+			base.OnLowMemory();
 		}
 
 		protected override void OnNewIntent(Intent intent)

@@ -104,7 +104,7 @@
 
                                             <Grid Grid.Row="0"  Grid.Column="1"  WidthRequest="68" TranslationY="{Binding TranslateYOffsetVertical}" >
 
-                                                <ff:CachedImage WidthRequest="68" HeightRequest="98" Source="{Binding PosterUrl}" InputTransparent="True"  >
+												<ff:CachedImage WidthRequest="68" HeightRequest="98" Source="{Binding PosterUrl}" InputTransparent="True" ff:LoadingPlaceholder="emtyLoadingPosterV2.png">
 
                                                     <ff:CachedImage.Transformations>
                                                         <ffTransformations:RoundedTransformation BorderSize="0" Radius="7" BorderHexColor="#303F9F" CropWidthRatio="0.7" >
