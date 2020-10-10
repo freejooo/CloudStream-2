@@ -293,45 +293,31 @@ namespace CloudStreamForms
 
 		string subtitleText1; // TOP
 		string subtitleText2; // BOTTOM
+		string subtitleTextFull; // BOTTOM
 
 		double currentTime = 0;
 
 		string lastSub = "";
-
+		bool isUpdatingSubs = false;
+		public const int SUBTITLE_EMPTY_TIME = 30;
+		public const double SUBTITLE_ADD_TIME = 0;//1000;
 		void UpdateSubtitles()
 		{
-			string comp = subtitleText1 + "|||" + subtitleText2;
+			string comp = subtitleTextFull;
 			if (lastSub == comp) {
 				return;
 			}
 			lastSub = comp;
 
-			Device.BeginInvokeOnMainThread(() => {
-				string subTxt = subtitleText1 + "\n" + subtitleText2;
-				print("TITLL:::: " + subtitleText1 + "|" + subtitleText2);
-
-				SubtitleTxt1.Text = subtitleText1;//"HELLO WORLD\ndadada YEeett";//
-				if (hasOutline) {
-					SubtitleTxt1Back1.Text = subtitleText1;
-					SubtitleTxt1Back2.Text = subtitleText1;
-					SubtitleTxt1Back3.Text = subtitleText1;
-					SubtitleTxt1Back4.Text = subtitleText1;
-					SubtitleTxt1Back5.Text = subtitleText1;
-					SubtitleTxt1Back6.Text = subtitleText1;
-					SubtitleTxt1Back7.Text = subtitleText1;
-					SubtitleTxt1Back8.Text = subtitleText1;
+			Device.InvokeOnMainThreadAsync(async () => {
+				while (isUpdatingSubs) {
+					await Task.Delay(10);
 				}
-
-
-				SubtitleTxt2.Text = subtitleText2;
-				SubtitleTxt2Back1.Text = subtitleText2;
-				SubtitleTxt2Back2.Text = subtitleText2;
-				SubtitleTxt2Back3.Text = subtitleText2;
-				SubtitleTxt2Back4.Text = subtitleText2;
-				SubtitleTxt2Back5.Text = subtitleText2;
-				SubtitleTxt2Back6.Text = subtitleText2;
-				SubtitleTxt2Back7.Text = subtitleText2;
-				SubtitleTxt2Back8.Text = subtitleText2;
+				isUpdatingSubs = true;
+				SubtitleTxt1.Text = "";
+				await Task.Delay(SUBTITLE_EMPTY_TIME);
+				SubtitleTxt1.Text = subtitleTextFull;
+				isUpdatingSubs = false;
 			});
 		}
 
@@ -342,6 +328,7 @@ namespace CloudStreamForms
 			try {
 				if (subtitleIndex == -1 || currentSubtitles[subtitleIndex].subtitles.Length <= 3) {
 					// await Task.Delay(50);
+					subtitleTextFull = "";
 					subtitleText2 = "";
 					subtitleText1 = "";
 					UpdateSubtitles();
@@ -353,23 +340,23 @@ namespace CloudStreamForms
 				while (!done) {
 					try {
 						var track = Subtrack[currentSubtitleIndexInCurrent];
+						var _currentTime = currentTime + (SUBTITLE_ADD_TIME + SUBTITLE_EMPTY_TIME);
 						// SET CORRECT TIME
 						bool IsTooHigh()
 						{
 							//  print("::::::>>>>>" + currentSubtitleIndexInCurrent + "|" + currentTime + "<>" + track.fromMilisec);
-							return currentTime < Subtrack[currentSubtitleIndexInCurrent].StartTime + subtitleDelay && currentSubtitleIndexInCurrent > 0;
+							return _currentTime < Subtrack[currentSubtitleIndexInCurrent].StartTime + subtitleDelay && currentSubtitleIndexInCurrent > 0;
 						}
 
 						bool IsTooLow()
 						{
-							return currentTime > Subtrack[currentSubtitleIndexInCurrent + 1].StartTime + subtitleDelay && currentSubtitleIndexInCurrent < Subtrack.Length - 1;
+							return _currentTime > Subtrack[currentSubtitleIndexInCurrent + 1].StartTime + subtitleDelay && currentSubtitleIndexInCurrent < Subtrack.Length - 1;
 						}
 
 						if (IsTooHigh()) {
 							while (IsTooHigh()) {
 								currentSubtitleIndexInCurrent--;
 							}
-							print("SKIPP::1");
 							continue;
 						}
 
@@ -377,15 +364,18 @@ namespace CloudStreamForms
 							while (IsTooLow()) {
 								currentSubtitleIndexInCurrent++;
 							}
-							print("SKIPP::2");
 							continue;
 						}
 
 
-						if (currentTime < track.EndTime + subtitleDelay && currentTime > track.StartTime + subtitleDelay) {
+						if (_currentTime < track.EndTime + subtitleDelay && _currentTime > track.StartTime + subtitleDelay) {
 							if (last != currentSubtitleIndexInCurrent) {
 								var lines = track.Lines;
 								if (lines.Count > 0) {
+									subtitleTextFull = "";
+									for (int i = 0; i < lines.Count; i++) {
+										subtitleTextFull += lines[i] + (i == (lines.Count - 1) ? "" : "\n");
+									}
 									if (lines.Count == 1) {
 										subtitleText1 = "";//lines[1].line;
 										subtitleText2 = lines[0];
@@ -396,12 +386,12 @@ namespace CloudStreamForms
 									}
 								}
 								UpdateSubtitles();
-								print("SETSUB:" + track.StartTime + "|" + currentTime + "|" + subtitleDelay);
 								lastType = false;
 							}
 						}
 						else {
 							if (!lastType) {
+								subtitleTextFull = "";
 								subtitleText1 = "";
 								subtitleText2 = "";
 								UpdateSubtitles();
@@ -411,12 +401,10 @@ namespace CloudStreamForms
 						done = true;
 
 						last = currentSubtitleIndexInCurrent;
-						print("DELAY!::: " + currentSubtitleIndexInCurrent);
 						//  await Task.Delay(30);
 					}
 					catch (Exception _ex) {
 						done = true;
-						print("EX::X:X::X:X: " + _ex);
 					}
 				}
 			}
@@ -702,6 +690,7 @@ namespace CloudStreamForms
 				new Vector2(-1,1),
 			};
 
+				/*
 				font1 = new Label[] {
 				 SubtitleTxt1Back1,
 				 SubtitleTxt1Back2,
@@ -711,9 +700,9 @@ namespace CloudStreamForms
 				 SubtitleTxt1Back6,
 				 SubtitleTxt1Back7,
 				 SubtitleTxt1Back8,
-			};
+			};*/
 
-
+				/*
 				font2 = new Label[] {
 				SubtitleTxt2Back1,
 				SubtitleTxt2Back2,
@@ -723,7 +712,7 @@ namespace CloudStreamForms
 				SubtitleTxt2Back6,
 				SubtitleTxt2Back7,
 				SubtitleTxt2Back8,
-			};
+			};*/
 				print("Videoplage Start 6");
 
 				float multi = 1f;
@@ -733,13 +722,13 @@ namespace CloudStreamForms
 				double base1Y = -5;
 				double base2Y = 20;
 				SubtitleTxt1.TranslationY = base1Y;
-				SubtitleTxt2.TranslationY = base2Y;
+				//	SubtitleTxt2.TranslationY = base2Y;
 
 				double hreq = SubtitleTxt1.HeightRequest;
 
 
 				double base1X = SubtitleTxt1.TranslationX;
-				double base2X = SubtitleTxt2.TranslationX;
+				//	double base2X = SubtitleTxt2.TranslationX;
 
 				bool hasDropshadow = Settings.SubtitlesHasDropShadow;
 				hasOutline = Settings.SubtitlesHasOutline;
@@ -747,6 +736,7 @@ namespace CloudStreamForms
 				string fontFam = App.GetFont(Settings.GlobalSubtitleFont);
 
 				string classId = hasDropshadow ? "OUTLINE" : "";
+				/*
 				for (int i = 0; i < font1.Length; i++) {
 					if (hasOutline) {
 						font1[i].FontFamily = fontFam;
@@ -774,13 +764,14 @@ namespace CloudStreamForms
 						font2[i].IsVisible = false;
 						font2[i].IsEnabled = false;
 					}
-				}
+				}*/
 
+				/*
 				SubtitleTxt1.FontFamily = fontFam;
-				SubtitleTxt2.FontFamily = fontFam;
+				SubtitleTxt2.FontFamily = fontFam;*/
 
 				SubtitleTxt1.ClassId = classId;
-				SubtitleTxt2.ClassId = classId;
+				//	SubtitleTxt2.ClassId = classId;
 
 				// ======================= END =======================
 
@@ -1017,6 +1008,20 @@ namespace CloudStreamForms
 					UpdateVideoStatus();
 				};
 
+
+				void UpdateIcons()
+				{
+					Device.BeginInvokeOnMainThread(() => {
+						int columCount = 0;
+						for (int i = 0; i < pressIcons.Length; i++) {
+							if (pressIcons[i].IsVisible) {
+								Grid.SetColumn(pressIcons[i], columCount);
+								columCount++;
+							}
+						}
+					});
+				}
+
 				bool hasAddedSubtitles = false;
 				Player.Playing += (o, e) => {
 					SetIsPausedUI(false);
@@ -1032,6 +1037,9 @@ namespace CloudStreamForms
 										hasAddedSubtitles = true;
 										int internals = currentSubtitles.Where(t => t.name.StartsWith("Internal")).Count();
 										currentSubtitles.Add(new VideoSubtitle() { subtitles = MainChrome.ParseSubtitles(sub).ToArray(), name = $"Internal{ (internals == 0 ? "" : " " + (internals + 1))}" });
+										//if(Settings.SubtitlesEnabled) {
+										subtitleIndex = currentSubtitles.Count - 1;
+										//}
 									}
 								}
 							}
@@ -1047,8 +1055,8 @@ namespace CloudStreamForms
 						/*});
                     });*/
 					}
-
-
+					SubTap.IsVisible = currentSubtitles.Count > 0 || SubTap.IsVisible;
+					UpdateIcons();
 					// Player.NextFrame(); // GRAY FIX?
 					App.currentVideoStatus.isLoaded = true;
 					UpdateVideoStatus();
@@ -1179,13 +1187,7 @@ namespace CloudStreamForms
 				GoPipModeTap.IsEnabled = Settings.PictureInPicture && App.FullPictureInPictureSupport;
 				GoPipModeTap.IsVisible = GoPipModeTap.IsEnabled;
 
-				int columCount = 0;
-				for (int i = 0; i < pressIcons.Length; i++) {
-					if (pressIcons[i].IsVisible) {
-						Grid.SetColumn(pressIcons[i], columCount);
-						columCount++;
-					}
-				}
+				UpdateIcons();
 				print("Videoplage Start 13");
 
 				App.currentVideoStatus.hasNextEpisode = NextEpisodeClicked != null;
