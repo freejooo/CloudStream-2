@@ -118,6 +118,22 @@ namespace CloudStreamForms.Pages
 			1000,2000,3000,4000,5000,7500,10000,15000,20000
 		};
 
+		public static readonly int[] ShadowStr = {
+			1,5,10,15,20,25
+		};
+
+		public static readonly string[] ShadowStrNames = {
+			"Light","Medium","Normal","Dark","Black","Max"
+		};
+
+		public static readonly int[] SubSize = {
+			12, 14, 16, 18, 20, 24, 28, 32, 36, 40
+		};
+
+		public static readonly int[] SubEmptyTime = {
+			0, 30, 60, 100, 200
+		};
+
 		public static SettingsHolder GeneralSettings = new SettingsHolder() {
 			header = "General",
 			settings = new SettingsItem[] {
@@ -305,6 +321,26 @@ namespace CloudStreamForms.Pages
 						Settings.NativeSubtitles = index;
 					}
 				}),
+				new SettingsItem() { img= "outline_subtitles_white_48dp.png",mainTxt="Center dropshadow",descriptTxt="" ,VarName = nameof(Settings.SubtitlesOutlineIsCentered)},
+				new SettingsList("outline_subtitles_white_48dp.png","Dropshadow strength","",() => { return $"{ShadowStrNames[ShadowStr.IndexOf(Settings.SubtitlesShadowStrenght)]}"; }, async () => {
+					string str = await ActionPopup.DisplayActionSheet("Set dropshadow strength",ShadowStr.IndexOf(Settings.SubtitlesShadowStrenght),ShadowStrNames);
+					if(str == "Cancel" || str == "") return;
+ 					Settings.SubtitlesShadowStrenght = ShadowStr[ShadowStrNames.IndexOf(str)];
+				}),
+				new SettingsList("baseline_format_size_white_48dp.png","Subtitle Size","",() => { return $"{Settings.SubtitlesSize}dp"; }, async () => {
+					string size = await ActionPopup.DisplayActionSheet("Set subtitle size",SubSize.IndexOf(Settings.SubtitlesSize),SubSize.Select(t => $"{t}dp").ToArray());
+					if(size == "Cancel" || size == "") return;
+					if(int.TryParse(size.Replace("dp",""),out int _size)) {
+ 						Settings.SubtitlesSize =_size;
+					}
+				}),
+				new SettingsList("baseline_access_time_white_48dp.png","Subtitle transition time","The small gap of time between updates",() => { return $"{Settings.SubtitlesEmptyTime}ms"; }, async () => {
+					string time = await ActionPopup.DisplayActionSheet("Set subtitle transition time", SubEmptyTime.IndexOf(Settings.SubtitlesEmptyTime),SubEmptyTime.Select(t => $"{t}ms").ToArray());
+					if(time == "Cancel" || time == "") return;
+					if(int.TryParse(time.Replace("ms",""),out int _time)) {
+ 						Settings.SubtitlesEmptyTime =_time;
+					}
+				}),
 			},
 		};
 
@@ -318,7 +354,7 @@ namespace CloudStreamForms.Pages
 				 Settings.TapjackProtectionPicker = res[2];
 				}),
 				new SettingsItem() { img = "baseline_report_problem_white_48dp.png", mainTxt = "Ignore SSL Certificate", descriptTxt = "If you disable this, some sites cant be reached", VarName = nameof(Settings.IgnoreSSLCert) },
-				
+
 				new SettingsList("outline_get_app_white_48dp.png","Main","Download location",() => { return Settings.VideoDownloadLocation; }, async () => {
 					string loc = await ActionPopup.DisplayEntry(InputPopupPage.InputPopupResult.plainText,Settings.VideoDownloadLocation,"Download location",-1,false,Settings.VideoDownloadLocation,"Set Location");
 					if(loc.IsClean() && loc != "Cancel") {

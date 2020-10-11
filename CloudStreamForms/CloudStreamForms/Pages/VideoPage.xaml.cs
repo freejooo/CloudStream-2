@@ -299,7 +299,7 @@ namespace CloudStreamForms
 
 		string lastSub = "";
 		bool isUpdatingSubs = false;
-		public const int SUBTITLE_EMPTY_TIME = 30;
+		public int SubtitlesEmptyTime = Settings.SubtitlesEmptyTime;
 		public const double SUBTITLE_ADD_TIME = 0;//1000;
 		void UpdateSubtitles()
 		{
@@ -315,8 +315,10 @@ namespace CloudStreamForms
 				}
 				isUpdatingSubs = true;
 				SubtitleTxt1.Text = "";
-				await Task.Delay(SUBTITLE_EMPTY_TIME);
+				SubtitleTxt1BG.Text = "";
+				await Task.Delay(SubtitlesEmptyTime);
 				SubtitleTxt1.Text = subtitleTextFull;
+				SubtitleTxt1BG.Text = subtitleTextFull;
 				isUpdatingSubs = false;
 			});
 		}
@@ -340,7 +342,7 @@ namespace CloudStreamForms
 				while (!done) {
 					try {
 						var track = Subtrack[currentSubtitleIndexInCurrent];
-						var _currentTime = currentTime + (SUBTITLE_ADD_TIME + SUBTITLE_EMPTY_TIME);
+						var _currentTime = currentTime + (SUBTITLE_ADD_TIME + SubtitlesEmptyTime);
 						// SET CORRECT TIME
 						bool IsTooHigh()
 						{
@@ -679,99 +681,21 @@ namespace CloudStreamForms
 
 				// ======================= SUBTITLE SETUP =======================
 
-				Vector2[] offsets = new Vector2[]  {
-				new Vector2(0,1),
-				new Vector2(1,1),
-				new Vector2(1,0),
-				new Vector2(1,-1),
-				new Vector2(0,-1),
-				new Vector2(-1,-1),
-				new Vector2(-1,0),
-				new Vector2(-1,1),
-			};
-
-				/*
-				font1 = new Label[] {
-				 SubtitleTxt1Back1,
-				 SubtitleTxt1Back2,
-				 SubtitleTxt1Back3,
-				 SubtitleTxt1Back4,
-				 SubtitleTxt1Back5,
-				 SubtitleTxt1Back6,
-				 SubtitleTxt1Back7,
-				 SubtitleTxt1Back8,
-			};*/
-
-				/*
-				font2 = new Label[] {
-				SubtitleTxt2Back1,
-				SubtitleTxt2Back2,
-				SubtitleTxt2Back3,
-				SubtitleTxt2Back4,
-				SubtitleTxt2Back5,
-				SubtitleTxt2Back6,
-				SubtitleTxt2Back7,
-				SubtitleTxt2Back8,
-			};*/
 				print("Videoplage Start 6");
 
-				float multi = 1f;
 
 
 				//double base1X = SubtitleTxt1.TranslationX;
 				double base1Y = -5;
-				double base2Y = 20;
 				SubtitleTxt1.TranslationY = base1Y;
-				//	SubtitleTxt2.TranslationY = base2Y;
-
-				double hreq = SubtitleTxt1.HeightRequest;
-
-
-				double base1X = SubtitleTxt1.TranslationX;
-				//	double base2X = SubtitleTxt2.TranslationX;
+				SubtitleTxt1BG.TranslationY = base1Y;
 
 				bool hasDropshadow = Settings.SubtitlesHasDropShadow;
 				hasOutline = Settings.SubtitlesHasOutline;
 
 				string fontFam = App.GetFont(Settings.GlobalSubtitleFont);
-
-				string classId = hasDropshadow ? "OUTLINE" : "";
-				/*
-				for (int i = 0; i < font1.Length; i++) {
-					if (hasOutline) {
-						font1[i].FontFamily = fontFam;
-						font1[i].TranslationX = base1X + offsets[i].X * multi;
-						font1[i].TranslationY = base1Y + offsets[i].Y * multi;
-						font1[i].ClassId = classId;
-						font1[i].HeightRequest = hreq;
-					}
-					else {
-						font1[i].IsVisible = false;
-						font1[i].IsEnabled = false;
-					}
-				}
-
-				for (int i = 0; i < font2.Length; i++) {
-					if (hasOutline) {
-						font2[i].FontFamily = fontFam;
-						font2[i].TranslationX = base2X + offsets[i].X * multi;
-						font2[i].TranslationY = base2Y + offsets[i].Y * multi;
-						font2[i].ClassId = classId;
-						font1[i].HeightRequest = hreq;
-
-					}
-					else {
-						font2[i].IsVisible = false;
-						font2[i].IsEnabled = false;
-					}
-				}*/
-
-				/*
 				SubtitleTxt1.FontFamily = fontFam;
-				SubtitleTxt2.FontFamily = fontFam;*/
-
-				SubtitleTxt1.ClassId = classId;
-				//	SubtitleTxt2.ClassId = classId;
+				SubtitleTxt1BG.FontFamily = fontFam;
 
 				// ======================= END =======================
 

@@ -129,6 +129,42 @@ namespace CloudStreamForms
             }
         }
 
+        public static int SubtitlesSize {
+            set {
+                App.SetKey("Settings", nameof(SubtitlesSize), value);
+            }
+            get {
+                return App.GetKey("Settings", nameof(SubtitlesSize), 18);
+            }
+        }
+
+        public static int SubtitlesEmptyTime {
+            set {
+                App.SetKey("Settings", nameof(SubtitlesEmptyTime), value);
+            }
+            get {
+                return App.GetKey("Settings", nameof(SubtitlesEmptyTime), 30);
+            }
+        }
+
+        public static bool SubtitlesOutlineIsCentered {
+            set {
+                App.SetKey("Settings", nameof(SubtitlesOutlineIsCentered), value);
+            }
+            get {
+                return App.GetKey("Settings", nameof(SubtitlesOutlineIsCentered), true);
+            }
+        }
+
+        public static int SubtitlesShadowStrenght {
+            set {
+                App.SetKey("Settings", nameof(SubtitlesShadowStrenght), value);
+            }
+            get {
+                return App.GetKey("Settings", nameof(SubtitlesShadowStrenght), 10);
+            }
+        }
+
         public static readonly string[] SubtitleTypeNames = {
             "None", "Dropshadow", "Outline", "Outline + dropshadow"
         };

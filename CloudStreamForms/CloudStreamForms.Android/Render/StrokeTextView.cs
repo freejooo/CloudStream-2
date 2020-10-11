@@ -105,6 +105,7 @@ namespace CloudStreamForms.Droid.Render
 
 	class StrokeTextView2 : TextView
 	{
+		public int ShadowStr = 1;
 		public StrokeTextView2(Context context) : base(context)
 		{
 		}
@@ -112,7 +113,7 @@ namespace CloudStreamForms.Droid.Render
 
 		protected override void OnDraw(Canvas canvas)
 		{
-			for (int i = 0; i < 10; i++) {
+			for (int i = 0; i < ShadowStr; i++) {
 				base.OnDraw(canvas);
 			}
 			//base.OnDraw(canvas);

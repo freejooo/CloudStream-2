@@ -8,6 +8,7 @@ using Android.Content;
 using Android.Graphics;
 using Android.OS;
 using Android.Runtime;
+using Android.Text;
 using Android.Views;
 using Android.Widget;
 using CloudStreamForms.Droid.Render;
@@ -31,17 +32,35 @@ namespace CloudStreamForms.Droid.Render
 			base.OnElementChanged(e);
 
 			if (Control != null) {
+				bool isBg = e.NewElement.ClassId == "BGBLACK";
+				if (!Settings.SubtitlesHasOutline && isBg) {
+					e.NewElement.Opacity = 0;
+				};
 
 				StrokeTextView2 strokeTextView = new StrokeTextView2(context) {
 					Text = e.NewElement.Text,
+					ShadowStr = (!isBg && Settings.SubtitlesHasDropShadow) ? Settings.SubtitlesShadowStrenght : 1,
 				};
 
-				strokeTextView.SetTypeface(Control.Typeface, TypefaceStyle.Normal);
-				strokeTextView.SetShadowLayer(5f, 0, 0, Android.Graphics.Color.Black);
-				strokeTextView.SetTextSize(Android.Util.ComplexUnitType.Dip, (float)e.NewElement.FontSize);
+				strokeTextView.SetTypeface(Control.Typeface, Settings.SubtitlesHasOutline ? TypefaceStyle.Bold : TypefaceStyle.Normal);
+				if (Settings.SubtitlesHasDropShadow && !isBg) {
+					float offset = Settings.SubtitlesOutlineIsCentered ? 0 : 5f;
+					strokeTextView.SetShadowLayer(5f, offset, offset, Android.Graphics.Color.Black);
+				}
+				strokeTextView.SetTextSize(Android.Util.ComplexUnitType.Dip, Settings.SubtitlesSize);
 				strokeTextView.TextAlignment = Android.Views.TextAlignment.Center;
 				//strokeTextView.BreakStrategy = Android.Text.BreakStrategy.;
 				strokeTextView.Gravity = GravityFlags.CenterHorizontal | GravityFlags.Bottom;
+				 
+				if (isBg) {
+					strokeTextView.SetTextColor(Android.Graphics.Color.Black);
+					TextPaint tp1 = strokeTextView.Paint;
+					tp1.StrokeWidth = (Settings.SubtitlesSize / 5.4f); //3f;                    
+					tp1.SetStyle(Paint.Style.Stroke);
+				}
+				else {
+					strokeTextView.SetTextColor(Android.Graphics.Color.White);
+				}
 
 				Control.AfterTextChanged += (_o, _e) => {
 					var _txt = e.NewElement.Text;
@@ -49,7 +68,7 @@ namespace CloudStreamForms.Droid.Render
 					//strokeTextView.ChangeText();
 				};
 
-					SetNativeControl(strokeTextView);
+				SetNativeControl(strokeTextView);
 				//strokeTextView.SetTextColor(Android.Graphics.Color.Purple);
 			}
 		}
