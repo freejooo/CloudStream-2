@@ -449,6 +449,13 @@ namespace CloudStreamForms.Pages
 			InitializeComponent();
 			BindingContext = this;
 
+			VideoPage.OnVideoAppear += (o, e) => { // LAG FIX
+				Device.BeginInvokeOnMainThread(() => {
+					EverythingHolder.IsVisible = !e;
+					EverythingHolder.IsEnabled = !e;
+				});
+			};
+
 			Device.InvokeOnMainThreadAsync(async () => {
 
 				Settings.OnInit();

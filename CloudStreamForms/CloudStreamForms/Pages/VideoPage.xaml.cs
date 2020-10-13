@@ -32,6 +32,8 @@ namespace CloudStreamForms
 		public delegate bool CanLoadLinks(string currentEpIMDBId);
 		public static LoadLinkForNextEpisode loadLinkForNext;
 		public static CanLoadLinks canLoad;
+		public static EventHandler<bool> OnVideoAppear ;
+
 
 		/// <summary>
 		/// If header is correct
@@ -1426,6 +1428,7 @@ namespace CloudStreamForms
 		protected override void OnAppearing()
 		{
 			base.OnAppearing();
+			OnVideoAppear?.Invoke(null, true);
 			App.currentVideoStatus.isInVideoplayer = true;
 			UpdateVideoStatus();
 
@@ -1458,6 +1461,8 @@ namespace CloudStreamForms
 		protected override void OnDisappearing()
 		{
 			App.currentVideoStatus.isInVideoplayer = false;
+			OnVideoAppear?.Invoke(null, false);
+
 			UpdateVideoStatus();
 
 			isShown = false;
