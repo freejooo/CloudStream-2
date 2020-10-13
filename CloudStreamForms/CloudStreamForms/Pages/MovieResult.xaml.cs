@@ -687,6 +687,10 @@ namespace CloudStreamForms
 						for (int i = firstEp - 1; i < lastEp; i++) {
 							var ep = episodes[i];
 							string imdbId = ep.IMDBEpisodeId;
+							if (SubtitlesEnabled) {
+								DownloadSubtitlesToFileLocation(ep, currentMovie, currentSeason, showToast: false);
+							}
+
 							CloudStreamCore.Title titleName = (Title)coreCopy.activeMovie.title.Clone();
 
 							coreCopy.GetEpisodeLink(coreCopy.activeMovie.title.IsMovie ? -1 : (ep.Id + 1), _currentSeason, false, false, _isDub);
@@ -945,7 +949,7 @@ namespace CloudStreamForms
             }*/
 			/*if (episodeResult.Rating == "") {
 				episodeResult.Rating = currentMovie.title.rating;
-			}*/ 
+			}*/
 			if (!isMovie) {
 				episodeResult.Title = episodeResult.Episode + ". " + episodeResult.Title;
 				print("ADDMOVIE:___" + episodeResult.Episode + "|" + episodeResult.Title);
@@ -1512,7 +1516,7 @@ namespace CloudStreamForms
 				bool hasDownloadedFile = App.KeyExists("dlength", "id" + GetCorrectId(episodeResult));
 				string downloadKeyData = "";
 
-				List<string> actions = new List<string>() { "Play in App", "Play in Browser",  "Auto Download", "Download", "Download Subtitles", "Copy Link", "Reload" }; // "Remove Link",
+				List<string> actions = new List<string>() { "Play in App", "Play in Browser", "Auto Download", "Download", "Download Subtitles", "Copy Link", "Reload" }; // "Remove Link",
 
 				if (App.CanPlayExternalPlayer()) {
 					actions.Insert(1, "Play External App");
@@ -1592,7 +1596,7 @@ namespace CloudStreamForms
 					string copy = await ActionPopup.DisplayActionSheet("Copy Link", episodeResult.GetMirros().ToArray());//await DisplayActionSheet("Copy Link", "Cancel", null, episodeResult.Mirros.ToArray());
 					for (int i = 0; i < episodeResult.GetMirros().Count; i++) {
 						if (episodeResult.GetMirros()[i] == copy) {
-							await App.RequestVlc(new List<string> { episodeResult.GetMirrosUrls()[i] }, new List<string> { episodeResult.GetMirros()[i] }, episodeResult.OgTitle, episodeResult.IMDBEpisodeId, episode: episodeResult.Episode, season: currentSeason, subtitleFull: currentMovie.subtitles.Select(t => t.data).FirstOrDefault(), descript: episodeResult.Description, overrideSelectVideo: false, startId: (int)episodeResult.ProgressState, headerId: currentMovie.title.id, isFromIMDB: true,generateM3u8:false);// startId: FROM_PROGRESS); //  (int)episodeResult.ProgressState																																																																													  //App.PlayVLCWithSingleUrl(episodeResult.mirrosUrls, episodeResult.Mirros, currentMovie.subtitles.Select(t => t.data).ToList(), currentMovie.subtitles.Select(t => t.name).ToList(), currentMovie.title.name, episodeResult.Episode, currentSeason, overrideSelectVideo);
+							await App.RequestVlc(new List<string> { episodeResult.GetMirrosUrls()[i] }, new List<string> { episodeResult.GetMirros()[i] }, episodeResult.OgTitle, episodeResult.IMDBEpisodeId, episode: episodeResult.Episode, season: currentSeason, subtitleFull: currentMovie.subtitles.Select(t => t.data).FirstOrDefault(), descript: episodeResult.Description, overrideSelectVideo: false, startId: (int)episodeResult.ProgressState, headerId: currentMovie.title.id, isFromIMDB: true, generateM3u8: false);// startId: FROM_PROGRESS); //  (int)episodeResult.ProgressState																																																																													  //App.PlayVLCWithSingleUrl(episodeResult.mirrosUrls, episodeResult.Mirros, currentMovie.subtitles.Select(t => t.data).ToList(), currentMovie.subtitles.Select(t => t.name).ToList(), currentMovie.title.name, episodeResult.Episode, currentSeason, overrideSelectVideo);
 							break;
 						}
 					}
@@ -1611,6 +1615,10 @@ namespace CloudStreamForms
 					}
 				}
 				else if (action == "Auto Download") {
+					if (SubtitlesEnabled) {
+						DownloadSubtitlesToFileLocation(episodeResult, currentMovie, currentSeason, showToast: false);
+					}
+
 					int epId = GetCorrectId(episodeResult);
 					BasicLink[] info = null;
 					bool hasMirrors = false;
@@ -1639,7 +1647,9 @@ namespace CloudStreamForms
 					for (int i = 0; i < links.Count; i++) {
 						if (links[i].PublicName == download) {
 							var link = links[i];
-							DownloadSubtitlesToFileLocation(episodeResult, currentMovie, currentSeason, showToast: false);
+							if (SubtitlesEnabled) {
+								DownloadSubtitlesToFileLocation(episodeResult, currentMovie, currentSeason, showToast: false);
+							}
 							TempThread tempThred = core.CreateThread(4);
 							core.StartThread("DownloadThread", async () => {
 								try {
@@ -1738,11 +1748,14 @@ namespace CloudStreamForms
 						return;
 					}
 					else {
+						string fullpath = App.GetPath(currentMovie.title.movieType, currentSeason, episodeResult.Episode, episodeResult.OgTitle, currentMovie.title.name, ".srt");
+
 						string extraPath = "/" + GetPathFromType(currentMovie.title.movieType);
 						if (!currentMovie.title.IsMovie) {
 							extraPath += "/" + CensorFilename(currentMovie.title.name);
 						}
-						App.DownloadFile(s, episodeResult.GetDownloadTitle(currentSeason, episodeResult.Episode) + ".srt", true, extraPath); // "/Subtitles" +
+						//	App.DownloadFile(s, episodeResult.GetDownloadTitle(currentSeason, episodeResult.Episode) + ".srt", true, extraPath); // "/Subtitles" +
+						App.DownloadFile(fullpath, s); // "/Subtitles" +
 						if (showToast) {
 							App.ShowToast("Subtitles Downloaded");
 						}

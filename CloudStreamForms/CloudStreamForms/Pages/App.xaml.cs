@@ -70,6 +70,7 @@ namespace CloudStreamForms
 			void ToggleRealFullScreen(bool fullscreen);
 			void ShowToast(string message, double duration);
 			string DownloadFile(string file, string fileName, bool mainPath, string extraPath);
+			string DownloadFile(string path, string data);
 			string ReadFile(string fileName, bool mainPath, string extraPath);
 			string ReadFile(string path);
 			string DownloadUrl(string url, string fileName, bool mainPath, string extraPath, string toast = "", bool isNotification = false, string body = "");
@@ -322,7 +323,7 @@ namespace CloudStreamForms
 		/// <param name="episodeId">id for key of lenght seen</param>
 		/// <param name="startId">FROM_START, FROM_PROGRESS or time in ms</param>
 		/// <param name="subtitleFull">Leave emty for no subtitles, full subtitle text as seen in a regular .srt</param>
-		public static async Task RequestVlc(List<string> urls, List<string> names, string episodeName, string episodeId, long startId = FROM_PROGRESS, string subtitleFull = "", int episode = -1, int season = -1, string descript = "", bool? overrideSelectVideo = null, string headerId = "", bool isFromIMDB = false,bool generateM3u8 = true)
+		public static async Task RequestVlc(List<string> urls, List<string> names, string episodeName, string episodeId, long startId = FROM_PROGRESS, string subtitleFull = "", int episode = -1, int season = -1, string descript = "", bool? overrideSelectVideo = null, string headerId = "", bool isFromIMDB = false, bool generateM3u8 = true)
 		{
 			if (isRequestingVLC) return;
 			isRequestingVLC = true;
@@ -352,7 +353,7 @@ namespace CloudStreamForms
 					return;
 				};
 
-				PlatformDep.RequestVlc(urls, names, episodeName, episodeId, startId, subtitleFull, (VideoPlayer)Settings.PreferedVideoPlayer, generateM3u8 );
+				PlatformDep.RequestVlc(urls, names, episodeName, episodeId, startId, subtitleFull, (VideoPlayer)Settings.PreferedVideoPlayer, generateM3u8);
 			}
 			isRequestingVLC = false;
 		}
@@ -372,19 +373,34 @@ namespace CloudStreamForms
 			return name;
 		}
 
-		public static string DownloadHandleIntent(MovieType movieType, int season, int episode, string episodeName, string titleName, int id, List<BasicMirrorInfo> mirrors, bool showNotification = true, bool showNotificationWhenDone = true, bool openWhenDone = false, string poster = "", string beforeTxt = "")//, int mirror, string title, string path, string poster, string fileName, string beforeTxt, bool openWhenDone, bool showNotificaion, bool showDoneNotificaion, bool showDoneAsToast, bool resumeIntent)
+		public static char[] invalidChars = { '|', '\\', '?', '*', '<', '\"', ':', '>','/' };
+
+		public static string GetPath(MovieType movieType, int season, int episode, string episodeName, string titleName, string ending)
 		{
+			static string SanitizePath(string input) // FIX EXTRA FOLDER BUG
+			{
+				for (int i = 0; i < invalidChars.Length; i++) {
+					input = input.Replace(invalidChars[i], ' ');
+				}
+				return input;
+			}
+
 			string ConvertToRealPath(string input)
 			{
 				return input
 					.Replace("{type}", GetPathFromType(movieType))
-					.Replace("{tname}", titleName)
-					.Replace("{name}", episodeName)
+					.Replace("{tname}", SanitizePath(titleName))
+					.Replace("{name}", SanitizePath(episodeName))
 					.Replace("{ep}", episode.ToString())
 					.Replace("{se}", season.ToString());
 			}
 
-			string path = ConvertToRealPath(Settings.VideoDownloadLocation) + ConvertToRealPath(movieType.IsMovie() ? Settings.VideoDownloadMovie : Settings.VideoDownloadTvSeries) + ".mp4";
+			return ConvertToRealPath(Settings.VideoDownloadLocation) + ConvertToRealPath(movieType.IsMovie() ? Settings.VideoDownloadMovie : Settings.VideoDownloadTvSeries) + ending;
+		}
+
+		public static string DownloadHandleIntent(MovieType movieType, int season, int episode, string episodeName, string titleName, int id, List<BasicMirrorInfo> mirrors, bool showNotification = true, bool showNotificationWhenDone = true, bool openWhenDone = false, string poster = "", string beforeTxt = "")//, int mirror, string title, string path, string poster, string fileName, string beforeTxt, bool openWhenDone, bool showNotificaion, bool showDoneNotificaion, bool showDoneAsToast, bool resumeIntent)
+		{
+			string path = GetPath(movieType, season, episode, episodeName, titleName, ".mp4");
 			return PlatformDep.DownloadHandleIntent(id, mirrors, episodeName, (movieType == MovieType.Movie || movieType == MovieType.AnimeMovie) ? titleName : $"{titleName} • {episodeName}", false, path, showNotification, showNotificationWhenDone, openWhenDone, poster, beforeTxt);
 		}
 
@@ -393,12 +409,8 @@ namespace CloudStreamForms
 			App.SetKey(hasDownloadedFolder, id.ToString(), true);
 
 			DownloadHeader header = ConvertTitleToHeader(title);
-			string extraPath = "/" + GetPathFromType(header);
 			bool isMovie = header.movieType == MovieType.AnimeMovie || header.movieType == MovieType.Movie;
 
-			if (!isMovie) {
-				extraPath += "/" + CensorFilename(title.name);
-			}
 
 			print("HEADERID::: " + header.RealId);
 			App.SetKey(nameof(DownloadHeader), "id" + header.RealId, header);
@@ -999,6 +1011,11 @@ namespace CloudStreamForms
 		public static string DownloadFile(string file, string fileName, bool mainPath = true, string extraPath = "")
 		{
 			return PlatformDep.DownloadFile(file, fileName, mainPath, extraPath);
+		}
+
+		public static string DownloadFile(string path, string data)
+		{
+			return PlatformDep.DownloadFile(path, data);
 		}
 
 		public static string ConvertPathAndNameToM3U8(List<string> path, List<string> name, bool isSubtitleEnabled = false, string beforePath = "", string overrideSubtitles = null)

@@ -964,7 +964,7 @@ namespace CloudStreamForms
 										int internals = currentSubtitles.Where(t => t.name.StartsWith("Internal")).Count();
 										currentSubtitles.Add(new VideoSubtitle() { subtitles = MainChrome.ParseSubtitles(sub).ToArray(), name = $"Internal{ (internals == 0 ? "" : " " + (internals + 1))}" });
 										//if(Settings.SubtitlesEnabled) {
-										subtitleIndex = currentSubtitles.Count - 1;
+										//subtitleIndex = currentSubtitles.Count - 1;
 										//}
 									}
 								}

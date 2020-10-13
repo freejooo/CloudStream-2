@@ -7067,7 +7067,7 @@ namespace CloudStreamForms.Core
 						}
 
 						// JUST IN CASE
-						var _slit = s.Split('\n');
+						var _slit = s.Replace("\\N"," ").Split('\n');
 						s = "";
 						for (int i = 0; i < _slit.Length; i++) {
 							var _line = _slit[i];

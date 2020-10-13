@@ -22,6 +22,7 @@ using LibVLCSharp.Forms.Shared;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
@@ -1908,6 +1909,13 @@ namespace CloudStreamForms.Droid
 			activity.ApplicationContext.StartActivity(promptInstall);
 		}
 
+		public static Java.IO.File WriteFile(string path, string write)
+		{
+			var split = path.Split('/');
+			string ending = split[^1];
+			string start = split[0..^1].Aggregate((i, j) => i + "/" + j);
+			return WriteFile(ending,start , write);
+		}
 
 		public static Java.IO.File WriteFile(string name, string basePath, string write)
 		{
@@ -2291,6 +2299,17 @@ namespace CloudStreamForms.Droid
 			}
 		}
 
+		public string DownloadFile(string path, string data)
+		{
+			try {
+				return WriteFile(GetPath(false, path), data).Path;
+			}
+			catch (Exception _ex) {
+				error(_ex);
+				return "";
+			}
+		}
+
 		public string DownloadHandleIntent(int id, List<BasicMirrorInfo> mirrors, string fileName, string titleName, bool mainPath, string extraPath, bool showNotification = true, bool showNotificationWhenDone = true, bool openWhenDone = false, string poster = "", string beforeTxt = "")//, int mirror, string title, string path, string poster, string fileName, string beforeTxt, bool openWhenDone, bool showNotificaion, bool showDoneNotificaion, bool showDoneAsToast, bool resumeIntent)
 		{
 			try {
@@ -2530,6 +2549,12 @@ namespace CloudStreamForms.Droid
 		{
 			return "";
 		}
+
+		public string DownloadFile(string path, string data)
+		{
+			return "";
+		}
+
 		public string DownloadHandleIntent(int id, List<BasicMirrorInfo> mirrors, string fileName, string titleName, bool mainPath, string extraPath, bool showNotification = true, bool showNotificationWhenDone = true, bool openWhenDone = false, string poster = "", string beforeTxt = "")
 		{
 			return "";
