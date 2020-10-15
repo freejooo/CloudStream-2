@@ -157,7 +157,6 @@ namespace CloudStreamForms
             var thread = mainCore.CreateThread(6);
             mainCore.StartThread("PopulateSubtitles", () => {
                 try {
-
                     string data = mainCore.DownloadSubtitle(currentChromeData.episodeId, lang, false, true); // MovieResult.GetId(episodeResult, chromeMovieResult)
                     if (data.IsClean()) {
                         if (!ContainsLang()) {
@@ -171,7 +170,7 @@ namespace CloudStreamForms
                         }
                     }
                     else {
-                        App.ShowToast("Error Downloading Subtitles");
+                        App.ShowToast("No subtitles found");
                     }
                 }
                 finally {

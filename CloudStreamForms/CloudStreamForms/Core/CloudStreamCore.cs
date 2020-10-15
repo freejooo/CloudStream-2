@@ -8913,8 +8913,21 @@ namespace CloudStreamForms.Core
 			return d.Substring(indexOfRem + offset, d.Length - indexOfRem - offset);
 		}
 
-
 #if DEBUG
+		static int GetStopwatchNum()
+		{
+			return 0;
+		}
+		static void EndStopwatchNum(int num, string name)
+		{ 
+		}
+		public static void EndDebugging()
+		{
+
+		}
+#endif
+
+#if false
 		readonly static object stopwatchLock = new object();
 		readonly static Dictionary<string, long> stopwatchPairs = new Dictionary<string, long>();
 		readonly static Dictionary<string, int> stopwatchCalls = new Dictionary<string, int>();

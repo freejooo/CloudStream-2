@@ -301,7 +301,7 @@ namespace CloudStreamForms.Pages
 		public static SettingsHolder SubtitleSettings = new SettingsHolder() {
 			header = "Subtitles",
 			settings = new SettingsItem[] {
-				new SettingsList("outline_subtitles_white_48dp.png","Subtitle Font","For in app videoplayer and chromecast",() => {return Settings.GlobalSubtitleFont; },async () => {
+				new SettingsList("outline_subtitles_white_48dp.png","Subtitle Font","App videoplayer and chromecast",() => {return Settings.GlobalSubtitleFont; },async () => {
 					string action = await ActionPopup.DisplayActionSheet("Subtitle Font",Settings.GlobalFonts.IndexOf(Settings.GlobalSubtitleFont),Settings.GlobalFonts.ToArray());
 					if(action != "" && action != "Cancel") {
 						Settings.GlobalSubtitleFont = action;
@@ -347,7 +347,7 @@ namespace CloudStreamForms.Pages
 		public static SettingsHolder AdvancedSettings = new SettingsHolder() {
 			header = "Advanced Settings",
 			settings = new SettingsItem[] {
-				new SettingsList("baseline_report_problem_white_48dp.png","Tapjack protection (Requires restart)","Disable this if you cant press certain things", () => { return $"{(Settings.TapjackProtectionButton ? 1 : 0) + (Settings.TapjackProtectionPicker ? 1 : 0) + (Settings.TapjackProtectionSearch ? 1 : 0)}/3 Active"; },async () => {
+				new SettingsList("baseline_report_problem_white_48dp.png","Tapjack protection","Requires restart, Disable this if you cant press certain things", () => { return $"{(Settings.TapjackProtectionButton ? 1 : 0) + (Settings.TapjackProtectionPicker ? 1 : 0) + (Settings.TapjackProtectionSearch ? 1 : 0)}/3 Active"; },async () => {
 				 List<bool> res = await ActionPopup.DisplaySwitchList(new List<string>() { "Search","Buttons","Picker" }, new List<bool>() { Settings.TapjackProtectionSearch,Settings.TapjackProtectionButton,Settings.TapjackProtectionPicker},"Tapjack protection");
 				 Settings.TapjackProtectionSearch = res[0];
 				 Settings.TapjackProtectionButton = res[1];
@@ -472,9 +472,8 @@ namespace CloudStreamForms.Pages
 					Grid.SetRow(v, counter);
 					counter++;
 				}
-
 				foreach (var set in settings) {
-					AddChild(new Label() { Text = set.header, FontSize = 17, FontAttributes = FontAttributes.Bold, TranslationX = 10, Margin = new Thickness(10, 20, 10, 10), TextColor = Color.White });
+					AddChild(new Label() { Text = set.header, FontSize = 17, FontAttributes = FontAttributes.Bold, TranslationX = 0, VerticalOptions = LayoutOptions.Center, HorizontalOptions = LayoutOptions.Start, Padding = new Thickness(0), Margin = new Thickness(20), TextColor = Color.White });
 
 					foreach (var subSet in set.settings) {
 
@@ -493,7 +492,7 @@ namespace CloudStreamForms.Pages
 						var subGrid = new Grid() {
 							HeightRequest = 50,
 							RowSpacing = -10,
-							Padding = new Thickness(0, 0, 50, 0),
+							Padding = new Thickness(0, 0, subSet.isSwitch ? 50 : (subSet.isList ? 100 : 0), 0),
 							VerticalOptions = LayoutOptions.Center,
 						};
 						subGrid.Children.Add(mainLabel);
@@ -602,6 +601,12 @@ namespace CloudStreamForms.Pages
 						Grid.SetColumn(subGrid, 1);
 					}
 				}
+
+				var gridCol = new RowDefinitionCollection();
+				for (int i = 0; i < AddTextGrid.Children.Count; i++) {
+					gridCol.Add(new RowDefinition() { Height = GridLength.Auto });
+				}
+				AddTextGrid.RowDefinitions = gridCol;
 				Appear();
 			});
 

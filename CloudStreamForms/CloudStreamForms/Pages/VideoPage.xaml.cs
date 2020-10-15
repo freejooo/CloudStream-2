@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using System.Threading;
 using System.Threading.Tasks;
 using Xamarin.Forms;
 using Xamarin.Forms.Internals;
@@ -280,7 +281,7 @@ namespace CloudStreamForms
 						}
 					}
 					else {
-						App.ShowToast("Error Downloading Subtitles");
+						App.ShowToast("No subtitles found");
 					}
 				}
 				finally {
@@ -1543,15 +1544,15 @@ namespace CloudStreamForms
 
 		public void Dispose()
 		{
-			//  Thread t = new Thread(() => {
+			Thread t = new Thread(() => {
 			var mediaPlayer = _mediaPlayer;
 			_mediaPlayer = null;
 			mediaPlayer?.Dispose();
 			_libVLC?.Dispose();
 			_libVLC = null;
-			// });
-			//  t.Name = "DISPOSETHREAD";
-			//t.Start();
+			});
+			t.Name = "DISPOSETHREAD";
+			t.Start();
 		}
 		async void Hide()
 		{
@@ -1617,7 +1618,7 @@ namespace CloudStreamForms
 				}
 				else {
 					long len = (long)(VideoSlider.Value * GetPlayerLenght());
-					Player.Time = len;
+					Player.Time = len; // THIS WILL CAUSE FREEZ WHEN PLAYING CURRUPT VIDEO
 					//SeekSubtitles(len);
 
 					dragingVideo = false;
@@ -1634,7 +1635,6 @@ namespace CloudStreamForms
 			catch (Exception _ex) {
 				print("ERROR DTAG: " + _ex);
 			}
-
 		}
 
 		private void VideoSlider_ValueChanged(object sender, ValueChangedEventArgs e)
