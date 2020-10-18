@@ -65,20 +65,6 @@ namespace CloudStreamForms.Droid
 	}
 
 	[Service]
-	public class DemoIntentService : IntentService
-	{
-		public DemoIntentService() : base("DemoIntentService") { }
-
-		protected override void OnHandleIntent(Android.Content.Intent intent)
-		{
-			print("perform some long running work");
-			System.Console.WriteLine("work complete");
-
-			print("HANDLE" + intent.Extras.GetString("data"));
-		}
-	}
-
-	[Service]
 	public class MainIntentService : IntentService
 	{
 		public MainIntentService() : base("MainIntentService") { }
@@ -98,7 +84,6 @@ namespace CloudStreamForms.Droid
 		}
 	}
 
-
 	[Service]
 	public class ChromeCastIntentService : IntentService
 	{
@@ -112,26 +97,30 @@ namespace CloudStreamForms.Droid
 			string data = intent.Extras.GetString("data");
 			//play" : "pause", "goforward", "stop
 			print("HANDLE [" + data + "]");
+			try {
+				switch (data) {
+					case "play":
+						MainChrome.PauseAndPlay(false);
+						break;
+					case "pause":
+						MainChrome.PauseAndPlay(true);
+						break;
+					case "goforward":
+						MainChrome.SeekMedia(30);
+						break;
+					case "goback":
+						MainChrome.SeekMedia(-30);
+						break;
+					case "stop":
+						//  MainChrome.StopCast();
+						MainChrome.JustStopVideo();
+						break;
+					default:
+						break;
+				}
+			}
+			catch (Exception) {
 
-			switch (data) {
-				case "play":
-					MainChrome.PauseAndPlay(false);
-					break;
-				case "pause":
-					MainChrome.PauseAndPlay(true);
-					break;
-				case "goforward":
-					MainChrome.SeekMedia(30);
-					break;
-				case "goback":
-					MainChrome.SeekMedia(-30);
-					break;
-				case "stop":
-					//  MainChrome.StopCast();
-					MainChrome.JustStopVideo();
-					break;
-				default:
-					break;
 			}
 
 		}
@@ -337,6 +326,7 @@ namespace CloudStreamForms.Droid
 		}
 	}
 
+	/*
 	[Service]
 	public class NotifyAtTime : IntentService
 	{
@@ -351,7 +341,7 @@ namespace CloudStreamForms.Droid
 			Toast.MakeText(Android.App.Application.Context, "Hello world", toastLength).Show();
 
 		}
-	}
+	}*/
 
 	[BroadcastReceiver]
 	public class AlertReceiver : BroadcastReceiver
@@ -445,14 +435,20 @@ namespace CloudStreamForms.Droid
 
 			//App.ShowToast("ON NEW INTENT");
 			//print("DA:::.2132131");
-			if (intent.DataString != null) {
-				print("INTENTNADADA:::" + intent.DataString);
+			var datastring = intent.DataString;
+			if (datastring != null) {
+				print("INTENTNADADA:::" + datastring);
 				print("GOT NON NULL DATA");
-				if (Intent.DataString != "" && Intent.DataString.Contains("cloudstreamforms:")) {
-					print("INTENTDATA::::" + Intent.DataString);
-					MainPage.PushPageFromUrlAndName(Intent.DataString);
+				if (datastring != "" && datastring.ToLower().Contains("cloudstreamforms:")) {
+					if (datastring.Contains("mallogin")) {
+						CloudStreamForms.Script.MALSyncApi.AuthenticateLogin(datastring);
+					}
+					else {
+						MainPage.PushPageFromUrlAndName(datastring);
+					}
 				}
 			}
+
 			Bundle extras = intent.Extras;
 			if (extras != null) {
 				if (extras.ContainsKey("data")) {
@@ -471,6 +467,7 @@ namespace CloudStreamForms.Droid
 		}
 
 		public static int PublicNot;
+
 
 		protected override void OnCreate(Bundle savedInstanceState)
 		{
@@ -1914,7 +1911,7 @@ namespace CloudStreamForms.Droid
 			var split = path.Split('/');
 			string ending = split[^1];
 			string start = split[0..^1].Aggregate((i, j) => i + "/" + j);
-			return WriteFile(ending,start , write);
+			return WriteFile(ending, start, write);
 		}
 
 		public static Java.IO.File WriteFile(string name, string basePath, string write)
