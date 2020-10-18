@@ -19,6 +19,7 @@ using static CloudStreamForms.Settings;
 using static CloudStreamForms.Core.CoreHelpers;
 using CloudStreamForms.InterfacePages;
 using static CloudStreamForms.InterfacePages.MovieResultHolder;
+using CloudStreamForms.Script;
 
 namespace CloudStreamForms
 {
@@ -390,6 +391,7 @@ namespace CloudStreamForms
 
 			controller.OnExposedEpisodesChanged += (object o, EpisodeData[] e) => {
 				if (IsDead) return;
+				
 				Device.InvokeOnMainThreadAsync(async () => {
 					FadeEpisodes.AbortAnimation("FadeTo");
 					FadeEpisodes.Opacity = 0;
@@ -402,8 +404,22 @@ namespace CloudStreamForms
 					SetHeight();
 					await Task.Delay(100);
 					await FadeEpisodes.FadeTo(1, FATE_TIME_MS);
+					if (Settings.HasMalAccountLogin) {
+						UpdateAllMalValues();
+						if (maxMalEpisode == 0) {
+							maxMalEpisode = e.Length;
+						}
+						UpdateMalVisual();
+					}
 				});
 			};
+
+			/*
+			controller.malDataLoaded += (o, e) => {
+				if (HasMalAccountLogin) {
+					UpdateAllMalValues();
+				}
+			};*/
 
 			controller.titleLoaded += (o, e) => {
 				try {
@@ -424,6 +440,7 @@ namespace CloudStreamForms
 					FromToPicker.SelectedIndexChanged += (object o, int e) => {
 						controller.SelFromToPickerSelectIndex(e);
 					};
+
 
 					Device.BeginInvokeOnMainThread(() => {
 						if (IsDead) return;
@@ -1802,6 +1819,169 @@ namespace CloudStreamForms
 				print("FATAL EX IN GETID: " + _ex);
 				return episodeResult.Id + "Extra=" + ToDown(episodeResult.Title) + "=EndAll";
 			}
+		}
+
+		private async void MalRating_Clicked(object sender, EventArgs e)
+		{
+			string rate = await ActionPopup.DisplayActionSheet("Rate anime", currentMalScore == -1 ? -1 :  10 - currentMalScore, MALSyncApi.MalRatingNames.Reverse().ToArray());
+			int index = MALSyncApi.MalRatingNames.IndexOf(rate);
+			if (index >= 0) {
+				if (currentMalScore == -1 && currentMalWatchType == MALSyncApi.MalStatusType.none) {
+					currentMalWatchType = MALSyncApi.MalStatusType.Watching;
+				}
+				currentMalScore = index + 1;
+				MalValueUpdated();
+			}
+		}
+
+		private async void MalProgress_Clicked(object sender, EventArgs e)
+		{
+			try {
+				int action = await ActionPopup.DisplayIntEntry("0", "Current Progress", 1, false, currentMalEpisodesProgress.ToString(), "Set Progress", 0, maxMalEpisode);
+				if (action != -1) {
+					if (currentMalEpisodesProgress == 0 && action != 0 && currentMalWatchType == MALSyncApi.MalStatusType.none) {
+						currentMalWatchType = MALSyncApi.MalStatusType.Watching;
+					}
+					currentMalEpisodesProgress = action;
+					if (currentMalEpisodesProgress == maxMalEpisode) {
+						currentMalWatchType = MALSyncApi.MalStatusType.Completed;
+					}
+
+					MalValueUpdated();
+				}
+			}
+			catch (Exception) { }
+		}
+
+		private async void MalWatching_Clicked(object sender, EventArgs e)
+		{
+			try {
+				string action = await ActionPopup.DisplayActionSheet("Set Status", (int)currentMalWatchType, MALSyncApi.StatusNames);
+				if (action != "Cancel") {
+					currentMalWatchType = (MALSyncApi.MalStatusType)(MALSyncApi.StatusNames.IndexOf(action));
+					MalValueUpdated();
+				}
+			}
+			catch (Exception) { }
+		}
+
+		public void UpdateMalVisual()
+		{
+			UpdateMalSyncVisual();
+			bool isVis = currentMovie.title.movieType == MovieType.Anime;
+			SecMalRow.IsVisible = isVis;
+			SecMalRow.IsEnabled = isVis;
+			Grid.SetRow(SecMalRow, isVis ? 6 : 5);
+			if (isVis) {
+				if (currentMalScore >= 0) {
+					MalRatingTxt.Text = MALSyncApi.MalRatingNames[currentMalScore - 1];
+				}
+				else {
+					MalRatingTxt.Text = "No Rating";
+				}
+
+				if (currentMalWatchType != MALSyncApi.MalStatusType.none) {
+					MalWatchingTxt.Text = MALSyncApi.StatusNames[(int)currentMalWatchType];
+				}
+				else {
+					MalWatchingTxt.Text = "Not Watched";
+				}
+
+				MalEpisodes.Text = $"{currentMalEpisodesProgress}/{maxMalEpisode}";
+			}
+		}
+
+		public List<int> malIds;
+		public int CurrentMalId { get { return malIds[0]; } }
+		public MALSyncApi.MalStatusType currentMalWatchType = MALSyncApi.MalStatusType.none;
+		public int currentMalEpisodesProgress = 0;
+		public int currentMalScore = -1;
+		public bool updateMalData;
+		public int maxMalEpisode = 0;
+
+		void MalValueUpdated()
+		{
+			updateMalData = true;
+			Device.BeginInvokeOnMainThread(() => {
+				UpdateMalVisual();
+			});
+		}
+
+		void UpdateMalSyncVisual()
+		{
+			SyncButton.Transformations = new List<FFImageLoading.Work.ITransformation>() { (new FFImageLoading.Transformations.TintTransformation(updateMalData ? DARK_BLUE_COLOR : LIGHT_LIGHT_BLACK_COLOR)) };
+		}
+
+		void UpdateAllMalValues()
+		{
+			try {
+				updateMalData = false;
+				if (currentMovie.title.movieType == MovieType.Anime) {
+					malIds = new List<int>();
+					var ms = currentMovie.title.MALData.seasonData[currentSeason].seasons;
+					maxMalEpisode = 0;
+
+					for (int i = 0; i < ms.Count; i++) {
+						malIds.Add(ms[i].MalId);
+						maxMalEpisode += ms[i].length;
+					}
+
+					if (MALSyncApi.allTitles.ContainsKey(CurrentMalId)) {
+						var data = MALSyncApi.allTitles[CurrentMalId];
+						currentMalWatchType = data.status.MalStatusType;
+						currentMalScore = data.status.score;
+					}
+					else {
+						currentMalWatchType = MALSyncApi.MalStatusType.none;
+						currentMalScore = -1;
+					}
+					 
+					currentMalEpisodesProgress = 0;
+					foreach (var id in malIds) {
+						if (MALSyncApi.allTitles.ContainsKey(id)) {
+							var data = MALSyncApi.allTitles[id];
+							currentMalEpisodesProgress += data.status.num_episodes_watched;;
+						}
+					}
+				}
+			}
+			catch (Exception _ex) {
+				error(_ex);
+			}
+		}
+
+		private async void MalSync_Clicked(object sender, EventArgs e)
+		{
+			if(currentMalWatchType == MALSyncApi.MalStatusType.none) {
+				App.ShowToast("Must select a watchstatus");
+				return;
+			}
+			if (currentMalScore < 0) {
+				App.ShowToast("Must select a rating");
+				return;
+			}
+
+			updateMalData = false;
+			Device.BeginInvokeOnMainThread(() => {
+				UpdateMalSyncVisual();
+			});
+			var ms = currentMovie.title.MALData.seasonData[currentSeason].seasons;
+			int currentMax = currentMalEpisodesProgress;
+
+			for (int i = 0; i < ms.Count; i++) {
+				var leng = ms[i].length;
+				if(leng == 0) {
+					leng = currentMalEpisodesProgress;
+				}
+				await MALSyncApi.SetScoreRequestAndGetTitle(ms[i].MalId, currentMalWatchType, currentMalScore, Math.Max(0, Math.Min(leng, currentMax)));
+
+				currentMax -= leng;
+			}
+			App.ShowToast("Sync complete");
+			UpdateAllMalValues();
+			Device.BeginInvokeOnMainThread(() => {
+				UpdateMalVisual();
+			});
 		}
 
 		// ============================== TOGGLE HAS SEEN EPISODE ==============================

@@ -54,7 +54,7 @@ namespace CloudStreamForms.Script
 				allTitles[data.id] = data;
 			}
 		}
-		 
+
 		static void StoreToken(string response)
 		{
 			try {
@@ -89,9 +89,18 @@ namespace CloudStreamForms.Script
 			var res = await SetScoreRequest(id, status == null ? null : statusAsString[(int)status], score, num_watched_episodes);
 			if (res.IsClean()) {
 				MalStatus title = JsonConvert.DeserializeObject<MalStatus>(res);
-				var currentTitle = allTitles[id];
-				currentTitle.status = title;
-				allTitles[id] = currentTitle;
+				if (allTitles.ContainsKey(id)) {
+					var currentTitle = allTitles[id];
+					currentTitle.status = title;
+					allTitles[id] = currentTitle;
+				}
+				else {
+					allTitles[id] = new MalTitleHolder() {
+						id = id,
+						name = "",
+						status = title,
+					};
+				}
 
 				return title;
 			}
@@ -171,8 +180,11 @@ namespace CloudStreamForms.Script
 			public DateTime JoinedAt { get { return DateTime.Parse(joined_at); } }
 		}
 
-		static readonly string[] statusAsString = { "watching", "completed", "on-hold", "dropped", "plan to watch" };
-		public enum MalStatusType { Watching = 0, Completed = 1, OnHold = 2, Dropped = 3, PlanToWatch = 4 };
+		public static readonly string[] StatusNames = { "Watching", "Completed", "On-Hold", "Dropped", "Plan To Watch" };
+		public static readonly string[] MalRatingNames = { "1 - Appalling", "2 - Horrible", "3 - Very Bad", "4 - Bad", "5 - Average", "6 - Fine", "7 - Good", "8 - Very Good", "9 - Great", "10 - Masterpiece" };
+		static readonly string[] statusAsString = { "watching", "completed", "on-hold", "dropped", "plan_to_watch" };
+
+		public enum MalStatusType { Watching = 0, Completed = 1, OnHold = 2, Dropped = 3, PlanToWatch = 4, none = -1 };
 
 		public static async Task<MalTitleHolder[]?> GetAllMalData(string user = "@me")
 		{
@@ -182,10 +194,8 @@ namespace CloudStreamForms.Script
 				while (!done) {
 					string res = await GetApi($"https://api.myanimelist.net/v2/users/{user}/animelist?fields=list_status&limit=1000&offset=0");
 					var root = JsonConvert.DeserializeObject<MalRoot>(res);
-					var titles = root.data.Select(t => new MalTitleHolder() { id = t.node.id, name = t.node.title,status = t.list_status }).ToArray();
-					for (int i = 0; i < titles.Length; i++) {
-						CloudStreamCore.print(titles[i].name + "|" + titles[i].id);
-					}
+					var titles = root.data.Select(t => new MalTitleHolder() { id = t.node.id, name = t.node.title, status = t.list_status }).ToArray();
+
 					data.AddRange(titles);
 					if (titles.Length < 1000) {
 						done = true;
@@ -196,7 +206,6 @@ namespace CloudStreamForms.Script
 			catch (Exception _ex) {
 				return null;
 			}
-
 		}
 
 		public static async Task<MalUser?> GetUser(bool setSettings = true)

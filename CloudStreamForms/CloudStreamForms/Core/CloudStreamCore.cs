@@ -293,6 +293,7 @@ namespace CloudStreamForms.Core
 		[Serializable]
 		public struct MALSeason
 		{
+			public int length;
 			public string malUrl;
 			public string aniListUrl;
 			public int MalId {
@@ -3177,11 +3178,11 @@ namespace CloudStreamForms.Core
 
 						for (int z = 0; z < activeMovie.title.MALData.seasonData.Count; z++) {
 							for (int q = 0; q < activeMovie.title.MALData.seasonData[z].seasons.Count; q++) {
-								string malUrl;
+								int malId;
 								lock (_lock) {
-									malUrl = activeMovie.title.MALData.seasonData[z].seasons[q].malUrl;
+									malId = activeMovie.title.MALData.seasonData[z].seasons[q].MalId;
 								}
-								if (FindHTML(malUrl, "/anime/", "/") == id) {
+								if (malId.ToString() == id) {
 									AnimekisaData ms;
 									lock (_lock) {
 										ms = activeMovie.title.MALData.seasonData[z].seasons[q].animekisaData;
@@ -3773,7 +3774,7 @@ namespace CloudStreamForms.Core
 							int id = ms.animeFlixData.EpisodesUrls[normalEpisode].id;
 
 							print("DLOAD:===" + id);
-							string main = DownloadString("https://animeflix.io/api/videos?episode_id=" + id,referer: "https://animeflix.io");
+							string main = DownloadString("https://animeflix.io/api/videos?episode_id=" + id, referer: "https://animeflix.io");
 							if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
 							var epData = JsonConvert.DeserializeObject<List<AnimeFlixRawEpisode>>(main);
 
@@ -3782,7 +3783,7 @@ namespace CloudStreamForms.Core
 									bool isApi = epData[i].file.StartsWith("/api");
 									string _name = "Animeflix " + epData[i].provider;
 									if (!isApi) {
-										AddPotentialLink(normalEpisode,  epData[i].file, _name, 10, epData[i].resolution);
+										AddPotentialLink(normalEpisode, epData[i].file, _name, 10, epData[i].resolution);
 									}
 									else {
 										AddPotentialLink(normalEpisode, new BasicLink() { baseUrl = "https://animeflix.io" + epData[i].file, name = _name, referer = "https://animeflix.io", isAdvancedLink = true, priority = 10 });
@@ -6212,6 +6213,7 @@ namespace CloudStreamForms.Core
 								string _malLink = (sqlLink == "-1" ? url.Replace("https://myanimelist.net", "") : sqlLink);
 								currentName = FindHTML(d, "<span itemprop=\"name\">", "<", decodeToNonHtml: true);
 								string sequel = FindHTML(d, "Sequel:", "</a></td>") + "<";
+								string totalEpisodes = FindHTML(d, "Episodes:</span>", "</div>");
 								sqlLink = FindHTML(sequel, "<a href=\"", "\"");
 								string _jap = FindHTML(d, "Japanese:</span> ", "<", decodeToNonHtml: true).Replace("  ", "").Replace("\n", "");
 								string _eng = FindHTML(d, "English:</span> ", "<", decodeToNonHtml: true).Replace("  ", "").Replace("\n", "");
@@ -6238,13 +6240,14 @@ namespace CloudStreamForms.Core
 								}
 								print("CURRENTNAME: " + currentName + "|" + _eng + "|" + _jap);
 								//tt2359704 = jojo
+								var malS = new MALSeason() { length = int.Parse(totalEpisodes), name = currentName, engName = _eng, japName = _jap, synonyms = _synos, malUrl = _malLink, startDate = _startDate, endDate = _endDate };
 								if (currentName.Contains("Part ") && !currentName.Contains("Part 1")) // WILL ONLY WORK UNTIL PART 10, BUT JUST HOPE THAT THAT DOSENT HAPPEND :) (Not on jojo)
 								{
-									data[^1].seasons.Add(new MALSeason() { name = currentName, engName = _eng, japName = _jap, synonyms = _synos, malUrl = _malLink, startDate = _startDate, endDate = _endDate });
+									data[^1].seasons.Add(malS);
 								}
 								else {
 									data.Add(new MALSeasonData() {
-										seasons = new List<MALSeason>() { new MALSeason() { name = currentName, engName = _eng, japName = _jap, synonyms = _synos, malUrl = _malLink, startDate = _startDate, endDate = _endDate } },
+										seasons = new List<MALSeason>() { malS },
 										malUrl = "https://myanimelist.net" + _malLink
 									});
 								}
@@ -6341,12 +6344,14 @@ namespace CloudStreamForms.Core
 										string _aniListLink = ToAniListUrl(title.id);
 										var _startDate = ToDate(title.startDate?.year, title.startDate?.month, title.startDate?.day);
 										var _endDate = ToDate(title.endDate?.year, title.endDate?.month, title.endDate?.day);
+										//title.episodes
+										var malS = new MALSeason() { length = title.episodes ?? 0, aniListUrl = _aniListLink, name = currentName, engName = _eng, japName = _jap, synonyms = _synos, malUrl = _malLink, startDate = _startDate, endDate = _endDate };
 										if (currentName.Contains("Part ") && !currentName.Contains("Part 1")) { // WILL ONLY WORK UNTIL PART 10, BUT JUST HOPE THAT THAT DOSENT HAPPEND :) (Not on jojo)
-											data[^1].seasons.Add(new MALSeason() { aniListUrl = _aniListLink, name = currentName, engName = _eng, japName = _jap, synonyms = _synos, malUrl = _malLink, startDate = _startDate, endDate = _endDate });
+											data[^1].seasons.Add(malS);
 										}
 										else {
 											data.Add(new MALSeasonData() {
-												seasons = new List<MALSeason>() { new MALSeason() { aniListUrl = _aniListLink, name = currentName, engName = _eng, japName = _jap, synonyms = _synos, malUrl = _malLink, startDate = _startDate, endDate = _endDate } },
+												seasons = new List<MALSeason>() { malS },
 												malUrl = _malLink,
 												aniListUrl = _aniListLink,
 											});
@@ -6951,7 +6956,7 @@ namespace CloudStreamForms.Core
 						}
 						//episodeLoaded?.Invoke(null, activeMovie.episodes);
 
-						activeMovie.episodes = new List<Episode>(); 
+						activeMovie.episodes = new List<Episode>();
 
 						for (int q = 1; q <= eps; q++) {
 							string lookFor = "?ref_=ttep_ep" + q;
@@ -7067,7 +7072,7 @@ namespace CloudStreamForms.Core
 						}
 
 						// JUST IN CASE
-						var _slit = s.Replace("\\N"," ").Split('\n');
+						var _slit = s.Replace("\\N", " ").Split('\n');
 						s = "";
 						for (int i = 0; i < _slit.Length; i++) {
 							var _line = _slit[i];
@@ -7430,7 +7435,7 @@ namespace CloudStreamForms.Core
 				}
 			}
 			catch (Exception _ex) {
-				print("THIS SHOULD NEVER HAPPEND: " + _ex);
+				print("THIS SHOULD NEVER HAPPEND, might be episode load when switching: " + _ex);
 			}
 		}
 
@@ -8338,7 +8343,7 @@ namespace CloudStreamForms.Core
 #if DEBUG
 				EndStopwatchNum(_s, nameof(AddPotentialLink));
 #endif
-			} 
+			}
 		}
 
 		public DubbedAnimeEpisode GetDubbedAnimeEpisode(string slug, int? eps = null)
@@ -8919,7 +8924,7 @@ namespace CloudStreamForms.Core
 			return 0;
 		}
 		static void EndStopwatchNum(int num, string name)
-		{ 
+		{
 		}
 		public static void EndDebugging()
 		{
@@ -9839,7 +9844,7 @@ namespace AniListAPI
 			public string type;
 			//    public int averageScore;
 			public int popularity;
-			//  public int episodes;
+			public int? episodes;
 			public string season;
 			public string hashtag;
 			public bool isAdult;
@@ -9889,7 +9894,7 @@ namespace AniListAPI
 			public string format;
 			public string type;
 			public string status;
-			//       public int episodes;
+			public int? episodes;
 			public object chapters;
 			public object volumes;
 			public string season;

@@ -9,193 +9,205 @@ using Xamarin.Forms.Xaml;
 
 namespace CloudStreamForms
 {
-    [XamlCompilation(XamlCompilationOptions.Compile)]
-    public partial class InputPopupPage : PopupPage
-    {
-        public enum InputPopupResult
-        {
-            integrerNumber = 0,
-            decimalNumber = 1,
-            plainText = 2,
-            password = 3,
-            url = 4,
-        }
+	[XamlCompilation(XamlCompilationOptions.Compile)]
+	public partial class InputPopupPage : PopupPage
+	{
+		public enum InputPopupResult
+		{
+			integrerNumber = 0,
+			decimalNumber = 1,
+			plainText = 2,
+			password = 3,
+			url = 4,
+		}
 
-        public static void CheckEntry(Entry entry, InputPopupResult inputType, bool autoPaste = false, string setText = null, bool setWidth = true, bool setFontSize = true)
-        {
-            entry.ReturnType = ReturnType.Done;
-            bool _isNumber = (inputType == InputPopupResult.decimalNumber || inputType == InputPopupResult.integrerNumber);
-            // FORCE CORRENT TYPE
-            entry.TextChanged += (o, e) => {
-                if (inputType == InputPopupResult.integrerNumber || inputType == InputPopupResult.decimalNumber) {
-                    if (e.NewTextValue.Contains("-") && !e.NewTextValue.StartsWith("-")) {
-                        entry.Text = e.OldTextValue;
-                    }
-                }
+		public static void CheckEntry(Entry entry, InputPopupResult inputType, bool autoPaste = false, string setText = null, bool setWidth = true, bool setFontSize = true, int min = int.MinValue, int max = int.MaxValue)
+		{
+			entry.ReturnType = ReturnType.Done;
+			bool _isNumber = (inputType == InputPopupResult.decimalNumber || inputType == InputPopupResult.integrerNumber);
+			// FORCE CORRENT TYPE
+			entry.TextChanged += (o, e) => {
+				if (inputType == InputPopupResult.integrerNumber || inputType == InputPopupResult.decimalNumber) {
+					if (e.NewTextValue.Contains("-") && !e.NewTextValue.StartsWith("-")) {
+						entry.Text = e.OldTextValue;
+					}
+				}
 
-                if (inputType == InputPopupResult.integrerNumber) {
-                    entry.Text = Regex.Replace(e.NewTextValue, "[^0-9-]", "");
-                }
-                else if (inputType == InputPopupResult.decimalNumber) {
-                    entry.Text = Regex.Replace(e.NewTextValue, "[^0-9.,-]", "");
-                    if (e.OldTextValue.IsClean()) {
-                        if (e.OldTextValue.Contains(",") || e.OldTextValue.Contains(".")) { // REMOVE DUPLICATES
-                            if (e.NewTextValue.EndsWith(",") || e.NewTextValue.EndsWith(".")) {
-                                entry.Text = entry.Text[0..^1];
-                            }
-                        }
-                    }
-                    else {
-                        if (e.NewTextValue.StartsWith(",") || e.NewTextValue.StartsWith(".")) {
-                            entry.Text = "";
-                        }
-                    }
-                }
-            };
+				if (inputType == InputPopupResult.integrerNumber) {
+					entry.Text = Regex.Replace(e.NewTextValue, "[^0-9-]", "");
+				}
+				else if (inputType == InputPopupResult.decimalNumber) {
+					entry.Text = Regex.Replace(e.NewTextValue, "[^0-9.,-]", "");
+					if (e.OldTextValue.IsClean()) {
+						if (e.OldTextValue.Contains(",") || e.OldTextValue.Contains(".")) { // REMOVE DUPLICATES
+							if (e.NewTextValue.EndsWith(",") || e.NewTextValue.EndsWith(".")) {
+								entry.Text = entry.Text[0..^1];
+							}
+						}
+					}
+					else {
+						if (e.NewTextValue.StartsWith(",") || e.NewTextValue.StartsWith(".")) {
+							entry.Text = "";
+						}
+					}
+				}
 
-            entry.Text = setText ?? "";
+				try {
+					if (_isNumber) {
+						decimal.TryParse(entry.Text, out decimal dec);
+						if (dec > max || dec < min) {
+							entry.Text = e.OldTextValue;
+						}
+					}
+				}
+				catch (System.Exception) {
 
-            if (inputType == InputPopupResult.decimalNumber || inputType == InputPopupResult.integrerNumber) {
-                entry.IsSpellCheckEnabled = false;
-                entry.IsTextPredictionEnabled = false;
-                entry.Keyboard = Keyboard.Numeric;
-            }
-            else if (inputType == InputPopupResult.password) {
-                entry.IsPassword = true;
-            }
-            else if (inputType == InputPopupResult.url) {
-                entry.Keyboard = Keyboard.Url;
-                entry.IsSpellCheckEnabled = false;
-                if (autoPaste && Xamarin.Essentials.Clipboard.HasText) {
-                    CloudStreamCore.print("AUTOPLAS:E ");
-                    var paste = Xamarin.Essentials.Clipboard.GetTextAsync().Result;
-                    CloudStreamCore.print("AUTOPLAS:E222: " + paste);
-                    entry.Text = paste;
-                }
-            }
-            entry.ClearButtonVisibility = ClearButtonVisibility.WhileEditing;
+				}
+			};
 
-            if (setWidth) {
-                entry.WidthRequest = _isNumber ? 150 : 300;
-            }
-            if (setFontSize) {
-                entry.FontSize = _isNumber ? 25 : 20;
-            }
-        }
+			entry.Text = setText ?? "";
 
-        readonly InputPopupResult InputType;
-        public InputPopupPage(InputPopupResult inputType, string placeHolder = "", string title = "", int offset = -1, bool autoPaste = true, string setText = null, string confirmText = "")
-        {
-            InitializeComponent();
-            BackgroundColor = new Color(0, 0, 0, 0.9);
-            InputType = inputType;
+			if (inputType == InputPopupResult.decimalNumber || inputType == InputPopupResult.integrerNumber) {
+				entry.IsSpellCheckEnabled = false;
+				entry.IsTextPredictionEnabled = false;
+				entry.Keyboard = Keyboard.Numeric;
+			}
+			else if (inputType == InputPopupResult.password) {
+				entry.IsPassword = true;
+			}
+			else if (inputType == InputPopupResult.url) {
+				entry.Keyboard = Keyboard.Url;
+				entry.IsSpellCheckEnabled = false;
+				if (autoPaste && Xamarin.Essentials.Clipboard.HasText) {
+					CloudStreamCore.print("AUTOPLAS:E ");
+					var paste = Xamarin.Essentials.Clipboard.GetTextAsync().Result;
+					CloudStreamCore.print("AUTOPLAS:E222: " + paste);
+					entry.Text = paste;
+				}
+			}
+			entry.ClearButtonVisibility = ClearButtonVisibility.WhileEditing;
 
-            CancelButton.Source = App.GetImageSource("netflixCancel.png");
-            if (offset != -1) {
-                void ChangeBtt(int add)
-                {
-                    if (InputF.Text == "") {
-                        InputF.Text = "0";
-                    }
-                    decimal p = decimal.Parse(InputF.Text);
-                    int round = ((int)System.Math.Round(p / offset)) * offset;
-                    InputF.Text = (round + add).ToString();
-                }
+			if (setWidth) {
+				entry.WidthRequest = _isNumber ? 150 : 300;
+			}
+			if (setFontSize) {
+				entry.FontSize = _isNumber ? 25 : 20;
+			}
+		}
 
-                UpButton.Source = App.GetImageSource("upButton3.png");
-                DownButton.Source = App.GetImageSource("upButton3.png");
-                UpButton.Clicked += (o, e) => {
-                    ChangeBtt(offset);
-                };
-                DownButton.Clicked += (o, e) => {
-                    ChangeBtt(-offset);
-                };
-            }
-            else {
-                OffsetButtons.IsVisible = false;
-                OffsetButtons.IsEnabled = false;
-            }
+		readonly InputPopupResult InputType;
+		public InputPopupPage(InputPopupResult inputType, string placeHolder = "", string title = "", int offset = -1, bool autoPaste = true, string setText = null, string confirmText = "", int min = int.MinValue, int max = int.MaxValue)
+		{
+			InitializeComponent();
+			BackgroundColor = new Color(0, 0, 0, 0.9);
+			InputType = inputType;
 
-            bool confirmEnabled = confirmText != "";
+			CancelButton.Source = App.GetImageSource("netflixCancel.png");
+			if (offset != -1) {
+				void ChangeBtt(int add)
+				{
+					if (InputF.Text == "") {
+						InputF.Text = "0";
+					}
+					decimal p = decimal.Parse(InputF.Text);
+					int round = ((int)System.Math.Round(p / offset)) * offset;
+					InputF.Text = (round + add).ToString();
+				}
 
-            ConfirmButton.IsVisible = confirmEnabled;
-            ConfirmButton.IsEnabled = confirmEnabled;
-            if (confirmEnabled) {
-                ConfirmButton.Text = confirmText;
-                CloudStreamCore.print("CONFIRMDDADA: " + confirmText);
-                ConfirmButton.Clicked += (o, e) => {
-                    Done();
-                };
-            }
+				UpButton.Source = App.GetImageSource("upButton3.png");
+				DownButton.Source = App.GetImageSource("upButton3.png");
+				UpButton.Clicked += (o, e) => {
+					ChangeBtt(offset);
+				};
+				DownButton.Clicked += (o, e) => {
+					ChangeBtt(-offset);
+				};
+			}
+			else {
+				OffsetButtons.IsVisible = false;
+				OffsetButtons.IsEnabled = false;
+			}
 
-            UpdateScreenRot();
-            TheStack.SizeChanged += (o, e) => {
-                UpdateScreenRot();
-            };
-            CancelButtonBtt.Clicked += (o, e) => {
-                cancel = true;
-                Done(IsNumber ? "" : "Cancel");
-            };
+			bool confirmEnabled = confirmText != "";
 
-            InputF.Completed += (o, e) => {
-                Done();
-            };
-            InputF.Placeholder = placeHolder;
-            CheckEntry(InputF, inputType, autoPaste, setText);
+			ConfirmButton.IsVisible = confirmEnabled;
+			ConfirmButton.IsEnabled = confirmEnabled;
+			if (confirmEnabled) {
+				ConfirmButton.Text = confirmText;
+				CloudStreamCore.print("CONFIRMDDADA: " + confirmText);
+				ConfirmButton.Clicked += (o, e) => {
+					Done();
+				};
+			}
 
-            HeaderTitle.Text = title;
-        }
+			UpdateScreenRot();
+			TheStack.SizeChanged += (o, e) => {
+				UpdateScreenRot();
+			};
+			CancelButtonBtt.Clicked += (o, e) => {
+				cancel = true;
+				Done(IsNumber ? "" : "Cancel");
+			};
 
-        string text = "";
-        bool isDone = false;
-        bool cancel = false;
-        bool IsNumber { get { return (InputType == InputPopupResult.decimalNumber || InputType == InputPopupResult.integrerNumber); } }
+			InputF.Completed += (o, e) => {
+				Done();
+			};
+			InputF.Placeholder = placeHolder;
+			CheckEntry(InputF, inputType, autoPaste, setText, min: min, max: max);
 
-        async void Done(string txt = null)
-        {
-            text = txt ?? InputF.Text;
-            isDone = true;
-            await Task.Delay(30);
-            await PopupNavigation.PopAsync(true);
-        }
+			HeaderTitle.Text = title;
+		}
 
-        public async Task<string> WaitForResult()
-        {
-            while (!isDone) {
-                await Task.Delay(10);
-            }
-            CloudStreamCore.print("MAIN RESTT:T::T: " + text);
-            if (cancel) {
-                if (InputType == InputPopupResult.decimalNumber || InputType == InputPopupResult.integrerNumber) {
-                    return "-1";
-                }
-                else return "Cancel";
-            }
-            if (IsNumber && text == "") {
-                return "-1";
-            }
+		string text = "";
+		bool isDone = false;
+		bool cancel = false;
+		bool IsNumber { get { return (InputType == InputPopupResult.decimalNumber || InputType == InputPopupResult.integrerNumber); } }
 
-            return text;
-        }
+		async void Done(string txt = null)
+		{
+			text = txt ?? InputF.Text;
+			isDone = true;
+			await Task.Delay(30);
+			await PopupNavigation.PopAsync(true);
+		}
 
-        const bool setOnLeft = true;
+		public async Task<string> WaitForResult()
+		{
+			while (!isDone) {
+				await Task.Delay(10);
+			}
+			CloudStreamCore.print("MAIN RESTT:T::T: " + text);
+			if (cancel) {
+				if (InputType == InputPopupResult.decimalNumber || InputType == InputPopupResult.integrerNumber) {
+					return "-1";
+				}
+				else return "Cancel";
+			}
+			if (IsNumber && text == "") {
+				return "-1";
+			}
 
-        void UpdateScreenRot()
-        {
-            bool hightOverWidth = Bounds.Height > Bounds.Width;
-            if (setOnLeft) {
-                CrossbttLayout.VerticalOptions = hightOverWidth ? LayoutOptions.End : LayoutOptions.Center;
-                CrossbttLayout.HorizontalOptions = hightOverWidth ? LayoutOptions.Center : LayoutOptions.End;
-                CrossbttLayout.TranslationY = hightOverWidth ? -40 : 20;
-                CrossbttLayout.TranslationX = hightOverWidth ? 0 : 40;
-                TheStack.TranslationX = hightOverWidth ? 0 : 80;
-                CenterStack.VerticalOptions = hightOverWidth ? LayoutOptions.Start : LayoutOptions.Center;
+			return text;
+		}
 
-                //TheStack.HorizontalOptions = hightOverWidth ? LayoutOptions.Center : LayoutOptions.CenterAndExpand;
-                TheStack.TranslationY = hightOverWidth ? 100 : 70;
-                Grid.SetRow(CrossbttLayout, hightOverWidth ? 1 : 0);
-                Grid.SetColumn(CrossbttLayout, hightOverWidth ? 0 : 1);
-            }
-        }
-    }
+		const bool setOnLeft = true;
+
+		void UpdateScreenRot()
+		{
+			bool hightOverWidth = Bounds.Height > Bounds.Width;
+			if (setOnLeft) {
+				CrossbttLayout.VerticalOptions = hightOverWidth ? LayoutOptions.End : LayoutOptions.Center;
+				CrossbttLayout.HorizontalOptions = hightOverWidth ? LayoutOptions.Center : LayoutOptions.End;
+				CrossbttLayout.TranslationY = hightOverWidth ? -40 : 20;
+				CrossbttLayout.TranslationX = hightOverWidth ? 0 : 40;
+				TheStack.TranslationX = hightOverWidth ? 0 : 80;
+				CenterStack.VerticalOptions = hightOverWidth ? LayoutOptions.Start : LayoutOptions.Center;
+
+				//TheStack.HorizontalOptions = hightOverWidth ? LayoutOptions.Center : LayoutOptions.CenterAndExpand;
+				TheStack.TranslationY = hightOverWidth ? 100 : 70;
+				Grid.SetRow(CrossbttLayout, hightOverWidth ? 1 : 0);
+				Grid.SetColumn(CrossbttLayout, hightOverWidth ? 0 : 1);
+			}
+		}
+	}
 }

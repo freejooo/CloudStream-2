@@ -33,6 +33,7 @@ namespace CloudStreamForms.InterfacePages
 
 		//	public EventHandler<FadePickerEvent> FadePickerChanged;
 		public event EventHandler<Movie> titleLoaded;
+		public event EventHandler<MALData> malDataLoaded;
 
 		public struct BackgroundImageEvent
 		{
@@ -179,8 +180,13 @@ namespace CloudStreamForms.InterfacePages
 			core.titleLoaded += Core_titleLoaded;
 			core.episodeHalfLoaded += EpisodesHalfLoaded;
 			core.episodeLoaded += Core_episodeLoaded;
-
+			core.malDataLoaded += Core_malDataLoaded;
 			core.GetImdbTitle(new Poster() { year = year, name = name, url = id });
+		}
+
+		private void Core_malDataLoaded(object sender, MALData e)
+		{
+			malDataLoaded?.Invoke(null, e);
 		}
 
 		public struct EpisodeData

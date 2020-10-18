@@ -66,9 +66,9 @@ namespace CloudStreamForms
             return await page.WaitForResult();
         }
 
-        public static async Task<string> DisplayEntry(InputPopupResult result, string placeHolder, string title = "", int offset = -1, bool autoPaste = true, string setText = null, string confirmText = "")
+        public static async Task<string> DisplayEntry(InputPopupResult result, string placeHolder, string title = "", int offset = -1, bool autoPaste = true, string setText = null, string confirmText = "", int min = int.MinValue, int max = int.MaxValue)
         {
-            var page = new InputPopupPage(result, placeHolder, title, offset, autoPaste, setText, confirmText);
+            var page = new InputPopupPage(result, placeHolder, title, offset, autoPaste, setText, confirmText,min,max);
             await PopupNavigation.Instance.PushAsync(page);
             return await page.WaitForResult();
         }
@@ -78,9 +78,9 @@ namespace CloudStreamForms
             return decimal.Parse((await DisplayEntry(InputPopupResult.decimalNumber, placeHolder, title, offset, autoPaste, setText, confirmText)).Replace(".", ","));
         }
 
-        public static async Task<int> DisplayIntEntry(string placeHolder, string title = "", int offset = -1, bool autoPaste = true, string setText = null, string confirmText = "")
+        public static async Task<int> DisplayIntEntry(string placeHolder, string title = "", int offset = -1, bool autoPaste = true, string setText = null, string confirmText = "", int min = int.MinValue, int max = int.MaxValue)
         {
-            return int.Parse(await DisplayEntry(InputPopupResult.integrerNumber, placeHolder, title, offset, autoPaste, setText, confirmText));
+            return int.Parse(await DisplayEntry(InputPopupResult.integrerNumber, placeHolder, title, offset, autoPaste, setText, confirmText,min,max));
         }
     }
 
