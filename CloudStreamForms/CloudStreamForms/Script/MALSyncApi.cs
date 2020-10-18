@@ -112,9 +112,14 @@ namespace CloudStreamForms.Script
 		public static async Task<string> SetScoreRequest(int id, string status = null, int? score = null, int? num_watched_episodes = null)
 		{
 			string arguments = "";
+			arguments += status == null ? "" : $"&status={status}";
+			arguments += score == null ? "" : $"&score={score}";
+			arguments += num_watched_episodes == null ? "" : $"&num_watched_episodes={num_watched_episodes}";
+
+			/*
 			arguments += status == null ? "" : $"status={status}";
 			arguments += (arguments == "" ? "" : "&") + (score == null ? "" : $"score={score}");
-			arguments += (arguments == "" ? "" : "&") + (num_watched_episodes == null ? "" : $"num_watched_episodes={num_watched_episodes}");
+			arguments += (arguments == "" ? "" : "&") + (num_watched_episodes == null ? "" : $"num_watched_episodes={num_watched_episodes}");*/
 			return await PostApi($"https://api.myanimelist.net/v2/anime/{id}/my_list_status", arguments);
 		}
 
@@ -181,7 +186,7 @@ namespace CloudStreamForms.Script
 		}
 
 		public static readonly string[] StatusNames = { "Watching", "Completed", "On-Hold", "Dropped", "Plan To Watch" };
-		public static readonly string[] MalRatingNames = { "1 - Appalling", "2 - Horrible", "3 - Very Bad", "4 - Bad", "5 - Average", "6 - Fine", "7 - Good", "8 - Very Good", "9 - Great", "10 - Masterpiece" };
+		public static readonly string[] MalRatingNames = { "No Rating", "1 - Appalling", "2 - Horrible", "3 - Very Bad", "4 - Bad", "5 - Average", "6 - Fine", "7 - Good", "8 - Very Good", "9 - Great", "10 - Masterpiece" };
 		static readonly string[] statusAsString = { "watching", "completed", "on-hold", "dropped", "plan_to_watch" };
 
 		public enum MalStatusType { Watching = 0, Completed = 1, OnHold = 2, Dropped = 3, PlanToWatch = 4, none = -1 };

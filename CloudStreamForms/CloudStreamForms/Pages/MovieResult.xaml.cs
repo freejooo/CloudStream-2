@@ -391,7 +391,7 @@ namespace CloudStreamForms
 
 			controller.OnExposedEpisodesChanged += (object o, EpisodeData[] e) => {
 				if (IsDead) return;
-				
+
 				Device.InvokeOnMainThreadAsync(async () => {
 					FadeEpisodes.AbortAnimation("FadeTo");
 					FadeEpisodes.Opacity = 0;
@@ -1823,13 +1823,13 @@ namespace CloudStreamForms
 
 		private async void MalRating_Clicked(object sender, EventArgs e)
 		{
-			string rate = await ActionPopup.DisplayActionSheet("Rate anime", currentMalScore == -1 ? -1 :  10 - currentMalScore, MALSyncApi.MalRatingNames.Reverse().ToArray());
+			string rate = await ActionPopup.DisplayActionSheet("Rate anime", 10 - currentMalScore, MALSyncApi.MalRatingNames.Reverse().ToArray());
 			int index = MALSyncApi.MalRatingNames.IndexOf(rate);
 			if (index >= 0) {
-				if (currentMalScore == -1 && currentMalWatchType == MALSyncApi.MalStatusType.none) {
+				if (currentMalScore == 0 && index != 0 && currentMalWatchType == MALSyncApi.MalStatusType.none) {
 					currentMalWatchType = MALSyncApi.MalStatusType.Watching;
 				}
-				currentMalScore = index + 1;
+				currentMalScore = index;
 				MalValueUpdated();
 			}
 		}
@@ -1859,6 +1859,9 @@ namespace CloudStreamForms
 				string action = await ActionPopup.DisplayActionSheet("Set Status", (int)currentMalWatchType, MALSyncApi.StatusNames);
 				if (action != "Cancel") {
 					currentMalWatchType = (MALSyncApi.MalStatusType)(MALSyncApi.StatusNames.IndexOf(action));
+					if (currentMalWatchType == MALSyncApi.MalStatusType.Completed && currentMalEpisodesProgress == 0) {
+						currentMalEpisodesProgress = maxMalEpisode;
+					}
 					MalValueUpdated();
 				}
 			}
@@ -1874,7 +1877,7 @@ namespace CloudStreamForms
 			Grid.SetRow(SecMalRow, isVis ? 6 : 5);
 			if (isVis) {
 				if (currentMalScore >= 0) {
-					MalRatingTxt.Text = MALSyncApi.MalRatingNames[currentMalScore - 1];
+					MalRatingTxt.Text = MALSyncApi.MalRatingNames[currentMalScore];
 				}
 				else {
 					MalRatingTxt.Text = "No Rating";
@@ -1895,7 +1898,7 @@ namespace CloudStreamForms
 		public int CurrentMalId { get { return malIds[0]; } }
 		public MALSyncApi.MalStatusType currentMalWatchType = MALSyncApi.MalStatusType.none;
 		public int currentMalEpisodesProgress = 0;
-		public int currentMalScore = -1;
+		public int currentMalScore = 0; // 0 = no rating
 		public bool updateMalData;
 		public int maxMalEpisode = 0;
 
@@ -1912,18 +1915,20 @@ namespace CloudStreamForms
 			SyncButton.Transformations = new List<FFImageLoading.Work.ITransformation>() { (new FFImageLoading.Transformations.TintTransformation(updateMalData ? DARK_BLUE_COLOR : LIGHT_LIGHT_BLACK_COLOR)) };
 		}
 
-		void UpdateAllMalValues()
+		void UpdateAllMalValues(bool fullUpdate = true)
 		{
 			try {
 				updateMalData = false;
 				if (currentMovie.title.movieType == MovieType.Anime) {
-					malIds = new List<int>();
-					var ms = currentMovie.title.MALData.seasonData[currentSeason].seasons;
-					maxMalEpisode = 0;
+					if (fullUpdate) {
+						malIds = new List<int>();
+						var ms = currentMovie.title.MALData.seasonData[currentSeason].seasons;
+						maxMalEpisode = 0;
 
-					for (int i = 0; i < ms.Count; i++) {
-						malIds.Add(ms[i].MalId);
-						maxMalEpisode += ms[i].length;
+						for (int i = 0; i < ms.Count; i++) {
+							malIds.Add(ms[i].MalId);
+							maxMalEpisode += ms[i].length;
+						}
 					}
 
 					if (MALSyncApi.allTitles.ContainsKey(CurrentMalId)) {
@@ -1933,14 +1938,14 @@ namespace CloudStreamForms
 					}
 					else {
 						currentMalWatchType = MALSyncApi.MalStatusType.none;
-						currentMalScore = -1;
+						currentMalScore = 0;
 					}
-					 
+
 					currentMalEpisodesProgress = 0;
 					foreach (var id in malIds) {
 						if (MALSyncApi.allTitles.ContainsKey(id)) {
 							var data = MALSyncApi.allTitles[id];
-							currentMalEpisodesProgress += data.status.num_episodes_watched;;
+							currentMalEpisodesProgress += data.status.num_episodes_watched; ;
 						}
 					}
 				}
@@ -1952,12 +1957,8 @@ namespace CloudStreamForms
 
 		private async void MalSync_Clicked(object sender, EventArgs e)
 		{
-			if(currentMalWatchType == MALSyncApi.MalStatusType.none) {
+			if (currentMalWatchType == MALSyncApi.MalStatusType.none) {
 				App.ShowToast("Must select a watchstatus");
-				return;
-			}
-			if (currentMalScore < 0) {
-				App.ShowToast("Must select a rating");
 				return;
 			}
 
@@ -1968,20 +1969,30 @@ namespace CloudStreamForms
 			var ms = currentMovie.title.MALData.seasonData[currentSeason].seasons;
 			int currentMax = currentMalEpisodesProgress;
 
+			bool error = false;
 			for (int i = 0; i < ms.Count; i++) {
 				var leng = ms[i].length;
-				if(leng == 0) {
+				if (leng == 0) {
 					leng = currentMalEpisodesProgress;
 				}
-				await MALSyncApi.SetScoreRequestAndGetTitle(ms[i].MalId, currentMalWatchType, currentMalScore, Math.Max(0, Math.Min(leng, currentMax)));
-
+				var status = await MALSyncApi.SetScoreRequestAndGetTitle(ms[i].MalId, currentMalWatchType, currentMalScore, Math.Max(0, Math.Min(leng, currentMax)));
+				if (status == null) {
+					error = true;
+				}
 				currentMax -= leng;
 			}
-			App.ShowToast("Sync complete");
-			UpdateAllMalValues();
-			Device.BeginInvokeOnMainThread(() => {
-				UpdateMalVisual();
-			});
+			if (error) {
+				App.ShowToast("Error Syncing");
+				MalValueUpdated();
+			}
+			else {
+				App.ShowToast("Sync complete");
+				UpdateAllMalValues(false);
+				Device.BeginInvokeOnMainThread(() => {
+					UpdateMalVisual();
+				});
+			}
+			
 		}
 
 		// ============================== TOGGLE HAS SEEN EPISODE ==============================
