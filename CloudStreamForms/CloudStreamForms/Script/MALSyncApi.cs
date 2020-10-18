@@ -1,17 +1,27 @@
-﻿using CloudStreamForms.Core;
+﻿using Acr.UserDialogs;
+using AniListAPI.Model;
+using CloudStreamForms.Core;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
+using Xamarin.Forms.Internals;
 
 namespace CloudStreamForms.Script
 {
+
+
+	//https://myanimelist.net/apiconfig/references/api/v2
 	public static class MALSyncApi
 	{
+
+		public static Dictionary<int, MalTitleHolder> allTitles = new Dictionary<int, MalTitleHolder>();
+
 		const string clientId = "4fd61fb30dd2931fb6ff39228a087103";
 
 		static int requestId = 0;
@@ -25,10 +35,26 @@ namespace CloudStreamForms.Script
 				string res = await PostRequest("https://myanimelist.net/v1/oauth2/token", $"client_id={clientId}&code={currentCode}&code_verifier={code_verifier}&grant_type=authorization_code");
 				StoreToken(res);
 				await GetUser();
+				App.SaveData();
+				await OnLoginOrStart();
 				App.ShowToast("Login complete");
 			}
 		}
 
+		public static async Task OnLoginOrStart()
+		{
+			await FetchAllTitles();
+		}
+
+		public static async Task FetchAllTitles()
+		{
+			var allUserData = await GetAllMalData();
+			allTitles.Clear();
+			foreach (var data in allUserData) {
+				allTitles[data.id] = data;
+			}
+		}
+		 
 		static void StoreToken(string response)
 		{
 			try {
@@ -56,6 +82,24 @@ namespace CloudStreamForms.Script
 			public string refresh_token;
 		}
 
+		public static async Task<MalStatus?> SetScoreRequestAndGetTitle(int id, MalStatusType? status = null, int? score = null, int? num_watched_episodes = null, bool update = true)
+		{
+			//curl 'https://api.myanimelist.net/v2/anime/30230?fields=id,title,main_picture,alternative_titles,start_date,end_date,synopsis,mean,rank,popularity,num_list_users,num_scoring_users,nsfw,created_at,updated_at,media_type,status,genres,my_list_status,num_episodes,start_season,broadcast,source,average_episode_duration,rating,pictures,background,related_anime,related_manga,recommendations,studios,statistics' \
+
+			var res = await SetScoreRequest(id, status == null ? null : statusAsString[(int)status], score, num_watched_episodes);
+			if (res.IsClean()) {
+				MalStatus title = JsonConvert.DeserializeObject<MalStatus>(res);
+				var currentTitle = allTitles[id];
+				currentTitle.status = title;
+				allTitles[id] = currentTitle;
+
+				return title;
+			}
+			else {
+				return null;
+			}
+		}
+
 		public static async Task<string> SetScoreRequest(int id, string status = null, int? score = null, int? num_watched_episodes = null)
 		{
 			string arguments = "";
@@ -65,12 +109,105 @@ namespace CloudStreamForms.Script
 			return await PostApi($"https://api.myanimelist.net/v2/anime/{id}/my_list_status", arguments);
 		}
 
-		public static async Task<Settings.MalUser?> GetUser(bool setSettings = true)
+		//{\"status\":\"on_hold\",\"score\":7,\"num_episodes_watched\":11,\"is_rewatching\":false,\"updated_at\":\"2020-10-17T23:30:29+00:00\",\"priority\":0,\"num_times_rewatched\":0,\"rewatch_value\":0,\"tags\":[],\"comments\":\"\"}"
+		[System.Serializable]
+		public struct MalStatus
+		{
+			public string status;
+			public int score;
+			public int num_episodes_watched;
+			public bool is_rewatching;
+			public DateTime updated_at;
+			public MalStatusType MalStatusType { get { return (MalStatusType)statusAsString.IndexOf(status); } }
+		}
+
+		public struct MainPicture
+		{
+			public string medium;
+			public string large;
+		}
+
+		public struct Node
+		{
+			public int id;
+			public string title;
+			public MainPicture main_picture;
+		}
+
+		public struct Datum
+		{
+			public Node node;
+			public MalStatus list_status;
+		}
+
+		[System.Serializable]
+		public struct MalTitleHolder
+		{
+			public MalStatus status;
+			public int id;
+			public string name;
+		}
+
+		public struct Paging
+		{
+		}
+
+		public struct MalRoot
+		{
+			public List<Datum> data;
+			public Paging paging;
+		}
+
+
+		//"{\"id\":[USERID],\"name\":\"[USERNAME]\",\"location\":\"\",\"joined_at\":\"2019-08-01T23:52:54+00:00\",\"picture\":\"https:\\/\\/api-cdn.myanimelist.net\\/images\\/userimages\\/[USERID].jpg?t=1603022400\"}"
+		[System.Serializable]
+		public struct MalUser
+		{
+			public int id;
+			public string name;
+			public string location;
+			public string joined_at;
+			public string picture;
+			public DateTime JoinedAt { get { return DateTime.Parse(joined_at); } }
+		}
+
+		static readonly string[] statusAsString = { "watching", "completed", "on-hold", "dropped", "plan to watch" };
+		public enum MalStatusType { Watching = 0, Completed = 1, OnHold = 2, Dropped = 3, PlanToWatch = 4 };
+
+		public static async Task<MalTitleHolder[]?> GetAllMalData(string user = "@me")
+		{
+			try {
+				List<MalTitleHolder> data = new List<MalTitleHolder>();
+				bool done = false;
+				while (!done) {
+					string res = await GetApi($"https://api.myanimelist.net/v2/users/{user}/animelist?fields=list_status&limit=1000&offset=0");
+					var root = JsonConvert.DeserializeObject<MalRoot>(res);
+					var titles = root.data.Select(t => new MalTitleHolder() { id = t.node.id, name = t.node.title,status = t.list_status }).ToArray();
+					for (int i = 0; i < titles.Length; i++) {
+						CloudStreamCore.print(titles[i].name + "|" + titles[i].id);
+					}
+					data.AddRange(titles);
+					if (titles.Length < 1000) {
+						done = true;
+					}
+				}
+				return data.ToArray();
+			}
+			catch (Exception _ex) {
+				return null;
+			}
+
+		}
+
+		public static async Task<MalUser?> GetUser(bool setSettings = true)
 		{
 			try {
 				string data = await GetApi("https://api.myanimelist.net/v2/users/@me");
 				if (data.IsClean()) {
-					Settings.MalUser user = JsonConvert.DeserializeObject<Settings.MalUser>(data);
+					MalUser user = JsonConvert.DeserializeObject<MalUser>(data);
+					if (user.picture.Contains("?t=")) {
+						user.picture = user.picture[..user.picture.IndexOf("?")];
+					}
 					if (setSettings) {
 						Settings.CurrentMalUser = user;
 					}
@@ -87,7 +224,7 @@ namespace CloudStreamForms.Script
 
 		public static async Task CheckToken()
 		{
-			if (CloudStreamCore.UnixTime > Settings.MalApiTokenUnixTime) {
+			if (CloudStreamCore.UnixTime >= Settings.MalApiTokenUnixTime) {
 				await RefreshToken();
 			}
 		}
@@ -157,8 +294,6 @@ namespace CloudStreamForms.Script
 				dataStream.Close();
 				response.Close();
 				return responseFromServer;
-				//"{\"status\":\"on_hold\",\"score\":7,\"num_episodes_watched\":11,\"is_rewatching\":false,\"updated_at\":\"2020-10-17T23:30:29+00:00\",\"priority\":0,\"num_times_rewatched\":0,\"rewatch_value\":0,\"tags\":[],\"comments\":\"\"}"
-				//"{\"status\":\"watching\",\"score\":8,\"num_episodes_watched\":11,\"is_rewatching\":false,\"updated_at\":\"2020-10-17T23:26:58+00:00\",\"priority\":0,\"num_times_rewatched\":0,\"rewatch_value\":0,\"tags\":[],\"comments\":\"\"}"
 			}
 			catch (Exception _ex) {
 				CloudStreamCore.error(_ex);

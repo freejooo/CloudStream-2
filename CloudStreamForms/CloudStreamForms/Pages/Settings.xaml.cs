@@ -1,5 +1,6 @@
 ﻿using CloudStreamForms.Core;
 using CloudStreamForms.Cryptography;
+using CloudStreamForms.Script;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -13,6 +14,7 @@ using Xamarin.Forms.Internals;
 using Xamarin.Forms.Xaml;
 using XamEffects;
 using static CloudStreamForms.MainPage;
+using static CloudStreamForms.Script.MALSyncApi;
 
 namespace CloudStreamForms
 {
@@ -264,12 +266,6 @@ namespace CloudStreamForms
 			}
 		}
 
-		[System.Serializable]
-		public struct MalUser
-		{
-			public int id;
-			public string name;
-		}
 
 
 		public static string AccountUsername {
@@ -921,14 +917,19 @@ namespace CloudStreamForms
                 }
             }*/
 		}
+
 		public static void OnInitAfter()
 		{
+			if (HasMalAccountLogin) {
+				MALSyncApi.OnLoginOrStart();
+			}
 			if (AccountOverrideServerData) { // If get account dident work and you have changed then override server data
 				PublishSyncAccount(5000);
 			}
 			else { // Get account data, will override current data 
 				GetSyncAccount(5000);
 			}
+
 			AccountOverrideServerData = true;
 
 			App.OnAppNotInForground += (o, e) => {
@@ -963,6 +964,7 @@ namespace CloudStreamForms
 			actions.AddRange(new string[] { "Export data", "Export Everything", "Import data", });
 
 			string action = await ActionPopup.DisplayActionSheet("Manage account", actions.ToArray());
+	
 			if (action == "Login to MAL account") {
 				CloudStreamForms.Script.MALSyncApi.Authenticate();
 			}
