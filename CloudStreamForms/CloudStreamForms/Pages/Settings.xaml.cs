@@ -10,7 +10,6 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Xamarin.Forms;
-using Xamarin.Forms.Internals;
 using Xamarin.Forms.Xaml;
 using XamEffects;
 using static CloudStreamForms.MainPage;
@@ -238,7 +237,7 @@ namespace CloudStreamForms
 				return App.GetKey("MalAccount", nameof(MalApiToken), "");
 			}
 		}
-		
+
 		public static string MalApiRefreshToken {
 			set {
 				App.SetKey("MalAccount", nameof(MalApiRefreshToken), value);
@@ -266,6 +265,38 @@ namespace CloudStreamForms
 			}
 		}
 
+		public static AniListSyncApi.AniListUser? CurrentAniListUser {
+			set {
+				App.SetKey("AniListAccount", nameof(CurrentAniListUser), value);
+			}
+			get {
+				return App.GetKey<AniListSyncApi.AniListUser?>("AniListAccount", nameof(CurrentAniListUser), null);
+			}
+		}
+
+		public static string AniListToken {
+			set {
+				App.SetKey("AniListAccount", nameof(AniListToken), value);
+			}
+			get {
+				return App.GetKey("AniListAccount", nameof(AniListToken), "");
+			}
+		}
+
+		public static int AniListTokenUnixTime {
+			set {
+				App.SetKey("AniListAccount", nameof(AniListTokenUnixTime), value);
+			}
+			get {
+				return App.GetKey("AniListAccount", nameof(AniListTokenUnixTime), 0);
+			}
+		}
+
+		public static bool HasAniListLogin {
+			get {
+				return AniListToken != "";
+			}
+		}
 
 
 		public static string AccountUsername {
@@ -918,9 +949,20 @@ namespace CloudStreamForms
             }*/
 		}
 
-		public static void OnInitAfter()
+		public static async void OnInitAfter()
 		{
+			if (HasAniListLogin) {
+				await AniListSyncApi.CheckToken();
+
+				if (!CurrentAniListUser.HasValue) {
+					AniListSyncApi.GetUser();
+				}
+			}
+
 			if (HasMalAccountLogin) {
+				if(!CurrentMalUser.HasValue) {
+					MALSyncApi.GetUser();
+				}
 				MALSyncApi.OnLoginOrStart();
 			}
 			if (AccountOverrideServerData) { // If get account dident work and you have changed then override server data
@@ -961,14 +1003,32 @@ namespace CloudStreamForms
 				actions.Add($"Logout from MAL{(currentMalUsername == "" ? "" : $" - {currentMalUsername}")}");
 			}
 
+			if (!HasAniListLogin) {
+				actions.Add("Login to AniList account");
+			}
+			else {
+				string currentAniListUsername = "";
+				var user = CurrentAniListUser;
+				if (user.HasValue) {
+					currentAniListUsername = user.Value.name;
+				}
+				actions.Add($"Logout from AniList {(currentAniListUsername == "" ? "" : $" - {currentAniListUsername}")}");
+			}
+
 			actions.AddRange(new string[] { "Export data", "Export Everything", "Import data", });
 
 			string action = await ActionPopup.DisplayActionSheet("Manage account", actions.ToArray());
-	
-			if (action == "Login to MAL account") {
+			if (action == "Login to AniList account") {
+				CloudStreamForms.Script.AniListSyncApi.Authenticate();
+			}
+			else if (action == "Login to MAL account") {
 				CloudStreamForms.Script.MALSyncApi.Authenticate();
 			}
-			else if(action.StartsWith("Logout from MAL")) {
+			else if(action.StartsWith("Logout from AniList")) {
+				App.RemoveFolder("AniListAccount");
+				App.ShowToast("Logout complete");
+			}
+			else if (action.StartsWith("Logout from MAL")) {
 				App.RemoveFolder("MalAccount");
 				App.ShowToast("Logout complete");
 			}

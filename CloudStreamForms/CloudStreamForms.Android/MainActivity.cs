@@ -443,6 +443,9 @@ namespace CloudStreamForms.Droid
 					if (datastring.Contains("mallogin")) {
 						CloudStreamForms.Script.MALSyncApi.AuthenticateLogin(datastring);
 					}
+					else if(datastring.Contains("anilistlogin")) {
+						CloudStreamForms.Script.AniListSyncApi.AuthenticateLogin(datastring);
+					}
 					else {
 						MainPage.PushPageFromUrlAndName(datastring);
 					}

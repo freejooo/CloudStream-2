@@ -1,13 +1,10 @@
 ﻿using CloudStreamForms.Core;
-using Esprima.Ast;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 using Xamarin.Forms;
-using Xamarin.Forms.Internals;
 using Xamarin.Forms.Xaml;
 
 namespace CloudStreamForms.Pages
@@ -403,7 +400,9 @@ namespace CloudStreamForms.Pages
 				new SettingsButton("baseline_feedback_white_48dp.png","Leave feedback","",async () => {
 					await thisPage.Navigation.PushModalAsync(new Feedback());
 				}),
-				new SettingsList("outline_settings_white_48dp.png","Manage Account","", () => { return (Settings.HasAccountLogin ? $"Logged in as {Settings.AccountUsername}" : ""); },async ()  => {
+				new SettingsList("outline_settings_white_48dp.png","Manage Account","", () => {					
+					return $"{(Settings.HasAccountLogin ? "CloudSync" : "")}{(Settings.HasMalAccountLogin ? $"{(Settings.HasAccountLogin ? " | " : "")}MAL" : "")}{(Settings.HasAniListLogin ?  $"{(Settings.HasAccountLogin || Settings.HasMalAccountLogin ? " | " : "")}AniList" : "")}"; 
+				},async ()  => {
 				   await Settings.ManageAccountClicked(() => Appear());
 				}),
 			},

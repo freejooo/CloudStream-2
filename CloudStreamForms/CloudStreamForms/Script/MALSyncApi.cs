@@ -1,6 +1,4 @@
-﻿using Acr.UserDialogs;
-using AniListAPI.Model;
-using CloudStreamForms.Core;
+﻿using CloudStreamForms.Core;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -10,16 +8,13 @@ using System.Net;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
-using Xamarin.Forms.Internals;
+using static CloudStreamForms.Script.OAuthPostGet;
 
 namespace CloudStreamForms.Script
 {
-
-
 	//https://myanimelist.net/apiconfig/references/api/v2
 	public static class MALSyncApi
 	{
-
 		public static Dictionary<int, MalTitleHolder> allTitles = new Dictionary<int, MalTitleHolder>();
 
 		const string clientId = "4fd61fb30dd2931fb6ff39228a087103";
@@ -29,15 +24,24 @@ namespace CloudStreamForms.Script
 
 		public static async void AuthenticateLogin(string data)
 		{
-			string state = CloudStreamForms.Core.CloudStreamCore.FindHTML(data + "&", "state=", "&");
-			if (state == "RequestID" + requestId) {
-				string currentCode = CloudStreamForms.Core.CloudStreamCore.FindHTML(data + "&", "code=", "&");
-				string res = await PostRequest("https://myanimelist.net/v1/oauth2/token", $"client_id={clientId}&code={currentCode}&code_verifier={code_verifier}&grant_type=authorization_code");
-				StoreToken(res);
-				await GetUser();
-				App.SaveData();
-				await OnLoginOrStart();
-				App.ShowToast("Login complete");
+			try {
+				string state = CloudStreamForms.Core.CloudStreamCore.FindHTML(data + "&", "state=", "&");
+				if (state == "RequestID" + requestId) {
+					string currentCode = CloudStreamForms.Core.CloudStreamCore.FindHTML(data + "&", "code=", "&");
+					string res = await PostRequest("https://myanimelist.net/v1/oauth2/token", $"client_id={clientId}&code={currentCode}&code_verifier={code_verifier}&grant_type=authorization_code");
+					if (res == "") {
+						App.ShowToast("Login failed, no token");
+						return;
+					}
+					StoreToken(res);
+					await GetUser();
+					App.SaveData();
+					await OnLoginOrStart();
+					App.ShowToast("Login complete");
+				}
+			}
+			catch (Exception) {
+				App.ShowToast("Login failed");
 			}
 		}
 
@@ -255,65 +259,6 @@ namespace CloudStreamForms.Script
 			return await GetRequest(url, "Bearer " + Settings.MalApiToken);
 		}
 
-		public static async Task<string> GetRequest(string url, string auth = null)
-		{
-			try {
-				HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
-				request.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
-
-				request.Method = "GET";
-				if (auth.IsClean()) {
-					request.Headers["Authorization"] = auth;
-				}
-				request.ContentType = "text/html; charset=UTF-8";
-				request.UserAgent = CloudStreamCore.USERAGENT;
-				request.Headers.Add("Accept-Language", "en-US,en;q=0.5");
-				request.Headers.Add("Accept-Encoding", "gzip, deflate");
-
-				request.Headers.Add("TE", "Trailers");
-
-				using HttpWebResponse response = (HttpWebResponse)await request.GetResponseAsync();
-
-				using Stream stream = response.GetResponseStream();
-				using StreamReader reader = new StreamReader(stream, Encoding.UTF8);
-				string result = await reader.ReadToEndAsync();
-				return result;
-			}
-			catch (Exception _ex) {
-				CloudStreamCore.error(_ex);
-				return "";
-			}
-		}
-
-		public static async Task<string> PostRequest(string url, string postdata, string rtype = "POST", string auth = null)
-		{
-			try {
-				HttpWebRequest request = (HttpWebRequest)HttpWebRequest.Create(url);
-
-				request.Method = rtype;
-				if (auth.IsClean()) {
-					request.Headers["Authorization"] = auth;
-				}
-				byte[] byteArray = Encoding.UTF8.GetBytes(postdata);
-				request.ContentType = "application/x-www-form-urlencoded";
-				request.ContentLength = byteArray.Length;
-				Stream dataStream = await request.GetRequestStreamAsync();
-				dataStream.Write(byteArray, 0, byteArray.Length);
-				dataStream.Close();
-				WebResponse response = await request.GetResponseAsync();
-				dataStream = response.GetResponseStream();
-				StreamReader reader = new StreamReader(dataStream);
-				string responseFromServer = await reader.ReadToEndAsync();
-				reader.Close();
-				dataStream.Close();
-				response.Close();
-				return responseFromServer;
-			}
-			catch (Exception _ex) {
-				CloudStreamCore.error(_ex);
-				return "";
-			}
-		}
 
 		public static async void Authenticate()
 		{
