@@ -146,8 +146,21 @@ xmlns:ffTransformations="clr-namespace:FFImageLoading.Transformations;assembly=F
 						</Grid>
 						<Grid Grid.Row="5"  Grid.Column="0" x:Name="SecMalRow" Margin="4,0,5,-10" IsVisible="False" IsEnabled="False">
 							<Grid HorizontalOptions="FillAndExpand" HeightRequest="60" TranslationX="0"  x:Name="MalQuickMenu" Margin="5">
-								<Grid>
+								<Grid x:Name="MalGridHolder"> 
 									<Grid Grid.Row="0"  Grid.Column="0">
+										<ffs:SvgCachedImage x:Name="LikeBtt" InputTransparent="True" Source="favorite_border.svg" BackgroundColor="Transparent"  WidthRequest="50" HeightRequest="50">
+											<ffs:SvgCachedImage.Transformations>
+												<ffTransformations:TintTransformation HexColor="#e6e6e6" ></ffTransformations:TintTransformation>
+
+											</ffs:SvgCachedImage.Transformations>
+										</ffs:SvgCachedImage>
+										<ImageButton BackgroundColor="Transparent" Clicked="AniListFav_Clicked" HeightRequest="40" ></ImageButton>
+									</Grid>
+									<Grid Grid.Row="1"  Grid.Column="0">
+										<Label Text="Like" HorizontalOptions="Center" x:Name="LikeLabel" TextColor="Gray" FontSize="11" ></Label>
+									</Grid>
+									
+									<Grid Grid.Row="0"  Grid.Column="1">
 										<!--595959-->
 										<ffs:SvgCachedImage x:Name="MalRatingBtt" HeightRequest="50" Source="grade_white.svg"  BackgroundColor="Transparent"  WidthRequest="50">
 											<ffs:SvgCachedImage.Transformations>
@@ -157,13 +170,13 @@ xmlns:ffTransformations="clr-namespace:FFImageLoading.Transformations;assembly=F
 										</ffs:SvgCachedImage>
 										<ImageButton BackgroundColor="Transparent" Clicked="MalRating_Clicked"></ImageButton>
 									</Grid>
-									<Grid Grid.Row="1"  Grid.Column="0">
-										<Label Text="7 - Good" x:Name="MalRatingTxt" HorizontalOptions="Center" TextColor="Gray" FontSize="11"  ></Label>
+									<Grid Grid.Row="1"  Grid.Column="1">
+										<Label Text="7 - Good" HorizontalTextAlignment="Center" x:Name="MalRatingTxt" HorizontalOptions="Center" TextColor="Gray" FontSize="11"  ></Label>
 									</Grid>
 
 									
 									
-									<Grid Grid.Row="0"  Grid.Column="1">
+									<Grid Grid.Row="0"  Grid.Column="2">
 										<ffs:SvgCachedImage x:Name="WatchingBtt" HeightRequest="40" Source="tag_faces.svg"  BackgroundColor="Transparent"  WidthRequest="50">
 											<ffs:SvgCachedImage.Transformations>
 												<ffTransformations:TintTransformation HexColor="#e6e6e6" ></ffTransformations:TintTransformation>
@@ -172,11 +185,11 @@ xmlns:ffTransformations="clr-namespace:FFImageLoading.Transformations;assembly=F
 										</ffs:SvgCachedImage>
 										<ImageButton BackgroundColor="Transparent" Clicked="MalWatching_Clicked" HeightRequest="40" ></ImageButton>
 									</Grid>
-									<Grid Grid.Row="1"  Grid.Column="1">
-										<Label Text="Watching"  x:Name="MalWatchingTxt" HorizontalOptions="Center" TextColor="Gray" FontSize="11" ></Label>
+									<Grid Grid.Row="1"  Grid.Column="2">
+										<Label Text="Watching"  x:Name="MalWatchingTxt" HorizontalTextAlignment="Center" HorizontalOptions="Center" TextColor="Gray" FontSize="11" ></Label>
 									</Grid>
 
-									<Grid Grid.Row="0"  Grid.Column="2">
+									<Grid Grid.Row="0"  Grid.Column="3">
 										<ffs:SvgCachedImage x:Name="MalProgress" InputTransparent="True" Source="progress_check.svg" BackgroundColor="Transparent"  WidthRequest="50">
 											<ffs:SvgCachedImage.Transformations>
 												<ffTransformations:TintTransformation HexColor="#e6e6e6" ></ffTransformations:TintTransformation>
@@ -185,11 +198,11 @@ xmlns:ffTransformations="clr-namespace:FFImageLoading.Transformations;assembly=F
 										</ffs:SvgCachedImage>
 										<ImageButton BackgroundColor="Transparent" Clicked="MalProgress_Clicked" HeightRequest="40" ></ImageButton>
 									</Grid>
-									<Grid Grid.Row="1"  Grid.Column="2">
+									<Grid Grid.Row="1"  Grid.Column="3">
 										<Label Text="11/24" x:Name="MalEpisodes" HorizontalOptions="Center" TextColor="Gray" FontSize="11" ></Label>
 									</Grid>
 
-									<Grid Grid.Row="0"  Grid.Column="3">
+									<Grid Grid.Row="0"  Grid.Column="4">
 										<ffs:SvgCachedImage x:Name="SyncButton" InputTransparent="True" Source="sync.svg" BackgroundColor="Transparent"  WidthRequest="50" HeightRequest="50">
 											<ffs:SvgCachedImage.Transformations>
 												<ffTransformations:TintTransformation HexColor="#e6e6e6" ></ffTransformations:TintTransformation>
@@ -198,7 +211,7 @@ xmlns:ffTransformations="clr-namespace:FFImageLoading.Transformations;assembly=F
 										</ffs:SvgCachedImage>
 										<ImageButton BackgroundColor="Transparent" Clicked="MalSync_Clicked" HeightRequest="40" ></ImageButton>
 									</Grid>
-									<Grid Grid.Row="1"  Grid.Column="3">
+									<Grid Grid.Row="1"  Grid.Column="4">
 										<Label Text="Sync Data" HorizontalOptions="Center" TextColor="Gray" FontSize="11" ></Label>
 									</Grid>
 

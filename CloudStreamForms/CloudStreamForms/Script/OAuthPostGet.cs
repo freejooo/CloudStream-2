@@ -34,6 +34,18 @@ namespace CloudStreamForms.Script
 				string result = await reader.ReadToEndAsync();
 				return result;
 			}
+			catch (WebException e) {
+				using (WebResponse response = e.Response) {
+					HttpWebResponse httpResponse = (HttpWebResponse)response;
+					Console.WriteLine("Error code: {0}", httpResponse.StatusCode);
+					using (Stream data = response.GetResponseStream())
+					using (var reader = new StreamReader(data)) {
+						string text = reader.ReadToEnd();
+						Console.WriteLine(text);
+					}
+				}
+				return "";
+			}
 			catch (Exception _ex) {
 				CloudStreamCore.error(_ex);
 				return "";
@@ -56,6 +68,7 @@ namespace CloudStreamForms.Script
 				dataStream.Write(byteArray, 0, byteArray.Length);
 				dataStream.Close();
 				WebResponse response = await request.GetResponseAsync();
+
 				dataStream = response.GetResponseStream();
 				StreamReader reader = new StreamReader(dataStream);
 				string responseFromServer = await reader.ReadToEndAsync();
@@ -63,6 +76,18 @@ namespace CloudStreamForms.Script
 				dataStream.Close();
 				response.Close();
 				return responseFromServer;
+			}
+			catch (WebException e) {
+				using (WebResponse response = e.Response) {
+					HttpWebResponse httpResponse = (HttpWebResponse)response;
+					Console.WriteLine("Error code: {0}", httpResponse.StatusCode);
+					using (Stream data = response.GetResponseStream())
+					using (var reader = new StreamReader(data)) {
+						string text = reader.ReadToEnd();
+						Console.WriteLine(text);
+					}
+				}
+				return "";
 			}
 			catch (Exception _ex) {
 				CloudStreamCore.error(_ex);

@@ -332,7 +332,7 @@ namespace CloudStreamForms.Core.AnimeProviders
 
         public override NonBloatSeasonData GetSeasonData(MALSeason ms, TempThread tempThread, string year, object storedData)
         {
-            int id = ms.MalId;
+            int id = ms._MalId;
             if (twistMoeSearch.ContainsKey(id)) {
                 string slug = twistMoeSearch[id];
                 var sources = GetSources(slug);

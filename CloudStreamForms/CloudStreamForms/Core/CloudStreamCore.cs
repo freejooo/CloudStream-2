@@ -298,9 +298,12 @@ namespace CloudStreamForms.Core
 			public string aniListUrl;
 			public int MalId {
 				get {
-					return int.Parse(FindHTML(malUrl, "anime/", "/"));
+					return _MalId == 0 ? int.Parse(FindHTML(malUrl, "anime/", "/")) : _MalId;
 				}
 			}
+
+			public int AniListId;
+			public int _MalId;
 			public string name;
 			public string japName;
 			public string engName;
@@ -6240,7 +6243,7 @@ namespace CloudStreamForms.Core
 								}
 								print("CURRENTNAME: " + currentName + "|" + _eng + "|" + _jap);
 								//tt2359704 = jojo
-								var malS = new MALSeason() { length = int.Parse(totalEpisodes), name = currentName, engName = _eng, japName = _jap, synonyms = _synos, malUrl = _malLink, startDate = _startDate, endDate = _endDate };
+								var malS = new MALSeason() { _MalId = int.Parse(FindHTML(_malLink, "anime/", "/")), length = int.Parse(totalEpisodes), name = currentName, engName = _eng, japName = _jap, synonyms = _synos, malUrl = _malLink, startDate = _startDate, endDate = _endDate };
 								if (currentName.Contains("Part ") && !currentName.Contains("Part 1")) // WILL ONLY WORK UNTIL PART 10, BUT JUST HOPE THAT THAT DOSENT HAPPEND :) (Not on jojo)
 								{
 									data[^1].seasons.Add(malS);
@@ -6345,7 +6348,7 @@ namespace CloudStreamForms.Core
 										var _startDate = ToDate(title.startDate?.year, title.startDate?.month, title.startDate?.day);
 										var _endDate = ToDate(title.endDate?.year, title.endDate?.month, title.endDate?.day);
 										//title.episodes
-										var malS = new MALSeason() { length = title.episodes ?? 0, aniListUrl = _aniListLink, name = currentName, engName = _eng, japName = _jap, synonyms = _synos, malUrl = _malLink, startDate = _startDate, endDate = _endDate };
+										var malS = new MALSeason() { _MalId = title.idMal ?? 0,AniListId = title.id, length = title.episodes ?? 0, aniListUrl = _aniListLink, name = currentName, engName = _eng, japName = _jap, synonyms = _synos, malUrl = _malLink, startDate = _startDate, endDate = _endDate };
 										if (currentName.Contains("Part ") && !currentName.Contains("Part 1")) { // WILL ONLY WORK UNTIL PART 10, BUT JUST HOPE THAT THAT DOSENT HAPPEND :) (Not on jojo)
 											data[^1].seasons.Add(malS);
 										}

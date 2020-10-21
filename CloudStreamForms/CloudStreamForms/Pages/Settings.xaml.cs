@@ -956,7 +956,7 @@ namespace CloudStreamForms
 
 				if (!CurrentAniListUser.HasValue) {
 					AniListSyncApi.GetUser();
-				}
+				} 
 			}
 
 			if (HasMalAccountLogin) {
@@ -1015,9 +1015,10 @@ namespace CloudStreamForms
 				actions.Add($"Logout from AniList {(currentAniListUsername == "" ? "" : $" - {currentAniListUsername}")}");
 			}
 
-			actions.AddRange(new string[] { "Export data", "Export Everything", "Import data", });
+			actions.AddRange(new string[] { "Export data", "Export Everything", "Import data",});
 
 			string action = await ActionPopup.DisplayActionSheet("Manage account", actions.ToArray());
+
 			if (action == "Login to AniList account") {
 				CloudStreamForms.Script.AniListSyncApi.Authenticate();
 			}
