@@ -403,7 +403,7 @@ namespace CloudStreamForms
 					SetHeight();
 					await Task.Delay(100);
 					await FadeEpisodes.FadeTo(1, FATE_TIME_MS);
-					if (Settings.HasMalAccountLogin) {
+					if (Settings.HasMalAccountLogin || Settings.HasAniListLogin) {
 						await UpdateAllMalValues();
 						if (maxAnimeEpisode == 0) {
 							maxAnimeEpisode = e.Length;
@@ -1908,7 +1908,12 @@ namespace CloudStreamForms
 				}
 
 				if (currentMalWatchType != AnimeStatusType.none) {
-					MalWatchingTxt.Text = MALSyncApi.StatusNames[(int)currentMalWatchType];
+					if (currentMalWatchType == AnimeStatusType.ReWatching) {
+						MalWatchingTxt.Text = "Re Watching";
+					}
+					else {
+						MalWatchingTxt.Text = MALSyncApi.StatusNames[(int)currentMalWatchType];
+					}
 				}
 				else {
 					MalWatchingTxt.Text = "Not Watched";

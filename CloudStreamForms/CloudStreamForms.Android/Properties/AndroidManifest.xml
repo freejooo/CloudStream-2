@@ -1,18 +1,18 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android" android:versionCode="1090900" android:versionName="1.9.8" package="com.CloudStreamForms.CloudStreamForms" android:installLocation="auto">
-	<uses-sdk android:minSdkVersion="21" android:targetSdkVersion="28" />
-	<application android:label="CloudStream 2" android:icon="@drawable/bicon"></application>
-	<uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-	<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-	<uses-permission android:name="android.permission.INTERNET" />
-	<uses-permission android:name="android.permission.INSTALL_PACKAGES" />
-	<uses-permission android:name="android.permission.WRITE_SETTINGS" />
-	<uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
-	<application android:usesCleartextTraffic="false">
-		<!--<provider android:name="android.support.v4.content.FileProvider" android:authorities="${applicationId}.provider" android:exported="false" android:grantUriPermissions="true">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" android:versionCode="1090900" android:versionName="1.9.9" package="com.CloudStreamForms.CloudStreamForms" android:installLocation="auto">
+  <uses-sdk android:minSdkVersion="21" android:targetSdkVersion="28" />
+  <application android:label="CloudStream 2" android:icon="@drawable/bicon"></application>
+  <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+  <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+  <uses-permission android:name="android.permission.INTERNET" />
+  <uses-permission android:name="android.permission.INSTALL_PACKAGES" />
+  <uses-permission android:name="android.permission.WRITE_SETTINGS" />
+  <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
+  <application android:usesCleartextTraffic="false">
+    <!--<provider android:name="android.support.v4.content.FileProvider" android:authorities="${applicationId}.provider" android:exported="false" android:grantUriPermissions="true">
 			<meta-data android:name="android.support.FILE_PROVIDER_PATHS" android:resource="@xml/provider_paths" />
 		</provider>-->
-		<!--
+    <!--
 		<provider
 		   android:name=".GenericFileProvider"
 		   android:authorities="${applicationId}.provider.storage"
@@ -22,8 +22,8 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/provider_paths" />
 		</provider>-->
-		<receiver android:process=":remote" android:name=".AlertReceiver" />
-		<!-- <receiver android:process=":remote" android:name=".DownloadReceiver" />-->
-		<service android:name=".OnKilledService" android:stopWithTask="false"></service>
-	</application>
+    <receiver android:process=":remote" android:name=".AlertReceiver" />
+    <!-- <receiver android:process=":remote" android:name=".DownloadReceiver" />-->
+    <service android:name=".OnKilledService" android:stopWithTask="false"></service>
+  </application>
 </manifest>
