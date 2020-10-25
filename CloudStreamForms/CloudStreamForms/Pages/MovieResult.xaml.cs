@@ -1976,6 +1976,7 @@ namespace CloudStreamForms
 					bool error = true;
 					currentMalWatchType = AnimeStatusType.none;
 					currentMalScore = 0;
+					currentMalEpisodesProgress = 0;
 
 					if (HasMalAccountLogin && CurrentMalId != 0) {
 						if (MALSyncApi.allTitles.ContainsKey(CurrentMalId)) {
@@ -1995,6 +1996,8 @@ namespace CloudStreamForms
 							if (error) {
 								isFromAniList = true;
 								currentMalWatchType = (AnimeStatusType)val.type;
+								currentMalScore = val.score;
+								currentMalEpisodesProgress = val.progress;
 							}
 						}
 						else {
@@ -2002,11 +2005,21 @@ namespace CloudStreamForms
 						}
 					}
 
-					currentMalEpisodesProgress = 0;
-					foreach (var id in malIds) {
-						if (MALSyncApi.allTitles.ContainsKey(id)) {
-							var data = MALSyncApi.allTitles[id];
-							currentMalEpisodesProgress += data.status.num_episodes_watched; ;
+					if (isFromAniList) {
+						for (int i = 1; i < aniListIds.Count; i++) {
+							int _id = aniListIds[0];
+							var show = await AniListSyncApi.GetDataAboutId(CurrentAniListId);
+							if (show.HasValue) {
+								currentMalEpisodesProgress += show.Value.progress;
+							}
+						}
+					}
+					else {
+						foreach (var id in malIds) {
+							if (MALSyncApi.allTitles.ContainsKey(id)) {
+								var data = MALSyncApi.allTitles[id];
+								currentMalEpisodesProgress += data.status.num_episodes_watched; ;
+							}
 						}
 					}
 				}

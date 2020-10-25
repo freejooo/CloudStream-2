@@ -129,7 +129,7 @@ namespace CloudStreamForms
 
 		public static List<BasicLink> Mirrors = new List<BasicLink>();
 
-		public static bool IsSeries { get { return !(currentVideo.season == -1 || currentVideo.episode == -1); } }
+		public static bool IsSeries { get { return !(currentVideo.season <= 0 || currentVideo.episode <= 0); } }
 		public static string BeforeAddToName { get { return IsSingleMirror && !currentVideo.isDownloadFile ? AllMirrorsNames[0] : (IsSeries ? ("S" + currentVideo.season + ":E" + currentVideo.episode + " ") : ""); } }
 		public static string CurrentDisplayName { get { return BeforeAddToName + (IsSeries ? ADD_BEFORE_EPISODE : "") + currentVideo.name + (IsSeries ? ADD_AFTER_EPISODE : "") + (IsSingleMirror ? "" : (" · " + CurrentMirrorName)); } }
 

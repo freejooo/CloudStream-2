@@ -39,7 +39,7 @@
 					<ColumnDefinition Width="Auto"></ColumnDefinition>
 				</Grid.ColumnDefinitions>
 
-				<Label x:Name="HeaderTitle" HorizontalOptions="Center" FontSize="20" FontAttributes="Bold" Text="Episode 1 hello world" TextColor="#e6e6e6" ></Label>
+				<Label x:Name="HeaderTitle" HorizontalTextAlignment="Center" HorizontalOptions="Center" FontSize="20" FontAttributes="Bold" Text="Episode 1 hello world" TextColor="#e6e6e6" ></Label>
 
 				<Grid  x:Name="CenterStack">
 					<Grid.RowDefinitions >

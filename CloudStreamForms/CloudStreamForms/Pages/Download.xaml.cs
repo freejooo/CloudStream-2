@@ -87,62 +87,7 @@ namespace CloudStreamForms
 					string txt = await Clipboard.GetTextAsync();
 					string ytUrl = await ActionPopup.DisplayEntry(InputPopupResult.url, "https://youtu.be/", "Youtube link", confirmText: "Download");
 					if (!ytUrl.IsClean() || ytUrl == "Cancel") return;
-					await Device.InvokeOnMainThreadAsync(async () => {
-						//string ytUrl = t.Text;
-						Video v = null;
-						const string errorTxt = "Error Downloading YouTube Video";
-						try {
-							v = await YouTube.GetYTVideo(ytUrl);
-						}
-						catch (Exception) {
-							App.ShowToast(errorTxt);
-						}
-						if (v == null) {
-							App.ShowToast(errorTxt);
-						}
-						else {
-							try {
-								//   string dpath = YouTube.GetYTPath(v.Title);
-								var author = await YouTube.GetAuthorFromVideoAsync(v);
-								var data = await YouTube.GetInfoAsync(v);
-								int id = ConvertStringToInt(v.Id);
-
-
-								string vId = v.Id.Value;
-								var t = mainCore.CreateThread(4);
-								mainCore.StartThread("Sponsorblock", () => {
-									try {
-										string _d = mainCore.DownloadString("https://sponsor.ajay.app/api/skipSegments?videoID=" + vId, t);
-										if (_d != "") {
-											var smgs = JsonConvert.DeserializeObject<List<YTSponsorblockVideoSegments>>(_d);
-											App.SetKey("Sponsorblock", v.Id.Value.ToString(), smgs);
-										}
-									}
-									catch (Exception) { }
-								});
-								double mb = App.ConvertBytesToAny(data.Size.TotalBytes, 5, 2);
-
-								ImageService.Instance.LoadUrl(v.Thumbnails.HighResUrl, TimeSpan.FromDays(30)); // CASHE IMAGE
-
-								DownloadHeader header = new DownloadHeader() { movieType = MovieType.YouTube, id = author.Id, name = author.Title, hdPosterUrl = author.LogoUrl, posterUrl = author.LogoUrl, ogName = author.Title }; //description = v.Description,hdPosterUrl=v.Thumbnails.HighResUrl, };//ConvertTitleToHeader(title);
-
-								string filePath = YouTube.DownloadVideo(data, v.Title, data, v, id, header, true);
-
-								//  YouTube.client.Videos.ClosedCaptions.GetManifestAsync().Result.Tracks.
-								// YouTube.client.Videos.ClosedCaptions.DownloadAsync(v.,)
-
-								App.ShowToast("YouTube download started");
-								App.SetKey(nameof(DownloadHeader), "id" + header.RealId, header);
-								App.SetKey(nameof(DownloadEpisodeInfo), "id" + id, new DownloadEpisodeInfo() { dtype = DownloadType.YouTube, source = v.Url, description = v.Description, downloadHeader = header.RealId, episode = -1, season = -1, fileUrl = filePath, id = id, name = v.Title, hdPosterUrl = v.Thumbnails.HighResUrl });
-								App.SetKey("DownloadIds", id.ToString(), id);
-								await YouTube.DownloadSubtitles(v, filePath.Replace(".mp4", ".srt"));
-							}
-							catch (Exception _ex) {
-								print("MAINERROR:: " + _ex);
-								App.ShowToast(errorTxt);
-							}
-						}
-					});
+					await YouTube.HandleDownload(ytUrl);
 				};
 
 				MyEpisodeResultCollection = new ObservableCollection<EpisodeResult>();
@@ -707,6 +652,68 @@ namespace CloudStreamForms
 
 	public static class YouTube
 	{
+		public static async Task HandleDownload(string ytUrl)
+		{
+			await Device.InvokeOnMainThreadAsync(async () => {
+				//string ytUrl = t.Text;
+				Video v = null;
+				const string errorTxt = "Error Downloading YouTube Video";
+				try {
+					v = await YouTube.GetYTVideo(ytUrl);
+				}
+				catch (Exception _ex) {
+					error(_ex);
+					App.ShowToast(errorTxt);
+					return;
+				}
+				if (v == null) {
+					App.ShowToast(errorTxt);
+				}
+				else {
+					try {
+						//   string dpath = YouTube.GetYTPath(v.Title);
+						var author = await YouTube.GetAuthorFromVideoAsync(v);
+						var data = await YouTube.GetInfoAsync(v);
+						int id = ConvertStringToInt(v.Id);
+
+
+						string vId = v.Id.Value;
+						var t = mainCore.CreateThread(4);
+						mainCore.StartThread("Sponsorblock", () => {
+							try {
+								string _d = mainCore.DownloadString("https://sponsor.ajay.app/api/skipSegments?videoID=" + vId, t);
+								if (_d != "") {
+									var smgs = JsonConvert.DeserializeObject<List<YTSponsorblockVideoSegments>>(_d);
+									App.SetKey("Sponsorblock", v.Id.Value.ToString(), smgs);
+								}
+							}
+							catch (Exception) { }
+						});
+						double mb = App.ConvertBytesToAny(data.Size.TotalBytes, 5, 2);
+
+						ImageService.Instance.LoadUrl(v.Thumbnails.HighResUrl, TimeSpan.FromDays(30)); // CASHE IMAGE
+
+						DownloadHeader header = new DownloadHeader() { movieType = MovieType.YouTube, id = author.Id, name = author.Title, hdPosterUrl = author.LogoUrl, posterUrl = author.LogoUrl, ogName = author.Title }; //description = v.Description,hdPosterUrl=v.Thumbnails.HighResUrl, };//ConvertTitleToHeader(title);
+
+						string filePath = YouTube.DownloadVideo(data, v.Title, data, v, id, header, true);
+
+						//  YouTube.client.Videos.ClosedCaptions.GetManifestAsync().Result.Tracks.
+						// YouTube.client.Videos.ClosedCaptions.DownloadAsync(v.,)
+
+						App.ShowToast("YouTube download started");
+						App.SetKey(nameof(DownloadHeader), "id" + header.RealId, header);
+						App.SetKey(nameof(DownloadEpisodeInfo), "id" + id, new DownloadEpisodeInfo() { dtype = DownloadType.YouTube, source = v.Url, description = v.Description, downloadHeader = header.RealId, episode = -1, season = -1, fileUrl = filePath, id = id, name = v.Title, hdPosterUrl = v.Thumbnails.HighResUrl });
+						App.SetKey("DownloadIds", id.ToString(), id);
+						await YouTube.DownloadSubtitles(v, filePath.Replace(".mp4", ".srt"));
+					}
+					catch (Exception _ex) {
+						print("MAINERROR:: " + _ex);
+						App.ShowToast(errorTxt);
+					}
+				}
+			});
+		}
+
 		public static string GetYTVideoId(string url)
 		{
 			try {
@@ -745,8 +752,13 @@ namespace CloudStreamForms
 
 		public static async Task<MuxedStreamInfo> GetInfoAsync(Video v)
 		{
-			var manifest = await client.Videos.Streams.GetManifestAsync(v.Id);
-			return manifest.GetMuxed().WithHighestVideoQuality() as MuxedStreamInfo;
+			var s = client.Videos.Streams;
+			print("STREAM : " + s);
+			var manifest = await s.GetManifestAsync(v.Id);
+			print("MAINI:: " + manifest);
+			return manifest
+				.GetMuxed()
+				.WithHighestVideoQuality() as MuxedStreamInfo;
 		}
 
 		public static async Task DownloadSubtitles(Video v, string path)

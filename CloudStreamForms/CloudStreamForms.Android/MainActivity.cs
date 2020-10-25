@@ -379,9 +379,12 @@ namespace CloudStreamForms.Droid
 	[Activity(Label = "CloudStream 2", Icon = "@drawable/bicon512", Theme = "@style/MainTheme.Splash", MainLauncher = true, LaunchMode = LaunchMode.SingleTop,
 		ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation | ConfigChanges.SmallestScreenSize | ConfigChanges.ScreenLayout  // MUST HAVE FOR PIP MODE OR ELSE IT WILL TRIGGER ONCREATE
 		, SupportsPictureInPicture = true, ResizeableActivity = true),
-		IntentFilter(new[] { Intent.ActionView }, DataScheme = "cloudstreamforms", Categories = new[] { Intent.CategoryDefault, Intent.CategoryBrowsable }),
-		IntentFilter(new[] { Intent.ActionView }, DataScheme = "https", DataPathPrefix = "/title", DataHost = "www.imdb.com", Categories = new[] { Intent.CategoryDefault, Intent.CategoryBrowsable })
-		]
+		IntentFilter(new[] { Intent.ActionView }, Label = "Open in CloudStream", DataScheme = "cloudstreamforms", Categories = new[] { Intent.CategoryDefault, Intent.CategoryBrowsable }),
+		IntentFilter(new[] { Intent.ActionView }, Label = "Open in CloudStream", DataScheme = "https", DataPathPrefix = "/title", DataHost = "www.imdb.com", Categories = new[] { Intent.CategoryDefault, Intent.CategoryBrowsable }),
+
+		IntentFilter(new[] { Intent.ActionSend }, Label = "Download Video", Categories = new[] { Intent.CategoryDefault }, DataMimeType = "text/plain", DataHosts = new[] { "youtube.com", "youtu.be" }), // VIA SHARE
+		IntentFilter(new[] { Intent.ActionView }, Label = "Download Video", Categories = new[] { Intent.CategoryDefault, Intent.CategoryBrowsable }, DataScheme = "https", DataHosts = new[] { "youtube.com", "youtu.be" }), // VIA LINK
+	]
 
 	public class MainActivity : global::Xamarin.Forms.Platform.Android.FormsAppCompatActivity
 	{
@@ -427,29 +430,65 @@ namespace CloudStreamForms.Droid
 			base.OnLowMemory();
 		}
 
-		protected override void OnNewIntent(Intent intent)
+		static bool IsFromYoutube(string data)
+		{
+			return data.Contains("www.youtube.com") || data.Contains("youtu.be");
+		}
+
+		static async void HandleYoutubeUrl(string url)
+		{
+			App.ShowToast("Downloading video");
+			await YouTube.HandleDownload(url);
+			/*
+				string action = await ActionPopup.DisplayActionSheet("YouTube Video", "Download video", "Play video");
+				if(action == "Download video") {
+					await YouTube.HandleDownload(datastring);
+				}
+				else if(action == "Play video") {
+					await App.RequestVlc(datastring, "Youtube");
+				}*/
+		}
+
+		protected override async void OnNewIntent(Intent intent)
 		{
 			if (Settings.IS_TEST_BUILD) {
 				return;
 			}
-
-			//App.ShowToast("ON NEW INTENT");
-			//print("DA:::.2132131");
+			var clip = intent.ClipData;
 			var datastring = intent.DataString;
+			var fullData = intent.Data;
+			var type = intent.Type;
+
+
 			if (datastring != null) {
 				print("INTENTNADADA:::" + datastring);
 				print("GOT NON NULL DATA");
-				if (datastring != "" && datastring.ToLower().Contains("cloudstreamforms:")) {
-					if (datastring.Contains("mallogin")) {
-						CloudStreamForms.Script.MALSyncApi.AuthenticateLogin(datastring);
+				if (datastring != "") {
+					if (IsFromYoutube(datastring)) {
+						HandleYoutubeUrl(datastring);
 					}
-					else if(datastring.Contains("anilistlogin")) {
-						CloudStreamForms.Script.AniListSyncApi.AuthenticateLogin(datastring);
-					}
-					else {
-						MainPage.PushPageFromUrlAndName(datastring);
+					else if (datastring.ToLower().Contains("cloudstreamforms:")) {
+						if (datastring.Contains("mallogin")) {
+							CloudStreamForms.Script.MALSyncApi.AuthenticateLogin(datastring);
+						}
+						else if (datastring.Contains("anilistlogin")) {
+							CloudStreamForms.Script.AniListSyncApi.AuthenticateLogin(datastring);
+						}
+						else {
+							MainPage.PushPageFromUrlAndName(datastring);
+						}
 					}
 				}
+			}
+			else if (clip != null) { // THIS HANDELS SHARE ACTION
+				try {
+					var first = clip.GetItemAt(0);
+					var t = first.Text;
+					if (IsFromYoutube(t)) {
+						HandleYoutubeUrl(t);
+					}
+				}
+				catch (Exception) { }
 			}
 
 			Bundle extras = intent.Extras;
@@ -532,7 +571,6 @@ namespace CloudStreamForms.Droid
 					UpdatePipVideostatus();
 				};
 				LogFile("Completed PIP");
-
 			}
 			catch (Exception _ex) {
 				LogFile("ERROR LOADING APP: " + _ex);
@@ -561,12 +599,15 @@ namespace CloudStreamForms.Droid
 
 				//Typeface.CreateFromAsset(Application.Context.Assets, "Times-New-Roman.ttf");
 
-				if (Intent.DataString != null) {
+				var datastring = Intent.DataString;
+				var clip = Intent.ClipData;
+
+				if (datastring != null) {
 					print("GOT NON NULL DATA");
-					if (Intent.DataString != "") {
-						print("INTENTDATA::::" + Intent.DataString);
-						if (Intent.DataString.Contains("www.imdb.com")) {
-							string id = FindHTML(Intent.DataString + "/", "title/", "/");
+					if (datastring != "") {
+						print("INTENTDATA::::" + datastring);
+						if (datastring.Contains("www.imdb.com")) {
+							string id = FindHTML(datastring + "/", "title/", "/");
 							//  var _thread = mainCore.CreateThread(2);
 							mainCore.StartThread("IMDb Thread", async () => {
 								string json = mainCore.DownloadString($"https://v2.sg.media-imdb.com/suggestion/t/{id}.json");
@@ -581,8 +622,11 @@ namespace CloudStreamForms.Droid
 								});
 							});
 						}
+						else if (IsFromYoutube(datastring)) {
+							HandleYoutubeUrl(datastring);
+						}
 						else {
-							MainPage.PushPageFromUrlAndName(Intent.DataString);
+							MainPage.PushPageFromUrlAndName(datastring);
 						}
 					}
 				}
@@ -2193,7 +2237,7 @@ namespace CloudStreamForms.Droid
 			//Percentage can be calculated for API 16+
 			double percentAvail = mi.AvailMem / (double)mi.TotalMem * 100.0;
 			long f1 = mainS.ElapsedMilliseconds;
-			App.ShowToast("GG: " + (int)percentAvail + "MEGS: " + availableMegs + " | " );
+			App.ShowToast("GG: " + (int)percentAvail + "MEGS: " + availableMegs + " | ");
 			/*
 			Device.BeginInvokeOnMainThread(() => {
 

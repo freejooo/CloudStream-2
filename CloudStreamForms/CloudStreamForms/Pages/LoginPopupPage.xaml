@@ -41,7 +41,7 @@
 					<ColumnDefinition Width="Auto"></ColumnDefinition>
 				</Grid.ColumnDefinitions>
 
-				<Label x:Name="HeaderTitle" HorizontalOptions="Center" VerticalOptions="End" FontSize="20" TranslationX="14" FontAttributes="Bold" Text="Episode 1 hello world" TextColor="#e6e6e6" ></Label>
+				<Label x:Name="HeaderTitle" HorizontalOptions="Center" HorizontalTextAlignment="Center" VerticalOptions="End" FontSize="20" TranslationX="14" FontAttributes="Bold" Text="Episode 1 hello world" TextColor="#e6e6e6" ></Label>
 
 
                 <StackLayout  Grid.Row="1" HorizontalOptions="Start" VerticalOptions="Center" BackgroundColor="Transparent">
