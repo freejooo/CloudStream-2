@@ -5232,9 +5232,7 @@ namespace CloudStreamForms.Core
 				else {
 					mId = FindHTML(d, "id_movie: ", ",");
 				}
-				// 
 				string _d = DownloadString(isMovie ? $"https://false-promise.lookmovie.ag/api/v1/storage/movies?id_movie={mId}" : $"https://false-promise.lookmovie.ag/api/v1/storage/shows/?slug={slug}");
-				//                         
 
 				string token = FindHTML(_d, "accessToken\":\"", "\"");
 				string exp = FindHTML(_d, "expires\":", ",");
@@ -5253,7 +5251,7 @@ namespace CloudStreamForms.Core
 				for (int i = 0; i < labels.Length; i++) {
 					string _link = FindHTML(_masterM3u8, $"\"{labels[i]}\":\"", "\"");
 					if (_link == "") _link = FindHTML(_masterM3u8, $"\"{labels[i]}p\":\"", "\"");
-					if (_link != "") {
+					if (_link != "" && !_link.Contains("/dummy/") && !_link.Contains("/earth-1984/")) { // REMOVE PREMIUM BUG
 						AddPotentialLink(normalEpisode, _link, "LookMovie", prio, labels[i]);
 					}
 					prio++;

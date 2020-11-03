@@ -464,6 +464,7 @@ namespace CloudStreamForms
 			base.OnDisappearing();
 		}
 
+		bool firstTimeNoBookmarks = true;
 		bool hasAppered = false;
 		protected override void OnAppearing()
 		{
@@ -489,7 +490,12 @@ namespace CloudStreamForms
 					IndexChanged();
 				}
 				ViewGrid.IsVisible = Settings.Top100Enabled;
-				if (!Settings.Top100Enabled && selectedTabItem != 0) {
+				if(firstTimeNoBookmarks && !hasBookmarks && Settings.Top100Enabled) { // WILL REDIRECT TO TOP IMDb when no bookmarks
+					firstTimeNoBookmarks = false;
+					selectedTabItem = 2;
+					ChangeSizeOfTabs();
+				}
+				else if (!Settings.Top100Enabled && selectedTabItem != 0) {
 					selectedTabItem = 0;
 					ChangeSizeOfTabs();
 				}
