@@ -52,6 +52,7 @@
     <None Remove="Resource\AudioVolLow2.png" />
     <None Remove="Resource\AudioVolLow3.png" />
     <None Remove="Resource\baseline_access_time_white_48dp.png" />
+    <None Remove="Resource\baseline_closed_caption_white_48dp.png" />
     <None Remove="Resource\baseline_fast_forward_white_48dp.png" />
     <None Remove="Resource\baseline_feedback_white_48dp.png" />
     <None Remove="Resource\baseline_fiber_new_white_48dp.png" />
@@ -210,6 +211,7 @@
     <EmbeddedResource Include="Resource\AudioVolLow2.png" />
     <EmbeddedResource Include="Resource\AudioVolLow3.png" />
     <EmbeddedResource Include="Resource\baseline_access_time_white_48dp.png" />
+    <EmbeddedResource Include="Resource\baseline_closed_caption_white_48dp.png" />
     <EmbeddedResource Include="Resource\baseline_fast_forward_white_48dp.png" />
     <EmbeddedResource Include="Resource\baseline_feedback_white_48dp.png" />
     <EmbeddedResource Include="Resource\baseline_fiber_new_white_48dp.png" />

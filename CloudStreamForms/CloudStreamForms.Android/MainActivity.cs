@@ -14,6 +14,7 @@ using Android.Runtime;
 using Android.Support.Annotation;
 using Android.Support.V4.App;
 using Android.Support.V4.Content;
+using Android.Support.V4.Media.Session;
 using Android.Text;
 using Android.Views;
 using Android.Widget;
@@ -123,6 +124,19 @@ namespace CloudStreamForms.Droid
 
 			}
 
+		}
+	}
+
+	/*
+	[BroadcastReceiver(Enabled = true)]
+	[Android.App.IntentFilter(new[] { AudioManager.ActionAudioBecomingNoisy, AudioManager.ActionHeadsetPlug })]*/
+	public class BecomingNoisyReceiver : BroadcastReceiver // WHEN REMOVE HEADPHONES
+	{
+		public override void OnReceive(Context context, Intent intent)
+		{
+			if (AudioManager.ActionAudioBecomingNoisy == intent.Action) {
+				OnAudioFocusChanged?.Invoke(null, false);
+			}
 		}
 	}
 
@@ -372,8 +386,6 @@ namespace CloudStreamForms.Droid
 		}
 	}
 
-
-
 	/*
 	[Activity(Label = "CloudStream 2", Icon = "@drawable/bicon512", Theme = "@style/MainTheme.Splash", MainLauncher = true, LaunchMode = LaunchMode.SingleTop, ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation), IntentFilter(new[] { Intent.ActionView }, DataScheme = "cloudstreamforms", Categories = new[] { Intent.CategoryDefault, Intent.CategoryBrowsable })]*/
 	[Activity(Label = "CloudStream 2", Icon = "@drawable/bicon512", Theme = "@style/MainTheme.Splash", MainLauncher = true, LaunchMode = LaunchMode.SingleTop,
@@ -459,7 +471,6 @@ namespace CloudStreamForms.Droid
 			var fullData = intent.Data;
 			var type = intent.Type;
 
-
 			if (datastring != null) {
 				print("INTENTNADADA:::" + datastring);
 				print("GOT NON NULL DATA");
@@ -509,12 +520,111 @@ namespace CloudStreamForms.Droid
 		}
 
 		public static int PublicNot;
+		MediaSessionCompat mediaSession;
 
+		public class MediaSessionCallback : MediaSessionCompat.Callback
+		{
+			public override bool OnMediaButtonEvent(Intent mediaButtonEvent)
+			{
+				try {
+					var keyEvent = mediaButtonEvent.GetParcelableExtra(Intent.ExtraKeyEvent) as KeyEvent;
+					if (keyEvent == null) {
+						return false;
+					}
+					switch (keyEvent.KeyCode) {
+						case Keycode.MediaPlay:
+							App.OnRemovePlayAction?.Invoke(null, App.PlayerEventType.Play);
+							break;
+						case Keycode.MediaPause:
+							App.OnRemovePlayAction?.Invoke(null, App.PlayerEventType.Pause);
+							break;
+						case Keycode.MediaNext:
+							App.OnRemovePlayAction?.Invoke(null, App.PlayerEventType.SkipCurrentChapter);
+							break;
+						case Keycode.MediaSkipForward:
+							App.OnRemovePlayAction?.Invoke(null, App.PlayerEventType.SeekForward);
+							break;
+						case Keycode.MediaSkipBackward:
+							App.OnRemovePlayAction?.Invoke(null, App.PlayerEventType.SeekBack);
+							break;
+						case Keycode.MediaPlayPause:
+							App.OnRemovePlayAction?.Invoke(null, App.PlayerEventType.SeekForward);
+							break;
+						case Keycode.MediaStop:
+							App.OnRemovePlayAction?.Invoke(null, App.PlayerEventType.Stop);
+							break;
+						case Keycode.Headsethook:
+							App.OnRemovePlayAction?.Invoke(null, App.PlayerEventType.Pause);
+							break;
+						default:
+							break;
+					}
+
+					print("EVENT:" + keyEvent);
+				}
+				catch (Exception) {
+					return false;
+				}
+
+				return base.OnMediaButtonEvent(mediaButtonEvent);
+			}
+
+			public override void OnPause()
+			{
+				App.OnRemovePlayAction?.Invoke(null, App.PlayerEventType.Pause);
+				base.OnPause();
+			}
+
+			public override void OnPlay()
+			{
+				App.OnRemovePlayAction?.Invoke(null, App.PlayerEventType.Play);
+
+				base.OnPlay();
+			}
+
+			public override void OnFastForward()
+			{
+				App.OnRemovePlayAction?.Invoke(null, App.PlayerEventType.SeekForward);
+
+				base.OnFastForward();
+			}
+
+			public override void OnRewind()
+			{
+				App.OnRemovePlayAction?.Invoke(null, App.PlayerEventType.SeekBack);
+
+				base.OnRewind();
+			}
+			public override void OnSkipToNext()
+			{
+				App.OnRemovePlayAction?.Invoke(null, App.PlayerEventType.SkipCurrentChapter);
+
+				base.OnSkipToNext();
+			}
+
+			public override void OnSkipToPrevious()
+			{
+				//App.OnRemovePlayAction?.Invoke(null, App.PlayerEventType.PrevMirror);
+
+				base.OnSkipToPrevious();
+			}
+		}
+		public AudioManager audioManager => Application.Context.GetSystemService(Context.AudioService) as AudioManager;
+		ComponentName mediaComponent;
+		void CreateMediaSession()
+		{
+			mediaSession = new MediaSessionCompat(this, "CloudStream 2");
+			mediaSession.SetFlags((int)(MediaSessionFlags.HandlesMediaButtons | MediaSessionFlags.HandlesTransportControls));
+			mediaSession.SetCallback(new MediaSessionCallback());
+			//mediaComponent = new ComponentName(ApplicationContext, new BecomingNoisyReceiver().Class);
+			//audioManager.RegisterMediaButtonEventReceiver(mediaComponent);
+		}
 
 		protected override void OnCreate(Bundle savedInstanceState)
 		{
 			LogFile($"============================== ON CREATE AT {UnixTime} ==============================");
 			print("ON CREATED:::::!!!!!!!!!");
+			CreateMediaSession();
 
 			try {
 				SetTheme(Resource.Style.MainTheme_NonSplash);
@@ -958,6 +1068,8 @@ namespace CloudStreamForms.Droid
 
 		protected override void OnPause()
 		{
+			UnregisterReceiver(becomingNoisyReceiver); // AudioManager.ActionHeadsetPlug 
+
 			base.OnPause();
 		}
 
@@ -979,9 +1091,14 @@ namespace CloudStreamForms.Droid
 			//  }
 		}
 
+		BecomingNoisyReceiver becomingNoisyReceiver;
+
 		protected override void OnResume()
 		{
 			base.OnResume();
+			becomingNoisyReceiver = new BecomingNoisyReceiver();
+			RegisterReceiver(becomingNoisyReceiver, new IntentFilter(AudioManager.ActionAudioBecomingNoisy)); // AudioManager.ActionHeadsetPlug 
+
 			if (!App.IsPictureInPicture) {
 				OnAppResume?.Invoke(null, EventArgs.Empty);
 			}
@@ -1200,10 +1317,10 @@ namespace CloudStreamForms.Droid
 
 			// If no method has successfully gave us a value, let's try a third method
 			if (estimatedAudioLatency == AUDIO_LATENCY_NOT_ESTIMATED) {
-				AudioManager audioManager = Application.Context.GetSystemService(Context.AudioService) as AudioManager;
+				//AudioManager audioManager = Application.Context.GetSystemService(Context.AudioService) as AudioManager;
 				try {
 					System.Reflection.MethodInfo getOutputLatencyMethod = typeof(AudioManager).GetMethod("getOutputLatency");
-					estimatedAudioLatency = (int)getOutputLatencyMethod.Invoke(audioManager, new object[] { AudioContentType.Music }) * 1000000L;
+					estimatedAudioLatency = (int)getOutputLatencyMethod.Invoke(activity.audioManager, new object[] { AudioContentType.Music }) * 1000000L;
 				}
 				catch (Exception ignored) {
 					print("IGNORED::: " + ignored);
@@ -2190,13 +2307,19 @@ namespace CloudStreamForms.Droid
 				myAudioFocusListener = new MyAudioFocusListener();
 				myAudioFocusListener.FocusChanged += ((sender, b) => {
 					OnAudioFocusChanged?.Invoke(this, b);
+				});
+
+				OnAudioFocusChanged += (o, b) => {
 					if (b) {
 						// play stuff
+						//	activity.RegisterReceiver(becomingNoisyReceiver, new IntentFilter(AudioManager.ActionAudioBecomingNoisy));
 					}
 					else {
 						// stop playing stuff
+						//	activity.UnregisterReceiver(becomingNoisyReceiver);
 					}
-				});
+				};
+
 				var playbackAttributes = new AudioAttributes.Builder()
 					  .SetUsage(AudioUsageKind.Media)
 					  .SetContentType(AudioContentType.Movie)

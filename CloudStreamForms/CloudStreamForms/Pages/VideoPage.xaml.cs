@@ -32,7 +32,7 @@ namespace CloudStreamForms
 		public delegate bool CanLoadLinks(string currentEpIMDBId);
 		public static LoadLinkForNextEpisode loadLinkForNext;
 		public static CanLoadLinks canLoad;
-		public static EventHandler<bool> OnVideoAppear ;
+		public static EventHandler<bool> OnVideoAppear;
 
 
 		/// <summary>
@@ -275,6 +275,9 @@ namespace CloudStreamForms
 									subtitles = MainChrome.ParseSubtitles(data).ToArray()
 								};
 								currentSubtitles.Add(s);
+								if (Settings.AutoAddInternalSubtitles) {
+									subtitleIndex = currentSubtitles.Count - 1;
+								}
 							}
 							App.ShowToast(name + " subtitles added");
 						}
@@ -375,6 +378,9 @@ namespace CloudStreamForms
 						if (_currentTime < track.EndTime + subtitleDelay && _currentTime > track.StartTime + subtitleDelay) {
 							if (last != currentSubtitleIndexInCurrent) {
 								var lines = track.Lines;
+								if(!Settings.SubtitlesClosedCaptioning) {
+									lines = lines.Select(t => CloudStreamCore.RemoveCCFromSubtitles(t)).ToList();
+								}
 								if (lines.Count > 0) {
 									subtitleTextFull = "";
 									for (int i = 0; i < lines.Count; i++) {
@@ -963,9 +969,9 @@ namespace CloudStreamForms
 										hasAddedSubtitles = true;
 										int internals = currentSubtitles.Where(t => t.name.StartsWith("Internal")).Count();
 										currentSubtitles.Add(new VideoSubtitle() { subtitles = MainChrome.ParseSubtitles(sub).ToArray(), name = $"Internal{ (internals == 0 ? "" : " " + (internals + 1))}" });
-										//if(Settings.SubtitlesEnabled) {
-										//subtitleIndex = currentSubtitles.Count - 1;
-										//}
+										if (Settings.AutoAddInternalSubtitles) {
+											subtitleIndex = currentSubtitles.Count - 1;
+										}
 									}
 								}
 							}
@@ -1220,6 +1226,9 @@ namespace CloudStreamForms
 							Player.SetPause(false);
 						}
 						break;
+					case App.PlayerEventType.PlayPauseToggle:
+						Player.Pause();
+						break;
 					case App.PlayerEventType.NextMirror:
 						SelectNextMirror();
 						break;
@@ -1250,7 +1259,8 @@ namespace CloudStreamForms
 
 		async Task SkipCurrentCap()
 		{
-			if (Player != null || skipToEnd < 1000) {
+			var _time = GetPlayerTime();
+			if ((Player != null || skipToEnd < 1000) && _time < skipToEnd) {
 				var _len = GetPlayerLenght();
 				if (_len < skipToEnd + 1000 && NextEpisodeClicked != null) {
 					await NextEpisodeClicked();
@@ -1544,11 +1554,11 @@ namespace CloudStreamForms
 		public void Dispose()
 		{
 			Thread t = new Thread(() => {
-			var mediaPlayer = _mediaPlayer;
-			_mediaPlayer = null;
-			mediaPlayer?.Dispose();
-			_libVLC?.Dispose();
-			_libVLC = null;
+				var mediaPlayer = _mediaPlayer;
+				_mediaPlayer = null;
+				mediaPlayer?.Dispose();
+				_libVLC?.Dispose();
+				_libVLC = null;
 			});
 			t.Name = "DISPOSETHREAD";
 			t.Start();
@@ -1618,7 +1628,7 @@ namespace CloudStreamForms
 				else {
 					long len = (long)(VideoSlider.Value * GetPlayerLenght());
 					Player.Time = len; // THIS WILL CAUSE FREEZ WHEN PLAYING CURRUPT VIDEO
-					//SeekSubtitles(len);
+									   //SeekSubtitles(len);
 
 					dragingVideo = false;
 					SlideChangedLabel.IsVisible = false;

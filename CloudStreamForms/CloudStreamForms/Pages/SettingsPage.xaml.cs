@@ -338,6 +338,8 @@ namespace CloudStreamForms.Pages
  						Settings.SubtitlesEmptyTime =_time;
 					}
 				}),
+				new SettingsItem() { img= "baseline_closed_caption_white_48dp.png",mainTxt="Closed Captions",descriptTxt="" ,VarName = nameof(Settings.SubtitlesClosedCaptioning)},
+				new SettingsItem() { img= "outline_subtitles_white_48dp.png",mainTxt="Auto add subtitles",descriptTxt="" ,VarName = nameof(Settings.AutoAddInternalSubtitles)},
 			},
 		};
 
@@ -400,8 +402,8 @@ namespace CloudStreamForms.Pages
 				new SettingsButton("baseline_feedback_white_48dp.png","Leave feedback","",async () => {
 					await thisPage.Navigation.PushModalAsync(new Feedback());
 				}),
-				new SettingsList("outline_settings_white_48dp.png","Manage Account","", () => {					
-					return $"{(Settings.HasAccountLogin ? "CloudSync" : "")}{(Settings.HasMalAccountLogin ? $"{(Settings.HasAccountLogin ? " | " : "")}MAL" : "")}{(Settings.HasAniListLogin ?  $"{(Settings.HasAccountLogin || Settings.HasMalAccountLogin ? " | " : "")}AniList" : "")}"; 
+				new SettingsList("outline_settings_white_48dp.png","Manage Account","", () => {
+					return $"{(Settings.HasAccountLogin ? "CloudSync" : "")}{(Settings.HasMalAccountLogin ? $"{(Settings.HasAccountLogin ? " | " : "")}MAL" : "")}{(Settings.HasAniListLogin ?  $"{(Settings.HasAccountLogin || Settings.HasMalAccountLogin ? " | " : "")}AniList" : "")}";
 				},async ()  => {
 				   await Settings.ManageAccountClicked(() => Appear());
 				}),

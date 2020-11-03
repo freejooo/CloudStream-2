@@ -135,7 +135,7 @@ namespace CloudStreamForms
 				App.SetKey("Settings", nameof(SubtitlesSize), value);
 			}
 			get {
-				return App.GetKey("Settings", nameof(SubtitlesSize), 18);
+				return App.GetKey("Settings", nameof(SubtitlesSize), 20);
 			}
 		}
 
@@ -163,6 +163,30 @@ namespace CloudStreamForms
 			}
 			get {
 				return App.GetKey("Settings", nameof(SubtitlesShadowStrenght), 10);
+			}
+		}
+
+		/// <summary>
+		/// Disable or enable https://en.wikipedia.org/wiki/Closed_captioning 
+		/// 
+		/// I GOT THE MACHINE READY.
+		/// [engine starting]
+		/// </summary>
+		public static bool SubtitlesClosedCaptioning {
+			set {
+				App.SetKey("Settings", nameof(SubtitlesClosedCaptioning), value);
+			}
+			get {
+				return App.GetKey("Settings", nameof(SubtitlesClosedCaptioning), true);
+			}
+		}
+
+		public static bool AutoAddInternalSubtitles {
+			set {
+				App.SetKey("Settings", nameof(AutoAddInternalSubtitles), value);
+			}
+			get {
+				return App.GetKey("Settings", nameof(AutoAddInternalSubtitles), true);
 			}
 		}
 

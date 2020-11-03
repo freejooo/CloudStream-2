@@ -5703,6 +5703,12 @@ namespace CloudStreamForms.Core
 
 		#endregion
 
+		public static string RemoveCCFromSubtitles(string inp)
+		{
+			Regex cc = new Regex(@"/\[(.*?)\]|\((.*?)\)/g"); // WILL REMOVE ALL CHARS IN (....) or [....]
+			return cc.Replace(inp, "");
+		}
+
 		static void GetSeasonAndPartFromName(string name, out int season, out int part)
 		{
 			season = 0;
@@ -7086,8 +7092,12 @@ namespace CloudStreamForms.Core
 					}
 
 					s = s.Replace("\n\n", "");
+					if(!Settings.SubtitlesClosedCaptioning) {
+						s = RemoveCCFromSubtitles(s);
+					}
+
 					if (showToast) {
-						App.ShowToast("Subtitles Downloaded");
+						App.ShowToast("Subtitles Loaded");
 					}
 					if (s.Length > 100) { // MUST BE CORRECT
 						cachedSubtitles[cacheKey] = s;
