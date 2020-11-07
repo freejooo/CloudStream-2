@@ -6,8 +6,6 @@ https://github.com/LagradOst/CloudStream-2/releases
 **Discord:**
 https://discord.gg/5Hus6fM
 
-CloudStream 2 is the successor to https://github.com/LagradOst/CloudStream, and focuses more on appearance and usability. It is a Xamarin.Forms project, but I have no working UWP build at the moment.   
-
 **FEATURES:**
 + **AdFree**, No ads whatsoever
 + No tracking/analytics
@@ -16,6 +14,7 @@ CloudStream 2 is the successor to https://github.com/LagradOst/CloudStream, and 
 + Watch history that can easily be toggled and removed
 + Instant search, get results fast
 + IMDb, MAL and AniList integration
++ MAL and Anilist login
 + Recommendations for every movie
 + Trailer from IMDb
 + Movie and Episode description
@@ -28,10 +27,6 @@ CloudStream 2 is the successor to https://github.com/LagradOst/CloudStream, and 
 
 **REQUIREMENTS:**
 + ~~On Android, you must have VLC or any other video player that can play .m3u8 files installed.~~  VLC is recommended, but not required
-
-
-**CANT PLAY VIDEO?**
-+ If you can't play any movie, make sure to link the .m3u8 filetype to a video player. On Android you have to go to file manager and open the mirrorlist.m3u8 file that CloudStream 2 generated as a video file. 
 
 **SCREENSHOTS:**
 
@@ -65,9 +60,9 @@ https://www.opensubtitles.org (Subtitles)
 
 https://js.do/code (Title sharing)
 
-**Movie/Tv-Series:**
+**Movie/Tv-Series Sites:**
 
-https://www8.watchmovie.movie/
+https://123files.club/
 
 https://v2.vidsrc.me/
 
@@ -79,34 +74,44 @@ https://c123movies.com/
 
 https://on.the123movies.eu/
 
-https://yesmoviess.to/
+https://www3.watchserieshd.tv/
+
+https://gomostream.com/
+
+https://movies123.pro/
 
 https://bestdubbedanime.com/
 
-https://www.kickassanime.rs/
+https://watchseriesfree.co/
+
+https://www.monkeystream.net/
+
+https://www1.kickassanime.rs/
+
+https://lookmovie.ag/
 
 **Anime Sites:**
 
-https://animevibe.tv
+https://twist.moe/
 
-https://9anime.to
+https://www.animefever.tv/
 
-https://www9.gogoanime.io
+https://www1.gogoanime.movie/
 
-https://www1.kickassanime.rs
+https://www1.kickassanime.rs/
 
-https://bestdubbedanime.com
+https://bestdubbedanime.com/
 
-https://animeflix.io
+https://animeflix.io/
 
-https://animekisa.tv
-
-https://dreamanime.fun
-
-https://www8.watchmovie.movie/
+https://animekisa.tv/
 
 https://kissanimefree.xyz/
 
-https://ww1.animesimple.com
+https://ww1.animesimple.com/
 
-https://vidstreaming.io
+https://vidstreaming.io/
+
+https://watchseriesfree.co/
+
+https://4anime.to/
