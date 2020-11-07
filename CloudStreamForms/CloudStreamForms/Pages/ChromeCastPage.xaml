@@ -54,71 +54,67 @@
                 </Grid>-->
              
                 <BoxView VerticalOptions="FillAndExpand" ></BoxView>
-                <StackLayout Margin="0,0,0,50" >
-                    <Grid HorizontalOptions="Center" x:Name="UpperIconHolder" ColumnSpacing="25" Margin="10" TranslationY="-10" TranslationX="10">
-                        <Grid.ColumnDefinitions >
-                            <ColumnDefinition Width="Auto" />
-                            <ColumnDefinition Width="Auto" />
-                            <ColumnDefinition Width="Auto" />
-                            <ColumnDefinition Width="Auto" />
-                        </Grid.ColumnDefinitions>
-                        <ImageButton x:Name="PlayList" Grid.Column="0" BackgroundColor="Transparent"  Scale="{Binding ScaleAll}"  ></ImageButton>
-                            <ImageButton x:Name="Subbutton" Grid.Column="1" BackgroundColor="Transparent"  Scale="1.2"  Clicked="SubClicked"></ImageButton>
-                        <ImageButton x:Name="StopAll" Grid.Column="2" BackgroundColor="Transparent" Scale="{Binding ScaleAllBig}"  Margin="10"  ></ImageButton>
-                        <ImageButton x:Name="Audio" Grid.Column="3" BackgroundColor="Transparent"  Scale="1" WidthRequest="45" TranslationX="-12" HeightRequest="45"  Clicked="AudioClicked"></ImageButton>
-                    </Grid>
-                    <Grid HorizontalOptions="Center" ColumnSpacing="20" x:Name="LowerIconHolder">
-                        <Grid.ColumnDefinitions >
-                            <ColumnDefinition Width="Auto" />
-                            <ColumnDefinition Width="Auto" />
-                            <ColumnDefinition Width="Auto" />
-                            <ColumnDefinition Width="Auto" />
-                            <ColumnDefinition Width="Auto" />
-                        </Grid.ColumnDefinitions>
+					<StackLayout Margin="0,0,0,50" >
+						<Grid HorizontalOptions="Center" x:Name="UpperIconHolder" ColumnSpacing="25" Margin="10" TranslationY="-10" TranslationX="10">
+							<Grid.ColumnDefinitions >
+								<ColumnDefinition Width="Auto" />
+								<ColumnDefinition Width="Auto" />
+								<ColumnDefinition Width="Auto" />
+								<ColumnDefinition Width="Auto" />
+							</Grid.ColumnDefinitions>
+							<ImageButton x:Name="PlayList" Grid.Column="0" BackgroundColor="Transparent"  Scale="{Binding ScaleAll}"  ></ImageButton>
+							<ImageButton x:Name="Subbutton" Grid.Column="1" BackgroundColor="Transparent"  Scale="1.2"  Clicked="SubClicked"></ImageButton>
+							<ImageButton x:Name="StopAll" Grid.Column="2" BackgroundColor="Transparent" Scale="{Binding ScaleAllBig}"  Margin="10"  ></ImageButton>
+							<ImageButton x:Name="Audio" Grid.Column="3" BackgroundColor="Transparent"  Scale="1" WidthRequest="45" TranslationX="-12" HeightRequest="45"  Clicked="AudioClicked"></ImageButton>
+						</Grid>
+						<Grid HorizontalOptions="Center" ColumnSpacing="20" x:Name="LowerIconHolder">
+							<Grid.ColumnDefinitions >
+								<ColumnDefinition Width="Auto" />
+								<ColumnDefinition Width="Auto" />
+								<ColumnDefinition Width="Auto" />
+								<ColumnDefinition Width="Auto" />
+								<ColumnDefinition Width="Auto" />
+							</Grid.ColumnDefinitions>
 
-                        <ImageButton x:Name="SkipBack" Grid.Column="0" BackgroundColor="Transparent" Scale="{Binding ScaleAll}" ></ImageButton>
-                        <ff:CachedImage x:Name="BackForward" InputTransparent="True" Grid.Column="1" BackgroundColor="Transparent"  Scale="1" HeightRequest="{Binding IconSize}" WidthRequest="{Binding IconSize}" ></ff:CachedImage>
-                            <xe:BorderView  x:Name="BackForwardBtt" xe:TouchEffect.Color="White" Grid.Column="1" TranslationX="0" Opacity="0.6" VerticalOptions="Center" WidthRequest="34" HeightRequest="34" CornerRadius="17" HorizontalOptions="Center" BackgroundColor="Transparent">
-                            </xe:BorderView>
-                        
-                        <Label Text="{Binding BackForwardTime}" Grid.Column="1" VerticalOptions="Center" HorizontalOptions="Center" TranslationY="0" TextColor="White" InputTransparent="True" FontSize="17"></Label>
-                            <Image   x:Name="Pause" Source="netflixPause128.png" Grid.Column="2" BackgroundColor="Transparent" Scale="1.7" Margin="15" WidthRequest="30" HeightRequest="30" InputTransparent="True" > 
-                        </Image>
-                        <Button  Clicked="Pause_Clicked" BackgroundColor="Transparent"  Grid.Column="2" WidthRequest="45" ></Button>
-                       <!-- <ImageButton x:Name="Pause" Grid.Column="2" BackgroundColor="Transparent" Clicked="Pause_Clicked" Scale="{Binding ScaleAllBig}" Margin="10" WidthRequest="30" HeightRequest="30" ></ImageButton>-->
-                            <ff:CachedImage x:Name="FastForward" Grid.Column="3"  InputTransparent="True" BackgroundColor="Transparent" Scale="1"  HeightRequest="{Binding IconSize}" WidthRequest="{Binding IconSize}" ></ff:CachedImage>
-                            <xe:BorderView  x:Name="FastForwardBtt" xe:TouchEffect.Color="White" Grid.Column="3" TranslationX="0" Opacity="0.6" VerticalOptions="Center" WidthRequest="34" HeightRequest="34" CornerRadius="17" HorizontalOptions="Center" BackgroundColor="Transparent">
-                            </xe:BorderView>
+							<ImageButton x:Name="SkipBack" Grid.Column="0" BackgroundColor="Transparent" Scale="{Binding ScaleAll}" ></ImageButton>
+							<ff:CachedImage x:Name="BackForward" InputTransparent="True" Grid.Column="1" BackgroundColor="Transparent"  Scale="1" HeightRequest="{Binding IconSize}" WidthRequest="{Binding IconSize}" ></ff:CachedImage>
+							<xe:BorderView  x:Name="BackForwardBtt" xe:TouchEffect.Color="White" Grid.Column="1" TranslationX="0" Opacity="0.6" VerticalOptions="Center" WidthRequest="34" HeightRequest="34" CornerRadius="17" HorizontalOptions="Center" BackgroundColor="Transparent">
+							</xe:BorderView>
 
-                            <Label Text="{Binding FastForwardTime}" Grid.Column="3" VerticalOptions="Center" HorizontalOptions="Center" TranslationY="0" TextColor="White" InputTransparent="True" FontSize="17"  ></Label>
-                        <ImageButton x:Name="SkipForward" Grid.Column="4" BackgroundColor="Transparent" Scale="{Binding ScaleAll}" ></ImageButton>
-                    </Grid>
+							<Label Text="{Binding BackForwardTime}" Grid.Column="1" VerticalOptions="Center" HorizontalOptions="Center" TranslationY="0" TextColor="White" InputTransparent="True" FontSize="17"></Label>
+							<Image   x:Name="Pause" Source="netflixPause128.png" Grid.Column="2" BackgroundColor="Transparent" Scale="1.7" Margin="15" WidthRequest="30" HeightRequest="30" InputTransparent="True" >
+							</Image>
+							<Button  Clicked="Pause_Clicked" BackgroundColor="Transparent"  Grid.Column="2" WidthRequest="45" ></Button>
+							<!-- <ImageButton x:Name="Pause" Grid.Column="2" BackgroundColor="Transparent" Clicked="Pause_Clicked" Scale="{Binding ScaleAllBig}" Margin="10" WidthRequest="30" HeightRequest="30" ></ImageButton>-->
+							<ff:CachedImage x:Name="FastForward" Grid.Column="3"  InputTransparent="True" BackgroundColor="Transparent" Scale="1"  HeightRequest="{Binding IconSize}" WidthRequest="{Binding IconSize}" ></ff:CachedImage>
+							<xe:BorderView  x:Name="FastForwardBtt" xe:TouchEffect.Color="White" Grid.Column="3" TranslationX="0" Opacity="0.6" VerticalOptions="Center" WidthRequest="34" HeightRequest="34" CornerRadius="17" HorizontalOptions="Center" BackgroundColor="Transparent">
+							</xe:BorderView>
 
-                    <Grid HorizontalOptions="Fill" ColumnSpacing="0" Padding="10,0" Margin="0">
-                        <Grid.ColumnDefinitions >
-                            <ColumnDefinition Width="Auto" />
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="Auto" />
-                        </Grid.ColumnDefinitions>
-                        <Label Grid.Row="0" Grid.Column="0" x:Name="StartTxt" Text="" HorizontalOptions="Start"></Label>
-                        <Label Grid.Row="0" Grid.Column="2" x:Name="EndTxt" Text="" HorizontalOptions="End"></Label>
-                    </Grid>
-                    <Slider x:Name="VideoSlider" Grid.Column="1" MinimumTrackColor="#303F9F" ThumbColor="#303F9F" HorizontalOptions="Fill" Margin="0,0,0,10"></Slider>
-                        <Grid HorizontalOptions="Center">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto"></ColumnDefinition>
-                                <ColumnDefinition Width="Auto"></ColumnDefinition>
-                                <ColumnDefinition Width="Auto"></ColumnDefinition>
-                            </Grid.ColumnDefinitions>
-                            <Image x:Name="ChromeImg" Grid.Column="0" Source="round_cast_white_48dp2_4.png" HeightRequest="23" WidthRequest="23" VerticalOptions="Center" Margin="10,0"></Image>
-                            <Label x:Name="ChromeLabel" Grid.Column="1" Text="Yeetos" VerticalOptions="Center"></Label>
-                        </Grid>
+							<Label Text="{Binding FastForwardTime}" Grid.Column="3" VerticalOptions="Center" HorizontalOptions="Center" TranslationY="0" TextColor="White" InputTransparent="True" FontSize="17"  ></Label>
+							<ImageButton x:Name="SkipForward" Grid.Column="4" BackgroundColor="Transparent" Scale="{Binding ScaleAll}" ></ImageButton>
+						</Grid>
 
-                </StackLayout>
-               
-                
-               
-            </StackLayout>
+						<Grid HorizontalOptions="Fill" ColumnSpacing="0" Padding="10,0" Margin="0">
+							<Grid.ColumnDefinitions >
+								<ColumnDefinition Width="Auto" />
+								<ColumnDefinition Width="*" />
+								<ColumnDefinition Width="Auto" />
+							</Grid.ColumnDefinitions>
+							<Label Grid.Row="0" Grid.Column="0" x:Name="StartTxt" WidthRequest="100" Text="" HorizontalOptions="Start" HorizontalTextAlignment="Start"></Label>
+							<Label Grid.Row="0" Grid.Column="2" x:Name="EndTxt" WidthRequest="100" Text="" HorizontalOptions="End" HorizontalTextAlignment="End"></Label>
+						</Grid>
+						<Slider x:Name="VideoSlider" Grid.Column="1" MinimumTrackColor="#303F9F" ThumbColor="#303F9F" HorizontalOptions="Fill" Margin="0,0,0,10"></Slider>
+						<Grid HorizontalOptions="Center">
+							<Grid.ColumnDefinitions>
+								<ColumnDefinition Width="Auto"></ColumnDefinition>
+								<ColumnDefinition Width="Auto"></ColumnDefinition>
+								<ColumnDefinition Width="Auto"></ColumnDefinition>
+							</Grid.ColumnDefinitions>
+							<Image x:Name="ChromeImg" Grid.Column="0" Source="round_cast_white_48dp2_4.png" HeightRequest="23" WidthRequest="23" VerticalOptions="Center" Margin="10,0"></Image>
+							<Label x:Name="ChromeLabel" Grid.Column="1" Text="Yeetos" VerticalOptions="Center"></Label>
+						</Grid>
+					</StackLayout>
+				</StackLayout>
             </Grid>
         </ScrollView>
     </ContentPage.Content>

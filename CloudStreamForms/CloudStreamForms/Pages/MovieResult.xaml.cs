@@ -939,14 +939,14 @@ namespace CloudStreamForms
 			if (checkColor) {
 				SetColor(episodeResult);
 			}
-			print("POST PRO ON: " + episodeResult.IMDBEpisodeId);
+			//print("POST PRO ON: " + episodeResult.IMDBEpisodeId);
 			string realId = episodeResult.IMDBEpisodeId;
-			print("ID::::::: ON " + realId + "|" + App.GetKey(VIEW_TIME_POS, realId, -1L));
+			//print("ID::::::: ON " + realId + "|" + App.GetKey(VIEW_TIME_POS, realId, -1L));
 			if ((pos = App.GetViewPos(realId)) > 0) {
 				if ((len = App.GetViewDur(realId)) > 0) {
 					episodeResult.Progress = (double)pos / (double)len;
 					episodeResult.ProgressState = pos;
-					print("MAIN DRI:: " + pos + "|" + len + "|" + episodeResult.Progress);
+					//print("MAIN DRI:: " + pos + "|" + len + "|" + episodeResult.Progress);
 				}//tt8993804 // tt0772328
 			}
 			return episodeResult;

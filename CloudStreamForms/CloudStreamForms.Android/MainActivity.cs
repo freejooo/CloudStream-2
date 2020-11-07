@@ -595,6 +595,7 @@ namespace CloudStreamForms.Droid
 
 				base.OnRewind();
 			}
+
 			public override void OnSkipToNext()
 			{
 				App.OnRemovePlayAction?.Invoke(null, App.PlayerEventType.SkipCurrentChapter);

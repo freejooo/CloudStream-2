@@ -10,6 +10,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Xamarin.Forms;
@@ -372,11 +373,9 @@ namespace CloudStreamForms.Core
 				return parser.ParseStream(stream, Encoding.UTF8).Select(t => {
 
 					// REMOVE BLOAT
+					Regex rep = new Regex(@"/<(.*?)>/g");
 					for (int i = 0; i < t.Lines.Count; i++) {
-						var inp = t.Lines[i];
-						while (ContainsStartColor(inp)) {
-							t.Lines[i] = inp.Replace($"<font color=\"{FindHTML(inp, "<font color=\"", "\"")}\">", "");
-						}
+						t.Lines[i] = rep.Replace(t.Lines[i], ""); 
 					}
 
 					t.Lines = t.Lines.Select(_t => _t.Replace("<i>", "").Replace("{i}", "").Replace("<b>", "").Replace("{b}", "").Replace("<u>", "").Replace("{u}", "").Replace("</i>", "").Replace("{/i}", "").Replace("</b>", "").Replace("{/b}", "").Replace("</u>", "").Replace("{/u}", "").Replace("</font>", "")).ToList();

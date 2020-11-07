@@ -694,7 +694,7 @@ namespace CloudStreamForms
 
 
 				//double base1X = SubtitleTxt1.TranslationX;
-				double base1Y = -5;
+				double base1Y = -10;
 				SubtitleTxt1.TranslationY = base1Y;
 				SubtitleTxt1BG.TranslationY = base1Y;
 
@@ -1192,6 +1192,9 @@ namespace CloudStreamForms
 
 		public async void HandleAppPipMode(object o, bool e)
 		{
+			SubtitleTxt1.IsVisible = !e;
+			SubtitleTxt1BG.IsVisible = !e;
+
 			AllButtons.IsEnabled = !e;
 			AllButtons.IsVisible = !e;
 			if (!e) {
@@ -1443,7 +1446,7 @@ namespace CloudStreamForms
 			UpdateVideoStatus();
 
 			LibVLCSharp.Shared.Core.Initialize();
-
+			 
 			print("ON APPEARING VIDEOPAGE");
 			isShown = true;
 			App.OnAudioFocusChanged += HandleAudioFocus;
@@ -1975,7 +1978,9 @@ namespace CloudStreamForms
 			}
 			else if (args.Type == TouchTracking.TouchActionType.Released) {
 				if (isMovingCursor && isMovingHorozontal && Math.Abs(isMovingSkipTime) > 1000) { // SKIP TIME
-					FadeEverything(true);
+																								 //FadeEverything(true);
+					SkiptimeLabel.Text = "";
+
 					if (Player != null) {
 						SeekMedia(isMovingSkipTime - playerTime + isMovingStartTime);
 					}
