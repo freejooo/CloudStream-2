@@ -9,203 +9,212 @@ using CloudStreamForms.Core;
 using CloudStreamForms.Pages;
 using Rg.Plugins.Popup.Services;
 using System.Linq;
+using System.Security.Cryptography.X509Certificates;
 
 namespace CloudStreamForms
 {
-    // Learn more about making custom code visible in the Xamarin.Forms previewer
-    // by visiting https://aka.ms/xamarinforms-previewer
+	// Learn more about making custom code visible in the Xamarin.Forms previewer
+	// by visiting https://aka.ms/xamarinforms-previewer
 
-    [DesignTimeVisible(false)]
-    public partial class MainPage : Xamarin.Forms.TabbedPage
-    {
-        public const string DARK_BLUE_COLOR = "#303F9F";
-        public const string LIGHT_BLUE_COLOR = "#829eff";
-        public const string LIGHT_BLACK_COLOR = "#595959";
-        public const string LIGHT_LIGHT_BLACK_COLOR = "#e6e6e6";
-        public const string BLACK_COLOR = "#111111";
-        public const string ITEM_COLOR = "#617eff";
-        public const string LIGHT_DARK_BLUE_COLOR = "#1976D2";
+	[DesignTimeVisible(false)]
+	public partial class MainPage : Xamarin.Forms.TabbedPage
+	{
+		public const string DARK_BLUE_COLOR = "#303F9F";
+		public const string LIGHT_BLUE_COLOR = "#829eff";
+		public const string LIGHT_BLACK_COLOR = "#595959";
+		public const string LIGHT_LIGHT_BLACK_COLOR = "#e6e6e6";
+		public const string BLACK_COLOR = "#111111";
+		public const string ITEM_COLOR = "#617eff";
+		public const string LIGHT_DARK_BLUE_COLOR = "#1976D2";
 
-        public const bool IS_EMTY_BUILD = false;
-        public const bool IS_TEST_VIDEO = false;
+		public const bool IS_EMTY_BUILD = false;
+		public const bool IS_TEST_VIDEO = false;
 
-        public static string intentData = "";
-        public static MainPage mainPage;
+		public static string intentData = "";
+		public static MainPage mainPage;
 
-        [Serializable]
-        public struct BookmarkPoster
-        {
-            public string name;
-            public string posterUrl;
-            public string id;
-            //  public Button button;
-        }
+		[Serializable]
+		public struct BookmarkPoster
+		{
+			public string name;
+			public string posterUrl;
+			public string id;
+			//  public Button button;
+		}
 
-        public static bool NewGithubUpdate {
-            get {
-                if (githubUpdateTag == "") { return false; }
-                else { return ("v" + App.GetBuildNumber() != githubUpdateTag); }
-            }
-        }
+		public static bool NewGithubUpdate {
+			get {
+				if (githubUpdateTag == "") { return false; }
+				else { return ("v" + App.GetBuildNumber() != githubUpdateTag); }
+			}
+		}
 
-        public static string githubUpdateTag = "";
-        public static string githubUpdateText = "";
+		public static string githubUpdateTag = "";
+		public static string githubUpdateText = "";
 
-        public static async Task ShowUpdate(bool skipIntro = false)
-        {
-            if (Device.RuntimePlatform == Device.Android) {
-                var recommendedArc = (App.AndroidVersionArchitecture)App.PlatformDep.GetArchitecture();
+		public static async Task ShowUpdate(bool skipIntro = false)
+		{
+			if (Device.RuntimePlatform == Device.Android) {
+				var recommendedArc = (App.AndroidVersionArchitecture)App.PlatformDep.GetArchitecture();
 
-                string option = skipIntro ? "Download Update" : await ActionPopup.DisplayActionSheet($"App update {githubUpdateTag}", "Download Update", "Ignore this time", "Dont show this again");
-                if (option == "Download Update") {
+				string option = skipIntro ? "Download Update" : await ActionPopup.DisplayActionSheet($"App update {githubUpdateTag}", "Download Update", "Ignore this time", "Dont show this again");
+				if (option == "Download Update") {
 
-                    List<string> options = new List<string>() { };
-                    var arcs = App.GetEnumList<App.AndroidVersionArchitecture>();
-                    foreach (var ver in arcs) {
-                        options.Add(App.GetVersionPublicName(ver) + (recommendedArc == ver ? " (Recommended)" : " "));
-                    }
-                    string version = await ActionPopup.DisplayActionSheet("Download App Architecture", options.ToArray());
-                    if (version == "Cancel" || version == "") return;
-                    foreach (var ver in arcs) {
-                        if (version.StartsWith(App.GetVersionPublicName(ver) + " ")) {
-                            App.DownloadNewGithubUpdate(githubUpdateTag, ver);
-                            break;
-                        }
-                    }
-                }
-                else if (option == "Dont show this again") {
-                    Settings.ShowAppUpdate = false;
-                }
-            }
-        }
+					List<string> options = new List<string>() { };
+					var arcs = App.GetEnumList<App.AndroidVersionArchitecture>();
+					foreach (var ver in arcs) {
+						options.Add(App.GetVersionPublicName(ver) + (recommendedArc == ver ? " (Recommended)" : " "));
+					}
+					string version = await ActionPopup.DisplayActionSheet("Download App Architecture", options.ToArray());
+					if (version == "Cancel" || version == "") return;
+					foreach (var ver in arcs) {
+						if (version.StartsWith(App.GetVersionPublicName(ver) + " ")) {
+							App.DownloadNewGithubUpdate(githubUpdateTag, ver);
+							break;
+						}
+					}
+				}
+				else if (option == "Dont show this again") {
+					Settings.ShowAppUpdate = false;
+				}
+			}
+		}
 
-        public static void CheckGitHubUpdate()
-        {
-            try {
-                if (Device.RuntimePlatform == Device.Android) { // ONLY ANDROID CAN UPDATE
+		public static void CheckGitHubUpdate()
+		{
+			try {
+				if (Device.RuntimePlatform == Device.Android) { // ONLY ANDROID CAN UPDATE
 
-                    TempThread tempThred = mainCore.CreateThread(4);
-                    mainCore.StartThread("GitHub Update Thread", async () => {
-                        try {
-                            string d = mainCore.DownloadString("https://github.com/LagradOst/CloudStream-2/releases", tempThred);
-                            if (!mainCore.GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
+					TempThread tempThred = mainCore.CreateThread(4);
+					mainCore.StartThread("GitHub Update Thread", async () => {
+						try {
+							string d = mainCore.DownloadString("https://github.com/LagradOst/CloudStream-2/releases", tempThred);
+							if (!mainCore.GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
 
-                            string look = "/LagradOst/CloudStream-2/releases/tag/";
-                            //   float bigf = -1;
-                            //     string bigUpdTxt = "";
-                            // while (d.Contains(look)) {
+							string look = "/LagradOst/CloudStream-2/releases/tag/";
+							//   float bigf = -1;
+							//     string bigUpdTxt = "";
+							// while (d.Contains(look)) {
 
-                            githubUpdateTag = FindHTML(d, look, "\"");
-                            githubUpdateText = FindHTML(d, look + githubUpdateTag + "\">", "<");
-                            if (Settings.ShowAppUpdate && NewGithubUpdate) {
-                                await ShowUpdate();
-                            }
-                            print("UPDATE SEARCHED: " + githubUpdateTag + "|" + githubUpdateText);
-                        }
-                        finally {
-                            mainCore.JoinThred(tempThred);
-                        }
-                    });
-                }
-            }
-            catch (Exception _ex) {
-                print("Github ex::" + _ex);
-            }
+							githubUpdateTag = FindHTML(d, look, "\"");
+							githubUpdateText = FindHTML(d, look + githubUpdateTag + "\">", "<");
+							if (Settings.ShowAppUpdate && NewGithubUpdate) {
+								await ShowUpdate();
+							}
+							print("UPDATE SEARCHED: " + githubUpdateTag + "|" + githubUpdateText);
+						}
+						finally {
+							mainCore.JoinThred(tempThred);
+						}
+					});
+				}
+			}
+			catch (Exception _ex) {
+				print("Github ex::" + _ex);
+			}
 
-        }
+		}
 
-        protected override void OnAppearing()
-        {
-            base.OnAppearing();
-            App.isOnMainPage = true;
-            App.UpdateBackground();
-            // App.Test();
-        }
+		protected override void OnAppearing()
+		{
+			base.OnAppearing();
+			App.isOnMainPage = true;
+			App.UpdateBackground();
+			// App.Test();
+		}
 
-        protected override void OnDisappearing()
-        {
-            base.OnDisappearing();
-            App.isOnMainPage = false;
-            App.UpdateBackground();
-        }
+		protected override void OnDisappearing()
+		{
+			base.OnDisappearing();
+			App.isOnMainPage = false;
+			App.UpdateBackground();
+		}
 
-        // public static readonly string[] baseIcons = new string[] { "outline_home_white_48dp.png", "searchIcon.png", "outline_get_app_white_48dp.png", "outline_settings_white_48dp.png" };
-        public static readonly string[] baseIcons = new string[] { "outline_home_white_48dp.png", "MainSearchIcon.png", "MainNetflixDownloadIcon.png", "MainSettingsIcon_backup.png" };
-        public static readonly string[] onSelectedIcons = new string[] { "outline_home_white_48dp.png", "MainSearchIcon.png", "MainNetflixDownloadIcon.png", "MainSettingsIcon_backup.png" };
-        //    public static readonly string[] onSelectedIcons = new string[] { "sharp_home_white_48dp.png", "searchIcon.png", "sharp_get_app_white_48dp.png", "sharp_settings_white_48dp.png" };
+		// public static readonly string[] baseIcons = new string[] { "outline_home_white_48dp.png", "searchIcon.png", "outline_get_app_white_48dp.png", "outline_settings_white_48dp.png" };
+		public static readonly string[] baseIcons = new string[] { "outline_home_white_48dp.png", "MainSearchIcon.png", "MainNetflixDownloadIcon.png", "MainSettingsIcon_backup.png" };
+		public static readonly string[] onSelectedIcons = new string[] { "outline_home_white_48dp.png", "MainSearchIcon.png", "MainNetflixDownloadIcon.png", "MainSettingsIcon_backup.png" };
+		//    public static readonly string[] onSelectedIcons = new string[] { "sharp_home_white_48dp.png", "searchIcon.png", "sharp_get_app_white_48dp.png", "sharp_settings_white_48dp.png" };
 
-        public static void OnIconStart(int i)
-        {
-            mainPage.Children[i].IconImageSource = onSelectedIcons[i];
-        }
+		public static void OnIconStart(int i)
+		{
+			mainPage.Children[i].IconImageSource = onSelectedIcons[i];
+		}
 
-        public static void OnIconEnd(int i)
-        {
-            mainPage.Children[i].IconImageSource = baseIcons[i];
-        }
+		public static void OnIconEnd(int i)
+		{
+			mainPage.Children[i].IconImageSource = baseIcons[i];
+		}
 
-        public static void UnhandledExceptionTrapper(object sender, UnhandledExceptionEventArgs e)
-        {
-            print(" ===================================== SUPERFATAL EX =====================================\n" +
-                e.ExceptionObject.ToString() + "\n" +
-                e.IsTerminating + "\n" +
-                sender.ToString() +
-                "\n ===================================== END ====================================="
-                );
-        }
+		public static void UnhandledExceptionTrapper(object sender, UnhandledExceptionEventArgs e)
+		{
+			print(" ===================================== SUPERFATAL EX =====================================\n" +
+				e.ExceptionObject.ToString() + "\n" +
+				e.IsTerminating + "\n" +
+				sender.ToString() +
+				"\n ===================================== END ====================================="
+				);
+		}
 
-        public async void LoadVideoPage()
-        {
-            await Device.InvokeOnMainThreadAsync(async () => {
-                await Navigation.PushModalAsync(new VideoPage(VideoPage.lastVideo), true);
-            });
-        }
+		public async void LoadVideoPage()
+		{
+			await Device.InvokeOnMainThreadAsync(async () => {
+				await Navigation.PushModalAsync(new VideoPage(VideoPage.lastVideo), true);
+			});
+		}
 
-        public MainPage()
-        {
-            InitializeComponent();
+		public static void SelectMainPageIndex(int index)
+		{
+			mainPage.CurrentPage = mainPage.Children[index];
+		}
 
-            try {
-                App.OnAppReopen += (o, e) => {
-                    if (VideoPage.CanReopen) {
-                        VideoPage.CanReopen = false;
-                        LoadVideoPage();
-                    }
-                };
+		public MainPage()
+		{
+			InitializeComponent();
 
-                App.OnAppNotInForground += (o, e) => {
-                    App.SaveData();
-                };
 
-                mainPage = this; CloudStreamCore.mainPage = mainPage;
+
+			try {
+				App.OnAppReopen += (o, e) => {
+					if (VideoPage.CanReopen) {
+						VideoPage.CanReopen = false;
+						LoadVideoPage();
+					}
+				};
+
+				App.OnAppNotInForground += (o, e) => {
+					App.SaveData();
+				};
+
+				mainPage = this; CloudStreamCore.mainPage = mainPage;
 
 #if DEBUG
-                System.AppDomain.CurrentDomain.UnhandledException += UnhandledExceptionTrapper; 
+				System.AppDomain.CurrentDomain.UnhandledException += UnhandledExceptionTrapper;
 #endif
 
-                if (IS_TEST_VIDEO) {
-                    Page p = new VideoPage(new VideoPage.PlayVideo() { descript = "", name = "Black Bunny", episode = -1, season = -1, MirrorNames = new List<string>() { "Googlevid" }, MirrorUrls = new List<string>() { "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" } });//new List<string>() { "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" }, new List<string>() { "Black" }, new List<string>() { });// { mainPoster = mainPoster };
-                    mainPage.Navigation.PushModalAsync(p, false);
-                    print("PUST: ::: :");
-                } 
-                if (IS_EMTY_BUILD) return;
+				if (IS_TEST_VIDEO) {
+					Page p = new VideoPage(new VideoPage.PlayVideo() { descript = "", name = "Black Bunny", episode = -1, season = -1, MirrorNames = new List<string>() { "Googlevid" }, MirrorUrls = new List<string>() { "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" } });//new List<string>() { "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" }, new List<string>() { "Black" }, new List<string>() { });// { mainPoster = mainPoster };
+					mainPage.Navigation.PushModalAsync(p, false);
+					print("PUST: ::: :");
+				}
+				if (IS_EMTY_BUILD) return;
 
 
-                List<string> names = new List<string>() { "Home", "Search", "Downloads", "Settings" };
-                //List<string> icons = new List<string>() { "homeIcon.png", "searchIcon.png", "downloadIcon.png", "baseline_settings_applications_white_48dp_inverted_big.png" };
-                List<Page> pages = new List<Page>() { new Home(), new Search(), new Download(), new SettingsPage(), };
+				List<string> names = new List<string>() { "Home", "Search", "Downloads", "Settings" };
+				//List<string> icons = new List<string>() { "homeIcon.png", "searchIcon.png", "downloadIcon.png", "baseline_settings_applications_white_48dp_inverted_big.png" };
+				List<Page> pages = new List<Page>() { new Home(), new Search(), new Download(), new SettingsPage(), };
 
-                for (int i = 0; i < pages.Count; i++) {
-                    Children.Add(pages[i]);
-                    Children[i].Title = names[i];
-                    Children[i].IconImageSource = baseIcons[i];
-                }
-                On<Xamarin.Forms.PlatformConfiguration.Android>().SetToolbarPlacement(ToolbarPlacement.Bottom);
-                LateCheck();
-            }
-            catch (Exception) {
-            }
-            /*
+				for (int i = 0; i < pages.Count; i++) {
+					Children.Add(pages[i]);
+					Children[i].Title = names[i];
+					Children[i].IconImageSource = baseIcons[i];
+				}
+				On<Xamarin.Forms.PlatformConfiguration.Android>().SetToolbarPlacement(ToolbarPlacement.Bottom);
+
+				LateCheck();
+			}
+			catch (Exception) {
+			}
+			/*
             if (Settings.IS_TEST_BUILD) {
                 return;
             }
@@ -231,88 +240,88 @@ namespace CloudStreamForms
             catch (Exception _ex) {
                 error(_ex);
             }*/
-            // BarBackgroundColor = Color.Black;
-            //   BarTextColor = Color.OrangeRed;
+			// BarBackgroundColor = Color.Black;
+			//   BarTextColor = Color.OrangeRed;
 
-            //Page _p = new ReviewPage("tt0371746", "Iron Man");
-            //MainPage.mainPage.Navigation.PushModalAsync(_p);
+			//Page _p = new ReviewPage("tt0371746", "Iron Man");
+			//MainPage.mainPage.Navigation.PushModalAsync(_p);
 
-            //PushPageFromUrlAndName("tt4869896", "Overlord");
-            //  PushPageFromUrlAndName("tt0409591", "Naruto");
-            //  PushPageFromUrlAndName("tt10885406", "Ascendance of a Bookworm");
-            // PushPageFromUrlAndName("tt9054364", "That Time I Got Reincarnated as a Slime");
-            // PushPageFromUrlAndName("tt0371746", "Iron Man");
-            // PushPageFromUrlAndName("tt10954274", "ID: Invaded");
-        }
-
-
-        async void LateCheck()
-        {
-            await Task.Delay(5000);
-            //   App.PlatformDep.PictureInPicture();
-            try {
-                CheckGitHubUpdate();
-                MainChrome.StartImageChanger();
-                MainChrome.GetAllChromeDevices();
-            }
-            catch (Exception _ex) {
-                error("ERROR IN LATECHECK::: " + _ex);
-            }
-        }
-
-        public static void PushPageFromUrlAndName(string url, string name)
-        {
-            try {
-                Poster _p = new Poster() { url = url, name = name };
-                Search.PushPage(_p, MainPage.mainPage.Navigation);
-            }
-            catch (Exception) {
-
-            }
-        }
-
-        public static void PushPageFromUrlAndName(string intentData)
-        {
-            string url = FindHTML(intentData, "cloudstreamforms:", "Name=");
-            string name = FindHTML(intentData, "Name=", "=EndAll");
-            print("MUSHFROMMMM: " + name + "|" + url);
-            //Task.Delay(10000);
-            if (name != "" && url != "") {
-                PushPageFromUrlAndName(url, System.Web.HttpUtility.UrlDecode(name));
-            }
-        }        /// <summary>
-                 /// Creates color with corrected brightness.
-                 /// </summary>
-                 /// <param name="color">Color to correct.</param>
-                 /// <param name="correctionFactor">The brightness correction factor. Must be between -1 and 1. 
-                 /// Negative values produce darker colors.</param>
-                 /// <returns>
-                 /// Corrected <see cref="Color"/> structure.
-                 /// </returns>
-        public static Color ChangeColorBrightness(Color color, float correctionFactor)
-        {
-            float red = (float)color.R;
-            float green = (float)color.G;
-            float blue = (float)color.B;
-
-            if (correctionFactor < 0) {
-                correctionFactor = 1 + correctionFactor;
-                red *= correctionFactor;
-                green *= correctionFactor;
-                blue *= correctionFactor;
-            }
-            else {
-                red = (255 - red) * correctionFactor + red;
-                green = (255 - green) * correctionFactor + green;
-                blue = (255 - blue) * correctionFactor + blue;
-            }
-
-            return Color.FromRgba((int)red, (int)green, (int)blue, color.A);
-        }
-    }
+			//PushPageFromUrlAndName("tt4869896", "Overlord");
+			//  PushPageFromUrlAndName("tt0409591", "Naruto");
+			//  PushPageFromUrlAndName("tt10885406", "Ascendance of a Bookworm");
+			// PushPageFromUrlAndName("tt9054364", "That Time I Got Reincarnated as a Slime");
+			// PushPageFromUrlAndName("tt0371746", "Iron Man");
+			// PushPageFromUrlAndName("tt10954274", "ID: Invaded");
+		}
 
 
-    // -------------------------------- END CHROMECAST --------------------------------
+		async void LateCheck()
+		{
+			await Task.Delay(5000);
+			//   App.PlatformDep.PictureInPicture();
+			try {
+				CheckGitHubUpdate();
+				MainChrome.StartImageChanger();
+				MainChrome.GetAllChromeDevices();
+			}
+			catch (Exception _ex) {
+				error("ERROR IN LATECHECK::: " + _ex);
+			}
+		}
+
+		public static void PushPageFromUrlAndName(string url, string name)
+		{
+			try {
+				Poster _p = new Poster() { url = url, name = name };
+				Search.PushPage(_p, MainPage.mainPage.Navigation);
+			}
+			catch (Exception) {
+
+			}
+		}
+
+		public static void PushPageFromUrlAndName(string intentData)
+		{
+			string url = FindHTML(intentData, "cloudstreamforms:", "Name=");
+			string name = FindHTML(intentData, "Name=", "=EndAll");
+			print("MUSHFROMMMM: " + name + "|" + url);
+			//Task.Delay(10000);
+			if (name != "" && url != "") {
+				PushPageFromUrlAndName(url, System.Web.HttpUtility.UrlDecode(name));
+			}
+		}        /// <summary>
+				 /// Creates color with corrected brightness.
+				 /// </summary>
+				 /// <param name="color">Color to correct.</param>
+				 /// <param name="correctionFactor">The brightness correction factor. Must be between -1 and 1. 
+				 /// Negative values produce darker colors.</param>
+				 /// <returns>
+				 /// Corrected <see cref="Color"/> structure.
+				 /// </returns>
+		public static Color ChangeColorBrightness(Color color, float correctionFactor)
+		{
+			float red = (float)color.R;
+			float green = (float)color.G;
+			float blue = (float)color.B;
+
+			if (correctionFactor < 0) {
+				correctionFactor = 1 + correctionFactor;
+				red *= correctionFactor;
+				green *= correctionFactor;
+				blue *= correctionFactor;
+			}
+			else {
+				red = (255 - red) * correctionFactor + red;
+				green = (255 - green) * correctionFactor + green;
+				blue = (255 - blue) * correctionFactor + blue;
+			}
+
+			return Color.FromRgba((int)red, (int)green, (int)blue, color.A);
+		}
+	}
+
+
+	// -------------------------------- END CHROMECAST --------------------------------
 
 
 }

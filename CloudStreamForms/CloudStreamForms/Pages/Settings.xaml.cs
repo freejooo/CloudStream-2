@@ -118,6 +118,15 @@ namespace CloudStreamForms
 			}
 		}
 
+		public static bool BackPressToHome {
+			set {
+				App.SetKey("Settings", nameof(BackPressToHome), value);
+			}
+			get {
+				return App.GetKey("Settings", nameof(BackPressToHome), true);
+			}
+		}
+
 		public static bool SubtitlesHasDropShadow {
 			get {
 				return SubtitleType == 1 || SubtitleType == 3;

@@ -56,6 +56,17 @@ namespace CloudStreamForms
 				});
 			}
 		}
+		
+		protected override bool OnBackButtonPressed()
+		{
+			if (Settings.BackPressToHome) {
+				MainPage.SelectMainPageIndex(0);
+				return true;
+			}
+			else {
+				return base.OnBackButtonPressed();
+			}
+		}
 
 		public Download()
 		{

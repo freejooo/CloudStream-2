@@ -21,7 +21,7 @@ namespace CloudStreamForms
         {
             base.OnAppearing();
             BackgroundColor = Settings.BlackRBGColor;
-        }
+        } 
         public Search()
         {
             InitializeComponent();
@@ -153,7 +153,13 @@ namespace CloudStreamForms
 
         protected override bool OnBackButtonPressed()
         {
-            return base.OnBackButtonPressed(); //   return true; // 
+            if (Settings.BackPressToHome) {
+                MainPage.SelectMainPageIndex(0);
+                return true;
+            }
+            else {
+                return base.OnBackButtonPressed();
+            }
         }
 
 
