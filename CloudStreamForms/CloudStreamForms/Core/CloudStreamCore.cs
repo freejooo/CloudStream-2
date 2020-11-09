@@ -44,7 +44,10 @@ namespace CloudStreamForms.Core
 				new TheMovieBloatFreeProvider(this),
              //   new AnimeVibeBloatFreeProvider(this), // HCaptcha ??
               //  new NineAnimeBloatFreeProvider(this), // Link extraction
-				new FourAnimeBloatFreeProvider(this)};
+				new FourAnimeBloatFreeProvider(this),
+				new AnimeParadiseBFProvider(this),
+
+			};
 			movieProviders = new IMovieProvider[] {
 				new FilesClubProvider(this),
 				new DirectVidsrcProvider(this),
@@ -294,6 +297,7 @@ namespace CloudStreamForms.Core
 		public struct MALSeason
 		{
 			public int length;
+			public int season;
 			public string malUrl;
 			public string aniListUrl;
 			public int MalId {
@@ -6352,7 +6356,7 @@ namespace CloudStreamForms.Core
 										var _startDate = ToDate(title.startDate?.year, title.startDate?.month, title.startDate?.day);
 										var _endDate = ToDate(title.endDate?.year, title.endDate?.month, title.endDate?.day);
 										//title.episodes
-										var malS = new MALSeason() { _MalId = title.idMal ?? 0,AniListId = title.id, length = title.episodes ?? 0, aniListUrl = _aniListLink, name = currentName, engName = _eng, japName = _jap, synonyms = _synos, malUrl = _malLink, startDate = _startDate, endDate = _endDate };
+										var malS = new MALSeason() { _MalId = title.idMal ?? 0, AniListId = title.id, length = title.episodes ?? 0, aniListUrl = _aniListLink, name = currentName, engName = _eng, japName = _jap, synonyms = _synos, malUrl = _malLink, startDate = _startDate, endDate = _endDate };
 										if (currentName.Contains("Part ") && !currentName.Contains("Part 1")) { // WILL ONLY WORK UNTIL PART 10, BUT JUST HOPE THAT THAT DOSENT HAPPEND :) (Not on jojo)
 											data[^1].seasons.Add(malS);
 										}
@@ -7090,7 +7094,7 @@ namespace CloudStreamForms.Core
 					}
 
 					s = s.Replace("\n\n", "");
-					if(!Settings.SubtitlesClosedCaptioning) {
+					if (!Settings.SubtitlesClosedCaptioning) {
 						s = RemoveCCFromSubtitles(s);
 					}
 
