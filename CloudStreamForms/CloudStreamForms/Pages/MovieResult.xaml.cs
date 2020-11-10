@@ -924,7 +924,6 @@ namespace CloudStreamForms
 					default:
 						break;
 				}
-				print("SETCOLOR::: " + state);
 
 				episodeResult.MainTextColor = hexColors[color];
 				episodeResult.MainDarkTextColor = darkHexColors[color];
@@ -968,7 +967,6 @@ namespace CloudStreamForms
 			}*/
 			if (!isMovie) {
 				episodeResult.Title = episodeResult.Episode + ". " + episodeResult.Title;
-				print("ADDMOVIE:___" + episodeResult.Episode + "|" + episodeResult.Title);
 			}
 
 			if (episodeResult.PosterUrl == "") {

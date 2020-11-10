@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using static CloudStreamForms.Core.BlotFreeProvider;
 using static CloudStreamForms.Core.CloudStreamCore;
 
@@ -10,33 +11,6 @@ namespace CloudStreamForms.Core.MovieProviders
         public override bool NullMetadata => true;
         public FilesClubProvider(CloudStreamCore _core) : base(_core) { }
 
-        public static string GetFileFromEvalData(string d)
-        {
-            const string _lookFor = "eval(function";
-            string code = "";
-            while (d.Contains(_lookFor)) {
-                code = _lookFor + FindHTML(d, _lookFor, "</script");
-                if (code.Contains("jwplayer")) break;
-                d = RemoveOne(d, _lookFor);
-            }
-            return FindHTML(GetEval(code), "file:\'", "\'");
-        }
-
-        public static string GetEval(string code)
-        {
-            Jint.Engine e = new Jint.Engine().SetValue("log_alert", new Action<string>((a) => {
-                if (a.Contains("log_alert")) {
-                    a = a.Replace("log_alert", "eval");
-                }
-                code = a;
-            }));
-            while (code.StartsWith("eval")) {
-                code = code.Replace("eval", "log_alert");
-                e.Execute(code);
-            }
-
-            return code;
-        }
 
         public override void LoadLink(object metadata, int episode, int season, int normalEpisode, bool isMovie, TempThread tempThred)
         {
@@ -69,20 +43,22 @@ namespace CloudStreamForms.Core.MovieProviders
                         string _ev = DownloadString("https://123files.club" + __ref, referer: request, tempThred: _thread);
                         if (_ev == "") return;
 
-                        string evalData = GetFileFromEvalData(_ev);
-
-                        if (evalData == "") {
-                            string realSite = FindHTML(_ev, "src=\"", "\"");
-                            if (realSite != "" && !realSite.StartsWith("http")) {
-                                EvalRef(realSite);
+                        List<VideoFileData> evalDatas = GetFileFromEvalData(_ev);
+						foreach (var evalData in evalDatas) {
+                            if (evalData.url == "") {
+                                string realSite = FindHTML(_ev, "src=\"", "\"");
+                                if (realSite != "" && !realSite.StartsWith("http")) {
+                                    EvalRef(realSite);
+                                }
+                            }
+                            else {
+                                string _url = evalData.url.Replace("#", "");
+                                if (_url.Length > 10) {
+                                    AddPotentialLink(normalEpisode, _url, "FilesClub", 5);
+                                }
                             }
                         }
-                        else {
-                            evalData = evalData.Replace("#", "");
-                            if (evalData.Length > 10) {
-                                AddPotentialLink(normalEpisode, evalData, "FilesClub", 5);
-                            }
-                        }
+                        
                     }
                     EvalRef(_ref);
 
