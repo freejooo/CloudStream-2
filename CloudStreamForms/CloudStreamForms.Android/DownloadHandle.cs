@@ -153,6 +153,11 @@ namespace CloudStreamForms.Droid
 			bool masterplay = CheckIfMaster(data); // JUST CHECKS IF IT CONTAINS SEVERAL M3U8 SUBFILES
 			var split = data.Split('\n');
 
+			static string GenerateLine(string line, string endLink)
+			{
+				return line.StartsWith("http") ? line : (((line.StartsWith("/") || endLink.EndsWith("/")) ? endLink : $"{endLink[0..endLink.LastIndexOf("/")]}/") + line);
+			}
+
 			string endData = masterplay ? "" : data;
 			string endLink = masterplay ? "" : url;
 			if (masterplay) {
@@ -169,7 +174,8 @@ namespace CloudStreamForms.Droid
 					}
 					else {
 						if (nextIsUrl) {
-							masterLinks[masterLinks.Count - 1] = new M3U8MasterLink() { link = line.StartsWith("http") ? line : endLink + line, bandWidth = masterLinks[masterLinks.Count - 1].bandWidth };
+							// line.StartsWith("http") ? line : (endLink + ((line.StartsWith("/") || endLink.EndsWith("/")) ? "" : "/") + line)
+							masterLinks[^1] = new M3U8MasterLink() { link = GenerateLine(line, endLink), bandWidth = masterLinks[masterLinks.Count - 1].bandWidth };
 						}
 						nextIsUrl = false;
 					}
@@ -192,15 +198,13 @@ namespace CloudStreamForms.Droid
 					linkNext = true;
 				}
 				else if (linkNext) {
-					var endLine = line.StartsWith("http") ? line : endLink + line;
+					var endLine = GenerateLine(line, endLink);//line.StartsWith("http") ? line : (((line.StartsWith("/") || endLink.EndsWith("/")) ? endLink : $"{endLink[0..endLink.LastIndexOf("/")]}/") + line);
 					ends.Add(endLine);
 					linkNext = false;
 				}
 			}
 			return ends.ToArray();
 		}
-
-
 
 		public static string DownloadULRasText(string url, string referer)
 		{
@@ -573,29 +577,44 @@ namespace CloudStreamForms.Droid
 								}
 
 
-								void OnError()
+								void OnError(string reason = "")
 								{
 									showDone = false;
-									ShowDone(false, "Download Failed");
+									ShowDone(false, $"Download Failed, {progress}%" + ((reason == "") ? "" : $" - {reason}"));
 								}
 
 								if (isM3u8) {
 									var links = ParseM3u8(url, referer);
-									int counter = 0;
-									byte[] buffer;
-									try {
-										while ((buffer = CloudStreamCore.DownloadByteArrayFromUrl(links[counter], referer)) != null) {
-											counter++;
-											m3u8Progress = counter * 100 / links.Length;
-											count = buffer.Length;
-											total += count;
-											bytesPerSec += count;
-											output.Write(buffer, 0, count);
-											if (WriteDataUpdate()) return;
-										}
+									if (links == null) {
+										OnError("Error parsing m3u8");
 									}
-									catch (Exception) {
-										OnError();
+									else {
+										int counter = 0;
+										byte[] buffer;
+										int max = links.Length;
+										try {
+											while ((buffer = CloudStreamCore.DownloadByteArrayFromUrl(links[counter], referer)) != null) {
+												counter++;
+												m3u8Progress = counter * 100 / max;
+
+												count = buffer.Length;
+												total += count;
+												bytesPerSec += count;
+												output.Write(buffer, 0, count);
+
+												fileLength = (int)(total / ((double)counter / max));
+												App.SetKey("dlength", "id" + id, fileLength);
+
+												if (WriteDataUpdate()) return;
+											}
+										}
+										catch (Exception _ex) {
+											error(_ex);
+											if (counter < max - 4) { // LAST 4 ts CAN BE CUT OFF, NOT MUCH LOST OR MIGHT BE ERROR
+												OnError();
+											}
+										}
+										print("Done downloading m3u8!");
 									}
 								}
 								else {

@@ -7668,7 +7668,7 @@ namespace CloudStreamForms.Core
 		{
 			public string baseUrl;
 			public bool isAdvancedLink;
-			public bool CanBeDownloaded { get { return typeName != "m3u8"; } }
+			public bool CanBeDownloaded { get { return Settings.PremitM3u8Download || typeName != "m3u8"; } }
 			public bool IsSeperatedAudioStream { get { if (audioStreams == null) return false; return audioStreams.Count() > 0; } }
 			// public List<AdvancedStream> streams;
 			public List<AdvancedAudioStream> audioStreams;

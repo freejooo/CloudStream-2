@@ -53,6 +53,24 @@ namespace CloudStreamForms
 			}
 		}
 
+		public static bool PremitM3u8Download {
+			set {
+				App.SetKey("Settings", nameof(PremitM3u8Download), value);
+			}
+			get {
+				return App.GetKey("Settings", nameof(PremitM3u8Download), false);
+			}
+		}
+
+		public static bool CheckDownloadLinkBefore {
+			set {
+				App.SetKey("Settings", nameof(CheckDownloadLinkBefore), value);
+			}
+			get {
+				return App.GetKey("Settings", nameof(CheckDownloadLinkBefore), false);
+			}
+		}
+
 		public static bool VideoPlayerShowSkip {
 			set {
 				App.SetKey("Settings", nameof(VideoPlayerShowSkip), value);

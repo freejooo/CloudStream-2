@@ -1668,22 +1668,23 @@ namespace CloudStreamForms
 							core.StartThread("DownloadThread", async () => {
 								try {
 									//UserDialogs.Instance.ShowLoading("Checking link...", MaskType.Gradient);
-									await ActionPopup.StartIndeterminateLoadinbar("Checking link...");
-									double fileSize = CloudStreamCore.GetFileSize(link.baseUrl, link.referer ?? "");
-									//    UserDialogs.Instance.HideLoading();
-									await ActionPopup.StopIndeterminateLoadinbar();
+									bool doNotCheckLink = link.baseUrl.Contains(".m3u8") || Settings.CheckDownloadLinkBefore;
+									double fileSize = 2;
+									if (!doNotCheckLink) {
+										await ActionPopup.StartIndeterminateLoadinbar("Checking link...");
+										fileSize = doNotCheckLink ? 2 : CloudStreamCore.GetFileSize(link.baseUrl, link.referer ?? "");
+										await ActionPopup.StopIndeterminateLoadinbar();
+									}
 									if (fileSize > 1) {
-										print("DSUZE:::::" + episodeResult.Episode);
-
+										
 										// ImageService.Instance.LoadUrl(episodeResult.PosterUrl, TimeSpan.FromDays(30)); // CASHE IMAGE
 										App.UpdateDownload(GetCorrectId(episodeResult), -1);
 										print("CURRENTSESON: " + currentSeason);
-
-										string dpath = App.RequestDownload(GetCorrectId(episodeResult), episodeResult.OgTitle, episodeResult.Description, episodeResult.Episode, currentSeason, new List<BasicMirrorInfo>() { new BasicMirrorInfo() { mirror = link.baseUrl, name = link.PublicName, referer = link.referer } }, episodeResult.GetDownloadTitle(currentSeason, episodeResult.Episode) + ".mp4", episodeResult.PosterUrl, currentMovie.title, episodeResult.IMDBEpisodeId);
-
-										App.ShowToast("Download Started - " + fileSize + "MB");
+										App.ShowToast($"Download Started {(doNotCheckLink ? "" : $"-{fileSize}MB")}");
 										episodeResult.downloadState = 2;
 										ForceUpdate(episodeResult.Id);
+
+										string dpath = App.RequestDownload(GetCorrectId(episodeResult), episodeResult.OgTitle, episodeResult.Description, episodeResult.Episode, currentSeason, new List<BasicMirrorInfo>() { new BasicMirrorInfo() { mirror = link.baseUrl, name = link.PublicName, referer = link.referer } }, episodeResult.GetDownloadTitle(currentSeason, episodeResult.Episode) + ".mp4", episodeResult.PosterUrl, currentMovie.title, episodeResult.IMDBEpisodeId);
 									}
 									else {
 										App.ShowToast("Download Failed");
