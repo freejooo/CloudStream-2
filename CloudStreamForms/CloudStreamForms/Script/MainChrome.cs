@@ -373,7 +373,7 @@ namespace CloudStreamForms.Core
 				return parser.ParseStream(stream, Encoding.UTF8).Select(t => {
 
 					// REMOVE BLOAT
-					Regex rep = new Regex(@"/<(.*?)>/g");
+					Regex rep = new Regex(@"<(.*?)>");
 					for (int i = 0; i < t.Lines.Count; i++) {
 						t.Lines[i] = rep.Replace(t.Lines[i], ""); 
 					}

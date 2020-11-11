@@ -5233,8 +5233,8 @@ namespace CloudStreamForms.Core
 
 		public static string RemoveCCFromSubtitles(string inp)
 		{
-			Regex cc = new Regex(@"/\[(.*?)\]|\((.*?)\)/g"); // WILL REMOVE ALL CHARS IN (....) or [....]
-			return cc.Replace(inp, "");
+			Regex cc = new Regex(@"\[(.*?)\]|\((.*?)\)"); // WILL REMOVE ALL CHARS IN (....) or [....]
+			return cc.Replace(inp, "").Replace('♪',' ').Replace('♫',' ');
 		}
 
 		static void GetSeasonAndPartFromName(string name, out int season, out int part)

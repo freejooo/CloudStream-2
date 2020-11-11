@@ -381,6 +381,11 @@ namespace CloudStreamForms
 								if(!Settings.SubtitlesClosedCaptioning) {
 									lines = lines.Select(t => CloudStreamCore.RemoveCCFromSubtitles(t)).ToList();
 								}
+
+								foreach (var line in lines) {
+									print("line:" + line);
+								}
+
 								if (lines.Count > 0) {
 									subtitleTextFull = "";
 									for (int i = 0; i < lines.Count; i++) {
