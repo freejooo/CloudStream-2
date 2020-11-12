@@ -5,7 +5,6 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -15,7 +14,6 @@ using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 using YoutubeExplode;
 using YoutubeExplode.Channels;
-using YoutubeExplode.Converter;
 using YoutubeExplode.Videos;
 using YoutubeExplode.Videos.Streams;
 using static CloudStreamForms.App;
@@ -56,7 +54,7 @@ namespace CloudStreamForms
 				});
 			}
 		}
-		
+
 		protected override bool OnBackButtonPressed()
 		{
 			if (Settings.BackPressToHome) {
@@ -276,25 +274,19 @@ namespace CloudStreamForms
 										}
 									}
 								}
-
-								print("ID???????==" + id + "  > " + info.info.name + " |" + info.info.season + "|" + info.state.state.ToString() + " Bytes: " + info.state.bytesDownloaded + "|" + info.state.totalBytes + "|" + info.state.ProcentageDownloaded + "%");
-
-
 							}
 							catch (Exception _ex) {
-								print("ERROR WHILE DOWNLOADLOADING::" + _ex);
+								error("ERROR WHILE DOWNLOADLOADING::" + _ex);
 							}
 						});
 
 						for (int i = 0; i < headerRemovers.Count; i++) {
 							if (!validHeaders.ContainsKey(headerRemovers[i])) {
-								print("HEADER:::==" + headerRemovers[i]);
 								RemoveDownloadCookie(null, headerRemovers[i]);
 							}
 						}
 
 						// ========================== SET VALUES ==========================
-
 
 						//   List<EpisodeResult> eps = new List<EpisodeResult>();
 						var ckeys = downloadHeaders.Keys.OrderBy(t => t).ToList();
@@ -379,13 +371,11 @@ namespace CloudStreamForms
 						App.SetKey("Settings", "hasDownloads", _epres.Length != 0);
 
 						bool noDownloads = _epres.Length == 0;
-						print("DONELOAD");
 						Device.BeginInvokeOnMainThread(() => {
 
 							MyEpisodeResultCollection.Clear();
 							foreach (var ep in _epres) {
 								try {
-									print("IIIIII::: " + ep.Title);
 									MyEpisodeResultCollection.Add(ep);
 								}
 								catch (Exception _ex) {
@@ -396,14 +386,10 @@ namespace CloudStreamForms
 
 							// episodeView.Opacity = 0;
 							// episodeView.FadeTo(1, 200);
-							print("start1 DONE!");
 
 							baseTxt.IsVisible = noDownloads;
-							print("start2 DONE!");
 							baseImg.IsVisible = noDownloads;
-							print("start3 DONE!");
 							SetHeight();
-							print("ALL DONE!");
 						});
 					}
 					catch (Exception _ex) {
@@ -411,7 +397,6 @@ namespace CloudStreamForms
 					}
 					finally {
 						inProgress = false;
-						print("FINISH LOAD");
 					}
 				});
 				//mThread.SetApartmentState(ApartmentState.STA);
@@ -445,7 +430,6 @@ namespace CloudStreamForms
 			};
 		}
 
-
 		public static string GetExtraString(DownloadState state)
 		{
 			return state switch
@@ -472,8 +456,6 @@ namespace CloudStreamForms
 
 		public static Dictionary<int, App.DownloadInfo> downloads = new Dictionary<int, App.DownloadInfo>();
 		public static Dictionary<int, App.DownloadHeader> downloadHeaders = new Dictionary<int, App.DownloadHeader>();
-
-
 
 		private void episodeView_ItemTapped(object sender, ItemTappedEventArgs e)
 		{
@@ -564,14 +546,12 @@ namespace CloudStreamForms
 		{
 			long pos = startFromSaved ? GetViewPos(episodeId) : -1L;//App.GetKey(VIEW_TIME_POS, _episodeId, -1L);
 																	//long dur = App.GetKey(VIEW_TIME_DUR, episodeId, -1L);
-			print("MAINPOS: " + pos + "|" + episodeId);
 			if (pos != -1L) {// && dur != -1L) {
 				await RequestVlc(new List<string>() { file }, new List<string>() { name }, name, episodeId, startId: pos);
 			}
 			else {
 				await RequestVlc(new List<string>() { file }, new List<string>() { name }, name, episodeId);
 			}
-
 			//App.PlayVLCWithSingleUrl(file, name, overrideSelectVideo: false);
 		}
 
@@ -687,7 +667,6 @@ namespace CloudStreamForms
 						var data = await YouTube.GetInfoAsync(v);
 						int id = ConvertStringToInt(v.Id);
 
-
 						string vId = v.Id.Value;
 						var t = mainCore.CreateThread(4);
 						mainCore.StartThread("Sponsorblock", () => {
@@ -764,9 +743,7 @@ namespace CloudStreamForms
 		public static async Task<MuxedStreamInfo> GetInfoAsync(Video v)
 		{
 			var s = client.Videos.Streams;
-			print("STREAM : " + s);
 			var manifest = await s.GetManifestAsync(v.Id);
-			print("MAINI:: " + manifest);
 			return manifest
 				.GetMuxed()
 				.WithHighestVideoQuality() as MuxedStreamInfo;

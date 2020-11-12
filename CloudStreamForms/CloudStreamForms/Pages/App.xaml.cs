@@ -136,7 +136,7 @@ namespace CloudStreamForms
 
 		public enum DownloadState { Downloading, Downloaded, NotDownloaded, Paused }
 		public enum DownloadType { Normal = 0, YouTube = 1 }
-		public enum PlayerEventType { Stop = -1, Pause = 0, Play = 1, NextMirror = 2, PrevMirror = 3, SeekForward = 4, SeekBack = 5, SkipCurrentChapter = 6, NextEpisode = 7,PlayPauseToggle = 8 }
+		public enum PlayerEventType { Stop = -1, Pause = 0, Play = 1, NextMirror = 2, PrevMirror = 3, SeekForward = 4, SeekBack = 5, SkipCurrentChapter = 6, NextEpisode = 7, PlayPauseToggle = 8 }
 
 		public static EventHandler OnSomeDownloadFinished;
 		public static EventHandler OnSomeDownloadFailed;
@@ -373,7 +373,7 @@ namespace CloudStreamForms
 			return name;
 		}
 
-		public static char[] invalidChars = { '|', '\\', '?', '*', '<', '\"', ':', '>','/' };
+		public static char[] invalidChars = { '|', '\\', '?', '*', '<', '\"', ':', '>', '/' };
 
 		public static string GetPath(MovieType movieType, int season, int episode, string episodeName, string titleName, string ending)
 		{

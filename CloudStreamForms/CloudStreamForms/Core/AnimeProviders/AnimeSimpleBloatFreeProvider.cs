@@ -13,12 +13,9 @@ namespace CloudStreamForms.Core.AnimeProviders
 
 		public override void LoadLink(string episodeLink, int episode, int normalEpisode, TempThread tempThred, object extraData, bool isDub)
 		{
-			print("SIMPLEURL::: " + episodeLink);
-
 			string d = DownloadString(episodeLink);
 			string json = FindHTML(d, "var json = ", "</");
 			const string lookFor = "\"id\":\"";
-			print(" LOADDDD::D:D: " + json);
 
 			while (json.Contains(lookFor)) {
 				string id = FindHTML(json, lookFor, "\"");
@@ -36,7 +33,6 @@ namespace CloudStreamForms.Core.AnimeProviders
 						AddEpisodesFromMirrors(tempThred, DownloadString("https://vidstreaming.io//streaming.php?id=" + id), normalEpisode, "", " Simple");
 					}
 				}
-				print("HI: " + host + "|" + id + "|" + type);
 			}
 		}
 
@@ -66,7 +62,6 @@ namespace CloudStreamForms.Core.AnimeProviders
 
 			return setData;
 		}
-
 
 		public struct AnimeSimpleTitle
 		{
@@ -109,12 +104,14 @@ namespace CloudStreamForms.Core.AnimeProviders
 				return null;
 			}
 		}
+
 		public struct AnimeSimpleEpisodes
 		{
 			public int dubbedEpisodes;
 			public int subbedEpisodes;
 			public string[] urls;
 		}
+
 		AnimeSimpleEpisodes? GetAnimeSimpleEpisodes(string id)
 		{
 			try {
@@ -132,7 +129,6 @@ namespace CloudStreamForms.Core.AnimeProviders
 					string subDub = FindHTML(_d, "success\">", "<");
 					bool isDub = subDub.Contains("Dubbed");
 					bool isSub = subDub.Contains("Subbed");
-					print(_d);
 					int episode = int.Parse(FindHTML(_d, "</i> Episode ", "<"));
 					if (isDub) {
 						dubbedEpisodes = episode;

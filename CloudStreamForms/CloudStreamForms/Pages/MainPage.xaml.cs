@@ -1,15 +1,12 @@
-﻿using System;
+﻿using CloudStreamForms.Core;
+using CloudStreamForms.Pages;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Threading.Tasks;
 using Xamarin.Forms;
 using Xamarin.Forms.PlatformConfiguration.AndroidSpecific;
 using static CloudStreamForms.Core.CloudStreamCore;
-using CloudStreamForms.Core;
-using CloudStreamForms.Pages;
-using Rg.Plugins.Popup.Services;
-using System.Linq;
-using System.Security.Cryptography.X509Certificates;
 
 namespace CloudStreamForms
 {

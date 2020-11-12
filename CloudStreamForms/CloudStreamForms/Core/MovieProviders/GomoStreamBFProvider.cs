@@ -43,7 +43,6 @@ namespace CloudStreamForms.Core.MovieProviders
 				}
 			}
 			string gomoUrl = "https://" + GOMOURL + "/" + (isMovie ? "movie" : "show") + "/" + find;
-			print("GOMOURL==: " + gomoUrl);
 
 			DownloadGomoSteam(gomoUrl, tempThred, normalEpisode);
 		}
@@ -58,7 +57,6 @@ namespace CloudStreamForms.Core.MovieProviders
 		void DownloadGomoSteam(string url, TempThread tempThred, int episode)
 		{
 			bool done = true;
-			print("EXTRACTING GOMO: " + url);
 			try {
 				try {
 					string d = "";
@@ -67,22 +65,18 @@ namespace CloudStreamForms.Core.MovieProviders
 							// d = DownloadString(url, tempThred, false, 2); if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS TODO CHECK
 							d = DownloadString(url, tempThred, 2); if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
 						}
-						catch (System.Exception) {
-							print("Error gogo");
+						catch (System.Exception _ex) {
+							error("Error gogo");
 						}
 					}
 
 					if (d == "") {
-						print("GetHTML SAVE");
 						d = GetHTML(url);
 						if (!GetThredActive(tempThred)) { return; };
 					}
 
 					if (d == "") {
 						d = HTMLGet(url, "https://" + GOMOURL);
-						if (d != "") {
-							print("HTMLGET SAVE");
-						}
 						if (!GetThredActive(tempThred)) { return; };
 					}
 
@@ -404,8 +398,8 @@ namespace CloudStreamForms.Core.MovieProviders
 						debug("Dident get gogo");
 					}
 				}
-				catch (System.Exception) {
-					debug("Error");
+				catch (System.Exception _ex) {
+					error(_ex);
 				}
 			}
 			finally {

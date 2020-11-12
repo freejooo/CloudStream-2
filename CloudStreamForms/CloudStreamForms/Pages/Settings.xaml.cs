@@ -1007,11 +1007,11 @@ namespace CloudStreamForms
 
 				if (!CurrentAniListUser.HasValue) {
 					AniListSyncApi.GetUser();
-				} 
+				}
 			}
 
 			if (HasMalAccountLogin) {
-				if(!CurrentMalUser.HasValue) {
+				if (!CurrentMalUser.HasValue) {
 					MALSyncApi.GetUser();
 				}
 				MALSyncApi.OnLoginOrStart();
@@ -1066,7 +1066,7 @@ namespace CloudStreamForms
 				actions.Add($"Logout from AniList {(currentAniListUsername == "" ? "" : $" - {currentAniListUsername}")}");
 			}
 
-			actions.AddRange(new string[] { "Export data", "Export Everything", "Import data",});
+			actions.AddRange(new string[] { "Export data", "Export Everything", "Import data", });
 
 			string action = await ActionPopup.DisplayActionSheet("Manage account", actions.ToArray());
 
@@ -1076,7 +1076,7 @@ namespace CloudStreamForms
 			else if (action == "Login to MAL account") {
 				CloudStreamForms.Script.MALSyncApi.Authenticate();
 			}
-			else if(action.StartsWith("Logout from AniList")) {
+			else if (action.StartsWith("Logout from AniList")) {
 				App.RemoveFolder("AniListAccount");
 				App.ShowToast("Logout complete");
 			}

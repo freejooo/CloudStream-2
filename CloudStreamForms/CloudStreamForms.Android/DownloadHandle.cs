@@ -49,7 +49,7 @@ namespace CloudStreamForms.Droid
 				}
 			}
 			catch (Exception _ex) {
-				print("EXEPTION WHEN DESTROYED: " + _ex);
+				error("EXEPTION WHEN DESTROYED: " + _ex);
 			}
 		}
 
@@ -308,32 +308,24 @@ namespace CloudStreamForms.Droid
 
 				void ShowDone(bool succ, string overrideText = null)
 				{
-					print("DAAAAAAAAAASHOW DONE" + succ);
 					if (succ) {
 						App.RemoveKey(DOWNLOAD_KEY, id.ToString());
 						App.RemoveKey(DOWNLOAD_KEY_INTENT, id.ToString());
 					}
 					if (showDoneNotificaion) {
-						print("DAAAAAAAAAASHOW DONE!!!!");
 						Device.BeginInvokeOnMainThread(() => {
 							try {
-								print("DAAAAAAAAAASHOW DONE222");
 								ShowLocalNot(new LocalNot() { mediaStyle = poster != "", bigIcon = poster, title = title, autoCancel = true, onGoing = false, id = id, smallIcon = PublicNot, body = overrideText ?? (succ ? "Download done!" : "Download Failed") }, context); // ((e.Cancelled || e.Error != null) ? "Download Failed!"
 							}
 							catch (Exception _ex) {
-								print("SUPERFATALEX: " + _ex);
+								error("SUPERFATALEX: " + _ex);
 							}
 						});
 						//await Task.Delay(1000); // 100% sure that it is downloaded
 						OnSomeDownloadFinished?.Invoke(null, EventArgs.Empty);
 					}
-					else {
-						print("DONT SHOW WHEN DONE");
-					}
 					// Toast.MakeText(context, "PG DONE!!!", ToastLength.Long).Show(); 
 				}
-
-
 
 				void StartT()
 				{
@@ -346,7 +338,6 @@ namespace CloudStreamForms.Droid
 					}
 
 					Thread t = new Thread(() => {
-						print("START:::");
 						string json = JsonConvert.SerializeObject(new DownloadHandleNot() { id = id, mirrors = mirrors, showDoneAsToast = showDoneAsToast, openWhenDone = openWhenDone, showDoneNotificaion = showDoneNotificaion, beforeTxt = beforeTxt, mirror = mirror, path = path, poster = poster, showNotificaion = showNotificaion, title = title });
 
 						App.SetKey(DOWNLOAD_KEY_INTENT, id.ToString(), json);
@@ -395,7 +386,6 @@ namespace CloudStreamForms.Droid
 
 							URLConnection connection = _url.OpenConnection();
 
-							print("SET CONNECT ::");
 							if (!rFile.Exists()) {
 								print("FILE DOSENT EXITS");
 								rFile.CreateNewFile();
@@ -410,7 +400,6 @@ namespace CloudStreamForms.Droid
 									rFile.CreateNewFile();
 								}
 							}
-							print("SET CONNECT ::2");
 							connection.SetRequestProperty("Accept-Encoding", "identity");
 							if (referer != "") {
 								connection.SetRequestProperty("Referer", referer);
@@ -432,7 +421,6 @@ namespace CloudStreamForms.Droid
 									print("FAILED MASS");
 									clen = 0;
 								}
-								print("SET CONNECT ::3");
 							}
 
 							print("TOTALLLLL::: " + clen);

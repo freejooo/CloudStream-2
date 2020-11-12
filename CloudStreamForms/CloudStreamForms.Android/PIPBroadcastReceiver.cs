@@ -32,5 +32,4 @@ namespace CloudStreamForms.Droid
             App.OnRemovePlayAction?.Invoke(null, (App.PlayerEventType)controlType);
         }
     }
-
 }

@@ -124,7 +124,7 @@ namespace CloudStreamForms.InterfacePages
 			pick.index = index ?? pick.index;
 			pick.source = source ?? pick.source;
 			pick.isVisible = isVis ?? pick.isVisible;
-			
+
 			OnPickerChanged?.Invoke(null, pick);
 		}
 

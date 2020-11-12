@@ -15,332 +15,332 @@ using Button = Xamarin.Forms.Button;
 
 namespace CloudStreamForms
 {
-    public static class ActionPopup
-    {
-        public static bool isOpen = false;
+	public static class ActionPopup
+	{
+		public static bool isOpen = false;
 
-        public static async Task<string> DisplayActionSheet(string title, int sel, params string[] buttons)
-        {
-            var page = new SelectPopup(buttons.ToList(), sel, title, true,title == "Subtitle Font" || title == "App Font");
-            await PopupNavigation.Instance.PushAsync(page);
-            return await page.WaitForResult();
-        }
-
-        public static async Task<List<string>> DisplayLogin(string okButton, string cancelButton, string header, params PopupFeildsDatas[] loginData)
-        {
-            var page = new LoginPopupPage(okButton, cancelButton, header, loginData);
-            await PopupNavigation.Instance.PushAsync(page);
-            return await page.WaitForResult();
-        }
-
-        public static async Task<string> DisplayActionSheet(string title, params string[] buttons)
-        {
-            return await DisplayActionSheet(title, -1, buttons);
-        }
-
-        public static async Task DisplayLoadingBar(int loadingTime, string title = "Loading")
-        {
-            await PopupNavigation.Instance.PushAsync(new LoadingPopupPage(loadingTime, title));
-            await Task.Delay(loadingTime + 100);
-        }
-
-        static LoadingPopupPage currentLoading;
-        public static async Task StartIndeterminateLoadinbar(string title)
-        {
-            currentLoading = new LoadingPopupPage(-1, title);
-            await PopupNavigation.Instance.PushAsync(currentLoading);
-        }
-
-        public static async Task StopIndeterminateLoadinbar()
-        {
-            if (currentLoading != null) {
-                await currentLoading.End();
-            }
-            //PopupNavigation.PopAsync(false);
-        }
-
-        public static async Task<List<bool>> DisplaySwitchList(List<string> names,List<bool> toggled, string header)
-        {
-            var page = new SwitchPopup(names,toggled,header);
-            await PopupNavigation.Instance.PushAsync(page);
-            return await page.WaitForResult();
-        }
-
-        public static async Task<string> DisplayEntry(InputPopupResult result, string placeHolder, string title = "", int offset = -1, bool autoPaste = true, string setText = null, string confirmText = "", int min = int.MinValue, int max = int.MaxValue)
-        {
-            var page = new InputPopupPage(result, placeHolder, title, offset, autoPaste, setText, confirmText,min,max);
-            await PopupNavigation.Instance.PushAsync(page);
-            return await page.WaitForResult();
-        }
-
-        public static async Task<decimal> DisplayDecimalEntry(string placeHolder, string title = "", int offset = -1, bool autoPaste = true, string setText = null, string confirmText = "")
-        {
-            return decimal.Parse((await DisplayEntry(InputPopupResult.decimalNumber, placeHolder, title, offset, autoPaste, setText, confirmText)).Replace(".", ","));
-        }
-
-        public static async Task<int> DisplayIntEntry(string placeHolder, string title = "", int offset = -1, bool autoPaste = true, string setText = null, string confirmText = "", int min = int.MinValue, int max = int.MaxValue)
-        {
-            return int.Parse(await DisplayEntry(InputPopupResult.integrerNumber, placeHolder, title, offset, autoPaste, setText, confirmText,min,max));
-        }
-    }
-
-    public class LabelList
-    {
-        public Button button;
-
-        private List<string> _ItemsSource;
-        public List<string> ItemsSource { set { _ItemsSource = value; OnUpdateList(); } get { return _ItemsSource; } }
-        public EventHandler<int> SelectedIndexChanged;
-        private int _SelectedIndex = -1;
-
-        bool _IsVisible = true;
-        public bool IsVisible { get { return _IsVisible; } set { _IsVisible = value; button.IsVisible = value; } }
-        public int SelectedIndex { set { _SelectedIndex = value; SelectedIndexChanged?.Invoke(this, value); } get { return _SelectedIndex; } }
-        
-        public void SetIndexWithoutChange(int val)
+		public static async Task<string> DisplayActionSheet(string title, int sel, params string[] buttons)
 		{
-            _SelectedIndex = val;
-        }
-        // public List<string> Items { get { return ItemsSource; } }
+			var page = new SelectPopup(buttons.ToList(), sel, title, true, title == "Subtitle Font" || title == "App Font");
+			await PopupNavigation.Instance.PushAsync(page);
+			return await page.WaitForResult();
+		}
 
-        readonly Color bgColor;
-        public void OnUpdateList()
-        {
-            bool isEmty = ItemsSource.Count <= 1;
-            button.BackgroundColor = isEmty ? Color.Transparent : bgColor;
-            button.InputTransparent = isEmty;
-        }
+		public static async Task<List<string>> DisplayLogin(string okButton, string cancelButton, string header, params PopupFeildsDatas[] loginData)
+		{
+			var page = new LoginPopupPage(okButton, cancelButton, header, loginData);
+			await PopupNavigation.Instance.PushAsync(page);
+			return await page.WaitForResult();
+		}
 
+		public static async Task<string> DisplayActionSheet(string title, params string[] buttons)
+		{
+			return await DisplayActionSheet(title, -1, buttons);
+		}
 
-        public LabelList(Button _Button, List<string> __ItemSource, string title = "", bool fontTest = false)
-        {
-            button = _Button;
-            bgColor = button.BackgroundColor;
-            ItemsSource = __ItemSource;
-            print("fontTes1111t: " + _Button.Text + "|" + fontTest);
+		public static async Task DisplayLoadingBar(int loadingTime, string title = "Loading")
+		{
+			await PopupNavigation.Instance.PushAsync(new LoadingPopupPage(loadingTime, title));
+			await Task.Delay(loadingTime + 100);
+		}
 
-            button.Clicked += async (o, e) => {
-                //  await ActionPopup.DisplayEntry(InputPopupResult.decimalNumber, "ms", "Audio Delay",offset:50,setText:"0",confirmText:"Set Delay");
-                // await ActionPopup.DisplayEntry(InputPopupResult.url, "https://youtu.be/", "Youtube link",confirmText:"Download")
-                print("fontTest: " + _Button.Text + "|" + fontTest);
-                await PopupNavigation.Instance.PushAsync(new SelectPopup(ItemsSource, SelectedIndex, title, fontTest: fontTest));
-                SelectPopup.OnSelectedChanged += (_o, _e) => {
-                    SelectedIndex = _e;
-                };
-            };
+		static LoadingPopupPage currentLoading;
+		public static async Task StartIndeterminateLoadinbar(string title)
+		{
+			currentLoading = new LoadingPopupPage(-1, title);
+			await PopupNavigation.Instance.PushAsync(currentLoading);
+		}
 
-            SelectedIndexChanged += (o, e) => {
-                if (this == o) {
-                    if (e >= 0 && ItemsSource.Count > 0) {
-                        button.Text = ItemsSource[e];
-                    }
-                }
-                else {
-                    print("ERRORHANDEL:" + button.Text);
-                }
-            };
-        }
-    }
+		public static async Task StopIndeterminateLoadinbar()
+		{
+			if (currentLoading != null) {
+				await currentLoading.End();
+			}
+			//PopupNavigation.PopAsync(false);
+		}
 
+		public static async Task<List<bool>> DisplaySwitchList(List<string> names, List<bool> toggled, string header)
+		{
+			var page = new SwitchPopup(names, toggled, header);
+			await PopupNavigation.Instance.PushAsync(page);
+			return await page.WaitForResult();
+		}
 
+		public static async Task<string> DisplayEntry(InputPopupResult result, string placeHolder, string title = "", int offset = -1, bool autoPaste = true, string setText = null, string confirmText = "", int min = int.MinValue, int max = int.MaxValue)
+		{
+			var page = new InputPopupPage(result, placeHolder, title, offset, autoPaste, setText, confirmText, min, max);
+			await PopupNavigation.Instance.PushAsync(page);
+			return await page.WaitForResult();
+		}
 
-    [XamlCompilation(XamlCompilationOptions.Compile)]
-    public partial class SelectPopup : Rg.Plugins.Popup.Pages.PopupPage
-    {
-        public static int selected = -1;
-        public static EventHandler<int> OnSelectedChanged;
-        SelectLabelView selectBinding;
-        const int fullNum = 12;
-        const int halfNum = 6;
-        const bool setOnLeft = true;
+		public static async Task<decimal> DisplayDecimalEntry(string placeHolder, string title = "", int offset = -1, bool autoPaste = true, string setText = null, string confirmText = "")
+		{
+			return decimal.Parse((await DisplayEntry(InputPopupResult.decimalNumber, placeHolder, title, offset, autoPaste, setText, confirmText)).Replace(".", ","));
+		}
 
-        List<string> currentOptions = new List<string>();
-        void UpdateScreenRot()
-        {
-            bool hightOverWidth = Bounds.Height > Bounds.Width;
-            epview.HeightRequest = epview.RowHeight * (Math.Min(currentOptions.Count, (hightOverWidth) ? fullNum : halfNum)) + epview.RowHeight / 4;
-            if (setOnLeft) {
-                CrossbttLayout.VerticalOptions = hightOverWidth ? LayoutOptions.End : LayoutOptions.Center;
-                CrossbttLayout.HorizontalOptions = hightOverWidth ? LayoutOptions.Center : LayoutOptions.End;
-                CrossbttLayout.TranslationY = hightOverWidth ? -80 : -40;
-                CrossbttLayout.TranslationX = hightOverWidth ? 0 : 40;
-                TheStack.TranslationX = hightOverWidth ? 0 : 80;
-                //TheStack.HorizontalOptions = hightOverWidth ? LayoutOptions.Center : LayoutOptions.CenterAndExpand;
-                TheStack.TranslationY = hightOverWidth ? 40 : 40;
-                epview.TranslationY = hightOverWidth ? 0 : -40;
-                HeaderTitle.TranslationY = hightOverWidth ? 0 : -30;
-                Grid.SetRow(CrossbttLayout, hightOverWidth ? 1 : 0);
-                Grid.SetColumn(CrossbttLayout, hightOverWidth ? 0 : 1);
-            }
-        }
+		public static async Task<int> DisplayIntEntry(string placeHolder, string title = "", int offset = -1, bool autoPaste = true, string setText = null, string confirmText = "", int min = int.MinValue, int max = int.MaxValue)
+		{
+			return int.Parse(await DisplayEntry(InputPopupResult.integrerNumber, placeHolder, title, offset, autoPaste, setText, confirmText, min, max));
+		}
+	}
 
-        public async Task<string> WaitForResult()
-        {
-            while (true) {
-                await Task.Delay(10);
-                if (optionSelected != "") {
-                    return optionSelected;
-                }
-            }
-        }
+	public class LabelList
+	{
+		public Button button;
 
-        string optionSelected = "";
+		private List<string> _ItemsSource;
+		public List<string> ItemsSource { set { _ItemsSource = value; OnUpdateList(); } get { return _ItemsSource; } }
+		public EventHandler<int> SelectedIndexChanged;
+		private int _SelectedIndex = -1;
 
-        public SelectPopup(List<string> options, int selected, string header = "", bool isCenter = true, bool fontTest = false)
-        {
-            currentOptions = options;
+		bool _IsVisible = true;
+		public bool IsVisible { get { return _IsVisible; } set { _IsVisible = value; button.IsVisible = value; } }
+		public int SelectedIndex { set { _SelectedIndex = value; SelectedIndexChanged?.Invoke(this, value); } get { return _SelectedIndex; } }
 
-            if (ActionPopup.isOpen) {
-                PopupNavigation.PopAsync(false);
-            }
-            ActionPopup.isOpen = true;
-            //  BackgroundColor = Color.Transparent;
-            //   BackgroundImageSource = null;
-            BackgroundColor = new Color(0, 0, 0, 0.9);
-            InitializeComponent();
+		public void SetIndexWithoutChange(int val)
+		{
+			_SelectedIndex = val;
+		}
+		// public List<string> Items { get { return ItemsSource; } }
 
-            // On<Xamarin.Forms.PlatformConfiguration.Android>().Element.windo
-
-            UpdateScreenRot();
-            TheStack.SizeChanged += (o, e) => {
-                UpdateScreenRot();
-            };
-
-            HeaderTitle.Text = header;
-            HeaderTitle.IsEnabled = header != "";
-            HeaderTitle.IsVisible = header != "";
-
-            CancelButton.Source = GetImageSource("netflixCancel.png");
-            CancelButtonBtt.Clicked += (o, e) => {
-                OnSelectedChanged = null;
-                optionSelected = "Cancel";
-                ActionPopup.isOpen = false;
-                PopupNavigation.PopAsync(true);
-            };
+		readonly Color bgColor;
+		public void OnUpdateList()
+		{
+			bool isEmty = ItemsSource.Count <= 1;
+			button.BackgroundColor = isEmty ? Color.Transparent : bgColor;
+			button.InputTransparent = isEmty;
+		}
 
 
-            epview.ItemSelected += (o, e) => {
-                if (e.SelectedItemIndex != -1) {
-                    if (selected != e.SelectedItemIndex) {
-                        OnSelectedChanged?.Invoke(this, e.SelectedItemIndex);
-                    }
-                    epview.SelectedItem = null;
-                    OnSelectedChanged = null;
+		public LabelList(Button _Button, List<string> __ItemSource, string title = "", bool fontTest = false)
+		{
+			button = _Button;
+			bgColor = button.BackgroundColor;
+			ItemsSource = __ItemSource;
+			print("fontTes1111t: " + _Button.Text + "|" + fontTest);
 
-                    optionSelected = options[e.SelectedItemIndex];
-                    PopupNavigation.PopAsync(true);
-                }
-            };
+			button.Clicked += async (o, e) => {
+				//  await ActionPopup.DisplayEntry(InputPopupResult.decimalNumber, "ms", "Audio Delay",offset:50,setText:"0",confirmText:"Set Delay");
+				// await ActionPopup.DisplayEntry(InputPopupResult.url, "https://youtu.be/", "Youtube link",confirmText:"Download")
+				print("fontTest: " + _Button.Text + "|" + fontTest);
+				await PopupNavigation.Instance.PushAsync(new SelectPopup(ItemsSource, SelectedIndex, title, fontTest: fontTest));
+				SelectPopup.OnSelectedChanged += (_o, _e) => {
+					SelectedIndex = _e;
+				};
+			};
 
-            selectBinding = new SelectLabelView();
-            BindingContext = selectBinding;
-
-            for (int i = 0; i < currentOptions.Count; i++) {
-                bool isSel = i == selected;
-                selectBinding.MyNameCollection.Add(new PopupName() { IsSelected = isSel, Name = currentOptions[i].Replace("(Mirror ", "("), LayoutCenter = isCenter ? LayoutOptions.Center : LayoutOptions.Start, FontFam = fontTest ? GetFont(currentOptions[i]) : "" });
-            }
-
-            if (selected != -1) {
-                epview.ScrollTo(selectBinding.MyNameCollection[selected], ScrollToPosition.Center, false);
-            }
-             
-
-        }
+			SelectedIndexChanged += (o, e) => {
+				if (this == o) {
+					if (e >= 0 && ItemsSource.Count > 0) {
+						button.Text = ItemsSource[e];
+					}
+				}
+				else {
+					print("ERRORHANDEL:" + button.Text);
+				}
+			};
+		}
+	}
 
 
-        public class PopupName
-        {
-            public string Name { set; get; } = "Hello";
-            public bool IsSelected { set; get; } = false;
-            public FontAttributes FontAtt { get { return IsSelected ? FontAttributes.Bold : FontAttributes.None; } }
-            public int FontSize { get { return IsSelected ? 21 : 19; } }
-            public LayoutOptions LayoutCenter { get; set; }
-            public string FontFam { get; set; }
-        }
 
-        protected override void OnAppearing()
-        {
-            base.OnAppearing();
-        }
+	[XamlCompilation(XamlCompilationOptions.Compile)]
+	public partial class SelectPopup : Rg.Plugins.Popup.Pages.PopupPage
+	{
+		public static int selected = -1;
+		public static EventHandler<int> OnSelectedChanged;
+		SelectLabelView selectBinding;
+		const int fullNum = 12;
+		const int halfNum = 6;
+		const bool setOnLeft = true;
 
-        protected override void OnDisappearing()
-        {
-            ActionPopup.isOpen = false;
-            base.OnDisappearing();
-        }
+		List<string> currentOptions = new List<string>();
+		void UpdateScreenRot()
+		{
+			bool hightOverWidth = Bounds.Height > Bounds.Width;
+			epview.HeightRequest = epview.RowHeight * (Math.Min(currentOptions.Count, (hightOverWidth) ? fullNum : halfNum)) + epview.RowHeight / 4;
+			if (setOnLeft) {
+				CrossbttLayout.VerticalOptions = hightOverWidth ? LayoutOptions.End : LayoutOptions.Center;
+				CrossbttLayout.HorizontalOptions = hightOverWidth ? LayoutOptions.Center : LayoutOptions.End;
+				CrossbttLayout.TranslationY = hightOverWidth ? -80 : -40;
+				CrossbttLayout.TranslationX = hightOverWidth ? 0 : 40;
+				TheStack.TranslationX = hightOverWidth ? 0 : 80;
+				//TheStack.HorizontalOptions = hightOverWidth ? LayoutOptions.Center : LayoutOptions.CenterAndExpand;
+				TheStack.TranslationY = hightOverWidth ? 40 : 40;
+				epview.TranslationY = hightOverWidth ? 0 : -40;
+				HeaderTitle.TranslationY = hightOverWidth ? 0 : -30;
+				Grid.SetRow(CrossbttLayout, hightOverWidth ? 1 : 0);
+				Grid.SetColumn(CrossbttLayout, hightOverWidth ? 0 : 1);
+			}
+		}
 
-        // ### Methods for supporting animations in your popup page ###
+		public async Task<string> WaitForResult()
+		{
+			while (true) {
+				await Task.Delay(10);
+				if (optionSelected != "") {
+					return optionSelected;
+				}
+			}
+		}
 
-        // Invoked before an animation appearing
-        protected override void OnAppearingAnimationBegin()
-        {
-            base.OnAppearingAnimationBegin();
-        }
+		string optionSelected = "";
 
-        // Invoked after an animation appearing
-        protected override void OnAppearingAnimationEnd()
-        {
-            base.OnAppearingAnimationEnd();
-        }
+		public SelectPopup(List<string> options, int selected, string header = "", bool isCenter = true, bool fontTest = false)
+		{
+			currentOptions = options;
 
-        // Invoked before an animation disappearing
-        protected override void OnDisappearingAnimationBegin()
-        {
-            base.OnDisappearingAnimationBegin();
-        }
+			if (ActionPopup.isOpen) {
+				PopupNavigation.PopAsync(false);
+			}
+			ActionPopup.isOpen = true;
+			//  BackgroundColor = Color.Transparent;
+			//   BackgroundImageSource = null;
+			BackgroundColor = new Color(0, 0, 0, 0.9);
+			InitializeComponent();
 
-        // Invoked after an animation disappearing
-        protected override void OnDisappearingAnimationEnd()
-        {
-            base.OnDisappearingAnimationEnd();
-        }
+			// On<Xamarin.Forms.PlatformConfiguration.Android>().Element.windo
 
-        protected override Task OnAppearingAnimationBeginAsync()
-        {
-            return base.OnAppearingAnimationBeginAsync();
-        }
+			UpdateScreenRot();
+			TheStack.SizeChanged += (o, e) => {
+				UpdateScreenRot();
+			};
 
-        protected override Task OnAppearingAnimationEndAsync()
-        {
-            return base.OnAppearingAnimationEndAsync();
-        }
+			HeaderTitle.Text = header;
+			HeaderTitle.IsEnabled = header != "";
+			HeaderTitle.IsVisible = header != "";
 
-        protected override Task OnDisappearingAnimationBeginAsync()
-        {
-            return base.OnDisappearingAnimationBeginAsync();
-        }
+			CancelButton.Source = GetImageSource("netflixCancel.png");
+			CancelButtonBtt.Clicked += (o, e) => {
+				OnSelectedChanged = null;
+				optionSelected = "Cancel";
+				ActionPopup.isOpen = false;
+				PopupNavigation.PopAsync(true);
+			};
 
-        protected override Task OnDisappearingAnimationEndAsync()
-        {
-            return base.OnDisappearingAnimationEndAsync();
-        }
 
-        // ### Overrided methods which can prevent closing a popup page ###
+			epview.ItemSelected += (o, e) => {
+				if (e.SelectedItemIndex != -1) {
+					if (selected != e.SelectedItemIndex) {
+						OnSelectedChanged?.Invoke(this, e.SelectedItemIndex);
+					}
+					epview.SelectedItem = null;
+					OnSelectedChanged = null;
 
-        // Invoked when a hardware back button is pressed
-        protected override bool OnBackButtonPressed()
-        {
-            // Return true if you don't want to close this popup page when a back button is pressed
-            return true;// base.OnBackButtonPressed();
-        }
+					optionSelected = options[e.SelectedItemIndex];
+					PopupNavigation.PopAsync(true);
+				}
+			};
 
-        // Invoked when background is clicked
-        protected override bool OnBackgroundClicked()
-        {
-            // Return false if you don't want to close this popup page when a background of the popup page is clicked
-            return base.OnBackgroundClicked();
-        }
-    }
-    public class SelectLabelView
-    {
-        public ObservableCollection<PopupName> MyNameCollection { set { Added?.Invoke(null, null); _MyNameCollection = value; } get { return _MyNameCollection; } }
-        private ObservableCollection<PopupName> _MyNameCollection { set; get; }
+			selectBinding = new SelectLabelView();
+			BindingContext = selectBinding;
 
-        public event EventHandler Added;
+			for (int i = 0; i < currentOptions.Count; i++) {
+				bool isSel = i == selected;
+				selectBinding.MyNameCollection.Add(new PopupName() { IsSelected = isSel, Name = currentOptions[i].Replace("(Mirror ", "("), LayoutCenter = isCenter ? LayoutOptions.Center : LayoutOptions.Start, FontFam = fontTest ? GetFont(currentOptions[i]) : "" });
+			}
 
-        public SelectLabelView()
-        {
-            MyNameCollection = new ObservableCollection<PopupName>();
-        }
-    }
+			if (selected != -1) {
+				epview.ScrollTo(selectBinding.MyNameCollection[selected], ScrollToPosition.Center, false);
+			}
+
+
+		}
+
+
+		public class PopupName
+		{
+			public string Name { set; get; } = "Hello";
+			public bool IsSelected { set; get; } = false;
+			public FontAttributes FontAtt { get { return IsSelected ? FontAttributes.Bold : FontAttributes.None; } }
+			public int FontSize { get { return IsSelected ? 21 : 19; } }
+			public LayoutOptions LayoutCenter { get; set; }
+			public string FontFam { get; set; }
+		}
+
+		protected override void OnAppearing()
+		{
+			base.OnAppearing();
+		}
+
+		protected override void OnDisappearing()
+		{
+			ActionPopup.isOpen = false;
+			base.OnDisappearing();
+		}
+
+		// ### Methods for supporting animations in your popup page ###
+
+		// Invoked before an animation appearing
+		protected override void OnAppearingAnimationBegin()
+		{
+			base.OnAppearingAnimationBegin();
+		}
+
+		// Invoked after an animation appearing
+		protected override void OnAppearingAnimationEnd()
+		{
+			base.OnAppearingAnimationEnd();
+		}
+
+		// Invoked before an animation disappearing
+		protected override void OnDisappearingAnimationBegin()
+		{
+			base.OnDisappearingAnimationBegin();
+		}
+
+		// Invoked after an animation disappearing
+		protected override void OnDisappearingAnimationEnd()
+		{
+			base.OnDisappearingAnimationEnd();
+		}
+
+		protected override Task OnAppearingAnimationBeginAsync()
+		{
+			return base.OnAppearingAnimationBeginAsync();
+		}
+
+		protected override Task OnAppearingAnimationEndAsync()
+		{
+			return base.OnAppearingAnimationEndAsync();
+		}
+
+		protected override Task OnDisappearingAnimationBeginAsync()
+		{
+			return base.OnDisappearingAnimationBeginAsync();
+		}
+
+		protected override Task OnDisappearingAnimationEndAsync()
+		{
+			return base.OnDisappearingAnimationEndAsync();
+		}
+
+		// ### Overrided methods which can prevent closing a popup page ###
+
+		// Invoked when a hardware back button is pressed
+		protected override bool OnBackButtonPressed()
+		{
+			// Return true if you don't want to close this popup page when a back button is pressed
+			return true;// base.OnBackButtonPressed();
+		}
+
+		// Invoked when background is clicked
+		protected override bool OnBackgroundClicked()
+		{
+			// Return false if you don't want to close this popup page when a background of the popup page is clicked
+			return base.OnBackgroundClicked();
+		}
+	}
+	public class SelectLabelView
+	{
+		public ObservableCollection<PopupName> MyNameCollection { set { Added?.Invoke(null, null); _MyNameCollection = value; } get { return _MyNameCollection; } }
+		private ObservableCollection<PopupName> _MyNameCollection { set; get; }
+
+		public event EventHandler Added;
+
+		public SelectLabelView()
+		{
+			MyNameCollection = new ObservableCollection<PopupName>();
+		}
+	}
 }

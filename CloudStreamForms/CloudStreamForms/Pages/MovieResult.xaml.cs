@@ -1,5 +1,7 @@
 ﻿using CloudStreamForms.Core;
+using CloudStreamForms.InterfacePages;
 using CloudStreamForms.Models;
+using CloudStreamForms.Script;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -13,12 +15,10 @@ using Xamarin.Forms.Xaml;
 using XamEffects;
 using static CloudStreamForms.App;
 using static CloudStreamForms.Core.CloudStreamCore;
+using static CloudStreamForms.Core.CoreHelpers;
+using static CloudStreamForms.InterfacePages.MovieResultHolder;
 using static CloudStreamForms.MainPage;
 using static CloudStreamForms.Settings;
-using static CloudStreamForms.Core.CoreHelpers;
-using CloudStreamForms.InterfacePages;
-using static CloudStreamForms.InterfacePages.MovieResultHolder;
-using CloudStreamForms.Script;
 
 namespace CloudStreamForms
 {

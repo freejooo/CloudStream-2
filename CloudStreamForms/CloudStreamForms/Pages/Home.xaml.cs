@@ -490,7 +490,7 @@ namespace CloudStreamForms
 					IndexChanged();
 				}
 				ViewGrid.IsVisible = Settings.Top100Enabled;
-				if(firstTimeNoBookmarks && !hasBookmarks && Settings.Top100Enabled) { // WILL REDIRECT TO TOP IMDb when no bookmarks
+				if (firstTimeNoBookmarks && !hasBookmarks && Settings.Top100Enabled) { // WILL REDIRECT TO TOP IMDb when no bookmarks
 					firstTimeNoBookmarks = false;
 					selectedTabItem = 2;
 					ChangeSizeOfTabs();
@@ -540,7 +540,7 @@ namespace CloudStreamForms
 			}
 
 			await Device.InvokeOnMainThreadAsync(async () => {
-				
+
 				int perCol = ((width ?? Application.Current.MainPage.Width) < (height ?? Application.Current.MainPage.Height)) ? 3 : 6;
 
 				for (int i = 0; i < Bookmarks.Children.Count; i++) { // GRID

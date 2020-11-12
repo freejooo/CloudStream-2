@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Collections.Generic;
 using static CloudStreamForms.Core.BlotFreeProvider;
 using static CloudStreamForms.Core.CloudStreamCore;
 
@@ -28,7 +25,7 @@ namespace CloudStreamForms.Core.AnimeProviders
 			List<string> data = (List<string>)storedData;
 			NonBloatSeasonData setData = new NonBloatSeasonData() { dubEpisodes = new List<string>(), subEpisodes = new List<string>() };
 			foreach (var subData in data) {
-				
+
 			}
 
 			return setData;

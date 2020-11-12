@@ -94,8 +94,8 @@ namespace CloudStreamForms.Core.AnimeProviders
 			foreach (var subData in data) {
 				if ((setData.dubExists && subData.isDub) || (setData.subExists && !subData.isDub)) continue;
 
-				if (subData.season == ms.season && 
-					(ToLowerAndReplace(ms.name, false).StartsWith(ToLowerAndReplace(subData.name, false)) || 
+				if (subData.season == ms.season &&
+					(ToLowerAndReplace(ms.name, false).StartsWith(ToLowerAndReplace(subData.name, false)) ||
 					 ToLowerAndReplace(ms.engName, false).StartsWith(ToLowerAndReplace(subData.name, false)))) { // THIS IS BECAUSE SEASON IS SEPERATED FROM NAME
 					try {
 						string d = DownloadString("https://animeparadise.cc/anime.php?s=" + subData.id);

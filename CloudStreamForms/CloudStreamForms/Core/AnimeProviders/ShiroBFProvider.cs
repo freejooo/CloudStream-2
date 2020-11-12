@@ -2,13 +2,12 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using static CloudStreamForms.Core.BlotFreeProvider;
 using static CloudStreamForms.Core.CloudStreamCore;
 
 namespace CloudStreamForms.Core.AnimeProviders
 {
-	public class ShiroBFProvider : BloatFreeBaseAnimeProvider
+	class ShiroBFProvider : BloatFreeBaseAnimeProvider
 	{
 		public string token = "";
 
@@ -67,7 +66,7 @@ namespace CloudStreamForms.Core.AnimeProviders
 				if (token == "") {
 					token = GetShiroToken();
 				}
-				if(token == "") {
+				if (token == "") {
 					error("NO SHIRO TOKEN! AT " + nameof(StoreData));
 					return null;
 				}
@@ -78,7 +77,7 @@ namespace CloudStreamForms.Core.AnimeProviders
 
 				var data = JsonConvert.DeserializeObject<ShiroRoot>(d);
 				var ret = data.Data.Nav.Nav[0].Items.Where(t => t.type == "TV").Select(t => new RealShiroItem() {
-					name = (t.english ?? "").Replace(" ", "") == "" ? (t.canonicalTitle ?? t.name.Replace("DUBBED","")) : t.english,
+					name = (t.english ?? "").Replace(" ", "") == "" ? (t.canonicalTitle ?? t.name.Replace("DUBBED", "")) : t.english,
 					synonyms = t.synonyms.ToArray(),
 					isDub = t.language == "dubbed",
 					episodes = int.Parse(t.episodeCount),
@@ -95,7 +94,7 @@ namespace CloudStreamForms.Core.AnimeProviders
 
 		public override NonBloatSeasonData GetSeasonData(MALSeason ms, TempThread tempThread, string year, object storedData)
 		{
-			
+
 			List<RealShiroItem> data = (List<RealShiroItem>)storedData;
 			NonBloatSeasonData setData = new NonBloatSeasonData() { dubEpisodes = new List<string>(), subEpisodes = new List<string>() };
 			if (token == "") {
@@ -110,9 +109,7 @@ namespace CloudStreamForms.Core.AnimeProviders
 					synoExist = ms.synonyms.Where(t => subData.synonyms.Contains(t)).ToArray().Length > 0;
 				}
 
-				print("DDD:::: " + subData.name + " " + subData.isDub + "|" + ms.engName + "||| " + synoExist);
 				if (ToDown(ms.engName) == ToDown(subData.name) || synoExist) {
-					print("FFAF:FA:::: " + subData.name + " " + subData.isDub + "|" + ms.engName);
 					List<string> episodes = new List<string>();
 					string slug = subData.slug;
 

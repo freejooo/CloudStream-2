@@ -4,7 +4,6 @@ using SubtitlesParser.Classes;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Numerics;
 using System.Threading;
 using System.Threading.Tasks;
 using Xamarin.Forms;
@@ -378,7 +377,7 @@ namespace CloudStreamForms
 						if (_currentTime < track.EndTime + subtitleDelay && _currentTime > track.StartTime + subtitleDelay) {
 							if (last != currentSubtitleIndexInCurrent) {
 								var lines = track.Lines;
-								if(!Settings.SubtitlesClosedCaptioning) {
+								if (!Settings.SubtitlesClosedCaptioning) {
 									lines = lines.Select(t => CloudStreamCore.RemoveCCFromSubtitles(t)).ToList();
 								}
 
@@ -590,7 +589,6 @@ namespace CloudStreamForms
 					currentTime = time;
 					VideoSlider.Value = val;
 					if (len != -1 && len > 10000 && len <= time + 1000) {
-						//TODO: NEXT EPISODE
 						Navigation.PopModalAsync();
 					}
 				}
@@ -788,8 +786,8 @@ namespace CloudStreamForms
 				}
 
 				SubTap.IsVisible = HasSupportForSubtitles() && Settings.SUBTITLES_INVIDEO_ENABELD;
-				EpisodesTap.IsVisible = false; // TODO: ADD EPISODES SWITCH
-				NextEpisodeTap.IsVisible = false; // TODO: ADD NEXT EPISODE
+				EpisodesTap.IsVisible = false;
+				NextEpisodeTap.IsVisible = false;
 
 				if (currentVideo.isDownloadFile) {
 					var keys = Download.downloads.Keys;
@@ -1111,7 +1109,6 @@ namespace CloudStreamForms
 				};
 
 				Player.EncounteredError += (o, e) => {
-					// TODO: SKIP TO NEXT
 					error(_libVLC.LastLibVLCError);
 					print("ERROR LOADING MDDD: ");
 					ErrorWhenLoading();
@@ -1451,7 +1448,7 @@ namespace CloudStreamForms
 			UpdateVideoStatus();
 
 			LibVLCSharp.Shared.Core.Initialize();
-			 
+
 			print("ON APPEARING VIDEOPAGE");
 			isShown = true;
 			App.OnAudioFocusChanged += HandleAudioFocus;
