@@ -1507,17 +1507,12 @@ namespace CloudStreamForms
 			try {
 				if (loadingLinks) return;
 
-				print("EPDATA:::" + episodeResult.OgTitle + "|" + episodeResult.Episode);
 				if (!episodeResult.GetHasLoadedLinks()) {
 					try {
 						await LoadLinksForEpisode(episodeResult, false);
 					}
 					catch (Exception) { }
 				}
-				/*
-				if (loadingLinks) {
-					await Task.Delay(LoadingMiliSec + 40);
-				}*/
 
 				if (!episodeResult.GetHasLoadedLinks()) {
 					//   App.ShowToast(errorEpisodeToast); episodeView.SelectedItem = null;
@@ -1675,12 +1670,12 @@ namespace CloudStreamForms
 										fileSize = doNotCheckLink ? 2 : CloudStreamCore.GetFileSize(link.baseUrl, link.referer ?? "");
 										await ActionPopup.StopIndeterminateLoadinbar();
 									}
+
 									if (fileSize > 1) {
-										
 										// ImageService.Instance.LoadUrl(episodeResult.PosterUrl, TimeSpan.FromDays(30)); // CASHE IMAGE
 										App.UpdateDownload(GetCorrectId(episodeResult), -1);
 										print("CURRENTSESON: " + currentSeason);
-										App.ShowToast($"Download Started {(doNotCheckLink ? "" : $"-{fileSize}MB")}");
+										App.ShowToast($"Download Started{(doNotCheckLink ? "" : $" - {fileSize}MB")}");
 										episodeResult.downloadState = 2;
 										ForceUpdate(episodeResult.Id);
 

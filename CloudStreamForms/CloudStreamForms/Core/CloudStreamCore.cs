@@ -46,7 +46,7 @@ namespace CloudStreamForms.Core
               //  new NineAnimeBloatFreeProvider(this), // Link extraction
 				new FourAnimeBloatFreeProvider(this),
 				new AnimeParadiseBFProvider(this),
-
+				new ShiroBFProvider(this),
 			};
 			movieProviders = new IMovieProvider[] {
 				new FilesClubProvider(this),
@@ -2497,9 +2497,7 @@ namespace CloudStreamForms.Core
 							VidStreamingData data = ms.vidStreamingData;
 
 							foreach (var item in quickSearch) {
-								print("COMAPPDPAPDAPDPAP: " + ms.engName + "|" + item.cleanTitle);
 								if (ToDown(item.cleanTitle, replaceSpace: "") == ToDown(ms.engName, replaceSpace: "")) {
-									print("COMAPPDPAPDAPDPAPFOUND::::: " + ms.engName + "|" + item.cleanTitle + "|" + item.title + "|" + item.maxEp);
 
 									if (item.isDub) {
 										data.dubExists = true;
@@ -3143,7 +3141,6 @@ namespace CloudStreamForms.Core
 				string search = activeMovie.title.name;
 				string d = DownloadString("https://animekisa.tv/search?q=" + search);
 				if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
-				print("ANIMEKISKA ." + d);
 				const string lookFor = "<a class=\"an\" href=\"";
 
 				List<string> urls = new List<string>();
@@ -3157,21 +3154,16 @@ namespace CloudStreamForms.Core
 
 					urls.Add(uri);
 					titles.Add(title);
-					print("DLOAD:::::D:D::D:D:" + uri + "|" + title);
 				}
 
 				for (int i = 0; i < urls.Count; i++) {
 					try {
-
-
 						string url = urls[i];
-						print("DLOADLALDLADLLA:::" + url);
 						string _d = DownloadString("https://animekisa.tv" + url);
 						bool isDubbed = url.EndsWith("-dubbed");
 						if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
 
 						string id = FindHTML(_d, "href=\"https://myanimelist.net/anime/", "/");
-
 
 						for (int z = 0; z < activeMovie.title.MALData.seasonData.Count; z++) {
 							for (int q = 0; q < activeMovie.title.MALData.seasonData[z].seasons.Count; q++) {
@@ -3195,7 +3187,6 @@ namespace CloudStreamForms.Core
 									const string _lookFor = "<a class=\"infovan\" href=\"";
 									const string epFor = "<div class=\"centerv\">";
 
-
 									Dictionary<int, string> hrefs = new Dictionary<int, string>();
 									int maxEpisode = 0;
 									while (_d.Contains(_lookFor)) {
@@ -3208,7 +3199,6 @@ namespace CloudStreamForms.Core
 											maxEpisode = epNum;
 										}
 										hrefs[epNum] = href;
-										print("Href::" + href + "|" + epNum);
 									}
 
 									string[] episodes = new string[maxEpisode];
@@ -3639,7 +3629,6 @@ namespace CloudStreamForms.Core
 			{
 				try {
 					string result = DownloadString("https://animeflix.io/api/search?q=" + malData.firstName, waitTime: 6000, repeats: 2);//activeMovie.title.name);
-					print("FLIX::::" + result);
 					if (result == "") return;
 					if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
 					var res = JsonConvert.DeserializeObject<AnimeFlixQuickSearch>(result);
@@ -3653,25 +3642,19 @@ namespace CloudStreamForms.Core
 							names.AddRange(d.alternate_titles);
 						}
 						GetSeasonAndPartFromName(d.title, out int season, out int part);
-						print("ID::::SEASON:" + season + "|" + part + "|" + names[0]);
 
 						int id = season + part * 1000;
 						if (!alreadyAdded.Contains(id)) {
 							for (int q = 0; q < names.Count; q++) {
-								print("ANIMEFLIXFIRSTNAME: " + malData.firstName.ToLower());
 								if (names[q].ToLower().Contains(malData.firstName.ToLower()) || names[q].ToLower().Contains(activeMovie.title.name.ToLower())) {
-									print("NAMES:::da" + d.title);
 									alreadyAdded.Add(id);
 									try {
 										string url = "https://animeflix.io/api/episodes?anime_id=" + d.id + "&limit=50&sort=DESC";
-										print("DURL:::==" + url);
 										string dres = DownloadString(url, repeats: 2, waitTime: 500);
-										print("DRES:::" + dres);
 										if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
 										var seasonData = JsonConvert.DeserializeObject<AnimeFlixAnimeSeason>(dres);
 										for (int z = 0; z < seasonData.meta.last_page - 1; z++) {
 											string _url = "https://animeflix.io/api/episodes?anime_id=" + d.id + "&limit=50" + "&page=" + (i + 2) + "&sort=DESC";
-											print("DURL:::==" + url);
 											string _dres = DownloadString(url, repeats: 1, waitTime: 50);
 											var _seasonData = JsonConvert.DeserializeObject<AnimeFlixAnimeSeason>(dres);
 
@@ -3692,7 +3675,6 @@ namespace CloudStreamForms.Core
 											if (dubEx) {
 												hasDub = true;
 											}
-											print("ADDED EP::: " + _data.id + "|" + subEx + "|" + dubEx + "|");
 											animeFlixEpisodes[int.Parse(_data.episode_num) - 1] = new AnimeFlixEpisode() { id = _data.id, dubExists = dubEx, subExists = subEx };
 										}
 
@@ -8159,19 +8141,20 @@ namespace CloudStreamForms.Core
 		{
 			// use https://regex101.com/
 			// file:[\ optinal][' or "][FILEURL][label:][\ optinal][' or "][LABEL] where label is optinal
-			Regex lookFor = new Regex(@"file(\\|)(""|\'|):( |)(\\|)(""|\')([^\\""\']*)([\w\W]*?label(\\|)(""|\'|):( |)(\\|)(""|\')([^\\""\']*)|)");
+			Regex lookFor = new Regex(@"file(\\|)(""|\'|):( |)(\\|)(""|\')([^\\""""\']*)([\w\W]*?label(\\|)(""|\'|):( |)(\\|)(""|\')([^\\""""\']*)|)");
 			List<VideoFileData> videoFiles = new List<VideoFileData>();
 			const int urlMatch = 6;
 			const int labelMatch = 13;
 
 			var m = lookFor.Matches(inp);
 			for (int i = 0; i < m.Count; i++) {
-				var match = m[0];
+				var match = m[i];
 				if (match.Success) {
 					var g = match.Groups;
 					if (g.Count >= urlMatch) { // GOT URL
 						string url = g[urlMatch].Value;
 						string label = g.Count >= labelMatch ? g[labelMatch].Value : "";
+						if (url.EndsWith(".vtt") || url.EndsWith(".srt") || url.EndsWith(".jpg") || url.EndsWith(".png")) continue;
 
 						videoFiles.Add(new VideoFileData() { label = label, url = url });
 					}
