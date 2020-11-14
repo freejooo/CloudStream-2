@@ -192,7 +192,7 @@ namespace CloudStreamForms.Core
 							int subEp = episode - currentep; //episode - currentep;
 							if ((isDub ? ms.dubEpisodes : ms.subEpisodes) != null) {
 								currentep += isDub ? ms.dubEpisodes.Count : ms.subEpisodes.Count;
-								if (currentep > episode) {
+								if (currentep >= episode) {
 									try {
 										print("LOADING LINK FOR: " + Name);
 										LoadLink(isDub ? ms.dubEpisodes[subEp - 1] : ms.subEpisodes[subEp - 1], subEp, normalEpisode, tempThred, ms.extraData, isDub);
