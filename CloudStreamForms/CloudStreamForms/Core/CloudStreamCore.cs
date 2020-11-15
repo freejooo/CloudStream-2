@@ -8070,6 +8070,7 @@ namespace CloudStreamForms.Core
 			try {
 				HttpWebRequest webRequest = (HttpWebRequest)HttpWebRequest.Create(url);
 				if (GetRequireCert(url)) { webRequest.ServerCertificateValidationCallback = delegate { return true; }; }
+
 				webRequest.Method = "GET";
 				webRequest.Timeout = waitTime;
 				webRequest.ReadWriteTimeout = waitTime;

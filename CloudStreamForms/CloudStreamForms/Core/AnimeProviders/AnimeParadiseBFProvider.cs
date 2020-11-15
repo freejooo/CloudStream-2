@@ -9,6 +9,8 @@ namespace CloudStreamForms.Core.AnimeProviders
 {
 	class AnimeParadiseBFProvider : BloatFreeBaseAnimeProvider
 	{
+		public const bool IsNewApi = true;
+
 		public AnimeParadiseBFProvider(CloudStreamCore _core) : base(_core) { }
 
 		public override string Name => "AnimeParadise";
@@ -16,15 +18,23 @@ namespace CloudStreamForms.Core.AnimeProviders
 		public override void LoadLink(string episodeLink, int episode, int normalEpisode, TempThread tempThred, object extraData, bool isDub)
 		{
 			try {
-				string main = DownloadString(episodeLink);
-				if (main == "") return;
+				string d = "";
+#pragma warning disable 
+				if (!IsNewApi) {
+					string main = DownloadString(episodeLink);
+					if (main == "") return;
 
-				string fileId = FindHTML(main, "fileId=", "\"");
-				if (fileId == "") return;
+					string fileId = FindHTML(main, "fileId=", "\"");
+					if (fileId == "") return;
 
-				string d = DownloadString($"https://stream.animeparadise.cc/sources?fileId={fileId}", referer: $"https://stream.animeparadise.cc/embed.html?fileId={fileId}");
+					d = DownloadString($"https://stream.animeparadise.cc/sources?fileId={fileId}", referer: $"https://stream.animeparadise.cc/embed.html?fileId={fileId}");
+				}
+				else {
+					d = DownloadString(episodeLink);
+				}
+#pragma warning restore
+
 				if (d == "") return;
-
 				var videos = JsonConvert.DeserializeObject<AnimeParadiseVideoFile[]>(d);
 				int prio = 10;
 				foreach (var video in videos) {
@@ -61,7 +71,7 @@ namespace CloudStreamForms.Core.AnimeProviders
 				string search = malData.engName.Replace("-", " ");
 				List<AnimeParadiseData> data = new List<AnimeParadiseData>();
 				string searchQry = "https://animeparadise.cc/search.php?query=" + search;
-				string d = DownloadString(searchQry, referer: "https://animeparadise.cc/index.php");
+				string d = DownloadString(searchQry, referer: (IsNewApi ? "https://animeparadise.cc/" : "https://animeparadise.cc/index.php"));
 				if (d == "") {
 					return null;
 				}
@@ -117,7 +127,7 @@ namespace CloudStreamForms.Core.AnimeProviders
 						int lastEp = int.Parse(nodes[^1].InnerText);
 
 						for (int i = 1; i <= lastEp; i++) {
-							string s = $"https://animeparadise.cc/watch.php?s={subData.id}&ep={i}";
+							string s = IsNewApi ? $"https://animeparadise.cc/apis/fetchsources.php?s={subData.id}&ep={i}" : $"https://animeparadise.cc/watch.php?s={subData.id}&ep={i}";
 							if (subData.isDub) {
 								setData.dubEpisodes.Add(s);
 							}
