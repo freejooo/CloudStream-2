@@ -5281,12 +5281,16 @@ namespace CloudStreamForms.Core
 			if (inp.Count > max) {
 				inp.RemoveRange(max, inp.Count - max);
 			}
+			object inpLock = new object();
 
-			for (int q = 0; q < inp.Count; q++) {
+			Parallel.For(0, inp.Count, (q) => {
+				//for (int q = 0; q < inp.Count; q++) {
 				string url = "https://www.imdb.com/title/" + inp[q];
 
 				//string d =;
 				string _d = GetHTML(url);
+				List<string> genresNames = new List<string>() { "Action", "Adventure", "Animation", "Biography", "Comedy", "Crime", "Drama", "Family", "Fantasy", "Film-Noir", "History", "Horror", "Music", "Musical", "Mystery", "Romance", "Sci-Fi", "Sport", "Thriller", "War", "Western" };
+
 				const string lookFor = "<div class=\"rec_item\"";
 				while (_d.Contains(lookFor)) {
 					try {
@@ -5294,10 +5298,8 @@ namespace CloudStreamForms.Core
 						string tt = FindHTML(_d, " data-tconst=\"", "\"");
 						string name = FindHTML(_d, "alt=\"", "\"", decodeToNonHtml: true);
 						string img = FindHTML(_d, "loadlate=\"", "\"");
-						//  print("DATA::::::::" + tt + "|" + _d);
 						string d = RemoveOne(_d, "<a href=\"/title/" + tt + "/vote?v=X;k", -200);
 						string __d = FindHTML(_d, "<div class=\"rec-title\">\n       <a href=\"/title/" + tt, "<div class=\"rec-rating\">");
-						List<string> genresNames = new List<string>() { "Action", "Adventure", "Animation", "Biography", "Comedy", "Crime", "Drama", "Family", "Fantasy", "Film-Noir", "History", "Horror", "Music", "Musical", "Mystery", "Romance", "Sci-Fi", "Sport", "Thriller", "War", "Western" };
 						List<int> contansGenres = new List<int>();
 						for (int i = 0; i < genresNames.Count; i++) {
 							if (__d.Contains(genresNames[i])) {
@@ -5310,26 +5312,25 @@ namespace CloudStreamForms.Core
 							value += ".0";
 						}
 
-						bool add = true;
-						for (int z = 0; z < topLists.Count; z++) {
-							if (topLists[z].id == tt) {
+						lock (inpLock) {
+							bool add = true;
+							for (int z = 0; z < topLists.Count; z++) {
+								if (topLists[z].id == tt) {
+									add = false;
+								};
+							}
 
-								add = false;
-							};
+							if (add) {
+								topLists.Add(new IMDbTopList() { name = name, descript = descript, contansGenres = contansGenres, id = tt, img = img, place = -1, rating = value, runtime = "", genres = "" });
+							}
 						}
-
-						if (add) {
-							topLists.Add(new IMDbTopList() { name = name, descript = descript, contansGenres = contansGenres, id = tt, img = img, place = -1, rating = value, runtime = "", genres = "" });
-						}
-						else {
-						}
-
 					}
 					catch (Exception _ex) {
 						print("FATAL EX REC: " + _ex); // SOLVES CRASHING
 					}
 				}
-			}
+			});
+			//}
 
 			if (shuffle) {
 				CoreHelpers.Shuffle<IMDbTopList>(topLists);
@@ -5360,6 +5361,38 @@ namespace CloudStreamForms.Core
 			int place = start - 1;
 			int counter = 0;
 
+			var doc = new HtmlAgilityPack.HtmlDocument();
+			doc.LoadHtml(d);
+			//> div.lister-item-content > div.lister-item-header > a
+			var _res = doc.QuerySelectorAll("div.lister-item");// > div.lister-item-content > h3.lister-item-header > a");
+			foreach (var item in _res) {
+				place++;
+
+				var poster = item.QuerySelector("> div.lister-item-image > a > img");
+				var dataHolder = item.QuerySelector("> div.lister-item-content");
+				var textMuted = dataHolder.QuerySelectorAll("> p.text-muted");
+				var runTimeHolder = textMuted[0];
+
+				string name = dataHolder.QuerySelector("> h3.lister-item-header > a").InnerText;
+				string runtime = runTimeHolder.QuerySelector("> span.runtime")?.InnerText;
+				string _genres = runTimeHolder.QuerySelector("> span.genre").InnerText;
+				string rating = dataHolder.QuerySelector("> div.ratings-bar > div.ratings-imdb-rating").GetAttributeValue("data-value", "").Replace(',', '.');
+				if (!rating.Contains('.')) {
+					rating += ".0";
+				}
+				string descript = textMuted[1].InnerHtml.Replace("  ", "").Replace("\n", "");
+				int lastIndex = descript.IndexOf('<');
+				if (lastIndex > 0) {
+					descript = descript.Substring(0, lastIndex);
+				}
+				string id = poster.GetAttributeValue("data-tconst", "");
+				string img = poster.GetAttributeValue("loadlate", "");
+				topLists[counter] = (new IMDbTopList() { descript = descript, genres = _genres, id = id, img = img, name = name, place = place, rating = rating, runtime = runtime });
+				counter++;
+				//print("-----------------------------------");
+				//print(name + " | " + runtime + " | " + _genres + " | " + rating + " | " + descript + " | " + id + " | " + img);
+			}
+			/*
 			while (d.Contains(lookFor)) {
 				place++;
 				d = RemoveOne(d, lookFor);
@@ -5374,6 +5407,8 @@ namespace CloudStreamForms.Core
 				topLists[counter] = (new IMDbTopList() { descript = descript, genres = _genres, id = id, img = img, name = name, place = place, rating = rating, runtime = runtime });
 				counter++;
 			}
+			*/
+
 			print("------------------------------------ DONE! ------------------------------------");
 			return topLists.ToList();
 		}
@@ -6171,9 +6206,7 @@ namespace CloudStreamForms.Core
 										}
 									});
 								});
-
 							}
-
 						}
 						catch (Exception) { }
 
@@ -6327,59 +6360,131 @@ namespace CloudStreamForms.Core
 								years.Add(FindHTML(fromTo, lookFor, "\""));
 								fromTo = RemoveOne(fromTo, lookFor);
 							}
-							for (int i = 0; i < years.Count; i++) {
-								//https://www.imdb.com/title/tt0388629/episodes/?year=2020
-								string partURL = "https://www.imdb.com/title/" + activeMovie.title.id + "/episodes/_ajax?year=" + years[i];
-								d += DownloadString(partURL);
+
+							object dataLock = new object();
+							object epMaxLock = new object();
+
+							Dictionary<int, Episode> localEps = new Dictionary<int, Episode>();
+
+							int maxEpisode = 0;
+							string id = activeMovie.title.id;
+							Parallel.For(0, years.Count, (i) => {
+								try {
+									string partURL = "https://www.imdb.com/title/" + id + "/episodes/_ajax?year=" + years[i];
+									string pD = DownloadString(partURL);
+									var doc = new HtmlAgilityPack.HtmlDocument();
+									doc.LoadHtml(pD);
+									//print(d);
+									var episodes = doc.QuerySelectorAll("div.list_item");
+
+									int localMax = 0;
+									Episode[] lEps = new Episode[episodes.Count];
+									for (int j = 0; j < episodes.Count; j++) {
+										var ep = episodes[j];
+										try {
+											var info = ep.QuerySelector("> div.info");
+											var image = ep.QuerySelector("> div.image > a > div");
+											string _id = image.GetAttributeValue("data-const", "");
+											var img = image.QuerySelector("> img");
+											string posterUrl = img == null ? "" : img.GetAttributeValue("src", "");
+
+											int epNumber = info.QuerySelector("> meta").GetAttributeValue("content", 0);
+											string airDate = info.QuerySelector("> div.airdate").InnerText.Replace("  ", "").Replace("\n", "");
+											string rating = info.QuerySelector("> div.ipl-rating-widget > div.ipl-rating-star > span.ipl-rating-star__rating").InnerText;
+											string name = info.QuerySelector("> strong > a").InnerText;
+											string descript = info.QuerySelector("> div.item_description").InnerText.Replace("  ", "").Replace("\n", "");
+											if (epNumber > localMax) {
+												localMax = epNumber;
+											}
+											lock (dataLock) {
+												localEps[epNumber] = new Episode() { date = airDate, name = name, id = _id, posterUrl = posterUrl, rating = rating, description = descript };
+											}
+										}
+										catch (Exception _ex) {
+											error(_ex);
+										}
+										//print(epNumber + " |" + airDate + "|" + rating + "|" + name + "|" + posterUrl + "|" + _id);
+									}
+
+									lock (epMaxLock) {
+										if (localMax > maxEpisode) {
+											maxEpisode = localMax;
+										}
+									}
+								}
+								catch (Exception _ex) {
+									error(_ex);
+								}
+								/*lock (dataLock) {
+									data[i] = d;
+								}*/
+							});
+							if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
+
+							activeMovie.episodes = new List<Episode>();
+
+							for (int i = 1; i < maxEpisode; i++) {
+								bool contains = localEps.ContainsKey(i);
+								if (contains) {
+									activeMovie.episodes.Add(localEps[i]);
+								}
+								else {
+									activeMovie.episodes.Add(new Episode() { date = "", name = $"Episode #{season}.{i}", description = "", rating = "", posterUrl = "", id = "" });
+								}
 							}
 						}
-						if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
+						else {
+							if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
 
-						int eps = 0;
-						//https://www.imdb.com/title/tt4508902/episodes/_ajax?season=2
+							int eps = 0;
+							//https://www.imdb.com/title/tt4508902/episodes/_ajax?season=2
 
-						for (int q = 1; q < 2000; q++) {
-							if (d.Contains("?ref_=ttep_ep" + q)) {
-								eps = q;
-							}
-							else {
-								break;
-							}
-						}
-						//episodeLoaded?.Invoke(null, activeMovie.episodes);
-
-						activeMovie.episodes = new List<Episode>();
-
-						for (int q = 1; q <= eps; q++) {
-							string lookFor = "?ref_=ttep_ep" + q;
-							try {
-								d = d[d.IndexOf(lookFor)..];
-								string name = FindHTML(d, "title=\"", "\"", decodeToNonHtml: true);
-								string id = FindHTML(d, "div data-const=\"", "\"");
-								string rating = FindHTML(d, "<span class=\"ipl-rating-star__rating\">", "<");
-								string descript = FindHTML(d, "<div class=\"item_description\" itemprop=\"description\">", "<", decodeToNonHtml: true).Replace("\n", "").Replace("  ", "");
-								string date = FindHTML(d, "<div class=\"airdate\">", "<").Replace("\n", "").Replace("  ", "");
-								string posterUrl = FindHTML(d, "src=\"", "\"");
-								string divEpisode = FindHTML(d, "<div>", "<");
-
-								//print("ADDED EP::::" + name + "|" + q);
-
-								if (posterUrl == "https://m.media-amazon.com/images/G/01/IMDb/spinning-progress.gif" || posterUrl.Replace(" ", "") == "") {
-									posterUrl = VIDEO_IMDB_IMAGE_NOT_FOUND; // DEAFULT LOADING
+							for (int q = 1; q < 2000; q++) {
+								if (d.Contains("?ref_=ttep_ep" + q)) {
+									eps = q;
 								}
-
-								if (descript == "Know what this is about?") {
-									descript = "";
+								else {
+									break;
 								}
-								if (!divEpisode.Contains("Ep0")) // Episode offset is fucked if ep0
-								{
-									activeMovie.episodes.Add(new Episode() { date = date, name = name, description = descript, rating = rating, posterUrl = posterUrl, id = id });
+							}
+							//episodeLoaded?.Invoke(null, activeMovie.episodes);
+
+							activeMovie.episodes = new List<Episode>();
+
+							Stopwatch _ss = Stopwatch.StartNew();
+
+							for (int q = 1; q <= eps; q++) {
+								string lookFor = "?ref_=ttep_ep" + q;
+								try {
+									d = d[d.IndexOf(lookFor)..];
+									string name = FindHTML(d, "title=\"", "\"", decodeToNonHtml: true);
+									string id = FindHTML(d, "div data-const=\"", "\"");
+									string rating = FindHTML(d, "<span class=\"ipl-rating-star__rating\">", "<");
+									string descript = FindHTML(d, "<div class=\"item_description\" itemprop=\"description\">", "<", decodeToNonHtml: true).Replace("\n", "").Replace("  ", "");
+									string date = FindHTML(d, "<div class=\"airdate\">", "<").Replace("\n", "").Replace("  ", "");
+									string posterUrl = FindHTML(d, "src=\"", "\"");
+									string divEpisode = FindHTML(d, "<div>", "<");
+
+									//print("ADDED EP::::" + name + "|" + q);
+
+									if (posterUrl == "https://m.media-amazon.com/images/G/01/IMDb/spinning-progress.gif" || posterUrl.Replace(" ", "") == "") {
+										posterUrl = VIDEO_IMDB_IMAGE_NOT_FOUND; // DEAFULT LOADING
+									}
+
+									if (descript == "Know what this is about?") {
+										descript = "";
+									}
+									if (!divEpisode.Contains("Ep0")) // Episode offset is fucked if ep0
+									{
+										activeMovie.episodes.Add(new Episode() { date = date, name = name, description = descript, rating = rating, posterUrl = posterUrl, id = id });
+									}
+
 								}
-
+								catch (Exception _ex) {
+									error(_ex);
+								}
 							}
-							catch (Exception) {
-
-							}
+							print("ELAPSED TIME FOR FF::: " + _ss.ElapsedMilliseconds);
 						}
 
 						episodeHalfLoaded?.Invoke(null, activeMovie.episodes);
@@ -6506,6 +6611,9 @@ namespace CloudStreamForms.Core
 							error(_ex);
 						}
 					}
+				}
+				if(currentMax == 0) {
+					App.ShowToast("Zero episodes found");
 				}
 				return currentMax;
 			}
@@ -6733,7 +6841,7 @@ namespace CloudStreamForms.Core
 
 				for (int i = 0; i < names.Count; i++) {
 					vid = FindHTML(d, names[i].compareUrl, "\"");
-					if(vid.Contains('\'')) {
+					if (vid.Contains('\'')) {
 						vid = vid[0..vid.IndexOf('\'')];
 					}
 					if (vid != "") {
@@ -8038,13 +8146,8 @@ namespace CloudStreamForms.Core
 			return GetAllFilesRegex(GetEval(code));
 		}
 
-		/// <summary>
-		/// Simple funct to download a sites fist page as string
-		/// </summary>
-		/// <param name="url"></param>
-		/// <param name="UTF8Encoding"></param>
-		/// <returns></returns>
-		public string DownloadString(string url, TempThread? tempThred = null, int repeats = 2, int waitTime = 10000, string referer = "", Encoding encoding = null, string[] headerName = null, string[] headerValue = null)
+
+		public async Task<string> DownloadStringAsync(string url, TempThread? tempThred = null, int repeats = 2, int waitTime = 10000, string referer = "", Encoding encoding = null, string[] headerName = null, string[] headerValue = null, bool eng = false)
 		{
 #if DEBUG
 			int _s = GetStopwatchNum();
@@ -8053,7 +8156,31 @@ namespace CloudStreamForms.Core
 			for (int i = 0; i < repeats; i++) {
 				if (s == "") {
 					//s = DownloadStringOnce(url, tempThred, UTF8Encoding, waitTime);
-					s = DownloadStringWithCert(url, tempThred, waitTime, "", referer, encoding, headerName, headerValue);
+					s = await DownloadStringWithCertAsync(url, tempThred, waitTime, "", referer, encoding, headerName, headerValue, eng);
+				}
+			}
+#if DEBUG
+			EndStopwatchNum(_s, nameof(DownloadStringAsync));
+#endif
+			return s;
+		}
+
+		/// <summary>
+		/// Simple funct to download a sites fist page as string
+		/// </summary>
+		/// <param name="url"></param>
+		/// <param name="UTF8Encoding"></param>
+		/// <returns></returns>
+		public string DownloadString(string url, TempThread? tempThred = null, int repeats = 2, int waitTime = 10000, string referer = "", Encoding encoding = null, string[] headerName = null, string[] headerValue = null, bool eng = false)
+		{
+#if DEBUG
+			int _s = GetStopwatchNum();
+#endif
+			string s = "";
+			for (int i = 0; i < repeats; i++) {
+				if (s == "") {
+					//s = DownloadStringOnce(url, tempThred, UTF8Encoding, waitTime);
+					s = DownloadStringWithCert(url, tempThred, waitTime, "", referer, encoding, headerName, headerValue, eng);
 				}
 			}
 #if DEBUG
@@ -8062,7 +8189,7 @@ namespace CloudStreamForms.Core
 			return s;
 		}
 
-		public string DownloadStringWithCert(string url, TempThread? tempThred = null, int waitTime = 10000, string requestBody = "", string referer = "", Encoding encoding = null, string[] headerName = null, string[] headerValue = null)
+		public async Task<string> DownloadStringWithCertAsync(string url, TempThread? tempThred = null, int waitTime = 10000, string requestBody = "", string referer = "", Encoding encoding = null, string[] headerName = null, string[] headerValue = null, bool eng = false)
 		{
 			if (!url.IsClean()) return "";
 			url = url.Replace("http://", "https://");
@@ -8076,6 +8203,62 @@ namespace CloudStreamForms.Core
 				webRequest.ReadWriteTimeout = waitTime;
 				webRequest.ContinueTimeout = waitTime;
 				webRequest.Referer = referer;
+				if (eng) {
+					webRequest.Headers.Add("Accept-Language", "en;q=0.8");
+				}
+				if (encoding == null) {
+					encoding = Encoding.UTF8;
+				}
+
+				if (headerName != null) {
+					for (int i = 0; i < headerName.Length; i++) {
+						webRequest.Headers.Add(headerName[i], headerValue[i]);
+					}
+				}
+
+				print("REQUEST::: " + url);
+
+				using (var webResponse = await webRequest.GetResponseAsync()) {
+					try {
+						using StreamReader httpWebStreamReader = new StreamReader(webResponse.GetResponseStream(), encoding);
+						try {
+							if (tempThred != null) { if (!GetThredActive((TempThread)tempThred)) { return ""; }; } //  done = true; 
+							return await httpWebStreamReader.ReadToEndAsync();
+						}
+						catch (Exception _ex) {
+							print("FATAL ERROR DLOAD3: " + _ex + "|" + url);
+						}
+					}
+					catch (Exception) {
+						return "";
+					}
+
+				}
+				return "";
+			}
+			catch (Exception _ex) {
+				error("FATAL ERROR DLOAD: \n" + url + "\n============================================\n" + _ex + "\n============================================");
+				return "";
+			}
+		}
+
+		public string DownloadStringWithCert(string url, TempThread? tempThred = null, int waitTime = 10000, string requestBody = "", string referer = "", Encoding encoding = null, string[] headerName = null, string[] headerValue = null, bool eng = false)
+		{
+			if (!url.IsClean()) return "";
+			url = url.Replace("http://", "https://");
+
+			try {
+				HttpWebRequest webRequest = (HttpWebRequest)HttpWebRequest.Create(url);
+				if (GetRequireCert(url)) { webRequest.ServerCertificateValidationCallback = delegate { return true; }; }
+
+				webRequest.Method = "GET";
+				webRequest.Timeout = waitTime;
+				webRequest.ReadWriteTimeout = waitTime;
+				webRequest.ContinueTimeout = waitTime;
+				webRequest.Referer = referer;
+				if (eng) {
+					webRequest.Headers.Add("Accept-Language", "en;q=0.8");
+				}
 				if (encoding == null) {
 					encoding = Encoding.UTF8;
 				}

@@ -115,7 +115,7 @@ namespace CloudStreamForms.Core.AnimeProviders
 		AnimeSimpleEpisodes? GetAnimeSimpleEpisodes(string id)
 		{
 			try {
-				string _d = DownloadString("https://ww1.animesimple.com/request?anime-id=" + id + "&epi-page=4&top=10000&bottom=1");
+				string _d = DownloadString("https://ww1.animesimple.com/request?anime-id=" + id + "&epi-page=1&top=10000&bottom=1");
 				if (!_d.IsClean()) return null;
 				const string lookFor = "href=\"";
 
@@ -123,18 +123,29 @@ namespace CloudStreamForms.Core.AnimeProviders
 				int subbedEpisodes = 0;
 				List<string> urls = new List<string>();
 				while (_d.Contains(lookFor)) {
-					string url = FindHTML(_d, lookFor, "\"");
-					_d = RemoveOne(_d, lookFor);
-					urls.Add(url);
-					string subDub = FindHTML(_d, "success\">", "<");
-					bool isDub = subDub.Contains("Dubbed");
-					bool isSub = subDub.Contains("Subbed");
-					int episode = int.Parse(FindHTML(_d, "</i> Episode ", "<"));
-					if (isDub) {
-						dubbedEpisodes = episode;
+					try {
+						string url = FindHTML(_d, lookFor, "\"");
+						_d = RemoveOne(_d, lookFor);
+						urls.Add(url);
+						string subDub = FindHTML(_d, "success\">", "<");
+						bool isDub = subDub.Contains("Dubbed");
+						bool isSub = subDub.Contains("Subbed");
+
+						int.TryParse(FindHTML(_d, "</i> Episode ", "<"), out int episode);
+						if (episode == 0) {
+							error("ANISIMPLE EPISODE::: " + _d);
+						}
+						else {
+							if (isDub) {
+								dubbedEpisodes = episode;
+							}
+							if (isSub) {
+								subbedEpisodes = episode;
+							}
+						}
 					}
-					if (isSub) {
-						subbedEpisodes = episode;
+					catch (Exception _ex) {
+						error(_ex);
 					}
 				}
 				return new AnimeSimpleEpisodes() { urls = urls.ToArray(), dubbedEpisodes = dubbedEpisodes, subbedEpisodes = subbedEpisodes };
