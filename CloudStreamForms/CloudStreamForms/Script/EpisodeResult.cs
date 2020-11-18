@@ -47,6 +47,7 @@ namespace CloudStreamForms.Models
 		public ImageSource DownloadPlayBttSource { get; set; }
 		public Command TapCom { set; get; }
 		public Command TapComTwo { set; get; }
+		public Command TapComThree { set; get; }
 		public bool IsDownloading { get { return downloadState == 2; } }
 		public bool IsDownloaded { get { return downloadState == 1; } }
 		public bool IsSearchingDownloadResults { get { return downloadState == 4; } }

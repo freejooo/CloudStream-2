@@ -54,7 +54,7 @@
 									</Grid.RowDefinitions>
 
 									<Grid Grid.Row="0" Grid.Column="0" HorizontalOptions="Fill" >
-										<BoxView BackgroundColor="{Binding ExtraColor}" Margin="5,4" CornerRadius="5"></BoxView>
+										<Frame BackgroundColor="{Binding ExtraColor}" Margin="5,4" CornerRadius="5" HasShadow="True"></Frame>
 										<Grid  RowSpacing="0"  Padding="10,14" >
 											<Grid.RowDefinitions >
 												<RowDefinition Height="Auto" />

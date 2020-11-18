@@ -1005,6 +1005,28 @@ namespace CloudStreamForms
 				return -1;
 			}
 
+			episodeResult.TapComThree = new Command(async (s) => {
+				if (!canTapEpisode) return;
+				if (core == null) return;
+
+				int _id = GetRealIdFromId();
+				if (_id == -1) return;
+				canTapEpisode = false;
+				try {
+					var epRes = epView.MyEpisodeResultCollection[_id];
+					if (toggleViewState) {
+						ToggleEpisode(epRes);
+						episodeView.SelectedItem = null;
+					}
+					else {
+						await EpisodeSettings(epRes);
+					}
+				}
+				finally {
+					canTapEpisode = true;
+				} 
+			});
+
 			episodeResult.TapComTwo = new Command(async (s) => {
 				if (!canTapEpisode) return;
 				if (core == null) return;

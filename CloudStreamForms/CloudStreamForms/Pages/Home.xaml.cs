@@ -626,13 +626,14 @@ namespace CloudStreamForms
 
 								// var _color = Settings.BlackColor + 5;
 
-								BoxView boxView = new BoxView() {
+								Frame boxView = new Frame() {
 									BackgroundColor = Settings.ItemBackGroundColor,// Color.FromRgb(_color, _color, _color),
 									InputTransparent = true,
 									CornerRadius = 10,
 									HeightRequest = RecPosterHeight + bookmarkLabelTransY,
 									TranslationY = 0,
 									WidthRequest = RecPosterWith,
+									HasShadow = true,
 								};
 
 								stackLayout.Children.Add(boxView);

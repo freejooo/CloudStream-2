@@ -9,6 +9,7 @@
 		xmlns:ffs="clr-namespace:FFImageLoading.Svg.Forms;assembly=FFImageLoading.Svg.Forms"
 xmlns:ffTransformations="clr-namespace:FFImageLoading.Transformations;assembly=FFImageLoading.Transformations"
              xmlns:cloudstreamforms="clr-namespace:CloudStreamForms"
+             xmlns:cse="clr-namespace:CloudStreamForms.Effects"
              mc:Ignorable="d"
              
              x:Class="CloudStreamForms.MovieResult">
@@ -62,7 +63,8 @@ xmlns:ffTransformations="clr-namespace:FFImageLoading.Transformations;assembly=F
 
 							</ff:CachedImage>
 							<ImageButton x:Name="ChromeCastBtt" BackgroundColor="Transparent" Clicked="ChromeCastBtt_Clicked"  WidthRequest="40" HeightRequest="40"  VerticalOptions="Center" HorizontalOptions="Start"></ImageButton>
-							<Label Opacity="0" x:Name="NameLabel" FontSize="Title" Text="Iron Man" FontAttributes="Bold" HorizontalOptions="StartAndExpand" Margin="0,5,5,5"  TranslationX="-5.5" TranslationY="0" TextColor="#e7e7e7" InputTransparent="True"></Label>
+							<Label Opacity="0" x:Name="NameLabel" FontSize="Title" Text="Iron Man" FontAttributes="Bold" HorizontalOptions="StartAndExpand" Margin="0,5,5,5"  TranslationX="-5.5" TranslationY="0" TextColor="#e7e7e7" InputTransparent="True">
+							</Label>
 						</Grid>
 
 						<Grid Grid.Row="3"  Grid.Column="0" InputTransparent="True" Margin="0,-10,0,0">
@@ -304,9 +306,12 @@ xmlns:ffTransformations="clr-namespace:FFImageLoading.Transformations;assembly=F
                         x:Name="episodeView" SeparatorColor="Transparent" VerticalScrollBarVisibility="Never" HeightRequest="0">
 								<ListView.ItemTemplate>
 									<DataTemplate>
-										<ViewCell Tapped="ViewCell_Tapped" >
-											<Grid>
-												<BoxView BackgroundColor="{Binding ExtraColor}" VerticalOptions="FillAndExpand" Margin="5,5" CornerRadius="5"></BoxView>
+										<ViewCell Tapped="ViewCell_Tapped"  >
+											<Grid cse:LongPressedEffect.Command="{Binding TapComThree}" >
+												<Grid.Effects>
+													<cse:LongPressedEffect></cse:LongPressedEffect>
+												</Grid.Effects>
+												<Frame BackgroundColor="{Binding ExtraColor}" VerticalOptions="FillAndExpand" Margin="5,5" CornerRadius="5" HasShadow="True"></Frame>
 
 												<Grid RowSpacing="0"  Padding="0"  HorizontalOptions="Fill" VerticalOptions="FillAndExpand" Margin="4">
 													<!--SizeChanged="ViewCell_SizeChanged"-->
