@@ -471,7 +471,10 @@ namespace CloudStreamForms.Core
 		static string videoStreamPath;
 		static bool videoFileThreadCreated = false;
 
-		static void ListWriteFile(HttpListenerContext ctx, string path)
+		static bool shouldShowdownStream = false;
+		static bool isClearToStream = true;
+
+		static async void ListWriteFile(HttpListenerContext ctx, string path)
 		{
 			FileStream fs = null;
 			try {
@@ -479,6 +482,14 @@ namespace CloudStreamForms.Core
 				var req = ctx.Request;
 				p.SendChunked = true;
 
+				if (!isClearToStream) {
+					shouldShowdownStream = true;
+					while (!isClearToStream) {
+						await Task.Delay(100);
+					}
+				}
+
+				isClearToStream = false;
 				using (fs = new FileStream(videoStreamPath, FileMode.Open)) {
 					int startByte = -1;
 					int endByte = -1;
@@ -510,16 +521,25 @@ namespace CloudStreamForms.Core
 
 					byte[] temp = new byte[1024];
 					int count = 0;
-					while ((count = fs.Read(temp, 0, 1024)) > 0) {
-						p.OutputStream.Write(temp, 0, count);
+					try {
+						while ((count = fs.Read(temp, 0, 1024)) > 0) {
+							p.OutputStream.Write(temp, 0, count);
+							if (shouldShowdownStream) {
+								break;
+							}
+						}
 					}
-
+					catch (Exception _ex) {
+						error(_ex);
+					}
 					//int read = fs.Read(buffer, 0, endByte - startByte);
 					//  fs.Flush();
 					fs.Close();
 
 					// p.Close(buffer, true); 
 					p.OutputStream.Flush();
+					shouldShowdownStream = false;
+					isClearToStream = true;
 				}
 
 			}
@@ -552,6 +572,9 @@ namespace CloudStreamForms.Core
 			var thread = CloudStreamCore.mainCore.CreateThread(76);
 			mainCore.StartThread("VideoThread", () => {
 				try {
+					shouldShowdownStream = false;
+					isClearToStream = true;
+
 					using var listener = new HttpListener();
 					listener.Prefixes.Add(url);
 
@@ -805,7 +828,12 @@ namespace CloudStreamForms.Core
 
 		public static async void ShowLogo()
 		{
-			CurrentChromeMedia = await CurrentChannel.LoadAsync(new MediaInformation() { ContentId = "https://cdn.discordapp.com/attachments/551382684560261121/730169809408622702/ChromecastLogo6.png", StreamType = StreamType.None, ContentType = "image/jpeg" });
+			try {
+				CurrentChromeMedia = await CurrentChannel.LoadAsync(new MediaInformation() { ContentId = "https://cdn.discordapp.com/attachments/551382684560261121/730169809408622702/ChromecastLogo6.png", StreamType = StreamType.None, ContentType = "image/jpeg" });
+			}
+			catch (Exception _ex) {
+				error(_ex);
+			}
 			//  CurrentChromeMedia = await CurrentChannel.LoadAsync(new MediaInformation() { ContentId = "https://cdn.discordapp.com/attachments/288759480613732353/757352069689638912/csintro.mp4", StreamType = StreamType.Buffered, ContentType = "video/mp4",Metadata = new GenericMediaMetadata() { } });
 		}
 

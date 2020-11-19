@@ -6,8 +6,8 @@
              xmlns:ff="clr-namespace:FFImageLoading.Forms;assembly=FFImageLoading.Forms"             
              xmlns:xe="clr-namespace:XamEffects;assembly=XamEffects"
              xmlns:ffTransformations="clr-namespace:FFImageLoading.Transformations;assembly=FFImageLoading.Transformations"
-             xmlns:cloudstreamforms="clr-namespace:CloudStreamForms"
-             mc:Ignorable="d"
+             xmlns:cloudstreamforms="clr-namespace:CloudStreamForms" xmlns:cse="clr-namespace:CloudStreamForms.Effects"
+			 mc:Ignorable="d"
              x:Class="CloudStreamForms.Home">
     <StackLayout x:Name="MainStack" >
 
@@ -79,8 +79,12 @@
                     <ListView.ItemTemplate>
                         <DataTemplate     >
                             <cloudstreamforms:CustomCell Tapped="ViewCell_Tapped"   >
-                                <Grid RowSpacing="0"  Padding="0"  HorizontalOptions="Fill"  HeightRequest="98" VerticalOptions="Center">
-                                    <Grid.RowDefinitions >
+								<Grid RowSpacing="0"  Padding="0"  HorizontalOptions="Fill"  HeightRequest="98" VerticalOptions="Center" cse:LongPressedEffect.Command="{Binding TapComThree}" >
+									<Grid.Effects>
+										<cse:LongPressedEffect></cse:LongPressedEffect>
+									</Grid.Effects>
+									
+									<Grid.RowDefinitions >
                                         <RowDefinition Height="Auto" />
                                         <RowDefinition Height="Auto" />
                                         <RowDefinition Height="Auto" />

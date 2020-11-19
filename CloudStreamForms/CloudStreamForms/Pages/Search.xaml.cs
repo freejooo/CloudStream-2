@@ -11,7 +11,7 @@ namespace CloudStreamForms
 	[XamlCompilation(XamlCompilationOptions.Compile)]
 	public partial class Search : ContentPage
 	{
-		public ObservableCollection<SearchResult> mySearchResultCollection;
+		public ObservableCollection<SearchResult> MySearchResultCollection { get; set; }
 		public static Poster mainPoster;
 		ListView listView;
 		public string startText = "";
@@ -24,14 +24,32 @@ namespace CloudStreamForms
 		public Search()
 		{
 			InitializeComponent();
+			mainCore.searchLoaded += Search_searchLoaded;
+			BackgroundColor = Settings.BlackRBGColor;
+
+			MainSearchBar.TextChanged += SearchBar_TextChanged;
+			MainSearchBar.SearchButtonPressed += SearchBar_SearchButtonPressed;
+			
+			MySearchResultCollection = new ObservableCollection<SearchResult>();
+
+			BindingContext = this;
+
+			if (Device.RuntimePlatform == Device.UWP) {
+				OffBar.IsVisible = false;
+				OffBar.IsEnabled = false;
+			}
+			else {
+				OffBar.Source = App.GetImageSource("gradient.png"); OffBar.HeightRequest = 3; OffBar.HorizontalOptions = LayoutOptions.Fill; OffBar.ScaleX = 100; OffBar.Opacity = 0.3; OffBar.TranslationY = 9;
+			}
+			return;
 			BackgroundColor = Settings.BlackRBGColor;
 
 			mainCore.searchLoaded += Search_searchLoaded;
 
 			//BindingContext = new SearchPageViewer();
-
-			mySearchResultCollection = new ObservableCollection<SearchResult>() {
+			MySearchResultCollection = new ObservableCollection<SearchResult>() {
 			};
+
 
 			SearchBar searchBar = new SearchBar() {
 				Placeholder = "Movie Search...",
@@ -50,7 +68,7 @@ namespace CloudStreamForms
 			}
 			listView = new ListView {
 				// Source of data items.
-				ItemsSource = mySearchResultCollection,
+				ItemsSource = MySearchResultCollection,
 				RowHeight = 50,
 
 				// Define template for displaying each item.
@@ -97,6 +115,10 @@ namespace CloudStreamForms
                                     //boxView,
                                     new StackLayout
 									{
+										Effects = {
+											 new CloudStreamForms.Effects.LongPressedEffect(),
+										},
+										
 										VerticalOptions = LayoutOptions.CenterAndExpand,
 										Spacing = 0,
 										Children =
@@ -189,14 +211,18 @@ namespace CloudStreamForms
 		private void Search_searchLoaded(object sender, List<Poster> e)
 		{
 			activePosters = e;
+			var bgColor = Settings.ItemBackGroundColor.ToHex();
 			Device.BeginInvokeOnMainThread(() => {
-				mySearchResultCollection.Clear();
+				MySearchResultCollection.Clear();
 				for (int i = 0; i < mainCore.activeSearchResults.Count; i++) {
 					string extra = mainCore.activeSearchResults[i].extra;
 					if (extra != "") {
 						extra = " - " + extra;
 					}
-					mySearchResultCollection.Add(new SearchResult() { Id = i, Title = mainCore.activeSearchResults[i].name + extra, Extra = mainCore.activeSearchResults[i].year, Poster = mainCore.activeSearchResults[i].posterUrl });
+					int _id = i;
+					MySearchResultCollection.Add(new SearchResult() { OnClick = new Command( () => {
+						PushPage(activePosters[_id], Navigation);
+					}), ExtraColor = bgColor, Id = i, Title = mainCore.activeSearchResults[i].name + extra, Extra = mainCore.activeSearchResults[i].year, Poster = CloudStreamForms.Core.CloudStreamCore.ConvertIMDbImagesToHD(mainCore.activeSearchResults[i].posterUrl,40,60,multi:2) });
 				}
 			});
 		}

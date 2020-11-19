@@ -2,9 +2,60 @@
 <ContentPage xmlns="http://xamarin.com/schemas/2014/forms" 
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:d="http://xamarin.com/schemas/2014/forms/design"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             mc:Ignorable="d"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:cse="clr-namespace:CloudStreamForms.Effects" xmlns:ff="clr-namespace:FFImageLoading.Forms;assembly=FFImageLoading.Forms" xmlns:ffTransformations="clr-namespace:FFImageLoading.Transformations;assembly=FFImageLoading.Transformations"
+			 mc:Ignorable="d"
              x:Class="CloudStreamForms.Search">
- 
-    <!-- EVERYTHING IS MADE IN CODE -->
+
+	<StackLayout>
+
+		<SearchBar Placeholder="Movie Search..." CancelButtonColor="#bdbdbd" TranslationY="3" x:Name="MainSearchBar">
+
+		</SearchBar>
+		<Grid InputTransparent="True" TranslationY="-10">
+			<Image x:Name="OffBar" InputTransparent="True" VerticalOptions="Start" ></Image>
+		</Grid>
+		<ListView ItemsSource="{Binding MySearchResultCollection}" TranslationY="-6"
+                             CachingStrategy="RecycleElement"  
+                RowHeight="60" 
+                    x:Name="episodeView"  SeparatorColor="Transparent"  VerticalScrollBarVisibility="Never" >
+			<ListView.ItemTemplate>
+				<DataTemplate>
+					<ViewCell>
+						<Grid Padding="2,1" VerticalOptions="Fill" HorizontalOptions="Fill"  cse:LongPressedEffect.Command="{Binding OnClick}" >
+
+							<Grid.Effects>
+								<cse:LongPressedEffect></cse:LongPressedEffect>
+							</Grid.Effects>
+							<Frame HasShadow="True" BackgroundColor="{Binding ExtraColor}" VerticalOptions="Fill" HeightRequest="100" HorizontalOptions="Fill">
+
+							</Frame>
+							<Grid>
+								<Grid.ColumnDefinitions >
+									<ColumnDefinition Width="Auto" />
+									<ColumnDefinition Width="Auto" />
+								</Grid.ColumnDefinitions>
+								<ff:CachedImage HeightRequest="60" WidthRequest="40" Grid.Column="0" Source="{Binding Poster}" InputTransparent="True" ff:LoadingPlaceholder="emtyLoadingPosterV2.png">
+									<ff:CachedImage.Transformations >
+										<ffTransformations:RoundedTransformation Radius="10" CropHeightRatio="1.48"  >
+
+										</ffTransformations:RoundedTransformation>
+									</ff:CachedImage.Transformations>
+								</ff:CachedImage>
+								<Grid Grid.Column="1" HorizontalOptions="Fill" VerticalOptions="Fill" Padding="5,5">
+									<Grid.RowDefinitions >
+										<RowDefinition Height="Auto" />
+										<RowDefinition Height="Auto" />
+									</Grid.RowDefinitions>
+									<Label  TextColor="#e6e6e6" FontSize="15" Text="{Binding Title}"></Label>
+									<Label Grid.Row="1" TextColor="#828282" FontSize="12" Text="{Binding Extra}"></Label>
+
+								</Grid>
+							</Grid>
+							
+						</Grid>
+					</ViewCell>
+				</DataTemplate>
+			</ListView.ItemTemplate>
+		</ListView>
+	</StackLayout>
 </ContentPage>

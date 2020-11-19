@@ -372,9 +372,13 @@ namespace CloudStreamForms
 
 						bool noDownloads = _epres.Length == 0;
 						Device.BeginInvokeOnMainThread(() => {
-
+							
 							MyEpisodeResultCollection.Clear();
 							foreach (var ep in _epres) {
+								ep.TapComThree = new Command(async () => {
+									await HandleEpisodeAsync(ep);
+									episodeView.SelectedItem = null;
+								});
 								try {
 									MyEpisodeResultCollection.Add(ep);
 								}
@@ -556,6 +560,19 @@ namespace CloudStreamForms
 		}
 
 		public static DownloadEpisodeInfo chromeDownload;
+
+		public static async Task ChromeCastDownloadedFile(int key)
+		{
+			DownloadInfo info = downloads[key];
+
+			var header = downloadHeaders[info.info.downloadHeader];
+
+			await MainChrome.CastVideo(info.info.fileUrl, info.info.name, posterUrl: header.posterUrl, movieTitle: header.name, fromFile: true);
+			chromeDownload = info.info;
+			Page _p = ChromeCastPage.CreateChromePage(info.info); //{ episodeResult = new EpisodeResult() { }, chromeMovieResult = new Movie() { } };
+			await MainPage.mainPage.Navigation.PushModalAsync(_p, false);
+		}
+
 		public static async Task HandleEpisodeTapped(int key, Page p)
 		{
 			DownloadInfo info = downloads[key];
@@ -592,12 +609,7 @@ namespace CloudStreamForms
 				MainChrome.ConnectToChromeDevice("Disconnect");
 			}
 			else if (action == "Chromecast") {
-				var header = downloadHeaders[info.info.downloadHeader];
-
-				await MainChrome.CastVideo(info.info.fileUrl, info.info.name, posterUrl: header.posterUrl, movieTitle: header.name, fromFile: true);
-				chromeDownload = info.info;
-				Page _p = ChromeCastPage.CreateChromePage(info.info); //{ episodeResult = new EpisodeResult() { }, chromeMovieResult = new Movie() { } };
-				await MainPage.mainPage.Navigation.PushModalAsync(_p, false);
+				await ChromeCastDownloadedFile(key);
 			}
 			else if (action == "Play External App") {
 				PlayDownloadedFile(info, true);

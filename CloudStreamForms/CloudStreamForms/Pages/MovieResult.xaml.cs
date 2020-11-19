@@ -958,7 +958,7 @@ namespace CloudStreamForms
 			SetColor(episodeResult);
 			episodeResult.ExtraColor = Settings.ItemBackGroundColor.ToHex();
 			episodeResult.Season = currentSeason;
-
+			
 			/*if (episodeResult.Rating != "") {
                 episodeResult.Title += " | ★ " + episodeResult.Rating;
             }*/
@@ -1024,7 +1024,7 @@ namespace CloudStreamForms
 				}
 				finally {
 					canTapEpisode = true;
-				} 
+				}
 			});
 
 			episodeResult.TapComTwo = new Command(async (s) => {
@@ -1393,7 +1393,14 @@ namespace CloudStreamForms
 						}
 						else {
 							if (episodeResult.GetMirrosUrls().Count > 0) {
-								if (autoPlay) { PlayEpisode(episodeResult); }
+								if (autoPlay) {
+									if (MainChrome.IsConnectedToChromeDevice) {
+										ChromecastAt(0, episodeResult);
+									}
+									else {
+										PlayEpisode(episodeResult);
+									}
+								}
 								//episodeResult.GetHasLoadedLinks() = true;
 							}
 							else {
@@ -1524,6 +1531,28 @@ namespace CloudStreamForms
 			});
 		}
 
+		async void ChromecastAt(int count, EpisodeResult episodeResult)
+		{
+			chromeResult = episodeResult;
+			chromeMovieResult = currentMovie;
+			bool succ = false;
+			count--;
+			episodeView.SelectedItem = null;
+
+			while (!succ) {
+				count++;
+
+				if (count >= episodeResult.GetMirros().Count) {
+					succ = true;
+				}
+				else {
+					succ = await MainChrome.CastVideo(episodeResult.GetMirrosUrls()[count], episodeResult.GetMirros()[count], subtitleUrl: "", posterUrl: currentMovie.title.hdPosterUrl, movieTitle: currentMovie.title.name, subtitleDelay: 0);
+				}
+			}
+			ChromeCastPage.currentSelected = count;
+
+		}
+
 		async Task EpisodeSettings(EpisodeResult episodeResult)
 		{
 			try {
@@ -1566,28 +1595,6 @@ namespace CloudStreamForms
 
 				action = await ActionPopup.DisplayActionSheet(episodeResult.Title, actions.ToArray());//await DisplayActionSheet(episodeResult.Title, "Cancel", null, actions.ToArray());
 
-				async void ChromecastAt(int count)
-				{
-					chromeResult = episodeResult;
-					chromeMovieResult = currentMovie;
-					bool succ = false;
-					count--;
-					episodeView.SelectedItem = null;
-
-					while (!succ) {
-						count++;
-
-						if (count >= episodeResult.GetMirros().Count) {
-							succ = true;
-						}
-						else {
-							succ = await MainChrome.CastVideo(episodeResult.GetMirrosUrls()[count], episodeResult.GetMirros()[count], subtitleUrl: "", posterUrl: currentMovie.title.hdPosterUrl, movieTitle: currentMovie.title.name, subtitleDelay: 0);
-						}
-					}
-					ChromeCastPage.currentSelected = count;
-
-				}
-
 				if (action == "Play in Browser") {
 					string copy = await ActionPopup.DisplayActionSheet("Open Link", episodeResult.GetMirros().ToArray()); // await DisplayActionSheet("Open Link", "Cancel", null, episodeResult.Mirros.ToArray());
 					for (int i = 0; i < episodeResult.GetMirros().Count; i++) {
@@ -1610,12 +1617,12 @@ namespace CloudStreamForms
 				}
 				else if (action == "Chromecast") { // ============================== CHROMECAST ==============================
 					SetAsViewed(episodeResult);
-					ChromecastAt(0);
+					ChromecastAt(0, episodeResult);
 				}
 				else if (action == "Chromecast mirror") {
 					SetAsViewed(episodeResult);
 					string subMirror = await ActionPopup.DisplayActionSheet("Cast Mirror", episodeResult.GetMirros().ToArray());//await DisplayActionSheet("Copy Link", "Cancel", null, episodeResult.Mirros.ToArray());
-					ChromecastAt(episodeResult.GetMirros().IndexOf(subMirror));
+					ChromecastAt(episodeResult.GetMirros().IndexOf(subMirror), episodeResult);
 				}
 				else if (action == "Play") { // ============================== PLAY ==============================
 					PlayEpisode(episodeResult);

@@ -6,8 +6,8 @@
              xmlns:ff="clr-namespace:FFImageLoading.Forms;assembly=FFImageLoading.Forms"
              xmlns:ffTransformations="clr-namespace:FFImageLoading.Transformations;assembly=FFImageLoading.Transformations"
              mc:Ignorable="d"                         
-             xmlns:xe="clr-namespace:XamEffects;assembly=XamEffects"
-             x:Class="CloudStreamForms.DownloadViewPage">
+             xmlns:xe="clr-namespace:XamEffects;assembly=XamEffects" xmlns:cse="clr-namespace:CloudStreamForms.Effects"
+			 x:Class="CloudStreamForms.DownloadViewPage">
 	<Grid>
 		<Grid.RowDefinitions >
 			<RowDefinition Height="Auto" />
@@ -44,7 +44,12 @@
 					<ListView.ItemTemplate>
 						<DataTemplate >
 							<ViewCell Tapped="ViewCell_Tapped">
-								<Grid RowSpacing="0"  Padding="0"  HorizontalOptions="Fill" >
+								<Grid RowSpacing="0"  Padding="0"  HorizontalOptions="Fill" cse:LongPressedEffect.Command="{Binding TapComThree}"  >
+
+									<Grid.Effects>
+										<cse:LongPressedEffect></cse:LongPressedEffect>
+									</Grid.Effects>
+
 									<!--SizeChanged="ViewCell_SizeChanged"-->
 
 									<Grid.RowDefinitions >

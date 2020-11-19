@@ -66,10 +66,19 @@ namespace CloudStreamForms
 								}
 							}
 							if (add) {
-
 								string img = ConvertIMDbImagesToHD(iMDbTopList[currentImageCount].img, IsRecommended ? 76 : 180, IsRecommended ? 113 : 268);
 
-								AddEpisode(new EpisodeResult() { ForceDescript = true, Description = x.descript, Title = (x.place > 0 ? (x.place + ". ") : "") + x.name + " | ★ " + x.rating.Replace(",", "."), Id = x.place, PosterUrl = img, extraInfo = "Id=" + x.id + "|||Name=" + x.name + "|||" }, false);
+								AddEpisode(new EpisodeResult() {
+									TapComThree = new Command(() => {
+										PushPageFromUrlAndName(x.id, x.name);
+									}),
+									ForceDescript = true,
+									Description = x.descript,
+									Title = (x.place > 0 ? (x.place + ". ") : "") + x.name + " | ★ " + x.rating.Replace(",", "."),
+									Id = x.place,
+									PosterUrl = img,
+									extraInfo = "Id=" + x.id + "|||Name=" + x.name + "|||"
+								}, false);
 							}
 
 						}
@@ -593,7 +602,8 @@ namespace CloudStreamForms
 						if (CheckIfURLIsValid(posterUrl)) {
 							string posterURL = ConvertIMDbImagesToHD(posterUrl, 76, 113, 1.75); //.Replace(",76,113_AL", "," + pwidth + "," + pheight + "_AL").Replace("UY113", "UY" + pheight).Replace("UX76", "UX" + pwidth);
 							if (CheckIfURLIsValid(posterURL)) {
-								Grid stackLayout = new Grid() { VerticalOptions = LayoutOptions.Start };
+								Grid stackLayout = new Grid() { VerticalOptions = LayoutOptions.Start }; //								stackLayout.Effects.Add(new CloudStreamForms.Effects.LongPressedEffect());
+
 								Button imageButton = new Button() { HeightRequest = RecPosterHeight, WidthRequest = RecPosterWith, BackgroundColor = Color.Transparent, VerticalOptions = LayoutOptions.Start };
 								var ff = new FFImageLoading.Forms.CachedImage {
 									Source = posterURL,
@@ -620,7 +630,6 @@ namespace CloudStreamForms
 								}));
 								var _b = new BookmarkPoster() { id = id, name = name, posterUrl = posterUrl };
 								Commands.SetTapParameter(brView, _b);
-
 
 								bookmarkPosters.Add(_b);
 

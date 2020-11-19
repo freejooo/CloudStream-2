@@ -116,6 +116,7 @@ namespace CloudStreamForms
 
 		void UpdateEpisodes()
 		{
+			var bgColor = Settings.ItemBackGroundColor.ToHex();
 			MyEpisodeResultCollection.Clear();
 			try {
 				var header = Download.downloadHeaders[currentId];
@@ -157,7 +158,7 @@ namespace CloudStreamForms
 
 							activeEpisodes.Add(new EpisodeResult() {
 								OgTitle = info.info.name,
-								ExtraColor = Settings.ItemBackGroundColor.ToHex(),
+								ExtraColor = bgColor,
 								ExtraDescription = $"{Download.GetExtraString(info.state.state)}{((info.state.state == App.DownloadState.Downloaded || dloaded == -1) ? "" : extra)}",
 								Title = (ep != -1 ? $"S{ss}:E{ep} " : "") + info.info.name,
 								Description = info.info.description,
@@ -166,9 +167,15 @@ namespace CloudStreamForms
 								Id = info.info.id,
 								PosterUrl = info.info.hdPosterUrl,
 								Progress = _progress,
-								TapCom = new Command((s) => {
+								TapCom = new Command(async (s) => {
 									if (info.info.dtype == App.DownloadType.Normal) MovieResult.SetEpisode("tt" + info.info.id);
-									Download.PlayDownloadedFile(info);
+									if (MainChrome.IsConnectedToChromeDevice) {
+										await Download.ChromeCastDownloadedFile(info.info.id);
+									}
+									else {
+										Download.PlayDownloadedFile(info);
+									}
+
 									//Download.PlayDownloadedFile(fileUrl, fileName, info.info.episode, info.info.season, info.info.episodeIMDBId, info.info.source);
 									// Download.PlayVLCFile(fileUrl, fileName, info.info.id.ToString()); 
 								}),
@@ -180,6 +187,11 @@ namespace CloudStreamForms
 
 				activeEpisodes = activeEpisodes.OrderBy(t => (t.Episode + t.Season * 1000)).ToList();
 				for (int i = 0; i < activeEpisodes.Count; i++) {
+					int _id = i;
+					activeEpisodes[i].TapComThree = new Command(async () => {
+						print("LLLLLLLLLLLLLLLLLLL:::: " + _id);
+						await HandleEpisode(MyEpisodeResultCollection[_id]);
+					});
 					MyEpisodeResultCollection.Add(activeEpisodes[i]);
 				}
 
