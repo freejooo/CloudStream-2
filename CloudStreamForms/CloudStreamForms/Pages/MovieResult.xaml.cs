@@ -1765,7 +1765,7 @@ namespace CloudStreamForms
 			string id = episodeResult.IMDBEpisodeId;
 			if (!renew && hasSubtitles.ContainsKey(id)) {
 				if (showToast) {
-					App.ShowToast("Subtitles Already Downloaded");
+					App.ShowToast("Subtitles already downloaded");
 				}
 				return;
 			}
@@ -1780,9 +1780,9 @@ namespace CloudStreamForms
 					}
 
 					string s = mainCore.DownloadSubtitle(id, Settings.NativeSubShortName, false);
-					if (s == "") {
+					if (!s.IsClean()) {
 						if (showToast) {
-							App.ShowToast("No Subtitles Found");
+							App.ShowToast(s == null ? "Connection error" : "No subtitles found");
 						}
 						return;
 					}

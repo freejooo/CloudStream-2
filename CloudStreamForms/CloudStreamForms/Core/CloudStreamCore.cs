@@ -6526,6 +6526,7 @@ namespace CloudStreamForms.Core
 
 		/// <summary>
 		/// RETURN SUBTITLE STRING, BLOCKING ACTION, see subtitleNames and subtitleShortNames
+		/// null if connection error, "" if not found
 		/// </summary>
 		/// <param name="imdbTitleId"></param>
 		/// <param name="lang"></param>
@@ -6543,6 +6544,9 @@ namespace CloudStreamForms.Core
 				string rUrl = "https://www.opensubtitles.org/en/search/sublanguageid-" + lang + "/imdbid-" + imdbTitleId + "/sort-7/asc-0"; // best match first
 																																			//print(rUrl);
 				string d = DownloadString(rUrl);
+				if(d == "") {
+					return null;
+				}
 				if (d.Contains("<div class=\"msg warn\"><b>No results</b> found, try")) {
 					return "";
 				}
@@ -6551,10 +6555,15 @@ namespace CloudStreamForms.Core
 				string _url = "https://www.opensubtitles.org/" + lang + "/subtitles/" + _found;
 
 				d = DownloadString(_url);
+				if(d == "") {
+					return null;
+				}
+
 				const string subAdd = "https://dl.opensubtitles.org/en/download/file/";
 				string subtitleUrl = subAdd + FindHTML(d, "download/file/", "\"");
 				if (subtitleUrl != subAdd) {
 					string s = DownloadStringWithCert(subtitleUrl, referer: "https://www.opensubtitles.org", encoding: Encoding.UTF7);
+					if (s == "") return null;
 
 					if (BAN_SUBTITLE_ADS) {
 						List<string> bannedLines = new List<string>() { "Support us and become VIP member", "to remove all ads from www.OpenSubtitles.org", "to remove all ads from OpenSubtitles.org", "Advertise your product or brand here", "contact www.OpenSubtitles.org today" }; // No advertisement
@@ -6578,13 +6587,17 @@ namespace CloudStreamForms.Core
 						s = RemoveCCFromSubtitles(s);
 					}
 
-					if (showToast) {
-						App.ShowToast("Subtitles Loaded");
-					}
 					if (s.Length > 100) { // MUST BE CORRECT
 						cachedSubtitles[cacheKey] = s;
+
+						if (showToast) {
+							App.ShowToast("Subtitles Loaded");
+						}
+						return s;
 					}
-					return s;
+					else {
+						return "";
+					}
 				}
 				else {
 					return "";
@@ -6637,6 +6650,7 @@ namespace CloudStreamForms.Core
 					}
 
 					string _subtitleLoc = DownloadSubtitle(id, lang);
+					if (!_subtitleLoc.IsClean()) return;
 					if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
 					bool contains = false;
 					if (activeMovie.subtitles == null) {

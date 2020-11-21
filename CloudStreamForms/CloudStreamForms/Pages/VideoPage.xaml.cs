@@ -282,7 +282,7 @@ namespace CloudStreamForms
 						}
 					}
 					else {
-						App.ShowToast("No subtitles found");
+						App.ShowToast(data == null ? "Connection error" : "No subtitles found");
 					}
 				}
 				finally {
