@@ -1805,9 +1805,12 @@ namespace CloudStreamForms
 					HandleVideoAction(App.PlayerEventType.Stop);
 				}
 				else {
+					bool skip = Math.Abs(lastTimeChange) > 10000;
 					long len = (long)(VideoSlider.Value * GetPlayerLenght());
-					Player.Time = len; // THIS WILL CAUSE FREEZ WHEN PLAYING CURRUPT VIDEO
-									   //SeekSubtitles(len);
+					if (skip) {
+						Player.Time = len; // THIS WILL CAUSE FREEZ WHEN PLAYING CURRUPT VIDEO
+										   //SeekSubtitles(len);
+					}
 
 					dragingVideo = false;
 					SlideChangedLabel.IsVisible = false;
@@ -1825,6 +1828,7 @@ namespace CloudStreamForms
 			}
 		}
 
+		long lastTimeChange = 0;
 		private void VideoSlider_ValueChanged(object sender, ValueChangedEventArgs e)
 		{
 			if (!isShown) return;
@@ -1835,13 +1839,13 @@ namespace CloudStreamForms
 
 			ChangeTime(e.NewValue);
 			if (dragingVideo) {
-				long timeChange = (long)(VideoSlider.Value * GetPlayerLenght()) - GetPlayerTime();
+				lastTimeChange = (long)(VideoSlider.Value * GetPlayerLenght()) - GetPlayerTime();
 				CurrentTap++;
 				SlideChangedLabel.TranslationX = ((e.NewValue - 0.5)) * (VideoSlider.Width - 30); //+ StartTxt.WidthRequest/2;
 
 				//    var time = TimeSpan.FromMilliseconds(timeChange);
 
-				string before = ((Math.Abs(timeChange) < 1000) ? "" : timeChange > 0 ? "+" : "-") + ConvertTimeToString(Math.Abs(timeChange / 1000)); //+ (int)time.Seconds + "s";
+				string before = ((Math.Abs(lastTimeChange) < 1000) ? "" : lastTimeChange > 0 ? "+" : "-") + ConvertTimeToString(Math.Abs(lastTimeChange / 1000)); //+ (int)time.Seconds + "s";
 
 				SkiptimeLabel.Text = $"[{ConvertTimeToString(VideoSlider.Value * GetPlayerLenght() / 1000)}]";
 				SlideChangedLabel.Text = before;//CloudStreamCore.ConvertTimeToString((timeChange / 1000.0));
@@ -2155,7 +2159,7 @@ namespace CloudStreamForms
 				}
 			}
 			else if (args.Type == TouchTracking.TouchActionType.Released) {
-				if (isMovingCursor && isMovingHorozontal && Math.Abs(isMovingSkipTime) > 1000) { // SKIP TIME
+				if (isMovingCursor && isMovingHorozontal && Math.Abs(isMovingSkipTime) > 7000) { // SKIP TIME
 																								 //FadeEverything(true);
 					SkiptimeLabel.Text = "";
 
