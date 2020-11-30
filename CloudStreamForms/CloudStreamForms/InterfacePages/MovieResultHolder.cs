@@ -487,7 +487,7 @@ namespace CloudStreamForms.InterfacePages
 							}
 							else {
 								App.RemoveKey(App.NEXT_AIRING, tId);
-								Home.UpdateIsRequired = true;
+								//Home.UpdateIsRequired = true;
 							}
 						});
 					}

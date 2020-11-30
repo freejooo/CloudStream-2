@@ -981,7 +981,7 @@ namespace CloudStreamForms
 
 					uint maxWidth = 0;
 					uint maxHight = 0;
-					uint maxBitrate = 0;
+					//uint maxBitrate = 0;
 
 					foreach (var track in Player.Media.Tracks) {
 						switch (track.TrackType) {
@@ -994,19 +994,20 @@ namespace CloudStreamForms
 								if (track.Data.Video.Width > maxWidth) {
 									maxWidth = track.Data.Video.Width;
 									maxHight = track.Data.Video.Height;
-									maxBitrate = track.Bitrate;
+									//maxBitrate = track.Bitrate;
 								}
 								print("Video track");
 								print($"{nameof(track.Data.Video.FrameRateNum)}: {track.Data.Video.FrameRateNum}");
 								print($"{nameof(track.Data.Video.FrameRateDen)}: {track.Data.Video.FrameRateDen}");
 								print($"{nameof(track.Data.Video.Height)}: {track.Data.Video.Height}");
 								print($"{nameof(track.Data.Video.Width)}: {track.Data.Video.Width}");
-								print($"{nameof(track.Data.Video.Width)}: {track.Bitrate}");
+								//print($"{nameof(track.Data.Video.Width)}: {track.Bitrate}");
 								break;
 						}
 					}
+					//+ (maxBitrate == 0 ? "" : $" {App.ConvertBytesToGB(maxBitrate, 1)}Kbps") // bitrate is not established on connect :/
 					Device.BeginInvokeOnMainThread(() => {
-						RezLabel.Text = maxWidth == 0 ? "" : (($"{maxWidth}x{maxHight}") + (maxBitrate == 0 ? "" : $" {App.ConvertBytesToGB(maxBitrate, 1)}Kbps"));
+						RezLabel.Text = maxWidth == 0 ? "" : (($"{maxWidth}x{maxHight}"));
 					});
 
 					var slaves = Player.Media.Slaves;
@@ -1519,7 +1520,7 @@ namespace CloudStreamForms
 			long pos;
 			bool startTimeSet = false;
 			if (isFirstLoadedMirror) { // THIS IS TO MAKE IT USE DURATION KEY OVER LAST PLAYER POS
-				if ((pos = App.GetViewPos(currentVideo.episodeId ?? "")) != -1) {
+				if ((pos = App.GetViewPos(currentVideo.episodeId ?? "")) != -1) { // "tt7886180" "tt7886180"
 					long duration = App.GetViewDur(currentVideo.episodeId ?? "");
 					var pro = ((double)pos / (double)duration);
 					if (pro < 0.9 && pro > 0.05) {

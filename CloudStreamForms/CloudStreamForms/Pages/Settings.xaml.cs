@@ -1524,7 +1524,6 @@ namespace CloudStreamForms
 							Script.SyncWrapper.SetKeysFromTextFile(data);
 							Home.UpdateIsRequired = true;
 						}
-
 					}
 					catch (Exception _ex) {
 						App.ShowToast("Account error");

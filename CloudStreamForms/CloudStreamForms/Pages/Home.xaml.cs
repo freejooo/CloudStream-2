@@ -481,6 +481,7 @@ namespace CloudStreamForms
 				base.OnAppearing();
 				return;
 			}
+			UpdateLabels();
 			SetHeight();
 
 			try {
@@ -577,6 +578,32 @@ namespace CloudStreamForms
 			baseTxt.IsVisible = vis;
 		}
 
+		struct UpdateLabel
+		{
+			public string id;
+			public Button label;
+		}
+
+		List<UpdateLabel> updateLabels = new List<UpdateLabel>();
+
+		string GetAirDate(long airAt)
+		{
+			return airAt > UnixTime ? $"{CoreHelpers.ConvertUnixTimeToString(airAt)}" : "NEW!";
+		}
+
+		void UpdateLabels()
+		{
+			for (int i = 0; i < updateLabels.Count; i++) {
+				string txt = "No Data";
+				CloudStreamCore.NextAiringEpisodeData? nextData = App.GetKey<NextAiringEpisodeData?>(App.NEXT_AIRING, updateLabels[i].id, null);
+				if (nextData.HasValue) {
+					var nextAir = nextData.Value;
+					txt = GetAirDate(nextAir.airingAt);
+				}
+				updateLabels[i].label.Text = txt;
+			}
+		}
+
 		void UpdateBookmarks()
 		{
 			try {
@@ -586,6 +613,8 @@ namespace CloudStreamForms
 				List<string> data = new List<string>();
 				bookmarkPosters = new List<BookmarkPoster>();
 				Bookmarks.Children.Clear();
+				updateLabels.Clear();
+
 				int index = 0;
 				bool allDone = false;
 				for (int i = 0; i < keys.Count; i++) {
@@ -655,11 +684,11 @@ namespace CloudStreamForms
 									CloudStreamCore.NextAiringEpisodeData? nextData = App.GetKey<NextAiringEpisodeData?>(App.NEXT_AIRING, id, null);
 									if (nextData.HasValue) {
 										var nextAir = nextData.Value;
-										string nextTxt = nextAir.airingAt > UnixTime ? $"{CoreHelpers.ConvertUnixTimeToString(nextAir.airingAt)}" : "NEW!";
-										stackLayout.Children.Add(new Button() {
+										string nextTxt = GetAirDate(nextAir.airingAt);
+
+										var btt = new Button() {
 											//BackgroundColor = new Color(0.188, 0.247, 0.623, 0.8)
-											BackgroundColor = new Color(0, 0, 0, 0.4)
-											,
+											BackgroundColor = new Color(0, 0, 0, 0.4),
 											Text = nextTxt,
 											ClassId = "CUST",
 											TextColor = Color.White,
@@ -674,7 +703,9 @@ namespace CloudStreamForms
 											Scale = 1,
 											TranslationX = 1,
 											WidthRequest = 60
-										});
+										};
+										updateLabels.Add(new UpdateLabel() { label = btt, id = id });
+										stackLayout.Children.Add(btt);
 									}
 								}
 

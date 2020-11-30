@@ -1509,6 +1509,9 @@ namespace CloudStreamForms
 		{
 			if (!CanLoadLinkFrom(id, out int index)) return "";
 			var _ep = epView.MyEpisodeResultCollection[index + 1];
+			if(load) {
+				App.SetViewPos(_ep.IMDBEpisodeId, -1); // IN CASE YOU HAVE ALREADY WATCHED IT HALFWAY
+			}
 			await LoadLinksForEpisode(_ep, load, false, load);
 			return _ep.IMDBEpisodeId;
 		}
