@@ -5339,7 +5339,7 @@ namespace CloudStreamForms.Core
 			return topLists;
 		}
 
-		public static List<IMDbTopList> FetchTop100(List<string> order, int start = 1, int count = 250, bool top100 = true, bool isAnime = false)
+		public async Task<List<IMDbTopList>> FetchTop100(List<string> order, int start = 1, int count = 250, bool top100 = true, bool isAnime = false, bool upscale = false, int x = 96, int y = 142, double multi = 1)
 		{
 			IMDbTopList[] topLists = new IMDbTopList[count];
 			//List<string> genres = new List<string>() { "action", "adventure", "animation", "biography", "comedy", "crime", "drama", "family", "fantasy", "film-noir", "history", "horror", "music", "musical", "mystery", "romance", "sci-fi", "sport", "thriller", "war", "western" };
@@ -5355,7 +5355,7 @@ namespace CloudStreamForms.Core
 			//https://www.imdb.com/search/title/?title_type=feature&num_votes=25000,&genres=action&sort=user_rating,desc&start=51&ref_=adv_nxt
 			string trueUrl = $"https://www.imdb.com/search/title/?title_type=feature,tv_series,tv_miniseries&num_votes={(isAnime ? "1500" : "25000")},&genres=" + orders + (top100 ? "&sort=user_rating,desc" : "") + "&start=" + start + "&ref_=adv_nxt&count=" + count + (isAnime ? "&keywords=anime" : "");
 			print("TRUEURL:" + trueUrl);
-			string d = GetHTML(trueUrl, true);
+			string d = await mainCore.DownloadStringAsync(trueUrl, eng: true);
 
 			const string lookFor = "s=\"lo";//"class=\"loadlate\"";
 			int place = start - 1;
@@ -5387,6 +5387,9 @@ namespace CloudStreamForms.Core
 				}
 				string id = poster.GetAttributeValue("data-tconst", "");
 				string img = poster.GetAttributeValue("loadlate", "");
+				if (upscale) {
+					img = ConvertIMDbImagesToHD(img, x, y, multi);
+				}
 				topLists[counter] = (new IMDbTopList() { descript = descript, genres = _genres, id = id, img = img, name = name, place = place, rating = rating, runtime = runtime });
 				counter++;
 				//print("-----------------------------------");
@@ -6544,7 +6547,7 @@ namespace CloudStreamForms.Core
 				string rUrl = "https://www.opensubtitles.org/en/search/sublanguageid-" + lang + "/imdbid-" + imdbTitleId + "/sort-7/asc-0"; // best match first
 																																			//print(rUrl);
 				string d = DownloadString(rUrl);
-				if(d == "") {
+				if (d == "") {
 					return null;
 				}
 				if (d.Contains("<div class=\"msg warn\"><b>No results</b> found, try")) {
@@ -6555,7 +6558,7 @@ namespace CloudStreamForms.Core
 				string _url = "https://www.opensubtitles.org/" + lang + "/subtitles/" + _found;
 
 				d = DownloadString(_url);
-				if(d == "") {
+				if (d == "") {
 					return null;
 				}
 
@@ -6625,7 +6628,7 @@ namespace CloudStreamForms.Core
 						}
 					}
 				}
-				if(currentMax == 0) {
+				if (currentMax == 0) {
 					App.ShowToast("Zero episodes found");
 				}
 				return currentMax;
@@ -9009,8 +9012,7 @@ idMal
 		/// <returns></returns>
 		public string Get_title(string lang, RootObject WebContent)
 		{
-			return lang switch
-			{
+			return lang switch {
 				"en" => WebContent.data.Media.title.english,
 				"jap" => WebContent.data.Media.title.native,
 				//Default is jap_r

@@ -613,6 +613,16 @@ namespace CloudStreamForms
 			Player.SetAudioDelay(delay * 1000); // MS TO NS
 		}
 
+		void ShowVideoToast(string msg)
+		{
+			Device.BeginInvokeOnMainThread(() => {
+				ToastLabel.Text = msg;
+				ToastLabel.Opacity = 1;
+				ToastLabel.AbortAnimation("FadeTo");
+				ToastLabel.FadeTo(0, 700, Easing.SinIn);
+			});
+		}
+
 		static bool hasOutline = false;
 
 		readonly Label[] font1;
@@ -692,10 +702,6 @@ namespace CloudStreamForms
 
 				// ======================= SUBTITLE SETUP =======================
 
-				print("Videoplage Start 6");
-
-
-
 				//double base1X = SubtitleTxt1.TranslationX;
 				double base1Y = -10;
 				SubtitleTxt1.TranslationY = base1Y;
@@ -711,7 +717,8 @@ namespace CloudStreamForms
 				// ======================= END =======================
 
 				LibVLCSharp.Shared.Core.Initialize();
-				lockElements = new VisualElement[] { NextMirror, NextMirrorBtt, BacktoMain, GoBackBtt, EpisodeLabel, PausePlayClickBtt, PausePlayBtt, SkipForward, SkipForwardBtt, SkipForwardImg, SkipForwardSmall, SkipBack, SkipBackBtt, SkipBackImg, SkipBackSmall };
+				//NextMirror, NextMirrorBtt, 
+				lockElements = new VisualElement[] { ChangeCropBtt, ChangeCrop, BacktoMain, GoBackBtt, EpisodeLabel, RezLabel, PausePlayClickBtt, PausePlayBtt, SkipForward, SkipForwardBtt, SkipForwardImg, SkipForwardSmall, SkipBack, SkipBackBtt, SkipBackImg, SkipBackSmall };
 				settingsElements = new VisualElement[] { EpisodesTap, MirrorsTap, DelayTap, GoPipModeTap, SubTap, NextEpisodeTap, };
 				VisualElement[] pressIcons = new VisualElement[] { LockTap, EpisodesTap, MirrorsTap, DelayTap, GoPipModeTap, SubTap, NextEpisodeTap };
 
@@ -891,9 +898,19 @@ namespace CloudStreamForms
 				Commands.SetTap(EpisodesTap, new Command(() => {
 					//do something
 				}));
+				Commands.SetTap(ChangeCropBtt, new Command(() => {
+					CurrentTap++;
+					StartFade();
+					Settings.VideoCropType++;
+					if (Settings.VideoCropType > MAX_ASPECT_RATIO) {
+						Settings.VideoCropType = 0;
+					}
+					UpdateAspectRatio((AspectRatio)Settings.VideoCropType, true);
+				}));
+				/*
 				Commands.SetTap(NextMirrorBtt, new Command(() => {
 					SelectNextMirror();
-				}));
+				}));*/
 
 				//Commands.SetTapParameter(view, someObject);
 				// ================================================================================ UI ================================================================================
@@ -960,6 +977,37 @@ namespace CloudStreamForms
 				bool hasAddedSubtitles = false;
 				Player.Playing += (o, e) => {
 					SetIsPausedUI(false);
+					UpdateAspectRatio((AspectRatio)Settings.VideoCropType);
+
+					uint maxWidth = 0;
+					uint maxHight = 0;
+					uint maxBitrate = 0;
+
+					foreach (var track in Player.Media.Tracks) {
+						switch (track.TrackType) {
+							case TrackType.Audio:
+								print("Audio track");
+								print($"{nameof(track.Data.Audio.Channels)}: {track.Data.Audio.Channels}");
+								print($"{nameof(track.Data.Audio.Rate)}: {track.Data.Audio.Rate}");
+								break;
+							case TrackType.Video:
+								if (track.Data.Video.Width > maxWidth) {
+									maxWidth = track.Data.Video.Width;
+									maxHight = track.Data.Video.Height;
+									maxBitrate = track.Bitrate;
+								}
+								print("Video track");
+								print($"{nameof(track.Data.Video.FrameRateNum)}: {track.Data.Video.FrameRateNum}");
+								print($"{nameof(track.Data.Video.FrameRateDen)}: {track.Data.Video.FrameRateDen}");
+								print($"{nameof(track.Data.Video.Height)}: {track.Data.Video.Height}");
+								print($"{nameof(track.Data.Video.Width)}: {track.Data.Video.Width}");
+								print($"{nameof(track.Data.Video.Width)}: {track.Bitrate}");
+								break;
+						}
+					}
+					Device.BeginInvokeOnMainThread(() => {
+						RezLabel.Text = maxWidth == 0 ? "" : (($"{maxWidth}x{maxHight}") + (maxBitrate == 0 ? "" : $" {App.ConvertBytesToGB(maxBitrate, 1)}Kbps"));
+					});
 
 					var slaves = Player.Media.Slaves;
 					if (slaves != null && slaves.Length > 0 && !hasAddedSubtitles) {
@@ -979,6 +1027,8 @@ namespace CloudStreamForms
 								}
 							}
 						}
+
+
 						/*
                         Task.Run(async () => {
                             await Task.Delay(1000);
@@ -1132,7 +1182,7 @@ namespace CloudStreamForms
 				error("Videoplayer: " + _ex);
 			}
 
-			//  Player.AddSlave(MediaSlaveType.Subtitle,"") // ADD SUBTITLEs
+			//Player.AddSlave(MediaSlaveType.Subtitle,"") // ADD SUBTITLEs
 		}
 
 		bool isPausable = false;
@@ -1140,21 +1190,144 @@ namespace CloudStreamForms
 
 		void ShowNextMirror()
 		{
+			/*
 			NextMirror.IsVisible = !IsSingleMirror;
 			NextMirror.IsEnabled = !IsSingleMirror;
 			NextMirrorBtt.IsVisible = !IsSingleMirror;
-			NextMirrorBtt.IsEnabled = !IsSingleMirror;
+			NextMirrorBtt.IsEnabled = !IsSingleMirror;*/
 		}
 
 		void ErrorWhenLoading()
 		{
 			print("ERROR UCCURED");
-			App.ShowToast("Error loading media");
+			ShowVideoToast($"Error Loading {CurrentBasicLink.name}");
 			if (currentVideo.isDownloadFile) {
 				Navigation.PopModalAsync();
 			}
 			else {
 				SelectNextMirror();
+			}
+		}
+
+		const int MAX_ASPECT_RATIO = 5;
+		enum AspectRatio
+		{
+			Original = 0,
+			Fill = 1,
+			BestFit = 2,
+			FitScreen = 3,
+			_16_9 = 4,
+			_4_3 = 5,
+		}
+
+		private VideoTrack? GetVideoTrack(MediaPlayer mediaPlayer)
+		{
+			if (mediaPlayer == null) {
+				return null;
+			}
+			var selectedVideoTrack = mediaPlayer.VideoTrack;
+			if (selectedVideoTrack == -1) {
+				return null;
+			}
+
+			try {
+				var videoTrack = mediaPlayer.Media?.Tracks?.FirstOrDefault(t => t.Id == selectedVideoTrack);
+				return videoTrack == null ? (VideoTrack?)null : ((MediaTrack)videoTrack).Data.Video;
+			}
+			catch (Exception) {
+				return null;
+			}
+		}
+
+		private bool IsVideoSwapped(VideoTrack videoTrack)
+		{
+			var orientation = videoTrack.Orientation;
+			return orientation == VideoOrientation.LeftBottom || orientation == VideoOrientation.RightTop;
+		}
+
+		private AspectRatio? GetAspectRatio(MediaPlayer? mediaPlayer)
+		{
+			if (mediaPlayer == null) {
+				return null;
+			}
+
+			var aspectRatio = mediaPlayer.AspectRatio;
+			return aspectRatio == null ?
+				(mediaPlayer.Scale == 0 ? AspectRatio.BestFit : (mediaPlayer.Scale == 1 ? AspectRatio.Original : AspectRatio.FitScreen)) :
+				(aspectRatio == "4:3" ? AspectRatio._4_3 : aspectRatio == "16:9" ? AspectRatio._16_9 : AspectRatio.Fill);
+		}
+
+		private void UpdateAspectRatio(AspectRatio? aspectRatio = null, bool showToast = false)
+		{
+			if (aspectRatio == null) {
+				aspectRatio = GetAspectRatio(Player);
+			}
+
+			if (showToast) {
+				string toast = aspectRatio switch {
+					AspectRatio.Original => "Original",
+					AspectRatio.Fill => "Fill",
+					AspectRatio.BestFit => "Best Fit",
+					AspectRatio.FitScreen => "Fit Screen",
+					AspectRatio._16_9 => "16:9",
+					AspectRatio._4_3 => "4:3",
+					_ => "",
+				};
+
+				ShowVideoToast(toast);
+			}
+			if (vvideo != null && Player != null) {
+				switch (aspectRatio) {
+					case AspectRatio.Original:
+						Player.AspectRatio = null;
+						Player.Scale = 1;
+						break;
+					case AspectRatio.Fill:
+						var videoTrack = GetVideoTrack(Player);
+						if (videoTrack == null) {
+							break;
+						}
+						Player.Scale = 0;
+						Player.AspectRatio = IsVideoSwapped((VideoTrack)videoTrack) ? $"{vvideo.Height}:{vvideo.Width}" :
+							$"{vvideo.Width}:{vvideo.Height}";
+						break;
+					case AspectRatio.BestFit:
+						Player.AspectRatio = null;
+						Player.Scale = 0;
+						break;
+					case AspectRatio.FitScreen:
+						videoTrack = GetVideoTrack(Player);
+						if (videoTrack == null) {
+							break;
+						}
+						var track = (VideoTrack)videoTrack;
+						var videoSwapped = IsVideoSwapped(track);
+						var videoWidth = videoSwapped ? track.Height : track.Width;
+						var videoHeigth = videoSwapped ? track.Width : track.Height;
+						if (track.SarNum != track.SarDen) {
+							videoWidth = videoWidth * track.SarNum / track.SarDen;
+						}
+
+						var ar = videoWidth / (double)videoHeigth;
+						var videoViewWidth = vvideo.Width;
+						var videoViewHeight = vvideo.Height;
+						var dar = videoViewWidth / videoViewHeight;
+
+						var rawPixelsPerViewPixel = Device.Info.ScalingFactor;
+						var displayWidth = videoViewWidth * rawPixelsPerViewPixel;
+						var displayHeight = videoViewHeight * rawPixelsPerViewPixel;
+						Player.Scale = (float)(dar >= ar ? (displayWidth / videoWidth) : (displayHeight / videoHeigth));
+						Player.AspectRatio = null;
+						break;
+					case AspectRatio._16_9:
+						Player.AspectRatio = "16:9";
+						Player.Scale = 0;
+						break;
+					case AspectRatio._4_3:
+						Player.AspectRatio = "4:3";
+						Player.Scale = 0;
+						break;
+				}
 			}
 		}
 
@@ -1792,6 +1965,8 @@ namespace CloudStreamForms
 			EpisodeLabel.AbortAnimation("TranslateTo");
 			EpisodeLabel.TranslateTo(EpisodeLabel.TranslationX, disable ? -60 : 20, fadeTime, Easing.Linear);
 
+			RezLabel.AbortAnimation("TranslateTo");
+			RezLabel.TranslateTo(RezLabel.TranslationX, disable ? -60 : 40, fadeTime, Easing.Linear);
 
 			SubHolder.AbortAnimation("TranslateTo");
 			SubHolder.TranslateTo(EpisodeLabel.TranslationX, disable ? 0 : -90, fadeTime, Easing.Linear);

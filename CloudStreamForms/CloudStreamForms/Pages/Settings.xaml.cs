@@ -646,6 +646,15 @@ namespace CloudStreamForms
 			}
 		}
 
+		public static int VideoCropType {
+			set {
+				App.SetKey("Settings", nameof(VideoCropType), value);
+			}
+			get {
+				return App.GetKey("Settings", nameof(VideoCropType), 0);
+			}
+		}
+
 		public static Color ItemBackGroundColor = GetItemBgColor();
 
 		static Color GetItemBgColor()

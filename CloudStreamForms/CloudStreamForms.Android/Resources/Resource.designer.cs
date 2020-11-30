@@ -18830,56 +18830,59 @@ namespace CloudStreamForms.Droid
 			// aapt resource value: 0x7F070193
 			public const int searchIcon = 2131165587;
 			
-			// aapt resource value: 0x7F070194
-			public const int settingsIcon = 2131165588;
-			
 			// aapt resource value: 0x7F070195
-			public const int share_white_48dp = 2131165589;
+			public const int settingsIcon = 2131165589;
+			
+			// aapt resource value: 0x7F070194
+			public const int settings_overscan = 2131165588;
 			
 			// aapt resource value: 0x7F070196
-			public const int sharp_get_app_white_48dp = 2131165590;
+			public const int share_white_48dp = 2131165590;
 			
 			// aapt resource value: 0x7F070197
-			public const int sharp_home_white_48dp = 2131165591;
+			public const int sharp_get_app_white_48dp = 2131165591;
 			
 			// aapt resource value: 0x7F070198
-			public const int sharp_settings_white_48dp = 2131165592;
+			public const int sharp_home_white_48dp = 2131165592;
 			
 			// aapt resource value: 0x7F070199
-			public const int skip_next = 2131165593;
+			public const int sharp_settings_white_48dp = 2131165593;
 			
 			// aapt resource value: 0x7F07019A
-			public const int splash_background = 2131165594;
+			public const int skip_next = 2131165594;
 			
 			// aapt resource value: 0x7F07019B
-			public const int splash_background_remove = 2131165595;
+			public const int splash_background = 2131165595;
 			
 			// aapt resource value: 0x7F07019C
-			public const int subtitles = 2131165596;
+			public const int splash_background_remove = 2131165596;
 			
 			// aapt resource value: 0x7F07019D
-			public const int subtitles_off = 2131165597;
+			public const int subtitles = 2131165597;
 			
 			// aapt resource value: 0x7F07019E
-			public const int sync = 2131165598;
+			public const int subtitles_off = 2131165598;
 			
 			// aapt resource value: 0x7F07019F
-			public const int tag_faces = 2131165599;
+			public const int sync = 2131165599;
 			
 			// aapt resource value: 0x7F0701A0
-			public const int tooltip_frame_dark = 2131165600;
+			public const int tag_faces = 2131165600;
 			
 			// aapt resource value: 0x7F0701A1
-			public const int tooltip_frame_light = 2131165601;
+			public const int tooltip_frame_dark = 2131165601;
 			
 			// aapt resource value: 0x7F0701A2
-			public const int upButton = 2131165602;
+			public const int tooltip_frame_light = 2131165602;
 			
 			// aapt resource value: 0x7F0701A3
-			public const int visibility = 2131165603;
+			public const int upButton = 2131165603;
 			
 			// aapt resource value: 0x7F0701A4
-			public const int visibility_off = 2131165604;
+			public const int visibility = 2131165604;
+			
+			// aapt resource value: 0x7F0701A5
+			public const int visibility_off = 2131165605;
 			
 			static Drawable()
 			{

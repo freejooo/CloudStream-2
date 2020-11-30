@@ -238,12 +238,14 @@ namespace CloudStreamForms.Core.AnimeProviders
 				string allD = HTMLGet("https://twist.moe/api/anime", "https://twist.moe/", cookies: new List<Cookie>() { new Cookie() { Name = FindHTML("|" + tokenCook, "|", "="), Value = FindHTML(tokenCook + "|", "=", "|"), Expires = DateTime.Now.AddSeconds(1000) } }, keys: new List<string>() { "x-access-token" }, values: new List<string>() { openToken });
 				//  print("ALLD: " + allD);
 				MoeItem[] allItems = JsonConvert.DeserializeObject<MoeItem[]>(allD);
-				foreach (var item in allItems) {
-					if (item.mal_id != null) {
-						var slug = item.slug?.slug;
-						//print("MALID: " + item.mal_id + "|" + slug);
-						if (slug != null) {
-							twistMoeSearch[(int)item.mal_id] = slug;
+				if (allItems != null && allItems.Length > 0) {
+					foreach (var item in allItems) {
+						if (item.mal_id != null) {
+							var slug = item.slug?.slug;
+							//print("MALID: " + item.mal_id + "|" + slug);
+							if (slug != null) {
+								twistMoeSearch[(int)item.mal_id] = slug;
+							}
 						}
 					}
 				}

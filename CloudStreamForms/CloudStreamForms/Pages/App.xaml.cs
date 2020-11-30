@@ -229,7 +229,7 @@ namespace CloudStreamForms
 		{
 			return player switch
 			{
-				VideoPlayer.None => "No Videplayer",
+				VideoPlayer.None => "No Videoplayer",
 				VideoPlayer.VLC => "VLC",
 				// VideoPlayer.MPV => "MPV",
 				VideoPlayer.MXPlayer => "MX Player",

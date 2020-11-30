@@ -313,7 +313,7 @@
                     <Label Text="Build Version: "  x:Name="BuildNumber" TranslationX="10"  ></Label>
                     <Label Text="Github: https://github.com/LagradOst/CloudStream-2"  x:Name="G_GithubTxt" TranslationX="10"    ></Label>
                     <Button x:Name="StarMe" Text="Open Github" BackgroundColor="#141414"  HeightRequest="50"></Button>
-                    <Button x:Name="VideoplayerOption" Text="SetVideplayer" BackgroundColor="#141414"  HeightRequest="50"></Button>
+                    <Button x:Name="VideoplayerOption" Text="SetVideoplayer" BackgroundColor="#141414"  HeightRequest="50"></Button>
                     <Button x:Name="FeedbackBtt" Text="Leave Feedback" BackgroundColor="#141414" Clicked="FeedbackBtt_Clicked"  HeightRequest="50"></Button>
                     <Button x:Name="SetTheme" Text="Theme" BackgroundColor="#141414"  HeightRequest="50"></Button>
                     <Button x:Name="ManageAccount" Text="Manage Account" BackgroundColor="#141414"  HeightRequest="50"></Button>

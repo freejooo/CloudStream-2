@@ -2231,7 +2231,9 @@ namespace CloudStreamForms.Droid
 
 						if (subFile != null) {
 							var sfile = Android.Net.Uri.FromFile(subFile);
-							vlcIntent.PutExtra("subtitles_location", sfile);
+							vlcIntent.PutExtra("subtitles_location", sfile.Path);
+							//vlcIntent.PutExtra("sub_mrl", "file://" sfile.Path);
+							//vlcIntent.PutExtra("subtitles_location", "file:///storage/emulated/0/Download/mirrorlist.srt");
 						}
 
 						vlcIntent.SetComponent(VLC_COMPONENT);
@@ -2649,8 +2651,7 @@ namespace CloudStreamForms.Droid
 
 		static string GetVideoPlayerPackage(VideoPlayer player)
 		{
-			return player switch
-			{
+			return player switch {
 				// VideoPlayer.MPV => "is.xyz.mpv",
 				VideoPlayer.MXPlayer => "com.mxtech.videoplayer.ad",
 				VideoPlayer.VLC => "org.videolan.vlc",

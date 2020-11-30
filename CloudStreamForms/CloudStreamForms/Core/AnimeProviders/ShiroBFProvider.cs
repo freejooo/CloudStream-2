@@ -51,7 +51,7 @@ namespace CloudStreamForms.Core.AnimeProviders
 					string _d = DownloadString(before).Replace("\\", "");
 					var links = GetAllFilesRegex(_d);
 					foreach (var link in links) {
-						AddPotentialLink(normalEpisode, link.url, $"Shiro{(video.host == "googledrive" ? " GoogleDrive" : "")}", 5, link.label);
+						AddPotentialLink(normalEpisode, link.url, $"Shiro{(video.host == "googledrive" ? " GoogleDrive" : "")}", 15, link.label);
 					}
 				}
 			}

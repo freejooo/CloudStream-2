@@ -87,11 +87,13 @@
                         <xe:BorderView  x:Name="GoPipMode" xe:TouchEffect.Color="White"  VerticalOptions="Start" TranslationX="-3" TranslationY="33" Opacity="0.6" WidthRequest="54" HeightRequest="54" CornerRadius="27" Scale="1" HorizontalOptions="Start" BackgroundColor="Transparent">
                         </xe:BorderView>-->
 
-            <ffs:SvgCachedImage x:Name="NextMirror" HorizontalOptions="End" VerticalOptions="Start" TranslationX="-8" TranslationY="8" InputTransparent="True" HeightRequest="30" WidthRequest="30" BackgroundColor="Transparent" Source="skip_next.svg"></ffs:SvgCachedImage>
+            <!--<ffs:SvgCachedImage x:Name="NextMirror" HorizontalOptions="End" VerticalOptions="Start" TranslationX="-8" TranslationY="8" InputTransparent="True" HeightRequest="30" WidthRequest="30" BackgroundColor="Transparent" Source="skip_next.svg"></ffs:SvgCachedImage>
             <xe:BorderView  x:Name="NextMirrorBtt" xe:TouchEffect.Color="#66FFFFFF"  VerticalOptions="Start" TranslationX="3" TranslationY="-3" Opacity="1" WidthRequest="54" HeightRequest="54" CornerRadius="27" Scale="1" HorizontalOptions="End" BackgroundColor="Transparent">
-            </xe:BorderView>
-
-            <Label x:Name="SkipBack" ClassId="NOFADE" Text="-10" IsVisible="False" Opacity="0" VerticalOptions="Center" HorizontalOptions="Center" TranslationX="-200" AbsoluteLayout.LayoutFlags="All" FontSize="24" TextColor="White" />
+            </xe:BorderView>-->
+			<ffs:SvgCachedImage x:Name="ChangeCrop" HorizontalOptions="End" VerticalOptions="Start" TranslationX="-8" TranslationY="8" InputTransparent="True" HeightRequest="30" WidthRequest="30" BackgroundColor="Transparent" Source="settings_overscan.svg"></ffs:SvgCachedImage>
+			<xe:BorderView  x:Name="ChangeCropBtt" xe:TouchEffect.Color="#66FFFFFF"  VerticalOptions="Start" TranslationX="3" TranslationY="-3" Opacity="1" WidthRequest="54" HeightRequest="54" CornerRadius="27" Scale="1" HorizontalOptions="End" BackgroundColor="Transparent">
+			</xe:BorderView>
+			<Label x:Name="SkipBack" ClassId="NOFADE" Text="-10" IsVisible="False" Opacity="0" VerticalOptions="Center" HorizontalOptions="Center" TranslationX="-200" AbsoluteLayout.LayoutFlags="All" FontSize="24" TextColor="White" />
             <Label x:Name="SkipBackSmall"   Text="10" VerticalOptions="Center" HorizontalOptions="Center" TranslationX="-200" AbsoluteLayout.LayoutFlags="All" FontSize="20" TextColor="White" />
             <Image x:Name="SkipBackImg" VerticalOptions="Center" HorizontalOptions="Center" TranslationX="-200" AbsoluteLayout.LayoutFlags="All" WidthRequest="50" HeightRequest="50" />
             <xe:BorderView  x:Name="SkipBackBtt" xe:TouchEffect.Color="#66FFFFFF"  TranslationX="-100" VerticalOptions="Center" WidthRequest="34" HeightRequest="34" Scale="1.05" CornerRadius="17" HorizontalOptions="Center" BackgroundColor="Transparent">
@@ -99,6 +101,11 @@
 
             <Label x:Name="SkiptimeLabel" Text="" WidthRequest="1000" HorizontalTextAlignment="Center" TextColor="White" FontSize="25" VerticalOptions="Center" HorizontalOptions="Center" TranslationY="-60"></Label>
             <Label x:Name="EpisodeLabel"  Text="" VerticalOptions="Start" HorizontalOptions="Center" FontSize="14" TextColor="#e7e7e7" TranslationY="20"></Label>
+
+            <Label x:Name="RezLabel"  Text="" VerticalOptions="Start" HorizontalOptions="Center" FontSize="12" TextColor="#e7e7e7" TranslationY="40"></Label>
+
+			<Label x:Name="ToastLabel" ClassId="NOFADE" Text="" VerticalOptions="Start" HorizontalOptions="Center" FontSize="20" TextColor="#e7e7e7" TranslationY="70"></Label>
+			
             <Grid x:Name="VideoSliderAndSettings"  VerticalOptions="End" ColumnSpacing="30">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />

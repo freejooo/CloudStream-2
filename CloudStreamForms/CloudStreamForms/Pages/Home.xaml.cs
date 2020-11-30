@@ -138,9 +138,9 @@ namespace CloudStreamForms
 
 			Fething = true;
 			TempThread tempThred = mainCore.CreateThread(21);
-			mainCore.StartThread("FethTop100", () => {
+			mainCore.StartThread("FethTop100", async () => {
 				try {
-					var f = FetchTop100(new List<string>() { genres[MovieTypePicker.SelectedIndex] }, start, top100: IsTop100, isAnime: Settings.Top100Anime);
+					var f = await mainCore.FetchTop100(new List<string>() { genres[MovieTypePicker.SelectedIndex] }, start, top100: IsTop100, isAnime: Settings.Top100Anime);
 					if (!mainCore.GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
 
 					iMDbTopList.AddRange(f);
