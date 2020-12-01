@@ -61,7 +61,8 @@ namespace CloudStreamForms.Core
 				new TheMovieMovieBFProvider(this),
 				new MonkeyStreamProvider(this),
 				new KickassMovieProvider(this),
-				new LookmovieProvider(this)
+				new LookmovieProvider(this),
+				new HdmProvider(this),
 			};
 		}
 
