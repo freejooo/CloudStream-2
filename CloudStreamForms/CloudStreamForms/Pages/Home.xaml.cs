@@ -32,7 +32,7 @@ namespace CloudStreamForms
 		readonly BorderView[] selectTabItems;
 		readonly Label[] selectTabLabels;
 
-		int MovieIndex = 0;
+		int MovieIndex = -1;
 		public bool IsRecommended { get { return MovieIndex == 0; } }
 		public bool IsTop100 { get { return MovieIndex == 1; } }
 		public bool IsPopular { get { return MovieIndex == 2; } }
@@ -496,14 +496,15 @@ namespace CloudStreamForms
 					UpdateBookmarks();
 					UpdateIsRequired = false;
 				}
-				if (!hasAppered) {
-					IndexChanged();
-				}
+			
 				ViewGrid.IsVisible = Settings.Top100Enabled;
 				if (firstTimeNoBookmarks && !hasBookmarks && Settings.Top100Enabled) { // WILL REDIRECT TO TOP IMDb when no bookmarks
 					firstTimeNoBookmarks = false;
 					selectedTabItem = 2;
 					ChangeSizeOfTabs();
+					if (!hasAppered) {
+						IndexChanged();
+					}
 				}
 				else if (!Settings.Top100Enabled && selectedTabItem != 0) {
 					selectedTabItem = 0;

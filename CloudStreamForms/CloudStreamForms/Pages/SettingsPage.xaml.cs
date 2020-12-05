@@ -423,15 +423,26 @@ namespace CloudStreamForms.Pages
 			BuildSettings,
 		};
 
+		bool isCreated = false;
+
 		protected override void OnAppearing()
 		{
 			base.OnAppearing();
-			Appear();
+			thisPage.BackgroundColor = Settings.BlackRBGColor;
+
+			if (isCreated) {
+				Appear();
+			}
+			else {
+				Device.BeginInvokeOnMainThread(() => {
+					CreateView();
+					isCreated = true;
+				});
+			}
 		}
 
 		static void Appear()
 		{
-			thisPage.BackgroundColor = Settings.BlackRBGColor;
 			double _color = Math.Min(Settings.BlackColor + 3, 255) / 255.0;
 			Color c = new Color(_color);
 
@@ -458,71 +469,53 @@ namespace CloudStreamForms.Pages
 			}
 		}
 
-		public SettingsPage()
+		void CreateView()
 		{
-			InitializeComponent();
-			BindingContext = this;
+			int counter = 0;
 
-			VideoPage.OnVideoAppear += (o, e) => { // LAG FIX
-				Device.BeginInvokeOnMainThread(() => {
-					EverythingHolder.IsVisible = !e;
-					EverythingHolder.IsEnabled = !e;
-				});
-			};
+			void AddChild(View v)
+			{
+				AddTextGrid.Children.Add(v);
+				Grid.SetRow(v, counter);
+				counter++;
+			}
+			foreach (var set in settings) {
+				AddChild(new Label() { Text = set.header, FontSize = 17, FontAttributes = FontAttributes.Bold, TranslationX = 0, VerticalOptions = LayoutOptions.Center, HorizontalOptions = LayoutOptions.Start, Padding = new Thickness(0), Margin = new Thickness(20), TextColor = Color.White });
 
-			Device.InvokeOnMainThreadAsync(async () => {
+				foreach (var subSet in set.settings) {
 
-				Settings.OnInit();
-				Settings.OnInitAfter();
+					var mainLabel = new Label() { Text = subSet.mainTxt, VerticalOptions = LayoutOptions.Center, FontSize = 16, TextColor = Color.FromHex("#e6e6e6") };
+					var sublabel = new Label() { Text = subSet.descriptTxt, VerticalOptions = LayoutOptions.Center, FontSize = 12, TextColor = Color.FromHex("#AAA") };
+					var _img = new FFImageLoading.Forms.CachedImage() {
+						HorizontalOptions = LayoutOptions.Start,
+						WidthRequest = 25,
+						HeightRequest = 25,
+						Margin = new Thickness(5),
+						TranslationX = 5,
+						VerticalOptions = LayoutOptions.Center,
+						Source = App.GetImageSource(subSet.img),
+					};
 
-				thisPage = this;
+					var subGrid = new Grid() {
+						HeightRequest = 50,
+						RowSpacing = -10,
+						Padding = new Thickness(0, 0, subSet.isSwitch ? 50 : (subSet.isList ? 100 : 0), 0),
+						VerticalOptions = LayoutOptions.Center,
+					};
+					subGrid.Children.Add(mainLabel);
+					if (subSet.descriptTxt.IsClean()) {
+						subGrid.Children.Add(sublabel);
+					}
 
-				await Task.Delay(1000);
-				int counter = 0;
+					var bgBtn = new Button() {
+						BackgroundColor = Color.FromHex("#141414")
+					};
+					subSet.btt = bgBtn;
+					var _grid = new Grid() {
+						HeightRequest = 70,
+					};
 
-				void AddChild(View v)
-				{
-					AddTextGrid.Children.Add(v);
-					Grid.SetRow(v, counter);
-					counter++;
-				}
-				foreach (var set in settings) {
-					AddChild(new Label() { Text = set.header, FontSize = 17, FontAttributes = FontAttributes.Bold, TranslationX = 0, VerticalOptions = LayoutOptions.Center, HorizontalOptions = LayoutOptions.Start, Padding = new Thickness(0), Margin = new Thickness(20), TextColor = Color.White });
-
-					foreach (var subSet in set.settings) {
-
-						var mainLabel = new Label() { Text = subSet.mainTxt, VerticalOptions = LayoutOptions.Center, FontSize = 16, TextColor = Color.FromHex("#e6e6e6") };
-						var sublabel = new Label() { Text = subSet.descriptTxt, VerticalOptions = LayoutOptions.Center, FontSize = 12, TextColor = Color.FromHex("#AAA") };
-						var _img = new FFImageLoading.Forms.CachedImage() {
-							HorizontalOptions = LayoutOptions.Start,
-							WidthRequest = 25,
-							HeightRequest = 25,
-							Margin = new Thickness(5),
-							TranslationX = 5,
-							VerticalOptions = LayoutOptions.Center,
-							Source = App.GetImageSource(subSet.img),
-						};
-
-						var subGrid = new Grid() {
-							HeightRequest = 50,
-							RowSpacing = -10,
-							Padding = new Thickness(0, 0, subSet.isSwitch ? 50 : (subSet.isList ? 100 : 0), 0),
-							VerticalOptions = LayoutOptions.Center,
-						};
-						subGrid.Children.Add(mainLabel);
-						if (subSet.descriptTxt.IsClean()) {
-							subGrid.Children.Add(sublabel);
-						}
-
-						var bgBtn = new Button() {
-							BackgroundColor = Color.FromHex("#141414")
-						};
-						subSet.btt = bgBtn;
-						var _grid = new Grid() {
-							HeightRequest = 70,
-						};
-
-						List<View> mainChilds = new List<View>() {
+					List<View> mainChilds = new List<View>() {
 					   bgBtn,
 
 						new Grid() {
@@ -543,86 +536,108 @@ namespace CloudStreamForms.Pages
 							}
 						}
 					};
-						if (subSet.isSwitch) {
-							var _switch = new Switch() {
-								VerticalOptions = LayoutOptions.Center,
-								HorizontalOptions = LayoutOptions.End,
-							};
-							mainChilds.Insert(1, _switch);
-
-							bgBtn.Clicked += (o, e) => {
-								subSet.isFromAppear = false;
-								_switch.IsToggled = !_switch.IsToggled;
-								subSet.variable.Value = _switch.IsToggled;
-							};
-							_switch.Toggled += (o, e) => {
-								subSet.variable.Value = e.Value;
-								subSet.OnChange?.Invoke();
-								if (!subSet.isFromAppear) {
-									subSet.OnHumanInput?.Invoke();
-								}
-							};
-							subSet.onAppear += (o, e) => {
-								subSet.isFromAppear = true;
-								_switch.IsToggled = subSet.variable.Value;
-							};
+					if (subSet.isSwitch) {
+						var _switch = new Switch() {
+							VerticalOptions = LayoutOptions.Center,
+							HorizontalOptions = LayoutOptions.End,
 						};
-						if (subSet.isButton) {
-							bgBtn.Clicked += (o, e) => {
-								subSet.OnChange?.Invoke();
-							};
-						}
-						if (subSet.isList) {
-							var _tex = new Label() {
-								VerticalOptions = LayoutOptions.Center,
-								HorizontalOptions = LayoutOptions.End,
-								Padding = new Thickness(10),
-								InputTransparent = true,
-							};
-							mainChilds.Insert(1, _tex);
+						mainChilds.Insert(1, _switch);
 
-							bgBtn.Clicked += async (o, e) => {
-								await subSet.OnChange();
-								_tex.Text = subSet.OnResult();
-							};
-
-							subSet.onAppear += (o, e) => {
-								_tex.Text = subSet.OnResult();
-							};
-						}
-						if (subSet.isCondButton) {
-							string defTxt = subSet.mainTxt;
-							subSet.onAppear += (o, e) => {
-								bool enabled = subSet.CanAppear();
-								mainLabel.Text = enabled ? subSet.OnResult() : defTxt;
-								_grid.Opacity = enabled ? 1 : 0.5;
-							};
-							bgBtn.Clicked += async (o, e) => {
-								if (subSet.CanAppear()) {
-									await subSet.OnChange();
-									subSet.onAppear?.Invoke(null, EventArgs.Empty);
-								}
-							};
-						}
-
-						foreach (var _child in mainChilds) {
-							_grid.Children.Add(_child);
-						}
-						AddChild(_grid);
-						if (subSet.descriptTxt.IsClean()) {
-							Grid.SetRow(sublabel, 1);
-						}
-						Grid.SetColumn(subGrid, 1);
+						bgBtn.Clicked += (o, e) => {
+							subSet.isFromAppear = false;
+							_switch.IsToggled = !_switch.IsToggled;
+							subSet.variable.Value = _switch.IsToggled;
+						};
+						_switch.Toggled += (o, e) => {
+							subSet.variable.Value = e.Value;
+							subSet.OnChange?.Invoke();
+							if (!subSet.isFromAppear) {
+								subSet.OnHumanInput?.Invoke();
+							}
+						};
+						subSet.onAppear += (o, e) => {
+							subSet.isFromAppear = true;
+							_switch.IsToggled = subSet.variable.Value;
+						};
+					};
+					if (subSet.isButton) {
+						bgBtn.Clicked += (o, e) => {
+							subSet.OnChange?.Invoke();
+						};
 					}
-				}
+					if (subSet.isList) {
+						var _tex = new Label() {
+							VerticalOptions = LayoutOptions.Center,
+							HorizontalOptions = LayoutOptions.End,
+							Padding = new Thickness(10),
+							InputTransparent = true,
+						};
+						mainChilds.Insert(1, _tex);
 
-				var gridCol = new RowDefinitionCollection();
-				for (int i = 0; i < AddTextGrid.Children.Count; i++) {
-					gridCol.Add(new RowDefinition() { Height = GridLength.Auto });
+						bgBtn.Clicked += async (o, e) => {
+							await subSet.OnChange();
+							_tex.Text = subSet.OnResult();
+						};
+
+						subSet.onAppear += (o, e) => {
+							_tex.Text = subSet.OnResult();
+						};
+					}
+					if (subSet.isCondButton) {
+						string defTxt = subSet.mainTxt;
+						subSet.onAppear += (o, e) => {
+							bool enabled = subSet.CanAppear();
+							mainLabel.Text = enabled ? subSet.OnResult() : defTxt;
+							_grid.Opacity = enabled ? 1 : 0.5;
+						};
+						bgBtn.Clicked += async (o, e) => {
+							if (subSet.CanAppear()) {
+								await subSet.OnChange();
+								subSet.onAppear?.Invoke(null, EventArgs.Empty);
+							}
+						};
+					}
+
+					foreach (var _child in mainChilds) {
+						_grid.Children.Add(_child);
+					}
+					AddChild(_grid);
+					if (subSet.descriptTxt.IsClean()) {
+						Grid.SetRow(sublabel, 1);
+					}
+					Grid.SetColumn(subGrid, 1);
 				}
-				AddTextGrid.RowDefinitions = gridCol;
-				Appear();
-			});
+			}
+
+			var gridCol = new RowDefinitionCollection();
+			for (int i = 0; i < AddTextGrid.Children.Count; i++) {
+				gridCol.Add(new RowDefinition() { Height = GridLength.Auto });
+			}
+			AddTextGrid.RowDefinitions = gridCol;
+			Appear();
+		}
+
+
+		public SettingsPage()
+		{
+			InitializeComponent(); thisPage = this;
+
+			thisPage.BackgroundColor = Settings.BlackRBGColor;
+			BindingContext = this;
+
+			VideoPage.OnVideoAppear += (o, e) => { // LAG FIX
+				Device.BeginInvokeOnMainThread(() => {
+					EverythingHolder.IsVisible = !e;
+					EverythingHolder.IsEnabled = !e;
+				});
+			};
+
+			//Device.InvokeOnMainThreadAsync(() => {
+
+			Settings.OnInit();
+			Settings.OnInitAfter();
+
+			//});
 
 		}
 	}

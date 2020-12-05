@@ -27,15 +27,18 @@ namespace CloudStreamForms.Droid.Renderers
         protected override void OnElementPropertyChanged(object sender, PropertyChangedEventArgs e) // HOMESCREEN LINE HERE
         {
             base.OnElementPropertyChanged(sender, e);
-            if (done) return;
+             if (done) return;
             var path = CloudStreamForms.Settings.CurrentFont.FontStylePath;
             if (path == null) return;
-
+             
             //((TabbedPage)sender).bar
+  
             var rel = (Android.Widget.RelativeLayout)ViewGroup.GetChildAt(0);
-
+            
             //    var pager = (ViewPager)rel.GetChildAt(0);
             var view = (BottomNavigationView)rel.GetChildAt(1);
+        
+             
             var _f = (BottomNavigationMenuView)view.GetChildAt(0);
             var fontFace = Typeface.CreateFromAsset(context.Assets, path);
             for (int i = 0; i < _f.ChildCount; i++) {

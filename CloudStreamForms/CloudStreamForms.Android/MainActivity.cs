@@ -685,7 +685,8 @@ namespace CloudStreamForms.Droid
 			}
 			catch (Exception _ex) {
 				LogFile("ERROR LOADING APP: " + _ex);
-				App.ShowToast("Error Loading App: " + _ex);
+				error(_ex);
+				//App.ShowToast("Error Loading App: " + _ex);
 			}
 			/*F
             if (!CanDrawOverlays(this)) {
