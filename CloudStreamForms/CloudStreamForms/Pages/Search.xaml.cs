@@ -211,10 +211,14 @@ namespace CloudStreamForms
 		private void Search_searchLoaded(object sender, List<Poster> e)
 		{
 			activePosters = e;
+			var bg = Settings.ItemBackGroundColor;
 			var bgColor = Settings.ItemBackGroundColor.ToHex();
+			var bgBlue = new Color(bg.R / 1.2, bg.G / 1.2, bg.B, 1.0).ToHex();
+
 			Device.BeginInvokeOnMainThread(() => {
 				MySearchResultCollection.Clear();
 				for (int i = 0; i < mainCore.activeSearchResults.Count; i++) {
+					bool isBook = Home.IsBookmarked.ContainsKey(mainCore.activeSearchResults[i].url);
 					string extra = mainCore.activeSearchResults[i].extra;
 					if (extra != "") {
 						extra = " - " + extra;
@@ -222,7 +226,9 @@ namespace CloudStreamForms
 					int _id = i;
 					MySearchResultCollection.Add(new SearchResult() { OnClick = new Command( () => {
 						PushPage(activePosters[_id], Navigation);
-					}), ExtraColor = bgColor, Id = i, Title = mainCore.activeSearchResults[i].name + extra, Extra = mainCore.activeSearchResults[i].year, Poster = CloudStreamForms.Core.CloudStreamCore.ConvertIMDbImagesToHD(mainCore.activeSearchResults[i].posterUrl,40,60,multi:2) });
+					}), 
+						IsBookmarked = isBook,
+						ExtraColor = isBook ? bgBlue : bgColor, Id = i, Title = mainCore.activeSearchResults[i].name + extra, Extra = mainCore.activeSearchResults[i].year, Poster = CloudStreamForms.Core.CloudStreamCore.ConvertIMDbImagesToHD(mainCore.activeSearchResults[i].posterUrl,40,60,multi:2) });
 				}
 			});
 		}

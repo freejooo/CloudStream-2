@@ -9,7 +9,7 @@ namespace CloudStreamForms.Models
 		public string Extra { set; get; }
 		public string Poster { set; get; }
 		public string ExtraColor { set; get; }
-
+		public bool IsBookmarked { set; get; }
 		public Command OnClick { set; get; }
 	}
 }

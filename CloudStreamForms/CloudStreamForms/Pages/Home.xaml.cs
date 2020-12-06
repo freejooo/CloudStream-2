@@ -496,7 +496,7 @@ namespace CloudStreamForms
 					UpdateBookmarks();
 					UpdateIsRequired = false;
 				}
-			
+
 				ViewGrid.IsVisible = Settings.Top100Enabled;
 				if (firstTimeNoBookmarks && !hasBookmarks && Settings.Top100Enabled) { // WILL REDIRECT TO TOP IMDb when no bookmarks
 					firstTimeNoBookmarks = false;
@@ -605,6 +605,8 @@ namespace CloudStreamForms
 			}
 		}
 
+		public static Dictionary<string, bool> IsBookmarked = new Dictionary<string, bool>();
+
 		void UpdateBookmarks()
 		{
 			try {
@@ -615,6 +617,7 @@ namespace CloudStreamForms
 				bookmarkPosters = new List<BookmarkPoster>();
 				Bookmarks.Children.Clear();
 				updateLabels.Clear();
+				IsBookmarked.Clear();
 
 				int index = 0;
 				bool allDone = false;
@@ -630,6 +633,7 @@ namespace CloudStreamForms
 					string id = FindHTML(__key, "Id=", "|||");
 					if (name != "" && posterUrl != "" && id != "") {
 						if (CheckIfURLIsValid(posterUrl)) {
+							IsBookmarked.Add(id,true);
 							string posterURL = ConvertIMDbImagesToHD(posterUrl, 76, 113, 1.75); //.Replace(",76,113_AL", "," + pwidth + "," + pheight + "_AL").Replace("UY113", "UY" + pheight).Replace("UX76", "UX" + pwidth);
 							if (CheckIfURLIsValid(posterURL)) {
 								Grid stackLayout = new Grid() { VerticalOptions = LayoutOptions.Start }; //								stackLayout.Effects.Add(new CloudStreamForms.Effects.LongPressedEffect());
