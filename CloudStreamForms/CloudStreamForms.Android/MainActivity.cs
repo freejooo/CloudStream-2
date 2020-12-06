@@ -1597,7 +1597,7 @@ namespace CloudStreamForms.Droid
 				builder.SetContentText(body);
 				builder.SetAutoCancel(false);
 
-				builder.SetSmallIcon(Resource.Drawable.biconWhite512);//LocalNotificationIconId);
+				builder.SetSmallIcon(Resource.Drawable.round_cast_white_48dp2_4);
 				builder.SetOngoing(true);
 
 				var context = MainActivity.activity.ApplicationContext;

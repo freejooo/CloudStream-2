@@ -297,7 +297,13 @@ namespace CloudStreamForms.Droid
 						int isPause = isPaused[id];
 						bool canPause = isPause == 0;
 						if (isPause != 2) {
-							ShowLocalNot(new LocalNot() { actions = new List<LocalAction>() { new LocalAction() { action = $"handleDownload|||id={id}|||dType={(canPause ? 1 : 0)}|||", name = canPause ? "Pause" : "Resume" }, new LocalAction() { action = $"handleDownload|||id={id}|||dType=2|||", name = "Stop" } }, mediaStyle = false, bigIcon = poster, title = $"{title} - {ConvertBytesToAny(bytesPerSec / UPDATE_TIME, 2, 2)} MB/s", autoCancel = false, showWhen = false, onGoing = canPause, id = id, smallIcon = PublicNot, progress = progress, body = progressTxt }, context); //canPause
+							ShowLocalNot(new LocalNot() { 
+								actions = new List<LocalAction>() { 
+									new LocalAction() { action = $"handleDownload|||id={id}|||dType={(canPause ? 1 : 0)}|||", name = canPause ? "Pause" : "Resume" }, 
+									new LocalAction() { action = $"handleDownload|||id={id}|||dType=2|||", name = "Stop" } }, 
+								
+								mediaStyle = false, bigIcon = poster, title = $"{title} - {ConvertBytesToAny(bytesPerSec / UPDATE_TIME, 2, 2)} MB/s", 
+								autoCancel = false, showWhen = false, onGoing = canPause, id = id, smallIcon = canPause ? Resource.Drawable.BLoad : Resource.Drawable.BloadPause, progress = progress, body = progressTxt }, context); //canPause
 						}
 					}
 					catch (Exception _ex) {
@@ -311,11 +317,11 @@ namespace CloudStreamForms.Droid
 					if (succ) {
 						App.RemoveKey(DOWNLOAD_KEY, id.ToString());
 						App.RemoveKey(DOWNLOAD_KEY_INTENT, id.ToString());
-					}
+					} 
 					if (showDoneNotificaion) {
 						Device.BeginInvokeOnMainThread(() => {
 							try {
-								ShowLocalNot(new LocalNot() { mediaStyle = poster != "", bigIcon = poster, title = title, autoCancel = true, onGoing = false, id = id, smallIcon = PublicNot, body = overrideText ?? (succ ? "Download done!" : "Download Failed") }, context); // ((e.Cancelled || e.Error != null) ? "Download Failed!"
+								ShowLocalNot(new LocalNot() { mediaStyle = poster != "", bigIcon = poster, title = title, autoCancel = true, onGoing = false, id = id, smallIcon = succ ? Resource.Drawable.BloadDone : Resource.Drawable.BloadError, body = overrideText ?? (succ ? "Download done!" : "Download Failed") }, context); // ((e.Cancelled || e.Error != null) ? "Download Failed!"
 							}
 							catch (Exception _ex) {
 								error("SUPERFATALEX: " + _ex);

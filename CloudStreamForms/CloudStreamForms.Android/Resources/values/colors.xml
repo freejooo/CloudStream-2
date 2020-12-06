@@ -3,8 +3,8 @@
   <color name="launcher_background">#111111</color>
   <color name="colorPrimary">#3F51B5</color>
   <color name="colorPrimaryDark">#303F9F</color>
-  <color name="colorAccent">#1976D2</color>
-  <color name="navigationBarColor">#111111</color>
+  <color name="colorAccent">#007dfe</color>  <!--1976D2-->
+	<color name="navigationBarColor">#111111</color>
   <color name="statusBarColor">#111111</color>
   <color name="windowBackground">#111111</color>
   <color name="ListViewHighlighted">#232d6f</color>
