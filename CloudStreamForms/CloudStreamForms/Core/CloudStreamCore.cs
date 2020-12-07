@@ -10,6 +10,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -258,6 +259,7 @@ namespace CloudStreamForms.Core
 			public string genres;
 			public string descript;
 			public int place;
+			public string year;
 			public List<int> contansGenres;
 		}
 
@@ -5340,11 +5342,26 @@ namespace CloudStreamForms.Core
 			return topLists;
 		}
 
-		public async Task<List<IMDbTopList>> FetchTop100(List<string> order, int start = 1, int count = 250, bool top100 = true, bool isAnime = false, bool upscale = false, int x = 96, int y = 142, double multi = 1)
+		public static Dictionary<int, IMDbTopList[]> CachedTop100 = new Dictionary<int, IMDbTopList[]>();
+		static readonly List<int> cachedPopStack = new List<int>();
+		const int MAX_TOP_CACHE = 10;
+
+		public static int GetCacheId(int start, int count, bool top100, bool isAnime, string order)
 		{
-			IMDbTopList[] topLists = new IMDbTopList[count];
-			//List<string> genres = new List<string>() { "action", "adventure", "animation", "biography", "comedy", "crime", "drama", "family", "fantasy", "film-noir", "history", "horror", "music", "musical", "mystery", "romance", "sci-fi", "sport", "thriller", "war", "western" };
-			//List<string> genresNames = new List<string>() { "Action", "Adventure", "Animation", "Biography", "Comedy", "Crime", "Drama", "Family", "Fantasy", "Film-Noir", "History", "Horror", "Music", "Musical", "Mystery", "Romance", "Sci-Fi", "Sport", "Thriller", "War", "Western" };
+			var hashed = md5Hasher.ComputeHash(Encoding.UTF8.GetBytes(order));
+			var ivalue = BitConverter.ToInt32(hashed, 0);
+			return (top100 ? 1 : 0) + (isAnime ? 20 : 10) + (start * 100) + (count * 10000) + ivalue;
+		}
+
+		static readonly MD5 md5Hasher = MD5.Create();
+
+		public static string StripHTML(string input)
+		{
+			return Regex.Replace(input, "<.*?>", String.Empty);
+		}
+
+		public async Task<int> FetchTop100(List<string> order, int start = 1, int count = 250, bool top100 = true, bool isAnime = false, bool upscale = false, int x = 96, int y = 142, double multi = 1)
+		{
 			string orders = "";
 			for (int i = 0; i < order.Count; i++) {
 				if (i != 0) {
@@ -5352,13 +5369,20 @@ namespace CloudStreamForms.Core
 				}
 				orders += order[i];
 			}
+			int cId = GetCacheId(start, count, top100, isAnime, orders);
+			if (CachedTop100.ContainsKey(cId)) return cId;
+
+			IMDbTopList[] topLists = new IMDbTopList[count];
+			//List<string> genres = new List<string>() { "action", "adventure", "animation", "biography", "comedy", "crime", "drama", "family", "fantasy", "film-noir", "history", "horror", "music", "musical", "mystery", "romance", "sci-fi", "sport", "thriller", "war", "western" };
+			//List<string> genresNames = new List<string>() { "Action", "Adventure", "Animation", "Biography", "Comedy", "Crime", "Drama", "Family", "Fantasy", "Film-Noir", "History", "Horror", "Music", "Musical", "Mystery", "Romance", "Sci-Fi", "Sport", "Thriller", "War", "Western" };
+
 			//https://www.imdb.com/search/title/?genres=adventure&sort=user_rating,desc&title_type=feature&num_votes=25000,&pf_rd_m=A2FGELUUNOQJNL&pf_rd_p=5aab685f-35eb-40f3-95f7-c53f09d542c3&pf_rd_r=VV0XPKMS8FXZ6D8MM0VP&pf_rd_s=right-6&pf_rd_t=15506&pf_rd_i=top&ref_=chttp_gnr_2
 			//https://www.imdb.com/search/title/?title_type=feature&num_votes=25000,&genres=action&sort=user_rating,desc&start=51&ref_=adv_nxt
 			string trueUrl = $"https://www.imdb.com/search/title/?title_type=feature,tv_series,tv_miniseries&num_votes={(isAnime ? "1500" : "25000")},&genres=" + orders + (top100 ? "&sort=user_rating,desc" : "") + "&start=" + start + "&ref_=adv_nxt&count=" + count + (isAnime ? "&keywords=anime" : "");
 			print("TRUEURL:" + trueUrl);
 			string d = await mainCore.DownloadStringAsync(trueUrl, eng: true);
 
-			const string lookFor = "s=\"lo";//"class=\"loadlate\"";
+			//const string lookFor = "s=\"lo";//"class=\"loadlate\"";
 			int place = start - 1;
 			int counter = 0;
 
@@ -5374,14 +5398,16 @@ namespace CloudStreamForms.Core
 				var textMuted = dataHolder.QuerySelectorAll("> p.text-muted");
 				var runTimeHolder = textMuted[0];
 
-				string name = dataHolder.QuerySelector("> h3.lister-item-header > a").InnerText;
+				var _nameData = dataHolder.QuerySelector("> h3.lister-item-header");
+				string name = _nameData.QuerySelector("> a").InnerText;
+				string year = _nameData.QuerySelector("> span.lister-item-year")?.InnerText;
 				string runtime = runTimeHolder.QuerySelector("> span.runtime")?.InnerText;
 				string _genres = runTimeHolder.QuerySelector("> span.genre").InnerText;
 				string rating = dataHolder.QuerySelector("> div.ratings-bar > div.ratings-imdb-rating").GetAttributeValue("data-value", "").Replace(',', '.');
 				if (!rating.Contains('.')) {
 					rating += ".0";
 				}
-				string descript = textMuted[1].InnerHtml.Replace("  ", "").Replace("\n", "");
+				string descript = StripHTML(textMuted[1].InnerHtml.Replace("  ", "").Replace("\n", ""));
 				int lastIndex = descript.IndexOf('<');
 				if (lastIndex > 0) {
 					descript = descript.Substring(0, lastIndex);
@@ -5390,8 +5416,8 @@ namespace CloudStreamForms.Core
 				string img = poster.GetAttributeValue("loadlate", "");
 				if (upscale) {
 					img = ConvertIMDbImagesToHD(img, x, y, multi);
-				}
-				topLists[counter] = (new IMDbTopList() { descript = descript, genres = _genres, id = id, img = img, name = name, place = place, rating = rating, runtime = runtime });
+				} 
+				topLists[counter] = (new IMDbTopList() { descript = descript, genres = _genres, id = id, img = img, name = name, place = place, rating = rating, runtime = runtime, year = year.IsClean() ? year[1..^1] : "" });
 				counter++;
 				//print("-----------------------------------");
 				//print(name + " | " + runtime + " | " + _genres + " | " + rating + " | " + descript + " | " + id + " | " + img);
@@ -5414,7 +5440,13 @@ namespace CloudStreamForms.Core
 			*/
 
 			print("------------------------------------ DONE! ------------------------------------");
-			return topLists.ToList();
+			CachedTop100[cId] = topLists;
+			cachedPopStack.Add(cId);
+			if (cachedPopStack.Count > MAX_TOP_CACHE) {
+				CachedTop100.Remove(cachedPopStack[0]);
+				cachedPopStack.RemoveAt(0);
+			}
+			return cId;
 		}
 
 		public async Task QuickSearch(string text, bool purgeCurrentSearchThread = true, bool onlySearch = true, bool blocking = false)
@@ -7856,7 +7888,7 @@ namespace CloudStreamForms.Core
 		{
 			bool isMovie = eps == null;
 			string url = "https://bestdubbedanime.com/" + (isMovie ? "movies/jsonMovie" : "xz/v3/jsonEpi") + ".php?slug=" + slug + (eps != null ? ("/" + eps) : "") + "&_=" + UnixTime;
-			string d = DownloadString(url,referer: $"https://bestdubbedanime.com/{(isMovie ? "movies/" : "")}{slug}{(isMovie ? "" : $"/{eps}")}");
+			string d = DownloadString(url, referer: $"https://bestdubbedanime.com/{(isMovie ? "movies/" : "")}{slug}{(isMovie ? "" : $"/{eps}")}");
 			var f = JsonConvert.DeserializeObject<DubbedAnimeSearchRootObject>(d, new JsonSerializerSettings() { NullValueHandling = NullValueHandling.Ignore });
 			if (f.result.error) {
 				return new DubbedAnimeEpisode();

@@ -74,7 +74,7 @@ namespace CloudStreamForms
 									}),
 									ForceDescript = true,
 									Description = x.descript,
-									Title = (x.place > 0 ? (x.place + ". ") : "") + x.name + " | ★ " + x.rating.Replace(",", "."),
+									Title = (x.place > 0 ? (x.place + ". ") : "") + x.name + (x.year.IsClean() ?  $" ({x.year})" : "") + " ★ " + x.rating.Replace(",", "."),
 									Id = x.place,
 									PosterUrl = img,
 									extraInfo = "Id=" + x.id + "|||Name=" + x.name + "|||"
@@ -143,22 +143,7 @@ namespace CloudStreamForms
 					var f = await mainCore.FetchTop100(new List<string>() { genres[MovieTypePicker.SelectedIndex] }, start, top100: IsTop100, isAnime: Settings.Top100Anime);
 					if (!mainCore.GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
 
-					iMDbTopList.AddRange(f);
-					/*  Device.BeginInvokeOnMainThread(() => {
-
-                          for (int i = 0; i < iMDbTopList.Count; i++) {
-
-                              string img = ConvertIMDbImagesToHD(iMDbTopList[i].img, 67, 98, 4);
-                              IMDbTopList x = iMDbTopList[i];
-
-                              AddEpisode(new EpisodeResult() { Description = x.descript, Title = x.name + " | ★ " + x.rating.Replace(",", "."), Id = x.place, PosterUrl = img, extraInfo = "Id="+x.id+"|||Name="+x.name+"|||" }, false);
-                          }
-
-                    //  LoadMoreImages(false);
-                    // LoadMoreImages();
-
-                });*/
-					//if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
+					iMDbTopList.AddRange(CachedTop100[f]);
 					LoadMoreImages();
 				}
 				finally {
@@ -633,7 +618,7 @@ namespace CloudStreamForms
 					string id = FindHTML(__key, "Id=", "|||");
 					if (name != "" && posterUrl != "" && id != "") {
 						if (CheckIfURLIsValid(posterUrl)) {
-							IsBookmarked.Add(id,true);
+							IsBookmarked.Add(id, true);
 							string posterURL = ConvertIMDbImagesToHD(posterUrl, 76, 113, 1.75); //.Replace(",76,113_AL", "," + pwidth + "," + pheight + "_AL").Replace("UY113", "UY" + pheight).Replace("UX76", "UX" + pwidth);
 							if (CheckIfURLIsValid(posterURL)) {
 								Grid stackLayout = new Grid() { VerticalOptions = LayoutOptions.Start }; //								stackLayout.Effects.Add(new CloudStreamForms.Effects.LongPressedEffect());
