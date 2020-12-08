@@ -46,7 +46,8 @@ namespace CloudStreamForms.Core
               //  new NineAnimeBloatFreeProvider(this), // Link extraction
 				new FourAnimeBloatFreeProvider(this),
 				new AnimeParadiseBFProvider(this),
-				new ShiroBFProvider(this),
+				new ShiroBFProvider(this,"https://www.dubbedanime.vip","DubbedVip"),
+				new ShiroBFProvider(this,"https://shiro.is","Shiro"),
 			};
 			movieProviders = new IMovieProvider[] {
 				new FilesClubProvider(this),
@@ -6296,8 +6297,7 @@ namespace CloudStreamForms.Core
 					JoinThred(tempThred);
 				}
 			});
-		}
-
+		} 
 
 		// DONT USE  https://www1.moviesjoy.net/search/ THEY USE GOOGLE RECAPTCH TO GET LINKS
 		// DONT USE https://gostream.site/iron-man/ THEY HAVE DDOS PROTECTION

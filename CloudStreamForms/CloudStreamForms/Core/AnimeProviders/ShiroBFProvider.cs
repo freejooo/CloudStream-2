@@ -11,12 +11,15 @@ namespace CloudStreamForms.Core.AnimeProviders
 	{
 		public string token = "";
 
+		private readonly string _siteUrl;
+		private readonly string _name;
+
 		string GetShiroToken()
 		{
 			try {
-				string d = DownloadString("https://shiro.is/");
+				string d = DownloadString(_siteUrl);
 				string js = FindHTML(d, "src=\"/static/js/main", "\"");
-				string dScript = DownloadString("https://shiro.is/static/js/main" + js);
+				string dScript = DownloadString($"{_siteUrl}/static/js/main" + js);
 				return FindHTML(dScript, "token:\"", "\"");
 			}
 			catch (Exception _ex) {
@@ -25,14 +28,17 @@ namespace CloudStreamForms.Core.AnimeProviders
 			}
 		}
 
-		public ShiroBFProvider(CloudStreamCore _core) : base(_core)
+		public ShiroBFProvider(CloudStreamCore _core, string siteUrl, string name) : base(_core)
 		{
+			_siteUrl = siteUrl;
+			_name = name;
+
 			_core.StartThread("Shiro TokenThread", () => {
 				token = GetShiroToken();
 			});
 		}
 
-		public override string Name => "Shiro";
+		public override string Name => _name;
 
 		public override void LoadLink(string episodeLink, int episode, int normalEpisode, TempThread tempThred, object extraData, bool isDub)
 		{
@@ -40,18 +46,20 @@ namespace CloudStreamForms.Core.AnimeProviders
 				string episodeReq = DownloadString(episodeLink);
 				var epData = JsonConvert.DeserializeObject<ShiroEpisodeRoot>(episodeReq);
 				foreach (var video in epData.Data.videos) {
-					string before = video.host switch
+					string[] before = video.host switch
 					{
-						"googledrive" => "https://ani.googledrive.stream/vidstreaming/vid-ad/",
-						"vidstream" => "https://gogo-stream.com/ajax.php?id=", //"https://gogo-stream.com/streaming.php?id=",
-						_ => "",
+						"googledrive" => new string[] { "https://ani.googledrive.stream/vidstreaming/vid-ad/" },
+						"vidstream" => new string[] { "https://gogo-stream.com/ajax.php?id=", "https://ani.googledrive.stream/vidstreaming/vid/" }, //"https://gogo-stream.com/streaming.php?id=", // https://ani.googledrive.stream/vidstreaming/vid/
+						_ => null,
 					};
-					before += video.video_id;
-
-					string _d = DownloadString(before).Replace("\\", "");
-					var links = GetAllFilesRegex(_d);
-					foreach (var link in links) {
-						AddPotentialLink(normalEpisode, link.url, $"Shiro{(video.host == "googledrive" ? " GoogleDrive" : "")}", 15, link.label);
+					if (before == null) continue;
+					foreach (var b in before) {
+						string _before = b + video.video_id;
+						string _d = DownloadString(_before).Replace("\\", "");
+						var links = GetAllFilesRegex(_d);
+						foreach (var link in links) {
+							AddPotentialLink(normalEpisode, link.url, $"{Name}{(video.host == "googledrive" ? " GoogleDrive" : "")}", 15, link.label);
+						}
 					}
 				}
 			}

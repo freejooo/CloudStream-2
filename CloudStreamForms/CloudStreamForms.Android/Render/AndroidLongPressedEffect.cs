@@ -1,5 +1,6 @@
 ﻿using CloudStreamForms.Droid.Effects;
 using CloudStreamForms.Effects;
+using System;
 using Xamarin.Forms;
 using Xamarin.Forms.Platform.Android;
 
@@ -27,8 +28,11 @@ namespace CloudStreamForms.Droid.Effects
 		/// </summary>
 		public AndroidLongPressedEffect()
 		{
+			Init();
 		}
 
+		static int idCounter = 0;
+		int id = 0;
 		bool autoCancel = true;
 
 		/// <summary>
@@ -38,18 +42,28 @@ namespace CloudStreamForms.Droid.Effects
 		{
 			//because an effect can be detached immediately after attached (happens in listview), only attach the handler one time.
 			if (!_attached) {
+				idCounter++;
+				id = idCounter;
 				if (Control != null) {
 					//Control.LongClickable = true;
 					//Control.LongClick += Control_LongClick;
+					s = (Android.Views.View)Control;
 					Control.Touch += Container_Touch;
 				}
 				else {
 					//Container.LongClickable = true;
 					//Container.LongClick += Control_LongClick; 
+					s = (Android.Views.View)Container;
 					Container.Touch += Container_Touch;
 					autoCancel = false;
 					//Container.SetOnTouchListener(new OnTouchListener(LongPressedEffect.GetCommand(Element), LongPressedEffect.GetCommandParameter(Element)));
 				}
+				OnPress += (o, e) => {
+					if((int)o != id) {
+						Cancel();
+					}
+				};
+
 				_attached = true;
 			}
 		}
@@ -68,9 +82,21 @@ namespace CloudStreamForms.Droid.Effects
 			return _rect.Contains(x, y);
 		}
 
-		//https://stackoverflow.com/questions/7414065/android-scale-animation-on-view
-		private void Container_Touch(object sender, Android.Views.View.TouchEventArgs e)
+		static EventHandler OnPress;
+
+		//static Android.Views.Animations.AlphaAnimation fadeAni;
+		//static Android.Views.Animations.AlphaAnimation fadeAni2;
+		//
+		//static Android.Views.Animations.ScaleAnimation ani;
+		//static Android.Views.Animations.ScaleAnimation ani2;
+		  Android.Views.Animations.AnimationSet onCancelAni;
+		  Android.Views.Animations.AnimationSet onHoldAni;
+		//static bool hasInit = false;
+		 void Init()
 		{
+			//if (hasInit) return;
+			//hasInit = true;
+
 			const float scaleDownTo = 0.98f;
 			const float fadeTo = 0.7f;
 			const int duration = 50;
@@ -90,11 +116,11 @@ namespace CloudStreamForms.Droid.Effects
 			fadeAni2.FillAfter = true;
 			fadeAni2.Duration = duration;
 
-			Android.Views.Animations.AnimationSet onCancelAni = new Android.Views.Animations.AnimationSet(true);
+			 onCancelAni = new Android.Views.Animations.AnimationSet(true);
 			onCancelAni.AddAnimation(fadeAni);
 			onCancelAni.AddAnimation(ani);
 
-			Android.Views.Animations.AnimationSet onHoldAni = new Android.Views.Animations.AnimationSet(true);
+			 onHoldAni = new Android.Views.Animations.AnimationSet(true);
 			onHoldAni.AddAnimation(fadeAni2);
 			onHoldAni.AddAnimation(ani2);
 
@@ -102,24 +128,31 @@ namespace CloudStreamForms.Droid.Effects
 			onCancelAni.FillAfter = true;
 			onHoldAni.Duration = duration;
 			onCancelAni.Duration = duration;
+		}
+		Android.Views.View s;
+
+
+		void Cancel()
+		{
+			if (isHolding) {
+				isHolding = false;
+				s.StartAnimation(onCancelAni);
+			}
+		}
+
+		void Start()
+		{
+			if (!isHolding) {
+				isHolding = true;
+				s.StartAnimation(onHoldAni);
+			}
+		}
+
+		//https://stackoverflow.com/questions/7414065/android-scale-animation-on-view
+		private void Container_Touch(object sender, Android.Views.View.TouchEventArgs e)
+		{
 			var command = LongPressedEffect.GetCommand(Element);
-			var s = (Android.Views.View)sender;
-
-			void Cancel()
-			{
-				if (isHolding) {
-					isHolding = false;
-					s.StartAnimation(onCancelAni);
-				}
-			}
-
-			void Start()
-			{
-				if (!isHolding) {
-					isHolding = true;
-					s.StartAnimation(onHoldAni);
-				}
-			}
+	
 			System.Console.WriteLine("ACTION:" + e.Event.Action + "|" + e.Event.Action.HasFlag(Android.Views.MotionEventActions.Cancel));
 			e.Handled = true;
 
@@ -138,7 +171,7 @@ namespace CloudStreamForms.Droid.Effects
 					break;
 
 				case Android.Views.MotionEventActions.Down:
-
+					OnPress?.Invoke(id, EventArgs.Empty);
 					lastX = e.Event.RawX;
 					lastY = e.Event.RawY;
 					Start();

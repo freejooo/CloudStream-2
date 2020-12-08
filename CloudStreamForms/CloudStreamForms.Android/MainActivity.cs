@@ -1,5 +1,4 @@
-﻿using Acr.UserDialogs;
-using Android;
+﻿using Android;
 using Android.App;
 using Android.Bluetooth;
 using Android.Content;
@@ -659,8 +658,7 @@ namespace CloudStreamForms.Droid
 				LogFile("Starting Init");
 
 				FFImageLoading.Forms.Platform.CachedImageRenderer.Init(enableFastRenderer: true);
-				Rg.Plugins.Popup.Popup.Init(this, savedInstanceState);
-				UserDialogs.Init(this);
+				Rg.Plugins.Popup.Popup.Init(this);
 				LibVLCSharpFormsRenderer.Init();
 				XamEffects.Droid.Effects.Init();
 
