@@ -5276,9 +5276,18 @@ namespace CloudStreamForms.Core
 			}
 		}
 
+		static readonly string[] genresNames = new string[] { "Action", "Adventure", "Animation", "Biography", "Comedy", "Crime", "Drama", "Family", "Fantasy", "Film-Noir", "History", "Horror", "Music", "Musical", "Mystery", "Romance", "Sci-Fi", "Sport", "Thriller", "War", "Western" };
+
+		static int lastFetchRecommended = -1;
+		static List<IMDbTopList> cacheFetchRecommended = new List<IMDbTopList>();
 		public static List<IMDbTopList> FetchRecomended(List<string> inp, bool shuffle = true, int max = 10)
 		{
-			List<IMDbTopList> topLists = new List<IMDbTopList>();
+			int cId = GetHashId(inp.Aggregate((a, b) => a + b)) + (shuffle ? 1 : 0) + max*100;
+			if(lastFetchRecommended == cId) {
+				return cacheFetchRecommended;
+			}
+			lastFetchRecommended = cId;
+			cacheFetchRecommended.Clear();
 
 			CoreHelpers.Shuffle(inp);
 			if (inp.Count > max) {
@@ -5292,7 +5301,6 @@ namespace CloudStreamForms.Core
 
 				//string d =;
 				string _d = GetHTML(url);
-				List<string> genresNames = new List<string>() { "Action", "Adventure", "Animation", "Biography", "Comedy", "Crime", "Drama", "Family", "Fantasy", "Film-Noir", "History", "Horror", "Music", "Musical", "Mystery", "Romance", "Sci-Fi", "Sport", "Thriller", "War", "Western" };
 
 				const string lookFor = "<div class=\"rec_item\"";
 				while (_d.Contains(lookFor)) {
@@ -5303,8 +5311,12 @@ namespace CloudStreamForms.Core
 						string img = FindHTML(_d, "loadlate=\"", "\"");
 						string d = RemoveOne(_d, "<a href=\"/title/" + tt + "/vote?v=X;k", -200);
 						string __d = FindHTML(_d, "<div class=\"rec-title\">\n       <a href=\"/title/" + tt, "<div class=\"rec-rating\">");
+						string year = FindHTML(_d, "<span class=\"nobr\">", "<");
+						if(year != "") {
+							year = year[1..^1].Replace("TV Series ","");
+						}
 						List<int> contansGenres = new List<int>();
-						for (int i = 0; i < genresNames.Count; i++) {
+						for (int i = 0; i < genresNames.Length; i++) {
 							if (__d.Contains(genresNames[i])) {
 								contansGenres.Add(i);
 							}
@@ -5317,14 +5329,14 @@ namespace CloudStreamForms.Core
 
 						lock (inpLock) {
 							bool add = true;
-							for (int z = 0; z < topLists.Count; z++) {
-								if (topLists[z].id == tt) {
+							for (int z = 0; z < cacheFetchRecommended.Count; z++) {
+								if (cacheFetchRecommended[z].id == tt) {
 									add = false;
 								};
 							}
 
 							if (add) {
-								topLists.Add(new IMDbTopList() { name = name, descript = descript, contansGenres = contansGenres, id = tt, img = img, place = -1, rating = value, runtime = "", genres = "" });
+								cacheFetchRecommended.Add(new IMDbTopList() { name = name, descript = descript, contansGenres = contansGenres, id = tt, img = img, place = -1, rating = value, runtime = "", genres = "",year = year });
 							}
 						}
 					}
@@ -5332,25 +5344,27 @@ namespace CloudStreamForms.Core
 						print("FATAL EX REC: " + _ex); // SOLVES CRASHING
 					}
 				}
-			});
-			//}
+			}); 
 
 			if (shuffle) {
-				CoreHelpers.Shuffle<IMDbTopList>(topLists);
+				CoreHelpers.Shuffle<IMDbTopList>(cacheFetchRecommended);
 			}
 
-			return topLists;
+			return cacheFetchRecommended;
 		}
 
 		public static Dictionary<int, IMDbTopList[]> CachedTop100 = new Dictionary<int, IMDbTopList[]>();
 		static readonly List<int> cachedPopStack = new List<int>();
 		const int MAX_TOP_CACHE = 10;
 
+		static int GetHashId(string inp) {
+			var hashed = md5Hasher.ComputeHash(Encoding.UTF8.GetBytes(inp));
+			return  BitConverter.ToInt32(hashed, 0);
+		}
+
 		public static int GetCacheId(int start, int count, bool top100, bool isAnime, string order)
 		{
-			var hashed = md5Hasher.ComputeHash(Encoding.UTF8.GetBytes(order));
-			var ivalue = BitConverter.ToInt32(hashed, 0);
-			return (top100 ? 1 : 0) + (isAnime ? 20 : 10) + (start * 100) + (count * 10000) + ivalue;
+			return (top100 ? 1 : 0) + (isAnime ? 20 : 10) + (start * 100) + (count * 10000) + GetHashId(order);
 		}
 
 		static readonly MD5 md5Hasher = MD5.Create();
