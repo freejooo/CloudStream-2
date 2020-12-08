@@ -29,6 +29,8 @@ namespace CloudStreamForms.Droid.Effects
 		{
 		}
 
+		bool autoCancel = true;
+
 		/// <summary>
 		/// Apply the handler
 		/// </summary>
@@ -43,11 +45,27 @@ namespace CloudStreamForms.Droid.Effects
 				}
 				else {
 					//Container.LongClickable = true;
-					//Container.LongClick += Control_LongClick;
+					//Container.LongClick += Control_LongClick; 
 					Container.Touch += Container_Touch;
+					autoCancel = false;
+					//Container.SetOnTouchListener(new OnTouchListener(LongPressedEffect.GetCommand(Element), LongPressedEffect.GetCommandParameter(Element)));
 				}
 				_attached = true;
 			}
+		}
+
+		bool isHolding = false;
+
+		float lastX = -1;
+		float lastY = -1;
+		readonly Android.Graphics.Rect _rect = new Android.Graphics.Rect();
+		readonly int[] _location = new int[2];
+		bool IsViewInBounds(Android.Views.View v, int x, int y)
+		{
+			v.GetDrawingRect(_rect);
+			v.GetLocationOnScreen(_location);
+			_rect.Offset(_location[0], _location[1]);
+			return _rect.Contains(x, y);
 		}
 
 		//https://stackoverflow.com/questions/7414065/android-scale-animation-on-view
@@ -61,7 +79,6 @@ namespace CloudStreamForms.Droid.Effects
 			var ani2 = new Android.Views.Animations.ScaleAnimation(1f, scaleDownTo, 1f, scaleDownTo, Android.Views.Animations.Dimension.RelativeToSelf, 0.5f, Android.Views.Animations.Dimension.RelativeToSelf, 0.5f);
 			var fadeAni = new Android.Views.Animations.AlphaAnimation(fadeTo, 1f);
 			var fadeAni2 = new Android.Views.Animations.AlphaAnimation(1f, fadeTo);
-
 
 			ani.FillAfter = true;
 			ani.Duration = duration;
@@ -85,37 +102,81 @@ namespace CloudStreamForms.Droid.Effects
 			onCancelAni.FillAfter = true;
 			onHoldAni.Duration = duration;
 			onCancelAni.Duration = duration;
-
+			var command = LongPressedEffect.GetCommand(Element);
 			var s = (Android.Views.View)sender;
+
+			void Cancel()
+			{
+				if (isHolding) {
+					isHolding = false;
+					s.StartAnimation(onCancelAni);
+				}
+			}
+
+			void Start()
+			{
+				if (!isHolding) {
+					isHolding = true;
+					s.StartAnimation(onHoldAni);
+				}
+			}
+			System.Console.WriteLine("ACTION:" + e.Event.Action + "|" + e.Event.Action.HasFlag(Android.Views.MotionEventActions.Cancel));
+			e.Handled = true;
+
 			switch (e.Event.Action) {
 				case Android.Views.MotionEventActions.ButtonPress:
 					break;
 				case Android.Views.MotionEventActions.ButtonRelease:
+					if (isHolding) {
+						Cancel();
+						command?.Execute(LongPressedEffect.GetCommandParameter(Element));
+					}
 					break;
 				case Android.Views.MotionEventActions.Cancel:
-					s.StartAnimation(onCancelAni);
+					Cancel();
+					e.Handled = true;
 					break;
+
 				case Android.Views.MotionEventActions.Down:
-					s.StartAnimation(onHoldAni); 
+
+					lastX = e.Event.RawX;
+					lastY = e.Event.RawY;
+					Start();
 					break;
 				case Android.Views.MotionEventActions.HoverEnter:
 					break;
 				case Android.Views.MotionEventActions.HoverExit:
-					break;
+					Cancel(); break;
 				case Android.Views.MotionEventActions.HoverMove:
 					break;
 				case Android.Views.MotionEventActions.Mask:
 					break;
 				case Android.Views.MotionEventActions.Move:
+					if (!autoCancel) {
+						if (System.MathF.Sqrt(System.MathF.Pow(e.Event.RawX - lastX, 2) + System.MathF.Pow(e.Event.RawY - lastY, 2)) > 5) {
+							Cancel();
+						}
+						else if (!IsViewInBounds(s, (int)e.Event.RawX, (int)e.Event.RawY)) {
+							Cancel();
+						}
+					}
+					/*if (!((Android.Views.View)sender).ClipBounds.Contains(new Android.Graphics.Rect(x - 1, y + 1, x - 1, y - 1))) {
+						Cancel();
+					}*/
 					break;
 				case Android.Views.MotionEventActions.Outside:
-					break;
+					Cancel(); break;
 				case Android.Views.MotionEventActions.Up:
-					s.StartAnimation(onCancelAni); 
-
-					var command = LongPressedEffect.GetCommand(Element);
-					command?.Execute(LongPressedEffect.GetCommandParameter(Element));
+					if (isHolding) {
+						Cancel();
+						e.Handled = true;
+						command?.Execute(LongPressedEffect.GetCommandParameter(Element));
+					}
 					break;
+				case Android.Views.MotionEventActions.Scroll:
+					Cancel();
+					break;
+
 				default:
 					break;
 			}

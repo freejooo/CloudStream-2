@@ -394,6 +394,7 @@ namespace CloudStreamForms
 				Device.InvokeOnMainThreadAsync(async () => {
 					FadeEpisodes.AbortAnimation("FadeTo");
 					FadeEpisodes.Opacity = 0;
+					if (IsDead) return;
 					epView.MyEpisodeResultCollection.Clear();
 					for (int i = 0; i < e.Length; i++) {
 						var c = e[i];
@@ -708,7 +709,7 @@ namespace CloudStreamForms
 							}
 
 							CloudStreamCore.Title titleName = (Title)coreCopy.activeMovie.title.Clone();
-
+							if (IsDead) return;
 							coreCopy.GetEpisodeLink(coreCopy.activeMovie.title.IsMovie ? -1 : (ep.Id + 1), _currentSeason, false, false, _isDub);
 
 							int epId = GetCorrectId(ep, coreCopy.activeMovie);
@@ -757,15 +758,22 @@ namespace CloudStreamForms
 			episodeView.VerticalScrollBarVisibility = Settings.ScrollBarVisibility;
 			//  RecStack.HorizontalScrollBarVisibility = Settings.ScrollBarVisibility; // REPLACE REC
 
-			ReloadAllBtt.Clicked += (o, e) => {
+			Commands.SetTap(BackAllBtt, new Command(() => {
+				Navigation.PopModalAsync(true);
+				Search.mainPoster = new Poster();
+				Dispose();
+			}));
+			//BackAllBtt.Source = GetImageSource("baseline_arrow_back_white_48dp.png");
+
+			Commands.SetTap(ReloadAllBtt, new Command(() => {
 				App.RemoveKey("CacheImdb", currentMovie.title.id);
 				App.RemoveKey("CacheMAL", currentMovie.title.id);
 				Search.mainPoster = new Poster();
 				Navigation.PopModalAsync(false);
 				PushPageFromUrlAndName(currentMovie.title.id, mainPoster.name);
 				Dispose();
-			};
-			ReloadAllBtt.Source = GetImageSource("round_refresh_white_48dp.png");
+			}));
+			//ReloadAllBtt.Source = GetImageSource("baseline_refresh_white_48dp.png");
 
 			//core.GetImdbTitle(mainPoster);
 			ChangeStar();
@@ -958,13 +966,15 @@ namespace CloudStreamForms
 			SetColor(episodeResult);
 			episodeResult.ExtraColor = Settings.ItemBackGroundColor.ToHex();
 			episodeResult.Season = currentSeason;
-			
+
 			/*if (episodeResult.Rating != "") {
                 episodeResult.Title += " | ★ " + episodeResult.Rating;
             }*/
 			/*if (episodeResult.Rating == "") {
 				episodeResult.Rating = currentMovie.title.rating;
 			}*/
+
+			if (IsDead) return episodeResult;
 			if (!isMovie) {
 				episodeResult.Title = episodeResult.Episode + ". " + episodeResult.Title;
 			}
@@ -2205,6 +2215,7 @@ namespace CloudStreamForms
 				trailerStack.IsVisible = state == 2;
 				trailerStack.InputTransparent = state != 2;
 				// trailerView.HeightRequest = state == 2 ? Math.Min(epView.CurrentTrailers.Count, 4) * 350 : 0;
+				if (IsDead) return;
 
 				bool epVis = state == 0 && !isMovie;
 				EpPickers.IsEnabled = epVis;

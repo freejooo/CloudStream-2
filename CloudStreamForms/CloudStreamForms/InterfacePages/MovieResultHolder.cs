@@ -333,6 +333,7 @@ namespace CloudStreamForms.InterfacePages
 
 						SetEpisodeFromTo(0, max);
 						SetChangeTo(max);
+						if (IsDead) return;
 
 						// CLEAR EPISODES SO SWITCHING SUB DUB 
 						if (GetLatestDub.ContainsKey(currentMovie.title.id)) {
@@ -538,7 +539,10 @@ namespace CloudStreamForms.InterfacePages
 
 		public void Dispose()
 		{
-			core = null;
+			if (core != null) {
+				core.PurgeThreads(-1);
+				core = null;
+			}
 		}
 	}
 }

@@ -1976,16 +1976,16 @@ namespace CloudStreamForms
 			SubHolder.AbortAnimation("TranslateTo");
 			SubHolder.TranslateTo(EpisodeLabel.TranslationX, disable ? 0 : -90, fadeTime, Easing.Linear);
 
-			/*
+			
             AllButtons.AbortAnimation("FadeTo");
             AllButtons.FadeTo(fade, fadeTime);
-            */
-			foreach (var item in AllButtons.Children) {
+            
+			/*foreach (var item in AllButtons.Children) {
 				if (item.ClassId != "NOFADE") {
 					item.AbortAnimation("FadeTo");
 					item.FadeTo(fade, fadeTime);
 				}
-			}
+			}*/
 
 			await Task.Delay((int)fadeTime);
 			isInAnimation = false;

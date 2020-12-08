@@ -37,7 +37,13 @@ xmlns:ffTransformations="clr-namespace:FFImageLoading.Transformations;assembly=F
 							<ImageButton x:Name="TrailerBtt" BackgroundColor="Transparent"   HeightRequest="150" Aspect="AspectFill" ></ImageButton>
 							<ff:CachedImage x:Name="Gradient" WidthRequest="2000" HorizontalOptions="Fill" Aspect="AspectFill" VerticalOptions="End" InputTransparent="True" Rotation="180" Opacity="1" BackgroundColor="Transparent"></ff:CachedImage>
 							<ff:CachedImage x:Name="PlayBttGradient" HorizontalOptions="Center" VerticalOptions="Center"  Scale="1.8" WidthRequest="40" HeightRequest="40" Opacity="1"  BackgroundColor="Transparent" InputTransparent="True"></ff:CachedImage>
-							<ImageButton x:Name="ReloadAllBtt" BackgroundColor="Transparent" HorizontalOptions="End" HeightRequest="30" WidthRequest="30" VerticalOptions="Start" TranslationX="-10" TranslationY="10"></ImageButton>
+							<ffs:SvgCachedImage  BackgroundColor="Transparent" HorizontalOptions="End" HeightRequest="30" WidthRequest="30" VerticalOptions="Start" Scale="0.9" Margin="15" TranslationY="2" InputTransparent="True" Source="refresh.svg"></ffs:SvgCachedImage>
+							<ffs:SvgCachedImage  BackgroundColor="Transparent" HorizontalOptions="Start" HeightRequest="30" WidthRequest="30" VerticalOptions="Start" Scale="0.9" Margin="15" TranslationY="2" InputTransparent="True" Source="arrow_back_white.svg" ></ffs:SvgCachedImage>
+							<xe:BorderView  x:Name="BackAllBtt" xe:TouchEffect.Color="#66FFFFFF"  VerticalOptions="Start" Opacity="0.4" Margin="-10" WidthRequest="80" HeightRequest="80" CornerRadius="40" Scale="1" HorizontalOptions="Start" BackgroundColor="Transparent">
+							</xe:BorderView>
+							<xe:BorderView  x:Name="ReloadAllBtt" xe:TouchEffect.Color="#66FFFFFF"  VerticalOptions="Start" Opacity="0.4" Margin="-10" WidthRequest="80" HeightRequest="80" CornerRadius="40" Scale="1" HorizontalOptions="End" BackgroundColor="Transparent">
+							</xe:BorderView>
+
 							<!--  <Image x:Name="FakePlayBtt"  WidthRequest="100" VerticalOptions="Start"  TranslationY="75"></Image> -->
 						</Grid>
 
