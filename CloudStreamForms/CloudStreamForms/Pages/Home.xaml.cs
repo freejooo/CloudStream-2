@@ -1,4 +1,5 @@
 ﻿using CloudStreamForms.Core;
+using CloudStreamForms.Effects;
 using CloudStreamForms.Models;
 using System;
 using System.Collections.Generic;
@@ -10,7 +11,6 @@ using Xamarin.Forms.Xaml;
 using XamEffects;
 using static CloudStreamForms.Core.CloudStreamCore;
 using static CloudStreamForms.MainPage;
-using CloudStreamForms.Effects;
 
 namespace CloudStreamForms
 {
@@ -585,9 +585,9 @@ namespace CloudStreamForms
 					if (name != "" && posterUrl != "" && id != "") {
 						if (CheckIfURLIsValid(posterUrl)) {
 							IsBookmarked.Add(id, true);
-							string posterURL = ConvertIMDbImagesToHD(posterUrl, 76, 113, 1.75); 
+							string posterURL = ConvertIMDbImagesToHD(posterUrl, 76, 113, 1.75);
 							if (CheckIfURLIsValid(posterURL)) {
-							//	StackLayout slay = new StackLayout() { };
+								//	StackLayout slay = new StackLayout() { };
 
 
 								Grid stackLayout = new Grid() { VerticalOptions = LayoutOptions.Start, }; //								stackLayout.Effects.Add(new CloudStreamForms.Effects.LongPressedEffect());

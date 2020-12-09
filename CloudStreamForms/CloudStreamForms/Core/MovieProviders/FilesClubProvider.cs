@@ -74,7 +74,6 @@ namespace CloudStreamForms.Core.MovieProviders
 				while (dSource.Contains(lookFor)) {
 					string link = FindHTML(dSource, lookFor, "\"");
 
-					// DONT USE mixdrop.co, THEY HAVE RECAPTCHA TO GET TOKEN
 					if (link.Contains("googleusercontent")) {
 						AddPotentialLink(normalEpisode, link, "GoogleVideo Files", 13);
 					}

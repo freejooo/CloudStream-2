@@ -19,7 +19,7 @@ namespace CloudStreamForms.Core.AnimeProviders
 		{
 			try {
 				string d = "";
-#pragma warning disable 
+#pragma warning disable
 				if (!IsNewApi) {
 					string main = DownloadString(episodeLink);
 					if (main == "") return;

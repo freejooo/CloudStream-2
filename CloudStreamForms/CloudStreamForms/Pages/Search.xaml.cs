@@ -29,7 +29,7 @@ namespace CloudStreamForms
 
 			MainSearchBar.TextChanged += SearchBar_TextChanged;
 			MainSearchBar.SearchButtonPressed += SearchBar_SearchButtonPressed;
-			
+
 			MySearchResultCollection = new ObservableCollection<SearchResult>();
 
 			BindingContext = this;
@@ -118,7 +118,7 @@ namespace CloudStreamForms
 										Effects = {
 											 new CloudStreamForms.Effects.LongPressedEffect(),
 										},
-										
+
 										VerticalOptions = LayoutOptions.CenterAndExpand,
 										Spacing = 0,
 										Children =
@@ -224,11 +224,17 @@ namespace CloudStreamForms
 						extra = " - " + extra;
 					}
 					int _id = i;
-					MySearchResultCollection.Add(new SearchResult() { OnClick = new Command( () => {
-						PushPage(activePosters[_id], Navigation);
-					}), 
+					MySearchResultCollection.Add(new SearchResult() {
+						OnClick = new Command(() => {
+							PushPage(activePosters[_id], Navigation);
+						}),
 						IsBookmarked = isBook,
-						ExtraColor = isBook ? bgBlue : bgColor, Id = i, Title = mainCore.activeSearchResults[i].name + extra, Extra = mainCore.activeSearchResults[i].year, Poster = CloudStreamForms.Core.CloudStreamCore.ConvertIMDbImagesToHD(mainCore.activeSearchResults[i].posterUrl,40,60,multi:2) });
+						ExtraColor = isBook ? bgBlue : bgColor,
+						Id = i,
+						Title = mainCore.activeSearchResults[i].name + extra,
+						Extra = mainCore.activeSearchResults[i].year,
+						Poster = CloudStreamForms.Core.CloudStreamCore.ConvertIMDbImagesToHD(mainCore.activeSearchResults[i].posterUrl, 40, 60, multi: 2)
+					});
 				}
 			});
 		}

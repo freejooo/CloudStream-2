@@ -227,8 +227,7 @@ namespace CloudStreamForms
 
 		public static string GetVideoPlayerName(VideoPlayer player)
 		{
-			return player switch
-			{
+			return player switch {
 				VideoPlayer.None => "No Videoplayer",
 				VideoPlayer.VLC => "VLC",
 				// VideoPlayer.MPV => "MPV",
@@ -240,8 +239,7 @@ namespace CloudStreamForms
 
 		public static string GetPathFromType(MovieType t)
 		{
-			return t switch
-			{
+			return t switch {
 				MovieType.Movie => "Movies",
 				MovieType.TVSeries => "TVSeries",
 				MovieType.Anime => "Anime",

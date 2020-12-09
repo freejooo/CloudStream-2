@@ -372,7 +372,7 @@ namespace CloudStreamForms
 
 						bool noDownloads = _epres.Length == 0;
 						Device.BeginInvokeOnMainThread(() => {
-							
+
 							MyEpisodeResultCollection.Clear();
 							foreach (var ep in _epres) {
 								ep.TapComThree = new Command(async () => {
@@ -423,8 +423,7 @@ namespace CloudStreamForms
 
 		public static int ConvertToSortOrder(MovieType movieType)
 		{
-			return movieType switch
-			{
+			return movieType switch {
 				MovieType.Movie => 0,
 				MovieType.TVSeries => 2,
 				MovieType.Anime => 3,
@@ -436,8 +435,7 @@ namespace CloudStreamForms
 
 		public static string GetExtraString(DownloadState state)
 		{
-			return state switch
-			{
+			return state switch {
 				App.DownloadState.Downloading => "Downloading",
 				App.DownloadState.Downloaded => "Downloaded",
 				// CAN HEPPEND IF DOWNLOADED, BUT STOPPED DUE TO INTERNET or NOT DOWNLOADED

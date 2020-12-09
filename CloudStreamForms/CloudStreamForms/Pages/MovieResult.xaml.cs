@@ -541,8 +541,7 @@ namespace CloudStreamForms
 			controller.OnTextChanged += (object o, LabelInfo e) => {
 				if (IsDead) return;
 
-				Label label = e.label switch
-				{
+				Label label = e.label switch {
 					LabelType.NameLabel => NameLabel,
 					LabelType.YearLabel => RatingLabel,
 					LabelType.RatingLabel => RatingLabelRating,
@@ -565,8 +564,7 @@ namespace CloudStreamForms
 			controller.OnPickerChanged += (object o, PickerInfo e) => {
 				if (IsDead) return;
 
-				LabelList labelList = e.picker switch
-				{
+				LabelList labelList = e.picker switch {
 					PickerType.SeasonPicker => SeasonPicker,
 					PickerType.DubPicker => DubPicker,
 					PickerType.EpisodeFromToPicker => FromToPicker,
@@ -599,8 +597,7 @@ namespace CloudStreamForms
 			controller.OnBttChanged += (object o, ButtonInfo e) => {
 				if (IsDead) return;
 
-				Button btt = e.button switch
-				{
+				Button btt = e.button switch {
 					ButtonType.BatchDownloadPicker => BatchDownloadBtt,
 					ButtonType.SkipAnimeBtt => SkipAnimeBtt,
 					_ => null,
@@ -1519,7 +1516,7 @@ namespace CloudStreamForms
 		{
 			if (!CanLoadLinkFrom(id, out int index)) return "";
 			var _ep = epView.MyEpisodeResultCollection[index + 1];
-			if(load) {
+			if (load) {
 				App.SetViewPos(_ep.IMDBEpisodeId, -1); // IN CASE YOU HAVE ALREADY WATCHED IT HALFWAY
 			}
 			await LoadLinksForEpisode(_ep, load, false, load);
@@ -2242,8 +2239,7 @@ namespace CloudStreamForms
 			System.Timers.Timer timer = new System.Timers.Timer(10);
 			ProgressBar GetBar(int _state)
 			{
-				return _state switch
-				{
+				return _state switch {
 					0 => EPISODESBar,
 					1 => RECOMMENDATIONSBar,
 					2 => TRAILERSBar,

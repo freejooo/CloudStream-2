@@ -1,7 +1,5 @@
 ﻿using CloudStreamForms.Core.AnimeProviders;
-using Newtonsoft.Json;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using static CloudStreamForms.Core.AnimeProviders.ShiroBaseProvider;
 using static CloudStreamForms.Core.BlotFreeProvider;
