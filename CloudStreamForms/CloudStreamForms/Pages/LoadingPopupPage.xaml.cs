@@ -15,7 +15,7 @@ namespace CloudStreamForms
 			// BackgroundColor = new Color(0, 0, 0, 0.9);
 
 			if (ActionPopup.isOpen) {
-				PopupNavigation.PopAsync(false);
+				PopupNavigation.Instance.PopAsync(false);
 			}
 			ActionPopup.isOpen = true;
 
@@ -32,13 +32,13 @@ namespace CloudStreamForms
 		async void Main(int loadingMs)
 		{
 			await MainProgressBar.ProgressTo(1, (uint)Math.Max(loadingMs - RELEASE_MS, 0), Easing.SinIn);
-			End();
+			_ = End();
 		}
 
 		public async Task End()
 		{
 			await MainProgressBar.ScaleYTo(0, RELEASE_MS, Easing.SinIn);
-			await PopupNavigation.PopAsync(false);
+			await PopupNavigation.Instance.PopAsync(false);
 		}
 
 		protected override void OnAppearing()

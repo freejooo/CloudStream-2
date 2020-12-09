@@ -326,7 +326,7 @@ namespace CloudStreamForms
 			if (isRequestingVLC) return;
 			isRequestingVLC = true;
 			bool useVideo = overrideSelectVideo ?? Settings.UseVideoPlayer;
-			bool subtitlesEnabled = subtitleFull != "";
+			//bool subtitlesEnabled = subtitleFull != "";
 			if (useVideo) {
 				Page p = new VideoPage(new VideoPage.PlayVideo() {
 					descript = descript,
@@ -730,13 +730,13 @@ namespace CloudStreamForms
 		{
 			try {
 				string _set = ConvertToString(value);
-				if (myApp.Properties.ContainsKey(path)) {
+				if (MyApp.Properties.ContainsKey(path)) {
 					CloudStreamCore.print("CONTAINS KEY" + path);
-					myApp.Properties[path] = _set;
+					MyApp.Properties[path] = _set;
 				}
 				else {
 					CloudStreamCore.print("ADD KEY" + path);
-					myApp.Properties.Add(path, _set);
+					MyApp.Properties.Add(path, _set);
 				}
 			}
 			catch (Exception _ex) {
@@ -826,7 +826,7 @@ namespace CloudStreamForms
 		public static string GetRawKey(string path, string defVal = "")
 		{
 			try {
-				return myApp.Properties[path] as string;
+				return MyApp.Properties[path] as string;
 			}
 			catch (Exception) {
 				return defVal;
@@ -836,7 +836,7 @@ namespace CloudStreamForms
 		public static void SetRawKey(string path, string data)
 		{
 			try {
-				myApp.Properties[path] = data;
+				MyApp.Properties[path] = data;
 			}
 			catch (Exception) {
 			}
@@ -844,21 +844,21 @@ namespace CloudStreamForms
 
 		public static void ClearEveryKey()
 		{
-			myApp.Properties.Clear();
+			MyApp.Properties.Clear();
 		}
 
 		public static List<string> GetAllKeys()
 		{
-			return myApp.Properties.Keys.ToList();
+			return MyApp.Properties.Keys.ToList();
 		}
 
 		public static T GetKey<T>(string path, T defVal)
 		{
 			try {
-				if (myApp.Properties.ContainsKey(path)) {
+				if (MyApp.Properties.ContainsKey(path)) {
 					// CloudStreamCore.print("GETKEY::" + myApp.Properties[path]);
 					// CloudStreamCore.print("GETKEY::" + typeof(T).ToString() + "||" + ConvertToObject<T>(myApp.Properties[path] as string, defVal));
-					return (T)ConvertToObject<T>(myApp.Properties[path] as string, defVal);
+					return (T)ConvertToObject<T>(MyApp.Properties[path] as string, defVal);
 				}
 				else {
 					return defVal;
@@ -877,7 +877,7 @@ namespace CloudStreamForms
 
 				List<T> allKeys = new List<T>();
 				foreach (var key in keyNames) {
-					allKeys.Add((T)myApp.Properties[key]);
+					allKeys.Add((T)MyApp.Properties[key]);
 				}
 
 				return allKeys;
@@ -896,9 +896,9 @@ namespace CloudStreamForms
 
 		public static List<string> GetKeysPath(string folder)
 		{
-			string[] copy = new string[myApp.Properties.Keys.Count];
+			string[] copy = new string[MyApp.Properties.Keys.Count];
 			try {
-				myApp.Properties.Keys.CopyTo(copy, 0);
+				MyApp.Properties.Keys.CopyTo(copy, 0);
 				List<string> keyNames = copy.Where(t => t != null).Where(t => t.StartsWith(GetKeyPath(folder))).ToList();
 				return keyNames;
 			}
@@ -920,7 +920,7 @@ namespace CloudStreamForms
 		}
 		public static bool KeyExists(string path)
 		{
-			return (myApp.Properties.ContainsKey(path));
+			return (MyApp.Properties.ContainsKey(path));
 		}
 		public static void RemoveKey(string folder, string name)
 		{
@@ -930,8 +930,8 @@ namespace CloudStreamForms
 		public static void RemoveKey(string path)
 		{
 			try {
-				if (myApp.Properties.ContainsKey(path)) {
-					myApp.Properties.Remove(path);
+				if (MyApp.Properties.ContainsKey(path)) {
+					MyApp.Properties.Remove(path);
 				}
 			}
 			catch (Exception _ex) {
@@ -939,7 +939,7 @@ namespace CloudStreamForms
 			}
 		}
 
-		static Application myApp { get { return Application.Current; } }
+		static Application MyApp { get { return Current; } }
 
 		public static T ConvertToObject<T>(string str, T defValue)
 		{

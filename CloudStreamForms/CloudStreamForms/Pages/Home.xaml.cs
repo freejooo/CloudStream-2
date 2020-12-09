@@ -80,7 +80,7 @@ namespace CloudStreamForms
 									Title = (x.place > 0 ? (x.place + ". ") : "") + x.name + (x.year.IsClean() ? $" ({x.year})" : "") + " ★ " + x.rating.Replace(",", "."),
 									Id = x.place,
 									PosterUrl = img,
-									extraInfo = "Id=" + x.id + "|||Name=" + x.name + "|||"
+									ExtraInfo = "Id=" + x.id + "|||Name=" + x.name + "|||"
 								}, false);
 							}
 						}
@@ -166,7 +166,7 @@ namespace CloudStreamForms
 
 		public void PushPage(EpisodeResult episodeResult)
 		{
-			PushPageFromUrlAndName(FindShortend(episodeResult.extraInfo, "Id"), FindShortend(episodeResult.extraInfo, "Name"));
+			PushPageFromUrlAndName(FindShortend(episodeResult.ExtraInfo, "Id"), FindShortend(episodeResult.ExtraInfo, "Name"));
 
 		}
 
@@ -211,7 +211,7 @@ namespace CloudStreamForms
 			UpdateNoBookmarks();
 			for (int i = 0; i < selectTabItems.Length; i++) {
 				bool sel = selectedTabItem == i;
-				selectTabLabels[i].ScaleTo(sel ? 1.1 : 0.9, 150, Easing.SinOut);
+				_ = selectTabLabels[i].ScaleTo(sel ? 1.1 : 0.9, 150, Easing.SinOut);
 				selectTabLabels[i].FontAttributes = sel ? FontAttributes.Bold : FontAttributes.None;
 				selectTabLabels[i].TextColor = sel ? Color.FromHex("#FFF") : Color.FromHex("#c9c9c9");
 			}
@@ -222,7 +222,7 @@ namespace CloudStreamForms
 
 			Bookmarks.IsVisible = bookmarkVis;
 			Top100Stack.IsVisible = !bookmarkVis;
-			Top100Stack.FadeTo(bookmarkVis ? 0 : 1);
+			_ = Top100Stack.FadeTo(bookmarkVis ? 0 : 1);
 			if (selectedTabItem > 0) {
 				var _movieIndex = selectedTabItem - 1;
 				if (MovieIndex != _movieIndex) {
@@ -268,7 +268,9 @@ namespace CloudStreamForms
 			}
 
 			if (Settings.IS_TEST_BUILD) {
+#pragma warning disable CS0162 // Unreachable code detected
 				return;
+#pragma warning restore CS0162 // Unreachable code detected
 			}
 			try {
 				epView = new MainEpisodeView();
@@ -276,8 +278,9 @@ namespace CloudStreamForms
 
 				BackgroundColor = Settings.BlackRBGColor;
 
-				MovieTypePicker = new LabelList(MovieTypePickerBtt, genresNames);
-				MovieTypePicker.SelectedIndex = 0;
+				MovieTypePicker = new LabelList(MovieTypePickerBtt, genresNames) {
+					SelectedIndex = 0
+				};
 
 				MovieTypePicker.SelectedIndexChanged += (o, e) => {
 					ClearEpisodes(!IsRecommended);
@@ -345,17 +348,11 @@ namespace CloudStreamForms
 			return FindHTML(d, key + "=", "|||");
 		}
 
-		async Task AddEpisodeAsync(EpisodeResult episodeResult, bool setHeight = true, int delay = 10)
-		{
-			AddEpisode(episodeResult, setHeight);
-			await Task.Delay(delay);
-		}
-
 		void AddEpisode(EpisodeResult episodeResult, bool setHeight = true)
 		{
 			episodeResult.ExtraColor = Settings.ItemBackGroundColor.ToHex();
 			episodeResult.TapCom = new Command((s) => {
-				PushPageFromUrlAndName(FindShortend(episodeResult.extraInfo, "Id"), FindShortend(episodeResult.extraInfo, "Name"));
+				PushPageFromUrlAndName(FindShortend(episodeResult.ExtraInfo, "Id"), FindShortend(episodeResult.ExtraInfo, "Name"));
 				PushPage(episodeResult);
 			});
 			epView.MyEpisodeResultCollection.Add(episodeResult);
@@ -381,8 +378,8 @@ namespace CloudStreamForms
 		double MovieTypePickerBttScrollY = 0;
 		const int MovieTypePickerBttMinScrollY = 100;
 
-		public int PosterAtScreenWith { get { return (int)(currentWidth / (double)POSTER_WIDTH); } }
-		public int PosterAtScreenHight { get { return (int)(currentWidth / (double)POSTER_HIGHT); } }
+		public int PosterAtScreenWith { get { return (int)(CurrentWidth / (double)POSTER_WIDTH); } }
+		public int PosterAtScreenHight { get { return (int)(CurrentWidth / (double)POSTER_HIGHT); } }
 		readonly List<FFImageLoading.Forms.CachedImage> cachedImages = new List<FFImageLoading.Forms.CachedImage>();
 		public const int bookmarkLabelTransY = 30;
 
@@ -407,15 +404,6 @@ namespace CloudStreamForms
 
 				episodeView.HeightRequest = selectedTabItem == 0 ? 0 : epView.MyEpisodeResultCollection.Count * (episodeView.RowHeight) + 200;
 			});
-
-		}
-
-		void SetChashedImagePos(int pos)
-		{
-			int x = pos % PosterAtScreenWith;
-			int y = (int)(pos / PosterAtScreenWith);
-			Grid.SetColumn(cachedImages[pos], x);
-			Grid.SetRow(cachedImages[pos], y);
 		}
 
 		protected override void OnDisappearing()
@@ -429,8 +417,10 @@ namespace CloudStreamForms
 		protected override void OnAppearing()
 		{
 			if (Settings.IS_TEST_BUILD) {
+#pragma warning disable CS0162 // Unreachable code detected
 				base.OnAppearing();
 				return;
+#pragma warning restore CS0162 // Unreachable code detected
 			}
 			UpdateLabels();
 			SetHeight();
@@ -514,9 +504,8 @@ namespace CloudStreamForms
 				Bookmarks.HeightRequest = (bookmarkLabelTransY + RecPosterHeight + Bookmarks.RowSpacing) * (((Bookmarks.Children.Count - 1) / perCol) + 1) - 7 + Bookmarks.RowSpacing;
 				if (isFromSizeChange) {
 					await Task.Delay(100);
-					Bookmarks.FadeTo(1, 75);
+					_ = Bookmarks.FadeTo(1, 75);
 				}
-
 			});
 		}
 
@@ -536,7 +525,7 @@ namespace CloudStreamForms
 			public Button label;
 		}
 
-		List<UpdateLabel> updateLabels = new List<UpdateLabel>();
+		readonly List<UpdateLabel> updateLabels = new List<UpdateLabel>();
 
 		string GetAirDate(long airAt)
 		{
@@ -757,14 +746,15 @@ namespace CloudStreamForms
 			}
 			ChangeSizeOfTabs();
 		}
-		public double currentWidth { get { return Application.Current.MainPage.Width; } }
+
+		public double CurrentWidth { get { return Application.Current.MainPage.Width; } }
 
 		private void Grid_BindingContextChanged(object sender, EventArgs e)
 		{
 			var s = ((Grid)sender);
 			Commands.SetTap(s, new Command((o) => {
 				var episodeResult = ((EpisodeResult)o);
-				PushPageFromUrlAndName(FindShortend(episodeResult.extraInfo, "Id"), FindShortend(episodeResult.extraInfo, "Name"));
+				PushPageFromUrlAndName(FindShortend(episodeResult.ExtraInfo, "Id"), FindShortend(episodeResult.ExtraInfo, "Name"));
 				PushPage(episodeResult);
 
 				//do something

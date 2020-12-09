@@ -1015,15 +1015,15 @@ namespace CloudStreamForms
 				await AniListSyncApi.CheckToken();
 
 				if (!CurrentAniListUser.HasValue) {
-					AniListSyncApi.GetUser();
+					_ = AniListSyncApi.GetUser();
 				}
 			}
 
 			if (HasMalAccountLogin) {
 				if (!CurrentMalUser.HasValue) {
-					MALSyncApi.GetUser();
+					_ = GetUser();
 				}
-				MALSyncApi.OnLoginOrStart();
+				_ = OnLoginOrStart();
 			}
 			if (AccountOverrideServerData) { // If get account dident work and you have changed then override server data
 				PublishSyncAccount(5000);
@@ -1220,7 +1220,7 @@ namespace CloudStreamForms
 								App.ShowToast("Too short username or password");
 							}
 						}
-						catch (Exception _ex) {
+						catch {
 							App.ShowToast("Internal server error");
 						}
 					}
@@ -1266,7 +1266,7 @@ namespace CloudStreamForms
 								App.ShowToast("Too short username or password");
 							}
 						}
-						catch (Exception _ex) {
+						catch {
 							App.ShowToast("Internal server error");
 						}
 					}
@@ -1500,7 +1500,7 @@ namespace CloudStreamForms
 							}
 						}
 					}
-					catch (Exception _ex) {
+					catch {
 						App.ShowToast("Account error");
 						AccountOverrideServerData = true;
 					}
@@ -1525,7 +1525,7 @@ namespace CloudStreamForms
 							Home.UpdateIsRequired = true;
 						}
 					}
-					catch (Exception _ex) {
+					catch {
 						App.ShowToast("Account error");
 					}
 				});
@@ -1618,45 +1618,8 @@ namespace CloudStreamForms
 
 				}
 				catch (Exception _ex) {
-					CloudStreamCore.error("FATAL EX IN POSTREQUEST");
-				}
-
-
-
-				/*
-                using (var webResponse = webRequest.GetResponse()) {
-                    try {
-                        using (StreamReader httpWebStreamReader = new StreamReader(webResponse.GetResponseStream(), Encoding.UTF8)) {
-                            try {
-                                string s = httpWebStreamReader.ReadToEnd();
-                                if (s.StartsWith("OKDATA")) {
-                                    result = LoginErrorType.Ok;
-                                    if (logintype == Logintype.LoginAccount) {
-                                        return StringCipher.Decrypt(s.Split('\n')[1], password); // THE DATA IS OKDATA\nUSERDATA 
-                                    }
-                                    else {
-                                        return "";
-                                    }
-                                }
-                                else {
-                                    result = (LoginErrorType)int.Parse(CloudStreamCore.FindHTML(s, "ERRORCODE[", "]"));
-                                    return "";
-                                }
-                                //   _s = httpWebStreamReader.ReadToEnd();
-                                //  done = true;
-                            }
-                            catch (Exception _ex) {
-                                CloudStreamCore.error(_ex);
-                            }
-
-                        }
-                    }
-                    catch (Exception) {
-                        return "";
-                    }
-
-                }
-                */
+					CloudStreamCore.error("FATAL EX IN POSTREQUEST" + _ex);
+				} 
 				return "";
 			}
 			catch (Exception _ex) {

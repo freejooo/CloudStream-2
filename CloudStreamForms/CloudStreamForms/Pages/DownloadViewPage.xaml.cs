@@ -64,7 +64,7 @@ namespace CloudStreamForms
 		private void ViewCell_Tapped(object sender, EventArgs e)
 		{
 			EpisodeResult episodeResult = (EpisodeResult)(((ViewCell)sender).BindingContext);
-			HandleEpisode(episodeResult);
+			_ = HandleEpisode(episodeResult);
 			episodeView.SelectedItem = null;
 		}
 
@@ -102,11 +102,11 @@ namespace CloudStreamForms
 				ChromeCastPage.isActive = false;
 			}
 			if (!ChromeCastPage.isActive) {
-				OpenChrome(false);
+				OpenChrome();
 			}
 		}
 
-		public static void OpenChrome(bool validate = true)
+		public static void OpenChrome()
 		{
 			if (!ChromeCastPage.isActive && Download.chromeDownload != null) {
 				Page p = ChromeCastPage.CreateChromePage(Download.chromeDownload);// new (chromeResult, chromeMovieResult); //{ episodeResult = chromeResult, chromeMovieResult = chromeMovieResult };

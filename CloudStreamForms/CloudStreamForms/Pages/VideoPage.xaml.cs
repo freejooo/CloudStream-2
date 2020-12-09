@@ -154,7 +154,7 @@ namespace CloudStreamForms
 				task.Wait(timeSpan);
 				return task.IsCompleted;
 			}
-			catch (AggregateException ae) {
+			catch {
 				return false;
 				// throw ae.InnerExceptions[0];
 			}
@@ -295,8 +295,6 @@ namespace CloudStreamForms
 
 		int currentSubtitleIndexInCurrent = 0;
 
-		string subtitleText1; // TOP
-		string subtitleText2; // BOTTOM
 		string subtitleTextFull; // BOTTOM
 
 		double currentTime = 0;
@@ -335,8 +333,6 @@ namespace CloudStreamForms
 				if (subtitleIndex == -1 || currentSubtitles[subtitleIndex].subtitles.Length <= 3) {
 					// await Task.Delay(50);
 					subtitleTextFull = "";
-					subtitleText2 = "";
-					subtitleText1 = "";
 					UpdateSubtitles();
 					return;
 				}
@@ -390,14 +386,6 @@ namespace CloudStreamForms
 									for (int i = 0; i < lines.Count; i++) {
 										subtitleTextFull += lines[i] + (i == (lines.Count - 1) ? "" : "\n");
 									}
-									if (lines.Count == 1) {
-										subtitleText1 = "";//lines[1].line;
-										subtitleText2 = lines[0];
-									}
-									else {
-										subtitleText1 = lines[0];
-										subtitleText2 = lines[1];
-									}
 								}
 								UpdateSubtitles();
 								lastType = false;
@@ -406,8 +394,6 @@ namespace CloudStreamForms
 						else {
 							if (!lastType) {
 								subtitleTextFull = "";
-								subtitleText1 = "";
-								subtitleText2 = "";
 								UpdateSubtitles();
 								lastType = true;
 							}
@@ -417,7 +403,7 @@ namespace CloudStreamForms
 						last = currentSubtitleIndexInCurrent;
 						//  await Task.Delay(30);
 					}
-					catch (Exception _ex) {
+					catch {
 						done = true;
 					}
 				}
@@ -480,8 +466,6 @@ namespace CloudStreamForms
 
 		long skipToEnd;
 
-		bool isShowingSmallSkip = false;
-
 		public void PlayerTimeChanged(long time)
 		{
 			if (!isShown) return;
@@ -516,7 +500,7 @@ namespace CloudStreamForms
 					var _skip = skip[0];
 					isShowingSkip = true;
 
-					Device.InvokeOnMainThreadAsync(async () => {
+					_ = Device.InvokeOnMainThreadAsync(async () => {
 						skipToEnd = _skip.timestamp + _skip.duration;
 						SkipSomething.IsEnabled = true;
 						SkipSomething.IsVisible = !App.IsPictureInPicture || _skip.forceSkip;
@@ -528,8 +512,8 @@ namespace CloudStreamForms
 
 						SkipSomething.Layout(fadeToBounds);
 						SkipSomething.TranslationX = 0;
-						SkipSomething.FadeTo(1, easing: Easing.SinOut);
-						SkipSomething.LayoutTo(skipBounds, easing: Easing.SinOut);
+						_ = SkipSomething.FadeTo(1, easing: Easing.SinOut);
+						_ = SkipSomething.LayoutTo(skipBounds, easing: Easing.SinOut);
 
 						if (!_skip.forceSkip) {
 
@@ -546,8 +530,8 @@ namespace CloudStreamForms
 							await Task.Delay(500);
 						}
 
-						SkipSomething.TranslateTo(100, 0, easing: Easing.SinOut);
-						SkipSomething.FadeTo(0, easing: Easing.SinOut);
+						_ = SkipSomething.TranslateTo(100, 0, easing: Easing.SinOut);
+						_ = SkipSomething.FadeTo(0, easing: Easing.SinOut);
 
 						SkipSomething.IsEnabled = false;
 
@@ -622,11 +606,6 @@ namespace CloudStreamForms
 				ToastLabel.FadeTo(0, 700, Easing.SinIn);
 			});
 		}
-
-		static bool hasOutline = false;
-
-		readonly Label[] font1;
-		readonly Label[] font2;
 
 		bool canStart = true;
 
@@ -708,7 +687,6 @@ namespace CloudStreamForms
 				SubtitleTxt1BG.TranslationY = base1Y;
 
 				bool hasDropshadow = Settings.SubtitlesHasDropShadow;
-				hasOutline = Settings.SubtitlesHasOutline;
 
 				string fontFam = App.GetFont(Settings.GlobalSubtitleFont);
 				SubtitleTxt1.FontFamily = fontFam;
@@ -783,7 +761,7 @@ namespace CloudStreamForms
 
 				if (Settings.SUBTITLES_INVIDEO_ENABELD) {
 					try {
-						if (globalSubtitlesEnabled && HasSupportForSubtitles()) {
+						if (GlobalSubtitlesEnabled && HasSupportForSubtitles()) {
 							PopulateSubtitle();
 						}
 					}
@@ -844,7 +822,7 @@ namespace CloudStreamForms
 						for (int i = 0; i < AllMirrorsNames.Count; i++) {
 							if (AllMirrorsNames[i] == action) {
 								print("SELECT MIRR" + action);
-								SelectMirror(i);
+								_ = SelectMirror(i);
 							}
 						}
 					}
@@ -1165,7 +1143,7 @@ namespace CloudStreamForms
 					ErrorWhenLoading();
 				};
 
-				SelectMirror(currentVideo.preferedMirror);
+				_ = SelectMirror(currentVideo.preferedMirror);
 
 				ShowNextMirror();
 
@@ -1246,7 +1224,7 @@ namespace CloudStreamForms
 			return orientation == VideoOrientation.LeftBottom || orientation == VideoOrientation.RightTop;
 		}
 
-		private AspectRatio? GetAspectRatio(MediaPlayer? mediaPlayer)
+		private AspectRatio? GetAspectRatio(MediaPlayer mediaPlayer)
 		{
 			if (mediaPlayer == null) {
 				return null;
@@ -1338,7 +1316,7 @@ namespace CloudStreamForms
 		public static PlayVideo showOnAppearPage;
 		public static bool showOnAppear = false;
 		public static bool CanReopen = false;
-		public async void HandleAppResume(object o, EventArgs e)
+		public void HandleAppResume(object o, EventArgs e)
 		{
 			App.ToggleRealFullScreen(true);
 		}
@@ -1361,12 +1339,12 @@ namespace CloudStreamForms
 			App.PlatformDep.PictureInPicture();
 		}
 
-		public async void HandleAction(object o, App.PlayerEventType e)
+		public void HandleAction(object o, App.PlayerEventType e)
 		{
 			HandleVideoAction(e);
 		}
 
-		public async void HandleAppPipMode(object o, bool e)
+		public void HandleAppPipMode(object o, bool e)
 		{
 			SubtitleTxt1.IsVisible = !e;
 			SubtitleTxt1BG.IsVisible = !e;
@@ -1488,7 +1466,7 @@ namespace CloudStreamForms
 			if (_currentMirrorId >= AllMirrorsUrls.Count) {
 				_currentMirrorId = 0;
 			}
-			SelectMirror(_currentMirrorId);
+			_ = SelectMirror(_currentMirrorId);
 		}
 
 		void SelectPrevMirror()
@@ -1497,7 +1475,7 @@ namespace CloudStreamForms
 			if (_currentMirrorId < 0) {
 				_currentMirrorId = AllMirrorsUrls.Count - 1;
 			}
-			SelectMirror(_currentMirrorId);
+			_ = SelectMirror(_currentMirrorId);
 		}
 
 		bool isFirstLoadedMirror = true;
@@ -1514,8 +1492,9 @@ namespace CloudStreamForms
 			isPausable = false;
 			isSeekeble = false;
 
-			List<string> options = new List<string>();
-			options.Add($"sub-track-id={int.MaxValue}");
+			List<string> options = new List<string> {
+				$"sub-track-id={int.MaxValue}"
+			};
 
 			long pos;
 			bool startTimeSet = false;
@@ -1738,8 +1717,9 @@ namespace CloudStreamForms
 				mediaPlayer?.Dispose();
 				_libVLC?.Dispose();
 				_libVLC = null;
-			});
-			t.Name = "DISPOSETHREAD";
+			}) {
+				Name = "DISPOSETHREAD"
+			};
 			t.Start();
 		}
 		async void Hide()
@@ -1860,9 +1840,9 @@ namespace CloudStreamForms
 			SkipForwardImg.AbortAnimation("RotateTo");
 			SkipForwardImg.AbortAnimation("ScaleTo");
 			SkipForwardImg.Rotation = 0;
-			SkipForwardImg.ScaleTo(0.9, 100, Easing.SinInOut);
+			_ = SkipForwardImg.ScaleTo(0.9, 100, Easing.SinInOut);
 			await SkipForwardImg.RotateTo(90, 100, Easing.SinInOut);
-			SkipForwardImg.ScaleTo(1, 100, Easing.SinInOut);
+			_ = SkipForwardImg.ScaleTo(1, 100, Easing.SinInOut);
 			await SkipForwardImg.RotateTo(0, 100, Easing.SinInOut);
 		}
 
@@ -1871,9 +1851,9 @@ namespace CloudStreamForms
 			SkipBackImg.AbortAnimation("RotateTo");
 			SkipBackImg.AbortAnimation("ScaleTo");
 			SkipBackImg.Rotation = 0;
-			SkipBackImg.ScaleTo(0.9, 100, Easing.SinInOut);
+			_ = SkipBackImg.ScaleTo(0.9, 100, Easing.SinInOut);
 			await SkipBackImg.RotateTo(-90, 100, Easing.SinInOut);
-			SkipBackImg.ScaleTo(1, 100, Easing.SinInOut);
+			_ = SkipBackImg.ScaleTo(1, 100, Easing.SinInOut);
 			await SkipBackImg.RotateTo(0, 100, Easing.SinInOut);
 		}
 
@@ -1963,22 +1943,22 @@ namespace CloudStreamForms
 			print("FADETO: " + disable);
 			AllButtons.IsEnabled = !disable;
 			TotalOpasity = 1;
-			BlackBg.FadeTo(fade * 0.3);
+			_ = BlackBg.FadeTo(fade * 0.3);
 
 			VideoSliderAndSettings.AbortAnimation("TranslateTo");
-			VideoSliderAndSettings.TranslateTo(VideoSliderAndSettings.TranslationX, disable ? 80 : 0, fadeTime, Easing.Linear);
+			_ = VideoSliderAndSettings.TranslateTo(VideoSliderAndSettings.TranslationX, disable ? 80 : 0, fadeTime, Easing.Linear);
 			EpisodeLabel.AbortAnimation("TranslateTo");
-			EpisodeLabel.TranslateTo(EpisodeLabel.TranslationX, disable ? -60 : 20, fadeTime, Easing.Linear);
+			_ = EpisodeLabel.TranslateTo(EpisodeLabel.TranslationX, disable ? -60 : 20, fadeTime, Easing.Linear);
 
 			RezLabel.AbortAnimation("TranslateTo");
-			RezLabel.TranslateTo(RezLabel.TranslationX, disable ? -60 : 40, fadeTime, Easing.Linear);
+			_ = RezLabel.TranslateTo(RezLabel.TranslationX, disable ? -60 : 40, fadeTime, Easing.Linear);
 
 			SubHolder.AbortAnimation("TranslateTo");
-			SubHolder.TranslateTo(EpisodeLabel.TranslationX, disable ? 0 : -90, fadeTime, Easing.Linear);
+			_ = SubHolder.TranslateTo(EpisodeLabel.TranslationX, disable ? 0 : -90, fadeTime, Easing.Linear);
 
 
 			AllButtons.AbortAnimation("FadeTo");
-			AllButtons.FadeTo(fade, fadeTime);
+			_ = AllButtons.FadeTo(fade, fadeTime);
 
 			/*foreach (var item in AllButtons.Children) {
 				if (item.ClassId != "NOFADE") {

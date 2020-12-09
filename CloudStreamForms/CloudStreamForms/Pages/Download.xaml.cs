@@ -72,7 +72,9 @@ namespace CloudStreamForms
 			OffBar.Source = App.GetImageSource("gradient.png"); OffBar.HeightRequest = 3; OffBar.HorizontalOptions = LayoutOptions.Fill; OffBar.ScaleX = 100; OffBar.Opacity = 0.3; OffBar.TranslationY = 9;
 
 			if (Settings.IS_TEST_BUILD) {
+#pragma warning disable CS0162 // Unreachable code detected
 				return;
+#pragma warning restore CS0162 // Unreachable code detected
 			}
 			try {
 				baseImg.Source = App.GetImageSource("NoDownloads.png");
@@ -166,7 +168,9 @@ namespace CloudStreamForms
             }*/
 
 			if (Settings.IS_TEST_BUILD) {
+#pragma warning disable CS0162 // Unreachable code detected
 				return;
+#pragma warning restore CS0162 // Unreachable code detected
 			}
 			OnAppear();
 
@@ -200,7 +204,9 @@ namespace CloudStreamForms
 			if (inProgress) return;
 
 			if (Settings.IS_TEST_BUILD) {
+#pragma warning disable CS0162 // Unreachable code detected
 				return;
+#pragma warning restore CS0162 // Unreachable code detected
 			}
 
 			try {
@@ -402,9 +408,10 @@ namespace CloudStreamForms
 					finally {
 						inProgress = false;
 					}
-				});
-				//mThread.SetApartmentState(ApartmentState.STA);
-				mThread.Name = "EpisodeThread";
+				}) {
+					//mThread.SetApartmentState(ApartmentState.STA);
+					Name = "EpisodeThread"
+				};
 				mThread.Start();
 			}
 			catch (Exception _ex) {
@@ -695,7 +702,7 @@ namespace CloudStreamForms
 
 						DownloadHeader header = new DownloadHeader() { movieType = MovieType.YouTube, id = author.Id, name = author.Title, hdPosterUrl = author.LogoUrl, posterUrl = author.LogoUrl, ogName = author.Title }; //description = v.Description,hdPosterUrl=v.Thumbnails.HighResUrl, };//ConvertTitleToHeader(title);
 
-						string filePath = YouTube.DownloadVideo(data, v.Title, data, v, id, header, true);
+						string filePath = YouTube.DownloadVideo(data, v, id);
 
 						//  YouTube.client.Videos.ClosedCaptions.GetManifestAsync().Result.Tracks.
 						// YouTube.client.Videos.ClosedCaptions.DownloadAsync(v.,)
@@ -782,7 +789,7 @@ namespace CloudStreamForms
 			//client.Videos.ClosedCaptions.DownloadAsync()
 		}
 
-		public static string DownloadVideo(MuxedStreamInfo mediaStreamInfos, string name, MuxedStreamInfo info, Video v, int id, DownloadHeader header, bool isNotification = false)
+		public static string DownloadVideo(MuxedStreamInfo info, Video v, int id)
 		{
 			ImageService.Instance.LoadUrl(v.Thumbnails.HighResUrl, TimeSpan.FromDays(30)); // CACHE IMAGE 
 

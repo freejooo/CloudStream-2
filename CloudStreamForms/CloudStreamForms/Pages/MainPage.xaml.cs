@@ -188,12 +188,14 @@ namespace CloudStreamForms
 				System.AppDomain.CurrentDomain.UnhandledException += UnhandledExceptionTrapper;
 #endif
 
+#pragma warning disable CS0162 // Unreachable code detected
 				if (IS_TEST_VIDEO) {
 					Page p = new VideoPage(new VideoPage.PlayVideo() { descript = "", name = "Black Bunny", episode = -1, season = -1, MirrorNames = new List<string>() { "Googlevid" }, MirrorUrls = new List<string>() { "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" } });//new List<string>() { "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" }, new List<string>() { "Black" }, new List<string>() { });// { mainPoster = mainPoster };
 					mainPage.Navigation.PushModalAsync(p, false);
 					print("PUST: ::: :");
 				}
 				if (IS_EMTY_BUILD) return;
+#pragma warning restore CS0162 // Unreachable code detected
 
 
 				List<string> names = new List<string>() { "Home", "Search", "Downloads", "Settings" };

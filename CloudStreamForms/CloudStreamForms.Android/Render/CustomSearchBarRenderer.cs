@@ -11,7 +11,7 @@ namespace CloudStreamForms.Droid
 {
     public class CustomSearchBarRenderer : SearchBarRenderer
     {
-        private Context context;
+        private readonly Context context;
         public CustomSearchBarRenderer(Context context) : base(context)
         {
             this.context = context;

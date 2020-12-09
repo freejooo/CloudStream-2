@@ -14,11 +14,11 @@ namespace CloudStreamForms.Droid
 {
     public class PIPBroadcastReceiver : BroadcastReceiver
     {
-        MainActivity self;
+		//readonly MainActivity self;
 
-        public PIPBroadcastReceiver(MainActivity self)
+        public PIPBroadcastReceiver() // MainActivity self
         {
-            this.self = self;
+            //this.self = self;
         }
 
         public override void OnReceive(Context context, Intent intent)

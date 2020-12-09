@@ -20,7 +20,7 @@ namespace CloudStreamForms
 			return d != "";
 		}
 
-		LabelList requestType;
+		readonly LabelList requestType;
 
 		bool Submit()
 		{

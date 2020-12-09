@@ -32,8 +32,8 @@ namespace CloudStreamForms.InterfacePages
 		}
 
 		//	public EventHandler<FadePickerEvent> FadePickerChanged;
-		public event EventHandler<Movie> titleLoaded;
-		public event EventHandler<MALData> malDataLoaded;
+		public event EventHandler<Movie> TitleLoaded;
+		public event EventHandler<MALData> MalDataLoaded;
 
 		public struct BackgroundImageEvent
 		{
@@ -42,19 +42,7 @@ namespace CloudStreamForms.InterfacePages
 
 		public EventHandler<BackgroundImageEvent> OnBackgroundChanged;
 
-		public struct TextEvent
-		{
-			public string setTextTo;
-			public LabelType label;
-			public bool isVisible;
-		}
-
-		public struct ButtonEvent
-		{
-			public string setTextTo;
-			public ButtonType btt;
-			public bool isVisible;
-		}
+#pragma warning disable CS0649
 
 		public class ButtonInfo
 		{
@@ -69,6 +57,8 @@ namespace CloudStreamForms.InterfacePages
 			public string text;
 			public LabelType label;
 		}
+
+#pragma warning restore CS0649
 
 		public class PickerInfo
 		{
@@ -165,7 +155,7 @@ namespace CloudStreamForms.InterfacePages
 			ChangeText(LabelType.NameLabel, name);
 			ChangeText(LabelType.YearLabel, year);
 
-			core.fishProgressLoaded += (o, e) => {
+			core.FishProgressLoaded += (o, e) => {
 				if (IsDead) return;
 				if (!hasSkipedLoading) {
 					ChangeText(ButtonType.SkipAnimeBtt, $"Skip - {e.currentProgress} of {e.maxProgress}");
@@ -177,16 +167,16 @@ namespace CloudStreamForms.InterfacePages
 			};
 			tId = id.Replace("https://imdb.com/title/", "");
 
-			core.titleLoaded += Core_titleLoaded;
-			core.episodeHalfLoaded += EpisodesHalfLoaded;
-			core.episodeLoaded += Core_episodeLoaded;
-			core.malDataLoaded += Core_malDataLoaded;
+			core.TitleLoaded += Core_titleLoaded;
+			core.EpisodeHalfLoaded += EpisodesHalfLoaded;
+			core.EpisodeLoaded += Core_episodeLoaded;
+			core.MalDataLoaded += Core_malDataLoaded;
 			core.GetImdbTitle(new Poster() { year = year, name = name, url = id });
 		}
 
 		private void Core_malDataLoaded(object sender, MALData e)
 		{
-			malDataLoaded?.Invoke(null, e);
+			MalDataLoaded?.Invoke(null, e);
 		}
 
 		public struct EpisodeData
@@ -206,7 +196,7 @@ namespace CloudStreamForms.InterfacePages
 		public EventHandler<EpisodeData[]> OnExposedEpisodesChanged;
 
 		int maxEpisodes;
-		List<Episode> CurrentEpisodes { get { return currentMovie.episodes; } }
+		List<Episode> CurrentEpisodes { get { return CurrentMovie.episodes; } }
 
 		void AddEpisode(EpisodeData data, int index)
 		{
@@ -255,7 +245,7 @@ namespace CloudStreamForms.InterfacePages
 				ChangeRunning(false);
 				return;
 			};
-			bool isAnime = currentMovie.title.movieType == MovieType.Anime;
+			bool isAnime = CurrentMovie.title.movieType == MovieType.Anime;
 
 			if (!isMovie) {
 				allEpisodes = new EpisodeData[CurrentEpisodes.Count];
@@ -285,7 +275,7 @@ namespace CloudStreamForms.InterfacePages
 			else { // MOVE
 				maxEpisodes = 1;
 				allEpisodes = new EpisodeData[1];
-				AddEpisode(new EpisodeData() { Episode = 1, Rating = currentMovie.title.rating, Title = currentMovie.title.name, IMDBEpisodeId = currentMovie.title.id, Description = currentMovie.title.description, Id = 0, PosterUrl = "", Season = currentSeason }, 0);
+				AddEpisode(new EpisodeData() { Episode = 1, Rating = CurrentMovie.title.rating, Title = CurrentMovie.title.name, IMDBEpisodeId = CurrentMovie.title.id, Description = CurrentMovie.title.description, Id = 0, PosterUrl = "", Season = currentSeason }, 0);
 				SetEpisodeFromTo(0);
 			}
 
@@ -336,8 +326,8 @@ namespace CloudStreamForms.InterfacePages
 						if (IsDead) return;
 
 						// CLEAR EPISODES SO SWITCHING SUB DUB 
-						if (GetLatestDub.ContainsKey(currentMovie.title.id)) {
-							if (GetLatestDub[currentMovie.title.id] != isDub) {
+						if (GetLatestDub.ContainsKey(CurrentMovie.title.id)) {
+							if (GetLatestDub[CurrentMovie.title.id] != isDub) {
 								try {
 									for (int i = 0; i < exposedEpisodes.Length; i++) {
 										CloudStreamCore.ClearCachedLink(exposedEpisodes[i].IMDBEpisodeId);
@@ -348,7 +338,7 @@ namespace CloudStreamForms.InterfacePages
 								}
 							}
 						}
-						GetLatestDub[currentMovie.title.id] = isDub;
+						GetLatestDub[CurrentMovie.title.id] = isDub;
 						ChangeBatchDownload();
 					}
 					else {
@@ -413,7 +403,7 @@ namespace CloudStreamForms.InterfacePages
 		{
 			if (IsDead) return;
 			isMovie = (e.title.movieType == MovieType.Movie || e.title.movieType == MovieType.AnimeMovie);
-			titleLoaded?.Invoke(null, e);
+			TitleLoaded?.Invoke(null, e);
 
 			setFirstEpAsFade = true;
 
@@ -497,16 +487,16 @@ namespace CloudStreamForms.InterfacePages
 		}
 
 		public CloudStreamCore core;
-		public Movie currentMovie { get { return core.activeMovie; } }
+		public Movie CurrentMovie { get { return core.activeMovie; } }
 		public bool isDub = true;
 		public bool isMovie = false;
 		public int currentSeason = 0;
-		List<Poster> RecomendedPosters { get { return currentMovie.title.recomended; } }
+		//List<Poster> RecomendedPosters { get { return CurrentMovie.title.recomended; } }
 
 		public string CurrentMalLink {
 			get {
 				try {
-					string s = currentMovie.title.MALData.seasonData[currentSeason].malUrl;
+					string s = CurrentMovie.title.MALData.seasonData[currentSeason].malUrl;
 					if (s != "https://myanimelist.net") {
 						return s;
 					}
@@ -523,7 +513,7 @@ namespace CloudStreamForms.InterfacePages
 		public string CurrentAniListLink {
 			get {
 				try {
-					string s = currentMovie.title.MALData.seasonData[currentSeason].aniListUrl;
+					string s = CurrentMovie.title.MALData.seasonData[currentSeason].aniListUrl;
 					if (s.IsClean()) {
 						return s;
 					}

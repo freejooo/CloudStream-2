@@ -18,7 +18,7 @@ namespace CloudStreamForms
 		public const int MIN_MAXLINES = 3;
 		public const int MAX_MAXLINES = -1;
 		ReviewHolder holder;
-		string mainId;
+		readonly string mainId;
 
 		private ObservableCollection<ReviewItem> _MyEpisodeResultCollection;
 		public ObservableCollection<ReviewItem> MyEpisodeResultCollection { set { Added?.Invoke(null, null); _MyEpisodeResultCollection = value; } get { return _MyEpisodeResultCollection; } }

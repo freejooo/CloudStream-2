@@ -129,7 +129,7 @@ namespace CloudStreamForms.Droid
 				task.Wait(timeSpan);
 				return task.IsCompleted;
 			}
-			catch (AggregateException ae) {
+			catch {
 				return false;
 			}
 		}
@@ -175,7 +175,7 @@ namespace CloudStreamForms.Droid
 					else {
 						if (nextIsUrl) {
 							// line.StartsWith("http") ? line : (endLink + ((line.StartsWith("/") || endLink.EndsWith("/")) ? "" : "/") + line)
-							masterLinks[^1] = new M3U8MasterLink() { link = GenerateLine(line, endLink), bandWidth = masterLinks[masterLinks.Count - 1].bandWidth };
+							masterLinks[^1] = new M3U8MasterLink() { link = GenerateLine(line, endLink), bandWidth = masterLinks[^1].bandWidth };
 						}
 						nextIsUrl = false;
 					}

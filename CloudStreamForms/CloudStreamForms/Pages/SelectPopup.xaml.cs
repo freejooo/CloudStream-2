@@ -56,7 +56,7 @@ namespace CloudStreamForms
 			if (currentLoading != null) {
 				await currentLoading.End();
 			}
-			//PopupNavigation.PopAsync(false);
+			//PopupNavigation.Instance.PopAsync(false);
 		}
 
 		public static async Task<List<bool>> DisplaySwitchList(List<string> names, List<bool> toggled, string header)
@@ -149,12 +149,12 @@ namespace CloudStreamForms
 	{
 		public static int selected = -1;
 		public static EventHandler<int> OnSelectedChanged;
-		SelectLabelView selectBinding;
+		readonly SelectLabelView selectBinding;
 		const int fullNum = 12;
 		const int halfNum = 6;
 		const bool setOnLeft = true;
 
-		List<string> currentOptions = new List<string>();
+		readonly List<string> currentOptions = new List<string>();
 		void UpdateScreenRot()
 		{
 			bool hightOverWidth = Bounds.Height > Bounds.Width;
@@ -191,7 +191,7 @@ namespace CloudStreamForms
 			currentOptions = options;
 
 			if (ActionPopup.isOpen) {
-				PopupNavigation.PopAsync(false);
+				PopupNavigation.Instance.PopAsync(false);
 			}
 			ActionPopup.isOpen = true;
 			//  BackgroundColor = Color.Transparent;
@@ -215,7 +215,7 @@ namespace CloudStreamForms
 				OnSelectedChanged = null;
 				optionSelected = "Cancel";
 				ActionPopup.isOpen = false;
-				PopupNavigation.PopAsync(true);
+				PopupNavigation.Instance.PopAsync(true);
 			};
 
 
@@ -228,7 +228,7 @@ namespace CloudStreamForms
 					OnSelectedChanged = null;
 
 					optionSelected = options[e.SelectedItemIndex];
-					PopupNavigation.PopAsync(true);
+					PopupNavigation.Instance.PopAsync(true);
 				}
 			};
 
@@ -334,7 +334,7 @@ namespace CloudStreamForms
 	public class SelectLabelView
 	{
 		public ObservableCollection<PopupName> MyNameCollection { set { Added?.Invoke(null, null); _MyNameCollection = value; } get { return _MyNameCollection; } }
-		private ObservableCollection<PopupName> _MyNameCollection { set; get; }
+		private ObservableCollection<PopupName> _MyNameCollection;
 
 		public event EventHandler Added;
 

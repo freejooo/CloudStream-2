@@ -27,12 +27,12 @@ namespace CloudStreamForms.Core.MovieProviders
 			if (!isMovie) return null;
 			RealShiroItem?[] items = new RealShiroItem?[2] { null, null };
 			bool returnNull = true;
-			var bData = shiroBase.StoreData(tempThred, ToDown(activeMovie.title.name).Replace("  ", ""));
+			var bData = shiroBase.StoreData(tempThred, ToDown(ActiveMovie.title.name).Replace("  ", ""));
 			foreach (var data in bData) {
-				if (data.year != activeMovie.title.year.Substring(0, 4)) {
+				if (data.year != ActiveMovie.title.year.Substring(0, 4)) {
 					continue;
 				}
-				if (data.synonyms.Contains(data.name) || ToDown(data.name) == ToDown(activeMovie.title.name) || ToDown(data.name) == ToDown(activeMovie.title.ogName)) {
+				if (data.synonyms.Contains(data.name) || ToDown(data.name) == ToDown(ActiveMovie.title.name) || ToDown(data.name) == ToDown(ActiveMovie.title.ogName)) {
 					returnNull = false;
 					items[data.isDub ? 1 : 0] = data;
 				}

@@ -77,7 +77,7 @@ namespace CloudStreamForms
 
 		async void Done()
 		{
-			await PopupNavigation.PopAsync(true);
+			await PopupNavigation.Instance.PopAsync(true);
 			done = true;
 		}
 

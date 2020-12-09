@@ -8,7 +8,7 @@ using Button = Xamarin.Forms.Button;
 [assembly: ExportRenderer(typeof(Button), typeof(CustomButtonRenderer))]
 public class CustomButtonRenderer : ButtonRenderer
 {
-    private Context context;
+    private readonly Context context;
     public CustomButtonRenderer(Context context) : base(context)
     {
         this.context = context;

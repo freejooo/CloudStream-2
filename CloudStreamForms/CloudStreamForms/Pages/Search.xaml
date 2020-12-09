@@ -2,7 +2,11 @@
 <ContentPage xmlns="http://xamarin.com/schemas/2014/forms" 
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:d="http://xamarin.com/schemas/2014/forms/design"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:cse="clr-namespace:CloudStreamForms.Effects" xmlns:ff="clr-namespace:FFImageLoading.Forms;assembly=FFImageLoading.Forms" xmlns:ffTransformations="clr-namespace:FFImageLoading.Transformations;assembly=FFImageLoading.Transformations" xmlns:ff1="clr-namespace:FFImageLoading.Svg.Forms;assembly=FFImageLoading.Svg.Forms"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+			 xmlns:cse="clr-namespace:CloudStreamForms.Effects" 
+			 xmlns:ff="clr-namespace:FFImageLoading.Forms;assembly=FFImageLoading.Forms" 
+			 xmlns:ffTransformations="clr-namespace:FFImageLoading.Transformations;assembly=FFImageLoading.Transformations" 
+			 xmlns:ffs="clr-namespace:FFImageLoading.Svg.Forms;assembly=FFImageLoading.Svg.Forms"
 			 mc:Ignorable="d"
              x:Class="CloudStreamForms.Search">
 
@@ -51,13 +55,13 @@
 									<Label Grid.Row="1" TextColor="#828282" FontSize="12" Text="{Binding Extra}"></Label>
 
 								</Grid>
-								<ff1:SvgCachedImage Scale="0.9" ScaleX="0.9"  Opacity="1" IsVisible="{Binding IsBookmarked}" IsEnabled="{Binding IsBookmarked}" HorizontalOptions="End" HeightRequest="40" WidthRequest="40" Grid.Column="2" Source="bookmark.svg" InputTransparent="True">
+								<ffs:SvgCachedImage Scale="0.9" ScaleX="0.9"  Opacity="1" IsVisible="{Binding IsBookmarked}" IsEnabled="{Binding IsBookmarked}" HorizontalOptions="End" HeightRequest="40" WidthRequest="40" Grid.Column="2" Source="bookmark.svg" InputTransparent="True">
 									<ff:CachedImage.Transformations >
 										<ffTransformations:TintTransformation HexColor="#1a245e">
 											
 										</ffTransformations:TintTransformation>
 									</ff:CachedImage.Transformations>
-								</ff1:SvgCachedImage>
+								</ffs:SvgCachedImage>
 							</Grid>
 							
 						</Grid>

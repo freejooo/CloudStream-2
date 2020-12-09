@@ -166,7 +166,7 @@ namespace CloudStreamForms.Droid
 
 		public int notificationImportance = (int)NotificationImportance.Default;
 
-		public static NotificationManager _manager => (NotificationManager)Application.Context.GetSystemService(Context.NotificationService);
+		public static NotificationManager NotManager => (NotificationManager)Application.Context.GetSystemService(Context.NotificationService);
 		public static Dictionary<string, Bitmap> cachedBitmaps = new Dictionary<string, Bitmap>(); // TO ADD PREFORMACE WHEN ADDING NOTIFICATION W SAME IMAGE
 
 		public static async Task<Bitmap> GetImageBitmapFromUrl(string url)
@@ -238,7 +238,7 @@ namespace CloudStreamForms.Droid
 			if (Build.VERSION.SdkInt >= BuildVersionCodes.O) {
 				var channelId = $"{cc.PackageName}.general";
 				var channel = new NotificationChannel(channelId, "General", (NotificationImportance)not.notificationImportance);
-				_manager.CreateNotificationChannel(channel);
+				NotManager.CreateNotificationChannel(channel);
 
 				builder.SetChannelId(channelId);
 
@@ -324,7 +324,7 @@ namespace CloudStreamForms.Droid
 
 			//   print("NOTIFY::: " + not.id);
 			try {
-				_manager.Notify(not.id, builder.Build());
+				NotManager.Notify(not.id, builder.Build());
 			}
 			catch (Exception _ex) {
 				print("ED MANGAER::: " + _ex);
@@ -460,15 +460,17 @@ namespace CloudStreamForms.Droid
 				}*/
 		}
 
-		protected override async void OnNewIntent(Intent intent)
+		protected override void OnNewIntent(Intent intent)
 		{
 			if (Settings.IS_TEST_BUILD) {
+#pragma warning disable CS0162 // Unreachable code detected
 				return;
+#pragma warning restore CS0162 // Unreachable code detected
 			}
 			var clip = intent.ClipData;
 			var datastring = intent.DataString;
-			var fullData = intent.Data;
-			var type = intent.Type;
+			//var fullData = intent.Data;
+			//var type = intent.Type;
 
 			if (datastring != null) {
 				print("INTENTNADADA:::" + datastring);
@@ -526,8 +528,7 @@ namespace CloudStreamForms.Droid
 			public override bool OnMediaButtonEvent(Intent mediaButtonEvent)
 			{
 				try {
-					var keyEvent = mediaButtonEvent.GetParcelableExtra(Intent.ExtraKeyEvent) as KeyEvent;
-					if (keyEvent == null) {
+					if (!(mediaButtonEvent.GetParcelableExtra(Intent.ExtraKeyEvent) is KeyEvent keyEvent)) {
 						return false;
 					}
 					switch (keyEvent.KeyCode) {
@@ -609,8 +610,9 @@ namespace CloudStreamForms.Droid
 				base.OnSkipToPrevious();
 			}
 		}
-		public AudioManager audioManager => Application.Context.GetSystemService(Context.AudioService) as AudioManager;
-		ComponentName mediaComponent;
+
+		public AudioManager AudManager => Application.Context.GetSystemService(Context.AudioService) as AudioManager;
+
 		void CreateMediaSession()
 		{
 			mediaSession = new MediaSessionCompat(this, "CloudStream 2");
@@ -670,8 +672,6 @@ namespace CloudStreamForms.Droid
 				//LocalNotificationsImplementation.NotificationIconId = PublicNot;
 				MainDroid.NotificationIconId = PublicNot;
 
-				trustEveryone();
-
 				LogFile("Start Application");
 				LoadApplication(new App());
 				LogFile("Completed Startup");
@@ -693,8 +693,10 @@ namespace CloudStreamForms.Droid
             }*/
 
 			if (Settings.IS_TEST_BUILD) {
+#pragma warning disable CS0162 // Unreachable code detected
 				PlatformDep = new NullPlatfrom();
 				return;
+#pragma warning restore CS0162 // Unreachable code detected
 			}
 			try {
 				LogFile("Creating activity");
@@ -719,7 +721,7 @@ namespace CloudStreamForms.Droid
 						if (datastring.Contains("www.imdb.com")) {
 							string id = FindHTML(datastring + "/", "title/", "/");
 							//  var _thread = mainCore.CreateThread(2);
-							mainCore.StartThread("IMDb Thread", async () => {
+							mainCore.StartThread("IMDb Thread", () => {
 								string json = mainCore.DownloadString($"https://v2.sg.media-imdb.com/suggestion/t/{id}.json");
 								//  await Task.Delay(1000);
 								Device.BeginInvokeOnMainThread(() => {
@@ -979,7 +981,7 @@ namespace CloudStreamForms.Droid
 				if (isInPictureInPictureMode) {
 					UpdatePipVideostatus();
 					// Starts receiving events from action items in PiP mode.
-					receiver = new PIPBroadcastReceiver(this);
+					receiver = new PIPBroadcastReceiver();
 					RegisterReceiver(receiver, new IntentFilter(Constants.ACTION_MEDIA_CONTROL));
 				}
 				else {
@@ -997,21 +999,7 @@ namespace CloudStreamForms.Droid
 			}
 		}
 		#endregion
-
-		private static void trustEveryone()
-		{
-			/*
-            HttpsURLConnection.DefaultHostnameVerifier =
-                    new Org.Apache.Http.Conn.Ssl.AllowAllHostnameVerifier();
-            */
-		}
-
-		async void ResumeIntentData()
-		{
-			await Task.Delay(1000);
-			print("STARTINTENT");
-			DownloadHandle.ResumeIntents();
-		}
+#pragma warning disable CS0162, IDE0060 // Unreachable code detected
 
 		public void LogFile(string data, bool nextLine = true)
 		{
@@ -1026,6 +1014,7 @@ namespace CloudStreamForms.Droid
 			writer.Flush();
 			writer.Close();
 		}
+#pragma warning restore CS0162, IDE0060 // Unreachable code detected
 
 		/*
         private static void TaskSchedulerOnUnobservedTaskException(object sender, UnobservedTaskExceptionEventArgs unobservedTaskExceptionEventArgs)
@@ -1147,23 +1136,7 @@ namespace CloudStreamForms.Droid
 		public static string GetPath(bool mainPath, string extraPath)
 		{
 			return (mainPath ? (Android.OS.Environment.ExternalStorageDirectory + "/" + Android.OS.Environment.DirectoryDownloads) : Android.OS.Environment.ExternalStorageDirectory + "/") + extraPath;
-		}
-
-		public static void ShowBlackToast(string msg, double duration)
-		{
-			Device.BeginInvokeOnMainThread(() => {
-				ToastLength toastLength = ToastLength.Short;
-				if (duration >= 3) {
-					toastLength = ToastLength.Long;
-				}
-				Toast toast = Toast.MakeText(Application.Context, Html.FromHtml("<font color='#ffffff' >" + msg + "</font>"), toastLength);
-				toast.SetGravity(GravityFlags.CenterHorizontal | GravityFlags.Top, 0, 0);
-				var view = toast.View;
-				//Gets the actual oval background of the Toast then sets the colour filter
-				view.SetBackgroundColor(new Android.Graphics.Color(0, 0, 0, 10));//.SetColorFilter(Resource.dtra, PorterDuff.Mode.SRC_IN);
-				toast.Show();
-			});
-		}
+		} 
 	}
 
 
@@ -1249,92 +1222,7 @@ namespace CloudStreamForms.Droid
 					error(_ex);
 				}
 			}
-		}
-		/**
-  * The audio latency has not been estimated yet
-  */
-		private const long AUDIO_LATENCY_NOT_ESTIMATED = long.MinValue + 1;
-
-		/**
-         * The audio latency default value if we cannot estimate it
-         */
-		private const long DEFAULT_AUDIO_LATENCY = 100L * 1000L * 1000L; // 100ms
-
-		private static long FramesToNanoSeconds(long frames)
-		{
-			return frames * 1000000000L / 16000;
-		}
-
-		private static long NanoTime()
-		{
-			long nano = 10000L * Stopwatch.GetTimestamp();
-			nano /= TimeSpan.TicksPerMillisecond;
-			nano *= 100L;
-			return nano;
-		}
-
-		// Source: https://stackoverflow.com/a/52559996/497368
-		private long GetDelay()
-		{
-			long estimatedAudioLatency = AUDIO_LATENCY_NOT_ESTIMATED;
-			long audioFramesWritten = 0;
-			var outputBufferSize = AudioTrack.GetMinBufferSize(16000, ChannelOut.Stereo, Android.Media.Encoding.Pcm16bit);
-
-			AudioTrack track = new AudioTrack(Android.Media.Stream.Music, 16000, ChannelOut.Mono, Android.Media.Encoding.Pcm16bit, outputBufferSize, AudioTrackMode.Stream);//AudioManager.USE_DEFAULT_STREAM_TYPE, 16000, AudioFormat.CHANNEL_OUT_MONO, AudioFormat.ENCODING_PCM_16BIT, outputBufferSize, AudioTrack.MODE_STREAM);
-
-			// First method. SDK >= 19.
-			if ((int)Build.VERSION.SdkInt >= 19 && track != null) {
-
-				AudioTimestamp audioTimestamp = new AudioTimestamp();
-				if (track.GetTimestamp(audioTimestamp)) {
-
-					// Calculate the number of frames between our known frame and the write index
-					long frameIndexDelta = audioFramesWritten - audioTimestamp.FramePosition;
-
-					// Calculate the time which the next frame will be presented
-					long frameTimeDelta = FramesToNanoSeconds(frameIndexDelta);
-					long nextFramePresentationTime = audioTimestamp.NanoTime + frameTimeDelta;
-
-					// Assume that the next frame will be written at the current time
-					long nextFrameWriteTime = NanoTime();
-
-					// Calculate the latency
-					estimatedAudioLatency = nextFramePresentationTime - nextFrameWriteTime;
-				}
-			}
-
-			// Second method. SDK >= 18.
-			if (estimatedAudioLatency == AUDIO_LATENCY_NOT_ESTIMATED && (int)Build.VERSION.SdkInt >= 18) {
-				System.Reflection.MethodInfo getLatencyMethod;
-				try {
-					getLatencyMethod = typeof(AudioTrack).GetMethod("getLatency");
-					estimatedAudioLatency = (int)getLatencyMethod.Invoke(track, (Object[])null) * 1000000L;
-				}
-				catch (Exception ignored) {
-					print("IGNORED:::2222::: " + ignored);
-				}
-			}
-
-			// If no method has successfully gave us a value, let's try a third method
-			if (estimatedAudioLatency == AUDIO_LATENCY_NOT_ESTIMATED) {
-				//AudioManager audioManager = Application.Context.GetSystemService(Context.AudioService) as AudioManager;
-				try {
-					System.Reflection.MethodInfo getOutputLatencyMethod = typeof(AudioManager).GetMethod("getOutputLatency");
-					estimatedAudioLatency = (int)getOutputLatencyMethod.Invoke(activity.audioManager, new object[] { AudioContentType.Music }) * 1000000L;
-				}
-				catch (Exception ignored) {
-					print("IGNORED::: " + ignored);
-				}
-			}
-
-			// No method gave us a value. Let's use a default value. Better than nothing.
-			if (estimatedAudioLatency == AUDIO_LATENCY_NOT_ESTIMATED) {
-				print("DEF LATENCY");
-				estimatedAudioLatency = DEFAULT_AUDIO_LATENCY;
-			}
-
-			return estimatedAudioLatency;
-		}
+		} 
 
 		public DownloadProgressInfo GetDownloadProgressInfo(int id, string fileUrl)
 		{
@@ -1415,7 +1303,7 @@ namespace CloudStreamForms.Droid
 		/// Get or Set Resource Icon to display
 		/// </summary>
 		public static int NotificationIconId { get; set; }
-		static string _packageName => Application.Context.PackageName;
+		static string PkgName => Application.Context.PackageName;
 
 		public static void CancelFutureNotification(int id)
 		{
@@ -1582,7 +1470,7 @@ namespace CloudStreamForms.Droid
 
 		public static void CancelChromecast()
 		{
-			_manager.Cancel(CHROME_CAST_NOTIFICATION_ID);
+			NotManager.Cancel(CHROME_CAST_NOTIFICATION_ID);
 		}
 
 		readonly static MediaSession mediaSession = new MediaSession(Application.Context, "Chromecast");
@@ -1600,10 +1488,10 @@ namespace CloudStreamForms.Droid
 
 				var context = MainActivity.activity.ApplicationContext;
 				if (Build.VERSION.SdkInt >= BuildVersionCodes.O) {
-					var channelId = $"{_packageName}.general";
+					var channelId = $"{PkgName}.general";
 					var channel = new NotificationChannel(channelId, "General", NotificationImportance.Default);
 
-					_manager.CreateNotificationChannel(channel);
+					NotManager.CreateNotificationChannel(channel);
 
 					builder.SetChannelId(channelId);
 					//https://m.media-amazon.com/images/M/MV5BMTczNTI2ODUwOF5BMl5BanBnXkFtZTcwMTU0NTIzMw@@._V1_UX182_CR0,0,182,268_AL_.jpg
@@ -1635,7 +1523,7 @@ namespace CloudStreamForms.Droid
 
 				builder.SetContentIntent(GetCurrentPending("openchrome"));
 				try {
-					_manager.Notify(CHROME_CAST_NOTIFICATION_ID, builder.Build());
+					NotManager.Notify(CHROME_CAST_NOTIFICATION_ID, builder.Build());
 				}
 				catch (Exception _ex) {
 					print("EX NOTTIFY;; " + _ex);
@@ -1652,6 +1540,7 @@ namespace CloudStreamForms.Droid
 			return Application.Context.PackageManager.GetLaunchIntentForPackage(packageName);
 		}
 
+		/*
 		private long NotifyTimeInMilliseconds(DateTime notifyTime)
 		{
 			var utcTime = TimeZoneInfo.ConvertTimeToUtc(notifyTime);
@@ -1659,10 +1548,7 @@ namespace CloudStreamForms.Droid
 
 			var utcAlarmTimeInMillis = utcTime.AddSeconds(-epochDifference).Ticks / 10000;
 			return utcAlarmTimeInMillis;
-		}
-
-		// static bool hidden = false;
-		// static int baseShow = 0;
+		}*/
 
 		public void UpdateBackground(int color)
 		{
@@ -1937,8 +1823,6 @@ namespace CloudStreamForms.Droid
 					StatFs stat = new StatFs(path); //"/storage/sdcard1"
 
 					if (Build.VERSION.SdkInt >= BuildVersionCodes.JellyBeanMr2) {
-
-
 						long blockSize = stat.BlockSizeLong;
 						totalSpaceBytes = stat.BlockCountLong * stat.BlockSizeLong;
 						availableSpaceBytes = stat.AvailableBlocksLong * stat.BlockSizeLong;
@@ -1946,9 +1830,11 @@ namespace CloudStreamForms.Droid
 
 					}
 					else {
+#pragma warning disable CS0618 // Type or member is obsolete
 						totalSpaceBytes = (long)stat.BlockCount * (long)stat.BlockSize;
 						availableSpaceBytes = (long)stat.AvailableBlocks * (long)stat.BlockSize;
 						freeSpaceBytes = (long)stat.FreeBlocks * (long)stat.BlockSize;
+#pragma warning restore CS0618 // Type or member is obsolete
 					}
 				}
 
@@ -2110,14 +1996,14 @@ namespace CloudStreamForms.Droid
 				return null;
 			}
 		}
-
+		/*
 		static void OpenStore(string applicationPackageName)
 		{
 			Intent intent = new Intent(Intent.ActionView, Android.Net.Uri.Parse("market://details?id=" + applicationPackageName));
 			intent.AddFlags(ActivityFlags.NewTask);
 
 			activity.ApplicationContext.StartActivity(intent);
-		}
+		}*/
 
 		public const string VLC_PACKAGE = "org.videolan.vlc";
 		public const string VLC_INTENT_ACTION_RESULT = "org.videolan.vlc.player.result";
@@ -2130,39 +2016,9 @@ namespace CloudStreamForms.Droid
 				pm.GetPackageInfo(packageName, PackageInfoFlags.Activities);
 				return true;
 			}
-			catch (PackageManager.NameNotFoundException e) {
+			catch {
 				return false;
 			}
-		}
-
-		public static void OpenVlc(Activity _activity, int requestId, Android.Net.Uri uri, long time, String title, string subfile = "")
-		{
-			Intent vlcIntent = new Intent(VLC_INTENT_ACTION_RESULT);
-
-			vlcIntent.SetPackage(VLC_PACKAGE);
-			vlcIntent.SetDataAndTypeAndNormalize(uri, "video/*");
-
-			long position = time;
-			if (time == FROM_START) {
-				position = 1;
-			}
-			else if (time == FROM_PROGRESS) {
-				position = 0;
-			}
-
-			vlcIntent.PutExtra("position", position);
-			vlcIntent.PutExtra("title", title);
-			vlcIntent.SetComponent(VLC_COMPONENT);
-			subfile = "/sdcard/Download/subtitles.srt";
-			if (subfile != "") {
-				var sfile = Android.Net.Uri.FromFile(new Java.IO.File(subfile));  //"content://" + Android.Net.Uri.Parse(subfile);
-				print("SUBFILE::::" + subfile + "|" + sfile.Path);
-				//  print(sfile.Path);
-				vlcIntent.PutExtra("subtitles_location", subfile);//"/sdcard/Download/subtitles.srt");//sfile);//Android.Net.Uri.FromFile(subFile));
-																  // intent.PutExtra("subtitles_location", );//Android.Net.Uri.FromFile(subFile));
-			}
-			_activity.StartActivityForResult(vlcIntent, requestId);
-
 		}
 
 		public void RequestVlc(List<string> urls, List<string> names, string episodeName, string episodeId, long startId = -2, string subtitleFull = "", VideoPlayer preferedPlayer = VideoPlayer.VLC, bool generateM3u8 = true)
@@ -2348,21 +2204,19 @@ namespace CloudStreamForms.Droid
 		}
 
 #if DEBUG
-		ActivityManager activityManager => Application.Context.GetSystemService(Context.ActivityService) as ActivityManager;
+		ActivityManager ActManager => Application.Context.GetSystemService(Context.ActivityService) as ActivityManager;
 #endif
 		readonly static Stopwatch mainS = new Stopwatch();
+#if DEBUG
 		async void MainDelayTest()
 		{
-#if DEBUG
-
 			await Task.Delay(5000);
-			ActivityManager.MemoryInfo? mi = new ActivityManager.MemoryInfo();
-			activityManager.GetMemoryInfo(mi);
+			ActivityManager.MemoryInfo mi = new ActivityManager.MemoryInfo();
+			ActManager.GetMemoryInfo(mi);
 			double availableMegs = mi.AvailMem / 0x100000L;
 
 			//Percentage can be calculated for API 16+
 			double percentAvail = mi.AvailMem / (double)mi.TotalMem * 100.0;
-			long f1 = mainS.ElapsedMilliseconds;
 			App.ShowToast("GG: " + (int)percentAvail + "MEGS: " + availableMegs + " | ");
 			/*
 			Device.BeginInvokeOnMainThread(() => {
@@ -2371,8 +2225,8 @@ namespace CloudStreamForms.Droid
 				App.ShowToast("SHOW: " + (f2 - f1));
 			});*/
 			//MainDelayTest();
-#endif
 		}
+#endif
 
 		async void TestAwake()
 		{
@@ -2410,7 +2264,7 @@ namespace CloudStreamForms.Droid
 				}
 			}
 		}
-		private Handler handler = new Handler();
+		private readonly Handler handler = new Handler();
 
 		AudioManager AudioManager => Application.Context.GetSystemService(Context.AudioService) as AudioManager;
 
@@ -2577,8 +2431,8 @@ namespace CloudStreamForms.Droid
 				return Android.OS.Environment.ExternalStorageDirectory.Path;
 			}
 			catch (Exception _ex) {
-				return "";
 				error(_ex);
+				return "";
 			}
 		}
 
@@ -2621,7 +2475,7 @@ namespace CloudStreamForms.Droid
 
 				return builder.ToString();
 			}
-			catch (Exception _ex) {
+			catch {
 				return "";
 			}
 		}
@@ -2724,10 +2578,6 @@ namespace CloudStreamForms.Droid
 		public string DownloadHandleIntent(int id, List<BasicMirrorInfo> mirrors, string fileName, string titleName, bool mainPath, string extraPath, bool showNotification = true, bool showNotificationWhenDone = true, bool openWhenDone = false, string poster = "", string beforeTxt = "")
 		{
 			return "";
-		}
-
-		public void DownloadUpdate(string update)
-		{
 		}
 
 		public void DownloadUpdate(string update, string version)

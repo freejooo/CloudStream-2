@@ -15,7 +15,7 @@ namespace CloudStreamForms.Droid.Renderers
 {
     public class CustomTabbedPageRenderer : TabbedPageRenderer
     {
-        private Context context;
+        private readonly Context context;
 
         public CustomTabbedPageRenderer(Context context) : base(context)
         {

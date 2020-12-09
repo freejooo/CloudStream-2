@@ -48,16 +48,16 @@ namespace CloudStreamForms.Models
 		public Command TapCom { set; get; }
 		public Command TapComTwo { set; get; }
 		public Command TapComThree { set; get; }
-		public bool IsDownloading { get { return downloadState == 2; } }
-		public bool IsDownloaded { get { return downloadState == 1; } }
-		public bool IsSearchingDownloadResults { get { return downloadState == 4; } }
+		public bool IsDownloading { get { return DownloadState == 2; } }
+		public bool IsDownloaded { get { return DownloadState == 1; } }
+		public bool IsSearchingDownloadResults { get { return DownloadState == 4; } }
 		public bool IsNotSearchingDownloadResults { get { return !IsSearchingDownloadResults; } }
 
 		/// <summary>
 		/// 0 = Nothing, 1 = Downloaded, 2 = Downloading, 3 = Paused, 4 = Searching 
 		/// </summary>
-		public int downloadState { set; get; } = 0;
-		public string extraInfo { set; get; }
+		public int DownloadState { set; get; } = 0;
+		public string ExtraInfo { set; get; }
 		public string ExtraText { set; get; }
 		public double ExtraProgress { set; get; }
 		public bool DownloadNotDone { set; get; }
@@ -73,7 +73,6 @@ namespace CloudStreamForms.Models
             public List<string> mirrosUrls { set; get; }
             public List<string> subtitles { set; get; }
             public List<string> subtitlesUrls { set; get; }*/
-		public bool epVis { set; get; }
 		// public LoadResult loadResult { set; get; }
 		public bool GetHasLoadedLinks()
 		{

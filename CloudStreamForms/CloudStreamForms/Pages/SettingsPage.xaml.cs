@@ -224,10 +224,10 @@ namespace CloudStreamForms.Pages
 						Settings.BackCurrentGlobalFont = index;
 					}
 				}),
-				new SettingsItem() { img= "outline_aspect_ratio_white_48dp.png",mainTxt="Show statusbar",descriptTxt="This will not affect app videoplayer" ,VarName = nameof( Settings.HasStatusBar),OnChange = async () => { App.UpdateStatusBar();} },
-				new SettingsItem() { img= "outline_reorder_white_48dp.png",mainTxt="Extended Homepage",descriptTxt="Related, Top 100 and Trending" ,VarName = nameof( Settings.Top100Enabled)},
-				new SettingsItem() { img= "outline_reorder_white_48dp.png",mainTxt="Anime Home Page",descriptTxt="Set Top 100 and Trending to anime only" ,VarName = nameof( Settings.Top100Anime)},
-				new SettingsItem() { img= "outline_description_white_48dp.png",mainTxt="Episode description",descriptTxt="To remove spoilers or shorten episode list" ,VarName = nameof( Settings.EpDecEnabled)},
+				new SettingsItem() { img= "outline_aspect_ratio_white_48dp.png",mainTxt="Show statusbar",descriptTxt="This will not affect app videoplayer" ,VarName = nameof(Settings.HasStatusBar),OnChange = () => { App.UpdateStatusBar(); return Task.CompletedTask; } },
+				new SettingsItem() { img= "outline_reorder_white_48dp.png",mainTxt="Extended Homepage",descriptTxt="Related, Top 100 and Trending" ,VarName = nameof(Settings.Top100Enabled)},
+				new SettingsItem() { img= "outline_reorder_white_48dp.png",mainTxt="Anime Home Page",descriptTxt="Set Top 100 and Trending to anime only" ,VarName = nameof(Settings.Top100Anime)},
+				new SettingsItem() { img= "outline_description_white_48dp.png",mainTxt="Episode description",descriptTxt="To remove spoilers or shorten episode list" ,VarName = nameof(Settings.EpDecEnabled)},
 				new SettingsItem() { img= "animation.png",mainTxt="List animation",descriptTxt="To remove the popup animation for top 100" ,VarName = nameof(Settings.ListViewPopupAnimation)},
 
 			},

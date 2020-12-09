@@ -112,7 +112,7 @@ namespace CloudStreamForms.Script
 			public LikeData data;
 		}
 
-		static readonly Dictionary<int, AniListTitleHolder> isLiked = new Dictionary<int, AniListTitleHolder>();
+		//static readonly Dictionary<int, AniListTitleHolder> isLiked = new Dictionary<int, AniListTitleHolder>();
 
 		public enum AniListStatusType
 		{
@@ -277,13 +277,14 @@ namespace CloudStreamForms.Script
 			}
 		}
 
+		/*
 		static async Task<string> GetApi(string url)
 		{
 			if (await CheckToken()) {
 				return "";
 			}
 			return await GetRequest(url, "Bearer " + Settings.AniListToken);
-		}
+		}*/
 
 		static async Task<string> PostApi(string url, string args)
 		{

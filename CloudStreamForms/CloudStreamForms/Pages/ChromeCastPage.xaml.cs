@@ -44,8 +44,7 @@ namespace CloudStreamForms
 
 		public static int currentSelected = 0;
 		public static double changeTime = -1;
-
-		object subtitleMutex = new object();
+		readonly object subtitleMutex = new object();
 		public static List<Subtitle> subtitles = new List<Subtitle>();
 		public static int subtitleIndex = -1;
 		public static bool HasSubtitlesOn = false;
@@ -71,9 +70,9 @@ namespace CloudStreamForms
 			}
 			options.Add("Download Subtitles");
 
-			async Task UpdateSubtitles()
+			static async Task UpdateSubtitles()
 			{
-				ActionPopup.StartIndeterminateLoadinbar("Loading Subtitles...");
+				_ = ActionPopup.StartIndeterminateLoadinbar("Loading Subtitles...");
 				if (subtitleIndex != -1) {
 					await ChangeSubtitles(subtitles[subtitleIndex].data, subtitles[subtitleIndex].name, subtitleDelay);
 				}
@@ -126,7 +125,7 @@ namespace CloudStreamForms
 			}
 		}
 
-		Dictionary<string, bool> searchingForLang = new Dictionary<string, bool>();
+		readonly Dictionary<string, bool> searchingForLang = new Dictionary<string, bool>();
 
 		public void PopulateSubtitle(string lang = "", string name = "")
 		{
@@ -160,9 +159,10 @@ namespace CloudStreamForms
 					if (data.IsClean()) {
 						if (!ContainsLang()) {
 							lock (subtitleMutex) {
-								Subtitle s = new Subtitle();
-								s.name = name;
-								s.data = data;
+								Subtitle s = new Subtitle {
+									name = name,
+									data = data
+								};
 								subtitles.Add(s);
 							}
 							App.ShowToast(name + " subtitles added");
@@ -261,7 +261,7 @@ namespace CloudStreamForms
 		}
 
 		static string lastId = "";
-		static List<Subtitle> lastSubtitles = new List<Subtitle>();
+		//static List<Subtitle> lastSubtitles = new List<Subtitle>();
 
 		public struct ChromecastData
 		{
@@ -339,7 +339,7 @@ namespace CloudStreamForms
 				subtitleIndex = -1;
 				HasSubtitlesOn = false;
 				print("NOT THE SAME AT LAST ONE");
-				if (globalSubtitlesEnabled) {
+				if (GlobalSubtitlesEnabled) {
 					PopulateSubtitle();
 				}
 			}
@@ -387,12 +387,14 @@ namespace CloudStreamForms
 				SeekMedia(FastForwardTime);
 				FastForward.Rotation = 0;
 				if (rotateAllWay) {
+#pragma warning disable CS0162 // Unreachable code detected
 					await FastForward.RotateTo(360, 200, Easing.SinOut);
+#pragma warning restore CS0162 // Unreachable code detected
 				}
 				else {
-					FastForward.ScaleTo(0.9, time, Easing.SinOut);
+					_ = FastForward.ScaleTo(0.9, time, Easing.SinOut);
 					await FastForward.RotateTo(rotate, time, Easing.SinOut);
-					FastForward.ScaleTo(1, time, Easing.SinOut);
+					_ = FastForward.ScaleTo(1, time, Easing.SinOut);
 					await FastForward.RotateTo(0, time, Easing.SinOut);
 				}
 			}));
@@ -401,12 +403,14 @@ namespace CloudStreamForms
 				SeekMedia(-BackForwardTime);
 				BackForward.Rotation = 0;
 				if (rotateAllWay) {
+#pragma warning disable CS0162 // Unreachable code detected
 					await BackForward.RotateTo(-360, 200, Easing.SinOut);
+#pragma warning restore CS0162 // Unreachable code detected
 				}
 				else {
-					BackForward.ScaleTo(0.9, time, Easing.SinOut);
+					_ = BackForward.ScaleTo(0.9, time, Easing.SinOut);
 					await BackForward.RotateTo(-rotate, time, Easing.SinOut);
-					BackForward.ScaleTo(1, time, Easing.SinOut);
+					_ = BackForward.ScaleTo(1, time, Easing.SinOut);
 					await BackForward.RotateTo(0, time, Easing.SinOut);
 				}
 			}));
@@ -541,8 +545,6 @@ namespace CloudStreamForms
 			App.SetViewDur(lastId, (long)(MainChrome.CurrentCastingDuration * 1000));
 			App.ForceUpdateVideo?.Invoke(null, EventArgs.Empty);
 
-			lastSubtitles = subtitles;
-
 			App.UpdateBackground();
 			OnDisconnected -= OnDisconnectedHandle;
 			OnPauseChanged -= OnPauseChangedHandle;
@@ -589,12 +591,12 @@ namespace CloudStreamForms
 			await Pause.ScaleTo(1.6, 50, Easing.SinOut);
 			await Pause.ScaleTo(1.7, 50, Easing.SinOut);
 		}
-
+		/*
 		async void ListScale()
 		{
 			PlayList.Scale = 1.4;
 			await PlayList.ScaleTo(2, 50, Easing.SinOut);
 			await PlayList.ScaleTo(1.4, 50, Easing.SinOut);
-		}
+		}*/
 	}
 }

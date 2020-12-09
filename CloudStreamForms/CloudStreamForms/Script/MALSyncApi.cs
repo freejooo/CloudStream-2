@@ -203,7 +203,7 @@ namespace CloudStreamForms.Script
 				}
 				return data.ToArray();
 			}
-			catch (Exception _ex) {
+			catch {
 				return null;
 			}
 		}

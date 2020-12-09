@@ -17,7 +17,7 @@ namespace CloudStreamForms.Core.MovieProviders
 		public override void LoadLink(object metadata, int episode, int season, int normalEpisode, bool isMovie, TempThread tempThred)
 		{
 			if (isMovie) {
-				string _name = activeMovie.title.name.Replace(":", "");
+				string _name = ActiveMovie.title.name.Replace(":", "");
 				string d = DownloadString($"https://hdm.to/src/player/?v=https://1o.to/{_name}.mp4");
 				string key = FindHTML(d, "/playlist.m3u8?", "\"");
 				if (key != "") {

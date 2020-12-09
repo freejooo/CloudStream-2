@@ -259,6 +259,7 @@ namespace CloudStreamForms.Core.AnimeProviders
 			}
 		}
 
+#pragma warning disable CS0649
 		public struct MoeSlug
 		{
 			//public int id { get; set; }
@@ -278,7 +279,7 @@ namespace CloudStreamForms.Core.AnimeProviders
 			// public int hb_id { get; set; }
 			// public string created_at { get; set; }
 			// public string updated_at { get; set; }
-			// public int hidden { get; set; }
+			// public in0t hidden { get; set; }
 			public int? mal_id;
 			public MoeSlug? slug;
 		}
@@ -287,11 +288,6 @@ namespace CloudStreamForms.Core.AnimeProviders
 		{
 			public List<MoeItem> MyArray { get; set; }
 		}
-
-		/// <summary>
-		/// GIVEN MAL ID, RETURN SLUG
-		/// </summary>
-		readonly static Dictionary<int, string> twistMoeSearch = new Dictionary<int, string>();
 
 
 		public class MoeSource
@@ -303,7 +299,12 @@ namespace CloudStreamForms.Core.AnimeProviders
 			// public string created_at { get; set; }
 			// public string updated_at { get; set; }
 		}
+#pragma warning restore CS0649
 
+		/// <summary>
+		/// GIVEN MAL ID, RETURN SLUG
+		/// </summary>
+		readonly static Dictionary<int, string> twistMoeSearch = new Dictionary<int, string>();
 		List<MoeSource> GetSources(string slug)
 		{
 			if (openToken == "" || tokenCook == "") { Setup(); }
@@ -347,7 +348,7 @@ namespace CloudStreamForms.Core.AnimeProviders
 		{
 			string source = FetchMoeUrlFromSalted(episodeLink);
 			if (source == "") return;
-			string url = "https://twist.moe/" + source;
+			//string url = "https://twist.moe/" + source;
 
 			AddPotentialLink(normalEpisode, new BasicLink() {
 				referer = extraData.ToString(),

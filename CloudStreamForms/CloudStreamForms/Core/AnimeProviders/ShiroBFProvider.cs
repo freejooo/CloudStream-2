@@ -40,7 +40,7 @@ namespace CloudStreamForms.Core.AnimeProviders
 
 			string[] extraData = new string[2];
 			foreach (var subData in data) {
-				if ((setData.dubExists && subData.isDub) || (setData.subExists && !subData.isDub)) continue;
+				if ((setData.DubExists && subData.isDub) || (setData.SubExists && !subData.isDub)) continue;
 
 				bool synoExist = false;
 				if (subData.synonyms != null && ms.synonyms != null && ms.synonyms.Count > 0 && subData.synonyms.Length > 0) {

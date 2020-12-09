@@ -18,7 +18,7 @@ namespace CloudStreamForms.Core.AnimeProviders
 
 		public override object StoreData(string year, TempThread tempThred, MALData malData)
 		{
-			return helper.GetSearchResults(activeMovie.title.name, false);
+			return helper.GetSearchResults(ActiveMovie.title.name, false);
 		}
 
 		struct AnimbeFeverVideo

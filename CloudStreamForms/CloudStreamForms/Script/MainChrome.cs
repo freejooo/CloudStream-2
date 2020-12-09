@@ -359,11 +359,6 @@ namespace CloudStreamForms.Core
 			castLastUpdate = mm.CurrentTime;
 		}
 
-		static bool ContainsStartColor(string inp)
-		{
-			return inp.Contains("<font color=");
-		}
-
 		public static List<SubtitleItem> ParseSubtitles(string _inp)
 		{
 			try {
@@ -490,7 +485,7 @@ namespace CloudStreamForms.Core
 				}
 
 				isClearToStream = false;
-				using (fs = new FileStream(videoStreamPath, FileMode.Open)) {
+				using (fs = new FileStream(path, FileMode.Open)) {
 					int startByte = -1;
 					int endByte = -1;
 					if (req.Headers.AllKeys.Contains("Range")) {

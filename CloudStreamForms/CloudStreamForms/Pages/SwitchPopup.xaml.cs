@@ -16,7 +16,7 @@ namespace CloudStreamForms
 	public partial class SwitchPopup : Rg.Plugins.Popup.Pages.PopupPage
 	{
 		public static EventHandler<int> OnSelectedChanged;
-		SwitchLabelView selectBinding;
+		readonly SwitchLabelView selectBinding;
 		const int fullNum = 12;
 		const int halfNum = 6;
 		const bool setOnLeft = true;
@@ -50,13 +50,13 @@ namespace CloudStreamForms
 			}
 		}
 
-		int optionsCount;
+		readonly int optionsCount;
 		List<bool> result = null;
 		public SwitchPopup(List<string> options, List<bool> isToggled, string header = "")
 		{
 			InitializeComponent();
 			if (ActionPopup.isOpen) {
-				PopupNavigation.PopAsync(false);
+				PopupNavigation.Instance.PopAsync(false);
 			}
 			ActionPopup.isOpen = true;
 			optionsCount = options.Count;
@@ -76,7 +76,7 @@ namespace CloudStreamForms
 			CancelButtonBtt.Clicked += async (o, e) => {
 				result = selectBinding.MyNameCollection.Select(t => t.IsSelected).ToList();
 				ActionPopup.isOpen = false;
-				await PopupNavigation.PopAsync(true);
+				await PopupNavigation.Instance.PopAsync(true);
 			};
 			void ForceUpdate()
 			{
@@ -194,7 +194,7 @@ namespace CloudStreamForms
 	public class SwitchLabelView
 	{
 		public ObservableCollection<SwitchName> MyNameCollection { set { Added?.Invoke(null, null); _MyNameCollection = value; } get { return _MyNameCollection; } }
-		private ObservableCollection<SwitchName> _MyNameCollection { set; get; }
+		private ObservableCollection<SwitchName> _MyNameCollection;
 
 		public event EventHandler Added;
 

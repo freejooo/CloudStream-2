@@ -117,6 +117,7 @@ namespace CloudStreamForms.Core.AnimeProviders
 			public string year;
 		}
 
+#pragma warning disable CS0649
 		public struct ShiroItem
 		{
 			//public string _id;
@@ -172,7 +173,7 @@ namespace CloudStreamForms.Core.AnimeProviders
 
 		public struct ShiroEpisodeRoot
 		{
-			public string Status;
+			//public string Status;
 			public ShiroEpisodeData Data;
 		}
 
@@ -186,5 +187,6 @@ namespace CloudStreamForms.Core.AnimeProviders
 			public string host;
 			public string video_id;
 		}
+#pragma warning restore CS0649
 	}
 }
