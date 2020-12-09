@@ -34,7 +34,7 @@ namespace CloudStreamForms.Core
 				new TwistMoeBloatFreeProvider(this),
 				new AnimeFeverBloatFreeProvider(this),
 				new GogoAnimeProvider(this),
-				new KickassAnimeProvider(this),
+				//new KickassAnimeProvider(this), // Cloudflare ?
 				new DubbedAnimeProvider(this),
 				new AnimeFlixProvider(this),
 				new AnimekisaProvider(this),
@@ -62,9 +62,11 @@ namespace CloudStreamForms.Core
 				new DubbedAnimeMovieProvider(this),
 				new TheMovieMovieBFProvider(this),
 				new MonkeyStreamProvider(this),
-				new KickassMovieProvider(this),
+				//new KickassMovieProvider(this), // Cloudflare ?
 				new LookmovieProvider(this),
 				new HdmProvider(this),
+				new ShiroMovieProvider(this,"https://www.dubbedanime.vip","DubbedVip"),
+				new ShiroMovieProvider(this,"https://shiro.is","Shiro"),
 			};
 		}
 
@@ -500,7 +502,7 @@ namespace CloudStreamForms.Core
 		public struct MovieMetadata
 		{
 			public object metadata;
-			public object name;
+			public string name;
 		}
 
 		[Serializable]
@@ -1293,6 +1295,7 @@ namespace CloudStreamForms.Core
 
 		class KickassMovieProvider : BaseMovieProvier
 		{
+			const string SiteUrl = "https://www2.kickassanime.rs";
 			public override string Name => "KickassMovie";
 			public override void FishMainLinkTSync(TempThread tempThread)
 			{
@@ -1300,7 +1303,7 @@ namespace CloudStreamForms.Core
 
 				try {
 					string query = ToDown(activeMovie.title.name);
-					string url = "https://www.kickassanime.rs/search?q=" + query;
+					string url = $"{SiteUrl}/search?q={query}";
 					string d = DownloadString(url);
 					if (!GetThredActive(tempThread)) { return; }; // COPY UPDATE PROGRESS
 
@@ -1308,7 +1311,6 @@ namespace CloudStreamForms.Core
 					string dubUrl = "";
 					const string lookfor = "\"name\":\"";
 					string compare = ToDown(activeMovie.title.name, true, "");
-
 
 					while (d.Contains(lookfor)) {
 						string animeTitle = FindHTML(d, lookfor, "\"");
@@ -1319,7 +1321,7 @@ namespace CloudStreamForms.Core
 						d = RemoveOne(d, lookfor);
 						string animeT = animeTitle.Replace(dubTxt, "").Replace(cenTxt, "");
 						if (ToDown(animeT, true, "") == compare && ((isDub && dubUrl == "") || (!isDub && (subUrl == "")))) {
-							string slug = "https://www.kickassanime.rs" + FindHTML(d, "\"slug\":\"", "\"").Replace("\\/", "/");
+							string slug = SiteUrl + FindHTML(d, "\"slug\":\"", "\"").Replace("\\/", "/");
 							if (isDub) {
 								dubUrl = slug;
 							}
@@ -1337,8 +1339,7 @@ namespace CloudStreamForms.Core
 							_d = RemoveOne(_d, "epnum\":\"Episode 01");
 							string slug = FindHTML(_d, "slug\":\"", "\"").Replace("\\/", "/");
 							if (slug == "") return "";
-							return "https://www.kickassanime.rs" + slug;
-
+							return SiteUrl + slug;
 						}
 						catch (Exception _ex) {
 							error(_ex);
@@ -1389,9 +1390,7 @@ namespace CloudStreamForms.Core
 
 		class KickassAnimeProvider : BaseAnimeProvider
 		{
-			public KickassAnimeProvider(CloudStreamCore _core) : base(_core)
-			{
-			}
+			public KickassAnimeProvider(CloudStreamCore _core) : base(_core) { }
 
 			public override string Name => "KickassAnime";
 
@@ -1401,12 +1400,12 @@ namespace CloudStreamForms.Core
 				sub = data.kickassAnimeData.subExists;
 			}
 
-			const string mainUrl = "https://www1.kickassanime.rs";
+			const string SiteUrl = "https://www2.kickassanime.rs";
 
 			public override void FishMainLink(string year, TempThread tempThred, MALData malData)
 			{
 				string query = malData.firstName;
-				string url = mainUrl + "/search?q=" + query;//activeMovie.title.name.Replace(" ", "%20");
+				string url = SiteUrl + "/search?q=" + query;//activeMovie.title.name.Replace(" ", "%20");
 				print("COMPAREURL:" + url);
 				string d = DownloadString(url);
 				if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
@@ -1422,7 +1421,7 @@ namespace CloudStreamForms.Core
 					animeTitle = animeTitle.Replace(cenTxt, "").Replace(dubTxt, "").Replace(" ", "");
 
 					d = RemoveOne(d, lookfor);
-					string slug = mainUrl + FindHTML(d, "\"slug\":\"", "\"").Replace("\\/", "/");
+					string slug = SiteUrl + FindHTML(d, "\"slug\":\"", "\"").Replace("\\/", "/");
 
 					for (int i = 0; i < activeMovie.title.MALData.seasonData.Count; i++) {
 						for (int q = 0; q < activeMovie.title.MALData.seasonData[i].seasons.Count; q++) {
@@ -1455,7 +1454,7 @@ namespace CloudStreamForms.Core
 										string epNum = FindHTML(_d, _lookfor, "\"");
 										_d = RemoveOne(_d, _lookfor);
 
-										string _slug = mainUrl + FindHTML(_d, "\"slug\":\"", "\"").Replace("\\/", "/");
+										string _slug = SiteUrl + FindHTML(_d, "\"slug\":\"", "\"").Replace("\\/", "/");
 										//print("SLUGOS:" + _slug + "|" + epNum);
 										string createDate = FindHTML(_d, "\"createddate\":\"", "\"");
 										// string name = FindHTML(d, lookfor, "\"");
@@ -4911,6 +4910,7 @@ namespace CloudStreamForms.Core
 			public YesMoviesProvider(CloudStreamCore _core) : base(_core) { }
 
 			// DONT USE tinyzonetv recaptcha
+			// DONT USE https://projectfreetv.fun/ recaptcha
 			public override void FishMainLinkTSync(TempThread tempThread)
 			{
 				try {

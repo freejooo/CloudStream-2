@@ -59,7 +59,7 @@ namespace CloudStreamForms.Core
 
 			object GetData(Title data, out bool suc)
 			{
-				var list = data.movieMetadata.Where(t => t.name == Name).ToList();
+				var list = data.movieMetadata.Where(t => (string)t.name == Name).ToList();
 				suc = list.Count > 0;
 				return (suc ? list[0] : new MovieMetadata()).metadata;
 			}
