@@ -445,6 +445,7 @@ namespace CloudStreamForms
 
 					Device.BeginInvokeOnMainThread(() => {
 						if (IsDead) return;
+						_ = ReviewLabel.FadeTo(1, FATE_TIME_MS);
 
 						EPISODES.Text = IsMovie ? "MOVIE" : "EPISODES";
 						if (IsMovie) { // FORCE UPDATE WHEN INITAL LOAD MOVIE
@@ -537,6 +538,32 @@ namespace CloudStreamForms
 					RecomendationLoaded.IsVisible = e;
 					RecomendationLoaded.IsEnabled = e;
 				});
+			};
+
+			Commands.SetTap(AnalyticsBtt, new Command(async () => {
+				if (controller.pData != null) {
+					int count = controller.pData.Where(t => t.maxEpisode > 0).Count();
+					if (count > 0) {
+						await ActionPopup.DisplayActionSheet($"Providers found, {count}st", controller.pData.Where(t => t.maxEpisode > 0).Select(t => $"{t.provider} • {t.maxEpisode} episodes").ToArray());
+					}
+				}
+			}));
+
+			controller.OnPDataChanged += (object o, AnimeProviderEpisodes[] data) => {
+				if (controller.pData.Where(t => t.maxEpisode > 0).Count() > 0) { // IF ANY EPISODES
+					Device.BeginInvokeOnMainThread(() => {
+						if (AnalyticsBtt.IsVisible) return;
+						AnalyticsBtt.IsVisible = true;
+						AnalyticsBtt.IsEnabled = true;
+						AnalyticsImg.IsVisible = true;
+						AnalyticsImg.IsEnabled = true;
+						AnalyticsBg.IsEnabled = true;
+						AnalyticsBg.IsVisible = true;
+						AnalyticsImg.FadeTo(1, FATE_TIME_MS);
+						AnalyticsBtt.FadeTo(0.4, FATE_TIME_MS);
+						AnalyticsBg.FadeTo(1, FATE_TIME_MS);
+					});
+				}
 			};
 
 			controller.OnTextChanged += (object o, LabelInfo e) => {
@@ -1193,7 +1220,7 @@ namespace CloudStreamForms
 			if (fadeSeason) {
 				await SeasonBtt.FadeTo(1, FATE_TIME_MS);
 			}
-		} 
+		}
 
 		const double _RecPosterMulit = 1.75;
 		const int _RecPosterHeight = 100;
@@ -1287,7 +1314,7 @@ namespace CloudStreamForms
 						};
 
 						int _sel = int.Parse(i.ToString());
-						stackLayout.Children.Add(new BoxView() { BackgroundColor = Settings.ItemBackGroundColor, CornerRadius = 5, Margin = new Thickness(-20, -20, -20, -50) });
+						stackLayout.Children.Add(new Frame() { InputTransparent = true, BackgroundColor = Settings.ItemBackGroundColor, CornerRadius = 5, Margin = new Thickness(-20, -20, -20, -50), HasShadow = true });
 						stackLayout.Children.Add(ff);
 						stackLayout.Children.Add(playBtt);
 
@@ -1295,13 +1322,13 @@ namespace CloudStreamForms
 						trailerView.Children.Add(textLb);
 
 						stackLayout.SetValue(XamEffects.TouchEffect.ColorProperty, new Color(1, 1, 1, 0.3));
-						Commands.SetTap(stackLayout, new Command(async (o) => {
-							int z = (int)o;
+						int z = _sel;
+
+						Commands.SetTap(stackLayout, new Command(async () => {
 							var _t = epView.CurrentTrailers[z];
 							await RequestVlc(_t.Url, _t.Name);
 							//PlayVLCWithSingleUrl(_t.Url, _t.Name);
-						}));
-						Commands.SetTapParameter(stackLayout, _sel);
+						})); 
 						Grid.SetRow(stackLayout, (i + 1) * 2 - 2);
 						Grid.SetRow(textLb, (i + 1) * 2 - 1);
 					}

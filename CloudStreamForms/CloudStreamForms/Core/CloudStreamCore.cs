@@ -6121,14 +6121,23 @@ namespace CloudStreamForms.Core
 			}
 		}
 
-		public int GetMaxEpisodesInAnimeSeason(int currentSeason, bool isDub, TempThread? tempThred = null)
+		public struct AnimeProviderEpisodes
 		{
+			public int maxEpisode;
+			public string provider;
+		}
+
+		public int GetMaxEpisodesInAnimeSeason(int currentSeason, bool isDub, out AnimeProviderEpisodes[] pData, TempThread? tempThred = null)
+		{
+			pData = new AnimeProviderEpisodes[animeProviders.Length];
 			if (activeMovie.title.MALData.seasonData.Count > currentSeason) {
 				int currentMax = 0;
 				for (int i = 0; i < animeProviders.Length; i++) {
+					pData[i].provider = animeProviders[i].Name;
 					if (Settings.IsProviderActive(animeProviders[i].Name)) {
 						try {
 							int cmax = animeProviders[i].GetLinkCount(currentSeason, isDub, tempThred);
+							pData[i].maxEpisode = cmax;
 							if (cmax > currentMax) {
 								currentMax = cmax;
 							}

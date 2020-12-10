@@ -58,9 +58,9 @@ xmlns:ffTransformations="clr-namespace:FFImageLoading.Transformations;assembly=F
 								<!--<Button Grid.Column="0" Text="IMDb" BackgroundColor="Transparent" BorderColor="#303F9F" BorderWidth="2" WidthRequest="60" HeightRequest="40"></Button>
                             <Button Grid.Column="1" Text="MAL" BackgroundColor="Transparent" BorderColor="#303F9F" BorderWidth="2" WidthRequest="60" HeightRequest="40"></Button>-->
 
-								<Label Grid.Column="0"  Opacity="0" x:Name="RatingLabelRating" Text="" FontAttributes="Bold" HorizontalOptions="Start" VerticalOptions="Center" TranslationX="10" FontSize="18"   TextColor="#4257d8"></Label>
-								<Label Grid.Column="1" Opacity="0" x:Name="RatingLabel"   Text=""  HorizontalOptions="Start" TranslationX="10" VerticalOptions="Center"   TextColor="#646464"></Label>
-								<Button Grid.Column="2" x:Name="ReviewLabel"  BackgroundColor="Transparent" HorizontalOptions="End" TranslationX="10" VerticalOptions="Center" Text="Reviews" HeightRequest="30" WidthRequest="70" Margin="25,0" ClassId="CUST" TextColor="White" BorderWidth="2" CornerRadius="5" BorderColor="#303F9F" Opacity="0"></Button>
+								<Label InputTransparent="True" Grid.Column="0"  Opacity="0" x:Name="RatingLabelRating" Text="" FontAttributes="Bold" HorizontalOptions="Start" VerticalOptions="Center" TranslationX="10" FontSize="18"   TextColor="#4257d8"></Label>
+								<Label InputTransparent="True" Grid.Column="1" Opacity="0" x:Name="RatingLabel"   Text=""  HorizontalOptions="Start" TranslationX="10" VerticalOptions="Center"   TextColor="#646464"></Label>
+								<Button Grid.Column="2" x:Name="ReviewLabel"  BackgroundColor="Transparent" HorizontalOptions="End" TranslationX="10" VerticalOptions="Center" Text="Reviews" HeightRequest="40" WidthRequest="70" Margin="15,0" ClassId="CUST" TextColor="White" BorderWidth="2" CornerRadius="5" BorderColor="#303F9F" Opacity="0"></Button>
 							</Grid>
 							<Label x:Name="GenreLabel" Grid.Row="1" TextColor="#bababa" Padding="10,0,0,0"></Label>
 						</Grid>
@@ -74,9 +74,8 @@ xmlns:ffTransformations="clr-namespace:FFImageLoading.Transformations;assembly=F
 						</Grid>
 
 						<Grid Grid.Row="3"  Grid.Column="0" InputTransparent="True" Margin="0,-10,0,0">
-							<Label x:Name="DescriptionLabel" Opacity="0" Text="" HorizontalOptions="Fill" VerticalOptions="Start" Margin="10,0,10,0" MinimumHeightRequest="0" TranslationY="-20" FontSize="14" TextColor="#dadada"></Label>
+							<Label InputTransparent="True" x:Name="DescriptionLabel" Opacity="0" Text="" HorizontalOptions="Fill" VerticalOptions="Start" Margin="10,0,10,0" MinimumHeightRequest="0" TranslationY="-20" FontSize="14" TextColor="#dadada"></Label>
 						</Grid>
-
 
 						<Grid Grid.Row="5"  Grid.Column="0" x:Name="SecChromeRow" Margin="4,-20,5,0">
 							<Grid HorizontalOptions="FillAndExpand" HeightRequest="60" TranslationX="0"  x:Name="QuickMenu" Margin="5">
@@ -232,8 +231,9 @@ xmlns:ffTransformations="clr-namespace:FFImageLoading.Transformations;assembly=F
 							<RowDefinition Height="Auto" />
 						</Grid.RowDefinitions>
 
-						<Grid x:Name="EpPickers" Grid.Row="1"  Grid.Column="0" Margin="5,10,0,0" HorizontalOptions="Fill" HeightRequest="40">
+						<Grid x:Name="EpPickers" Grid.Row="1"  Grid.Column="0" Margin="5,10,5,0" HorizontalOptions="Fill" HeightRequest="40">
 							<Grid.ColumnDefinitions >
+								<ColumnDefinition Width="Auto"></ColumnDefinition>
 								<ColumnDefinition Width="Auto"></ColumnDefinition>
 								<ColumnDefinition Width="Auto"></ColumnDefinition>
 								<ColumnDefinition Width="Auto"></ColumnDefinition>
@@ -242,10 +242,18 @@ xmlns:ffTransformations="clr-namespace:FFImageLoading.Transformations;assembly=F
 							<Button x:Name="SeasonBtt" Grid.Column="0" InputTransparent="False" Opacity="0" BackgroundColor="#252525" Text="Season 1" TextColor="#e7e7e7" FontAttributes="Bold" FontSize="Body" CornerRadius="5" HeightRequest="37" ></Button>
 							<!--   <Picker x:Name="SeasonPicker"  TranslationX="13" TextColor="Transparent" IsVisible="False" VerticalOptions="Center" HorizontalOptions="Start"  FontAttributes="Bold" FontSize="Body" ></Picker> -->
 
-							<Button x:Name="DubBtt" Grid.Column="1" Opacity="0" InputTransparent="False" BackgroundColor="#252525" Text="Dub" TextColor="#e7e7e7" FontAttributes="Bold" FontSize="Body" CornerRadius="5" HeightRequest="37" WidthRequest="60" ></Button>
-							<Button x:Name="FromToBtt" Grid.Column="2" Opacity="0" InputTransparent="False" IsVisible="False" IsEnabled="False" BackgroundColor="#252525" Text="Test" TextColor="#e7e7e7" FontAttributes="Bold" FontSize="Body" CornerRadius="5" HeightRequest="37" WidthRequest="80" Margin="0,0,5,0"></Button>
-							<Button x:Name="BatchDownloadBtt" Grid.Column="3" InputTransparent="False" Opacity="0" IsEnabled="False" BackgroundColor="#252525" Text="Download All" TextColor="#e7e7e7" FontAttributes="Bold" FontSize="Body" CornerRadius="5" HeightRequest="37" TranslationX="-5" WidthRequest="110" HorizontalOptions="Start" ></Button>
+							<Button x:Name="DubBtt" Grid.Column="1" Opacity="0" InputTransparent="False" BackgroundColor="#252525" Text="Dub" TextColor="#e7e7e7" FontAttributes="Bold" FontSize="Body" CornerRadius="5" HeightRequest="37" WidthRequest="55" ></Button>
+							<Button x:Name="FromToBtt" Grid.Column="2" Opacity="0" InputTransparent="False" IsVisible="False" IsEnabled="False" BackgroundColor="#252525" Text="Test" TextColor="#e7e7e7" FontAttributes="Bold" FontSize="Body" CornerRadius="5" HeightRequest="37" WidthRequest="70" Margin="0,0,5,0"></Button>
+							<Button x:Name="BatchDownloadBtt" Grid.Column="3" InputTransparent="False" Opacity="0" IsEnabled="False" BackgroundColor="#252525" Text="Download" TextColor="#e7e7e7" FontAttributes="Bold" FontSize="Body" CornerRadius="5" HeightRequest="37" TranslationX="-5" WidthRequest="100" HorizontalOptions="Start" ></Button>
+							<Button x:Name="AnalyticsBg" IsVisible="False" IsEnabled="False" Opacity="0"  Grid.Column="4" InputTransparent="True" BackgroundColor="#252525" CornerRadius="5" HeightRequest="40" WidthRequest="40"  HorizontalOptions="End" VerticalOptions="Center"></Button>
+							<ffs:SvgCachedImage Grid.Column="4" IsVisible="False" IsEnabled="False" Opacity="0" x:Name="AnalyticsImg" BackgroundColor="Transparent" HorizontalOptions="End" HeightRequest="40" WidthRequest="40" VerticalOptions="Center" Scale="0.9" TranslationY="0" InputTransparent="True" Source="analytics.svg" >
+								<ffs:SvgCachedImage.Transformations>
+									<ffTransformations:TintTransformation HexColor="#e6e6e6" ></ffTransformations:TintTransformation>
 
+								</ffs:SvgCachedImage.Transformations>
+							</ffs:SvgCachedImage>
+							<xe:BorderView  Grid.Column="4" IsVisible="False" IsEnabled="False" Opacity="0" x:Name="AnalyticsBtt" xe:TouchEffect.Color="#66FFFFFF" HorizontalOptions="End" VerticalOptions="Center" WidthRequest="80" HeightRequest="80" Margin="-40" TranslationX="-20" CornerRadius="40" Scale="1" BackgroundColor="Transparent">
+							</xe:BorderView>
 							<!--
                             <ffs:SvgCachedImage x:Name="NotificationImg" Grid.Column="3" VerticalOptions="Center" HorizontalOptions="End" ></ffs:SvgCachedImage>
                             <xe:BorderView x:Name="NotificationBtt" IsEnabled="False" xe:TouchEffect.Color="White"  Opacity="0.4" Grid.Column="3" TranslationX="2.5" WidthRequest="36" HeightRequest="36" CornerRadius="18"  VerticalOptions="Center" HorizontalOptions="End"></xe:BorderView>

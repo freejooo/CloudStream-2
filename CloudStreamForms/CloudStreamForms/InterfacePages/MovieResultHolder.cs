@@ -307,8 +307,11 @@ namespace CloudStreamForms.InterfacePages
 		void ChangeBatchDownload()
 		{
 			bool canBatchDownload = exposedEpisodes.Length > 1;
-			ChangeText(ButtonType.BatchDownloadPicker, canBatchDownload ? "Download All" : null);
+			ChangeText(ButtonType.BatchDownloadPicker, canBatchDownload ? "Download" : null);
 		}
+
+		public AnimeProviderEpisodes[] pData;
+		public EventHandler<AnimeProviderEpisodes[]> OnPDataChanged;
 
 		void SetDubExist()
 		{
@@ -316,7 +319,8 @@ namespace CloudStreamForms.InterfacePages
 			core.StartThread("Set SUB/DUB", () => {
 				try {
 					if (IsDead) return;
-					int max = core.GetMaxEpisodesInAnimeSeason(currentSeason, isDub, tempThred);
+					int max = core.GetMaxEpisodesInAnimeSeason(currentSeason, isDub, out pData, tempThred);
+					OnPDataChanged?.Invoke(null, pData);
 					if (max > 0) {
 						if (IsDead) return;
 						max = Math.Min(max, maxEpisodes);

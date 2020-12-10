@@ -74,13 +74,28 @@ namespace CloudStreamForms
 					//if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
 				}
 				finally {
+					var bgColor = Settings.ItemBackGroundColor;
 					mainCore.JoinThred(tempThred);
 					if (holder.reviews != null) {
 						Device.BeginInvokeOnMainThread(() => {
 							MyEpisodeResultCollection.Clear();
 							int index = 0;
 							foreach (var rew in holder.reviews) {
-								MyEpisodeResultCollection.Add(new ReviewItem() { Author = rew.author, Date = rew.date, Rating = $"★ {rew.rating}", SpoilerText = rew.containsSpoiler ? "Contains Spoilers" : "", Text = rew.text, Title = rew.title, IsExpanded = false, index = index });
+								int _index = index;
+								MyEpisodeResultCollection.Add(new ReviewItem() {
+									ClickToExpand = new Command(() => {
+										TapCell(_index);
+									}),
+									ExtraColor = bgColor,
+									Author = rew.author,
+									Date = rew.date,
+									Rating = $"★ {rew.rating}",
+									SpoilerText = rew.containsSpoiler ? "Contains Spoilers" : "",
+									Text = rew.text,
+									Title = rew.title,
+									IsExpanded = false,
+									index = index
+								}) ;
 								index++;
 							}
 							SetHeight();
@@ -135,9 +150,9 @@ namespace CloudStreamForms
 			TryGetNewReviews(true);
 		}
 
-		private void ViewCell_Tapped(object sender, EventArgs e)
+		void TapCell(int index)
 		{
-			ReviewItem episodeResult = (ReviewItem)(((ViewCell)sender).BindingContext);
+			ReviewItem episodeResult = MyEpisodeResultCollection[index];
 			MyEpisodeResultCollection.Remove(episodeResult);
 			episodeResult.IsExpanded = !episodeResult.IsExpanded;
 			MyEpisodeResultCollection.Insert(episodeResult.index, episodeResult);
@@ -153,6 +168,12 @@ namespace CloudStreamForms
 				SetHeight();
 
 			});
+		}
+
+		private void ViewCell_Tapped(object sender, EventArgs e)
+		{
+			ReviewItem episodeResult = (ReviewItem)(((ViewCell)sender).BindingContext);
+			
 		}
 
 		private void episodeView_ItemTapped(object sender, ItemTappedEventArgs e)
@@ -181,6 +202,8 @@ namespace CloudStreamForms
 		public string SpoilerText { get; set; }
 		public int MaxLines { get { return IsExpanded ? MAX_MAXLINES : MIN_MAXLINES; } }
 		public bool IsExpanded { set; get; }
+		public Command ClickToExpand { set; get; }
+		public Color ExtraColor { set; get; }
 		public object Clone()
 		{
 			return this.MemberwiseClone();
