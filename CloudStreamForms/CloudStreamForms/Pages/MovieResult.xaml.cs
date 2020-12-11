@@ -1199,28 +1199,7 @@ namespace CloudStreamForms
 					//  App.PlayVLCWithSingleUrl(trailerUrl, currentMovie.title.name + " - Trailer");
 				}
 			}
-		}
-
-		async void FadeTitles(bool fadeSeason)
-		{
-			if (Core == null) return;
-
-			DescriptionLabel.Opacity = 0;
-			RatingLabel.Opacity = 0;
-			RatingLabelRating.Opacity = 0;
-			SeasonBtt.Opacity = 0;
-			//Rectangle bounds = DescriptionLabel.Bounds;
-			// DescriptionLabel.LayoutTo(new Rectangle(bounds.X, bounds.Y, bounds.Width, 0), FATE_TIME_MS);
-			await RatingLabelRating.FadeTo(1, FATE_TIME_MS);
-			_ = ReviewLabel.FadeTo(1, FATE_TIME_MS);
-
-			await RatingLabel.FadeTo(1, FATE_TIME_MS);
-			await DescriptionLabel.FadeTo(1, FATE_TIME_MS);
-			//    await DescriptionLabel.LayoutTo(bounds, FATE_TIME_MS);
-			if (fadeSeason) {
-				await SeasonBtt.FadeTo(1, FATE_TIME_MS);
-			}
-		}
+		} 
 
 		const double _RecPosterMulit = 1.75;
 		const int _RecPosterHeight = 100;
@@ -1265,8 +1244,6 @@ namespace CloudStreamForms
 		}
 
 		bool nextEpTimeShouldBeDisplayed = false;
-
-		readonly static Dictionary<string, bool> GetLatestDub = new Dictionary<string, bool>();
 
 		private void MovieResult_trailerLoaded(object sender, List<Trailer> e)
 		{

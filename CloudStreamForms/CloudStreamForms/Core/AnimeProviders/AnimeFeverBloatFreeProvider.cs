@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CloudStreamForms.Core.BaseProviders;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using static CloudStreamForms.Core.BlotFreeProvider;
@@ -8,10 +9,10 @@ namespace CloudStreamForms.Core.AnimeProviders
 {
 	class AnimeFeverBloatFreeProvider : BloatFreeBaseAnimeProvider
 	{
-		readonly AnimeFeverHelper helper;
+		readonly AnimeFeverBaseProvider helper;
 		public AnimeFeverBloatFreeProvider(CloudStreamCore _core) : base(_core)
 		{
-			helper = new AnimeFeverHelper(_core);
+			helper = new AnimeFeverBaseProvider(_core);
 		}
 
 		public override string Name => "AnimeFever";
@@ -125,7 +126,7 @@ namespace CloudStreamForms.Core.AnimeProviders
 
 		public override NonBloatSeasonData GetSeasonData(MALSeason ms, TempThread tempThread, string year, object storedData)
 		{
-			AnimeFeverHelper.AnimeFeverSearchInfo data = (AnimeFeverHelper.AnimeFeverSearchInfo)storedData;
+			AnimeFeverBaseProvider.AnimeFeverSearchInfo data = (AnimeFeverBaseProvider.AnimeFeverSearchInfo)storedData;
 			NonBloatSeasonData setData = new NonBloatSeasonData() { dubEpisodes = new List<string>(), subEpisodes = new List<string>() };
 			foreach (var subData in data.data) {
 				if (subData.name == ms.engName || subData.alt_name == ms.engName) {

@@ -153,6 +153,7 @@ namespace CloudStreamForms.Core
 							lock (_lock) {
 								ms = ActiveMovie.title.MALData.seasonData[i].seasons[q];
 								ms.season = i;
+								ms.part = q + 1;
 							}
 
 							NonBloatSeasonData data = GetSeasonData(ms, tempThred, year, storedData);

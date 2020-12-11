@@ -8,10 +8,10 @@ using Button = Xamarin.Forms.Button;
 [assembly: ExportRenderer(typeof(Button), typeof(CustomButtonRenderer))]
 public class CustomButtonRenderer : ButtonRenderer
 {
-    private readonly Context context;
+   // private readonly Context context;
     public CustomButtonRenderer(Context context) : base(context)
     {
-        this.context = context;
+       // this.context = context;
     }
 
     protected override void OnElementChanged(ElementChangedEventArgs<Button> e)

@@ -2193,10 +2193,7 @@ namespace CloudStreamForms.Droid
 			catch (Exception _ex) {
 				error(_ex);
 			}
-			mainS.Start();
-#if DEBUG
-			TestAwake();
-#endif
+			mainS.Start(); 
 			//MainDelayTest();
 			// long delay = getDelay();
 
@@ -2226,13 +2223,7 @@ namespace CloudStreamForms.Droid
 			});*/
 			//MainDelayTest();
 		}
-#endif
-
-		async void TestAwake()
-		{
-			await Task.Delay(4000);
-			//	DownloadHandle.ParseM3u8("https://pl.crunchyroll.com/evs1/2a397fdeaa9a0b59d8d5d9e24cda6420/assets/ca303e340e0f0169b8e8ba682855f2da_,3865381.mp4,3865382.mp4,3865380.mp4,3865379.mp4,3865378.mp4,.urlset/master.m3u8?Policy=eyJTdGF0ZW1lbnQiOlt7IlJlc291cmNlIjoiaHR0cCo6Ly9wbC5jcnVuY2h5cm9sbC5jb20vZXZzMS8yYTM5N2ZkZWFhOWEwYjU5ZDhkNWQ5ZTI0Y2RhNjQyMC9hc3NldHMvY2EzMDNlMzQwZTBmMDE2OWI4ZThiYTY4Mjg1NWYyZGFfLDM4NjUzODEubXA0LDM4NjUzODIubXA0LDM4NjUzODAubXA0LDM4NjUzNzkubXA0LDM4NjUzNzgubXA0LC51cmxzZXQvbWFzdGVyLm0zdTgiLCJDb25kaXRpb24iOnsiRGF0ZUxlc3NUaGFuIjp7IkFXUzpFcG9jaFRpbWUiOjE1OTk4MzQ2MDd9fX1dfQ__&Signature=UxXK9xHvYtoRhlgqCwbalv2USxrvwkiDYWGYWMwj6pyAzDj35PYrgNGFMHQcij7MQxzwd0Lmlxhcs98muF0u~wdhxbKOZ2vIJTXcjblRvf3dVKbEnwRgzOV3zhWobK2nGmFqC2SYXrGigdHYl2qxh1LvtHC-hTKenAWenRRIoRu9~1nQSmFqRDz0KqBbVMRcHlfCBISJUctYXcEWLrTQGzwZvz08o5N7Q-6Hf1~Qejz7n2bAlf1-ITJobH7LQIXIdUzQJ3EIkd1aIEJY~i36l3DgmGrATuQEbaAQh0G5VTFSgfcUtWDU7t9iJfcEOHVZ7YiLr6UyEGRH4bOPOlPGDg__&Key-Pair-Id=APKAJMWSQ5S7ZB3MF5VA", "");
-		}
+#endif 
 
 		MyAudioFocusListener myAudioFocusListener;
 

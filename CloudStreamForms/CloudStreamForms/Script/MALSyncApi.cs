@@ -50,6 +50,7 @@ namespace CloudStreamForms.Script
 		public static async Task FetchAllTitles()
 		{
 			var allUserData = await GetAllMalData();
+			if (allUserData == null) return;
 			allTitles.Clear();
 			foreach (var data in allUserData) {
 				allTitles[data.id] = data;
@@ -186,7 +187,7 @@ namespace CloudStreamForms.Script
 
 		public enum MalStatusType { Watching = 0, Completed = 1, OnHold = 2, Dropped = 3, PlanToWatch = 4, none = -1 };
 
-		public static async Task<MalTitleHolder[]?> GetAllMalData(string user = "@me")
+		public static async Task<MalTitleHolder[]> GetAllMalData(string user = "@me")
 		{
 			try {
 				List<MalTitleHolder> data = new List<MalTitleHolder>();

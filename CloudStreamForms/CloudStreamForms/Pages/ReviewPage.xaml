@@ -22,7 +22,7 @@
            IsRefreshing="{Binding IsRefreshing}"       RefreshControlColor="#303F9F"  -->
 					<ListView.ItemTemplate >
 						<DataTemplate >
-                        <ViewCell Tapped="ViewCell_Tapped" Appearing="ViewCell_Appearing" >
+                        <ViewCell Appearing="ViewCell_Appearing" >
 							<Grid cse:LongPressedEffect.Command="{Binding ClickToExpand}">
 								<Grid.Effects>
 									<cse:LongPressedEffect></cse:LongPressedEffect>

@@ -21,7 +21,7 @@ namespace CloudStreamForms.Droid.Renderers
         {
             this.context = context;
         }
-        const bool line = false;
+        //const bool line = false;
 
         public static bool done = false;
         protected override void OnElementPropertyChanged(object sender, PropertyChangedEventArgs e) // HOMESCREEN LINE HERE

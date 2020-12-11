@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using static CloudStreamForms.Core.CloudStreamCore;
 
-namespace CloudStreamForms.Core.AnimeProviders
+namespace CloudStreamForms.Core.BaseProviders
 {
 	class ShiroBaseProvider : BaseProvider
 	{

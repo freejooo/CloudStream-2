@@ -50,10 +50,11 @@ namespace CloudStreamForms.Cryptography
 			var plainTextBytes = Encoding.UTF8.GetBytes(plainText);
 			using var password = new Rfc2898DeriveBytes(passPhrase, saltStringBytes, DerivationIterations);
 			var keyBytes = password.GetBytes(Keysize / 8);
-			using var symmetricKey = new RijndaelManaged();
-			symmetricKey.BlockSize = 256;
-			symmetricKey.Mode = CipherMode.CBC;
-			symmetricKey.Padding = PaddingMode.PKCS7;
+			using var symmetricKey = new RijndaelManaged {
+				BlockSize = 256,
+				Mode = CipherMode.CBC,
+				Padding = PaddingMode.PKCS7
+			};
 			using var encryptor = symmetricKey.CreateEncryptor(keyBytes, ivStringBytes);
 			using var memoryStream = new MemoryStream();
 			using var cryptoStream = new CryptoStream(memoryStream, encryptor, CryptoStreamMode.Write);
@@ -83,10 +84,11 @@ namespace CloudStreamForms.Cryptography
 
 				using var password = new Rfc2898DeriveBytes(passPhrase, saltStringBytes, DerivationIterations);
 				var keyBytes = password.GetBytes(Keysize / 8);
-				using var symmetricKey = new RijndaelManaged();
-				symmetricKey.BlockSize = 256;
-				symmetricKey.Mode = CipherMode.CBC;
-				symmetricKey.Padding = PaddingMode.PKCS7;
+				using var symmetricKey = new RijndaelManaged {
+					BlockSize = 256,
+					Mode = CipherMode.CBC,
+					Padding = PaddingMode.PKCS7
+				};
 				using var decryptor = symmetricKey.CreateDecryptor(keyBytes, ivStringBytes);
 				using var memoryStream = new MemoryStream(cipherTextBytes);
 				using var cryptoStream = new CryptoStream(memoryStream, decryptor, CryptoStreamMode.Read);

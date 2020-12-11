@@ -47,7 +47,7 @@ namespace CloudStreamForms.Core
 				new AnimeFeverBloatFreeProvider(this),
 				new GogoAnimeProvider(this),
 				//new KickassAnimeProvider(this), // Cloudflare ?
-				new DubbedAnimeProvider(this),
+				new DubbedAnimeBFProvider(this),
 				new AnimeFlixProvider(this),
 				new AnimekisaProvider(this),
 				new KissFreeAnimeProvider(this),
@@ -307,6 +307,7 @@ namespace CloudStreamForms.Core
 		{
 			public int length;
 			public int season;
+			public int part;
 			public string malUrl;
 			public string aniListUrl;
 			public int MalId {
@@ -341,7 +342,6 @@ namespace CloudStreamForms.Core
 			public DubbedAnimeNetData dubbedAnimeNetData;
 			public AnimekisaData animekisaData;
 			public AnimeDreamData animedreamData;
-			public WatchMovieAnimeData watchMovieAnimeData;
 			public KissanimefreeData kissanimefreeData;
 			public AnimeSimpleData animeSimpleData;
 			public VidStreamingData vidStreamingData;
@@ -375,7 +375,6 @@ namespace CloudStreamForms.Core
 			public string[] urls;
 		}
 
-
 		[Serializable]
 		public struct KissanimefreeData
 		{
@@ -388,18 +387,6 @@ namespace CloudStreamForms.Core
 			public string dubReferer;
 			public string subReferer;
 		}
-
-		[Serializable]
-		public struct WatchMovieAnimeData
-		{
-			public bool dubExists;
-			public bool subExists;
-			public int maxSubbedEpisodes;
-			public int maxDubbedEpisodes;
-			public string dubUrl;
-			public string subUrl;
-		}
-
 
 		[Serializable]
 		public struct AnimekisaData
@@ -418,7 +405,6 @@ namespace CloudStreamForms.Core
 			public string[] dubbedEpisodes;
 			public string[] subbedEpisodes;
 		}
-
 
 		[System.Serializable]
 		public struct DubbedAnimeNetData
@@ -452,7 +438,6 @@ namespace CloudStreamForms.Core
 			public bool subExists;
 		}
 
-
 		[Serializable]
 		public struct GogoAnimeData
 		{
@@ -461,6 +446,7 @@ namespace CloudStreamForms.Core
 			public string subUrl;
 			public string dubUrl;
 		}
+
 		[Serializable]
 		public struct KickassAnimeData
 		{
@@ -495,9 +481,7 @@ namespace CloudStreamForms.Core
 			public string firstName;
 			public List<MALSeasonData> seasonData;
 			public bool done;
-			public bool loadSeasonEpCountDone;
 			public List<int> currentActiveGoGoMaxEpsPerSeason;
-			public List<int> currentActiveDubbedMaxEpsPerSeason;
 			public List<int> currentActiveKickassMaxEpsPerSeason;
 			public string currentSelectedYear;
 		}
@@ -550,7 +534,6 @@ namespace CloudStreamForms.Core
 			public string kickassSubUrl;
 			public string kickassDubUrl;
 			public string monkeyStreamMetadata;
-
 
 			public string shortEpView;
 
@@ -607,39 +590,6 @@ namespace CloudStreamForms.Core
 		}
 
 		#region QuickSearch
-		[System.Serializable]
-		public struct DubbedAnimeEpisode
-		{
-			public string rowid;
-			public string title;
-			public string desc;
-			public string status;
-			public object skips;
-			public int totalEp;
-			public string ep;
-			public int NextEp;
-			public string slug;
-			public string wideImg;
-			public string year;
-			public string showid;
-			public string Epviews;
-			public string TotalViews;
-			public string serversHTML;
-			public string preview_img;
-			public string tags;
-		}
-		[System.Serializable]
-		public struct DubbedAnimeSearchResult
-		{
-			public List<DubbedAnimeEpisode> anime;
-			public bool error;
-			public object errorMSG;
-		}
-		[System.Serializable]
-		public struct DubbedAnimeSearchRootObject
-		{
-			public DubbedAnimeSearchResult result;
-		}
 #pragma warning disable CS0649
 
 		[System.Serializable]
@@ -1724,82 +1674,9 @@ namespace CloudStreamForms.Core
 			}
 		}
 
-		public class DubbedAnimeMovieProvider : BaseMovieProvier
-		{
-			public override string Name => "DubbedAnime";
-			readonly DubbedAnimeProvider back;
-			public DubbedAnimeMovieProvider(CloudStreamCore _core) : base(_core)
-			{
-				back = new DubbedAnimeProvider(_core);
-			}
-
-			public void FishMainMovies(TempThread tempThread)
-			{
-				try {
-					string d = DownloadString("https://bestdubbedanime.com/movies/");
-
-					if (!GetThredActive(tempThread)) { return; }; // COPY UPDATE PROGRESS
-
-					if (d != "") {
-						titles.Clear();
-						hrefs.Clear();
-						const string lookFor = "//bestdubbedanime.com/movies/";
-						while (d.Contains(lookFor)) {
-							string href = FindHTML(d, lookFor, "\"");
-							d = RemoveOne(d, lookFor);
-							string title = FindHTML(d, "grid_item_title\">", "<");
-
-							hrefs.Add(href);
-							titles.Add(title);
-							// print(href + "|" + title);
-						}
-						if (hrefs.Count > 0) {
-							hasSearched = true;
-						}
-					}
-				}
-				catch (Exception _ex) {
-					error("EX IN MAINMOV: " + _ex);
-				}
-			}
-
-
-			public static List<string> hrefs = new List<string>();
-			public static List<string> titles = new List<string>();
-			public static bool hasSearched = false;
-
-			public override void FishMainLinkTSync(TempThread tempThread)
-			{
-				if (ActiveMovie.title.movieType == MovieType.AnimeMovie && !hasSearched) {
-					FishMainMovies(tempThread);
-				}
-			}
-
-			public override void LoadLinksTSync(int episode, int season, int normalEpisode, bool isMovie, TempThread tempThred)
-			{
-				try {
-					if (ActiveMovie.title.movieType == MovieType.AnimeMovie) {
-						for (int i = 0; i < titles.Count; i++) {
-							if (ToDown(titles[i], replaceSpace: "") == ToDown(ActiveMovie.title.name, replaceSpace: "")) {
-								var ep = core.GetDubbedAnimeEpisode(hrefs[i]);
-								if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
-								back.AddMirrors(ep, normalEpisode);
-								return;
-							}
-						}
-					}
-				}
-				catch (Exception _ex) {
-					error("PROVIDER ERROR: " + _ex);
-				}
-			}
-		}
-
 		public class AnimeSimpleProvider : BaseAnimeProvider
 		{
-			public AnimeSimpleProvider(CloudStreamCore _core) : base(_core)
-			{
-			}
+			public AnimeSimpleProvider(CloudStreamCore _core) : base(_core) { }
 
 			public override void GetHasDubSub(MALSeason data, out bool dub, out bool sub)
 			{
@@ -3191,203 +3068,6 @@ namespace CloudStreamForms.Core
 					}
 					_episode += data.Length;
 				}
-			}
-		}
-
-		public class DubbedAnimeProvider : BaseAnimeProvider
-		{
-			public DubbedAnimeProvider(CloudStreamCore _core) : base(_core) { }
-
-			public override string Name => "DubbedAnime";
-			public override bool HasSub => false;
-
-			public override void GetHasDubSub(MALSeason data, out bool dub, out bool sub)
-			{
-				dub = data.dubbedAnimeData.dubExists;
-				sub = false;
-			}
-
-			public override void FishMainLink(string year, TempThread tempThred, MALData malData)
-			{
-				string _imdb = ActiveMovie.title.name; //"Attack On Titan";
-				string _imdb2 = ActiveMovie.title.ogName; //"Attack On Titan";
-				string imdb = _imdb.Replace(".", "").Replace("/", "");
-				string searchUrl = "https://bestdubbedanime.com/search/" + imdb;
-				string d = DownloadString(searchUrl); // TrustFailure (Authentication failed, see inner exception.)
-				if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
-
-				const string lookFor = "class=\"resulta\" href=\"";
-				string nameLookFor = "<div class=\"titleresults\">";
-
-				List<int> alreadyAdded = new List<int>();
-				while (d.Contains(nameLookFor)) {
-					string name = FindHTML(d, nameLookFor, "<", decodeToNonHtml: true);
-					if (name.ToLower().Contains(_imdb.ToLower()) || name.ToLower().Contains(_imdb2.ToLower())) {
-
-						string url = FindHTML(d, lookFor, "\"").Replace("\\/", "/");
-						string slug = url.Replace("//bestdubbedanime.com/", "");
-
-						int season = 0;
-						if (name.ToLower().Contains("2nd season")) {
-							season = 2;
-						}
-						else if (name.ToLower().Contains("3rd season")) {
-							season = 3;
-						}
-						if (season == 0) {
-							for (int i = 1; i < 7; i++) {
-								if (name.EndsWith(" " + i)) {
-									season = i;
-								}
-							}
-						}
-						if (season == 0) {
-							season = 1;
-						}
-						int part = 1;
-						for (int i = 2; i < 5; i++) {
-							if (name.ToLower().Contains("part " + i)) {
-								part = i;
-							}
-						}
-
-
-						int id = season + part * 1000;
-						if (!alreadyAdded.Contains(id)) {
-							alreadyAdded.Add(id);
-							try {
-								lock (_lock) {
-									var ms = ActiveMovie.title.MALData.seasonData[season].seasons[part - 1];
-									ms.dubbedAnimeData.dubExists = true;
-									ms.dubbedAnimeData.slug = slug;
-									ActiveMovie.title.MALData.seasonData[season].seasons[part - 1] = ms;
-								}
-							}
-							catch (Exception _ex) {
-								error("ERROR IN SEASON::" + season + "PART" + part + ": EX: " + _ex);
-								//throw;
-								// ERROR
-							}
-						}
-					}
-					d = RemoveOne(d, nameLookFor);
-				}
-			}
-
-			public List<string> GetAllLinks(int currentSeason, bool isDub)
-			{
-				if (!isDub) return new List<string>();
-
-				List<string> baseUrls = new List<string>();
-
-				try {
-					for (int q = 0; q < ActiveMovie.title.MALData.seasonData[currentSeason].seasons.Count; q++) {
-						var ms = ActiveMovie.title.MALData.seasonData[currentSeason].seasons[q].dubbedAnimeData;
-
-						if (ms.dubExists) {
-							if (!baseUrls.Contains(ms.slug)) {
-								baseUrls.Add(ms.slug);
-							}
-							//print("BASEURL " + ms.baseUrl);
-						}
-					}
-				}
-				catch (Exception _ex) {
-					error(Name + "|" + nameof(GetAllLinks) + "|" + _ex);
-				}
-				return baseUrls;
-			}
-
-			public override void LoadLinksTSync(int episode, int season, int normalEpisode, bool isDub, TempThread tempThred)
-			{
-				if (!isDub) return;
-				if (episode <= ActiveMovie.title.MALData.currentActiveDubbedMaxEpsPerSeason.Sum()) {
-					List<string> fwords = GetAllLinks(season, isDub);
-					print("SLUG1." + fwords[0]);
-					int sel = -1;
-					int floor = 0;
-					int subtract = 0;
-					if (ActiveMovie.title.MALData.currentActiveDubbedMaxEpsPerSeason != null) {
-						for (int i = 0; i < ActiveMovie.title.MALData.currentActiveDubbedMaxEpsPerSeason.Count; i++) {
-							int seling = floor + ActiveMovie.title.MALData.currentActiveDubbedMaxEpsPerSeason[i];
-
-							if (episode > floor && episode <= seling) {
-								sel = i;
-								subtract = floor;
-
-							}
-							//print(activeMovie.title.MALData.currentActiveMaxEpsPerSeason[i] + "<<");
-							floor += ActiveMovie.title.MALData.currentActiveDubbedMaxEpsPerSeason[i];
-						}
-					}
-
-					string fwordLink = fwords[sel];
-					print("SLUGOS: " + fwordLink);
-					DubbedAnimeEpisode dubbedEp = core.GetDubbedAnimeEpisode(fwordLink, episode - subtract);
-					if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
-					AddMirrors(dubbedEp, normalEpisode);
-				}
-			}
-
-			public void AddMirrors(DubbedAnimeEpisode dubbedEp, int normalEpisode)
-			{
-				string serverUrls = dubbedEp.serversHTML;
-
-				const string sLookFor = "hl=\"";
-				while (serverUrls.Contains(sLookFor)) {
-					string baseUrl = FindHTML(dubbedEp.serversHTML, "hl=\"", "\"");
-					string burl = "https://bestdubbedanime.com/xz/api/playeri.php?url=" + baseUrl + "&_=" + UnixTime;
-					print(burl);
-					string _d = DownloadString(burl);
-					int prio = -10; // SOME LINKS ARE EXPIRED, CAUSING VLC TO EXIT
-
-					string enlink = "\'";
-					if (_d.Contains("<source src=\"")) {
-						enlink = "\"";
-					}
-					string lookFor = "<source src=" + enlink;
-					while (_d.Contains(lookFor)) {
-
-						string vUrl = FindHTML(_d, lookFor, enlink);
-						if (vUrl != "") {
-							vUrl = "https:" + vUrl;
-						}
-						string label = FindHTML(_d, "label=" + enlink, enlink);
-						//if (GetFileSize(vUrl) > 0) {
-						AddPotentialLink(normalEpisode, vUrl, "DubbedAnime", prio, label.Replace("0p", "0") + "p");
-						//}
-
-						_d = RemoveOne(_d, lookFor);
-						try {
-							_d = RemoveOne(_d, "label=" + enlink);
-						}
-						catch (Exception _ex) {
-							error(_ex);
-						}
-					}
-					serverUrls = RemoveOne(serverUrls, sLookFor);
-				}
-			}
-
-			public override int GetLinkCount(int currentSeason, bool isDub, TempThread? tempThred)
-			{
-				if (isDub) {
-					//  activeMovie.title.MALData.currentActiveDubbedMaxEpsPerSeason = new List<int>();
-					List<int> dubbedSum = new List<int>();
-					List<string> dubbedAnimeLinks = GetAllLinks(currentSeason, isDub);
-					if (tempThred != null) {
-						if (!GetThredActive((TempThread)tempThred)) { return 0; }; // COPY UPDATE PROGRESS
-					}
-					for (int i = 0; i < dubbedAnimeLinks.Count; i++) {
-						DubbedAnimeEpisode ep = core.GetDubbedAnimeEpisode(dubbedAnimeLinks[i], 1);
-						dubbedSum.Add(ep.totalEp);
-						// activeMovie.title.MALData.currentActiveDubbedMaxEpsPerSeason.Add(ep.totalEp);
-					}
-					core.activeMovie.title.MALData.currentActiveDubbedMaxEpsPerSeason = dubbedSum;
-
-					return dubbedSum.Sum();
-				}
-				return 0;
 			}
 		}
 
@@ -6523,153 +6203,7 @@ namespace CloudStreamForms.Core
 								error("MAIN EX PARALLEL FOR: " + _ex);
 							}
 						});
-
-						/*
-                        async void JoinT(TempThread t, int wait)
-                        {
-                            await Task.Delay(wait);
-                            JoinThred(t); 
-                        }
-
-                        JoinT(temp, 10000);*/
 						JoinThred(temp);
-						/*
-                        int _episode = int.Parse(episode.ToString()); // READ ONLY
-
-                        if (isDub) {
-                            TempThread tempthread = new TempThread();
-                            tempthread.typeId = 3; // MAKE SURE THIS IS BEFORE YOU CREATE THE THRED
-                            tempthread.Thread = new System.Threading.Thread(() => {
-                                try {
-                                    print("DUBBED::" + episode + "|" + activeMovie.title.MALData.currentActiveDubbedMaxEpsPerSeason.Sum());
-                                    if (episode <= activeMovie.title.MALData.currentActiveDubbedMaxEpsPerSeason.Sum()) {
-                                        List<string> fwords = GetAllDubbedAnimeLinks(activeMovie, season);
-                                        print("SLUG1." + fwords[0]);
-                                        int sel = -1;
-                                        int floor = 0;
-                                        int subtract = 0;
-                                        if (activeMovie.title.MALData.currentActiveDubbedMaxEpsPerSeason != null) {
-                                            for (int i = 0; i < activeMovie.title.MALData.currentActiveDubbedMaxEpsPerSeason.Count; i++) {
-                                                int seling = floor + activeMovie.title.MALData.currentActiveDubbedMaxEpsPerSeason[i];
-
-                                                if (episode > floor && episode <= seling) {
-                                                    sel = i;
-                                                    subtract = floor;
-
-                                                }
-                                                //print(activeMovie.title.MALData.currentActiveMaxEpsPerSeason[i] + "<<");
-                                                floor += activeMovie.title.MALData.currentActiveDubbedMaxEpsPerSeason[i];
-                                            }
-                                        }
-
-                                        string fwordLink = fwords[sel];
-                                        print("SLUGOS: " + fwordLink);
-                                        DubbedAnimeEpisode dubbedEp = GetDubbedAnimeEpisode(fwordLink, _episode - subtract);
-
-                                        string serverUrls = dubbedEp.serversHTML;
-                                        print("SERVERURLLRL:" + serverUrls);
-                                        const string sLookFor = "hl=\"";
-                                        while (serverUrls.Contains(sLookFor)) {
-                                            string baseUrl = FindHTML(dubbedEp.serversHTML, "hl=\"", "\"");
-                                            print("BASE::" + baseUrl);
-                                            string burl = "https://bestdubbedanime.com/xz/api/playeri.php?url=" + baseUrl + "&_=" + UnixTime;
-                                            print(burl);
-                                            string _d = DownloadString(burl);
-                                            print("SSC:" + _d);
-                                            int prio = -10; // SOME LINKS ARE EXPIRED, CAUSING VLC TO EXIT
-
-                                            string enlink = "\'";
-                                            if (_d.Contains("<source src=\"")) {
-                                                enlink = "\"";
-                                            }
-                                            string lookFor = "<source src=" + enlink;
-                                            while (_d.Contains(lookFor)) {
-                                                string vUrl = FindHTML(_d, lookFor, enlink);
-                                                if (vUrl != "") {
-                                                    vUrl = "https:" + vUrl;
-                                                }
-                                                string label = FindHTML(_d, "label=" + enlink, enlink);
-                                                print("DUBBEDANIMECHECK:" + vUrl + "|" + label);
-                                                //if (GetFileSize(vUrl) > 0) {
-                                                AddPotentialLink(normalEpisode, vUrl, "DubbedAnime " + label.Replace("0p", "0") + "p", prio);
-                                                //}
-
-                                                _d = RemoveOne(_d, lookFor);
-                                                _d = RemoveOne(_d, "label=" + enlink);
-                                            }
-                                            serverUrls = RemoveOne(serverUrls, sLookFor);
-                                        }
-                                    }
-                                }
-                                finally {
-                                    JoinThred(tempthread);
-                                }
-                            });
-                            tempthread.Thread.Name = "DubAnime Thread";
-                            tempthread.Thread.Start();
-
-                        }
-
-                        var kickAssLinks = GetAllKickassLinksFromAnime(activeMovie, season, isDub);
-                        print("KICKASSOS:" + normalEpisode);
-                        for (int i = 0; i < kickAssLinks.Count; i++) {
-                            print("KICKASSLINK:" + i + ". |" + kickAssLinks[i]);
-                        }
-                        if (normalEpisode < kickAssLinks.Count) {
-                            GetKickassVideoFromURL(kickAssLinks[normalEpisode], normalEpisode);
-                        }
-
-                        try {
-                            if (episode <= activeMovie.title.MALData.currentActiveGoGoMaxEpsPerSeason.Sum()) {
-                                string fwordLink = "";
-                                List<string> fwords = GetAllGogoLinksFromAnime(activeMovie, season, isDub);
-                                // for (int i = 0; i < fwords.Count; i++) {
-                                // print("FW: " + fwords[i]);
-                                //  }
-
-                                // --------------- GET WHAT SEASON THE EPISODE IS IN ---------------
-
-                                int sel = -1;
-                                int floor = 0;
-                                int subtract = 0;
-                                // print(activeMovie.title.MALData.currentActiveMaxEpsPerSeason);
-                                if (activeMovie.title.MALData.currentActiveGoGoMaxEpsPerSeason != null) {
-                                    for (int i = 0; i < activeMovie.title.MALData.currentActiveGoGoMaxEpsPerSeason.Count; i++) {
-                                        int seling = floor + activeMovie.title.MALData.currentActiveGoGoMaxEpsPerSeason[i];
-
-                                        if (episode > floor && episode <= seling) {
-                                            sel = i;
-                                            subtract = floor;
-
-                                        }
-                                        //print(activeMovie.title.MALData.currentActiveMaxEpsPerSeason[i] + "<<");
-                                        floor += activeMovie.title.MALData.currentActiveGoGoMaxEpsPerSeason[i];
-                                    }
-                                }
-                                //print("sel: " + sel);
-                                if (sel != -1) {
-                                    try {
-                                        fwordLink = fwords[sel].Replace("-dub", "") + (isDub ? "-dub" : "");
-                                    }
-                                    catch (Exception) {
-
-                                    }
-                                }
-
-                                if (fwordLink != "") { // IF FOUND
-                                    string dstring = "https://www3.gogoanime.io/" + fwordLink + "-episode-" + (_episode - subtract);
-                                    print("DSTRING: " + dstring);
-                                    string d = DownloadString(dstring, tempThred);
-
-                                    AddEpisodesFromMirrors(tempThred, d, normalEpisode);
-                                }
-                            }
-                        }
-                        catch (Exception) {
-                            print("GOGOANIME ERROR");
-                        }
-                        */
-
 					}
 					if (movieSearch) { // use https://movies123.pro/
 
@@ -7251,25 +6785,6 @@ namespace CloudStreamForms.Core
 #if DEBUG
 				EndStopwatchNum(_s, nameof(AddPotentialLink));
 #endif
-			}
-		}
-
-		public DubbedAnimeEpisode GetDubbedAnimeEpisode(string slug, int? eps = null)
-		{
-			bool isMovie = eps == null;
-			string url = "https://bestdubbedanime.com/" + (isMovie ? "movies/jsonMovie" : "xz/v3/jsonEpi") + ".php?slug=" + slug + (eps != null ? ("/" + eps) : "") + "&_=" + UnixTime;
-			string d = DownloadString(url, referer: $"https://bestdubbedanime.com/{(isMovie ? "movies/" : "")}{slug}{(isMovie ? "" : $"/{eps}")}");
-			var f = JsonConvert.DeserializeObject<DubbedAnimeSearchRootObject>(d, new JsonSerializerSettings() { NullValueHandling = NullValueHandling.Ignore });
-			if (f.result.error) {
-				return new DubbedAnimeEpisode();
-			}
-			else {
-				try {
-					return f.result.anime[0];
-				}
-				catch (Exception) {
-					return new DubbedAnimeEpisode();
-				}
 			}
 		}
 

@@ -168,13 +168,7 @@ namespace CloudStreamForms
 				SetHeight();
 
 			});
-		}
-
-		private void ViewCell_Tapped(object sender, EventArgs e)
-		{
-			ReviewItem episodeResult = (ReviewItem)(((ViewCell)sender).BindingContext);
-			
-		}
+		} 
 
 		private void episodeView_ItemTapped(object sender, ItemTappedEventArgs e)
 		{

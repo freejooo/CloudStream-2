@@ -356,21 +356,11 @@ namespace CloudStreamForms
 							else if (val.movieType == MovieType.Anime) {
 								// redirect to real 
 							}
-							// AddEpisode(ep);
 							ep.Episode = ConvertToSortOrder(val.movieType) * 1000 + i;
 							lock (clock) {
 								epres[i] = ep;
-								//  MyEpisodeResultCollection.Add(ep);
 							}
-							print("ADD EP::: " + ep.Title);
-							// epView.MyEpisodeResultCollection.Add(ep);
-							// eps.Add(ep);
-							// }
 						});
-
-						for (int i = 0; i < ckeys.Count; i++) {
-							print(i + "KEY:::" + ckeys[i]);
-						}
 
 						var _epres = ((EpisodeResult[])epres.Clone()).OrderBy(t => t.Episode).ToArray(); // MOVIE -> ANIMEMOVIE -> TV-SERIES -> ANIME -> YOUTUBE
 
@@ -394,9 +384,6 @@ namespace CloudStreamForms
 							}
 							episodeView.FadeTo(noDownloads ? 0 : 1, 200, Easing.SinOut);
 
-							// episodeView.Opacity = 0;
-							// episodeView.FadeTo(1, 200);
-
 							baseTxt.IsVisible = noDownloads;
 							baseImg.IsVisible = noDownloads;
 							SetHeight();
@@ -409,7 +396,6 @@ namespace CloudStreamForms
 						inProgress = false;
 					}
 				}) {
-					//mThread.SetApartmentState(ApartmentState.STA);
 					Name = "EpisodeThread"
 				};
 				mThread.Start();

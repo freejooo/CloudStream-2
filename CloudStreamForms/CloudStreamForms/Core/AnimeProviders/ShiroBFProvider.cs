@@ -1,7 +1,8 @@
-﻿using System;
+﻿using CloudStreamForms.Core.BaseProviders;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using static CloudStreamForms.Core.AnimeProviders.ShiroBaseProvider;
+using static CloudStreamForms.Core.BaseProviders.ShiroBaseProvider;
 using static CloudStreamForms.Core.BlotFreeProvider;
 using static CloudStreamForms.Core.CloudStreamCore;
 
