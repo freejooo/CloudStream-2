@@ -113,7 +113,7 @@ namespace CloudStreamForms.Core
 		public const bool REPLACE_IMDBNAME_WITH_POSTERNAME = true;
 		public static double posterRezMulti = 1.0;
 		public const string GOMOURL = "gomo.to";
-		public static string[] CertExeptSites = new string[] {
+		public static readonly string[] CertExeptSites = new string[] {
 			".gogoanime.",
 			".mp4upload.",
 			"fvs.io",
@@ -4297,7 +4297,7 @@ namespace CloudStreamForms.Core
 
 		public static bool GetRequireCert(string url)
 		{
-			if (!Settings.IgnoreSSLCert) return false;
+			if (!Settings._IgnoreSSLCert) return false;
 
 			foreach (var _url in CertExeptSites) {
 				if (url.Contains(_url)) return true;

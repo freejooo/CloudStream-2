@@ -31,7 +31,7 @@ namespace CloudStreamForms.Core.AnimeProviders
 
 		public override object StoreData(string year, TempThread tempThred, MALData malData)
 		{
-			return provider.Search(ToDown(ActiveMovie.title.name));
+			return provider.Search(ActiveMovie.title.name.Replace(".","").Replace("/","/").Replace("\'", ""));
 		}
 
 		public override NonBloatSeasonData GetSeasonData(MALSeason ms, TempThread tempThread, string year, object storedData)
