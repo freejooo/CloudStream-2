@@ -655,6 +655,26 @@ namespace CloudStreamForms
 			}
 		}
 
+#if DEBUG
+		public static string PublishDatabaseServerIp {
+			set {
+				App.SetKey("Settings", nameof(PublishDatabaseServerIp), value);
+			}
+			get {
+				return App.GetKey("Settings", nameof(PublishDatabaseServerIp), "");
+			}
+		}
+
+		public static bool IsDatabasePublisher {
+			set {
+				App.SetKey("Settings", nameof(IsDatabasePublisher), value);
+			}
+			get {
+				return App.GetKey("Settings", nameof(IsDatabasePublisher), false);
+			}
+		}
+#endif
+
 		public static Color ItemBackGroundColor = GetItemBgColor();
 
 		static Color GetItemBgColor()
@@ -1568,10 +1588,7 @@ namespace CloudStreamForms
 					//    webRequest.Headers.Add("DATA", StringCipher.Encrypt(data, password));
 				}
 
-
-
 				try {
-
 					HttpWebRequest _webRequest = webRequest;
 					Stream postStream = _webRequest.GetRequestStream();
 
@@ -1619,7 +1636,7 @@ namespace CloudStreamForms
 				}
 				catch (Exception _ex) {
 					CloudStreamCore.error("FATAL EX IN POSTREQUEST" + _ex);
-				} 
+				}
 				return "";
 			}
 			catch (Exception _ex) {

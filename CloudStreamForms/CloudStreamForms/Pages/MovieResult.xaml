@@ -180,9 +180,7 @@ xmlns:ffTransformations="clr-namespace:FFImageLoading.Transformations;assembly=F
 									<Grid Grid.Row="1"  Grid.Column="1">
 										<Label Text="7 - Good" HorizontalTextAlignment="Center" x:Name="MalRatingTxt" HorizontalOptions="Center" TextColor="Gray" FontSize="11"  ></Label>
 									</Grid>
-
-
-
+									
 									<Grid Grid.Row="0"  Grid.Column="2">
 										<ffs:SvgCachedImage x:Name="WatchingBtt" HeightRequest="40" Source="tag_faces.svg"  BackgroundColor="Transparent"  WidthRequest="50">
 											<ffs:SvgCachedImage.Transformations>
@@ -295,6 +293,7 @@ xmlns:ffTransformations="clr-namespace:FFImageLoading.Transformations;assembly=F
 						</Grid>
 					</Grid>
 					<Button x:Name="NextEpisodeInfoBtt" IsVisible="False" IsEnabled="False" HeightRequest="50" Margin="0,5,0,-5" InputTransparent="True" Text="Next Episode 12: 3d 20h 37m" CornerRadius="0" BackgroundColor="#303F9F" TextColor="#FFF" ClassId="CUST"></Button>
+					<Button x:Name="PublishDBBtt" IsVisible="False" IsEnabled="False" HeightRequest="50" Margin="0,5,0,-5" InputTransparent="True" Text="PUBLUSH" CornerRadius="0" BackgroundColor="#303F9F" TextColor="#FFF" ClassId="CUST"></Button>
 
 					<!--
 

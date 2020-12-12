@@ -391,7 +391,11 @@ namespace CloudStreamForms
 
 			controller.OnExposedEpisodesChanged += (object o, EpisodeData[] e) => {
 				if (IsDead) return;
-
+#if DEBUG
+				if (CurrentMovie.title.movieType == MovieType.Anime && Settings.IsDatabasePublisher) {
+					CSDatabaseApi.PostSeason(CurrentMovie,CurrentSeason);
+				}
+#endif
 				Device.InvokeOnMainThreadAsync(async () => {
 					FadeEpisodes.AbortAnimation("FadeTo");
 					FadeEpisodes.Opacity = 0;
@@ -426,7 +430,11 @@ namespace CloudStreamForms
 				try {
 					isLoaded = true;
 					if (IsDead) return;
-
+#if DEBUG
+					if (CurrentMovie.title.movieType == MovieType.Anime && Settings.IsDatabasePublisher) {
+						CSDatabaseApi.PostTitle(e.title);
+					}
+#endif
 					if (setKey) {
 						SetKey();
 					}
@@ -1199,7 +1207,7 @@ namespace CloudStreamForms
 					//  App.PlayVLCWithSingleUrl(trailerUrl, currentMovie.title.name + " - Trailer");
 				}
 			}
-		} 
+		}
 
 		const double _RecPosterMulit = 1.75;
 		const int _RecPosterHeight = 100;
@@ -1305,7 +1313,7 @@ namespace CloudStreamForms
 							var _t = epView.CurrentTrailers[z];
 							await RequestVlc(_t.Url, _t.Name);
 							//PlayVLCWithSingleUrl(_t.Url, _t.Name);
-						})); 
+						}));
 						Grid.SetRow(stackLayout, (i + 1) * 2 - 2);
 						Grid.SetRow(textLb, (i + 1) * 2 - 1);
 					}

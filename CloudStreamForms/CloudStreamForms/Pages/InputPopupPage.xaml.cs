@@ -176,7 +176,7 @@ namespace CloudStreamForms
 			while (!isDone) {
 				await Task.Delay(10);
 			}
-			CloudStreamCore.print("MAIN RESTT:T::T: " + text);
+
 			if (cancel) {
 				if (InputType == InputPopupResult.decimalNumber || InputType == InputPopupResult.integrerNumber) {
 					return "-1";

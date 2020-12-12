@@ -253,7 +253,6 @@ namespace CloudStreamForms.Pages
 					}
 				}),
 			},
-
 		};
 
 		public static SettingsHolder ClearSettigns = new SettingsHolder() {
@@ -374,6 +373,15 @@ namespace CloudStreamForms.Pages
 				}),
 				new SettingsItem() { img= "outline_get_app_white_48dp.png",mainTxt="Experamental m3u8 downloader",descriptTxt="Very limited support" ,VarName = nameof(Settings.PremitM3u8Download)},
 				new SettingsItem() { img= "outline_get_app_white_48dp.png",mainTxt="Check download link",descriptTxt="" ,VarName = nameof(Settings.CheckDownloadLinkBefore)},
+#if DEBUG
+				new SettingsItem() { img= "round_build_white_48dp.png",mainTxt="Database publisher",descriptTxt="" ,VarName = nameof(Settings.IsDatabasePublisher)},
+				new SettingsList("round_build_white_48dp.png","Server","IP adress",() => { return Settings.PublishDatabaseServerIp; }, async () => {
+					string loc = await ActionPopup.DisplayEntry(InputPopupPage.InputPopupResult.plainText, Settings.PublishDatabaseServerIp,"Server IP",-1,false, Settings.PublishDatabaseServerIp,"Set IP");
+					if(loc.IsClean() && loc != "Cancel") {
+						Settings.PublishDatabaseServerIp = loc;
+					}
+				}),
+#endif
 			},
 		};
 
