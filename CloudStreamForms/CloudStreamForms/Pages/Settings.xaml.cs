@@ -1095,9 +1095,18 @@ namespace CloudStreamForms
 				actions.Add($"Logout from AniList {(currentAniListUsername == "" ? "" : $" - {currentAniListUsername}")}");
 			}
 
-			actions.AddRange(new string[] { "Export data", "Export Everything", "Import data", });
+			actions.AddRange(new string[] {
+#if DEBUG
+				"TEST",
+#endif               
+				"Export data", "Export Everything", "Import data", });
 
 			string action = await ActionPopup.DisplayActionSheet("Manage account", actions.ToArray());
+#if DEBUG
+			if (action == "TEST") {
+				//App.AddShortcut("Iron Man", "tt0371746", "https://m.media-amazon.com/images/M/MV5BMTczNTI2ODUwOF5BMl5BanBnXkFtZTcwMTU0NTIzMw@@._V1_UX182_CR0,0,182,268_AL_.jpg");
+			}
+#endif
 
 			if (action == "Login to AniList account") {
 				CloudStreamForms.Script.AniListSyncApi.Authenticate();

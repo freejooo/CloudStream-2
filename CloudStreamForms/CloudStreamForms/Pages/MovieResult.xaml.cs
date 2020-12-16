@@ -127,7 +127,7 @@ namespace CloudStreamForms
 
 		async void Share()
 		{
-			List<string> actions = new List<string>() { "Everything", "CloudStream Link", "IMDb Link", "Title", "Title and Description" };
+			List<string> actions = new List<string>() { "Everything", "CloudStream Link", "IMDb Link", "Title", "Title and Description", "Create shortcut" };
 			if (CurrentMalLink != "") {
 				actions.Insert(3, "MAL Link");
 			}
@@ -137,7 +137,11 @@ namespace CloudStreamForms
 			if (trailerUrl != "") {
 				actions.Insert(actions.Count - 2, "Trailer Link");
 			}
-			string a = await ActionPopup.DisplayActionSheet("Copy", actions.ToArray());//await DisplayActionSheet("Copy", "Cancel", null, actions.ToArray());
+			string a = await ActionPopup.DisplayActionSheet("Share", actions.ToArray());//await DisplayActionSheet("Copy", "Cancel", null, actions.ToArray());
+			if(a == "Create shortcut") {
+				App.AddShortcut(CurrentMovie.title.name, CurrentMovie.title.id, CurrentMovie.title.hdPosterUrl);
+				return;
+			}
 			string copyTxt = "";
 
 			async Task<string> GetMovieCode()
@@ -2112,10 +2116,14 @@ namespace CloudStreamForms
 					}
 				}
 
-				if (Settings.HasAniListLogin) {
-					error |= !await AniListSyncApi.PostDataAboutId(ms[i].AniListId, (AniListSyncApi.AniListStatusType)(int)currentMalWatchType, currentMalScore, progress);
+				try {
+					if (Settings.HasAniListLogin && CurrentAniListLink.IsClean()) {
+						error |= !await AniListSyncApi.PostDataAboutId(ms[i].AniListId, (AniListSyncApi.AniListStatusType)(int)currentMalWatchType, currentMalScore, progress);
+					}
 				}
+				catch (Exception) {
 
+				}
 				currentMax -= leng;
 			}
 			if (error) {

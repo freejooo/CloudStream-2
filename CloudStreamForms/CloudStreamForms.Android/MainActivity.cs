@@ -13,6 +13,8 @@ using Android.Runtime;
 using Android.Support.Annotation;
 using Android.Support.V4.App;
 using Android.Support.V4.Content;
+using Android.Support.V4.Content.PM;
+using Android.Support.V4.Graphics.Drawable;
 using Android.Support.V4.Media.Session;
 using Android.Text;
 using Android.Views;
@@ -808,7 +810,6 @@ namespace CloudStreamForms.Droid
 				error(_ex);
 			}
 			LogFile($"============================== STARTUP DONE AT {UnixTime} ==============================");
-
 			// TaskScheduler.UnobservedTaskException += TaskSchedulerOnUnobservedTaskException;
 			//  Android.Renderscripts.ta
 			// var bar = new Xamarin.Forms.Platform.Android.TabbedRenderer();//.Platform.Android.
@@ -1106,7 +1107,7 @@ namespace CloudStreamForms.Droid
 		{
 			try {
 				List<string> requests = new List<string>() {
-				Manifest.Permission.WriteExternalStorage, Manifest.Permission.RequestInstallPackages,Manifest.Permission.InstallPackages,Manifest.Permission.WriteSettings,  //Manifest.Permission.Bluetooth
+				Manifest.Permission.WriteExternalStorage, Manifest.Permission.RequestInstallPackages,Manifest.Permission.InstallPackages,Manifest.Permission.WriteSettings, Manifest.Permission.InstallShortcut,  //Manifest.Permission.Bluetooth
             };
 
 				for (int i = 0; i < requests.Count; i++) {
@@ -1136,7 +1137,7 @@ namespace CloudStreamForms.Droid
 		public static string GetPath(bool mainPath, string extraPath)
 		{
 			return (mainPath ? (Android.OS.Environment.ExternalStorageDirectory + "/" + Android.OS.Environment.DirectoryDownloads) : Android.OS.Environment.ExternalStorageDirectory + "/") + extraPath;
-		} 
+		}
 	}
 
 
@@ -1169,6 +1170,33 @@ namespace CloudStreamForms.Droid
 
 	public class MainDroid : App.IPlatformDep
 	{
+		//ShortcutManager ShortManager => Application.Context.GetSystemService(Context.ShortcutService) as ShortcutManager;
+		//https://github.com/severnake/AndroSpy/blob/9a46b61e0adcd416e3a7b27ec24d22bf6f55dfd5/Client/MainActivity.cs#L440
+		public async void AddShortcut(string name, string imdbId, string url)
+		{
+			var bitmap = await GetImageBitmapFromUrl(url);
+			var uri = Android.Net.Uri.Parse($"cloudstreamforms:{imdbId}Name={name}=EndAll");
+			var intent_ = new Intent(Intent.ActionView, uri);
+			if (Build.VERSION.SdkInt >= BuildVersionCodes.O) {
+				if (ShortcutManagerCompat.IsRequestPinShortcutSupported(MainActivity.activity)) {
+					ShortcutInfoCompat shortcutInfo = new ShortcutInfoCompat.Builder(MainActivity.activity, imdbId)
+					 .SetIntent(intent_)
+					 .SetShortLabel(name)
+					 .SetIcon(IconCompat.CreateWithBitmap(bitmap))
+					 .Build();
+					ShortcutManagerCompat.RequestPinShortcut(MainActivity.activity, shortcutInfo, null);
+				}
+			}
+			else {
+				Intent installer = new Intent();
+				installer.PutExtra("android.intent.extra.shortcut.INTENT", intent_);
+				installer.PutExtra("android.intent.extra.shortcut.NAME", name);
+				installer.PutExtra("android.intent.extra.shortcut.ICON", bitmap);
+				installer.SetAction("com.android.launcher.action.INSTALL_SHORTCUT");
+				MainActivity.activity.SendBroadcast(installer);
+			}
+		}
+
 		public void PictureInPicture()
 		{
 			MainActivity.activity.ShowPictureInPicture();
@@ -1222,7 +1250,7 @@ namespace CloudStreamForms.Droid
 					error(_ex);
 				}
 			}
-		} 
+		}
 
 		public DownloadProgressInfo GetDownloadProgressInfo(int id, string fileUrl)
 		{
@@ -1320,7 +1348,6 @@ namespace CloudStreamForms.Droid
 
 		public void ShowNotIntentAsync(string title, string body, int id, string titleId, string titleName, DateTime? time = null, string bigIconUrl = "")
 		{
-
 			var localNot = new LocalNot() { title = title, body = body, id = id, data = titleId == "-1" ? ("cloudstreamforms:" + titleId + "Name=" + titleName + "=EndAll") : null, bigIcon = bigIconUrl, autoCancel = true, mediaStyle = true, notificationImportance = (int)NotificationImportance.Default, showWhen = true, when = time, smallIcon = PublicNot };
 
 
@@ -2193,7 +2220,7 @@ namespace CloudStreamForms.Droid
 			catch (Exception _ex) {
 				error(_ex);
 			}
-			mainS.Start(); 
+			mainS.Start();
 			//MainDelayTest();
 			// long delay = getDelay();
 
@@ -2223,7 +2250,7 @@ namespace CloudStreamForms.Droid
 			});*/
 			//MainDelayTest();
 		}
-#endif 
+#endif
 
 		MyAudioFocusListener myAudioFocusListener;
 
@@ -2541,6 +2568,11 @@ namespace CloudStreamForms.Droid
 	public class NullPlatfrom : App.IPlatformDep
 	{
 		public EventHandler<bool> OnAudioFocusChanged { get; set; }
+
+		public void AddShortcut(string name, string imdbId, string url)
+		{
+			throw new NotImplementedException();
+		}
 
 		public void CancelNot(int id)
 		{

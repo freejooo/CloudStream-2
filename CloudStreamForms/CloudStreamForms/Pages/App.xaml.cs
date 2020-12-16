@@ -107,6 +107,12 @@ namespace CloudStreamForms
 			public int GetArchitecture();
 			public bool ResumeDownload(int id);
 			public void PictureInPicture();
+			public void AddShortcut(string name, string imdbId, string url);
+		}
+
+		public static void AddShortcut(string name, string imdbId, string url)
+		{
+			PlatformDep.AddShortcut(name, imdbId, url);
 		}
 
 		public static VideoPlayerStatus currentVideoStatus = new VideoPlayerStatus() { isInVideoplayer = false, isLoaded = false, isPaused = false, hasNextEpisode = false, shouldSkip = false };
