@@ -657,7 +657,13 @@ namespace CloudStreamForms
 				});
 			};
 
-			controller.Init(mainPoster.url, mainPoster.name, mainPoster.year);
+			/*
+			Thread cThread = new Thread(() =>
+			{*/
+				controller.Init(mainPoster.url, mainPoster.name, mainPoster.year);
+			/*})
+			{ Name = "Create Controller Thread"};
+			cThread.Start();*/
 
 			Gradient.Source = GetGradient();
 			Gradient.HeightRequest = 200;

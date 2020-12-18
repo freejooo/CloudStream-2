@@ -77,13 +77,13 @@ namespace CloudStreamForms.Core.BaseProviders
 				if (href == "") continue;
 				var hDiv = q.QuerySelector("> div.result");
 				string name = hDiv.QuerySelector("> div.titleresults").InnerText;
-				var innerHt = hDiv.QuerySelector("> div.inresult").InnerHtml.Replace('\n',' ').Replace('\r', ' ').Replace("  ","");
+				var innerHt = hDiv.QuerySelector("> div.inresult").InnerHtml.Replace('\n', ' ').Replace('\r', ' ').Replace("  ", "");
 				bool isMovie = innerHt.Length > 4;
 				items.Add(new DubbedSearchItem() {
 					isMovie = isMovie,
 					name = name,
-					slug = href.Replace("//bestdubbedanime.com/",""),
-				}); 
+					slug = href.Replace("//bestdubbedanime.com/", ""),
+				});
 			}
 			return items;
 		}
@@ -154,34 +154,37 @@ namespace CloudStreamForms.Core.BaseProviders
 		static bool isSearchingMovies = false;
 		public void FishMainMovies()
 		{
-			if (isSearchingMovies || hasSearchedMovies) return;
-			isSearchingMovies = true;
-			try {
-				string d = DownloadString("https://bestdubbedanime.com/movies/");
+			//var t = core.CreateThread(2);
+			core.StartThread("DubbedMoviesThread", () => {
+				if (isSearchingMovies || hasSearchedMovies) return;
+				isSearchingMovies = true;
+				try {
+					string d = DownloadString("https://bestdubbedanime.com/movies/");
 
-				if (d != "") { 
-					const string lookFor = "//bestdubbedanime.com/movies/";
-					while (d.Contains(lookFor)) {
-						string href = FindHTML(d, lookFor, "\"");
-						d = RemoveOne(d, lookFor);
-						string title = FindHTML(d, "grid_item_title\">", "<");
-						movies.Add(new DubbedSearchItem() {
-							isMovie = true,
-							name = title,
-							slug = href
-						});
-					}
-					if (movies.Count > 0) {
-						hasSearchedMovies = true;
+					if (d != "") {
+						const string lookFor = "//bestdubbedanime.com/movies/";
+						while (d.Contains(lookFor)) {
+							string href = FindHTML(d, lookFor, "\"");
+							d = RemoveOne(d, lookFor);
+							string title = FindHTML(d, "grid_item_title\">", "<");
+							movies.Add(new DubbedSearchItem() {
+								isMovie = true,
+								name = title,
+								slug = href
+							});
+						}
+						if (movies.Count > 0) {
+							hasSearchedMovies = true;
+						}
 					}
 				}
-			}
-			catch (Exception _ex) {
-				error("EX IN MAINMOV: " + _ex);
-			}
-			finally {
-				isSearchingMovies = false;
-			}
+				catch (Exception _ex) {
+					error("EX IN MAINMOV: " + _ex);
+				}
+				finally {
+					isSearchingMovies = false;
+				}
+			});
 		}
 	}
 }
