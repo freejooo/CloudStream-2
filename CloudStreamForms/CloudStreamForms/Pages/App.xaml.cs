@@ -823,8 +823,8 @@ namespace CloudStreamForms
 
 		public static void RemoveFolder(string folder)
 		{
-			List<string> keys = App.GetKeysPath(folder);
-			for (int i = 0; i < keys.Count; i++) {
+			string[] keys = App.GetKeysPath(folder);
+			for (int i = 0; i < keys.Length; i++) {
 				RemoveKey(keys[i]);
 			}
 		}
@@ -853,9 +853,9 @@ namespace CloudStreamForms
 			MyApp.Properties.Clear();
 		}
 
-		public static List<string> GetAllKeys()
+		public static string[] GetAllKeys()
 		{
-			return MyApp.Properties.Keys.ToList();
+			return MyApp.Properties.Keys.ToArray();
 		}
 
 		public static T GetKey<T>(string path, T defVal)
@@ -876,36 +876,37 @@ namespace CloudStreamForms
 
 		}
 
-		public static List<T> GetKeys<T>(string folder)
+		public static T[] GetKeys<T>(string folder)
 		{
 			try {
-				List<string> keyNames = GetKeysPath(folder);
-
-				List<T> allKeys = new List<T>();
-				foreach (var key in keyNames) {
-					allKeys.Add((T)MyApp.Properties[key]);
+				string[] keyNames = GetKeysPath(folder);
+				int len = keyNames.Length;
+				T[] allKeys = new T[len];
+				for (int i = 0; i < len; i++) {
+					string p = (string)MyApp.Properties[keyNames[i]];
+					allKeys[i] = ConvertToObject<T>(p, default);
 				}
 
 				return allKeys;
 			}
-			catch (Exception) {
-				return new List<T>();
+			catch (Exception _ex) {
+				error(_ex);
+				return new T[0];
 			}
-
 		}
 
 		public static int GetKeyCount(string folder)
 		{
-			return GetKeysPath(folder).Count;
+			return GetKeysPath(folder).Length;
 		}
 
 
-		public static List<string> GetKeysPath(string folder)
+		public static string[] GetKeysPath(string folder)
 		{
 			string[] copy = new string[MyApp.Properties.Keys.Count];
 			try {
 				MyApp.Properties.Keys.CopyTo(copy, 0);
-				List<string> keyNames = copy.Where(t => t != null).Where(t => t.StartsWith(GetKeyPath(folder))).ToList();
+				string[] keyNames = copy.Where(t => t != null).Where(t => t.StartsWith(GetKeyPath(folder))).ToArray();
 				return keyNames;
 			}
 			catch (Exception _ex) {
@@ -914,7 +915,7 @@ namespace CloudStreamForms
 					print("MAX COPY::" + copy[i]);
 				}
 				App.ShowToast("Error");
-				return new List<string>();
+				return new string[0];
 			}
 
 		}
@@ -924,15 +925,18 @@ namespace CloudStreamForms
 			string path = GetKeyPath(folder, name);
 			return KeyExists(path);
 		}
+
 		public static bool KeyExists(string path)
 		{
 			return (MyApp.Properties.ContainsKey(path));
 		}
+
 		public static void RemoveKey(string folder, string name)
 		{
 			string path = GetKeyPath(folder, name);
 			RemoveKey(path);
 		}
+
 		public static void RemoveKey(string path)
 		{
 			try {
@@ -978,29 +982,6 @@ namespace CloudStreamForms
 			bf.Serialize(ms, obj);
 			return ms.ToArray();
 		}
-
-
-		/*
-        public static void ShowNotification(string title, string body)
-        {
-            CrossLocalNotifications.Current.Show(title, body);
-        }
-
-        public static void ShowNotification(string title, string body, int id, int sec)
-        {
-            CrossLocalNotifications.Current.Show(title, body, id, DateTime.Now.AddSeconds(sec));
-        }
-
-        public static void ShowNotification(string title, string body, int id, DateTime time)
-        {
-            CrossLocalNotifications.Current.Show(title, body, id, time);
-        }
-
-        public static void CancelNotifaction(int id)
-        {
-            CrossLocalNotifications.Current.Cancel(id);
-            PlatformDep.CancelNot(id);
-        }*/
 
 		public static ImageSource GetImageSource(string inp)
 		{
@@ -1081,9 +1062,8 @@ namespace CloudStreamForms
 
 		protected override void OnResume()
 		{
+			Home.UpdateIsRequired = true;
 			// Handle when your app resumes
 		}
 	}
-
-
 }

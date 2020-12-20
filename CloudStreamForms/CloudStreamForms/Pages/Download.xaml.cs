@@ -218,8 +218,8 @@ namespace CloudStreamForms
 					Thread.Sleep(100);
 
 					try {
-						List<string> keys = App.GetKeys<string>("DownloadIds");
-						List<string> keysPaths = App.GetKeysPath("DownloadIds");
+						//string[] keys = App.GetKeys<string>("DownloadIds");
+						string[] keysPaths = App.GetKeysPath("DownloadIds");
 
 						downloads.Clear();
 						downloadHeaders.Clear();
@@ -228,7 +228,7 @@ namespace CloudStreamForms
 						List<int> headerRemovers = new List<int>();
 						Dictionary<int, bool> validHeaders = new Dictionary<int, bool>();
 
-						Parallel.For(0, keys.Count, (i) => {
+						Parallel.For(0, keysPaths.Length, (i) => {
 							try {
 
 								// Thread.Sleep(1000);
@@ -482,7 +482,7 @@ namespace CloudStreamForms
 				DownloadHeader header = downloadHeaders[key];
 				if (header.movieType == MovieType.AnimeMovie || header.movieType == MovieType.Movie) {
 					var infoKey = downloadHelper[key].infoIds[0];
-					await HandleEpisodeTapped(infoKey, p);
+					await HandleEpisodeTapped(infoKey);
 				}
 				else {
 					await p.Navigation.PushModalAsync(new DownloadViewPage(key), false);
@@ -499,6 +499,7 @@ namespace CloudStreamForms
 			PlayDownloadedFile(_info.info, vlc);
 			//Download.PlayDownloadedFile(_info.info.fileUrl, _info.info.name, _info.info.episode, _info.info.season, _info.info.episodeIMDBId, _info.info.source, true, vlc ?? !Settings.UseVideoPlayer);
 		}
+
 		public static void PlayDownloadedFile(DownloadEpisodeInfo _info, bool? vlc = null)
 		{
 			Download.PlayDownloadedFile(_info.fileUrl, _info.name, _info.episode, _info.season, _info.dtype == DownloadType.YouTube ? _info.id.ToString() : _info.episodeIMDBId, _info.source, true, vlc ?? !Settings.UseVideoPlayer);
@@ -564,7 +565,7 @@ namespace CloudStreamForms
 			await MainPage.mainPage.Navigation.PushModalAsync(_p, false);
 		}
 
-		public static async Task HandleEpisodeTapped(int key, Page p)
+		public static async Task HandleEpisodeTapped(int key)
 		{
 			DownloadInfo info = downloads[key];
 			List<string> actions = new List<string>() {

@@ -349,6 +349,36 @@ namespace CloudStreamForms.Core
 			public List<NonBloatSeasonData> nonBloatSeasonData;
 		}
 
+		[System.Serializable]
+		public enum EpisodeOrigin
+		{
+			IMDbTitle = 0,
+			DownloadEp = 1,
+			YoutubeExternal = 2,
+			PureExternal = 3,
+		}
+
+		[System.Serializable]
+		public struct CachedCoreEpisode
+		{
+			/// <summary>
+			/// progress from 0-1
+			/// </summary>
+			public double progress;
+			public EpisodeOrigin origin;
+			public Movie state;
+			public DateTime createdAt;
+			public int episode;
+			public int season;
+			public string episodeName;
+			public string description;
+			public string rating;
+			public string poster;
+			public string parentName;
+			public string imdbId;
+			public string parentImdbId;
+		}
+
 		[Serializable]
 		public struct VidStreamingData
 		{
@@ -804,14 +834,13 @@ namespace CloudStreamForms.Core
 			public int number;
 		}
 
-
+#pragma warning disable CS0649
 		[Serializable]
 		struct MoeService
 		{
 			public string service;
 			public string serviceId;
 		}
-
 		/*
 		[Serializable]
 		struct MoeLink
@@ -856,6 +885,8 @@ namespace CloudStreamForms.Core
 			//public string[] licensors;
 			//public MoeLink[] links;
 		}
+#pragma warning restore CS0649
+
 		#endregion
 
 		// ========================================================= EVENTS =========================================================
@@ -2206,6 +2237,7 @@ namespace CloudStreamForms.Core
 		public void AddTrollvid(string id, int normalEpisode, string referer, TempThread tempThred, string extra = "")
 		{
 			string d = HTMLGet("https://trollvid.net/embed/" + id, referer);
+			if (!GetThredActive(tempThred)) return;
 			AddPotentialLink(normalEpisode, FindHTML(d, "<source src=\"", "\""), "Trollvid" + extra, 7);
 		}
 
@@ -7093,7 +7125,7 @@ namespace CloudStreamForms.Core
 			for (int i = 0; i < repeats; i++) {
 				if (s == "") {
 					//s = DownloadStringOnce(url, tempThred, UTF8Encoding, waitTime);
-					s = await DownloadStringWithCertAsync(url, tempThred, waitTime, "", referer, encoding, headerName, headerValue, eng);
+					s = await DownloadStringWithCertAsync(url, tempThred, waitTime, referer, encoding, headerName, headerValue, eng);
 				}
 			}
 #if DEBUG
@@ -7126,7 +7158,7 @@ namespace CloudStreamForms.Core
 			return s;
 		}
 
-		public async Task<string> DownloadStringWithCertAsync(string url, TempThread? tempThred = null, int waitTime = 10000, string requestBody = "", string referer = "", Encoding encoding = null, string[] headerName = null, string[] headerValue = null, bool eng = false)
+		public async Task<string> DownloadStringWithCertAsync(string url, TempThread? tempThred = null, int waitTime = 10000, string referer = "", Encoding encoding = null, string[] headerName = null, string[] headerValue = null, bool eng = false)
 		{
 			if (!url.IsClean()) return "";
 			url = url.Replace("http://", "https://");

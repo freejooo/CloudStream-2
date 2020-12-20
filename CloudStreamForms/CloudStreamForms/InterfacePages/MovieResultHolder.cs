@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using static CloudStreamForms.Core.CloudStreamCore;
 using static CloudStreamForms.Core.CoreHelpers;
@@ -23,15 +24,8 @@ namespace CloudStreamForms.InterfacePages
 		{
 			isRunning = _isRunning;
 			OnRunningChanged?.Invoke(null, _isRunning);
-		}
+		} 
 
-		public struct FadePickerEvent
-		{
-			public PickerType picker;
-			public bool isVis;
-		}
-
-		//	public EventHandler<FadePickerEvent> FadePickerChanged;
 		public event EventHandler<Movie> TitleLoaded;
 		public event EventHandler<MALData> MalDataLoaded;
 
@@ -127,7 +121,7 @@ namespace CloudStreamForms.InterfacePages
 			ChangeText(ButtonType.SkipAnimeBtt, null);
 		}
 
-		public void Init(string id, string name, string year)
+		public void Init()
 		{
 			core = new CloudStreamCore();
 
@@ -152,9 +146,6 @@ namespace CloudStreamForms.InterfacePages
 				buttons[i] = new ButtonInfo() { text = "", isVisible = false, button = _buttons[i] };
 			}
 
-			ChangeText(LabelType.NameLabel, name);
-			ChangeText(LabelType.YearLabel, year);
-
 			core.FishProgressLoaded += (o, e) => {
 				if (IsDead) return;
 				if (!hasSkipedLoading) {
@@ -165,13 +156,36 @@ namespace CloudStreamForms.InterfacePages
 					}
 				}
 			};
-			tId = id.Replace("https://imdb.com/title/", "");
 
 			core.TitleLoaded += Core_titleLoaded;
 			core.EpisodeHalfLoaded += EpisodesHalfLoaded;
 			core.EpisodeLoaded += Core_episodeLoaded;
 			core.MalDataLoaded += Core_malDataLoaded;
+		}
+
+		public void Init(string id, string name, string year)
+		{
+			Init();
+			tId = id.Replace("https://imdb.com/title/", "");
+			ChangeText(LabelType.NameLabel, name);
+			ChangeText(LabelType.YearLabel, year);
 			core.GetImdbTitle(new Poster() { year = year, name = name, url = id });
+		}
+
+		public void Init(Movie movie)
+		{
+			Init();
+			core.activeMovie = movie;
+			ChangeText(LabelType.NameLabel, movie.title.name);
+			ChangeText(LabelType.YearLabel, movie.title.year);
+			Thread t = new Thread(() => {
+				Core_titleLoaded(true, movie);
+				ChangeText(ButtonType.SkipAnimeBtt, null);
+				EpisodesHalfLoaded(null, movie.episodes);
+				Core_malDataLoaded(null, movie.title.MALData);
+				Core_episodeLoaded(null, movie.episodes);
+			}) { Name = "CORE CREATION THREAD" };
+			t.Start();
 		}
 
 		private void Core_malDataLoaded(object sender, MALData e)
@@ -282,24 +296,31 @@ namespace CloudStreamForms.InterfacePages
 			if (isAnime) {
 				core.GetSubDub(currentSeason, out bool subExists, out bool dubExists);
 
-				isDub = dubExists && Settings.DefaultDub;
+				isDub = App.GetKey("DubIndex", CurrentMovie.title.id + currentSeason, dubExists && Settings.DefaultDub);
+				if (isDub && !dubExists) {
+					isDub = false;
+				}
+				else if (!isDub && !subExists) {
+					isDub = true;
+				}
 
 				List<string> dubSource = new List<string>();
 
-				if (Settings.DefaultDub) {
-					if (dubExists) {
-						dubSource.Add("Dub");
-					}
+				//if (Settings.DefaultDub) {
+				if (dubExists) {
+					dubSource.Add("Dub");
 				}
+				//}
 				if (subExists) {
 					dubSource.Add("Sub");
 				}
+				/*
 				if (!Settings.DefaultDub) {
 					if (dubExists) {
 						dubSource.Add("Dub");
 					}
-				}
-				ChangePicker(PickerType.DubPicker, dubSource, 0, true);
+				}*/
+				ChangePicker(PickerType.DubPicker, dubSource, isDub ? 0 : 1, true);
 				SetDubExist();
 			}
 		}
@@ -395,6 +416,7 @@ namespace CloudStreamForms.InterfacePages
 		public void DubPickerSelectIndex(bool _isDub)
 		{
 			isDub = _isDub;
+			App.SetKey("DubIndex", CurrentMovie.title.id + currentSeason, _isDub);
 			SetDubExist();
 		}
 
@@ -406,6 +428,9 @@ namespace CloudStreamForms.InterfacePages
 		private void Core_titleLoaded(object sender, Movie e)
 		{
 			if (IsDead) return;
+
+			bool isInstantLoad = sender != null && (bool)sender == true;
+
 			isMovie = (e.title.movieType == MovieType.Movie || e.title.movieType == MovieType.AnimeMovie);
 			TitleLoaded?.Invoke(null, e);
 
@@ -448,14 +473,16 @@ namespace CloudStreamForms.InterfacePages
 				ChangePicker(PickerType.SeasonPicker, seasonList, selIndex, true);
 
 				currentSeason = selIndex + 1;
-
-				core.GetImdbEpisodes(currentSeason);
+				if (!isInstantLoad) {
+					core.GetImdbEpisodes(currentSeason);
+				}
 			}
 			else {
 				currentSeason = 0; // MOVIES
-				core.GetImdbEpisodes();
+				if (!isInstantLoad) {
+					core.GetImdbEpisodes();
+				}
 			}
-
 
 			if (Settings.ShowNextEpisodeReleaseDate) {
 				void UpdateNextEpisodeInfoUI(NextAiringEpisodeData nextAir)

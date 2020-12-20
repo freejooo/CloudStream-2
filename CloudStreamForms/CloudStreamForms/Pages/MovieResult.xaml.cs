@@ -138,7 +138,7 @@ namespace CloudStreamForms
 				actions.Insert(actions.Count - 2, "Trailer Link");
 			}
 			string a = await ActionPopup.DisplayActionSheet("Share", actions.ToArray());//await DisplayActionSheet("Copy", "Cancel", null, actions.ToArray());
-			if(a == "Create shortcut") {
+			if (a == "Create shortcut") {
 				App.AddShortcut(CurrentMovie.title.name, CurrentMovie.title.id, CurrentMovie.title.hdPosterUrl);
 				return;
 			}
@@ -281,9 +281,14 @@ namespace CloudStreamForms
 
 
 		bool hasAppeared = false;
+		int lastPlayedEp = -1;
 		protected override void OnAppearing()
 		{
 			base.OnAppearing();
+
+			if (Settings.CacheNextEpisode && lastPlayedEp != -1) {
+				CacheEpisode(lastPlayedEp);
+			}
 
 			ForceUpdate(checkColor: true);
 			OnSomeDownloadFinished += OnHandleDownload;
@@ -367,10 +372,9 @@ namespace CloudStreamForms
 			return GetImageSource("gradient" + Settings.BlackColor + ".png");
 		}
 
-		public MovieResult()
+		public MovieResult(Movie? _movie = null)
 		{
 			InitializeComponent();
-
 
 			SeasonPicker = new LabelList(SeasonBtt, new List<string>());
 			DubPicker = new LabelList(DubBtt, new List<string>());
@@ -397,7 +401,7 @@ namespace CloudStreamForms
 				if (IsDead) return;
 #if DEBUG
 				if (CurrentMovie.title.movieType == MovieType.Anime && Settings.IsDatabasePublisher) {
-					CSDatabaseApi.PostSeason(CurrentMovie,CurrentSeason);
+					CSDatabaseApi.PostSeason(CurrentMovie, CurrentSeason);
 				}
 #endif
 				Device.InvokeOnMainThreadAsync(async () => {
@@ -660,7 +664,12 @@ namespace CloudStreamForms
 			/*
 			Thread cThread = new Thread(() =>
 			{*/
+			if (_movie.HasValue) {
+				controller.Init(_movie.Value);
+			}
+			else {
 				controller.Init(mainPoster.url, mainPoster.name, mainPoster.year);
+			}
 			/*})
 			{ Name = "Create Controller Thread"};
 			cThread.Start();*/
@@ -1365,7 +1374,7 @@ namespace CloudStreamForms
 			}
 		}
 
-		void PlayDownloadedEp(EpisodeResult episodeResult, string data = null)
+		void PlayDownloadedEp(EpisodeResult episodeResult)
 		{
 			var _info = App.GetDownloadInfo(GetCorrectId(episodeResult), false);
 			//   var downloadKeyData = data ?? _info.info.fileUrl;
@@ -1379,7 +1388,7 @@ namespace CloudStreamForms
 
 		static int currentDownloadSearchesHappening = 0;
 
-		async Task<EpisodeResult> LoadLinksForEpisode(EpisodeResult episodeResult, bool autoPlay = true, bool overrideLoaded = false, bool showloading = true)
+		public async Task<EpisodeResult> LoadLinksForEpisode(EpisodeResult episodeResult, bool autoPlay = true, bool overrideLoaded = false, bool showloading = true)
 		{
 			if (loadingLinks) return episodeResult;
 
@@ -1479,13 +1488,13 @@ namespace CloudStreamForms
 			}
 		}
 
-
 		// ============================== PLAY VIDEO ==============================
 		async void PlayEpisode(EpisodeResult episodeResult, bool? overrideSelectVideo = null)
 		{
 			if (isRequestingPlayEpisode) return;
 			isRequestingPlayEpisode = true;
 			SetAsViewed(episodeResult);
+			lastPlayedEp = episodeResult.Id;
 
 			/*
             string _sub = "";
@@ -1530,6 +1539,43 @@ namespace CloudStreamForms
 				return false;
 			}
 			return true;
+		}
+
+		public void CacheEpisode(int index)
+		{
+			string tId = CurrentMovie.title.id;
+			App.RemoveKey(nameof(CachedCoreEpisode), tId);
+			if (epView.MyEpisodeResultCollection.Count > index && index >= 0) {
+				var _ep = epView.MyEpisodeResultCollection[index];
+				double progress = 0;
+				long dur;
+				long pos;
+				if ((dur = App.GetViewDur(_ep.IMDBEpisodeId)) != -1) {
+					if ((pos = App.GetViewPos(_ep.IMDBEpisodeId)) != -1) {
+						progress = pos / (double)dur;
+					}
+				}
+				if (progress > 0.9) {
+					CacheEpisode(index + 1);
+					return;
+				}
+
+				App.SetKey(nameof(CachedCoreEpisode), tId, new CachedCoreEpisode() {
+					origin = EpisodeOrigin.IMDbTitle,
+					progress = progress,
+					createdAt = DateTime.UtcNow,
+					description = _ep.Description,
+					episode = _ep.Episode,
+					season = _ep.Season,
+					episodeName = _ep.OgTitle,
+					rating = _ep.Rating.Replace(" ", ""),
+					poster = _ep.PosterUrl,
+					parentName = CurrentMovie.title.name,
+					state = CurrentMovie,
+					imdbId = _ep.IMDBEpisodeId,
+					parentImdbId = CurrentMovie.title.id,
+				});
+			}
 		}
 
 		public async Task<string> LoadLinkFrom(string id, bool load)
@@ -1772,7 +1818,7 @@ namespace CloudStreamForms
 				else if (action == "Play Downloaded File") { // ============================== PLAY FILE ==============================
 															 //  bool succ = App.DeleteFile(info.info.fileUrl); 
 															 //  Download.PlayVLCFile(downloadKeyData, episodeResult.Title);
-					PlayDownloadedEp(episodeResult, downloadKeyData);
+					PlayDownloadedEp(episodeResult);
 				}
 				else if (action == "Delete Downloaded File") {  // ============================== DELETE FILE ==============================
 					DeleteFile(downloadKeyData, episodeResult);

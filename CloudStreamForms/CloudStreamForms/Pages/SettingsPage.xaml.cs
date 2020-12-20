@@ -137,6 +137,7 @@ namespace CloudStreamForms.Pages
 				new SettingsItem() { img= "MainSearchIcon.png",mainTxt="Quick Search",descriptTxt="Search every character" ,VarName = nameof(Settings.SearchEveryCharEnabled) },
 				new SettingsItem() { img= "outline_subtitles_white_48dp.png",mainTxt="Subtitles",descriptTxt="Auto download subtitles" ,VarName = nameof(Settings.SubtitlesEnabled) },
 				new SettingsItem() { img= "outline_cached_white_48dp.png",mainTxt="Cache data",descriptTxt="Speed up loading time" ,VarName = nameof(Settings.CacheData) },
+				new SettingsItem() { img= "outline_cached_white_48dp.png",mainTxt="Resume watching",descriptTxt="Save the last episode watched" ,VarName = nameof(Settings.CacheNextEpisode) },
 				new SettingsItem() { img= "outline_cached_white_48dp.png",mainTxt="Use AniList",descriptTxt="Prefer AniList over MAL for faster load" ,VarName = nameof(Settings.UseAniList) },
 				new SettingsItem() { img= "baseline_fiber_new_white_48dp.png",mainTxt="Show episode releasedate",descriptTxt="Restart Required, AniList only" ,VarName = nameof(Settings.ShowNextEpisodeReleaseDate) },
 				new SettingsItem() { img= "outline_record_voice_over_white_48dp.png",mainTxt="Default dub",descriptTxt="Autoset to dub/sub when it can" ,VarName = nameof(Settings.DefaultDub) },

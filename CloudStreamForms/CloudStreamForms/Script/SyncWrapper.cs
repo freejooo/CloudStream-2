@@ -8,10 +8,10 @@ namespace CloudStreamForms.Script
 	{
 		public const string header = "CLOUDSTREAM USERDATA";
 
-		static string AddFolder<T>(string folder, List<string> keys)
+		static string AddFolder<T>(string folder, string[] keys)
 		{
-			string s = $"FOLDER[{folder}]RESULTS[{keys.Count}]TYPE[{typeof(T).Name}]\n";
-			for (int i = 0; i < keys.Count; i++) {
+			string s = $"FOLDER[{folder}]RESULTS[{keys.Length}]TYPE[{typeof(T).Name}]\n";
+			for (int i = 0; i < keys.Length; i++) {
 				s += $"KEY[{keys[i]}]DATA[{App.GetRawKey(keys[i])}]\n";
 			}
 			return s;
@@ -19,7 +19,7 @@ namespace CloudStreamForms.Script
 
 		static string AddFolder<T>(string folder)
 		{
-			List<string> viewTimePosKeys = App.GetKeysPath(folder);
+			string[] viewTimePosKeys = App.GetKeysPath(folder);
 			return AddFolder<T>(folder, viewTimePosKeys);
 		}
 

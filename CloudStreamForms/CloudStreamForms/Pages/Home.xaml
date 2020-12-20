@@ -9,156 +9,175 @@
              xmlns:cloudstreamforms="clr-namespace:CloudStreamForms" xmlns:cse="clr-namespace:CloudStreamForms.Effects"
 			 mc:Ignorable="d"
              x:Class="CloudStreamForms.Home">
-    <StackLayout x:Name="MainStack" >
+	<StackLayout x:Name="MainStack" >
 
-        <Label x:Name="TitleName" Margin="3" Text="Home" Padding="0,10,0,5" HorizontalOptions="Center"  FontSize="25"   TextColor="#ffffff" ></Label>
+		<Label x:Name="TitleName" Margin="3" Text="Home" Padding="0,10,0,5" HorizontalOptions="Center"  FontSize="25"   TextColor="#ffffff" ></Label>
 
-        <!--TextColor="#303F9F"-->
-        <!--   <Label Text="Bookmarks" FontAttributes="Italic" TranslationX="10" VerticalOptions="Start" HorizontalOptions="FillAndExpand" FontSize="Small"  x:Name="BTxt"></Label>-->
-        <Grid x:Name="ViewGrid" HeightRequest="35" MinimumHeightRequest="50" >
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"></ColumnDefinition>
-                <ColumnDefinition Width="*"></ColumnDefinition>
-                <ColumnDefinition Width="*"></ColumnDefinition>
-                <ColumnDefinition Width="*"></ColumnDefinition>
-            </Grid.ColumnDefinitions>
+		<!--TextColor="#303F9F"-->
+		<!--   <Label Text="Bookmarks" FontAttributes="Italic" TranslationX="10" VerticalOptions="Start" HorizontalOptions="FillAndExpand" FontSize="Small"  x:Name="BTxt"></Label>-->
+		<Grid x:Name="ViewGrid" HeightRequest="35" MinimumHeightRequest="50" >
+			<Grid.ColumnDefinitions>
+				<ColumnDefinition Width="*"></ColumnDefinition>
+				<ColumnDefinition Width="*"></ColumnDefinition>
+				<ColumnDefinition Width="*"></ColumnDefinition>
+				<ColumnDefinition Width="*"></ColumnDefinition>
+			</Grid.ColumnDefinitions>
 			<xe:BorderView xe:TouchEffect.Color="#0FFFFFFF" CornerRadius="0" x:Name="HomeBtt">
-                <Label Text="Home" FontSize="17" VerticalOptions="Center" Scale="1.2" FontAttributes="Bold" MinimumHeightRequest="50"  HorizontalTextAlignment="Center" TextColor="White" x:Name="HomeLbl"></Label>
-            </xe:BorderView>
+				<Label Text="Home" FontSize="17" VerticalOptions="Center" Scale="1.2" FontAttributes="Bold" MinimumHeightRequest="50"  HorizontalTextAlignment="Center" TextColor="White" x:Name="HomeLbl"></Label>
+			</xe:BorderView>
 			<xe:BorderView Grid.Column="1" xe:TouchEffect.Color="#0FFFFFFF" CornerRadius="0" x:Name="RelatedBtt">
-                <Label Text="Related" FontSize="17" VerticalOptions="Center"  Scale="0.9"  HorizontalTextAlignment="Center" MinimumHeightRequest="50"  TextColor="White" x:Name="RelatedLbl"></Label>
-            </xe:BorderView>
+				<Label Text="Related" FontSize="17" VerticalOptions="Center"  Scale="0.9"  HorizontalTextAlignment="Center" MinimumHeightRequest="50"  TextColor="White" x:Name="RelatedLbl"></Label>
+			</xe:BorderView>
 			<xe:BorderView Grid.Column="2" xe:TouchEffect.Color="#0FFFFFFF" CornerRadius="0" x:Name="TopBtt">
-                <Label Text="Top IMDb" FontSize="17" VerticalOptions="Center" Scale="0.9" HorizontalTextAlignment="Center" MinimumHeightRequest="50" TextColor="White" x:Name="TopLbl"></Label>
-            </xe:BorderView>
+				<Label Text="Top IMDb" FontSize="17" VerticalOptions="Center" Scale="0.9" HorizontalTextAlignment="Center" MinimumHeightRequest="50" TextColor="White" x:Name="TopLbl"></Label>
+			</xe:BorderView>
 			<xe:BorderView Grid.Column="3" xe:TouchEffect.Color="#0FFFFFFF" CornerRadius="0" x:Name="TrendingBtt">
-                <Label Text="Trending" FontSize="17" VerticalOptions="Center" Scale="0.9"  HorizontalTextAlignment="Center" MinimumHeightRequest="50" TextColor="White" x:Name="TrendingLbl"></Label>
-            </xe:BorderView>
+				<Label Text="Trending" FontSize="17" VerticalOptions="Center" Scale="0.9"  HorizontalTextAlignment="Center" MinimumHeightRequest="50" TextColor="White" x:Name="TrendingLbl"></Label>
+			</xe:BorderView>
 
-        </Grid>
-        <Grid VerticalOptions="Fill"   HeightRequest="20000">
+		</Grid>
+		<Grid VerticalOptions="Fill"   HeightRequest="20000">
+			<Image x:Name="baseImg" IsVisible="False" VerticalOptions="Fill" HorizontalOptions="Fill" Scale="0.6" BackgroundColor="Transparent" AbsoluteLayout.LayoutBounds="0, 0, 1, 1" AbsoluteLayout.LayoutFlags="All"  InputTransparent="True" TranslationY="-40"></Image>
+			<Label x:Name="baseTxt" IsVisible="False" AbsoluteLayout.LayoutBounds="0, 0, 1, 1" AbsoluteLayout.LayoutFlags="All"  VerticalOptions="Center" HorizontalOptions="Center" TextColor="#434343" ClassId="CUST" FontAttributes="Bold" FontSize="18" TranslationY="80" InputTransparent="True" Text="No Bookmarks"></Label>
+			<!--<Button x:Name="baseMore" IsVisible="true" BackgroundColor="White" CornerRadius="10" TextColor="Black" ClassId="CUST" AbsoluteLayout.LayoutBounds="0, 0, 1, 1" AbsoluteLayout.LayoutFlags="All"  VerticalOptions="Center" HorizontalOptions="Center" HeightRequest="30" FontAttributes="Bold" FontSize="18" TranslationY="200" Padding="10,0" InputTransparent="True" Text="Search for more titles"></Button>-->
 
-            <Image x:Name="baseImg" IsVisible="False" VerticalOptions="Fill" HorizontalOptions="Fill" Scale="0.6" BackgroundColor="Transparent" AbsoluteLayout.LayoutBounds="0, 0, 1, 1" AbsoluteLayout.LayoutFlags="All"  InputTransparent="True" TranslationY="-40"></Image>
-            <Label x:Name="baseTxt" IsVisible="False" AbsoluteLayout.LayoutBounds="0, 0, 1, 1" AbsoluteLayout.LayoutFlags="All"  VerticalOptions="Center" HorizontalOptions="Center" TextColor="#434343" ClassId="CUST" FontAttributes="Bold" FontSize="18" TranslationY="80" InputTransparent="True" Text="No Bookmarks"></Label>
-            <!--<Button x:Name="baseMore" IsVisible="true" BackgroundColor="White" CornerRadius="10" TextColor="Black" ClassId="CUST" AbsoluteLayout.LayoutBounds="0, 0, 1, 1" AbsoluteLayout.LayoutFlags="All"  VerticalOptions="Center" HorizontalOptions="Center" HeightRequest="30" FontAttributes="Bold" FontSize="18" TranslationY="200" Padding="10,0" InputTransparent="True" Text="Search for more titles"></Button>-->
+
+			<!--<BoxView HeightRequest="1" Color="#303F9F"></BoxView>-->
 
 
-            <!--<BoxView HeightRequest="1" Color="#303F9F"></BoxView>-->
-            <ScrollView VerticalScrollBarVisibility="Never" >
+			<ScrollView VerticalScrollBarVisibility="Never" Orientation="Vertical" Grid.Row="0" x:Name="BookHolder" >
+				<StackLayout>
+					<Grid x:Name="FastTxt">
+						<Button Text="Clear" TextColor="Black" ClassId="CUST" HeightRequest="30" Margin="10" WidthRequest="70" FontSize="Body" HorizontalOptions="End" BackgroundColor="White" x:Name="FastTxtBtt"></Button>
+						<Label Text="Resume Watching" VerticalOptions="Center" Margin="10" TextColor="White" FontSize="Body" InputTransparent="True" ></Label>
+					</Grid>
+					<ScrollView Orientation="Both" VerticalScrollBarVisibility="Never" HorizontalScrollBarVisibility="Never" Grid.Row="0" HeightRequest="128" x:Name="FastScroll">
+						<Grid x:Name="NextEpisode" VerticalOptions="Start" HorizontalOptions="Start" HeightRequest="128">
 
-                     <Grid x:Name="Bookmarks" VerticalOptions="Start" HorizontalOptions="Start" >
+						</Grid>
+					</ScrollView>
+					<ScrollView VerticalScrollBarVisibility="Never" Orientation="Vertical" >
+						<StackLayout>
 
-                    </Grid>
-             </ScrollView>
+							<Label Text="Bookmarks" Margin="10" TextColor="White" FontSize="Body" x:Name="BookTxt"></Label>
+					<Grid x:Name="Bookmarks" VerticalOptions="Start" HorizontalOptions="Fill" >
 
-            <!--   <BoxView HeightRequest="1" Color="#303F9F"></BoxView>-->
+							</Grid>
+						</StackLayout>
 
-            <!--<BoxView  HeightRequest="3" Color="#303F9F" TranslationY="10"></BoxView>-->
+					</ScrollView>
 
-            <Grid x:Name="Top100Stack" IsEnabled="True" IsVisible="True" HorizontalOptions="Fill" VerticalOptions="Fill">
-        
+				</StackLayout>
+			</ScrollView>
 
-                <!--        <ScrollView x:Name="ImageScroller">
+			<!--   <BoxView HeightRequest="1" Color="#303F9F"></BoxView>-->
+
+			<!--<BoxView  HeightRequest="3" Color="#303F9F" TranslationY="10"></BoxView>-->
+
+			<Grid x:Name="Top100Stack" IsEnabled="True" IsVisible="True" HorizontalOptions="Fill" VerticalOptions="Fill">
+
+
+				<!--        <ScrollView x:Name="ImageScroller">
             <StackLayout>
                 <Grid x:Name="ItemGrid">
             
                 </Grid>
             </StackLayout>
         </ScrollView>-->
-             
 
 
-                <!--<ActivityIndicator x:Name="LoadingIndicator" TranslationY="30"></ActivityIndicator>-->
 
-                <ListView ItemsSource="{Binding MyEpisodeResultCollection}" 
+				<!--<ActivityIndicator x:Name="LoadingIndicator" TranslationY="30"></ActivityIndicator>-->
+
+				<ListView ItemsSource="{Binding MyEpisodeResultCollection}" 
                              CachingStrategy="RecycleElement" 
                 ItemTapped="episodeView_ItemTapped" RowHeight="105"
                     x:Name="episodeView"  SeparatorColor="Transparent"  VerticalOptions="Start" VerticalScrollBarVisibility="Never"     >
-                    <ListView.ItemTemplate>
-                        <DataTemplate     >
-                            <cloudstreamforms:CustomCell Tapped="ViewCell_Tapped"   >
+					<ListView.ItemTemplate>
+						<DataTemplate     >
+							<cloudstreamforms:CustomCell Tapped="ViewCell_Tapped"   >
 								<Grid RowSpacing="0"  Padding="0"  HorizontalOptions="Fill"  HeightRequest="98" VerticalOptions="Center" cse:LongPressedEffect.Command="{Binding TapComThree}" >
 									<Grid.Effects>
 										<cse:LongPressedEffect></cse:LongPressedEffect>
 									</Grid.Effects>
-									
+
 									<Grid.RowDefinitions >
-                                        <RowDefinition Height="Auto" />
-                                        <RowDefinition Height="Auto" />
-                                        <RowDefinition Height="Auto" />
-                                    </Grid.RowDefinitions>
-                                    <Frame CornerRadius="5" BackgroundColor="{Binding ExtraColor}" Margin="7,0" HeightRequest="98" VerticalOptions="Center" HasShadow="True">
+										<RowDefinition Height="Auto" />
+										<RowDefinition Height="Auto" />
+										<RowDefinition Height="Auto" />
+									</Grid.RowDefinitions>
+									<Frame CornerRadius="5" BackgroundColor="{Binding ExtraColor}" Margin="7,0" HeightRequest="98" VerticalOptions="Center" HasShadow="True">
 
-                                    </Frame>
-                                    <Grid Grid.Row="0" Grid.Column="0" HorizontalOptions="Fill" VerticalOptions="Center">
-                                        <Grid  RowSpacing="0"  Padding="0" >
-                                            <Grid.RowDefinitions >
-                                                <RowDefinition Height="Auto" />
-                                                <RowDefinition Height="Auto" />
-                                                <RowDefinition Height="Auto" />
-                                            </Grid.RowDefinitions>
+									</Frame>
+									<Grid Grid.Row="0" Grid.Column="0" HorizontalOptions="Fill" VerticalOptions="Center">
+										<Grid  RowSpacing="0"  Padding="0" >
+											<Grid.RowDefinitions >
+												<RowDefinition Height="Auto" />
+												<RowDefinition Height="Auto" />
+												<RowDefinition Height="Auto" />
+											</Grid.RowDefinitions>
 
-                                            <Grid.ColumnDefinitions >
-                                                <ColumnDefinition Width="Auto" />
-                                                <ColumnDefinition Width="Auto" />
-                                                <ColumnDefinition Width="Auto" />
-                                            </Grid.ColumnDefinitions>
+											<Grid.ColumnDefinitions >
+												<ColumnDefinition Width="Auto" />
+												<ColumnDefinition Width="Auto" />
+												<ColumnDefinition Width="Auto" />
+											</Grid.ColumnDefinitions>
 
-                                            <Grid Grid.Row="0"  Grid.Column="1"  WidthRequest="68" TranslationY="{Binding TranslateYOffsetVertical}" >
+											<Grid Grid.Row="0"  Grid.Column="1"  WidthRequest="68" TranslationY="{Binding TranslateYOffsetVertical}" >
 
 												<ff:CachedImage WidthRequest="68" HeightRequest="98" Source="{Binding PosterUrl}" InputTransparent="True" ff:LoadingPlaceholder="emtyLoadingPosterV2.png">
 
-                                                    <ff:CachedImage.Transformations>
-                                                        <ffTransformations:RoundedTransformation BorderSize="0" Radius="7" BorderHexColor="#303F9F" CropWidthRatio="0.7" >
+													<ff:CachedImage.Transformations>
+														<ffTransformations:RoundedTransformation BorderSize="0" Radius="7" BorderHexColor="#303F9F" CropWidthRatio="0.7" >
 
-                                                        </ffTransformations:RoundedTransformation>
-                                                    </ff:CachedImage.Transformations>
-                                                </ff:CachedImage>
-                                                <!--
+														</ffTransformations:RoundedTransformation>
+													</ff:CachedImage.Transformations>
+												</ff:CachedImage>
+												<!--
                                                     <ff:CachedImage PropertyChanging="Image_PropertyChanging" InputTransparent="True" BackgroundColor="Transparent">
 
                                                     </ff:CachedImage>-->
-                                                <xe:BorderView  xe:TouchEffect.Color="White" Opacity="0.5" CornerRadius="1.2" BackgroundColor="Transparent" xe:EffectsConfig.ChildrenInputTransparent="False" xe:Commands.Tap="{Binding TapCom}" >
-                                                    <!-- xe:Commands.Tap="{Binding TapCommand}"-->
-                                                    <!--   <ImageButton Clicked="ImageButton_Clicked" BackgroundColor="Transparent" InputTransparent="False" ></ImageButton  > -->
+												<xe:BorderView  xe:TouchEffect.Color="White" Opacity="0.5" CornerRadius="1.2" BackgroundColor="Transparent" xe:EffectsConfig.ChildrenInputTransparent="False" xe:Commands.Tap="{Binding TapCom}" >
+													<!-- xe:Commands.Tap="{Binding TapCommand}"-->
+													<!--   <ImageButton Clicked="ImageButton_Clicked" BackgroundColor="Transparent" InputTransparent="False" ></ImageButton  > -->
 
-                                                </xe:BorderView>
+												</xe:BorderView>
 
-                                            </Grid>
-                                            <!--
+											</Grid>
+											<!--
                                             <Grid  Grid.Row="0"  Grid.Column="0">
                                                 <BoxView WidthRequest="3" HeightRequest="10" Color="#303F9F"></BoxView>
                                             </Grid>-->
 
-                                            <Grid  Grid.Row="0"  Grid.Column="2" Padding="0,3">
-                                                <Grid RowSpacing="0" Padding="0" >
-                                                    <Grid.RowDefinitions >
-                                                        <RowDefinition Height="Auto" />
-                                                        <RowDefinition Height="Auto" />
-                                                        <RowDefinition Height="Auto" />
-                                                    </Grid.RowDefinitions>
-                                                    <Grid.ColumnDefinitions >
-                                                        <ColumnDefinition Width="Auto" />
-                                                        <ColumnDefinition Width="Auto" />
-                                                        <ColumnDefinition Width="Auto" />
-                                                    </Grid.ColumnDefinitions>
-                                                    <Grid Grid.Row="0"  Grid.Column="0" Padding="0,3">
-                                                        <Label Text="{Binding Title}" TextColor="{Binding MainTextColor}" FontAttributes="Bold" FontSize="13"/>
-                                                    </Grid>
-                                                    <Grid Grid.Row="1"  Grid.Column="0" >
-                                                        <Label Text="{Binding Description}"  TextColor="{Binding MainDarkTextColor}" MaxLines="4"  />
-                                                    </Grid>
-                                                </Grid>
-                                            </Grid>
-                                        </Grid>
+											<Grid  Grid.Row="0"  Grid.Column="2" Padding="0,3">
+												<Grid RowSpacing="0" Padding="0" >
+													<Grid.RowDefinitions >
+														<RowDefinition Height="Auto" />
+														<RowDefinition Height="Auto" />
+														<RowDefinition Height="Auto" />
+													</Grid.RowDefinitions>
+													<Grid.ColumnDefinitions >
+														<ColumnDefinition Width="Auto" />
+														<ColumnDefinition Width="Auto" />
+														<ColumnDefinition Width="Auto" />
+													</Grid.ColumnDefinitions>
+													<Grid Grid.Row="0"  Grid.Column="0" Padding="0,3">
+														<Label Text="{Binding Title}" TextColor="{Binding MainTextColor}" FontAttributes="Bold" FontSize="13"/>
+													</Grid>
+													<Grid Grid.Row="1"  Grid.Column="0" >
+														<Label Text="{Binding Description}"  TextColor="{Binding MainDarkTextColor}" MaxLines="4"  />
+													</Grid>
+												</Grid>
+											</Grid>
+										</Grid>
 
-                                    </Grid>
-                                   
-<!--
+									</Grid>
+
+									<!--
                                     <Grid Grid.Row="0" Grid.Column="0" HorizontalOptions="Fill" TranslationY="95">
                                         <ProgressBar Progress="{Binding ExtraProgress}" IsVisible="{Binding DownloadNotDone}" IsEnabled="{Binding DownloadNotDone}" HeightRequest="5"  VerticalOptions="Start"/>
                                     </Grid>-->
-                                    <!--
+									<!--
                             <Grid Grid.Row="1" x:Name="PBar"  Grid.Column="0" VerticalOptions="Center">
                                 <ContentView VerticalOptions="Center">
                                     <ProgressBar Progress="{Binding Progress}" VerticalOptions="Center" PropertyChanged="ProgressBar_BindingContextChanged" IsVisible="False" IsEnabled="False"></ProgressBar>
@@ -166,20 +185,20 @@
                             </Grid>-->
 
 
-                                </Grid>
+								</Grid>
 
-                            </cloudstreamforms:CustomCell>
-                        </DataTemplate>
-                    </ListView.ItemTemplate>
-                </ListView>
-                <Button    x:Name="MovieTypePickerBtt"  VerticalOptions="End" HorizontalOptions="End" InputTransparent="False" Margin="10" WidthRequest="100" Text="Sci-Fi" TextColor="#e7e7e7" FontAttributes="Bold" FontSize="Body" CornerRadius="5" HeightRequest="40" BackgroundColor="#252525" ></Button>
+							</cloudstreamforms:CustomCell>
+						</DataTemplate>
+					</ListView.ItemTemplate>
+				</ListView>
+				<Button    x:Name="MovieTypePickerBtt"  VerticalOptions="End" HorizontalOptions="End" InputTransparent="False" Margin="10" WidthRequest="100" Text="Sci-Fi" TextColor="#e7e7e7" FontAttributes="Bold" FontSize="Body" CornerRadius="5" HeightRequest="40" BackgroundColor="#252525" ></Button>
 				<ProgressBar   x:Name="LoadingIndicator"  HorizontalOptions="Fill" ClassId="id" HeightRequest="15" TranslationY="-8" VerticalOptions="Start" InputTransparent="True"></ProgressBar>
 			</Grid>
-            <Image x:Name="OffBar" Grid.Row="0" InputTransparent="True" VerticalOptions="Start" TranslationY="0"></Image>
+			<Image x:Name="OffBar" Grid.Row="0" InputTransparent="True" VerticalOptions="Start" TranslationY="0"></Image>
 
-        </Grid>
+		</Grid>
 
-        <!-- <BoxView HorizontalOptions="Fill" Color="#4b4b4b"  HeightRequest="2" ></BoxView>-->
+		<!-- <BoxView HorizontalOptions="Fill" Color="#4b4b4b"  HeightRequest="2" ></BoxView>-->
 
-    </StackLayout>
+	</StackLayout>
 </ContentPage>

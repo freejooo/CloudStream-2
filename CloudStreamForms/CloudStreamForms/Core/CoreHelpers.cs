@@ -9,6 +9,7 @@ namespace CloudStreamForms.Core
 {
 	public class BlotFreeProvider
 	{
+		[System.Serializable]
 		public struct NonBloatSeasonData
 		{
 			public string name; // ID OF PROVIDER

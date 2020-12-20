@@ -70,7 +70,7 @@ namespace CloudStreamForms
 
 		async Task HandleEpisode(EpisodeResult episodeResult)
 		{
-			await Download.HandleEpisodeTapped(episodeResult.Id, this);
+			await Download.HandleEpisodeTapped(episodeResult.Id);
 			UpdateEpisodes();
 		}
 

@@ -145,6 +145,15 @@ namespace CloudStreamForms
 			}
 		}
 
+		public static bool CacheNextEpisode {
+			set {
+				App.SetKey("Settings", nameof(CacheNextEpisode), value);
+			}
+			get {
+				return App.GetKey("Settings", nameof(CacheNextEpisode), true);
+			}
+		}
+
 		public static bool SubtitlesHasDropShadow {
 			get {
 				return SubtitleType == 1 || SubtitleType == 3;
