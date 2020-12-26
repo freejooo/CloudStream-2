@@ -580,6 +580,9 @@ namespace CloudStreamForms
 		public App()
 		{
 			instance = this;
+			Settings.CurrentFont = Settings.CurrentGlobalFonts[Settings.CurrentGlobalFont];
+			//Settings.CurrentGlobalFont = Settings.BackCurrentGlobalFont;
+
 			// Resources["LABELFONT"] = LabelFont;
 
 			InitializeComponent();
@@ -602,11 +605,12 @@ namespace CloudStreamForms
             }*/
 
 			try {
+				/*
 				int set = Settings.BackCurrentGlobalFont;
 				if (set != -1) {
 					Settings.CurrentGlobalFont = set;
 					Settings.BackCurrentGlobalFont = -1;
-				}
+				}*/
 
 				MainPage = new MainPage();
 			}
@@ -1062,7 +1066,6 @@ namespace CloudStreamForms
 
 		protected override void OnResume()
 		{
-			Home.UpdateIsRequired = true;
 			// Handle when your app resumes
 		}
 	}

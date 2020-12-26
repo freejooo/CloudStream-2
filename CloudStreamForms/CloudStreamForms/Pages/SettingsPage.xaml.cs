@@ -144,6 +144,7 @@ namespace CloudStreamForms.Pages
 				new SettingsItem() { img= "outline_history_white_48dp.png",mainTxt="Pause history",descriptTxt="Will pause all viewing history" ,VarName = nameof(Settings.PauseHistory) },
 				new SettingsItem() { img= "baseline_ondemand_video_white_48dp.png",mainTxt="Autoload next episode",descriptTxt="Autoload the next episode in the background while in the app videoplayer" ,VarName = nameof( Settings.LazyLoadNextLink) },
 				new SettingsItem() { img= "baseline_fast_forward_white_48dp.png",mainTxt="Show skip",descriptTxt="Skip opening/credits in videoplayer" ,VarName = nameof(Settings.VideoPlayerShowSkip) },
+				new SettingsItem() { img= "baseline_screen_lock_landscape_white_48dp.png",mainTxt="Lock Landscape",descriptTxt="Locks the screen in videoplayer mode" ,VarName = nameof(Settings.VideoplayerLockLandscape) },
 
 				new SettingsItem() { img= "sponsorblock.png",mainTxt="YouTube sponsorblock",descriptTxt="Skip ads, intro, outro" ,VarName = nameof(Settings.VideoPlayerSponsorblock) },
 				new SettingsItem() { img= "sponsorblock.png",mainTxt="Autoskip YouTube ads",descriptTxt="" ,VarName = nameof(Settings.VideoPlayerSponsorblockAutoSkipAds) },
@@ -217,9 +218,9 @@ namespace CloudStreamForms.Pages
 					Appear();
 					App.UpdateBackground();
 				}),
-				new SettingsList("baseline_text_format_white_48dp.png","App Font","Restart Required", () => { return Settings.CurrentUpdatedFont.Name; }, async () => {
+				new SettingsList("baseline_text_format_white_48dp.png","App Font","Restart Required", () => { return Settings.CurrentGlobalFonts[Settings.BackCurrentGlobalFont].Name; }, async () => {
 					string[] fonts = Settings.CurrentGlobalFonts.Select(t => t.Name).ToArray();
-					var sel = await ActionPopup.DisplayActionSheet("App Font", fonts.IndexOf(Settings.CurrentUpdatedFont.Name), fonts);
+					var sel = await ActionPopup.DisplayActionSheet("App Font", fonts.IndexOf(Settings.CurrentGlobalFonts[Settings.BackCurrentGlobalFont].Name), fonts);
 					int index = fonts.IndexOf(sel);
 					if(index != -1) {
 						Settings.BackCurrentGlobalFont = index;

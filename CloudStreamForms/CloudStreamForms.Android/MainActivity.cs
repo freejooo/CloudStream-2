@@ -1659,7 +1659,6 @@ namespace CloudStreamForms.Droid
 			catch (Exception _ex) {
 				error(_ex);
 			}
-
 		}
 
 		public void ToggleRealFullScreen(bool fullscreen)
@@ -1728,7 +1727,7 @@ namespace CloudStreamForms.Droid
 		public void LandscapeOrientation()
 		{
 			try {
-				MainActivity.activity.RequestedOrientation = ScreenOrientation.Landscape;
+				MainActivity.activity.RequestedOrientation = Settings.VideoplayerLockLandscape ? ScreenOrientation.Landscape : ScreenOrientation.SensorLandscape ;
 			}
 			catch (Exception _ex) {
 				error(_ex);

@@ -273,6 +273,15 @@ namespace CloudStreamForms
 			}
 		}
 
+		public static bool VideoplayerLockLandscape {
+			set {
+				App.SetKey("Settings", nameof(VideoplayerLockLandscape), value);
+			}
+			get {
+				return App.GetKey("Settings", nameof(VideoplayerLockLandscape), false);
+			}
+		}
+
 		public static bool HasAccountLogin {
 			set {
 				App.SetKey("Account", nameof(HasAccountLogin), value);
@@ -785,25 +794,25 @@ namespace CloudStreamForms
 		public static int BackCurrentGlobalFont {
 			set {
 				App.SetKey("Settings", nameof(BackCurrentGlobalFont), value);
-				CurrentUpdatedFont = CurrentGlobalFonts[value < 0 ? CurrentGlobalFont : value];
+				//CurrentUpdatedFont = CurrentGlobalFonts[value < 0 ? CurrentGlobalFont : value];
 			}
 			get {
-				return App.GetKey("Settings", nameof(BackCurrentGlobalFont), -1);
+				return App.GetKey("Settings", nameof(BackCurrentGlobalFont), 1);
 			}
 		}
 
 		public static int CurrentGlobalFont {
-			set {
+			/*set {
 				App.SetKey("Settings", nameof(CurrentGlobalFont), value);
 				CurrentFont = CurrentGlobalFonts[value];
-			}
+			}*/
 			get {
-				return App.GetKey("Settings", nameof(CurrentGlobalFont), 1); // BY DEAFULT Gotham
+				return BackCurrentGlobalFont;// App.GetKey("Settings", nameof(CurrentGlobalFont), 1); // BY DEAFULT Gotham
 			}
 		}
 
-		public static GlobalFont CurrentFont = CurrentGlobalFonts[CurrentGlobalFont];
-		public static GlobalFont CurrentUpdatedFont = CurrentGlobalFonts[CurrentGlobalFont];
+		public static GlobalFont CurrentFont;
+	//	public static GlobalFont CurrentUpdatedFont = CurrentGlobalFonts[CurrentGlobalFont];
 
 		public static bool CacheImdb { get { return CacheData; } }
 		public static bool CacheMAL { get { return CacheData; } }

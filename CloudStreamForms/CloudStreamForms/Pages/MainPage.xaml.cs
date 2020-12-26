@@ -169,7 +169,6 @@ namespace CloudStreamForms
 			InitializeComponent();
 
 
-
 			try {
 				App.OnAppReopen += (o, e) => {
 					if (VideoPage.CanReopen) {
