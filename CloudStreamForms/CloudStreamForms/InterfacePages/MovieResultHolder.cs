@@ -24,7 +24,7 @@ namespace CloudStreamForms.InterfacePages
 		{
 			isRunning = _isRunning;
 			OnRunningChanged?.Invoke(null, _isRunning);
-		} 
+		}
 
 		public event EventHandler<Movie> TitleLoaded;
 		public event EventHandler<MALData> MalDataLoaded;
@@ -320,7 +320,7 @@ namespace CloudStreamForms.InterfacePages
 						dubSource.Add("Dub");
 					}
 				}*/
-				ChangePicker(PickerType.DubPicker, dubSource, isDub ? 0 : 1, true);
+				ChangePicker(PickerType.DubPicker, dubSource, isDub ? 0 : dubSource.Count - 1, true);
 				SetDubExist();
 			}
 		}

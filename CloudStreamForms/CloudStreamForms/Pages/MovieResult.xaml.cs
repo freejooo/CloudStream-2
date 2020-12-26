@@ -617,23 +617,28 @@ namespace CloudStreamForms
 				if (labelList == null) return;
 				labelList.ItemsSource = e.source;
 				Device.InvokeOnMainThreadAsync(async () => {
-					var btt = labelList.button;
-					//if (labelList.SelectedIndex == -1) {
-					labelList.SetIndexWithoutChange(e.index);
-					//}
-					if (e.picker != PickerType.EpisodeFromToPicker) {
-						btt.IsVisible = true;
+					try {
+						var btt = labelList.button;
+						//if (labelList.SelectedIndex == -1) {
+						labelList.SetIndexWithoutChange(e.index);
+						//}
+						if (e.picker != PickerType.EpisodeFromToPicker) {
+							btt.IsVisible = true;
+						}
+						btt.Text = e.Text;
+						btt.IsEnabled = e.isVisible;
+						if (btt.Opacity == 0 && e.isVisible) {
+							await btt.FadeTo(1, FATE_TIME_MS);
+						}
+						else if (btt.Opacity == 1 && !e.isVisible) {
+							await btt.FadeTo(0, FATE_TIME_MS);
+						}
+						if (e.picker == PickerType.EpisodeFromToPicker) {
+							btt.IsVisible = e.isVisible;
+						}
 					}
-					btt.Text = e.Text;
-					btt.IsEnabled = e.isVisible;
-					if (btt.Opacity == 0 && e.isVisible) {
-						await btt.FadeTo(1, FATE_TIME_MS);
-					}
-					else if (btt.Opacity == 1 && !e.isVisible) {
-						await btt.FadeTo(0, FATE_TIME_MS);
-					}
-					if (e.picker == PickerType.EpisodeFromToPicker) {
-						btt.IsVisible = e.isVisible;
+					catch (Exception _ex) {
+						error(_ex);
 					}
 				});
 			};
