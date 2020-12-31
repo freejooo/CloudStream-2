@@ -1773,7 +1773,7 @@ namespace CloudStreamForms
 							Core.StartThread("DownloadThread", async () => {
 								try {
 									//UserDialogs.Instance.ShowLoading("Checking link...", MaskType.Gradient);
-									bool doNotCheckLink = link.baseUrl.Contains(".m3u8") || Settings.CheckDownloadLinkBefore;
+									bool doNotCheckLink = link.baseUrl.Contains(".m3u8") || !Settings.CheckDownloadLinkBefore;
 									double fileSize = 2;
 									if (!doNotCheckLink) {
 										await ActionPopup.StartIndeterminateLoadinbar("Checking link...");

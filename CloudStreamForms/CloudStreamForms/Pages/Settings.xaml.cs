@@ -67,7 +67,7 @@ namespace CloudStreamForms
 				App.SetKey("Settings", nameof(CheckDownloadLinkBefore), value);
 			}
 			get {
-				return App.GetKey("Settings", nameof(CheckDownloadLinkBefore), false);
+				return App.GetKey("Settings", nameof(CheckDownloadLinkBefore), true);
 			}
 		}
 
