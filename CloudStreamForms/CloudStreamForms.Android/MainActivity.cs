@@ -389,7 +389,7 @@ namespace CloudStreamForms.Droid
 
 	/*
 	[Activity(Label = "CloudStream 2", Icon = "@drawable/bicon512", Theme = "@style/MainTheme.Splash", MainLauncher = true, LaunchMode = LaunchMode.SingleTop, ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation), IntentFilter(new[] { Intent.ActionView }, DataScheme = "cloudstreamforms", Categories = new[] { Intent.CategoryDefault, Intent.CategoryBrowsable })]*/
-	[Activity(Label = "CloudStream 2", Icon = "@drawable/bicon512", Theme = "@style/MainTheme.Splash", MainLauncher = true, LaunchMode = LaunchMode.SingleTop,
+	[Activity(Label = "CloudStream 2", Icon = "@mipmap/ic_launcher", Theme = "@style/MainTheme.Splash", MainLauncher = true, LaunchMode = LaunchMode.SingleTop,
 		ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation | ConfigChanges.SmallestScreenSize | ConfigChanges.ScreenLayout  // MUST HAVE FOR PIP MODE OR ELSE IT WILL TRIGGER ONCREATE
 		, SupportsPictureInPicture = true, ResizeableActivity = true),
 		IntentFilter(new[] { Intent.ActionView }, Label = "Open in CloudStream", DataScheme = "cloudstreamforms", Categories = new[] { Intent.CategoryDefault, Intent.CategoryBrowsable }),

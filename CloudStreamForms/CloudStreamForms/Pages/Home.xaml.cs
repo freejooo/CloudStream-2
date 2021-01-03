@@ -99,22 +99,23 @@ namespace CloudStreamForms
 		public void GetFetchRecomended()
 		{
 			if (!Settings.Top100Enabled) return;
-
-			if (!Fething) {
-				Fething = true;
-				TempThread tempThred = mainCore.CreateThread(21);
-				mainCore.StartThread("GetFetchRecomended", () => {
-					try {
-						var f = FetchRecomended(bookmarkPosters.Select(t => t.id).ToList());
-						if (!mainCore.GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
-						iMDbTopList.AddRange(f);
-						LoadMoreImages();
-					}
-					finally {
-						Fething = false;
-						mainCore.JoinThred(tempThred);
-					}
-				});
+			if (bookmarkPosters != null && bookmarkPosters.Count > 0) {
+				if (!Fething) {
+					Fething = true;
+					TempThread tempThred = mainCore.CreateThread(21);
+					mainCore.StartThread("GetFetchRecomended", () => {
+						try {
+							var f = FetchRecomended(bookmarkPosters.Select(t => t.id).ToList());
+							if (!mainCore.GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
+							iMDbTopList.AddRange(f);
+							LoadMoreImages();
+						}
+						finally {
+							Fething = false;
+							mainCore.JoinThred(tempThred);
+						}
+					});
+				}
 			}
 		}
 
