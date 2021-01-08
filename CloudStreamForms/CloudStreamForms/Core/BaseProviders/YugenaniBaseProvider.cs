@@ -227,6 +227,7 @@ namespace CloudStreamForms.Core.BaseProviders
 			try {
 				string post = PostYugenaniSite("https://yugenani.me/api/search/", $"query={query}", "https://yugenani.me/").Replace("\\", "");
 				string main = "{ \"query\": " + FindHTML(post, "query\": \"", "]\"") + "]}";
+				print("Search::: " + post + "|\n" + main);
 				return JsonConvert.DeserializeObject<YuSearchRoot>(main);
 			}
 			catch (Exception _ex) {

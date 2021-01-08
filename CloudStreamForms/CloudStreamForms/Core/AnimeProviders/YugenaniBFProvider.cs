@@ -60,10 +60,11 @@ namespace CloudStreamForms.Core.AnimeProviders
 			YuSearchItems[] data = (YuSearchItems[])storedData;
 			NonBloatSeasonData setData = new NonBloatSeasonData() { dubEpisodes = new List<string>(), subEpisodes = new List<string>() };
 			if (baseProvider == null) return setData;
+			int index = 0;
 
 			foreach (var subData in data) {
 				string toDownTitle = ToDown(subData.fields.title);
-				if (ToDown(ms.name) == toDownTitle || ToDown(ms.engName) == toDownTitle || ToDown(ms.japName) == toDownTitle) { // CAN BE REMOVED, BUT MIGHT BE BLOCKED DUE TO MANY REQUESTS
+				if (index < 2 || ToDown(ms.name) == toDownTitle || ToDown(ms.engName) == toDownTitle || ToDown(ms.japName) == toDownTitle) { // CAN BE REMOVED, BUT MIGHT BE BLOCKED DUE TO MANY REQUESTS
 					var info = baseProvider.GetYuInfo(subData.pk, subData.fields.slug);
 					if (!GetThredActive(tempThread)) return setData;
 					if (info.HasValue) {
@@ -75,9 +76,12 @@ namespace CloudStreamForms.Core.AnimeProviders
 							for (int i = 0; i < infoVal.dubbedEps; i++) {
 								setData.dubEpisodes.Add($"https://yugenani.me/watch/{subData.pk}/{subData.fields.slug}-dub/{(i + 1)}/");
 							}
+							return setData;
 						}
 					}
 				}
+
+				index++;
 			}
 
 			return setData;
