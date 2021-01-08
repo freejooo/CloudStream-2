@@ -319,11 +319,13 @@ namespace CloudStreamForms.Core.AnimeProviders
 		{
 			if (isFetching) return;
 			if (openToken != "" && tokenCook != "") return;
-			Thread t = new Thread(() => {
-				Thread.Sleep(5000);
-				Setup();
-			});
-			t.Start();
+			if (Settings.IsProviderActive(Name)) {
+				Thread t = new Thread(() => {
+					Thread.Sleep(1000);
+					Setup();
+				});
+				t.Start();
+			}
 		}
 
 		public override string Name => "Twist";
