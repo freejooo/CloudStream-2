@@ -81,6 +81,7 @@ namespace CloudStreamForms.Core
 				new HdmProvider(this),
 				new ShiroMovieProvider(this,"https://www.dubbedanime.vip","DubbedVip"),
 				new ShiroMovieProvider(this,"https://shiro.is","Shiro"),
+				new Embed2Provider(this),
 			};
 		}
 

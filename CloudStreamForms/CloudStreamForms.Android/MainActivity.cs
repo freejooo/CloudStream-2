@@ -749,6 +749,7 @@ namespace CloudStreamForms.Droid
 
 				RequestPermission(this);
 				LogFile("Permissions Loaded");
+				//GetLatency(); // https://developer.amazon.com/docs/fire-tv/audio-video-synchronization.html#section1-2
 
 				//App.ShowToast("ON CREATE");
 
@@ -1093,6 +1094,19 @@ namespace CloudStreamForms.Droid
 				OnAppResume?.Invoke(null, EventArgs.Empty);
 			}
 		}
+
+		//https://github.com/google/ExoPlayer/blob/b5beb32618ac99adc58b537031a6f7c3dd761b9a/library/core/src/main/java/com/google/android/exoplayer2/audio/AudioTrackPositionTracker.java#L172
+		/*void GetLatency()
+		{
+			try {
+				var method = typeof(AudioTrack).GetMethod("getLatency");
+				var res = method.Invoke(null, null);
+				print(res);
+			}
+			catch (Exception _ex) {
+				error(_ex);
+			}
+		}*/
 
 
 		public override void OnRequestPermissionsResult(int requestCode, string[] permissions, [GeneratedEnum] Android.Content.PM.Permission[] grantResults)
