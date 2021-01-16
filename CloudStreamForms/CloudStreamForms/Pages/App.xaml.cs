@@ -220,6 +220,7 @@ namespace CloudStreamForms
 			VLC = 0,
 			//MPV = 1,
 			MXPlayer = 2,
+			MXPlayerPro = 3,
 			Auto = -2,
 		}
 
@@ -238,6 +239,7 @@ namespace CloudStreamForms
 				VideoPlayer.VLC => "VLC",
 				// VideoPlayer.MPV => "MPV",
 				VideoPlayer.MXPlayer => "MX Player",
+				VideoPlayer.MXPlayerPro => "MX Player Pro",
 				VideoPlayer.Auto => "Auto",
 				_ => "",
 			};

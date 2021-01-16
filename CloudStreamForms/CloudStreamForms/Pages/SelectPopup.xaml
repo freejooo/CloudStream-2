@@ -3,11 +3,11 @@
     xmlns="http://xamarin.com/schemas/2014/forms"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:pages="clr-namespace:Rg.Plugins.Popup.Pages;assembly=Rg.Plugins.Popup"
-    xmlns:animations="clr-namespace:Rg.Plugins.Popup.Animations;assembly=Rg.Plugins.Popup"            xmlns:ff="clr-namespace:FFImageLoading.Forms;assembly=FFImageLoading.Forms"  
-
-             x:Class="CloudStreamForms.SelectPopup">
-    <!--You can set an animation in the xaml file or in the csharp code behind-->
-    <!--
+    xmlns:animations="clr-namespace:Rg.Plugins.Popup.Animations;assembly=Rg.Plugins.Popup"            
+	xmlns:ff="clr-namespace:FFImageLoading.Forms;assembly=FFImageLoading.Forms"  
+	x:Class="CloudStreamForms.SelectPopup">
+	<!--You can set an animation in the xaml file or in the csharp code behind-->
+	<!--
     <pages:PopupPage.Animation>
         <animations:ScaleAnimation 
             PositionIn="Center"
@@ -20,56 +20,52 @@
             EasingOut="SpringOut"
             HasBackgroundAnimation="False"/>
     </pages:PopupPage.Animation>-->
-    <!--You can use any elements here which are extended from Xamarin.Forms.View-->
-    <StackLayout BackgroundColor="Transparent">
+	<!--You can use any elements here which are extended from Xamarin.Forms.View-->
+	<StackLayout BackgroundColor="Transparent">
+		<AbsoluteLayout x:Name="TheStack" HorizontalOptions="Center" VerticalOptions="CenterAndExpand" BackgroundColor="Transparent">
+			<Grid  RowSpacing="0" VerticalOptions="Center"   BackgroundColor="Transparent" >
+				<Grid.RowDefinitions >
+					<RowDefinition Height="Auto" />
+					<RowDefinition Height="Auto" />
+					<RowDefinition Height="Auto" />
+					<RowDefinition Height="*" />
+					<RowDefinition Height="*" />
+				</Grid.RowDefinitions>
 
-        <AbsoluteLayout x:Name="TheStack" HorizontalOptions="Center" VerticalOptions="CenterAndExpand" BackgroundColor="Transparent">
-            <Grid  RowSpacing="0" VerticalOptions="Center"   BackgroundColor="Transparent" >
-                <Grid.RowDefinitions >
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="*" />
-                    <RowDefinition Height="*" />
-                </Grid.RowDefinitions>
-                
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto"></ColumnDefinition>
-                    <ColumnDefinition Width="Auto"></ColumnDefinition>
-                    <ColumnDefinition Width="Auto"></ColumnDefinition>
-                </Grid.ColumnDefinitions>
+				<Grid.ColumnDefinitions>
+					<ColumnDefinition Width="Auto"></ColumnDefinition>
+					<ColumnDefinition Width="Auto"></ColumnDefinition>
+					<ColumnDefinition Width="Auto"></ColumnDefinition>
+				</Grid.ColumnDefinitions>
 
-                <Label x:Name="HeaderTitle" HorizontalOptions="Center" HorizontalTextAlignment="Center" FontSize="20" FontAttributes="Bold" Text="Episode 1 hello world" TextColor="#e6e6e6" Margin="30,0" ></Label>
-                
-                <ListView BackgroundColor="Transparent" x:Name="epview"  Grid.Row="0" Grid.Column="0"    ItemsSource="{Binding MyNameCollection}" SeparatorColor="Transparent"  VerticalOptions="Fill" RowHeight="40" Margin="0,40"  >
-                    <ListView.ItemTemplate >
-                        <DataTemplate >
-                            <ViewCell >
-                                <StackLayout HorizontalOptions="{Binding LayoutCenter}" VerticalOptions="Center" >
-                                    <Label Text="{Binding Name}"  TextColor="#e6e6e6" HorizontalOptions="{Binding LayoutCenter}" VerticalOptions="Center"  FontAttributes="{Binding FontAtt}" FontSize="{Binding FontSize}" FontFamily="{Binding FontFam}" ></Label>
-                                </StackLayout> 
-                            </ViewCell>
-                        </DataTemplate>
-                    </ListView.ItemTemplate>
-                </ListView>
-                <!-- <Button Grid.Row="1" Text="d">
+				<Label x:Name="HeaderTitle" HorizontalOptions="Center" HorizontalTextAlignment="Center" FontSize="20" FontAttributes="Bold" Text="Episode 1 hello world" TextColor="#e6e6e6" Margin="30,0" ></Label>
+
+				<ListView BackgroundColor="Transparent" x:Name="epview"  Grid.Row="0" Grid.Column="0"    ItemsSource="{Binding MyNameCollection}" SeparatorColor="Transparent"  VerticalOptions="Fill" RowHeight="40" Margin="0,40"  >
+					<ListView.ItemTemplate >
+						<DataTemplate >
+							<ViewCell >
+								<StackLayout HorizontalOptions="{Binding LayoutCenter}" VerticalOptions="Center" >
+									<Label Text="{Binding Name}"  TextColor="#e6e6e6" HorizontalOptions="{Binding LayoutCenter}" VerticalOptions="Center"  FontAttributes="{Binding FontAtt}" FontSize="{Binding FontSize}" FontFamily="{Binding FontFam}" ></Label>
+								</StackLayout>
+							</ViewCell>
+						</DataTemplate>
+					</ListView.ItemTemplate>
+				</ListView>
+				<!-- <Button Grid.Row="1" Text="d">
                 
             </Button>-->
-                <AbsoluteLayout BackgroundColor="Transparent" Grid.Row="1" Grid.Column="1" HorizontalOptions="Center" VerticalOptions="End"   TranslationY="0" x:Name="CrossbttLayout" Margin="40">
-                    <Grid> 
-                        <Button   x:Name="CancelButtonBtt" BackgroundColor="Transparent" HeightRequest="80" WidthRequest="80" Padding="0"  VerticalOptions="Center"   HorizontalOptions="Center">
-                            <!-- CornerRadius="100" -->
+				<AbsoluteLayout BackgroundColor="Transparent" Grid.Row="1" Grid.Column="1" HorizontalOptions="Center" VerticalOptions="End"   TranslationY="0" x:Name="CrossbttLayout" Margin="40">
+					<Grid>
+						<Button   x:Name="CancelButtonBtt" BackgroundColor="Transparent" HeightRequest="80" WidthRequest="80" Padding="0"  VerticalOptions="Center"   HorizontalOptions="Center">
+							<!-- CornerRadius="100" -->
 
-                        </Button>
-                        <ff:CachedImage x:Name="CancelButton" InputTransparent="True" BackgroundColor="Transparent" HeightRequest="60" WidthRequest="60"   VerticalOptions="Center"  HorizontalOptions="Center">
+						</Button>
+						<ff:CachedImage x:Name="CancelButton" InputTransparent="True" BackgroundColor="Transparent" HeightRequest="60" WidthRequest="60"   VerticalOptions="Center"  HorizontalOptions="Center">
 
-                        </ff:CachedImage> 
-                    </Grid> 
-                </AbsoluteLayout> 
-            </Grid>
-
-
-        </AbsoluteLayout>
-    </StackLayout>
-
+						</ff:CachedImage>
+					</Grid>
+				</AbsoluteLayout>
+			</Grid>
+		</AbsoluteLayout>
+	</StackLayout>
 </pages:PopupPage>

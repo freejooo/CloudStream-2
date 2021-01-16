@@ -27,6 +27,7 @@ namespace CloudStreamForms.Core.BaseProviders
 			}
 		}
 
+#pragma warning disable CS0649
 		public struct YuVideoMulti
 		{
 			public string src;
@@ -73,6 +74,8 @@ namespace CloudStreamForms.Core.BaseProviders
 		{
 			public YuSearchItems[] query;
 		}
+
+#pragma warning restore CS0649
 
 		static string GetYugenaniSite(string url, out string token, out string cfduid)
 		{

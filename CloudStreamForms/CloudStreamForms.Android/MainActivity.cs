@@ -1095,11 +1095,13 @@ namespace CloudStreamForms.Droid
 			}
 		}
 
+		//https://github.com/dot42/api/blob/b6bb6cf9ed9b4a548c788b19abb6134d5b9d4b3b/Generated/v2.1/Android.Media.cs#L1490
 		//https://github.com/google/ExoPlayer/blob/b5beb32618ac99adc58b537031a6f7c3dd761b9a/library/core/src/main/java/com/google/android/exoplayer2/audio/AudioTrackPositionTracker.java#L172
 		/*void GetLatency()
 		{
 			try {
 				var method = typeof(AudioTrack).GetMethod("getLatency");
+
 				var res = method.Invoke(null, null);
 				print(res);
 			}
@@ -1741,7 +1743,7 @@ namespace CloudStreamForms.Droid
 		public void LandscapeOrientation()
 		{
 			try {
-				MainActivity.activity.RequestedOrientation = Settings.VideoplayerLockLandscape ? ScreenOrientation.Landscape : ScreenOrientation.SensorLandscape ;
+				MainActivity.activity.RequestedOrientation = Settings.VideoplayerLockLandscape ? ScreenOrientation.Landscape : ScreenOrientation.SensorLandscape;
 			}
 			catch (Exception _ex) {
 				error(_ex);
@@ -2163,6 +2165,19 @@ namespace CloudStreamForms.Droid
 						MXIntent.AddFlags(ActivityFlags.NewTask);
 						Android.App.Application.Context.StartActivity(MXIntent);
 						break;
+					case VideoPlayer.MXPlayerPro:
+						Intent MXProIntent = new Intent();
+						MXProIntent.SetPackage(package);
+						MXProIntent.SetDataAndTypeAndNormalize(uri, "video/m3u8");
+
+						MXProIntent.AddFlags(ActivityFlags.GrantReadUriPermission);
+						MXProIntent.AddFlags(ActivityFlags.GrantWriteUriPermission);
+						MXProIntent.AddFlags(ActivityFlags.GrantPrefixUriPermission);
+						MXProIntent.AddFlags(ActivityFlags.GrantPersistableUriPermission);
+
+						MXProIntent.AddFlags(ActivityFlags.NewTask);
+						Android.App.Application.Context.StartActivity(MXProIntent);
+						break;
 					default:
 						break;
 				}
@@ -2538,6 +2553,7 @@ namespace CloudStreamForms.Droid
 			return player switch {
 				// VideoPlayer.MPV => "is.xyz.mpv",
 				VideoPlayer.MXPlayer => "com.mxtech.videoplayer.ad",
+				VideoPlayer.MXPlayerPro => "com.mxtech.videoplayer.pro",
 				VideoPlayer.VLC => "org.videolan.vlc",
 				_ => "",
 			};

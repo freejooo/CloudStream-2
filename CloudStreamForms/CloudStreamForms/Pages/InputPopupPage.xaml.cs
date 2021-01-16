@@ -145,8 +145,7 @@ namespace CloudStreamForms
 				UpdateScreenRot();
 			};
 			CancelButtonBtt.Clicked += (o, e) => {
-				cancel = true;
-				Done(IsNumber ? "" : "Cancel");
+				Cancel();
 			};
 
 			InputF.Completed += (o, e) => {
@@ -156,6 +155,18 @@ namespace CloudStreamForms
 			CheckEntry(InputF, inputType, autoPaste, setText, min: min, max: max);
 
 			HeaderTitle.Text = title;
+		}
+
+		protected override bool OnBackButtonPressed()
+		{
+			Cancel();
+			return true;
+		}
+
+		void Cancel()
+		{
+			cancel = true;
+			Done(IsNumber ? "" : "Cancel");
 		}
 
 		string text = "";

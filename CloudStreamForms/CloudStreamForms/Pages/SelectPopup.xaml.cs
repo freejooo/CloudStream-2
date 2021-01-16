@@ -186,6 +186,14 @@ namespace CloudStreamForms
 
 		string optionSelected = "";
 
+		void Cancel()
+		{
+			OnSelectedChanged = null;
+			optionSelected = "Cancel";
+			ActionPopup.isOpen = false;
+			PopupNavigation.Instance.PopAsync(true);
+		}
+
 		public SelectPopup(List<string> options, int selected, string header = "", bool isCenter = true, bool fontTest = false)
 		{
 			currentOptions = options;
@@ -193,6 +201,7 @@ namespace CloudStreamForms
 			if (ActionPopup.isOpen) {
 				PopupNavigation.Instance.PopAsync(false);
 			}
+			
 			ActionPopup.isOpen = true;
 			//  BackgroundColor = Color.Transparent;
 			//   BackgroundImageSource = null;
@@ -212,12 +221,8 @@ namespace CloudStreamForms
 
 			CancelButton.Source = GetImageSource("netflixCancel.png");
 			CancelButtonBtt.Clicked += (o, e) => {
-				OnSelectedChanged = null;
-				optionSelected = "Cancel";
-				ActionPopup.isOpen = false;
-				PopupNavigation.Instance.PopAsync(true);
+				Cancel();
 			};
-
 
 			epview.ItemSelected += (o, e) => {
 				if (e.SelectedItemIndex != -1) {
@@ -243,8 +248,6 @@ namespace CloudStreamForms
 			if (selected != -1) {
 				epview.ScrollTo(selectBinding.MyNameCollection[selected], ScrollToPosition.Center, false);
 			}
-
-
 		}
 
 
@@ -315,13 +318,21 @@ namespace CloudStreamForms
 			return base.OnDisappearingAnimationEndAsync();
 		}
 
+		/*
+		protected override bool OnBackButtonPressed()
+		{
+			isActive = false;
+			return base.OnBackButtonPressed();
+		}*/
+
 		// ### Overrided methods which can prevent closing a popup page ###
 
 		// Invoked when a hardware back button is pressed
 		protected override bool OnBackButtonPressed()
 		{
 			// Return true if you don't want to close this popup page when a back button is pressed
-			return true;// base.OnBackButtonPressed();
+			//Cancel();
+			return  base.OnBackButtonPressed();
 		}
 
 		// Invoked when background is clicked
