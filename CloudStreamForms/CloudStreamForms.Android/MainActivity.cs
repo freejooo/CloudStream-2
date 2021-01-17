@@ -764,5 +764,4 @@ namespace CloudStreamForms.Droid
 			return (mainPath ? (Android.OS.Environment.ExternalStorageDirectory + "/" + Android.OS.Environment.DirectoryDownloads) : Android.OS.Environment.ExternalStorageDirectory + "/") + extraPath;
 		}
 	}
-
 }

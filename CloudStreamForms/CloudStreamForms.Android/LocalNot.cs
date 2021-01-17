@@ -173,8 +173,7 @@ namespace CloudStreamForms.Droid
 			try {
 				NotManager.Notify(not.id, builder.Build());
 			}
-			catch (Exception _ex) {
-			}
+			catch { }
 		}
 		public static Intent GetLauncherActivity(Context context = null)
 		{

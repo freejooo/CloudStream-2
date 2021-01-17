@@ -12,8 +12,10 @@ using CloudStreamForms.Core;
 using CloudStreamForms.Droid.Services;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using Xamarin.Forms;
@@ -77,6 +79,9 @@ namespace CloudStreamForms.Droid
 			}
 		}
 
+		
+		
+
 		public DownloadProgressInfo GetDownloadProgressInfo(int id, string fileUrl)
 		{
 			try {
@@ -102,7 +107,7 @@ namespace CloudStreamForms.Droid
 				print("CONTAINS ::>>" + DownloadHandle.isStartProgress.ContainsKey(id));
 				progressInfo.bytesDownloaded = (exists ? (file.Length()) : 0) + (DownloadHandle.isStartProgress.ContainsKey(id) ? 1 : 0);
 
-				progressInfo.totalBytes = exists ? App.GetKey<int>("dlength", "id" + id, 0) : 0;
+				progressInfo.totalBytes = exists ? App.GetKey<long>("dlength", "id" + id, 0) : 0;
 				print("STATE:::::==" + progressInfo.totalBytes + "|" + progressInfo.bytesDownloaded);
 
 				if (!exists) {
@@ -125,7 +130,7 @@ namespace CloudStreamForms.Droid
 			}
 			catch (Exception _ex) {
 				error(_ex);
-				return new DownloadProgressInfo();
+				return null;
 			}
 		}
 
@@ -373,6 +378,7 @@ namespace CloudStreamForms.Droid
 				error(_ex);
 			}
 		}
+
 		public StorageInfo GetStorageInformation(string path = "")
 		{
 			try {

@@ -8,6 +8,7 @@ namespace CloudStreamForms.Models
 {
 	public class EpisodeResult : ICloneable
 	{
+		public int InternalId { set; get; }
 		public int Id { set; get; }
 		public string IMDBEpisodeId;
 		public int Episode { set; get; } = -1;
@@ -21,10 +22,10 @@ namespace CloudStreamForms.Models
 		public ImageSource VideoSource { get { return App.GetImageSource("nexflixPlayBtt.png"); } }
 		public ImageSource DownloadSource {
 			get {
-				if (IsDownloaded) {
+				if (DownloadState == 1) {
 					return "NetflixDownload3v2.png";//"NetflixDownload2.png";
 				}
-				else if (IsDownloading) {
+				else if (ExtraProgress > 0) {
 					return "CancelCrossV2.png";//"netflixStop128v2.png";
 				}
 				return "NetflixDownload1.png";
@@ -36,8 +37,10 @@ namespace CloudStreamForms.Models
 		public Command TapCom { set; get; }
 		public Command TapComTwo { set; get; }
 		public Command TapComThree { set; get; }
+		/*
 		public bool IsDownloading { get { return DownloadState == 2; } }
 		public bool IsDownloaded { get { return DownloadState == 1; } }
+		public bool IsHalfDownloaded { get { return DownloadState == 3; } }*/
 		public bool IsSearchingDownloadResults { get { return DownloadState == 4; } }
 		public bool IsNotSearchingDownloadResults { get { return !IsSearchingDownloadResults; } }
 
@@ -57,7 +60,7 @@ namespace CloudStreamForms.Models
 		public double Progress { set; get; }
 		public long ProgressState = -2;
 		public bool HasProgress { get { return Progress > 0.05; } } // OVER 5% SO YOU CAN REMOVE IT
-		public bool HasDownloadProgress { get { return ExtraProgress > 0.05; } } // OVER 5% SO YOU CAN REMOVE IT
+		public bool HasDownloadProgress { get { return ExtraProgress > 0 && DownloadState != 1; } } // OVER 5% SO YOU CAN REMOVE IT
 		/*    public List<string> Mirros { set; get; }
             public List<string> mirrosUrls { set; get; }
             public List<string> subtitles { set; get; }

@@ -11,6 +11,7 @@ namespace CloudStreamForms.InterfacePages
 {
 	class MovieResultHolder
 	{
+		const int MAX_EPS_PER = 50;
 		bool IsDead { get { return core == null; } }
 
 		public int MaxTrailers = 4;
@@ -220,7 +221,7 @@ namespace CloudStreamForms.InterfacePages
 		void SetEpisodeFromTo(int segment, int max = -1)
 		{
 			if (IsDead) return;
-			int start = MovieResultMainEpisodeView.MAX_EPS_PER * segment;
+			int start = MAX_EPS_PER * segment;
 			if (max == -1) {
 				max = allEpisodes.Length;
 			}
@@ -228,7 +229,7 @@ namespace CloudStreamForms.InterfacePages
 				max = Math.Min(max, allEpisodes.Length);
 			}
 
-			int end = Math.Min(MovieResultMainEpisodeView.MAX_EPS_PER * (segment + 1), max);
+			int end = Math.Min(MAX_EPS_PER * (segment + 1), max);
 			exposedEpisodes = allEpisodes[start..end];
 			OnExposedEpisodesChanged?.Invoke(null, exposedEpisodes);
 			ChangeRunning(false);
@@ -241,11 +242,11 @@ namespace CloudStreamForms.InterfacePages
 			}
 			var source = new List<string>();
 
-			int times = (int)Math.Ceiling((decimal)maxEp / (decimal)MovieResultMainEpisodeView.MAX_EPS_PER);
+			int times = (int)Math.Ceiling(maxEp / (decimal)MAX_EPS_PER);
 
 			for (int i = 0; i < times; i++) {
-				int fromTo = maxEp - i * MovieResultMainEpisodeView.MAX_EPS_PER;
-				string f = (i * MovieResultMainEpisodeView.MAX_EPS_PER + 1) + "-" + ((i) * MovieResultMainEpisodeView.MAX_EPS_PER + Math.Min(fromTo, MovieResultMainEpisodeView.MAX_EPS_PER));
+				int fromTo = maxEp - i * MAX_EPS_PER;
+				string f = (i * MAX_EPS_PER + 1) + "-" + ((i) * MAX_EPS_PER + Math.Min(fromTo, MAX_EPS_PER));
 				source.Add(f);
 			}
 

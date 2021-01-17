@@ -45,7 +45,9 @@ namespace CloudStreamForms
 				}
 			}
 		}
-		
+
+		public static EventHandler<DownloadProgressInfo> OnDStateChanged;
+
 		public static int GetInternalId(string imdbId)
 		{
 			MD5 md5Hasher = MD5.Create();
@@ -120,6 +122,8 @@ namespace CloudStreamForms
 			public void AddShortcut(string name, string imdbId, string url);
 		//	public void GetDownloadProgress(string imdbId, out long bytes, out long totalBytes);
 		}
+
+		static public EventHandler<int> onExtendedButtonPressed;
 
 		public static void AddShortcut(string name, string imdbId, string url)
 		{

@@ -92,6 +92,7 @@
     <Compile Include="LocalNot.cs" />
     <Compile Include="MainDroid.cs" />
     <Compile Include="Render\AndroidLongPressedEffect.cs" />
+    <Compile Include="Render\CustomActivityIndicatorRenderer.cs" />
     <Compile Include="Render\CustomButtonRenderer.cs" />
     <Compile Include="Render\CustomTabbedPageRenderer.cs" />
     <Compile Include="Render\CustomSliderRenderer.cs" />

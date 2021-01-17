@@ -218,6 +218,7 @@ namespace CloudStreamForms.Droid
 
 				int progress = 0;
 				int bytesPerSec = 0;
+				DownloadProgressInfo updateInfo = new DownloadProgressInfo();
 
 				void UpdateDloadNot(string progressTxt, double updateTime = UPDATE_TIME)
 				{
@@ -228,6 +229,7 @@ namespace CloudStreamForms.Droid
 					try {
 						int isPause = isPaused[id];
 						bool canPause = isPause == 0;
+
 						if (isPause != 2) {
 							ShowLocalNot(new LocalNot() {
 								actions = new List<LocalAction>() {
@@ -298,10 +300,13 @@ namespace CloudStreamForms.Droid
 							StrictMode.SetThreadPolicy(policy);
 						}
 						long total = 0;
-						int fileLength = 0;
+						long fileLength = 0;
 
 						void UpdateProgress(double updateTime = UPDATE_TIME)
 						{
+							updateInfo.state = DownloadState.Downloading;
+							updateInfo.bytesDownloaded = total;
+							App.OnDStateChanged?.Invoke(id, updateInfo);
 							UpdateDloadNot($"{beforeTxt.Replace("{name}", urlName)}{progress} % ({ConvertBytesToAny(total, 1, 2)} MB/{ConvertBytesToAny(fileLength, 1, 2)} MB)", updateTime);
 						}
 
@@ -380,7 +385,8 @@ namespace CloudStreamForms.Droid
 								}
 							}
 							else {
-								fileLength = clen + (int)total;
+								fileLength = clen + total;
+								updateInfo.totalBytes = fileLength;
 								App.SetKey("dlength", "id" + id, fileLength);
 								string fileExtension = MimeTypeMap.GetFileExtensionFromUrl(url);
 								InputStream input = new BufferedInputStream(connection.InputStream);
@@ -441,6 +447,9 @@ namespace CloudStreamForms.Droid
 									}
 									if (isPaused[id] == 2) { // DELETE FILE
 										ShowDone(false, "Download Stopped");
+										updateInfo.state = DownloadState.NotDownloaded;
+										updateInfo.bytesDownloaded = 0;
+										App.OnDStateChanged?.Invoke(id, updateInfo);
 										output.Flush();
 										output.Close();
 										input.Close();
@@ -510,6 +519,8 @@ namespace CloudStreamForms.Droid
 												output.Write(buffer, 0, count);
 
 												fileLength = (int)(total / ((double)counter / max));
+
+												updateInfo.totalBytes = fileLength;
 												App.SetKey("dlength", "id" + id, fileLength);
 
 												if (WriteDataUpdate()) return;

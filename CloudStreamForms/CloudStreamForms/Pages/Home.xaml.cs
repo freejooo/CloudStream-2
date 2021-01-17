@@ -156,8 +156,8 @@ namespace CloudStreamForms
 			episodeView.SelectedItem = null;
 			//EpisodeResult episodeResult = ((EpisodeResult)((ListView)sender).BindingContext);
 			//PlayEpisode(episodeResult);
-
 		}
+
 		private void ImageButton_Clicked(object sender, EventArgs e)
 		{
 			EpisodeResult episodeResult = ((EpisodeResult)((ImageButton)sender).BindingContext);
@@ -200,7 +200,6 @@ namespace CloudStreamForms
                     image.Scale = 0.3f;
                 }*/
 			}
-
 		}
 
 		public Command TapCommand { set; get; } = new Command((o) => { print("Hello:"); });
@@ -441,22 +440,23 @@ namespace CloudStreamForms
 			for (int i = 0; i < Math.Min(epis.Length, 5); i++) {
 				var ep = epis[i];
 				Grid stack = new Grid() { };
+				const double textAddSpace = 40;
 
 				var ff = new FFImageLoading.Forms.CachedImage {
 					Source = ep.poster,
 					HeightRequest = FastPosterHeight,
 					WidthRequest = FastPosterWith,
 					BackgroundColor = Color.Transparent,
+					TranslationY = -5,
 					VerticalOptions = LayoutOptions.Start,
 					InputTransparent = true,
 					Transformations = {
                             //  new FFImageLoading.Transformations.RoundedTransformation(10,1,1.5,10,"#303F9F")
-                                    new FFImageLoading.Transformations.RoundedTransformation(3, 1.78, 1, 0, "#303F9F")
+                                    new FFImageLoading.Transformations.RoundedTransformation(5, 1.78, 1, 0, "#303F9F")
 									},
 					//	InputTransparent = true,
 				};
 
-				const double textAddSpace = 40;
 				Frame boxView = new Frame() {
 					BackgroundColor = Settings.ItemBackGroundColor,// Color.FromRgb(_color, _color, _color),
 																   //	InputTransparent = true,
@@ -472,7 +472,7 @@ namespace CloudStreamForms
 					Source = pSource,
 					HeightRequest = playSize,
 					WidthRequest = playSize,
-					TranslationY = -textAddSpace / 2,
+					TranslationY = -15,
 					BackgroundColor = Color.Transparent,
 					HorizontalOptions = LayoutOptions.Center,
 					VerticalOptions = LayoutOptions.Center,
@@ -486,9 +486,9 @@ namespace CloudStreamForms
 					BackgroundColor = Color.Transparent,
 					Progress = ep.progress,
 					WidthRequest = FastPosterWith,
-					TranslationY = -(4 + textAddSpace / 2),
+					HeightRequest = 3.5,
+					TranslationY = -(8.5 + textAddSpace / 2),
 				};
-				stack.Children.Add(progress);
 
 				/*
 				var brView = new BorderView() { VerticalOptions = LayoutOptions.Fill, HorizontalOptions = LayoutOptions.Fill, CornerRadius = 5 };
@@ -500,9 +500,18 @@ namespace CloudStreamForms
 				stack.Children.Add(boxView);
 				stack.Children.Add(ff);
 				stack.Children.Add(playBtt);
-				bool isMovie = ep.season <= 0 || ep.episode <= 0;
-				stack.Children.Add(new Label() { Text = (isMovie ? "" : $"S{ep.season}:E{ep.episode} ") + $"{ep.episodeName}",Margin = new Thickness(5,0), VerticalOptions = LayoutOptions.Start, VerticalTextAlignment = TextAlignment.Center, HorizontalTextAlignment = TextAlignment.Start, HorizontalOptions = LayoutOptions.Start, Padding = 1, TextColor = Color.White, MaxLines = 1, ClassId = "OUTLINE", TranslationY = FastPosterHeight, WidthRequest = FastPosterWith });
+				stack.Children.Add(progress);
 
+				bool isMovie = ep.season <= 0 || ep.episode <= 0;
+				stack.Children.Add(new Label() { Text = (isMovie ? "" : $"S{ep.season}:E{ep.episode} ") + $"{ep.episodeName}", Margin = new Thickness(5, 0), VerticalOptions = LayoutOptions.Start, VerticalTextAlignment = TextAlignment.Center, HorizontalTextAlignment = TextAlignment.Start, HorizontalOptions = LayoutOptions.Start, Padding = 1, TextColor = Color.White, MaxLines = 1, ClassId = "OUTLINE", TranslationY = FastPosterHeight - 3.5, WidthRequest = FastPosterWith });
+
+				/*
+				var infoBtt = new ImageButton() { Source = App.GetImageSource("baseline_help_outline_white_48dp.png"), HeightRequest = 7, WidthRequest = 7, VerticalOptions = LayoutOptions.End, HorizontalOptions = LayoutOptions.End, Margin = new Thickness(5, 5) };
+				infoBtt.Clicked += async (o, e) => {
+					var res = new MovieResult(ep.state);
+					await Navigation.PushModalAsync(res, false);
+				};*/
+			//	stack.Children.Add(infoBtt);
 				stack.Effects.Add(Effect.Resolve("CloudStreamForms.LongPressedEffect"));
 
 				LongPressedEffect.SetCommand(stack, new Command(async () => {
@@ -710,7 +719,7 @@ namespace CloudStreamForms
 									InputTransparent = true,
 									Transformations = {
                             //  new FFImageLoading.Transformations.RoundedTransformation(10,1,1.5,10,"#303F9F")
-                                    new FFImageLoading.Transformations.RoundedTransformation(10, 1, 1.5, 0, "#303F9F")
+                                    new FFImageLoading.Transformations.RoundedTransformation(5, 1, 1.5, 0, "#303F9F")
 									},
 									//	InputTransparent = true,
 								};
@@ -734,7 +743,7 @@ namespace CloudStreamForms
 								Frame boxView = new Frame() {
 									BackgroundColor = Settings.ItemBackGroundColor,// Color.FromRgb(_color, _color, _color),
 																				   //	InputTransparent = true,
-									CornerRadius = 5,
+									CornerRadius = 2,
 									HeightRequest = RecPosterHeight + bookmarkLabelTransY,
 									TranslationY = 0,
 									WidthRequest = RecPosterWith,
@@ -746,8 +755,6 @@ namespace CloudStreamForms
 								//stackLayout.Children.Add(imageButton);
 								stackLayout.Children.Add(new Label() { Text = name, VerticalOptions = LayoutOptions.Start, VerticalTextAlignment = TextAlignment.Center, HorizontalTextAlignment = TextAlignment.Center, HorizontalOptions = LayoutOptions.Center, Padding = 1, TextColor = Color.White, MaxLines = 2, ClassId = "OUTLINE", TranslationY = RecPosterHeight });
 								//stackLayout.Children.Add(brView);
-
-
 
 
 								if (Settings.ShowNextEpisodeReleaseDate) {
