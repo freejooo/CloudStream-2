@@ -53,38 +53,6 @@ namespace CloudStreamForms.Droid
 			}
 		}
 
-		public static void ResumeIntents()
-		{
-			activity.LogFile("Resuming intents");
-
-			try {
-				int downloadResumes = 0;
-				foreach (var path in App.GetKeysPath(DOWNLOAD_KEY_INTENT)) {
-					//  App.GetKey<long>(DOWNLOAD_KEY, path, 0);
-					downloadResumes++;
-					try {
-						string data = App.GetKey<string>(path, null);
-						HandleIntent(data);
-					}
-					catch (Exception) { }
-				}
-
-				if (downloadResumes == 1) {
-					App.ShowToast("Resumed Download");
-				}
-				else if (downloadResumes != 0) {
-					App.ShowToast($"Resumed {downloadResumes} downloads");
-				}
-			}
-			catch (Exception _ex) {
-				activity.LogFile("Resume Intents Failed: " + _ex);
-				App.ShowToast("Error resuming download");
-			}
-			finally {
-				activity.LogFile("Resuming intents done");
-			}
-		}
-
 		readonly static Dictionary<int, OutputStream> outputStreams = new Dictionary<int, OutputStream>();
 		readonly static Dictionary<int, InputStream> inputStreams = new Dictionary<int, InputStream>();
 		public static List<int> activeIds = new List<int>();
@@ -133,7 +101,6 @@ namespace CloudStreamForms.Droid
 				return false;
 			}
 		}
-
 
 		public static bool CheckIfMaster(string data)
 		{
@@ -209,34 +176,6 @@ namespace CloudStreamForms.Droid
 		public static string DownloadULRasText(string url, string referer)
 		{
 			return CloudStreamCore.mainCore.DownloadString(url, referer: referer);
-			/*
-			try {
-				URL _url = new URL(url);
-
-				URLConnection connection = _url.OpenConnection();
-				connection.ConnectTimeout = 5000; // 5 sec 
-				//connection.set = "UTF-8";
-				connection.Connect();
-				if (connection.ContentLength > 100000) return ""; // TEXT ONLY
-				InputStream input = new BufferedInputStream(connection.InputStream);
-				int count = 0;
-				//byte[] data = new byte[1024];
-
-				byte[] totalData = new byte[connection.ContentLength];
-				if (input.Read(totalData) > 0) {
-					var data = Encoding.UTF8.GetString(totalData);
-				}
-				else {
-					return "";
-				}
-
-			}
-			catch (Exception) {
-				return "";
-			}*/
-			//while ((count = input.Read(data)) != -1) {
-
-			//}
 		}
 
 		public static bool ResumeDownload(int id)
@@ -269,25 +208,18 @@ namespace CloudStreamForms.Droid
 			const int UPDATE_TIME = 1;
 
 			try {
-
 				isStartProgress[id] = true;
 				print("START DLOAD::: " + id);
 				if (isPaused.ContainsKey(id)) {
-					//if (isPaused[id] == 2) {
-					//  isPaused.Remove(id);
-					//    print("YEET DELETED KEEEE");
 					return;
-					//  }
 				}
+
 				var context = Application.Context;
 
-				//$"{nameof(id)}={id}|||{nameof(title)}={title}|||{nameof(path)}={path}|||{nameof(poster)}={poster}|||{nameof(fileName)}={fileName}|||{nameof(beforeTxt)}={beforeTxt}|||{nameof(openWhenDone)}={openWhenDone}|||{nameof(showDoneNotificaion)}={showDoneNotificaion}|||{nameof(showDoneAsToast)}={showDoneAsToast}|||");
-
 				int progress = 0;
-
 				int bytesPerSec = 0;
 
-				void UpdateDloadNot(string progressTxt)
+				void UpdateDloadNot(string progressTxt, double updateTime = UPDATE_TIME)
 				{
 					//poster != ""
 					if (!isPaused.ContainsKey(id)) {
@@ -297,19 +229,27 @@ namespace CloudStreamForms.Droid
 						int isPause = isPaused[id];
 						bool canPause = isPause == 0;
 						if (isPause != 2) {
-							ShowLocalNot(new LocalNot() { 
-								actions = new List<LocalAction>() { 
-									new LocalAction() { action = $"handleDownload|||id={id}|||dType={(canPause ? 1 : 0)}|||", name = canPause ? "Pause" : "Resume" }, 
-									new LocalAction() { action = $"handleDownload|||id={id}|||dType=2|||", name = "Stop" } }, 
-								
-								mediaStyle = false, bigIcon = poster, title = $"{title} - {ConvertBytesToAny(bytesPerSec / UPDATE_TIME, 2, 2)} MB/s", 
-								autoCancel = false, showWhen = false, onGoing = canPause, id = id, smallIcon = canPause ? Resource.Drawable.BLoad : Resource.Drawable.BloadPause, progress = progress, body = progressTxt }, context); //canPause
+							ShowLocalNot(new LocalNot() {
+								actions = new List<LocalAction>() {
+									new LocalAction() { action = $"handleDownload|||id={id}|||dType={(canPause ? 1 : 0)}|||", name = canPause ? "Pause" : "Resume" },
+									new LocalAction() { action = $"handleDownload|||id={id}|||dType=2|||", name = "Stop" } },
+
+								mediaStyle = false,
+								bigIcon = poster,
+								title = $"{title} - {ConvertBytesToAny((long)(bytesPerSec / updateTime), 2, 2)} MB/s",
+								autoCancel = false,
+								showWhen = false,
+								onGoing = canPause,
+								id = id,
+								smallIcon = canPause ? Resource.Drawable.BLoad : Resource.Drawable.BloadPause,
+								progress = progress,
+								body = progressTxt
+							}, context); //canPause
 						}
 					}
 					catch (Exception _ex) {
 						print("ERRORLOADING PROGRESS:::" + _ex);
 					}
-
 				}
 
 				void ShowDone(bool succ, string overrideText = null)
@@ -317,7 +257,7 @@ namespace CloudStreamForms.Droid
 					if (succ) {
 						App.RemoveKey(DOWNLOAD_KEY, id.ToString());
 						App.RemoveKey(DOWNLOAD_KEY_INTENT, id.ToString());
-					} 
+					}
 					if (showDoneNotificaion) {
 						Device.BeginInvokeOnMainThread(() => {
 							try {
@@ -337,10 +277,7 @@ namespace CloudStreamForms.Droid
 				{
 					isStartProgress[id] = true;
 					if (isPaused.ContainsKey(id)) {
-						//if (isPaused[id] == 2) {
-						//    isPaused.Remove(id);
 						return;
-						//  }
 					}
 
 					Thread t = new Thread(() => {
@@ -363,9 +300,9 @@ namespace CloudStreamForms.Droid
 						long total = 0;
 						int fileLength = 0;
 
-						void UpdateProgress()
+						void UpdateProgress(double updateTime = UPDATE_TIME)
 						{
-							UpdateDloadNot($"{beforeTxt.Replace("{name}", urlName)}{progress} % ({ConvertBytesToAny(total, 1, 2)} MB/{ConvertBytesToAny(fileLength, 1, 2)} MB)");
+							UpdateDloadNot($"{beforeTxt.Replace("{name}", urlName)}{progress} % ({ConvertBytesToAny(total, 1, 2)} MB/{ConvertBytesToAny(fileLength, 1, 2)} MB)", updateTime);
 						}
 
 						void UpdateFromId(object sender, int _id)
@@ -424,12 +361,9 @@ namespace CloudStreamForms.Droid
 									}
 								});
 								if (!Completed) {
-									print("FAILED MASS");
 									clen = 0;
 								}
 							}
-
-							print("TOTALLLLL::: " + clen);
 
 							if (clen == 0) {
 								if (isStartProgress.ContainsKey(id)) {
@@ -440,8 +374,6 @@ namespace CloudStreamForms.Droid
 									removeKeys = false;
 									resumeIntent = false;
 									rFile.Delete();
-
-									print("DELETE;;;");
 								}
 								else {
 									ShowDone(false);
@@ -449,7 +381,6 @@ namespace CloudStreamForms.Droid
 							}
 							else {
 								fileLength = clen + (int)total;
-								print("FILELEN:::: " + fileLength);
 								App.SetKey("dlength", "id" + id, fileLength);
 								string fileExtension = MimeTypeMap.GetFileExtensionFromUrl(url);
 								InputStream input = new BufferedInputStream(connection.InputStream);
@@ -462,10 +393,7 @@ namespace CloudStreamForms.Droid
 								inputStreams[id] = input;
 
 								if (isPaused.ContainsKey(id)) {
-									//if (isPaused[id] == 2) {
-									//    isPaused.Remove(id);
 									return;
-									//  }
 								}
 
 								isPaused[id] = 0;
@@ -485,7 +413,6 @@ namespace CloudStreamForms.Droid
 								byte[] data = new byte[1024];
 								// skip;
 								int count;
-								int previousProgress = 0;
 								UpdateDloadNot(total == 0 ? "Download starting" : "Download resuming");
 
 								System.DateTime lastUpdateTime = System.DateTime.Now;
@@ -504,7 +431,6 @@ namespace CloudStreamForms.Droid
 									progress = cProgress();
 
 									if (isPaused[id] == 1) {
-										print("PAUSEDOWNLOAD");
 										UpdateProgress();
 										while (isPaused[id] == 1) {
 											Thread.Sleep(100);
@@ -514,7 +440,6 @@ namespace CloudStreamForms.Droid
 										}
 									}
 									if (isPaused[id] == 2) { // DELETE FILE
-										print("DOWNLOAD STOPPED");
 										ShowDone(false, "Download Stopped");
 										output.Flush();
 										output.Close();
@@ -536,40 +461,28 @@ namespace CloudStreamForms.Droid
 										return true;
 									}
 
-									if (DateTime.Now.Subtract(lastUpdateTime).TotalSeconds > UPDATE_TIME) {
+									var currentUpdateTime = DateTime.Now.Subtract(lastUpdateTime).TotalSeconds;
+									if (currentUpdateTime > UPDATE_TIME) {
 										lastUpdateTime = DateTime.Now;
 										long diff = total - lastTotal;
-										//  UpdateDloadNot($"{ConvertBytesToAny(diff/UPDATE_TIME, 2,2)}MB/s | {progress}%");
-										//{ConvertBytesToAny(diff / UPDATE_TIME, 2, 2)}MB/s | 
 										if (progress >= 100) {
 											print("DLOADPG DONE!");
 											ShowDone(true);
 										}
 										else {
-											UpdateProgress();
-											// UpdateDloadNot(progress + "%");
+											UpdateProgress(currentUpdateTime);
 										}
 										bytesPerSec = 0;
 
 										lastTotal = total;
 									}
 
-									if (progress >= 100 || progress > previousProgress) {
-										// Only post progress event if we've made progress.
-										previousProgress = progress;
-										if (progress >= 100) {
-											print("DLOADPG DONE!");
-											ShowDone(true);
-											showDone = false;
-										}
-										else {
-											// UpdateProgress();
-											// UpdateDloadNot(progress + "%");
-										}
+									if (progress >= 100) {
+										ShowDone(true);
+										showDone = false;
 									}
 									return false;
 								}
-
 
 								void OnError(string reason = "")
 								{

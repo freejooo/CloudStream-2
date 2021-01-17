@@ -31,18 +31,6 @@ namespace CloudStreamForms.Models
 			}
 		}
 
-		public double DownloadSize {
-			get {
-				if (IsDownloaded) {
-					return 0.8;
-				}
-				else if (IsDownloading) {
-					return 0.8;
-				}
-				return 0.8;
-			}
-		}
-
 		public bool ForceDescript = false;
 		public ImageSource DownloadPlayBttSource { get; set; }
 		public Command TapCom { set; get; }
@@ -69,6 +57,7 @@ namespace CloudStreamForms.Models
 		public double Progress { set; get; }
 		public long ProgressState = -2;
 		public bool HasProgress { get { return Progress > 0.05; } } // OVER 5% SO YOU CAN REMOVE IT
+		public bool HasDownloadProgress { get { return ExtraProgress > 0.05; } } // OVER 5% SO YOU CAN REMOVE IT
 		/*    public List<string> Mirros { set; get; }
             public List<string> mirrosUrls { set; get; }
             public List<string> subtitles { set; get; }

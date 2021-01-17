@@ -6724,6 +6724,7 @@ namespace CloudStreamForms.Core
 
 		public bool AddPotentialLink(int normalEpisode, BasicLink basicLink)
 		{
+			print("ADDING LINK::: " + basicLink.baseUrl);
 			lock (cachedLinksLock) {
 				string id = (activeMovie.title.IsMovie ? activeMovie.title.id : activeMovie.episodes[normalEpisode].id);
 				var link = GetCachedLink(id);

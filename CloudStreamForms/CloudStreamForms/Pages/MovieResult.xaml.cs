@@ -769,7 +769,7 @@ namespace CloudStreamForms
 							if (IsDead) return;
 							coreCopy.GetEpisodeLink(coreCopy.activeMovie.title.IsMovie ? -1 : (ep.Id + 1), _currentSeason, false, false, _isDub);
 
-							int epId = GetCorrectId(ep, coreCopy.activeMovie);
+							int epId = GetCorrectId(ep);
 							await Task.Delay(10000); // WAIT 10 Sec
 							try {
 								BasicLink[] info = null;
@@ -1005,6 +1005,9 @@ namespace CloudStreamForms
 			}
 			//print("POST PRO ON: " + episodeResult.IMDBEpisodeId);
 			string realId = episodeResult.IMDBEpisodeId;
+			var _info = App.GetDownloadInfo(GetCorrectId(episodeResult), false);
+
+			episodeResult.ExtraProgress = _info == null || _info.state == null ? 0 : _info.state.ProcentageDownloaded;
 			//print("ID::::::: ON " + realId + "|" + App.GetKey(VIEW_TIME_POS, realId, -1L));
 			if ((pos = App.GetViewPos(realId)) > 0) {
 				if ((len = App.GetViewDur(realId)) > 0) {
@@ -1821,8 +1824,6 @@ namespace CloudStreamForms
 					await EpisodeSettings(episodeResult);
 				}
 				else if (action == "Play Downloaded File") { // ============================== PLAY FILE ==============================
-															 //  bool succ = App.DeleteFile(info.info.fileUrl); 
-															 //  Download.PlayVLCFile(downloadKeyData, episodeResult.Title);
 					PlayDownloadedEp(episodeResult);
 				}
 				else if (action == "Delete Downloaded File") {  // ============================== DELETE FILE ==============================
@@ -1900,32 +1901,10 @@ namespace CloudStreamForms
 			ForceUpdate(episodeResult.Id);
 		}
 
-		public int GetCorrectId(EpisodeResult episodeResult, Movie? m = null)
+		public int GetCorrectId(EpisodeResult episodeResult)
 		{
-			m ??= CurrentMovie;
-			return int.Parse(((m?.title.movieType == MovieType.TVSeries || m?.title.movieType == MovieType.Anime) ? m?.episodes[episodeResult.Id].id : m?.title.id).Replace("tt", ""));
+			return GetInternalId(episodeResult.IMDBEpisodeId); //int.Parse(((m?.title.movieType == MovieType.TVSeries || m?.title.movieType == MovieType.Anime) ? m?.episodes[episodeResult.Id].id : m?.title.id).Replace("tt", ""));
 		}
-
-
-		// ============================== ID OF EPISODE ==============================
-		public string GetId(EpisodeResult episodeResult)
-		{
-			return GetId(episodeResult, CurrentMovie);
-		}
-
-		public static string GetId(EpisodeResult episodeResult, Movie currentMovie)
-		{
-			try {
-				return (currentMovie.title.movieType == MovieType.TVSeries || currentMovie.title.movieType == MovieType.Anime) ? currentMovie.episodes[episodeResult.Id].id : currentMovie.title.id;
-			}
-			catch (Exception _ex) {
-				print("FATAL EX IN GETID: " + _ex);
-				return episodeResult.Id + "Extra=" + ToDown(episodeResult.Title) + "=EndAll";
-			}
-		}
-
-
-
 
 		private async void MalRating_Clicked(object sender, EventArgs e)
 		{

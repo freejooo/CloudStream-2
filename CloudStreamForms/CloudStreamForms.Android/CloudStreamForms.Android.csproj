@@ -89,6 +89,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Constants.cs" />
+    <Compile Include="LocalNot.cs" />
+    <Compile Include="MainDroid.cs" />
     <Compile Include="Render\AndroidLongPressedEffect.cs" />
     <Compile Include="Render\CustomButtonRenderer.cs" />
     <Compile Include="Render\CustomTabbedPageRenderer.cs" />
@@ -108,6 +110,9 @@
     <Compile Include="Render\StrokeTextView.cs" />
     <Compile Include="Resources\Resource.designer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Services\ChromeCastIntentService.cs" />
+    <Compile Include="Services\MainIntentService.cs" />
+    <Compile Include="Services\OnKilledService.cs" />
   </ItemGroup>
   <ItemGroup>
     <AndroidAsset Include="Assets\Trebuchet-MS.ttf" />

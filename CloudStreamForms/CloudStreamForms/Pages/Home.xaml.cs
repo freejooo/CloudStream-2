@@ -451,23 +451,23 @@ namespace CloudStreamForms
 					InputTransparent = true,
 					Transformations = {
                             //  new FFImageLoading.Transformations.RoundedTransformation(10,1,1.5,10,"#303F9F")
-                                    new FFImageLoading.Transformations.RoundedTransformation(10, 1.78, 1, 0, "#303F9F")
+                                    new FFImageLoading.Transformations.RoundedTransformation(3, 1.78, 1, 0, "#303F9F")
 									},
 					//	InputTransparent = true,
 				};
 
-				const double textAddSpace = 20;
+				const double textAddSpace = 40;
 				Frame boxView = new Frame() {
 					BackgroundColor = Settings.ItemBackGroundColor,// Color.FromRgb(_color, _color, _color),
 																   //	InputTransparent = true,
-					CornerRadius = 5,
+					CornerRadius = 2,
 					HeightRequest = FastPosterHeight + textAddSpace,
 					TranslationY = 0,
 					WidthRequest = FastPosterWith,
 					HasShadow = true,
 				};
 
-				const double playSize = 30;
+				const double playSize = 50;
 				var playBtt = new FFImageLoading.Forms.CachedImage {
 					Source = pSource,
 					HeightRequest = playSize,
@@ -488,6 +488,7 @@ namespace CloudStreamForms
 					WidthRequest = FastPosterWith,
 					TranslationY = -(4 + textAddSpace / 2),
 				};
+				stack.Children.Add(progress);
 
 				/*
 				var brView = new BorderView() { VerticalOptions = LayoutOptions.Fill, HorizontalOptions = LayoutOptions.Fill, CornerRadius = 5 };
@@ -499,9 +500,8 @@ namespace CloudStreamForms
 				stack.Children.Add(boxView);
 				stack.Children.Add(ff);
 				stack.Children.Add(playBtt);
-				stack.Children.Add(progress);
 				bool isMovie = ep.season <= 0 || ep.episode <= 0;
-				stack.Children.Add(new Label() { Text = (isMovie ? "" : $"S{ep.season}:E{ep.episode} ") + $"{ep.episodeName}", VerticalOptions = LayoutOptions.Start, VerticalTextAlignment = TextAlignment.Center, HorizontalTextAlignment = TextAlignment.Center, HorizontalOptions = LayoutOptions.Center, Padding = 1, TextColor = Color.White, MaxLines = 1, ClassId = "OUTLINE", TranslationY = FastPosterHeight, WidthRequest = FastPosterWith });
+				stack.Children.Add(new Label() { Text = (isMovie ? "" : $"S{ep.season}:E{ep.episode} ") + $"{ep.episodeName}",Margin = new Thickness(5,0), VerticalOptions = LayoutOptions.Start, VerticalTextAlignment = TextAlignment.Center, HorizontalTextAlignment = TextAlignment.Start, HorizontalOptions = LayoutOptions.Start, Padding = 1, TextColor = Color.White, MaxLines = 1, ClassId = "OUTLINE", TranslationY = FastPosterHeight, WidthRequest = FastPosterWith });
 
 				stack.Effects.Add(Effect.Resolve("CloudStreamForms.LongPressedEffect"));
 

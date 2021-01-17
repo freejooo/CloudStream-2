@@ -45,6 +45,19 @@ namespace CloudStreamForms
 				}
 			}
 		}
+		
+		public static int GetInternalId(string imdbId)
+		{
+			MD5 md5Hasher = MD5.Create();
+			var hashed = md5Hasher.ComputeHash(Encoding.UTF8.GetBytes(imdbId));
+			return BitConverter.ToInt32(hashed, 0);
+		}
+
+		/*
+		public static void GetDownloadProgress(string imdbId, out long bytes, out long totalBytes)
+		{
+
+		}*/
 
 		public static string GetFont(string f, bool extend = true)
 		{
@@ -73,7 +86,6 @@ namespace CloudStreamForms
 			string DownloadFile(string path, string data);
 			string ReadFile(string fileName, bool mainPath, string extraPath);
 			string ReadFile(string path);
-			string DownloadUrl(string url, string fileName, bool mainPath, string extraPath, string toast = "", bool isNotification = false, string body = "");
 			bool DeleteFile(string path);
 			void DownloadUpdate(string update, string version);
 			string GetDownloadPath(string path, string extraFolder);
@@ -90,12 +102,10 @@ namespace CloudStreamForms
 			void ToggleFullscreen(bool fullscreen);
 			void SetBrightness(double opacity);
 			double GetBrightness();
-			void ShowNotIntent(string title, string body, int id, string titleId, string titleName, DateTime? time = null, string bigIconUrl = "");
 			void Test();
 			EventHandler<bool> OnAudioFocusChanged { set; get; }
 			bool GainAudioFocus();
 			void ReleaseAudioFocus();
-			void CancelNot(int id);
 			bool GetPlayerInstalled(VideoPlayer player);
 			//  void PlayExternalApp(VideoPlayer player);
 			string DownloadHandleIntent(int id, List<BasicMirrorInfo> mirrors, string fileName, string titleName, bool mainPath, string extraPath, bool showNotification = true, bool showNotificationWhenDone = true, bool openWhenDone = false, string poster = "", string beforeTxt = "");
@@ -108,6 +118,7 @@ namespace CloudStreamForms
 			public bool ResumeDownload(int id);
 			public void PictureInPicture();
 			public void AddShortcut(string name, string imdbId, string url);
+		//	public void GetDownloadProgress(string imdbId, out long bytes, out long totalBytes);
 		}
 
 		public static void AddShortcut(string name, string imdbId, string url)
@@ -476,11 +487,6 @@ namespace CloudStreamForms
 			public double UsedProcentage { get { return ConvertBytesToGB(UsedSpace, 4) / ConvertBytesToGB(TotalSpace, 4); } }
 		}
 
-		public static void OnDownloadProgressChanged(string path, DownloadProgressChangedEventArgs progress)
-		{
-			// Main.print("PATH: " + path + " | Progress:" + progress.ProgressPercentage);
-		}
-
 		public static void Test()
 		{
 			PlatformDep.Test();
@@ -532,11 +538,6 @@ namespace CloudStreamForms
 			PlatformDep.SetBrightness(brightness);
 		}
 
-		public static void ShowNotIntent(string title, string body, int id, string titleId, string titleName, DateTime? time = null, string bigIconUrl = "")
-		{
-			PlatformDep.ShowNotIntent(title, body, id, titleId, titleName, time, bigIconUrl);
-		}
-
 		public static bool isOnMainPage = true;
 
 		public static void UpdateBackground(int color = -1)
@@ -583,37 +584,9 @@ namespace CloudStreamForms
 		{
 			instance = this;
 			Settings.CurrentFont = Settings.CurrentGlobalFonts[Settings.CurrentGlobalFont];
-			//Settings.CurrentGlobalFont = Settings.BackCurrentGlobalFont;
-
-			// Resources["LABELFONT"] = LabelFont;
-
 			InitializeComponent();
 
-			/*
-            var LabelFont = new Style(typeof(Label)) {
-                Setters = {
-                    new Setter() {
-                        Property = Label.FontFamilyProperty,
-                        Value = "Gotham.ttf#Google Sans",
-                    }
-                }
-            };
-
-            ICollection<ResourceDictionary> mergedDictionaries = Application.Current.Resources.MergedDictionaries;
-            if (mergedDictionaries != null) {
-                mergedDictionaries.Clear();
-                mergedDictionaries.Add(new DarkTheme());
-
-            }*/
-
 			try {
-				/*
-				int set = Settings.BackCurrentGlobalFont;
-				if (set != -1) {
-					Settings.CurrentGlobalFont = set;
-					Settings.BackCurrentGlobalFont = -1;
-				}*/
-
 				MainPage = new MainPage();
 			}
 			catch (Exception) {
@@ -712,22 +685,6 @@ namespace CloudStreamForms
 			}
 			print("SAVING DATA DONE!!");
 		}
-
-
-		/*
-        public static void PlayVLCWithSingleUrl(List<string> url, List<string> name, List<string> subtitleData, List<string> subtitleNames, string publicName = "", int episode = -1, int season = -1, bool? overrideSelectVideo = null)
-        {
-            bool useVideo = overrideSelectVideo ?? Settings.UseVideoPlayer;
-
-            if (useVideo) {
-                Page p = new VideoPage(new VideoPage.PlayVideo() { descript = "", name = publicName, isSingleMirror = false, episode = episode, season = season, MirrorNames = name, MirrorUrls = url, });// SubtitlesNames = subtitleNames  new List<string>() { "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" }, new List<string>() { "Black" }, new List<string>() { });// { mainPoster = mainPoster };
-                ((MainPage)CloudStreamCore.mainPage).Navigation.PushModalAsync(p, false);
-            }
-            else {
-                platformDep.PlayVlc(url, name, subtitleData.Count > 0 ? subtitleData[0] : "");
-            }
-            //PlayVlc?.Invoke(null, url); 
-        }*/
 
 		static string GetKeyPath(string folder, string name = "")
 		{
@@ -906,7 +863,6 @@ namespace CloudStreamForms
 			return GetKeysPath(folder).Length;
 		}
 
-
 		public static string[] GetKeysPath(string folder)
 		{
 			string[] copy = new string[MyApp.Properties.Keys.Count];
@@ -994,11 +950,6 @@ namespace CloudStreamForms
 			return ImageSource.FromResource("CloudStreamForms.Resource." + inp, Assembly.GetExecutingAssembly());
 		}
 
-		public static string DownloadUrl(string url, string fileName, bool mainPath = true, string extraPath = "", string toast = "", bool isNotification = false, string body = "")
-		{
-			return PlatformDep.DownloadUrl(url, fileName, mainPath, extraPath, toast, isNotification, body);
-		}
-
 		public static string DownloadFile(string file, string fileName, bool mainPath = true, string extraPath = "")
 		{
 			return PlatformDep.DownloadFile(file, fileName, mainPath, extraPath);
@@ -1025,33 +976,27 @@ namespace CloudStreamForms
 			return _s;
 		}
 
-		public static byte[] ConvertPathAndNameToM3U8Bytes(List<string> path, List<string> name, bool isSubtitleEnabled = false, string beforePath = "")
-		{
-			return Encoding.UTF8.GetBytes(ConvertPathAndNameToM3U8(path, name, isSubtitleEnabled, beforePath));
-		}
-
 		public static void OpenSpecifiedBrowser(string url)
 		{
-			CloudStreamCore.print("SPECTrying to open: " + url);
-			if (CloudStreamCore.CheckIfURLIsValid(url)) {
+			print("SPECTrying to open: " + url);
+			if (CheckIfURLIsValid(url)) {
 				try {
 					Browser.OpenAsync(new Uri(url));
 				}
 				catch (Exception _ex) {
-					CloudStreamCore.print("SPECBROWSER LOADED ERROR, SHOULD NEVER HAPPEND!!" + _ex);
+					error("SPECBROWSER LOADED ERROR, SHOULD NEVER HAPPEND!!" + _ex);
 				}
 			}
 		}
 
 		public static async Task OpenBrowser(string url)
 		{
-			CloudStreamCore.print("Trying to open: " + url);
-			if (CloudStreamCore.CheckIfURLIsValid(url)) {
+			if (CheckIfURLIsValid(url)) {
 				try {
 					await Launcher.OpenAsync(new Uri(url));
 				}
 				catch (Exception _ex) {
-					CloudStreamCore.print("BROWSER LOADED ERROR, SHOULD NEVER HAPPEND!!" + _ex);
+					error(_ex);
 				}
 			}
 		}
