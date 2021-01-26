@@ -35,6 +35,8 @@ namespace CloudStreamForms
 
 		public const string errorEpisodeToast = "No Links Found";
 
+		public static int malTimeout = -1;
+
 		public static int LoadingMiliSec {
 			set {
 				App.SetKey("Settings", nameof(LoadingMiliSec), value);

@@ -4790,7 +4790,7 @@ namespace CloudStreamForms.Core
 			}
 		}
 
-		public void GetMALData(bool cacheData = true)
+		public void GetMALData(bool cacheData = true, int timeout = -1)
 		{
 			bool fetchData = true;
 			if (Settings.CacheMAL) {
@@ -5116,8 +5116,13 @@ namespace CloudStreamForms.Core
 					});
 					t.Start();
 
+					int time = 0;
 					while (t.IsAlive && !shouldSkipAnimeLoading) {
 						Thread.Sleep(10);
+						time += 10;
+						if (timeout != -1 && timeout < time) {
+							shouldSkipAnimeLoading = true;
+						}
 					}
 
 					print("SKIPPPED::: " + shouldSkipAnimeLoading);
@@ -5426,7 +5431,7 @@ namespace CloudStreamForms.Core
 							}
 
 							if (activeMovie.title.movieType == MovieType.Anime) {
-								GetMALData();
+								GetMALData(timeout: Settings.malTimeout);
 							}
 							else { // FISHING : THIS IS TO SPEED UP LINK FETHING
 								Task.Factory.StartNew(() => {
