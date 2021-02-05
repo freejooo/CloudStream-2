@@ -556,7 +556,7 @@ namespace CloudStreamForms
 				if (controller.pData != null) {
 					int count = controller.pData.Where(t => t.maxEpisode > 0).Count();
 					if (count > 0) {
-						await ActionPopup.DisplayActionSheet($"Providers found, {count}st", controller.pData.Where(t => t.maxEpisode > 0).Select(t => $"{t.provider} • {t.maxEpisode} episodes").ToArray());
+						await ActionPopup.DisplayActionSheet($"{count} Providers found", controller.pData.Where(t => t.maxEpisode > 0).Select(t => $"{t.provider} • {t.maxEpisode} episodes").ToArray());
 					}
 				}
 			}));
