@@ -1,7 +1,20 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android" android:versionCode="2010300" android:versionName="2.1.3" package="com.CloudStreamForms.CloudStreamForms" android:installLocation="auto">
 	<uses-sdk android:minSdkVersion="21" android:targetSdkVersion="29" />
-	<application android:label="CloudStream 2" android:icon="@drawable/bicon" android:usesCleartextTraffic="false"></application>
+    <application android:label="CloudStream 2" android:icon="@drawable/bicon" android:usesCleartextTraffic="false">
+        <activity-alias android:name="com.CloudStreamForms.CloudStreamForms.adaptive" android:label="CloudStream 2" android:icon="@mipmap/ic_launcher" android:roundIcon="@mipmap/ic_launcher_round" android:targetActivity="com.CloudStreamForms.CloudStreamForms.MainActivity" android:enabled="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+        <activity-alias android:name="com.CloudStreamForms.CloudStreamForms.hexagon" android:label="CloudStream 2" android:icon="@drawable/bicon512" android:targetActivity="com.CloudStreamForms.CloudStreamForms.MainActivity" android:enabled="false">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+    </application>
 	<uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 	<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 	<uses-permission android:name="android.permission.INTERNET" />

@@ -47,6 +47,10 @@ namespace CloudStreamForms.UWP
         {
             // DO NOTHING
         }
+        public void UpdateIcon(int icon)
+        {
+            // DO NOTHING
+        }
 
         public void UpdateStatusBar()
         {

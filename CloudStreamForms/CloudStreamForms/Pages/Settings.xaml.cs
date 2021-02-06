@@ -734,6 +734,23 @@ namespace CloudStreamForms
 			get { return HasScrollBar ? ScrollBarVisibility.Default : ScrollBarVisibility.Never; }
 		}
 
+        //Names of activity-aliases
+        public static string[] AppIcons = new string[]
+        {
+            "Adaptive",
+            "Hexagon"
+        };
+
+        public static int AppIcon
+        {
+            set {
+                App.SetKey("Settings", nameof(AppIcons), value);
+            }
+            get {
+                return App.GetKey("Settings", nameof(AppIcons), 0);
+            }
+        }
+
 		public struct GlobalFont
 		{
 			public string Name;
