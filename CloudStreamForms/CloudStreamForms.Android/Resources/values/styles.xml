@@ -2,74 +2,76 @@
 
 <resources>
 
-  <style name="MainTheme" parent="MainTheme.Base">
-  </style>
-  <style name="MainTheme.Splash" parent="MainTheme.Base">
-    <item name="android:windowBackground">@drawable/splash_background</item>
-  </style>
+	<style name="MainTheme" parent="MainTheme.Base">
+	</style>
+	<style name="MainTheme.Splash" parent="MainTheme.Base">
+		<item name="android:windowBackground">@drawable/splash_background</item>
+	</style>
 	<style name="MainTheme.NonSplash" parent="MainTheme.Base">
 		<item name="android:windowBackground">@drawable/splash_background_remove</item>
 	</style>
 
-  <!-- Base theme applied no matter what API -->
-  <style name="MainTheme.Base" parent="Theme.Design.NoActionBar">
-    <!--
+	<!-- Base theme applied no matter what API -->
+	<style name="MainTheme.Base" parent="Theme.Design.NoActionBar">
+		<!--
     <Setter Property="BarBackgroundColor" Value="#7698f3"></Setter>
     <Setter Property="BarTextColor" Value="#ffffff"></Setter>-->
 
-    <!--If you are using revision 22.1 please use just windowNoTitle. Without android:-->
-    <item name="windowNoTitle">true</item>
-    <!--We will be using the toolbar so no need to show ActionBar-->
-    <item name="windowActionBar">false</item>
-     <!-- Set theme colors from http://www.google.com/design/spec/style/color.html#color-color-palette -->
-    <!-- colorPrimary is used for the default action bar background -->
-    <item name="colorPrimary">#3F51B5</item>
-    <!-- colorPrimaryDark is used for the status bar -->
-    <item name="colorPrimaryDark">#3F51B5</item>
+		<!--If you are using revision 22.1 please use just windowNoTitle. Without android:-->
+		<item name="windowNoTitle">true</item>
+		<!--We will be using the toolbar so no need to show ActionBar-->
+		<item name="windowActionBar">false</item>
+		<!-- Set theme colors from http://www.google.com/design/spec/style/color.html#color-color-palette -->
+		<!-- colorPrimary is used for the default action bar background -->
+		<item name="colorPrimary">#3F51B5</item>
+		<!-- colorPrimaryDark is used for the status bar -->
+		<item name="colorPrimaryDark">#3F51B5</item>
 
-    <item name="android:textAllCaps">false</item>
-    <!-- colorAccent is used as the default value for colorControlActivated
+		<item name="android:textAllCaps">false</item>
+		<!-- colorAccent is used as the default value for colorControlActivated
          which is used to tint widgets -->
 
-    <item name="colorAccent">#1976D2</item>
+		<item name="colorAccent">#1976D2</item>
 
-    <!--1976D2-->
-    <item name="android:windowBackground">@color/navigationBarColor</item>
-    <item name="android:navigationBarColor">@color/navigationBarColor</item>
-    <!--   <item name="android:navigationBarDividerColor">@color/ListViewHighlighted</item>-->
+		<!--1976D2-->
+		<item name="android:windowBackground">@color/navigationBarColor</item>
+		<item name="android:navigationBarColor">@color/navigationBarColor</item>
+		<!--   <item name="android:navigationBarDividerColor">@color/ListViewHighlighted</item>-->
 
-    <item name="android:statusBarColor">@color/statusBarColor</item>
+		<item name="android:statusBarColor">@color/statusBarColor</item>
 
-    <item name="android:colorLongPressedHighlight">@color/ListViewHighlighted</item>
+		<item name="android:colorLongPressedHighlight">@color/ListViewHighlighted</item>
+		<item name="colorControlActivated">@color/cursorcolor</item>
+		<!--	<item name="android:textCursorDrawable">@null</item> -->
 
-    <item name="android:colorPressedHighlight">@color/ListViewSelected</item>
-    <item name="android:colorFocusedHighlight">@color/ListViewSelected</item>
-    <item name="android:colorActivatedHighlight">@color/ListViewSelected</item>
-    <!--
+		<item name="android:colorPressedHighlight">@color/ListViewSelected</item>
+		<item name="android:colorFocusedHighlight">@color/ListViewSelected</item>
+		<item name="android:colorActivatedHighlight">@color/ListViewSelected</item>
+		<!--
     <item name="android:activatedBackgroundIndicator">@color/ListViewSelected</item>-->
-    <item name="windowActionModeOverlay">true</item>
+		<item name="windowActionModeOverlay">true</item>
 
-    <!-- active thumb & track color (30% transparency) -->
-    <!--
+		<!-- active thumb & track color (30% transparency) -->
+		<!--
     <item name="android:colorControlActivated">#f1f1f1</item>
     <item name="colorSwitchThumbNormal">#f1f1f1</item>
     <item name="android:colorControlHighlight">#f1f1f1</item>
     <item name="android:colorControlNormal">#f1f1f1</item>
     -->
-    <!--
+		<!--
     <item name="android:alertDialogTheme">@color/mtrl_btn_transparent_bg_color</item>
 -->
 
 
-    <!-- You can also set colorControlNormal, colorControlActivated
+		<!-- You can also set colorControlNormal, colorControlActivated
          colorControlHighlight and colorSwitchThumbNormal. -->
 
-    <!-- 
+		<!-- 
     <item name="android:datePickerDialogTheme">@style/AppCompatDialogStyle</item>
     -->
-  </style>
+	</style>
 
-  <style name="AppCompatDialogStyle" parent="Theme.AppCompat.Light.Dialog">
-    <item name="colorAccent">#1976D2</item>
-  </style>
+	<style name="AppCompatDialogStyle" parent="Theme.AppCompat.Light.Dialog">
+		<item name="colorAccent">#1976D2</item>
+	</style>
 </resources>

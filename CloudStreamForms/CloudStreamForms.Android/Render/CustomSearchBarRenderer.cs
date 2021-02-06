@@ -1,7 +1,9 @@
 ﻿using Android.Content;
+using Android.Runtime;
 using Android.Text;
 using Android.Widget;
 using CloudStreamForms.Droid;
+using System;
 using Xamarin.Forms;
 using Xamarin.Forms.Platform.Android;
 using G = Android.Graphics;
@@ -42,6 +44,12 @@ namespace CloudStreamForms.Droid
 
             textView.SetHintTextColor(G.Color.Rgb(64, 64, 64));
             textView.SetTextColor(G.Color.Rgb(200, 200, 200));
+
+            /*
+            IntPtr IntPtrtextViewClass = JNIEnv.FindClass(typeof(TextView));
+            IntPtr mCursorDrawableResProperty = JNIEnv.GetFieldID(IntPtrtextViewClass, "mCursorDrawableRes", "I");
+
+            JNIEnv.SetField(Control.Handle, mCursorDrawableResProperty, Resource.Drawable.my_cursor);*/
             /*
             textView.SetTextColor(G.Color.Rgb(32, 32, 32));
             textView.SetHintTextColor(G.Color.Rgb(128, 128, 128));*/

@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using System.Windows.Input;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
+using XamEffects;
 using static CloudStreamForms.Core.CloudStreamCore;
 
 namespace CloudStreamForms
@@ -35,11 +36,8 @@ namespace CloudStreamForms
 			get {
 				return new Command(async () => {
 					IsRefreshing = true;
-					print("YEET;;;;dd");
 					UpdateEpisodes();
 					await Task.Delay(100);
-					// await RefreshData();
-
 					IsRefreshing = false;
 				});
 			}
@@ -54,6 +52,15 @@ namespace CloudStreamForms
 			//  BindingContext = epView;
 			BindingContext = this;
 			BackgroundColor = Settings.BlackRBGColor;
+
+			var header = Download.downloadHeaders[currentId];
+			BackAllTxt.Text = header.name;
+			Commands.SetTap(BackAllBtt, new Command(() => {
+				Navigation.PopModalAsync(true);
+			}));
+			Commands.SetTap(ChromeCastBtt, new Command(() => {
+				WaitChangeChromeCast();
+			}));
 		}
 
 		void SetHeight()
@@ -72,11 +79,6 @@ namespace CloudStreamForms
 		{
 			await Download.HandleEpisodeTapped(episodeResult.Id);
 			UpdateEpisodes();
-		}
-
-		private void ChromeCastBtt_Clicked(object sender, EventArgs e)
-		{
-			WaitChangeChromeCast();
 		}
 
 		async void WaitChangeChromeCast()
@@ -129,7 +131,6 @@ namespace CloudStreamForms
 					if (info != null) {
 						Download.downloads[key] = info;
 						if (info.state.totalBytes == 0 && info.state.bytesDownloaded != 1) {
-							print("DC 0 DATAA:::: ");
 							Download.RemoveDownloadCookie(key);
 						}
 						else {
@@ -139,11 +140,9 @@ namespace CloudStreamForms
 							string fileUrl = info.info.fileUrl;
 							string fileName = info.info.name;
 
-							print(info.state.bytesDownloaded + "|" + info.state.totalBytes);
 							int dloaded = (int)info.state.ProcentageDownloaded;
 							// string extra = (info.state.state == App.DownloadState.Downloaded ? "" : App.ConvertBytesToAny(info.state.bytesDownloaded, 0, 2) + " MB of " + App.ConvertBytesToAny(info.state.totalBytes, 0, 2) + " MB"); 
 							string extra = $" {dloaded }%";
-							print("EXTRA: " + extra + "|" + dloaded);
 							//.TapCom = new Command(async (s) => {
 							long pos;
 							long len;
@@ -151,7 +150,6 @@ namespace CloudStreamForms
 							if ((pos = App.GetViewPos(info.info.id)) > 0) {
 								if ((len = App.GetViewDur(info.info.id)) > 0) {
 									_progress = (double)pos / (double)len;
-									print("SET PROGRES:::" + "|" + _progress);
 								}
 							}
 							var dPlaySource = App.GetImageSource("nexflixPlayBtt.png");
@@ -189,7 +187,6 @@ namespace CloudStreamForms
 				for (int i = 0; i < activeEpisodes.Count; i++) {
 					int _id = i;
 					activeEpisodes[i].TapComThree = new Command(async () => {
-						print("LLLLLLLLLLLLLLLLLLL:::: " + _id);
 						await HandleEpisode(MyEpisodeResultCollection[_id]);
 					});
 					MyEpisodeResultCollection.Add(activeEpisodes[i]);
@@ -253,6 +250,7 @@ namespace CloudStreamForms
 				OffBar.Source = App.GetImageSource("gradient.png"); OffBar.HeightRequest = 3; OffBar.HorizontalOptions = LayoutOptions.Fill; OffBar.ScaleX = 100; OffBar.Opacity = 0.3; OffBar.TranslationY = 9;
 			}
 		}
+
 		void UpdateVisual()
 		{
 			if (MainChrome.IsConnectedToChromeDevice) {
@@ -263,6 +261,7 @@ namespace CloudStreamForms
 			}
 			ChromeName.TextColor = MainChrome.CurrentImage > 0 ? Color.FromHex(MainPage.LIGHT_BLUE_COLOR) : Color.FromHex("#e6e6e6");
 		}
+
 		private void MainChrome_OnChromeImageChanged(object sender, string e)
 		{
 			ImgChromeCastBtt.Source = App.GetImageSource(e);

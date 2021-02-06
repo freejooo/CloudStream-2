@@ -6,7 +6,7 @@
              xmlns:ff="clr-namespace:FFImageLoading.Forms;assembly=FFImageLoading.Forms"
              xmlns:ffTransformations="clr-namespace:FFImageLoading.Transformations;assembly=FFImageLoading.Transformations"
              mc:Ignorable="d"                         
-             xmlns:xe="clr-namespace:XamEffects;assembly=XamEffects" xmlns:cse="clr-namespace:CloudStreamForms.Effects"
+             xmlns:xe="clr-namespace:XamEffects;assembly=XamEffects" xmlns:cse="clr-namespace:CloudStreamForms.Effects" xmlns:ffs="clr-namespace:FFImageLoading.Svg.Forms;assembly=FFImageLoading.Svg.Forms"
 			 x:Class="CloudStreamForms.DownloadViewPage">
 	<Grid>
 		<Grid.RowDefinitions >
@@ -15,22 +15,31 @@
 			<RowDefinition Height="Auto" />
 		</Grid.RowDefinitions>
 
-		<Grid Grid.Row="1" x:Name="ChromeHolder" HeightRequest="30">
+		<Grid Grid.Row="1" x:Name="BackHolder" HeightRequest="40" Margin="10,0,0,0">
 			<Grid.ColumnDefinitions >
 				<ColumnDefinition Width="Auto" />
 				<ColumnDefinition Width="Auto" />
-				<ColumnDefinition Width="Auto" />
+				<ColumnDefinition Width="*" />
 			</Grid.ColumnDefinitions>
+			<ffs:SvgCachedImage BackgroundColor="Transparent" HorizontalOptions="Start" HeightRequest="30" WidthRequest="30" VerticalOptions="Center" Scale="0.9" Margin="0" TranslationY="0" InputTransparent="True" Source="arrow_back_white.svg" ></ffs:SvgCachedImage>
+			<xe:BorderView x:Name="BackAllBtt" xe:TouchEffect.Color="#66FFFFFF"  VerticalOptions="Center" Opacity="0.4" WidthRequest="40" HeightRequest="40" Margin="-5" CornerRadius="30" Scale="1" HorizontalOptions="Start" BackgroundColor="Transparent">
+			</xe:BorderView>
+			<Label VerticalOptions="Center" x:Name="BackAllTxt" Grid.Column="1" Margin="5,0,0,0" TextColor="#e6e6e6" Text="Not connected" TranslationX="-3"></Label>
 
-			<ff:CachedImage x:Name="ImgChromeCastBtt" BackgroundColor="Transparent" WidthRequest="40" HeightRequest="40" VerticalOptions="Center" HorizontalOptions="Start" Scale="0.7" TranslationX="4.6" >
-
-			</ff:CachedImage>
-			<ImageButton x:Name="ChromeCastBtt" BackgroundColor="Transparent" Clicked="ChromeCastBtt_Clicked"  WidthRequest="40" HeightRequest="40"  VerticalOptions="Center" HorizontalOptions="Start"></ImageButton>
-			<Label VerticalOptions="Center" x:Name="ChromeName" Grid.Column="1" TextColor="#e6e6e6" Text="Not connected" TranslationX="-3"></Label>
-
+			<Grid VerticalOptions="End" Grid.Column="2" x:Name="ChromeHolder" HeightRequest="40" >
+				<Grid.ColumnDefinitions >
+					<ColumnDefinition Width="*" />
+					<ColumnDefinition Width="Auto" />
+					<ColumnDefinition Width="Auto" />
+				</Grid.ColumnDefinitions>
+				<Label VerticalOptions="Center" HorizontalTextAlignment="End" x:Name="ChromeName" TextColor="#e6e6e6" Text="Not connected" TranslationX="5"></Label>
+				<ff:CachedImage Grid.Column="1" x:Name="ImgChromeCastBtt" BackgroundColor="Transparent" WidthRequest="30" HeightRequest="30" VerticalOptions="Center" HorizontalOptions="Start" Scale="0.7" TranslationX="4.6" ></ff:CachedImage>
+				<xe:BorderView BackgroundColor="Transparent" x:Name="ChromeCastBtt" xe:TouchEffect.Color="#66FFFFFF"  Grid.Column="1" Opacity="0.4" WidthRequest="40" HeightRequest="40" CornerRadius="30" Scale="1" VerticalOptions="Center" HorizontalOptions="Start" Margin="0,0,0,0">
+				</xe:BorderView>
+			</Grid>
 		</Grid>
 
-		<Grid Grid.Row="2"  Grid.Column="0" VerticalOptions="Start" >
+		<Grid Grid.Row="3"  Grid.Column="0" VerticalOptions="Start" >
 
 			<RefreshView BackgroundColor="#1D1D1D" RefreshColor="#4e66ff" Command="{Binding RefreshCommand}" 
            IsRefreshing="{Binding IsRefreshing}"          >
@@ -122,7 +131,7 @@
 
 		</Grid>
 
-		<Grid Grid.Row="2"  Grid.Column="0" InputTransparent="True" TranslationY="-10">
+		<Grid Grid.Row="3"  Grid.Column="0" InputTransparent="True" TranslationY="-10">
 			<Image x:Name="OffBar" InputTransparent="True" VerticalOptions="Start" ></Image>
 		</Grid>
 
