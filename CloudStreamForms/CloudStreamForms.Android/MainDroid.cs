@@ -256,35 +256,35 @@ namespace CloudStreamForms.Droid
 			}
 		}
 
-        public void UpdateIcon(int icon)
-        {
-            ComponentName adaptive = new Android.Content.ComponentName(Application.Context, "com.CloudStreamForms.CloudStreamForms.adaptive");
-            ComponentName hexagon = new Android.Content.ComponentName(Application.Context, "com.CloudStreamForms.CloudStreamForms.hexagon");
+        
+		public void UpdateIcon(int icon)
+		{
+			ComponentName adaptive = new Android.Content.ComponentName(Application.Context, "com.CloudStreamForms.CloudStreamForms.adaptive");
+			ComponentName hexagon = new Android.Content.ComponentName(Application.Context, "com.CloudStreamForms.CloudStreamForms.hexagon");
 
-            ComponentEnabledState[] states = new ComponentEnabledState[2];
+			ComponentEnabledState[] states = new ComponentEnabledState[2];
 
-            switch (icon)
-            {
-                case 0:
-                    states[0] = ComponentEnabledState.Enabled;
-                    states[1] = ComponentEnabledState.Disabled;
-                    break;
-                case 1:
-                    states[0] = ComponentEnabledState.Disabled;
-                    states[1] = ComponentEnabledState.Enabled;
-                    break;
-            }
-                    
+			switch (icon)
+			{
+				case 0:
+					states[0] = ComponentEnabledState.Enabled;
+					states[1] = ComponentEnabledState.Disabled;
+					break;
+				case 1:
+					states[0] = ComponentEnabledState.Disabled;
+					states[1] = ComponentEnabledState.Enabled;
+					break;
+			}
 
-            Forms.Context.PackageManager.SetComponentEnabledSetting(
-                    adaptive,
-                    states[0],
-                    ComponentEnableOption.DontKillApp);
-            Forms.Context.PackageManager.SetComponentEnabledSetting(
-                    hexagon,
-                    states[1],
-                    ComponentEnableOption.DontKillApp);
-        }
+			Forms.Context.PackageManager.SetComponentEnabledSetting(
+					adaptive,
+					states[0],
+					ComponentEnableOption.DontKillApp);
+			Forms.Context.PackageManager.SetComponentEnabledSetting(
+					hexagon,
+					states[1],
+					ComponentEnableOption.DontKillApp);
+		}
 
 		public void UpdateStatusBar()
 		{

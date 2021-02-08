@@ -99,7 +99,7 @@ namespace CloudStreamForms
 			void UpdateStatusBar();
 			void UpdateBackground(int color);
 			void UpdateBackground();
-            void UpdateIcon(int icon);
+			void UpdateIcon(int icon);
 			void LandscapeOrientation();
 			void NormalOrientation();
 			void ToggleFullscreen(bool fullscreen);
@@ -559,10 +559,10 @@ namespace CloudStreamForms
 			}
 		}
 
-        public static void UpdateIcon(int icon)
-        {
-            PlatformDep.UpdateIcon(icon);
-        }
+		public static void UpdateIcon(int icon)
+		{
+			PlatformDep.UpdateIcon(icon);
+		}
 
 		public static void UpdateToTransparentBg()
 		{
