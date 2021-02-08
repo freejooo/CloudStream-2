@@ -226,6 +226,14 @@ namespace CloudStreamForms.Pages
 						Settings.BackCurrentGlobalFont = index;
 					}
 				}),
+				new SettingsList("outline_reorder_white_48dp.png","App Icon","Set app icon", () => { return Settings.AppIcons[Settings.AppIcon]; }, async () => {
+					var sel = await ActionPopup.DisplayActionSheet("App Icon", Settings.AppIcon, Settings.AppIcons);
+					int index = Array.IndexOf(Settings.AppIcons, sel);
+					if(index != -1) {
+						Settings.AppIcon = index;
+						App.UpdateIcon(index);
+					}
+				}),
 				new SettingsItem() { img= "outline_aspect_ratio_white_48dp.png",mainTxt="Show statusbar",descriptTxt="This will not affect app videoplayer" ,VarName = nameof(Settings.HasStatusBar),OnChange = () => { App.UpdateStatusBar(); return Task.CompletedTask; } },
 				new SettingsItem() { img= "outline_reorder_white_48dp.png",mainTxt="Extended Homepage",descriptTxt="Related, Top 100 and Trending" ,VarName = nameof(Settings.Top100Enabled)},
 				new SettingsItem() { img= "outline_reorder_white_48dp.png",mainTxt="Anime Home Page",descriptTxt="Set Top 100 and Trending to anime only" ,VarName = nameof(Settings.Top100Anime)},
