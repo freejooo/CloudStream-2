@@ -31,14 +31,14 @@ https://discord.gg/5Hus6fM
 **SCREENSHOTS:**
 
 <p align="center">
-    <img src="https://cdn.discordapp.com/attachments/551382684560261121/737733342320918528/Screenshot_20200728_200847_com.CloudStreamForms.CloudStreamForms.jpg" width="200" title="hover text">  
-    <img src="https://cdn.discordapp.com/attachments/551382684560261121/737733082051772556/Screenshot_20200728_200428_com.CloudStreamForms.CloudStreamForms.jpg" width="200" title="hover text">  
-    <img src="https://cdn.discordapp.com/attachments/551382684560261121/737733081443729438/Screenshot_20200728_200424_com.CloudStreamForms.CloudStreamForms.jpg" width="200" title="hover text">  
-    <img src="https://cdn.discordapp.com/attachments/551382684560261121/737733082517602374/Screenshot_20200728_200504_com.CloudStreamForms.CloudStreamForms.jpg" width="200" title="hover text">  
-    <img src="https://cdn.discordapp.com/attachments/551382684560261121/737733083184496782/Screenshot_20200728_200717_com.CloudStreamForms.CloudStreamForms.jpg" width="200" title="hover text">  
-    <img src="https://cdn.discordapp.com/attachments/551382684560261121/737734409435742291/Screenshot_20200728_201303_com.CloudStreamForms.CloudStreamForms.jpg" width="200" title="hover text">  
-    <img src="https://camo.githubusercontent.com/ccf1accb427df6c651bb1bd0d00e4ed2e6e41b85/68747470733a2f2f63646e2e646973636f72646170702e636f6d2f6174746163686d656e74732f3534323037303935393036373130333233322f3639353539343932343931323933343932322f53637265656e73686f745f32303230303430335f3133303832315f636f6d2e436c6f756453747265616d466f726d732e436c6f756453747265616d466f726d732e706e67" width="200" title="hover text">  
-        <img src="https://camo.githubusercontent.com/e262c40fb0ede4dac4373be6e2befc4800277f1b/68747470733a2f2f63646e2e646973636f72646170702e636f6d2f6174746163686d656e74732f3534323037303935393036373130333233322f3639353539383736353138343338353035362f53637265656e73686f745f32303230303430335f3133303832315f636f6d2e436c6f756453747265616d466f726d732e436c6f756453747265616d466f726d732e706e67" width="200" title="hover text">  
+    <img src="https://cdn.discordapp.com/attachments/551382684560261121/809891204371316796/Screenshot_20210212_215540_com.CloudStreamForms.CloudStreamForms.jpg" width="200" title="Homepage">  
+    <img src="https://cdn.discordapp.com/attachments/551382684560261121/809891204073783296/Screenshot_20210212_215615_com.CloudStreamForms.CloudStreamForms.jpg" width="200" title="Trending">  
+    <img src="https://cdn.discordapp.com/attachments/551382684560261121/809891203830906950/Screenshot_20210212_215624_com.CloudStreamForms.CloudStreamForms.jpg" width="200" title="Search">  
+    <img src="https://cdn.discordapp.com/attachments/551382684560261121/809891203490250752/Screenshot_20210212_215636_com.CloudStreamForms.CloudStreamForms.jpg" width="200" title="Downloads">  
+    <img src="https://cdn.discordapp.com/attachments/551382684560261121/809891202936864799/Screenshot_20210212_215713_com.CloudStreamForms.CloudStreamForms.jpg" width="200" title="Movie">  
+    <img src="https://cdn.discordapp.com/attachments/551382684560261121/809891203239641108/Screenshot_20210212_215658_com.CloudStreamForms.CloudStreamForms.jpg" width="200" title="Tv-Series">  
+    <img src="https://cdn.discordapp.com/attachments/551382684560261121/809891202395930694/Screenshot_20210212_215747_com.CloudStreamForms.CloudStreamForms.jpg" width="200" title="Anime">  
+        <img src="https://camo.githubusercontent.com/e262c40fb0ede4dac4373be6e2befc4800277f1b/68747470733a2f2f63646e2e646973636f72646170702e636f6d2f6174746163686d656e74732f3534323037303935393036373130333233322f3639353539383736353138343338353035362f53637265656e73686f745f32303230303430335f3133303832315f636f6d2e436c6f756453747265616d466f726d732e436c6f756453747265616d466f726d732e706e67" width="200" title="Chromecast">  
 
 </p>
 
