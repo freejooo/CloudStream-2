@@ -23,16 +23,13 @@ namespace CloudStreamForms
 			if (loadingMs == -1) {
 				MainProgressBar.ClassId = "id";
 			}
-			else {
-				Main(loadingMs);
-			}
 		}
 
 		const int RELEASE_MS = 100;
-		async void Main(int loadingMs)
+		public async Task Main(int loadingMs)
 		{
 			await MainProgressBar.ProgressTo(1, (uint)Math.Max(loadingMs - RELEASE_MS, 0), Easing.SinIn);
-			_ = End();
+			await End();
 		}
 
 		public async Task End()

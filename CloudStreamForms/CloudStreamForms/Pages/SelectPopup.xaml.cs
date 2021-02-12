@@ -40,8 +40,11 @@ namespace CloudStreamForms
 
 		public static async Task DisplayLoadingBar(int loadingTime, string title = "Loading")
 		{
-			await PopupNavigation.Instance.PushAsync(new LoadingPopupPage(loadingTime, title));
-			await Task.Delay(loadingTime + 100);
+			var page = new LoadingPopupPage(loadingTime, title);
+			await PopupNavigation.Instance.PushAsync(page);
+			if (loadingTime != -1) {
+				await page.Main(loadingTime);
+			}
 		}
 
 		static LoadingPopupPage currentLoading;
@@ -201,7 +204,7 @@ namespace CloudStreamForms
 			if (ActionPopup.isOpen) {
 				PopupNavigation.Instance.PopAsync(false);
 			}
-			
+
 			ActionPopup.isOpen = true;
 			//  BackgroundColor = Color.Transparent;
 			//   BackgroundImageSource = null;
@@ -332,7 +335,7 @@ namespace CloudStreamForms
 		{
 			// Return true if you don't want to close this popup page when a back button is pressed
 			//Cancel();
-			return  base.OnBackButtonPressed();
+			return base.OnBackButtonPressed();
 		}
 
 		// Invoked when background is clicked
