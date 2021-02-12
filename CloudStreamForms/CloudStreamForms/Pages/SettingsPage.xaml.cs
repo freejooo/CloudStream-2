@@ -226,7 +226,7 @@ namespace CloudStreamForms.Pages
 						Settings.BackCurrentGlobalFont = index;
 					}
 				}),
-				new SettingsList("outline_reorder_white_48dp.png","App Icon","Set app icon", () => { return Settings.AppIcons[Settings.AppIcon]; }, async () => {
+				new SettingsList("baseline_rounded_corner_white_48dp.png","App Icon","Set app icon", () => { return Settings.AppIcons[Settings.AppIcon]; }, async () => {
 					var sel = await ActionPopup.DisplayActionSheet("App Icon", Settings.AppIcon, Settings.AppIcons);
 					int index = Array.IndexOf(Settings.AppIcons, sel);
 					if(index != -1) {

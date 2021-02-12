@@ -46,9 +46,15 @@ namespace CloudStreamForms.Droid
 		public int sprite;
 	}
 
-	[Activity(Label = "CloudStream 2", Name = "com.CloudStreamForms.CloudStreamForms.MainActivity", Icon = "@mipmap/ic_launcher", Theme = "@style/MainTheme.Splash", LaunchMode = LaunchMode.SingleTop,
+	[Activity(Label = "CloudStream 2", Icon = "@mipmap/ic_launcher", Theme = "@style/MainTheme.Splash", LaunchMode = LaunchMode.SingleTop, 
+#if DEBUG
+		MainLauncher = true,
+#else
+	Name = "com.CloudStreamForms.CloudStreamForms.MainActivity", 
+#endif
 		ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation | ConfigChanges.SmallestScreenSize | ConfigChanges.ScreenLayout  // MUST HAVE FOR PIP MODE OR ELSE IT WILL TRIGGER ONCREATE
 		, SupportsPictureInPicture = true, ResizeableActivity = true),
+
 		IntentFilter(new[] { Intent.ActionView }, Label = "Open in CloudStream", DataScheme = "cloudstreamforms", Categories = new[] { Intent.CategoryDefault, Intent.CategoryBrowsable }),
 		IntentFilter(new[] { Intent.ActionView }, Label = "Open in CloudStream", DataScheme = "https", DataPathPrefix = "/title", DataHost = "www.imdb.com", Categories = new[] { Intent.CategoryDefault, Intent.CategoryBrowsable }),
 
