@@ -62,6 +62,7 @@ namespace CloudStreamForms.Core
 				new ShiroBFProvider(this,"https://www.dubbedanime.vip","DubbedVip"),
 				new ShiroBFProvider(this,"https://shiro.is","Shiro"),
 				new YugenaniBFProvider(this),
+				new GenoanimeBFProvider(this),
 			};
 			movieProviders = new IMovieProvider[] {
 				new FilesClubProvider(this),
