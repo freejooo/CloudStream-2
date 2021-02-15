@@ -48,14 +48,14 @@
                                 <StackLayout VerticalOptions="Center">
                                     
                                 <Grid HorizontalOptions="Start" VerticalOptions="End" TranslationX="50"   >
-                                        <Grid.RowDefinitions >
+                                        <Grid.RowDefinitions>
                                             <RowDefinition Height="Auto" />
                                             <RowDefinition Height="Auto" /> 
                                         </Grid.RowDefinitions>
                                         <Grid.ColumnDefinitions >
-                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="7*" />
                                             <ColumnDefinition Width="Auto" />
-                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="4*" />
                                         </Grid.ColumnDefinitions>
                                         <Label Text="{Binding Name}"  TextColor="#e6e6e6" HorizontalOptions="End" HorizontalTextAlignment="End" VerticalTextAlignment="Center" VerticalOptions="Center" FontSize="20" FontAttributes="Bold"  ></Label>
                                         <Switch Grid.Column="1" IsToggled="{Binding IsSelected}" VerticalOptions="Center" HorizontalOptions="End"></Switch>

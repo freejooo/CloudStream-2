@@ -554,9 +554,13 @@ namespace CloudStreamForms
 
 			Commands.SetTap(AnalyticsBtt, new Command(async () => {
 				if (controller.pData != null) {
-					int count = controller.pData.Where(t => t.maxEpisode > 0).Count();
-					if (count > 0) {
-						await ActionPopup.DisplayActionSheet($"{count} Providers found", controller.pData.Where(t => t.maxEpisode > 0).Select(t => $"{t.provider} • {t.maxEpisode} episodes").ToArray());
+					var p = controller.pData.Where(t => t.maxEpisode > 0);
+					if (p.Count() > 0) {
+						var list = await ActionPopup.DisplaySwitchList(p.Select(t => $"{t.provider} • {t.maxEpisode}").ToList(), p.Select(t => Settings.IsProviderActive(t.provider)).ToList(), $"{p.Count()} Providers found");
+						var pNames = p.Select(t => t.provider).ToArray();
+						for (int i = 0; i < list.Count; i++) {
+							App.SetKey("ProviderActive", pNames[i], list[i]);
+						}
 					}
 				}
 			}));
@@ -998,7 +1002,7 @@ namespace CloudStreamForms
 				for (int i = 0; i < epView.MyEpisodeResultCollection.Count; i++) {
 					if (epView.MyEpisodeResultCollection[i].InternalId == internalId) {
 						print("PPPP:::: " + info.ProcentageDownloaded);
-						epView.MyEpisodeResultCollection[i].ExtraProgress = info.ProcentageDownloaded/100.0;
+						epView.MyEpisodeResultCollection[i].ExtraProgress = info.ProcentageDownloaded / 100.0;
 						Device.BeginInvokeOnMainThread(() => {
 							epView.MyEpisodeResultCollection[i] = (EpisodeResult)epView.MyEpisodeResultCollection[i].Clone();
 						});
@@ -1092,7 +1096,7 @@ namespace CloudStreamForms
 			episodeResult.InternalId = GetInternalId(episodeResult.IMDBEpisodeId);
 			var dstate = App.GetDownloadInfo(episodeResult.InternalId);
 			if (dstate != null && dstate.state != null) {
-				episodeResult.ExtraProgress = dstate.state.ProcentageDownloaded/100.0;
+				episodeResult.ExtraProgress = dstate.state.ProcentageDownloaded / 100.0;
 			}
 			SetColor(episodeResult);
 
