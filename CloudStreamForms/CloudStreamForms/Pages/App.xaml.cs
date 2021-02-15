@@ -121,7 +121,7 @@ namespace CloudStreamForms
 			public bool ResumeDownload(int id);
 			public void PictureInPicture();
 			public void AddShortcut(string name, string imdbId, string url);
-		//	public void GetDownloadProgress(string imdbId, out long bytes, out long totalBytes);
+			//	public void GetDownloadProgress(string imdbId, out long bytes, out long totalBytes);
 		}
 
 		static public EventHandler<int> onExtendedButtonPressed;
@@ -684,16 +684,21 @@ namespace CloudStreamForms
 			return PlatformDep.GetDownloadPath(path, extraFolder);
 		}
 
-		public static async void SaveData()
+		public static void SaveData()
 		{
 			print("SAVING DATA");
 			try {
-				await Application.Current.SavePropertiesAsync();
+				System.Threading.Thread t = new System.Threading.Thread(() => { // idk await cant be used inside lock, and I dont want it blocking mainthread
+					lock (keyMutexLock) {
+						Application.Current.SavePropertiesAsync().Wait();
+						print("SAVING DATA DONE!!");
+					}
+				});
+				t.Start();
 			}
 			catch (Exception _ex) {
 				error(_ex);
 			}
-			print("SAVING DATA DONE!!");
 		}
 
 		static string GetKeyPath(string folder, string name = "")
@@ -709,13 +714,15 @@ namespace CloudStreamForms
 		{
 			try {
 				string _set = ConvertToString(value);
-				if (MyApp.Properties.ContainsKey(path)) {
-					CloudStreamCore.print("CONTAINS KEY" + path);
-					MyApp.Properties[path] = _set;
-				}
-				else {
-					CloudStreamCore.print("ADD KEY" + path);
-					MyApp.Properties.Add(path, _set);
+				lock (keyMutexLock) {
+					if (MyApp.Properties.ContainsKey(path)) {
+						CloudStreamCore.print("CONTAINS KEY" + path);
+						MyApp.Properties[path] = _set;
+					}
+					else {
+						CloudStreamCore.print("ADD KEY" + path);
+						MyApp.Properties.Add(path, _set);
+					}
 				}
 			}
 			catch (Exception _ex) {
@@ -782,6 +789,8 @@ namespace CloudStreamForms
 			return GetKey(VIEW_TIME_DUR, _parse.ToString(), -1L);
 		}
 
+		static readonly object keyMutexLock = new object();
+
 		public static T GetKey<T>(string folder, string name, T defVal)
 		{
 			try {
@@ -805,7 +814,9 @@ namespace CloudStreamForms
 		public static string GetRawKey(string path, string defVal = "")
 		{
 			try {
-				return MyApp.Properties[path] as string;
+				lock (keyMutexLock) {
+					return MyApp.Properties[path] as string;
+				}
 			}
 			catch (Exception) {
 				return defVal;
@@ -815,7 +826,9 @@ namespace CloudStreamForms
 		public static void SetRawKey(string path, string data)
 		{
 			try {
-				MyApp.Properties[path] = data;
+				lock (keyMutexLock) {
+					MyApp.Properties[path] = data;
+				}
 			}
 			catch (Exception) {
 			}
@@ -823,24 +836,30 @@ namespace CloudStreamForms
 
 		public static void ClearEveryKey()
 		{
-			MyApp.Properties.Clear();
+			lock (keyMutexLock) {
+				MyApp.Properties.Clear();
+			}
 		}
 
 		public static string[] GetAllKeys()
 		{
-			return MyApp.Properties.Keys.ToArray();
+			lock (keyMutexLock) {
+				return MyApp.Properties.Keys.ToArray();
+			}
 		}
 
 		public static T GetKey<T>(string path, T defVal)
 		{
 			try {
-				if (MyApp.Properties.ContainsKey(path)) {
-					// CloudStreamCore.print("GETKEY::" + myApp.Properties[path]);
-					// CloudStreamCore.print("GETKEY::" + typeof(T).ToString() + "||" + ConvertToObject<T>(myApp.Properties[path] as string, defVal));
-					return (T)ConvertToObject<T>(MyApp.Properties[path] as string, defVal);
-				}
-				else {
-					return defVal;
+				lock (keyMutexLock) {
+					if (MyApp.Properties.ContainsKey(path)) {
+						// CloudStreamCore.print("GETKEY::" + myApp.Properties[path]);
+						// CloudStreamCore.print("GETKEY::" + typeof(T).ToString() + "||" + ConvertToObject<T>(myApp.Properties[path] as string, defVal));
+						return (T)ConvertToObject<T>(MyApp.Properties[path] as string, defVal);
+					}
+					else {
+						return defVal;
+					}
 				}
 			}
 			catch (Exception) {
@@ -855,9 +874,12 @@ namespace CloudStreamForms
 				string[] keyNames = GetKeysPath(folder);
 				int len = keyNames.Length;
 				T[] allKeys = new T[len];
-				for (int i = 0; i < len; i++) {
-					string p = (string)MyApp.Properties[keyNames[i]];
-					allKeys[i] = ConvertToObject<T>(p, default);
+
+				lock (keyMutexLock) {
+					for (int i = 0; i < len; i++) {
+						string p = (string)MyApp.Properties[keyNames[i]];
+						allKeys[i] = ConvertToObject<T>(p, default);
+					}
 				}
 
 				return allKeys;
@@ -875,21 +897,22 @@ namespace CloudStreamForms
 
 		public static string[] GetKeysPath(string folder)
 		{
-			string[] copy = new string[MyApp.Properties.Keys.Count];
-			try {
-				MyApp.Properties.Keys.CopyTo(copy, 0);
-				string[] keyNames = copy.Where(t => t != null).Where(t => t.StartsWith(GetKeyPath(folder))).ToArray();
-				return keyNames;
-			}
-			catch (Exception _ex) {
-				print("MAN EX GET KEY PARKKK " + _ex);
-				for (int i = 0; i < copy.Length; i++) {
-					print("MAX COPY::" + copy[i]);
+			lock (keyMutexLock) {
+				string[] copy = new string[MyApp.Properties.Keys.Count];
+				try {
+					MyApp.Properties.Keys.CopyTo(copy, 0);
+					string[] keyNames = copy.Where(t => t != null).Where(t => t.StartsWith(GetKeyPath(folder))).ToArray();
+					return keyNames;
 				}
-				App.ShowToast("Error");
-				return new string[0];
+				catch (Exception _ex) {
+					print("MAN EX GET KEY PARKKK " + _ex);
+					for (int i = 0; i < copy.Length; i++) {
+						print("MAX COPY::" + copy[i]);
+					}
+					App.ShowToast("Error");
+					return new string[0];
+				}
 			}
-
 		}
 
 		public static bool KeyExists(string folder, string name)
@@ -900,7 +923,9 @@ namespace CloudStreamForms
 
 		public static bool KeyExists(string path)
 		{
-			return (MyApp.Properties.ContainsKey(path));
+			lock (keyMutexLock) {
+				return (MyApp.Properties.ContainsKey(path));
+			}
 		}
 
 		public static void RemoveKey(string folder, string name)
@@ -912,8 +937,10 @@ namespace CloudStreamForms
 		public static void RemoveKey(string path)
 		{
 			try {
-				if (MyApp.Properties.ContainsKey(path)) {
-					MyApp.Properties.Remove(path);
+				lock (keyMutexLock) {
+					if (MyApp.Properties.ContainsKey(path)) {
+						MyApp.Properties.Remove(path);
+					}
 				}
 			}
 			catch (Exception _ex) {
