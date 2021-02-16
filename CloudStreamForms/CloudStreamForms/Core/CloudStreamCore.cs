@@ -5096,18 +5096,22 @@ namespace CloudStreamForms.Core
 							int count = 0;
 							object threadLock = new object();
 
+							int providerCount = Math.Max(1, animeProviders.Where(t => Settings.IsProviderActive(t.Name)).Count());
+							//FishProgressLoaded?.Invoke(null, new FishLoaded() { name = "", progressProcentage = ((double)count) / providerCount, maxProgress = providerCount, currentProgress = count });
+
 							Parallel.For(0, animeProviders.Length, (int i) => {
-								print("STARTEDANIME: " + animeProviders[i].ToString() + "|" + i);
-								lock (threadLock) {
-									FishProgressLoaded?.Invoke(null, new FishLoaded() { name = animeProviders[i].Name, progressProcentage = ((double)count) / animeProviders.Length, maxProgress = animeProviders.Length, currentProgress = count });
-								}
 								if (Settings.IsProviderActive(animeProviders[i].Name)) {
+									print("STARTEDANIME: " + animeProviders[i].ToString() + "|" + i);
+									lock (threadLock) {
+										FishProgressLoaded?.Invoke(null, new FishLoaded() { name = animeProviders[i].Name, progressProcentage = ((double)count) / providerCount, maxProgress = providerCount, currentProgress = count });
+									}
 									animeProviders[i].FishMainLink(currentSelectedYear, tempThred, activeMovie.title.MALData);
-								}
-								lock (threadLock) {
-									count++;
-									FishProgressLoaded?.Invoke(null, new FishLoaded() { name = animeProviders[i].Name, progressProcentage = ((double)count) / animeProviders.Length, maxProgress = animeProviders.Length, currentProgress = count });
-									print("COUNT INCRESED < -------------------------------- " + count);
+
+									lock (threadLock) {
+										count++;
+										FishProgressLoaded?.Invoke(null, new FishLoaded() { name = animeProviders[i].Name, progressProcentage = ((double)count) / providerCount, maxProgress = providerCount, currentProgress = count });
+										print("COUNT INCRESED < -------------------------------- " + count);
+									}
 								}
 								//if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
 							});
