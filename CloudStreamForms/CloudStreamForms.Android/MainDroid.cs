@@ -247,6 +247,7 @@ namespace CloudStreamForms.Droid
 
 				int uiOptions = (int)window.DecorView.SystemUiVisibility;
 				uiOptions |= (int)SystemUiFlags.LayoutHideNavigation;
+
 				window.DecorView.SystemUiVisibility = (StatusBarVisibility)uiOptions;
 
 				window.SetNavigationBarColor(Android.Graphics.Color.Transparent);
@@ -330,6 +331,8 @@ namespace CloudStreamForms.Droid
 				if (fullscreen) {
 					uiOptions |= (int)SystemUiFlags.HideNavigation;
 					uiOptions |= (int)SystemUiFlags.Fullscreen;
+					uiOptions |= (int)SystemUiFlags.LayoutStable; //FIX?
+
 					window.AddFlags(WindowManagerFlags.TurnScreenOn);
 					window.AddFlags(WindowManagerFlags.KeepScreenOn);
 					window.AddFlags(WindowManagerFlags.Fullscreen); // REMOVES STATUS BAR
@@ -337,6 +340,8 @@ namespace CloudStreamForms.Droid
 				else {
 					uiOptions &= ~(int)SystemUiFlags.HideNavigation;
 					uiOptions &= ~(int)SystemUiFlags.Fullscreen;
+					uiOptions &= ~(int)SystemUiFlags.LayoutStable;
+
 					window.ClearFlags(WindowManagerFlags.TurnScreenOn);
 					window.ClearFlags(WindowManagerFlags.KeepScreenOn);
 					window.ClearFlags(WindowManagerFlags.Fullscreen);
