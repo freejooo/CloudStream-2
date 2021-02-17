@@ -331,7 +331,10 @@ namespace CloudStreamForms.Droid
 				if (fullscreen) {
 					uiOptions |= (int)SystemUiFlags.HideNavigation;
 					uiOptions |= (int)SystemUiFlags.Fullscreen;
-					uiOptions |= (int)SystemUiFlags.LayoutStable; //FIX?
+					uiOptions |= (int)SystemUiFlags.LowProfile;
+					uiOptions |= (int)SystemUiFlags.LayoutStable;
+					uiOptions |= (int)SystemUiFlags.ImmersiveSticky;
+					uiOptions |= (int)SystemUiFlags.LayoutHideNavigation;
 
 					window.AddFlags(WindowManagerFlags.TurnScreenOn);
 					window.AddFlags(WindowManagerFlags.KeepScreenOn);
@@ -340,7 +343,10 @@ namespace CloudStreamForms.Droid
 				else {
 					uiOptions &= ~(int)SystemUiFlags.HideNavigation;
 					uiOptions &= ~(int)SystemUiFlags.Fullscreen;
+					uiOptions &= ~(int)SystemUiFlags.LowProfile;
 					uiOptions &= ~(int)SystemUiFlags.LayoutStable;
+					uiOptions &= ~(int)SystemUiFlags.ImmersiveSticky;
+					uiOptions &= ~(int)SystemUiFlags.LayoutHideNavigation;
 
 					window.ClearFlags(WindowManagerFlags.TurnScreenOn);
 					window.ClearFlags(WindowManagerFlags.KeepScreenOn);
