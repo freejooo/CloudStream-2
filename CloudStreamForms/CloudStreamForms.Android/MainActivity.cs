@@ -267,6 +267,28 @@ namespace CloudStreamForms.Droid
 				base.OnSkipToPrevious();
 			}
 		}
+		public class ChromeMediaSessionCallback : MediaSessionCompat.Callback
+		{
+			public override void OnPause()
+			{
+				MainChrome.PauseAndPlay(true);
+			}
+
+			public override void OnPlay()
+			{
+				MainChrome.PauseAndPlay(false);
+			}
+
+			public override void OnSeekTo(long pos)
+			{
+				MainChrome.SetChromeTime(pos / 1000.0);
+			}
+
+			public override void OnStop()
+			{
+				MainChrome.JustStopVideo();
+			}
+		}
 
 		public AudioManager AudManager => Application.Context.GetSystemService(Context.AudioService) as AudioManager;
 
@@ -403,7 +425,7 @@ namespace CloudStreamForms.Droid
 							MainDroid.CancelChromecast();
 						}
 						else {
-							MainDroid.UpdateChromecastNotification(e.title, e.body, e.isPaused, e.posterUrl);
+							MainDroid.UpdateChromecastNotification(e.title, e.body, e.isPaused, e.posterUrl, e.time, e.duration);
 						}
 					}
 					catch (Exception _ex) {

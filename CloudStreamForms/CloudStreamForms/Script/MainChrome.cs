@@ -113,6 +113,8 @@ namespace CloudStreamForms.Core
 			public bool isCasting;
 			public bool isPlaying;
 			public bool isPaused;
+			public long time;
+			public long duration;
 		}
 
 		public static event EventHandler<ChromeNotification> OnNotificationChanged;
@@ -156,7 +158,7 @@ namespace CloudStreamForms.Core
 		private static bool isPlaying;
 		public static bool IsPaused {
 			set {
-				isPaused = value; Notification.isPaused = value;
+				isPaused = value; Notification.isPaused = value; Notification.time = (long)(CurrentTime * 1000);
 				Device.BeginInvokeOnMainThread(() => {
 					OnNotificationChanged?.Invoke(null, Notification);
 				});
@@ -165,7 +167,7 @@ namespace CloudStreamForms.Core
 		}
 		public static bool IsPlaying {
 			set {
-				isPlaying = value; Notification.isPlaying = value;
+				isPlaying = value; Notification.isPlaying = value; Notification.time = (long)(CurrentTime * 1000);
 				Device.BeginInvokeOnMainThread(() => {
 					OnNotificationChanged?.Invoke(null, Notification);
 				});
@@ -711,6 +713,8 @@ namespace CloudStreamForms.Core
 				print("START!!");
 
 				CurrentCastingDuration = (double)CurrentChromeMedia.Media.Duration;
+				Notification.duration = (long)(CurrentCastingDuration * 1000);
+
 				if (setTime != -1) {
 					SetChromeTime(setTime);
 				}
@@ -722,6 +726,8 @@ namespace CloudStreamForms.Core
 				Notification.body = mirrorName;
 				Notification.title = movieTitle;
 				Notification.posterUrl = posterUrl;
+				Notification.time = 0L;
+
 				Device.BeginInvokeOnMainThread(() => {
 					OnNotificationChanged?.Invoke(null, Notification);
 				});

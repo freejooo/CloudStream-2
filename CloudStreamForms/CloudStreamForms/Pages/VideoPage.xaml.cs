@@ -1189,7 +1189,7 @@ namespace CloudStreamForms
 		}
 
 		const int MAX_ASPECT_RATIO = 5;
-		enum AspectRatio
+		public enum AspectRatio
 		{
 			Original = 0,
 			Fill = 1,
@@ -1606,8 +1606,8 @@ namespace CloudStreamForms
 			print("ON APPEARING VIDEOPAGE");
 			isShown = true;
 			App.OnAudioFocusChanged += HandleAudioFocus;
-			App.OnAppNotInForground += HandleAppExit;
-			App.OnAppResume += HandleAppResume;
+			//App.OnAppNotInForground += HandleAppExit;
+			//App.OnAppResume += HandleAppResume;
 			App.OnPictureInPictureModeChanged += HandleAppPipMode;
 			App.OnRemovePlayAction += HandleAction;
 
@@ -1639,8 +1639,8 @@ namespace CloudStreamForms
 
 			print("ONDIS:::::::");
 			try {
-				App.OnAppNotInForground -= HandleAppExit;
-				App.OnAppResume -= HandleAppResume;
+				//App.OnAppNotInForground -= HandleAppExit;
+				//App.OnAppResume -= HandleAppResume;
 				App.OnAudioFocusChanged -= HandleAudioFocus;
 				App.OnPictureInPictureModeChanged -= HandleAppPipMode;
 				App.OnRemovePlayAction -= HandleAction;

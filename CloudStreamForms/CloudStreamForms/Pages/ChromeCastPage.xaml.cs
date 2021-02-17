@@ -519,7 +519,7 @@ namespace CloudStreamForms
 		{
 			base.OnAppearing();
 			App.UpdateToTransparentBg();
-			BackFaded.Source = GetImageSource("faded.png");
+			//BackFaded.Source = GetImageSource("faded.png");
 			PlayList.Source = GetImageSource(RoundedPrefix + "_playlist_play_white_48dp.png");
 			StopAll.Source = GetImageSource(RoundedPrefix + "_stop_white_48dp.png");
 			BackForward.Source = GetImageSource("netflixSkipBack.png");//GetImageSource(RoundedPrefix + "_replay_white_48dp.png");

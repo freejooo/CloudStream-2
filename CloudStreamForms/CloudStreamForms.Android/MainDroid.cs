@@ -6,8 +6,10 @@ using Android.Media.Session;
 using Android.OS;
 using Android.Support.V4.Content.PM;
 using Android.Support.V4.Graphics.Drawable;
+using Android.Support.V4.Media.Session;
 using Android.Views;
 using Android.Widget;
+using AndroidX.Media.App;
 using CloudStreamForms.Core;
 using CloudStreamForms.Droid.Services;
 using System;
@@ -79,8 +81,8 @@ namespace CloudStreamForms.Droid
 			}
 		}
 
-		
-		
+
+
 
 		public DownloadProgressInfo GetDownloadProgressInfo(int id, string fileUrl)
 		{
@@ -160,12 +162,20 @@ namespace CloudStreamForms.Droid
 			NotManager.Cancel(CHROME_CAST_NOTIFICATION_ID);
 		}
 
-		readonly static MediaSession mediaSession = new MediaSession(Application.Context, "Chromecast");
+		static MediaSessionCompat mediaSession;
 
-		public static async void UpdateChromecastNotification(string title, string body, bool isPaused, string poster)
+		static void InitChromeMediaSession()
+		{
+			var mediaCallback = new ChromeMediaSessionCallback();
+			mediaSession = new MediaSessionCompat(Application.Context, "Chromecast");
+			mediaSession.SetCallback(mediaCallback);
+		}
+
+		public static async void UpdateChromecastNotification(string title, string body, bool isPaused, string poster, long time, long duration)
 		{
 			try {
-				var builder = new Notification.Builder(Application.Context);
+				//new Android.Support.V4.Media.Session.MediaControllerCompat.
+				var builder = new AndroidX.Core.App.NotificationCompat.Builder(Application.Context);
 				builder.SetContentTitle(title);
 				builder.SetContentText(body);
 				builder.SetAutoCancel(false);
@@ -187,13 +197,31 @@ namespace CloudStreamForms.Droid
 						builder.SetLargeIcon(bitmap);
 					}
 
-					builder.SetStyle(new Notification.MediaStyle().SetMediaSession(mediaSession.SessionToken).SetShowActionsInCompactView(0, 1, 2)); // NICER IMAGE
+					var stateBuilder = new PlaybackStateCompat.Builder()
+			.SetActions(PlaybackStateCompat.ActionSeekTo | PlaybackStateCompat.ActionPause | PlaybackStateCompat.ActionPlay | PlaybackStateCompat.ActionStop)
+			.SetState(
+				isPaused ? PlaybackStateCompat.StatePaused : PlaybackStateCompat.StatePlaying,
+				time, 1f, SystemClock.ElapsedRealtime()
+			);
+					
+					mediaSession.SetPlaybackState(stateBuilder.Build());
+					mediaSession.SetFlags(MediaSessionCompat.FlagHandlesMediaButtons | MediaSessionCompat.FlagHandlesTransportControls);
+					mediaSession.SetMetadata(new Android.Support.V4.Media.MediaMetadataCompat.Builder()
+				//.PutString(MediaMetadata.MetadataKeyArtist, "title")
+				//.PutString(MediaMetadata.MetadataKeyTitle, "genre")
+				.PutLong(MediaMetadata.MetadataKeyDuration, duration) //Negative duration means the duration is unknown
+																	 // .PutString(MediaMetadata.MetadataKeyArt, "https://homepages.cae.wisc.edu/~ece533/images/peppers.png")
+				.Build());
+					builder.SetColor(Android.Graphics.Color.Black.ToArgb()); // THIS IS VERY IMPORTANT FOR THE APPERANCE OF THE SEEKBAR IN THE NOTIFICATION
+					builder.SetColorized(true);
+
+					mediaSession.Active = true;
+
+					//	mediaSession.SetMetadata(new Android.Support.V4.Media.MediaMetadataCompat() { Description = new Android.Support.V4.Media.MediaDescriptionCompat() { } })
 
 					List<string> actionNames = new List<string>() { "-30s", isPaused ? "Play" : "Pause", "+30s", "Stop" };
 					List<int> sprites = new List<int>() { Resource.Drawable.netflixGoBack128, isPaused ? Resource.Drawable.netflixPlay128v2 : Resource.Drawable.netflixPause128v2, Resource.Drawable.netflixGoForward128, Resource.Drawable.netflixStop128v2 };
 					List<string> actionIntent = new List<string>() { "goback", isPaused ? "play" : "pause", "goforward", "stop" }; // next
-
-					List<Notification.Action> actions = new List<Notification.Action>();
 
 					for (int i = 0; i < sprites.Count; i++) {
 						var _resultIntent = new Intent(context, typeof(ChromeCastIntentService));
@@ -203,12 +231,14 @@ namespace CloudStreamForms.Droid
 						PendingIntentFlags.UpdateCurrent
 						 );
 
-						actions.Add(new Notification.Action(sprites[i], actionNames[i], _pending));
+						builder.AddAction(new AndroidX.Core.App.NotificationCompat.Action(sprites[i], actionNames[i], _pending));
 					}
-					builder.SetActions(actions.ToArray());
+
+					builder.SetStyle(new NotificationCompat.MediaStyle().SetMediaSession(mediaSession.SessionToken).SetShowActionsInCompactView(0, 1, 2)); // NICER IMAGE
 				}
 
 				builder.SetContentIntent(GetCurrentPending("openchrome"));
+
 				try {
 					NotManager.Notify(CHROME_CAST_NOTIFICATION_ID, builder.Build());
 				}
@@ -257,7 +287,7 @@ namespace CloudStreamForms.Droid
 			}
 		}
 
-        
+
 		public void UpdateIcon(int icon)
 		{
 			ComponentName adaptive = new Android.Content.ComponentName(Application.Context, "com.CloudStreamForms.CloudStreamForms.adaptive");
@@ -265,8 +295,7 @@ namespace CloudStreamForms.Droid
 
 			ComponentEnabledState[] states = new ComponentEnabledState[2];
 
-			switch (icon)
-			{
+			switch (icon) {
 				case 0:
 					states[0] = ComponentEnabledState.Enabled;
 					states[1] = ComponentEnabledState.Disabled;
@@ -799,6 +828,8 @@ namespace CloudStreamForms.Droid
 					.SetAcceptsDelayedFocusGain(true)
 					.SetOnAudioFocusChangeListener(myAudioFocusListener, handler)
 					.Build();
+
+				InitChromeMediaSession();
 			}
 			catch (Exception _ex) {
 				error(_ex);

@@ -616,7 +616,7 @@ namespace CloudStreamForms
 				App.SetKey("Settings", nameof(TapjackProtectionSearch), value);
 			}
 			get {
-				return App.GetKey("Settings", nameof(TapjackProtectionSearch), true);
+				return App.GetKey("Settings", nameof(TapjackProtectionSearch), false);
 			}
 		}
 		public static bool TapjackProtectionButton {
@@ -624,7 +624,7 @@ namespace CloudStreamForms
 				App.SetKey("Settings", nameof(TapjackProtectionButton), value);
 			}
 			get {
-				return App.GetKey("Settings", nameof(TapjackProtectionButton), true);
+				return App.GetKey("Settings", nameof(TapjackProtectionButton), false);
 			}
 		}
 		public static bool TapjackProtectionPicker {
@@ -632,7 +632,7 @@ namespace CloudStreamForms
 				App.SetKey("Settings", nameof(TapjackProtectionPicker), value);
 			}
 			get {
-				return App.GetKey("Settings", nameof(TapjackProtectionPicker), true);
+				return App.GetKey("Settings", nameof(TapjackProtectionPicker), false);
 			}
 		}
 
@@ -671,7 +671,7 @@ namespace CloudStreamForms
 				App.SetKey("Settings", nameof(VideoCropType), value);
 			}
 			get {
-				return App.GetKey("Settings", nameof(VideoCropType), 0);
+				return App.GetKey("Settings", nameof(VideoCropType), (int)VideoPage.AspectRatio.BestFit); // FUCK Original
 			}
 		}
 
