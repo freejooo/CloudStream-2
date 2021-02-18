@@ -1176,12 +1176,22 @@ namespace CloudStreamForms
 			NextMirrorBtt.IsEnabled = !IsSingleMirror;*/
 		}
 
-		void ErrorWhenLoading()
+		async void ErrorWhenLoading()
 		{
 			print("ERROR UCCURED");
-			ShowVideoToast($"Error Loading {CurrentBasicLink.name}");
+			if (currentVideo.isSingleMirror || currentVideo.isDownloadFile) {
+				ShowVideoToast($"Error Loading");
+			}
+			else {
+				ShowVideoToast($"Error Loading {CurrentBasicLink.name}");
+			}
 			if (currentVideo.isDownloadFile) {
-				Navigation.PopModalAsync();
+				App.ShowToast("Error Loading Media");
+				MainDispose();
+				await Device.InvokeOnMainThreadAsync( async () => {
+					App.ToggleRealFullScreen(false);
+					await Navigation.PopModalAsync();
+				});
 			}
 			else {
 				SelectNextMirror();
@@ -1701,7 +1711,6 @@ namespace CloudStreamForms
 				else {
 					_mediaPlayer.Stop();
 					Dispose();
-
 				}
 			}
 			catch (Exception) {
