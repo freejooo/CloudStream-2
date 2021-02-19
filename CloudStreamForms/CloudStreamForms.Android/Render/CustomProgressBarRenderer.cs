@@ -8,7 +8,7 @@ namespace CloudStreamForms.Droid
 {
 	public class CustomProgressBarRenderer : ProgressBarRenderer
 	{
-		private Context context;
+		private readonly Context context;
 		public CustomProgressBarRenderer(Context context) : base(context)
 		{
 			this.context = context;

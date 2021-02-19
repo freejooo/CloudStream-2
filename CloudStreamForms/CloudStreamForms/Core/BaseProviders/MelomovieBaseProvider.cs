@@ -3,6 +3,8 @@ using System;
 using System.Collections.Generic;
 using static CloudStreamForms.Core.CloudStreamCore;
 
+#nullable enable
+
 namespace CloudStreamForms.Core.BaseProviders
 {
 	class MelomovieBaseProvider : BaseProvider

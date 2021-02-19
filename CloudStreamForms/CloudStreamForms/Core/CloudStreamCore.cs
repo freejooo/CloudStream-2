@@ -23,16 +23,36 @@ namespace CloudStreamForms.Core
 	public class CloudStreamCore : ICloneable
 	{
 		// =================================== DONT USE ===================================
-		// www2.himovies.to : recaptcha
-		// fsapi.xyz, : captcha
-		// mixdrop.co : recaptcha for token
-		// tinyzonetv : recaptcha
-		// https://projectfreetv.fun/ : recaptcha
-		// https://www1.moviesjoy.net/search/ or https://moviesjoy.to : recaptcha for link loading
-		// https://gostream.site/iron-man/ : DDOS protecton
-		// 9anime.to : IP BANNED and captca (I Think)
-		// dood.watch : recaptcha for token
-		// abcvideo.cc : recaptcha, dev tool block, ip block
+		// https://abcvideo.cc : recaptcha, dev tool block, ip block
+		// https://moviesjoy.to : recaptcha for link loading
+		// https://www1.moviesjoy.net : recaptcha for links
+		// https://animesuge.io : recaptcha for links
+		// https://9anime.to : IP BANNED and recaptcha
+		// https://mixdrop.co : recaptcha for token
+		// https://dood.watch : recaptcha for token
+		// https://www2.himovies.to : recaptcha
+		// https://projectfreetv.fun : recaptcha
+		// https://cinebloom.org : recaptcha + cloudflare
+		// https://tinyzonetv : recaptcha
+		// https://fsapi.xyz : captcha
+		// https://noxx.to : captcha
+		// https://onionplay.co : hCaptcha
+		// https://soap2day.to : hCaptcha + cloudflare
+		// https://Bmovies.nl : cloudflare
+		// https://vmovee.watch : cloudflare
+		// https://kiss-anime.ws : cloudflare
+		// https://kissasian.sh : cloudflare
+		// https://gostream.site : DDOS protecton
+		// https://C1ne.co : antijs
+		// https://pahe.ph : unable to get link, redirected to other site
+		// https://kisscartoon.sh : antibot
+		// ================================= WONT BE ADDED ================================
+		// https://Ffmovies.io : audiogap
+		// https://xmovies8.lol : few working links
+		// https://wwatchseries.com : few working links + duplicate links
+		// https://stremiomovies.com : few working links + duplicate links
+		// https://animixplay.to : duplicate of shiro, dubbedvip and genoanime
+		// https://ssoap2day.to : slow search and few titles
 		// ================================================================================
 
 		public static bool[] isAnimeProviderEnabled;
@@ -56,7 +76,7 @@ namespace CloudStreamForms.Core
 				new VidstreamingAnimeProvider(this),
 				new TheMovieProvider(this),
              //   new AnimeVibeBloatFreeProvider(this), // HCaptcha ??
-              //  new NineAnimeBloatFreeProvider(this), // Link extraction
+              //  new NineAnimeBloatFreeProvider(this), // RECAPTCHA Link extraction
 				new FourAnimeProvider(this),
 				new AnimeParadiseProvider(this),
 				new ShiroProvider(this,"https://www.dubbedanime.vip", "DubbedVip"),

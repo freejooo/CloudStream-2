@@ -43,7 +43,7 @@ namespace CloudStreamForms.Droid
 {
 	public class CustomPickerRenderer : PickerRenderer
 	{
-		private Context context;
+		private readonly Context context;
 		public CustomPickerRenderer(Context context) : base(context)
 		{
 			this.context = context;

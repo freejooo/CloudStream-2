@@ -11,6 +11,7 @@ namespace CloudStreamForms.Core.AnimeProviders
 
 		public override string Name => "ArrayAnime";
 
+#pragma warning disable CS0649
 		[System.Serializable]
 		struct ArrayAnimeSearchResultRoot
 		{
@@ -59,6 +60,7 @@ namespace CloudStreamForms.Core.AnimeProviders
 			//public string link; // VIDSTREAM LINK
 			//public string totalepisode;
 		}
+#pragma warning restore CS0649
 
 		readonly static string[] videoRez = {
 			"","240p","360p","480p","720p","1080p","1152p","2160p",
