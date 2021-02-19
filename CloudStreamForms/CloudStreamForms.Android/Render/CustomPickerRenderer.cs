@@ -41,41 +41,41 @@ namespace CloudStreamForms.Droid
 [assembly: ExportRenderer(typeof(Picker), typeof(CustomPickerRenderer))]
 namespace CloudStreamForms.Droid
 {
-    public class CustomPickerRenderer : PickerRenderer
-    {
-        private Context context;
-        public CustomPickerRenderer(Context context) : base(context)
-        {
-            this.context = context;
-        }
-        /*
+	public class CustomPickerRenderer : PickerRenderer
+	{
+		private Context context;
+		public CustomPickerRenderer(Context context) : base(context)
+		{
+			this.context = context;
+		}
+		/*
         protected override void OnElementPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
             base.OnElementPropertyChanged(sender, e);
             SetControlStyle();
         }*/
-        protected override void OnElementChanged(ElementChangedEventArgs<Picker> e)
-        {
-            base.OnElementChanged(e);
+		protected override void OnElementChanged(ElementChangedEventArgs<Picker> e)
+		{
+			base.OnElementChanged(e);
 
-            if (Control == null || e.NewElement == null) return;
+			if (Control == null || e.NewElement == null) return;
 
-            // Control.SetBackgroundColor(new Android.Graphics.Color(60, 60, 60));
-            //Control.back
-            //Control.Typeface = Control.IsFocused ? Typeface.DefaultBold : Typeface.Default;
-            //for example ,change the line to red:
-            //  SetControlStyle();
-            var c = Android.Graphics.Color.Transparent;
-            if (Settings.TapjackProtectionPicker) {
-                Control.FilterTouchesWhenObscured = true;
-            }
-            if (Build.VERSION.SdkInt >= BuildVersionCodes.Lollipop)
-                Control.BackgroundTintList = ColorStateList.ValueOf(c);
-            else
-                Control.Background.SetColorFilter(c, PorterDuff.Mode.SrcAtop);
-        }
+			// Control.SetBackgroundColor(new Android.Graphics.Color(60, 60, 60));
+			//Control.back
+			//Control.Typeface = Control.IsFocused ? Typeface.DefaultBold : Typeface.Default;
+			//for example ,change the line to red:
+			//  SetControlStyle();
+			var c = Android.Graphics.Color.Transparent;
+			if (Settings.TapjackProtectionPicker) {
+				Control.FilterTouchesWhenObscured = true;
+			}
+			if (Build.VERSION.SdkInt >= BuildVersionCodes.Lollipop)
+				Control.BackgroundTintList = ColorStateList.ValueOf(c);
+			else
+				Control.Background.SetColorFilter(c, PorterDuff.Mode.SrcAtop);
+		}
 
-        /*
+		/*
         private void SetControlStyle()
         {
             if (Control != null) {
@@ -86,5 +86,5 @@ namespace CloudStreamForms.Droid
             }
         }*/
 
-    }
+	}
 }

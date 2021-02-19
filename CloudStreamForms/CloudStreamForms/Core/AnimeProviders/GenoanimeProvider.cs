@@ -1,15 +1,15 @@
 ﻿using HtmlAgilityPack.CssSelectors.NetCore;
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using static CloudStreamForms.Core.BlotFreeProvider;
 using static CloudStreamForms.Core.CloudStreamCore;
-using System;
-using System.Linq;
 
 namespace CloudStreamForms.Core.AnimeProviders
 {
-	class GenoanimeBFProvider : BloatFreeBaseAnimeProvider
+	class GenoanimeProvider : BloatFreeBaseAnimeProvider
 	{
-		public GenoanimeBFProvider(CloudStreamCore _core) : base(_core) { }
+		public GenoanimeProvider(CloudStreamCore _core) : base(_core) { }
 
 		public override string Name => "Genoanime";
 
@@ -27,7 +27,7 @@ namespace CloudStreamForms.Core.AnimeProviders
 				string size = FindHTML(d, "size=\"", "\"");
 				string type = FindHTML(d, "type=\"", "\"");
 
-				if(size.EndsWith("0")) {
+				if (size.EndsWith("0")) {
 					size += "p";
 				}
 

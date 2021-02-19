@@ -7,11 +7,11 @@ using static CloudStreamForms.Core.CloudStreamCore;
 
 namespace CloudStreamForms.Core.AnimeProviders
 {
-	class AnimeParadiseBFProvider : BloatFreeBaseAnimeProvider
+	class AnimeParadiseProvider : BloatFreeBaseAnimeProvider
 	{
 		public const bool IsNewApi = true;
 
-		public AnimeParadiseBFProvider(CloudStreamCore _core) : base(_core) { }
+		public AnimeParadiseProvider(CloudStreamCore _core) : base(_core) { }
 
 		public override string Name => "AnimeParadise";
 

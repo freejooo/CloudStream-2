@@ -511,7 +511,7 @@ namespace CloudStreamForms
 					var res = new MovieResult(ep.state);
 					await Navigation.PushModalAsync(res, false);
 				};*/
-			//	stack.Children.Add(infoBtt);
+				//	stack.Children.Add(infoBtt);
 				stack.Effects.Add(Effect.Resolve("CloudStreamForms.LongPressedEffect"));
 
 				LongPressedEffect.SetCommand(stack, new Command(async () => {

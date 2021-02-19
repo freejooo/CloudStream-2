@@ -10,11 +10,11 @@ using static CloudStreamForms.Core.CloudStreamCore;
 
 namespace CloudStreamForms.Core.MovieProviders
 {
-	class GomoStreamBFProvider : BloatFreeMovieProvider
+	class GomoStreamMovieProvider : BloatFreeMovieProvider
 	{
 		public override string Name => "GomoStream";
 		public override bool NullMetadata => true;
-		public GomoStreamBFProvider(CloudStreamCore _core) : base(_core) { }
+		public GomoStreamMovieProvider(CloudStreamCore _core) : base(_core) { }
 
 		public override void LoadLink(object metadata, int episode, int season, int normalEpisode, bool isMovie, TempThread tempThred)
 		{

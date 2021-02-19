@@ -1,8 +1,8 @@
-﻿using System.Collections.Generic;
-using static CloudStreamForms.Core.CloudStreamCore;
-using HtmlAgilityPack.CssSelectors.NetCore;
+﻿using HtmlAgilityPack.CssSelectors.NetCore;
 using Newtonsoft.Json;
 using System;
+using System.Collections.Generic;
+using static CloudStreamForms.Core.CloudStreamCore;
 
 namespace CloudStreamForms.Core.BaseProviders
 {

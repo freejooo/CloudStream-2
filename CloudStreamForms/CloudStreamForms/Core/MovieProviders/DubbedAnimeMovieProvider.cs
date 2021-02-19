@@ -1,6 +1,4 @@
 ﻿using CloudStreamForms.Core.BaseProviders;
-using System;
-using System.Collections.Generic;
 using static CloudStreamForms.Core.BlotFreeProvider;
 using static CloudStreamForms.Core.CloudStreamCore;
 

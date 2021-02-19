@@ -2,7 +2,6 @@
 using Android.Content;
 using Android.Content.PM;
 using Android.Media;
-using Android.Media.Session;
 using Android.OS;
 using Android.Support.V4.Content.PM;
 using Android.Support.V4.Graphics.Drawable;
@@ -14,10 +13,8 @@ using CloudStreamForms.Core;
 using CloudStreamForms.Droid.Services;
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
-using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using Xamarin.Forms;
@@ -203,14 +200,14 @@ namespace CloudStreamForms.Droid
 				isPaused ? PlaybackStateCompat.StatePaused : PlaybackStateCompat.StatePlaying,
 				time, 1f, SystemClock.ElapsedRealtime()
 			);
-					
+
 					mediaSession.SetPlaybackState(stateBuilder.Build());
 					mediaSession.SetFlags(MediaSessionCompat.FlagHandlesMediaButtons | MediaSessionCompat.FlagHandlesTransportControls);
 					mediaSession.SetMetadata(new Android.Support.V4.Media.MediaMetadataCompat.Builder()
 				//.PutString(MediaMetadata.MetadataKeyArtist, "title")
 				//.PutString(MediaMetadata.MetadataKeyTitle, "genre")
 				.PutLong(MediaMetadata.MetadataKeyDuration, duration) //Negative duration means the duration is unknown
-																	 // .PutString(MediaMetadata.MetadataKeyArt, "https://homepages.cae.wisc.edu/~ece533/images/peppers.png")
+																	  // .PutString(MediaMetadata.MetadataKeyArt, "https://homepages.cae.wisc.edu/~ece533/images/peppers.png")
 				.Build());
 					builder.SetColor(Android.Graphics.Color.Black.ToArgb()); // THIS IS VERY IMPORTANT FOR THE APPERANCE OF THE SEEKBAR IN THE NOTIFICATION
 					builder.SetColorized(true);

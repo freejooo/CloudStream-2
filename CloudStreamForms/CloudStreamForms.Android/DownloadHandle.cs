@@ -2,23 +2,19 @@
 using Android.Content;
 using Android.OS;
 using Android.Webkit;
-using CloudStreamForms;
 using CloudStreamForms.Core;
-using CloudStreamForms.Droid;
 using Java.IO;
 using Java.Net;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Xamarin.Forms;
 using static CloudStreamForms.App;
 using static CloudStreamForms.Core.CloudStreamCore;
 using static CloudStreamForms.Droid.LocalNot;
-using static CloudStreamForms.Droid.MainActivity;
 using Application = Android.App.Application;
 namespace CloudStreamForms.Droid
 {

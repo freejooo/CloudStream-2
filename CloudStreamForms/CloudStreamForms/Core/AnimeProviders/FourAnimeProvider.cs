@@ -7,9 +7,9 @@ using static CloudStreamForms.Core.CloudStreamCore;
 
 namespace CloudStreamForms.Core.AnimeProviders
 {
-	class FourAnimeBloatFreeProvider : BloatFreeBaseAnimeProvider
+	class FourAnimeProvider : BloatFreeBaseAnimeProvider
 	{
-		public FourAnimeBloatFreeProvider(CloudStreamCore _core) : base(_core) { }
+		public FourAnimeProvider(CloudStreamCore _core) : base(_core) { }
 		//public override bool HasDub => false; // some are dub
 		public override string Name => "4Anime";
 

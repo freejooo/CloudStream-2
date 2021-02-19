@@ -1,21 +1,16 @@
 ﻿using CloudStreamForms.Core.BaseProviders;
-using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Net;
-using System.Text;
-using System.Threading;
 using static CloudStreamForms.Core.BaseProviders.YugenaniBaseProvider;
 using static CloudStreamForms.Core.BlotFreeProvider;
 using static CloudStreamForms.Core.CloudStreamCore;
 
 namespace CloudStreamForms.Core.AnimeProviders
 {
-	class YugenaniBFProvider : BloatFreeBaseAnimeProvider
+	class YugenaniProvider : BloatFreeBaseAnimeProvider
 	{
 		readonly YugenaniBaseProvider baseProvider;
 
-		public YugenaniBFProvider(CloudStreamCore _core) : base(_core)
+		public YugenaniProvider(CloudStreamCore _core) : base(_core)
 		{
 			if (Settings.IsProviderActive(Name)) {
 				baseProvider = new YugenaniBaseProvider();

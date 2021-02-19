@@ -7,9 +7,9 @@ using static CloudStreamForms.Core.CloudStreamCore;
 
 namespace CloudStreamForms.Core.AnimeProviders
 {
-	class NineAnimeBloatFreeProvider : BloatFreeBaseAnimeProvider
+	class NineAnimeProvider : BloatFreeBaseAnimeProvider
 	{
-		public NineAnimeBloatFreeProvider(CloudStreamCore _core) : base(_core) { }
+		public NineAnimeProvider(CloudStreamCore _core) : base(_core) { }
 
 		public override string Name => "9Anime";
 

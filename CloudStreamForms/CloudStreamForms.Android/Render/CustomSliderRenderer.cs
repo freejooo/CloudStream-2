@@ -8,28 +8,28 @@ using Xamarin.Forms.Platform.Android;
 [assembly: ExportRenderer(typeof(Slider), typeof(CustomSliderRenderer))]
 public class CustomSliderRenderer : SliderRenderer
 {
-    private Context context;
+	private Context context;
 
-    public CustomSliderRenderer(Context context) : base(context)
-    {
-        this.context = context;
-    }
+	public CustomSliderRenderer(Context context) : base(context)
+	{
+		this.context = context;
+	}
 
-    protected override void OnElementChanged(ElementChangedEventArgs<Slider> e)
-    {
-        base.OnElementChanged(e);
-        if (Control == null)
-            return;
-        var seek = Control as global::Android.Widget.SeekBar;
-        seek.FilterTouchesWhenObscured = true;
+	protected override void OnElementChanged(ElementChangedEventArgs<Slider> e)
+	{
+		base.OnElementChanged(e);
+		if (Control == null)
+			return;
+		var seek = Control as global::Android.Widget.SeekBar;
+		seek.FilterTouchesWhenObscured = true;
 
-        int size = e.NewElement.ClassId == "big" ? 70 : 40;
+		int size = e.NewElement.ClassId == "big" ? 70 : 40;
 
-        ShapeDrawable th = new ShapeDrawable(new OvalShape());
-        th.SetIntrinsicWidth(size);
-        th.SetIntrinsicHeight(size);
-        th.SetColorFilter(e.NewElement.ThumbColor.ToAndroid(), Android.Graphics.PorterDuff.Mode.SrcOver);
-        seek.SetThumb(th); 
-    }
+		ShapeDrawable th = new ShapeDrawable(new OvalShape());
+		th.SetIntrinsicWidth(size);
+		th.SetIntrinsicHeight(size);
+		th.SetColorFilter(e.NewElement.ThumbColor.ToAndroid(), Android.Graphics.PorterDuff.Mode.SrcOver);
+		seek.SetThumb(th);
+	}
 }
 

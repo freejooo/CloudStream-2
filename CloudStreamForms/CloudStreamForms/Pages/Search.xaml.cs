@@ -44,7 +44,7 @@ namespace CloudStreamForms
 		private void SearchBar_SearchButtonPressed(object sender, EventArgs e)
 		{
 			_ = mainCore.QuickSearch(((SearchBar)sender).Text);
-		} 
+		}
 
 		protected override bool OnBackButtonPressed()
 		{

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -143,8 +142,6 @@ namespace CloudStreamForms.Core
 
 			public override void FishMainLink(string year, TempThread tempThred, MALData malData)
 			{
-				print("FF:::: <>>");
-				print("NDNDNDNND;;; " + Name + "|" + year + "|" + malData.engName);
 				object storedData = NullMetadata ? null : StoreData(year, tempThred, malData);
 				if (storedData == null && !NullMetadata) return;
 				for (int i = 0; i < ActiveMovie.title.MALData.seasonData.Count; i++) {

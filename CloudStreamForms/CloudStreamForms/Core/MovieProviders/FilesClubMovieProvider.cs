@@ -5,11 +5,11 @@ using static CloudStreamForms.Core.CloudStreamCore;
 
 namespace CloudStreamForms.Core.MovieProviders
 {
-	class FilesClubProvider : BloatFreeMovieProvider
+	class FilesClubMovieProvider : BloatFreeMovieProvider
 	{
 		public override string Name => "123FilesClub";
 		public override bool NullMetadata => true;
-		public FilesClubProvider(CloudStreamCore _core) : base(_core) { }
+		public FilesClubMovieProvider(CloudStreamCore _core) : base(_core) { }
 
 
 		public override void LoadLink(object metadata, int episode, int season, int normalEpisode, bool isMovie, TempThread tempThred)

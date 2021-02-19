@@ -740,8 +740,7 @@ namespace CloudStreamForms
 			"Hexagon"
 		};
 
-		public static int AppIcon
-		{
+		public static int AppIcon {
 			set {
 				App.SetKey("Settings", nameof(AppIcons), value);
 			}
@@ -830,7 +829,7 @@ namespace CloudStreamForms
 		}
 
 		public static GlobalFont CurrentFont;
-	//	public static GlobalFont CurrentUpdatedFont = CurrentGlobalFonts[CurrentGlobalFont];
+		//	public static GlobalFont CurrentUpdatedFont = CurrentGlobalFonts[CurrentGlobalFont];
 
 		public static bool CacheImdb { get { return CacheData; } }
 		public static bool CacheMAL { get { return CacheData; } }

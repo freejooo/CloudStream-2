@@ -195,7 +195,7 @@ namespace CloudStreamForms.Script
 				int index = 0;
 				while (!done) {
 					index++;
-					string res = await GetApi($"https://api.myanimelist.net/v2/users/{user}/animelist?fields=list_status&limit=1000&offset={index*1000}");
+					string res = await GetApi($"https://api.myanimelist.net/v2/users/{user}/animelist?fields=list_status&limit=1000&offset={index * 1000}");
 					var root = JsonConvert.DeserializeObject<MalRoot>(res);
 					var titles = root.data.Select(t => new MalTitleHolder() { id = t.node.id, name = t.node.title, status = t.list_status }).ToArray();
 

@@ -59,7 +59,7 @@ namespace CloudStreamForms.Droid.Effects
 					//Container.SetOnTouchListener(new OnTouchListener(LongPressedEffect.GetCommand(Element), LongPressedEffect.GetCommandParameter(Element)));
 				}
 				OnPress += (o, e) => {
-					if((int)o != id) {
+					if ((int)o != id) {
 						Cancel();
 					}
 				};
@@ -89,10 +89,10 @@ namespace CloudStreamForms.Droid.Effects
 		//
 		//static Android.Views.Animations.ScaleAnimation ani;
 		//static Android.Views.Animations.ScaleAnimation ani2;
-		  Android.Views.Animations.AnimationSet onCancelAni;
-		  Android.Views.Animations.AnimationSet onHoldAni;
+		Android.Views.Animations.AnimationSet onCancelAni;
+		Android.Views.Animations.AnimationSet onHoldAni;
 		//static bool hasInit = false;
-		 void Init()
+		void Init()
 		{
 			//if (hasInit) return;
 			//hasInit = true;
@@ -116,11 +116,11 @@ namespace CloudStreamForms.Droid.Effects
 			fadeAni2.FillAfter = true;
 			fadeAni2.Duration = duration;
 
-			 onCancelAni = new Android.Views.Animations.AnimationSet(true);
+			onCancelAni = new Android.Views.Animations.AnimationSet(true);
 			onCancelAni.AddAnimation(fadeAni);
 			onCancelAni.AddAnimation(ani);
 
-			 onHoldAni = new Android.Views.Animations.AnimationSet(true);
+			onHoldAni = new Android.Views.Animations.AnimationSet(true);
 			onHoldAni.AddAnimation(fadeAni2);
 			onHoldAni.AddAnimation(ani2);
 
@@ -152,7 +152,7 @@ namespace CloudStreamForms.Droid.Effects
 		private void Container_Touch(object sender, Android.Views.View.TouchEventArgs e)
 		{
 			var command = LongPressedEffect.GetCommand(Element);
-	
+
 			System.Console.WriteLine("ACTION:" + e.Event.Action + "|" + e.Event.Action.HasFlag(Android.Views.MotionEventActions.Cancel));
 			e.Handled = true;
 

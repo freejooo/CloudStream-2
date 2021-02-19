@@ -1,5 +1,4 @@
-﻿using CloudStreamForms.Core.AnimeProviders;
-using CloudStreamForms.Core.BaseProviders;
+﻿using CloudStreamForms.Core.BaseProviders;
 using System;
 using System.Linq;
 using static CloudStreamForms.Core.BaseProviders.ShiroBaseProvider;

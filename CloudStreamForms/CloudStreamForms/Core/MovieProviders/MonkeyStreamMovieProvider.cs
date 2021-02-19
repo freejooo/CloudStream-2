@@ -3,9 +3,9 @@ using static CloudStreamForms.Core.CloudStreamCore;
 
 namespace CloudStreamForms.Core.MovieProviders
 {
-	class MonkeyStreamProvider : BloatFreeMovieProvider
+	class MonkeyStreamMovieProvider : BloatFreeMovieProvider
 	{
-		public MonkeyStreamProvider(CloudStreamCore _core) : base(_core) { }
+		public MonkeyStreamMovieProvider(CloudStreamCore _core) : base(_core) { }
 
 		public override string Name => "MonkeyStream";
 

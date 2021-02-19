@@ -3,11 +3,11 @@ using static CloudStreamForms.Core.CloudStreamCore;
 
 namespace CloudStreamForms.Core.MovieProviders
 {
-	class HdmProvider : BloatFreeMovieProvider
+	class HdmMovieProvider : BloatFreeMovieProvider
 	{
 		public override string Name => "Hdm";
 		public override bool NullMetadata => true;
-		public HdmProvider(CloudStreamCore _core) : base(_core) { }
+		public HdmMovieProvider(CloudStreamCore _core) : base(_core) { }
 
 		public override object StoreData(bool isMovie, TempThread tempThred)
 		{

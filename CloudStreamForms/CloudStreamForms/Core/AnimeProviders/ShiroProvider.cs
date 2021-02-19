@@ -8,14 +8,14 @@ using static CloudStreamForms.Core.CloudStreamCore;
 
 namespace CloudStreamForms.Core.AnimeProviders
 {
-	class ShiroBFProvider : BloatFreeBaseAnimeProvider
+	class ShiroProvider : BloatFreeBaseAnimeProvider
 	{
 		public ShiroBaseProvider shiroBase;
 		public string Token => shiroBase.Token;
 		private string SiteUrl => shiroBase._siteUrl;
 		public override string Name => shiroBase._name;
 
-		public ShiroBFProvider(CloudStreamCore _core, string siteUrl, string name) : base(_core)
+		public ShiroProvider(CloudStreamCore _core, string siteUrl, string name) : base(_core)
 		{
 			shiroBase = new ShiroBaseProvider(_core, siteUrl, name, false);
 		}

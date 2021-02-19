@@ -288,7 +288,7 @@ namespace CloudStreamForms.Core.BaseProviders
 				int.TryParse(FindHTML(d, "Episodes</div><span class=\"description\" style=\"font-size: 12px;\">", "<"), out int subEpisodes);
 				int.TryParse(FindHTML(d, "mal_id\":", ","), out int malId);
 				if (malId <= 0) return null;
-				var info =  new YuInfo() {
+				var info = new YuInfo() {
 					malId = malId,
 					dubbedEps = dubEpisodes,
 					subbedEps = subEpisodes,

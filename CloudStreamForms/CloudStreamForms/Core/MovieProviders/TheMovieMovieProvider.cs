@@ -6,10 +6,10 @@ using static CloudStreamForms.Core.CloudStreamCore;
 
 namespace CloudStreamForms.Core.MovieProviders
 {
-	class TheMovieMovieBFProvider : BloatFreeMovieProvider
+	class TheMovieMovieProvider : BloatFreeMovieProvider
 	{
 		public override string Name => "TheMovie";
-		public TheMovieMovieBFProvider(CloudStreamCore _core) : base(_core) { }
+		public TheMovieMovieProvider(CloudStreamCore _core) : base(_core) { }
 
 		//public override bool HasAnimeMovie => false;
 

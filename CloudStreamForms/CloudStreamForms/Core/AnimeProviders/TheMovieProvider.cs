@@ -7,9 +7,9 @@ using static CloudStreamForms.Core.CloudStreamCore.TheMovieHelper;
 
 namespace CloudStreamForms.Core.AnimeProviders
 {
-	class TheMovieBloatFreeProvider : BloatFreeBaseAnimeProvider
+	class TheMovieProvider : BloatFreeBaseAnimeProvider
 	{
-		public TheMovieBloatFreeProvider(CloudStreamCore _core) : base(_core) { }
+		public TheMovieProvider(CloudStreamCore _core) : base(_core) { }
 
 		public override string Name => "WatchMovies";
 

@@ -1,16 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-using Android.App;
-using Android.Content;
+﻿using Android.Content;
 using Android.Graphics;
-using Android.OS;
-using Android.Runtime;
 using Android.Text;
 using Android.Views;
-using Android.Widget;
 using CloudStreamForms.Droid.Render;
 using CloudStreamForms.Render;
 using Xamarin.Forms;
@@ -51,7 +42,7 @@ namespace CloudStreamForms.Droid.Render
 				strokeTextView.TextAlignment = Android.Views.TextAlignment.Center;
 				//strokeTextView.BreakStrategy = Android.Text.BreakStrategy.;
 				strokeTextView.Gravity = GravityFlags.CenterHorizontal | GravityFlags.Bottom;
-				 
+
 				if (isBg) {
 					strokeTextView.SetTextColor(Android.Graphics.Color.Black);
 					TextPaint tp1 = strokeTextView.Paint;

@@ -6,9 +6,9 @@ using static CloudStreamForms.Core.CloudStreamCore;
 
 namespace CloudStreamForms.Core.AnimeProviders
 {
-	class AnimeVibeBloatFreeProvider : BloatFreeBaseAnimeProvider
+	class AnimeVibeProvider : BloatFreeBaseAnimeProvider
 	{
-		public AnimeVibeBloatFreeProvider(CloudStreamCore _core) : base(_core) { }
+		public AnimeVibeProvider(CloudStreamCore _core) : base(_core) { }
 
 		public override string Name => "AnimeVibe";
 

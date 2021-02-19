@@ -1,19 +1,15 @@
-﻿using System.Collections.Generic;
+﻿using CloudStreamForms.Core.BaseProviders;
+using System.Collections.Generic;
+using static CloudStreamForms.Core.BaseProviders.DubbedAnimeBaseProvider;
 using static CloudStreamForms.Core.BlotFreeProvider;
 using static CloudStreamForms.Core.CloudStreamCore;
-using HtmlAgilityPack.CssSelectors.NetCore;
-using HtmlAgilityPack.CssSelectors;
-using static CloudStreamForms.Core.BaseProviders.DubbedAnimeBaseProvider;
-using CloudStreamForms.Core.BaseProviders;
-using Newtonsoft.Json;
-using System;
 
 namespace CloudStreamForms.Core.AnimeProviders
 {
-	class DubbedAnimeBFProvider : BloatFreeBaseAnimeProvider
+	class DubbedAnimeProvider : BloatFreeBaseAnimeProvider
 	{
 		readonly DubbedAnimeBaseProvider provider;
-		public DubbedAnimeBFProvider(CloudStreamCore _core) : base(_core)
+		public DubbedAnimeProvider(CloudStreamCore _core) : base(_core)
 		{
 			provider = new DubbedAnimeBaseProvider(_core);
 		}
@@ -31,7 +27,7 @@ namespace CloudStreamForms.Core.AnimeProviders
 
 		public override object StoreData(string year, TempThread tempThred, MALData malData)
 		{
-			return provider.Search(ActiveMovie.title.name.Replace(".","").Replace("/","/").Replace("\'", ""));
+			return provider.Search(ActiveMovie.title.name.Replace(".", "").Replace("/", "/").Replace("\'", ""));
 		}
 
 		public override NonBloatSeasonData GetSeasonData(MALSeason ms, TempThread tempThread, string year, object storedData)

@@ -31,10 +31,10 @@ using static CloudStreamForms.Core.CloudStreamCore;
 
 namespace CloudStreamForms.Core.MovieProviders
 {
-	class YesMoviesBFProvider : BloatFreeMovieProvider
+	class YesMoviesMovieProvider : BloatFreeMovieProvider
 	{
 		public override string Name => "YesMovies";
-		public YesMoviesBFProvider(CloudStreamCore _core) : base(_core) { }
+		public YesMoviesMovieProvider(CloudStreamCore _core) : base(_core) { }
 		const string SiteUrl = "https://yesmovies.mom";
 
 		public override object StoreData(bool isMovie, TempThread tempThred)

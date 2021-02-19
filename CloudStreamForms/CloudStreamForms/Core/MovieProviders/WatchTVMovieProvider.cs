@@ -4,13 +4,13 @@ using static CloudStreamForms.Core.CloudStreamCore;
 
 namespace CloudStreamForms.Core.MovieProviders
 {
-	class WatchTVBFProvider : BloatFreeMovieProvider
+	class WatchTVMovieProvider : BloatFreeMovieProvider
 	{
 		public override string Name => "WatchTv";
 		public override bool NullMetadata => true;
 		public override bool HasMovie => false;
 		public override bool HasAnimeMovie => false;
-		public WatchTVBFProvider(CloudStreamCore _core) : base(_core) { }
+		public WatchTVMovieProvider(CloudStreamCore _core) : base(_core) { }
 
 		public override void LoadLink(object metadata, int episode, int season, int normalEpisode, bool isMovie, TempThread tempThred)
 		{

@@ -13,7 +13,7 @@ using static CloudStreamForms.Core.CloudStreamCore;
 
 namespace CloudStreamForms.Core.AnimeProviders
 {
-	class TwistMoeBloatFreeProvider : BloatFreeBaseAnimeProvider
+	class TwistMoeProvider : BloatFreeBaseAnimeProvider
 	{
 		static string HTMLGet(string uri, string referer, bool br = false, List<Cookie> cookies = null, List<string> keys = null, List<string> values = null)
 		{
@@ -320,7 +320,7 @@ namespace CloudStreamForms.Core.AnimeProviders
 			return null;
 		}
 
-		public TwistMoeBloatFreeProvider(CloudStreamCore _core) : base(_core)
+		public TwistMoeProvider(CloudStreamCore _core) : base(_core)
 		{
 			if (isFetching) return;
 			if (openToken != "" && tokenCook != "") return;

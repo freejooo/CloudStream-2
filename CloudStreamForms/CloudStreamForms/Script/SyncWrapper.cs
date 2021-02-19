@@ -1,6 +1,5 @@
 ﻿using CloudStreamForms.Core;
 using System;
-using System.Collections.Generic;
 
 namespace CloudStreamForms.Script
 {

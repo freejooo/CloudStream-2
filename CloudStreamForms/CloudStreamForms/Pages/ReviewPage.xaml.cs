@@ -95,7 +95,7 @@ namespace CloudStreamForms
 									Title = rew.title,
 									IsExpanded = false,
 									index = index
-								}) ;
+								});
 								index++;
 							}
 							SetHeight();
@@ -168,7 +168,7 @@ namespace CloudStreamForms
 				SetHeight();
 
 			});
-		} 
+		}
 
 		private void episodeView_ItemTapped(object sender, ItemTappedEventArgs e)
 		{

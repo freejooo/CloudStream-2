@@ -7,10 +7,10 @@ using static CloudStreamForms.Core.CloudStreamCore;
 
 namespace CloudStreamForms.Core.AnimeProviders
 {
-	class AnimeFeverBloatFreeProvider : BloatFreeBaseAnimeProvider
+	class AnimeFeverProvider : BloatFreeBaseAnimeProvider
 	{
 		readonly AnimeFeverBaseProvider helper;
-		public AnimeFeverBloatFreeProvider(CloudStreamCore _core) : base(_core)
+		public AnimeFeverProvider(CloudStreamCore _core) : base(_core)
 		{
 			helper = new AnimeFeverBaseProvider(_core);
 		}

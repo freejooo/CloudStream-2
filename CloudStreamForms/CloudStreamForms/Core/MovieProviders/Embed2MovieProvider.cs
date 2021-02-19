@@ -4,11 +4,11 @@ using static CloudStreamForms.Core.CloudStreamCore;
 
 namespace CloudStreamForms.Core.MovieProviders
 {
-	class Embed2Provider : BloatFreeMovieProvider
+	class Embed2MovieProvider : BloatFreeMovieProvider
 	{
 		public override string Name => "Embed2";
 		public override bool NullMetadata => true;
-		public Embed2Provider(CloudStreamCore _core) : base(_core) { }
+		public Embed2MovieProvider(CloudStreamCore _core) : base(_core) { }
 		public override bool HasAnimeMovie => true;
 		public override bool HasMovie => true;
 		public override bool HasTvSeries => true;

@@ -1188,7 +1188,7 @@ namespace CloudStreamForms
 			if (currentVideo.isDownloadFile) {
 				App.ShowToast("Error Loading Media");
 				MainDispose();
-				await Device.InvokeOnMainThreadAsync( async () => {
+				await Device.InvokeOnMainThreadAsync(async () => {
 					App.ToggleRealFullScreen(false);
 					await Navigation.PopModalAsync();
 				});
