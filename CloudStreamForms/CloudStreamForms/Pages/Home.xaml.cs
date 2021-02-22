@@ -442,7 +442,7 @@ namespace CloudStreamForms
 
 				string title = ep.episode > 0 && ep.season > 0 ? $"S{ep.season}:E{ep.episode} {ep.episodeName}" : $"{ep.episodeName}";
 				const int MAX_TITLE_LENGHT = 20;
-				if(title.Length > MAX_TITLE_LENGHT) {
+				if (title.Length > MAX_TITLE_LENGHT) {
 					title = title[0..MAX_TITLE_LENGHT] + "...";
 				}
 
@@ -459,6 +459,12 @@ namespace CloudStreamForms
 					OpenCommand = new Command(async () => {
 						var res = new MovieResult(ep.state);
 						await Navigation.PushModalAsync(res, false);
+						for (int i = 0; i < 100; i++) {
+							if (res.epView.MyEpisodeResultCollection.Count > 0) { // FIXES NEXT EPISODE PROBLEM
+								break;
+							}
+							await Task.Delay(50);
+						}
 						await res.LoadLinksForEpisode(new EpisodeResult() { Episode = ep.episode, Season = ep.season, Id = ep.episode - 1, Description = ep.description, IMDBEpisodeId = ep.imdbId, OgTitle = ep.episodeName });
 					}),
 					RemoveCommand = new Command(() => {
@@ -469,11 +475,11 @@ namespace CloudStreamForms
 								break;
 							}
 						}
-						if(epView.NextEpisodeCollection.Count == 0) {
+						if (epView.NextEpisodeCollection.Count == 0) {
 							UpdateNextEpisode();
 						}
 					}),
-				}) ;
+				});
 			}
 		}
 
