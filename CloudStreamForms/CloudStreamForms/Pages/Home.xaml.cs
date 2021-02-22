@@ -321,7 +321,7 @@ namespace CloudStreamForms
 					}
 				};
 
-
+				/*
 				if (Device.RuntimePlatform == Device.UWP) {
 					// BlueSeperator.IsVisible = false;
 					// BlueSeperator.IsEnabled = false;
@@ -330,7 +330,7 @@ namespace CloudStreamForms
 				}
 				else {
 					OffBar.Source = App.GetImageSource("gradient.png"); OffBar.HeightRequest = 3; OffBar.HorizontalOptions = LayoutOptions.Fill; OffBar.ScaleX = 100; OffBar.Opacity = 0.3;
-				}
+				}*/
 
 				episodeView.VerticalScrollBarVisibility = Settings.ScrollBarVisibility;
 			}
@@ -420,8 +420,8 @@ namespace CloudStreamForms
 		{
 			FastTxt.IsEnabled = show;
 			FastTxt.IsVisible = show;
-			FastScroll.IsEnabled = show;
-			FastScroll.IsVisible = show;
+			NextEpisodeView.IsEnabled = show;
+			NextEpisodeView.IsVisible = show;
 			BookTxt.IsEnabled = show;
 			BookTxt.IsVisible = show;
 		}

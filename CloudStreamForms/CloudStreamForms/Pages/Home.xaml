@@ -36,15 +36,25 @@
 			</xe:BorderView>
 
 		</Grid>
-		<Grid VerticalOptions="Fill"   HeightRequest="20000">
-			<Image x:Name="baseImg" IsVisible="False" VerticalOptions="Fill" HorizontalOptions="Fill" Scale="0.6" BackgroundColor="Transparent" AbsoluteLayout.LayoutBounds="0, 0, 1, 1" AbsoluteLayout.LayoutFlags="All"  InputTransparent="True" TranslationY="-40"></Image>
-			<Label x:Name="baseTxt" IsVisible="False" AbsoluteLayout.LayoutBounds="0, 0, 1, 1" AbsoluteLayout.LayoutFlags="All"  VerticalOptions="Center" HorizontalOptions="Center" TextColor="#434343" ClassId="CUST" FontAttributes="Bold" FontSize="18" TranslationY="80" InputTransparent="True" Text="No Bookmarks"></Label>
-			<!--<Button x:Name="baseMore" IsVisible="true" BackgroundColor="White" CornerRadius="10" TextColor="Black" ClassId="CUST" AbsoluteLayout.LayoutBounds="0, 0, 1, 1" AbsoluteLayout.LayoutFlags="All"  VerticalOptions="Center" HorizontalOptions="Center" HeightRequest="30" FontAttributes="Bold" FontSize="18" TranslationY="200" Padding="10,0" InputTransparent="True" Text="Search for more titles"></Button>-->
+		<ProgressBar   x:Name="LoadingIndicator"  HorizontalOptions="Fill" IsVisible="false" IsEnabled="False" ClassId="id" HeightRequest="15" Margin="-7.5" VerticalOptions="Start" InputTransparent="True"></ProgressBar>
 
+		<ScrollView VerticalScrollBarVisibility="Never" Orientation="Vertical" Grid.Row="3" x:Name="BookHolder">
+			<Grid VerticalOptions="Start">
+				<Grid.RowDefinitions>
+					<RowDefinition Height="Auto"></RowDefinition>
+					<RowDefinition Height="Auto"></RowDefinition>
+					<RowDefinition Height="Auto"></RowDefinition>
+					<RowDefinition Height="Auto"></RowDefinition>
+				</Grid.RowDefinitions>
+				<Image x:Name="baseImg" IsVisible="False" VerticalOptions="Fill" HorizontalOptions="Fill" Scale="0.6" BackgroundColor="Transparent" AbsoluteLayout.LayoutBounds="0, 0, 1, 1" AbsoluteLayout.LayoutFlags="All"  InputTransparent="True" TranslationY="-40"></Image>
+				<Label x:Name="baseTxt" IsVisible="False" AbsoluteLayout.LayoutBounds="0, 0, 1, 1" AbsoluteLayout.LayoutFlags="All"  VerticalOptions="Center" HorizontalOptions="Center" TextColor="#434343" ClassId="CUST" FontAttributes="Bold" FontSize="18" TranslationY="80" InputTransparent="True" Text="No Bookmarks"></Label>
+				<Grid x:Name="FastTxt" Grid.Row="1" HeightRequest="50">
+					<Button Text="Clear" TextColor="Black" ClassId="CUST" HeightRequest="30" Margin="10" WidthRequest="70" FontSize="Body" HorizontalOptions="End" BackgroundColor="White" x:Name="FastTxtBtt"></Button>
+					<Label Text="Resume Watching" VerticalOptions="Center" Margin="10" TextColor="White" FontSize="Body" InputTransparent="True" ></Label>
+				</Grid>
 
-			<!--<BoxView HeightRequest="1" Color="#303F9F"></BoxView>-->
-				<CollectionView ItemsSource="{Binding NextEpisodeCollection}"  HeightRequest="160"
-                             VerticalOptions="Start" VerticalScrollBarVisibility="Never" >
+				<CollectionView ItemsSource="{Binding NextEpisodeCollection}"  HeightRequest="160" Grid.Row="2" Margin="0,-5"
+                             VerticalOptions="Start" VerticalScrollBarVisibility="Never" x:Name="NextEpisodeView">
 					<CollectionView.ItemsLayout>
 						<LinearItemsLayout Orientation="Horizontal" />
 					</CollectionView.ItemsLayout>
@@ -66,7 +76,6 @@
 								</Frame>
 								<StackLayout Margin="5,5">
 									<Grid>
-
 										<ff:CachedImage HeightRequest="100" Margin="0,0" Source="{Binding PosterUrl}" InputTransparent="True" ff:LoadingPlaceholder="emtyLoadingPosterV2.png">
 
 											<ff:CachedImage.Transformations>
@@ -108,132 +117,103 @@
 						</DataTemplate>
 					</CollectionView.ItemTemplate>
 				</CollectionView>
-			<ScrollView VerticalScrollBarVisibility="Never" Orientation="Vertical" Grid.Row="0" x:Name="BookHolder" >
-				<StackLayout>
-					<Grid x:Name="FastTxt">
-						<Button Text="Clear" TextColor="Black" ClassId="CUST" HeightRequest="30" Margin="10" WidthRequest="70" FontSize="Body" HorizontalOptions="End" BackgroundColor="White" x:Name="FastTxtBtt"></Button>
-						<Label Text="Resume Watching" VerticalOptions="Center" Margin="10" TextColor="White" FontSize="Body" InputTransparent="True" ></Label>
+			<!--	<Image x:Name="OffBar" Grid.Row="0" InputTransparent="True" VerticalOptions="Start" TranslationY="0"></Image>-->
+				<StackLayout Grid.Row="3">
+					<Label Text="Bookmarks" Margin="10,0,10,10" TextColor="White" FontSize="Body" x:Name="BookTxt"></Label>
+					<Grid x:Name="Bookmarks" VerticalOptions="Start" HorizontalOptions="Fill" >
+
 					</Grid>
-				
-					<ScrollView VerticalScrollBarVisibility="Never" Orientation="Vertical" IsVisible="false" >
-						<StackLayout>
-							<Label Text="Bookmarks" Margin="10" TextColor="White" FontSize="Body" x:Name="BookTxt"></Label>
-							<Grid x:Name="Bookmarks" VerticalOptions="Start" HorizontalOptions="Fill" >
-
-							</Grid>
-						</StackLayout>
-
-					</ScrollView>
-
 				</StackLayout>
-			</ScrollView>
-
-			<!--   <BoxView HeightRequest="1" Color="#303F9F"></BoxView>-->
-
-			<!--<BoxView  HeightRequest="3" Color="#303F9F" TranslationY="10"></BoxView>-->
-
-			<Grid x:Name="Top100Stack" IsEnabled="True" IsVisible="True" HorizontalOptions="Fill" VerticalOptions="Fill">
-
-
-				<!--        <ScrollView x:Name="ImageScroller">
-            <StackLayout>
-                <Grid x:Name="ItemGrid">
-            
-                </Grid>
-            </StackLayout>
-        </ScrollView>-->
-
-
-
-				<!--<ActivityIndicator x:Name="LoadingIndicator" TranslationY="30"></ActivityIndicator>-->
-
-				<CollectionView ItemsSource="{Binding MyEpisodeResultCollection}" 
+			</Grid>
+		</ScrollView>
+		<Grid x:Name="Top100Stack" IsEnabled="True" IsVisible="True" HorizontalOptions="Fill" VerticalOptions="Fill">
+			<CollectionView ItemsSource="{Binding MyEpisodeResultCollection}" 
                     x:Name="episodeView"   VerticalOptions="Start" VerticalScrollBarVisibility="Never"     >
-					<CollectionView.ItemsLayout>
-						<LinearItemsLayout Orientation="Vertical" />
-					</CollectionView.ItemsLayout>
-					<CollectionView.ItemTemplate>
-						<DataTemplate>
-							<Grid RowSpacing="0"  Padding="0"  HorizontalOptions="Fill"  HeightRequest="98" VerticalOptions="Center" cse:LongPressedEffect.Command="{Binding TapComThree}" >
-								<Grid.Effects>
-									<cse:LongPressedEffect></cse:LongPressedEffect>
-								</Grid.Effects>
+				<CollectionView.ItemsLayout>
+					<LinearItemsLayout Orientation="Vertical" />
+				</CollectionView.ItemsLayout>
+				<CollectionView.ItemTemplate>
+					<DataTemplate>
+						<Grid RowSpacing="0"  Padding="0"  HorizontalOptions="Fill"  HeightRequest="98" VerticalOptions="Center" cse:LongPressedEffect.Command="{Binding TapComThree}" >
+							<Grid.Effects>
+								<cse:LongPressedEffect></cse:LongPressedEffect>
+							</Grid.Effects>
 
-								<Grid.RowDefinitions >
-									<RowDefinition Height="Auto" />
-									<RowDefinition Height="Auto" />
-									<RowDefinition Height="Auto" />
-								</Grid.RowDefinitions>
-								<Frame CornerRadius="5" BackgroundColor="{Binding ExtraColor}" Margin="5,5" HeightRequest="98" VerticalOptions="Center" HasShadow="True"></Frame>
-								<Grid Grid.Row="0" Grid.Column="0" HorizontalOptions="Fill" VerticalOptions="Center" Margin="5,5" >
-									<Grid  RowSpacing="0"  Padding="0" >
-										<Grid.RowDefinitions >
-											<RowDefinition Height="Auto" />
-											<RowDefinition Height="Auto" />
-											<RowDefinition Height="Auto" />
-										</Grid.RowDefinitions>
+							<Grid.RowDefinitions >
+								<RowDefinition Height="Auto" />
+								<RowDefinition Height="Auto" />
+								<RowDefinition Height="Auto" />
+							</Grid.RowDefinitions>
+							<Frame CornerRadius="5" BackgroundColor="{Binding ExtraColor}" Margin="5,5" HeightRequest="98" VerticalOptions="Center" HasShadow="True"></Frame>
+							<Grid Grid.Row="0" Grid.Column="0" HorizontalOptions="Fill" VerticalOptions="Center" Margin="5,5" >
+								<Grid  RowSpacing="0"  Padding="0" >
+									<Grid.RowDefinitions >
+										<RowDefinition Height="Auto" />
+										<RowDefinition Height="Auto" />
+										<RowDefinition Height="Auto" />
+									</Grid.RowDefinitions>
 
-										<Grid.ColumnDefinitions >
-											<ColumnDefinition Width="Auto" />
-											<ColumnDefinition Width="Auto" />
-											<ColumnDefinition Width="Auto" />
-										</Grid.ColumnDefinitions>
+									<Grid.ColumnDefinitions >
+										<ColumnDefinition Width="Auto" />
+										<ColumnDefinition Width="Auto" />
+										<ColumnDefinition Width="Auto" />
+									</Grid.ColumnDefinitions>
 
-										<Grid Grid.Row="0"  Grid.Column="1"  WidthRequest="68" TranslationY="{Binding TranslateYOffsetVertical}" >
+									<Grid Grid.Row="0"  Grid.Column="1"  WidthRequest="68" TranslationY="{Binding TranslateYOffsetVertical}" >
 
-											<ff:CachedImage WidthRequest="68" HeightRequest="98" Source="{Binding PosterUrl}" InputTransparent="True" ff:LoadingPlaceholder="emtyLoadingPosterV2.png">
+										<ff:CachedImage WidthRequest="68" TranslationX="-9" HeightRequest="98" Source="{Binding PosterUrl}" InputTransparent="True" ff:LoadingPlaceholder="emtyLoadingPosterV2.png" VerticalOptions="Start" >
 
-												<ff:CachedImage.Transformations>
-													<ffTransformations:RoundedTransformation BorderSize="0" Radius="7" BorderHexColor="#303F9F" CropWidthRatio="0.7" >
+											<ff:CachedImage.Transformations>
+												<ffTransformations:RoundedTransformation BorderSize="0" Radius="7" BorderHexColor="#303F9F" CropWidthRatio="0.7" >
 
-													</ffTransformations:RoundedTransformation>
-												</ff:CachedImage.Transformations>
-											</ff:CachedImage>
-											<!--
+												</ffTransformations:RoundedTransformation>
+											</ff:CachedImage.Transformations>
+										</ff:CachedImage>
+										<!--
                                                     <ff:CachedImage PropertyChanging="Image_PropertyChanging" InputTransparent="True" BackgroundColor="Transparent">
 
                                                     </ff:CachedImage>-->
-											<xe:BorderView  xe:TouchEffect.Color="White" Opacity="0.5" CornerRadius="1.2" BackgroundColor="Transparent" xe:EffectsConfig.ChildrenInputTransparent="False" xe:Commands.Tap="{Binding TapCom}" >
-												<!-- xe:Commands.Tap="{Binding TapCommand}"-->
-												<!--   <ImageButton Clicked="ImageButton_Clicked" BackgroundColor="Transparent" InputTransparent="False" ></ImageButton  > -->
+										<xe:BorderView  xe:TouchEffect.Color="White" Opacity="0.5" CornerRadius="1.2" BackgroundColor="Transparent" xe:EffectsConfig.ChildrenInputTransparent="False" xe:Commands.Tap="{Binding TapCom}" >
+											<!-- xe:Commands.Tap="{Binding TapCommand}"-->
+											<!--   <ImageButton Clicked="ImageButton_Clicked" BackgroundColor="Transparent" InputTransparent="False" ></ImageButton  > -->
 
-											</xe:BorderView>
+										</xe:BorderView>
 
-										</Grid>
-										<!--
+									</Grid>
+									<!--
                                             <Grid  Grid.Row="0"  Grid.Column="0">
                                                 <BoxView WidthRequest="3" HeightRequest="10" Color="#303F9F"></BoxView>
                                             </Grid>-->
 
-										<Grid  Grid.Row="0"  Grid.Column="2" Padding="0,3">
-											<Grid RowSpacing="0" Padding="0" >
-												<Grid.RowDefinitions >
-													<RowDefinition Height="Auto" />
-													<RowDefinition Height="Auto" />
-													<RowDefinition Height="Auto" />
-												</Grid.RowDefinitions>
-												<Grid.ColumnDefinitions >
-													<ColumnDefinition Width="Auto" />
-													<ColumnDefinition Width="Auto" />
-													<ColumnDefinition Width="Auto" />
-												</Grid.ColumnDefinitions>
-												<Grid Grid.Row="0"  Grid.Column="0" Padding="0,3">
-													<Label Text="{Binding Title}" TextColor="{Binding MainTextColor}" FontAttributes="Bold" FontSize="13"/>
-												</Grid>
-												<Grid Grid.Row="1"  Grid.Column="0" >
-													<Label Text="{Binding Description}"  TextColor="{Binding MainDarkTextColor}" MaxLines="4"  />
-												</Grid>
+									<Grid  Grid.Row="0"  Grid.Column="2" Padding="-10,3,0,3">
+										<Grid RowSpacing="0" Padding="0" >
+											<Grid.RowDefinitions >
+												<RowDefinition Height="Auto" />
+												<RowDefinition Height="Auto" />
+												<RowDefinition Height="Auto" />
+											</Grid.RowDefinitions>
+											<Grid.ColumnDefinitions >
+												<ColumnDefinition Width="Auto" />
+												<ColumnDefinition Width="Auto" />
+												<ColumnDefinition Width="Auto" />
+											</Grid.ColumnDefinitions>
+											<Grid Grid.Row="0"  Grid.Column="0" Padding="0,3">
+												<Label Text="{Binding Title}" TextColor="{Binding MainTextColor}" FontAttributes="Bold" FontSize="13"/>
+											</Grid>
+											<Grid Grid.Row="1"  Grid.Column="0" >
+												<Label Text="{Binding Description}"  TextColor="{Binding MainDarkTextColor}" MaxLines="4"  />
 											</Grid>
 										</Grid>
 									</Grid>
-
 								</Grid>
 
-								<!--
+							</Grid>
+
+							<!--
                                     <Grid Grid.Row="0" Grid.Column="0" HorizontalOptions="Fill" TranslationY="95">
                                         <ProgressBar Progress="{Binding ExtraProgress}" IsVisible="{Binding DownloadNotDone}" IsEnabled="{Binding DownloadNotDone}" HeightRequest="5"  VerticalOptions="Start"/>
                                     </Grid>-->
-								<!--
+							<!--
                             <Grid Grid.Row="1" x:Name="PBar"  Grid.Column="0" VerticalOptions="Center">
                                 <ContentView VerticalOptions="Center">
                                     <ProgressBar Progress="{Binding Progress}" VerticalOptions="Center" PropertyChanged="ProgressBar_BindingContextChanged" IsVisible="False" IsEnabled="False"></ProgressBar>
@@ -241,18 +221,11 @@
                             </Grid>-->
 
 
-							</Grid>
-						</DataTemplate>
-					</CollectionView.ItemTemplate>
-				</CollectionView>
-				<Button    x:Name="MovieTypePickerBtt"  VerticalOptions="End" HorizontalOptions="End" InputTransparent="False" Margin="10" WidthRequest="100" Text="Sci-Fi" TextColor="#e7e7e7" FontAttributes="Bold" FontSize="Body" CornerRadius="5" HeightRequest="40" BackgroundColor="#252525" ></Button>
-				<ProgressBar   x:Name="LoadingIndicator"  HorizontalOptions="Fill" ClassId="id" HeightRequest="15" TranslationY="-8" VerticalOptions="Start" InputTransparent="True"></ProgressBar>
-			</Grid>
-			<Image x:Name="OffBar" Grid.Row="0" InputTransparent="True" VerticalOptions="Start" TranslationY="0"></Image>
-
+						</Grid>
+					</DataTemplate>
+				</CollectionView.ItemTemplate>
+			</CollectionView>
+			<Button    x:Name="MovieTypePickerBtt"  VerticalOptions="End" HorizontalOptions="End" InputTransparent="False" Margin="10" WidthRequest="100" Text="Sci-Fi" TextColor="#e7e7e7" FontAttributes="Bold" FontSize="Body" CornerRadius="5" HeightRequest="40" BackgroundColor="#252525" ></Button>
 		</Grid>
-
-		<!-- <BoxView HorizontalOptions="Fill" Color="#4b4b4b"  HeightRequest="2" ></BoxView>-->
-
 	</StackLayout>
 </ContentPage>
