@@ -169,22 +169,10 @@
 												</ffTransformations:RoundedTransformation>
 											</ff:CachedImage.Transformations>
 										</ff:CachedImage>
-										<!--
-                                                    <ff:CachedImage PropertyChanging="Image_PropertyChanging" InputTransparent="True" BackgroundColor="Transparent">
-
-                                                    </ff:CachedImage>-->
-										<xe:BorderView  xe:TouchEffect.Color="White" Opacity="0.5" CornerRadius="1.2" BackgroundColor="Transparent" xe:EffectsConfig.ChildrenInputTransparent="False" xe:Commands.Tap="{Binding TapCom}" >
-											<!-- xe:Commands.Tap="{Binding TapCommand}"-->
-											<!--   <ImageButton Clicked="ImageButton_Clicked" BackgroundColor="Transparent" InputTransparent="False" ></ImageButton  > -->
-
+										<xe:BorderView Margin="3,0"  xe:TouchEffect.Color="White" Opacity="0.5" CornerRadius="1.2" TranslationX="-9" BackgroundColor="Transparent" xe:EffectsConfig.ChildrenInputTransparent="False" xe:Commands.Tap="{Binding TapCom}" >
 										</xe:BorderView>
-
 									</Grid>
-									<!--
-                                            <Grid  Grid.Row="0"  Grid.Column="0">
-                                                <BoxView WidthRequest="3" HeightRequest="10" Color="#303F9F"></BoxView>
-                                            </Grid>-->
-
+									
 									<Grid  Grid.Row="0"  Grid.Column="2" Padding="-10,3,0,3">
 										<Grid RowSpacing="0" Padding="0" >
 											<Grid.RowDefinitions >

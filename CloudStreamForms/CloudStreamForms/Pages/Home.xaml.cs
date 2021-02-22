@@ -469,6 +469,9 @@ namespace CloudStreamForms
 								break;
 							}
 						}
+						if(epView.NextEpisodeCollection.Count == 0) {
+							UpdateNextEpisode();
+						}
 					}),
 				}) ;
 			}
