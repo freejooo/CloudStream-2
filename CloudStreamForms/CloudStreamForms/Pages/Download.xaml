@@ -85,18 +85,14 @@
            IsRefreshing="{Binding IsRefreshing}"         >
 
 						<!-- <ProgressBar Progress="0.5"></ProgressBar> -->
-						<ListView ItemsSource="{Binding MyEpisodeResultCollection}"
-                             CachingStrategy="RecycleElement" 
-                ItemTapped="episodeView_ItemTapped" RowHeight="104" Opacity="0"
-                    x:Name="episodeView"  SeparatorColor="Transparent"  
-         >
-
-
+						<CollectionView ItemsSource="{Binding MyEpisodeResultCollection}" Opacity="0" x:Name="episodeView">
+							<CollectionView.ItemsLayout>
+								<LinearItemsLayout Orientation="Vertical" />
+							</CollectionView.ItemsLayout>
 							<!--  RefreshCommand="{Binding RefreshCommand}"
            IsRefreshing="{Binding IsRefreshing}"       RefreshControlColor="#303F9F"  -->
-							<ListView.ItemTemplate>
+							<CollectionView.ItemTemplate>
 								<DataTemplate >
-									<ViewCell Tapped="ViewCell_Tapped">
 										<Grid RowSpacing="0"  Padding="0"  HorizontalOptions="Fill" cse:LongPressedEffect.Command="{Binding TapComThree}"  >
 
 											<Grid.Effects>
@@ -110,7 +106,7 @@
 												<RowDefinition Height="Auto" />
 												<RowDefinition Height="Auto" />
 											</Grid.RowDefinitions>
-                                            <Frame BackgroundColor="{Binding ExtraColor}" CornerRadius="5" Margin="7,5" HasShadow="True"></Frame>
+                                            <Frame BackgroundColor="{Binding ExtraColor}" CornerRadius="5" Margin="5,5" HasShadow="True"></Frame>
 											<Grid Grid.Row="0" Grid.Column="0" HorizontalOptions="Fill" >
 												<Grid  RowSpacing="0"  Padding="3.3,5" >
 													<Grid.RowDefinitions >
@@ -199,11 +195,10 @@
 
 										</Grid>
 
-									</ViewCell>
 								</DataTemplate>
-							</ListView.ItemTemplate>
+							</CollectionView.ItemTemplate>
 
-						</ListView>
+						</CollectionView>
 					</RefreshView>
 
 				</Grid>

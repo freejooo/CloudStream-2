@@ -179,7 +179,7 @@ namespace CloudStreamForms
 
 		void SetHeight()
 		{
-			Device.BeginInvokeOnMainThread(() => episodeView.HeightRequest = 10000);//episodeView.HeightRequest = MyEpisodeResultCollection.Count * episodeView.RowHeight + 200);
+			//Device.BeginInvokeOnMainThread(() => episodeView.HeightRequest = 10000);//episodeView.HeightRequest = MyEpisodeResultCollection.Count * episodeView.RowHeight + 200);
 		}
 
 		public static void RemoveDownloadCookie(int? id = null, int? headerId = null)
@@ -448,7 +448,6 @@ namespace CloudStreamForms
 		}
 
 		public static Dictionary<int, DownloadHeaderHelper> downloadHelper = new Dictionary<int, DownloadHeaderHelper>();
-
 		public static Dictionary<int, App.DownloadInfo> downloads = new Dictionary<int, App.DownloadInfo>();
 		public static Dictionary<int, App.DownloadHeader> downloadHeaders = new Dictionary<int, App.DownloadHeader>();
 

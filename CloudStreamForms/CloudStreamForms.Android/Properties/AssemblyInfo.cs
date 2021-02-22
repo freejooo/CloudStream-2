@@ -1,6 +1,7 @@
 ﻿using Android.App;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using Xamarin.Forms.Xaml;
 
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
@@ -31,3 +32,4 @@ using System.Runtime.InteropServices;
 // Add some common permissions, these can be removed if not needed
 [assembly: UsesPermission(Android.Manifest.Permission.Internet)]
 [assembly: UsesPermission(Android.Manifest.Permission.WriteExternalStorage)]
+[assembly: XamlCompilation(XamlCompilationOptions.Compile)]

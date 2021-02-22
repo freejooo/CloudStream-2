@@ -53,6 +53,7 @@ namespace CloudStreamForms.Core
 		// https://stremiomovies.com : few working links + duplicate links
 		// https://animixplay.to : duplicate of shiro, dubbedvip and genoanime
 		// https://ssoap2day.to : slow search and few titles
+		// https://simplyaweeb.com : duplicate of https://www2.gogoanime.sh/
 		// ================================================================================
 
 		public static bool[] isAnimeProviderEnabled;

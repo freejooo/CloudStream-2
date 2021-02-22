@@ -20,7 +20,7 @@ namespace CloudStreamForms
 		const int POSTER_HIGHT = 96;
 		const int POSTER_WIDTH = 67;
 
-		public MainEpisodeView epView;
+		public MainEpisode100View epView;
 		public List<IMDbTopList> iMDbTopList = new List<IMDbTopList>();
 		readonly List<string> genres = new List<string>() { "", "action", "adventure", "animation", "biography", "comedy", "crime", "drama", "family", "fantasy", "film-noir", "history", "horror", "music", "musical", "mystery", "romance", "sci-fi", "sport", "thriller", "war", "western" };
 		readonly List<string> genresNames = new List<string>() { "Any", "Action", "Adventure", "Animation", "Biography", "Comedy", "Crime", "Drama", "Family", "Fantasy", "Film-Noir", "History", "Horror", "Music", "Musical", "Mystery", "Romance", "Sci-Fi", "Sport", "Thriller", "War", "Western" };
@@ -280,7 +280,7 @@ namespace CloudStreamForms
 #pragma warning restore CS0162 // Unreachable code detected
 			}
 			try {
-				epView = new MainEpisodeView();
+				epView = new MainEpisode100View();
 				BindingContext = epView;
 
 				BackgroundColor = Settings.BlackRBGColor;
@@ -302,11 +302,8 @@ namespace CloudStreamForms
 					}
 				};
 
-				double lastScroll = 0;
-
 				episodeView.Scrolled += (o, e) => {
-					MovieTypePickerBttScrollY -= lastScroll - e.ScrollY;
-					lastScroll = e.ScrollY;
+					MovieTypePickerBttScrollY += e.VerticalDelta;
 
 					if (MovieTypePickerBttScrollY > MovieTypePickerBttMinScrollY) {
 						MovieTypePickerBttScrollY = MovieTypePickerBttMinScrollY;
@@ -317,9 +314,9 @@ namespace CloudStreamForms
 
 					MovieTypePickerBtt.TranslationY = MovieTypePickerBttScrollY;
 
-					double maxY = episodeView.HeightRequest - episodeView.Height;
+					//	double maxY = episodeView.items.HeightRequest - episodeView.Height;
 					//print(maxY);
-					if (e.ScrollY >= maxY - 200) {
+					if (e.LastVisibleItemIndex >= epView.MyEpisodeResultCollection.Count - 10) {
 						LoadMoreImages();
 					}
 				};
@@ -409,7 +406,7 @@ namespace CloudStreamForms
 					MovieTypePickerBtt.Opacity = 0;
 				}
 
-				episodeView.HeightRequest = selectedTabItem == 0 ? 0 : epView.MyEpisodeResultCollection.Count * (episodeView.RowHeight) + 200;
+				//episodeView.HeightRequest = selectedTabItem == 0 ? 0 : epView.MyEpisodeResultCollection.Count * (episodeView.RowHeight) + 200;
 			});
 		}
 
@@ -435,92 +432,45 @@ namespace CloudStreamForms
 			bool hasTxt = epis.Length > 0;
 			UpdateHasNext(hasTxt);
 
-			NextEpisode.Children.Clear();
+			//NextEpisode.Children.Clear();
 			var pSource = App.GetImageSource("nexflixPlayBtt.png");
+
+			epView.NextEpisodeCollection.Clear();
+			var bgColor = Settings.ItemBackGroundColor.ToHex();
 			for (int i = 0; i < Math.Min(epis.Length, 5); i++) {
 				var ep = epis[i];
-				Grid stack = new Grid() { };
-				const double textAddSpace = 40;
 
-				var ff = new FFImageLoading.Forms.CachedImage {
-					Source = ep.poster,
-					HeightRequest = FastPosterHeight,
-					WidthRequest = FastPosterWith,
-					BackgroundColor = Color.Transparent,
-					TranslationY = -5,
-					VerticalOptions = LayoutOptions.Start,
-					InputTransparent = true,
-					Transformations = {
-                            //  new FFImageLoading.Transformations.RoundedTransformation(10,1,1.5,10,"#303F9F")
-                                    new FFImageLoading.Transformations.RoundedTransformation(5, 1.78, 1, 0, "#303F9F")
-									},
-					//	InputTransparent = true,
-				};
+				string title = ep.episode > 0 && ep.season > 0 ? $"S{ep.season}:E{ep.episode} {ep.episodeName}" : $"{ep.episodeName}";
+				const int MAX_TITLE_LENGHT = 20;
+				if(title.Length > MAX_TITLE_LENGHT) {
+					title = title[0..MAX_TITLE_LENGHT] + "...";
+				}
 
-				Frame boxView = new Frame() {
-					BackgroundColor = Settings.ItemBackGroundColor,// Color.FromRgb(_color, _color, _color),
-																   //	InputTransparent = true,
-					CornerRadius = 2,
-					HeightRequest = FastPosterHeight + textAddSpace,
-					TranslationY = 0,
-					WidthRequest = FastPosterWith,
-					HasShadow = true,
-				};
-
-				const double playSize = 50;
-				var playBtt = new FFImageLoading.Forms.CachedImage {
-					Source = pSource,
-					HeightRequest = playSize,
-					WidthRequest = playSize,
-					TranslationY = -15,
-					BackgroundColor = Color.Transparent,
-					HorizontalOptions = LayoutOptions.Center,
-					VerticalOptions = LayoutOptions.Center,
-					InputTransparent = true,
-				};
-
-				ProgressBar progress = new ProgressBar() {
-					HorizontalOptions = LayoutOptions.Fill,
-					ProgressColor = Color.FromHex("#829eff"),
-					VerticalOptions = LayoutOptions.End,
-					BackgroundColor = Color.Transparent,
+				epView.NextEpisodeCollection.Add(new HomeNextEpisode() {
+					ImdbId = ep.imdbId,
+					PosterUrl = ep.poster,
+					Title = title,
 					Progress = ep.progress,
-					WidthRequest = FastPosterWith,
-					HeightRequest = 3.5,
-					TranslationY = -(8.5 + textAddSpace / 2),
-				};
-
-				/*
-				var brView = new BorderView() { VerticalOptions = LayoutOptions.Fill, HorizontalOptions = LayoutOptions.Fill, CornerRadius = 5 };
-
-				brView.SetValue(XamEffects.TouchEffect.ColorProperty, Color.White);
-				Commands.SetTap(brView, new Command((o) => {
-					//PushPageFromUrlAndName(z.id, z.name);
-				}));*/
-				stack.Children.Add(boxView);
-				stack.Children.Add(ff);
-				stack.Children.Add(playBtt);
-				stack.Children.Add(progress);
-
-				bool isMovie = ep.season <= 0 || ep.episode <= 0;
-				stack.Children.Add(new Label() { Text = (isMovie ? "" : $"S{ep.season}:E{ep.episode} ") + $"{ep.episodeName}", Margin = new Thickness(5, 0), VerticalOptions = LayoutOptions.Start, VerticalTextAlignment = TextAlignment.Center, HorizontalTextAlignment = TextAlignment.Start, HorizontalOptions = LayoutOptions.Start, Padding = 1, TextColor = Color.White, MaxLines = 1, ClassId = "OUTLINE", TranslationY = FastPosterHeight - 3.5, WidthRequest = FastPosterWith });
-
-				/*
-				var infoBtt = new ImageButton() { Source = App.GetImageSource("baseline_help_outline_white_48dp.png"), HeightRequest = 7, WidthRequest = 7, VerticalOptions = LayoutOptions.End, HorizontalOptions = LayoutOptions.End, Margin = new Thickness(5, 5) };
-				infoBtt.Clicked += async (o, e) => {
-					var res = new MovieResult(ep.state);
-					await Navigation.PushModalAsync(res, false);
-				};*/
-				//	stack.Children.Add(infoBtt);
-				stack.Effects.Add(Effect.Resolve("CloudStreamForms.LongPressedEffect"));
-
-				LongPressedEffect.SetCommand(stack, new Command(async () => {
-					var res = new MovieResult(ep.state);
-					await Navigation.PushModalAsync(res, false);
-					await res.LoadLinksForEpisode(new EpisodeResult() { Episode = ep.episode, Season = ep.season, Id = ep.episode - 1, Description = ep.description, IMDBEpisodeId = ep.imdbId, OgTitle = ep.episodeName });
-				}));
-
-				NextEpisode.Children.Add(stack, i, 0);
+					ExtraColor = bgColor,
+					InfoCommand = new Command(async () => {
+						var res = new MovieResult(ep.state);
+						await Navigation.PushModalAsync(res, false);
+					}),
+					OpenCommand = new Command(async () => {
+						var res = new MovieResult(ep.state);
+						await Navigation.PushModalAsync(res, false);
+						await res.LoadLinksForEpisode(new EpisodeResult() { Episode = ep.episode, Season = ep.season, Id = ep.episode - 1, Description = ep.description, IMDBEpisodeId = ep.imdbId, OgTitle = ep.episodeName });
+					}),
+					RemoveCommand = new Command(() => {
+						App.RemoveKey(nameof(CachedCoreEpisode), ep.parentImdbId);
+						for (int i = 0; i < epView.NextEpisodeCollection.Count; i++) {
+							if (epView.NextEpisodeCollection[i].ImdbId == ep.imdbId) {
+								epView.NextEpisodeCollection.RemoveAt(i);
+								break;
+							}
+						}
+					}),
+				}) ;
 			}
 		}
 
@@ -881,12 +831,41 @@ namespace CloudStreamForms
 		private ObservableCollection<EpisodeResult> _MyEpisodeResultCollection;
 		public ObservableCollection<EpisodeResult> MyEpisodeResultCollection { set { Added?.Invoke(null, null); _MyEpisodeResultCollection = value; } get { return _MyEpisodeResultCollection; } }
 
+		public ObservableCollection<HomeNextEpisode> NextEpisodeCollection { set; get; }
+
 		public event EventHandler Added;
 
 		public MainEpisode100View()
 		{
 			MyEpisodeResultCollection = new ObservableCollection<EpisodeResult>();
+			NextEpisodeCollection = new ObservableCollection<HomeNextEpisode>();
 		}
+	}
+
+	public class HomeNextEpisode
+	{
+		public string ImdbId { set; get; }
+		public string Title { get; set; }
+		public string PosterUrl { get; set; }
+		public double Progress { get; set; }
+		public string ExtraColor { get; set; }
+		public Command OpenCommand { get; set; }
+		public Command InfoCommand { get; set; }
+		public Command RemoveCommand { get; set; }
+
+		/*public double progress;
+				public EpisodeOrigin origin;
+				public Movie state;
+				public DateTime createdAt;
+				public int episode;
+				public int season;
+				public string episodeName;
+				public string description;
+				public string rating;
+				public string poster;
+				public string parentName;
+				public string imdbId;
+				public string parentImdbId;*/
 	}
 
 }
