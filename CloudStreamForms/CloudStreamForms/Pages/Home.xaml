@@ -128,7 +128,7 @@
 		</ScrollView>
 		<Grid x:Name="Top100Stack" IsEnabled="True" IsVisible="True" HorizontalOptions="Fill" VerticalOptions="Fill">
 			<CollectionView ItemsSource="{Binding MyEpisodeResultCollection}" 
-                    x:Name="episodeView"   VerticalOptions="Start" VerticalScrollBarVisibility="Never"     >
+                    x:Name="episodeView"   VerticalOptions="Start" VerticalScrollBarVisibility="Never"   ItemSizingStrategy="MeasureFirstItem"  >
 				<CollectionView.ItemsLayout>
 					<LinearItemsLayout Orientation="Vertical" />
 				</CollectionView.ItemsLayout>

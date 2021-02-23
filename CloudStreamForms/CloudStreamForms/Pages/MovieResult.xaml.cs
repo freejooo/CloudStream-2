@@ -1043,15 +1043,6 @@ namespace CloudStreamForms
 			episodeResult.ExtraColor = Settings.ItemBackGroundColor.ToHex();
 			episodeResult.Season = CurrentSeason;
 
-
-
-			/*if (episodeResult.Rating != "") {
-                episodeResult.Title += " | ★ " + episodeResult.Rating;
-            }*/
-			/*if (episodeResult.Rating == "") {
-				episodeResult.Rating = currentMovie.title.rating;
-			}*/
-
 			if (IsDead) return episodeResult;
 			if (!IsMovie) {
 				episodeResult.Title = episodeResult.Episode + ". " + episodeResult.Title;
@@ -1247,8 +1238,8 @@ namespace CloudStreamForms
 		{
 			if (Core == null) return;
 
-		//	episodeView.RowHeight = Settings.EpDecEnabled ? 170 : 100;
-			//Device.BeginInvokeOnMainThread(() => episodeView.HeightRequest = (((setNull ?? showState != 0) || epView.MyEpisodeResultCollection.Count == 0) ? 0 : ((overrideCount ?? epView.MyEpisodeResultCollection.Count) * (episodeView.RowHeight) + Settings.TransparentAddPaddingEnd + 20))); // + 40 
+			episodeView.RowHeight = Settings.EpDecEnabled ? 170 : 100;
+			Device.BeginInvokeOnMainThread(() => episodeView.HeightRequest = (((setNull ?? showState != 0) || epView.MyEpisodeResultCollection.Count == 0) ? 0 : ((overrideCount ?? epView.MyEpisodeResultCollection.Count) * (episodeView.RowHeight) + Settings.TransparentAddPaddingEnd + 20))); // + 40 
 		}
 
 		private async void TrailerBtt_Clicked(object sender, EventArgs e)

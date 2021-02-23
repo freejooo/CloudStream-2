@@ -297,15 +297,16 @@ xmlns:ffTransformations="clr-namespace:FFImageLoading.Transformations;assembly=F
 					<Button x:Name="PublishDBBtt" IsVisible="False" IsEnabled="False" HeightRequest="50" Margin="0,5,0,-5" InputTransparent="True" Text="PUBLUSH" CornerRadius="0" BackgroundColor="#303F9F" TextColor="#FFF" ClassId="CUST"></Button>
 
 					<Grid  x:Name="RecFadeEpisodes">
-							<CollectionView ItemsSource="{Binding MyEpisodeResultCollection}" VerticalOptions="Fill" 
-                        x:Name="episodeView" VerticalScrollBarVisibility="Never" HeightRequest="0">
-								<CollectionView.ItemsLayout>
-									<LinearItemsLayout Orientation="Vertical" />
-								</CollectionView.ItemsLayout>
-								<CollectionView.ItemTemplate>
+							<ListView ItemsSource="{Binding MyEpisodeResultCollection}" VerticalOptions="Fill" 
+                        x:Name="episodeView" VerticalScrollBarVisibility="Never" HasUnevenRows="False" SeparatorColor="Transparent" CachingStrategy="RecycleElement" HeightRequest="0">
+								<!--<CollectionView.ItemsLayout>
+								<LinearItemsLayout Orientation="Vertical" />
+							</CollectionView.ItemsLayout>-->
+								<ListView.ItemTemplate>
 									<DataTemplate>
-										<ViewCell Tapped="ViewCell_Tapped"  >
-											<Grid cse:LongPressedEffect.Command="{Binding TapComThree}" >
+									<ViewCell Tapped="ViewCell_Tapped" >
+										
+									<Grid cse:LongPressedEffect.Command="{Binding TapComThree}" >
 												<Grid.Effects>
 													<cse:LongPressedEffect></cse:LongPressedEffect>
 												</Grid.Effects>
@@ -377,7 +378,7 @@ xmlns:ffTransformations="clr-namespace:FFImageLoading.Transformations;assembly=F
 															<ProgressBar IsVisible="{Binding HasProgress}" Progress="{Binding Progress}" ProgressColor="#829eff" VerticalOptions="End" HeightRequest="3"></ProgressBar>
 
 															<!-- Play Icon -->
-															<ff:CachedImage   Source="{Binding VideoSource}" Scale="0.5" InputTransparent="True"  BackgroundColor="Transparent">
+														<ff:CachedImage   Source="nexflixPlayBtt" Scale="0.5" InputTransparent="True"  BackgroundColor="Transparent">
 
 															</ff:CachedImage>
 														</Grid>
@@ -424,6 +425,7 @@ xmlns:ffTransformations="clr-namespace:FFImageLoading.Transformations;assembly=F
 													<Label Text="{Binding Description}"  TextColor="{Binding MainDarkTextColor}" LineHeight="1"  TranslationY="-5"  MaxLines="4" Grid.Row="1" Grid.Column="0" HorizontalOptions="Fill" VerticalOptions="Fill"  Padding="0,0,0,0" Margin="10,0" />
 												</Grid>
 											</Grid>
+									</ViewCell>
 											<!--
                                             <ff:CachedImage PropertyChanging="ImageGetGradient" InputTransparent="True" ScaleX="300" TranslationY="2" HeightRequest="10" Rotation="180" VerticalOptions="End" BackgroundColor="Transparent">
 
@@ -453,10 +455,9 @@ xmlns:ffTransformations="clr-namespace:FFImageLoading.Transformations;assembly=F
 -->
 											<!--<Label Text="{Binding Description}"  TextColor="{Binding MainDarkTextColor}" MaxLines="4"  />-->
 
-										</ViewCell>
 									</DataTemplate>
-								</CollectionView.ItemTemplate>
-							</CollectionView>
+								</ListView.ItemTemplate>
+							</ListView>
 
 						<StackLayout  x:Name="trailerStack">
 							<Grid x:Name="trailerView" VerticalOptions="Start" HorizontalOptions="CenterAndExpand" Margin="10" RowSpacing="10">
