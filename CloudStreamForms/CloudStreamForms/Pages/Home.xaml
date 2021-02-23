@@ -172,7 +172,7 @@
 										<xe:BorderView Margin="3,0"  xe:TouchEffect.Color="White" Opacity="0.5" CornerRadius="1.2" TranslationX="-9" BackgroundColor="Transparent" xe:EffectsConfig.ChildrenInputTransparent="False" xe:Commands.Tap="{Binding TapCom}" >
 										</xe:BorderView>
 									</Grid>
-									
+
 									<Grid  Grid.Row="0"  Grid.Column="2" Padding="-10,3,0,3">
 										<Grid RowSpacing="0" Padding="0" >
 											<Grid.RowDefinitions >
@@ -194,21 +194,7 @@
 										</Grid>
 									</Grid>
 								</Grid>
-
 							</Grid>
-
-							<!--
-                                    <Grid Grid.Row="0" Grid.Column="0" HorizontalOptions="Fill" TranslationY="95">
-                                        <ProgressBar Progress="{Binding ExtraProgress}" IsVisible="{Binding DownloadNotDone}" IsEnabled="{Binding DownloadNotDone}" HeightRequest="5"  VerticalOptions="Start"/>
-                                    </Grid>-->
-							<!--
-                            <Grid Grid.Row="1" x:Name="PBar"  Grid.Column="0" VerticalOptions="Center">
-                                <ContentView VerticalOptions="Center">
-                                    <ProgressBar Progress="{Binding Progress}" VerticalOptions="Center" PropertyChanged="ProgressBar_BindingContextChanged" IsVisible="False" IsEnabled="False"></ProgressBar>
-                                </ContentView>
-                            </Grid>-->
-
-
 						</Grid>
 					</DataTemplate>
 				</CollectionView.ItemTemplate>

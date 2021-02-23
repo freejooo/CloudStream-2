@@ -45,90 +45,81 @@
            IsRefreshing="{Binding IsRefreshing}"          >
 
 				<!-- <ProgressBar Progress="0.5"></ProgressBar>  ItemTapped="episodeView_ItemTapped" Tapped="ViewCell_Tapped"-->
-				<ListView ItemsSource="{Binding MyEpisodeResultCollection}"
-                             CachingStrategy="RecycleElement"  
-                RowHeight="100" Opacity="0"
-                    x:Name="episodeView"  SeparatorColor="Transparent"  VerticalScrollBarVisibility="Never"  >
-
-					<ListView.ItemTemplate>
+				<CollectionView ItemsSource="{Binding MyEpisodeResultCollection}" Opacity="0" x:Name="episodeView" VerticalScrollBarVisibility="Never">
+					<CollectionView.ItemTemplate>
 						<DataTemplate >
-							<ViewCell Tapped="ViewCell_Tapped">
-								<Grid RowSpacing="0"  Padding="0"  HorizontalOptions="Fill" cse:LongPressedEffect.Command="{Binding TapComThree}"  >
+							<Grid RowSpacing="0"  Padding="0"  HorizontalOptions="Fill" cse:LongPressedEffect.Command="{Binding TapComThree}">
+								<Grid.Effects>
+									<cse:LongPressedEffect></cse:LongPressedEffect>
+								</Grid.Effects>
 
-									<Grid.Effects>
-										<cse:LongPressedEffect></cse:LongPressedEffect>
-									</Grid.Effects>
+								<!--SizeChanged="ViewCell_SizeChanged"-->
 
-									<!--SizeChanged="ViewCell_SizeChanged"-->
+								<Grid.RowDefinitions >
+									<RowDefinition Height="Auto" />
+									<RowDefinition Height="Auto" />
+									<RowDefinition Height="Auto" />
+								</Grid.RowDefinitions>
 
-									<Grid.RowDefinitions >
-										<RowDefinition Height="Auto" />
-										<RowDefinition Height="Auto" />
-										<RowDefinition Height="Auto" />
-									</Grid.RowDefinitions>
+								<Grid Grid.Row="0" Grid.Column="0" HorizontalOptions="Fill" >
+									<Frame BackgroundColor="{Binding ExtraColor}" Margin="5,4" CornerRadius="5" HasShadow="True"></Frame>
+									<Grid  RowSpacing="0"  Padding="10,14" >
+										<Grid.RowDefinitions >
+											<RowDefinition Height="Auto" />
+											<RowDefinition Height="Auto" />
+											<RowDefinition Height="Auto" />
+										</Grid.RowDefinitions>
 
-									<Grid Grid.Row="0" Grid.Column="0" HorizontalOptions="Fill" >
-										<Frame BackgroundColor="{Binding ExtraColor}" Margin="5,4" CornerRadius="5" HasShadow="True"></Frame>
-										<Grid  RowSpacing="0"  Padding="10,14" >
-											<Grid.RowDefinitions >
-												<RowDefinition Height="Auto" />
-												<RowDefinition Height="Auto" />
-												<RowDefinition Height="Auto" />
-											</Grid.RowDefinitions>
+										<Grid.ColumnDefinitions >
+											<ColumnDefinition Width="Auto" />
+											<ColumnDefinition Width="Auto" />
+											<ColumnDefinition Width="Auto" />
+										</Grid.ColumnDefinitions>
+										<Grid  Grid.Row="0"  Grid.Column="0"  WidthRequest="126" HeightRequest="72" TranslationY="{Binding TranslateYOffset}" xe:TouchEffect.Color="White" xe:Commands.Tap="{Binding TapCom}" >
+											<ff:CachedImage WidthRequest="126" Source="{Binding ImageSource}" InputTransparent="True" >
+												<ff:CachedImage.Transformations >
+													<ffTransformations:RoundedTransformation Radius="1" CropWidthRatio="1.77"  >
 
-											<Grid.ColumnDefinitions >
-												<ColumnDefinition Width="Auto" />
-												<ColumnDefinition Width="Auto" />
-												<ColumnDefinition Width="Auto" />
-											</Grid.ColumnDefinitions>
-											<Grid  Grid.Row="0"  Grid.Column="0"  WidthRequest="126" HeightRequest="72" TranslationY="{Binding TranslateYOffset}" xe:TouchEffect.Color="White" xe:Commands.Tap="{Binding TapCom}" >
-												<ff:CachedImage WidthRequest="126" Source="{Binding ImageSource}" InputTransparent="True" >
-													<ff:CachedImage.Transformations >
-														<ffTransformations:RoundedTransformation Radius="1" CropWidthRatio="1.77"  >
+													</ffTransformations:RoundedTransformation>
+												</ff:CachedImage.Transformations>
+											</ff:CachedImage>
+											<ProgressBar IsVisible="{Binding HasProgress}" Progress="{Binding Progress}" ProgressColor="#829eff" VerticalOptions="End" HeightRequest="3"></ProgressBar>
+											<ff:CachedImage InputTransparent="True" BackgroundColor="Transparent" Source="{Binding DownloadPlayBttSource}" Scale="0.5">
+											</ff:CachedImage>
+										</Grid>
 
-														</ffTransformations:RoundedTransformation>
-													</ff:CachedImage.Transformations>
-												</ff:CachedImage>
-												<ProgressBar IsVisible="{Binding HasProgress}" Progress="{Binding Progress}" ProgressColor="#829eff" VerticalOptions="End" HeightRequest="3"></ProgressBar>
-												<ff:CachedImage InputTransparent="True" BackgroundColor="Transparent" Source="{Binding DownloadPlayBttSource}" Scale="0.5">
-												</ff:CachedImage>
-											</Grid>
-
-											<Grid  Grid.Row="0"  Grid.Column="1" Margin="0,2.5,0,0" >
-												<Grid RowSpacing="0" Padding="0" >
-													<Grid.RowDefinitions >
-														<RowDefinition Height="Auto" />
-														<RowDefinition Height="Auto" />
-														<RowDefinition Height="Auto" />
-													</Grid.RowDefinitions>
-													<Grid.ColumnDefinitions >
-														<ColumnDefinition Width="Auto" />
-														<ColumnDefinition Width="Auto" />
-														<ColumnDefinition Width="Auto" />
-													</Grid.ColumnDefinitions>
-													<Grid Grid.Row="0"  Grid.Column="0" >
-														<Label Text="{Binding Title}" TextColor="{Binding MainTextColor}" FontAttributes="Bold" FontSize="13"/>
-													</Grid>
-													<Grid Grid.Row="1"  Grid.Column="0" >
-														<Label Text="{Binding ExtraDescription}"  TextColor="#2291ff" MaxLines="3" FontSize="11" />
-													</Grid>
-													<Grid Grid.Row="2"  Grid.Column="0" >
-														<Label Text="{Binding Description}"  TextColor="{Binding MainDarkTextColor}" MaxLines="3"  />
-													</Grid>
+										<Grid  Grid.Row="0"  Grid.Column="1" Margin="0,2.5,0,0" >
+											<Grid RowSpacing="0" Padding="0" >
+												<Grid.RowDefinitions >
+													<RowDefinition Height="Auto" />
+													<RowDefinition Height="Auto" />
+													<RowDefinition Height="Auto" />
+												</Grid.RowDefinitions>
+												<Grid.ColumnDefinitions >
+													<ColumnDefinition Width="Auto" />
+													<ColumnDefinition Width="Auto" />
+													<ColumnDefinition Width="Auto" />
+												</Grid.ColumnDefinitions>
+												<Grid Grid.Row="0"  Grid.Column="0" >
+													<Label Text="{Binding Title}" TextColor="{Binding MainTextColor}" FontAttributes="Bold" FontSize="13"/>
+												</Grid>
+												<Grid Grid.Row="1"  Grid.Column="0" >
+													<Label Text="{Binding ExtraDescription}"  TextColor="#2291ff" MaxLines="3" FontSize="11" />
+												</Grid>
+												<Grid Grid.Row="2"  Grid.Column="0" >
+													<Label Text="{Binding Description}"  TextColor="{Binding MainDarkTextColor}" MaxLines="3"  />
 												</Grid>
 											</Grid>
-
 										</Grid>
 
 									</Grid>
+
 								</Grid>
-							</ViewCell>
+							</Grid>
 						</DataTemplate>
-					</ListView.ItemTemplate>
-
-				</ListView>
+					</CollectionView.ItemTemplate>
+				</CollectionView>
 			</RefreshView>
-
 		</Grid>
 
 		<Grid Grid.Row="3"  Grid.Column="0" InputTransparent="True" TranslationY="-10">

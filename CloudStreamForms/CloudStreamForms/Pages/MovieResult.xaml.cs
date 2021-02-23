@@ -401,8 +401,8 @@ namespace CloudStreamForms
 				}
 #endif
 				Device.InvokeOnMainThreadAsync(async () => {
-					FadeEpisodes.AbortAnimation("FadeTo");
-					FadeEpisodes.Opacity = 0;
+					episodeView.AbortAnimation("FadeTo");
+					episodeView.Opacity = 0;
 					if (IsDead) return;
 					epView.MyEpisodeResultCollection.Clear();
 					for (int i = 0; i < e.Length; i++) {
@@ -412,7 +412,7 @@ namespace CloudStreamForms
 					}
 					SetHeight();
 					await Task.Delay(100);
-					await FadeEpisodes.FadeTo(1, FATE_TIME_MS);
+					await episodeView.FadeTo(1, FATE_TIME_MS);
 					if (Settings.HasMalAccountLogin || Settings.HasAniListLogin) {
 						await UpdateAllMalValues();
 						if (maxAnimeEpisode == 0) {
@@ -448,7 +448,7 @@ namespace CloudStreamForms
 					};
 					SeasonPicker.SelectedIndexChanged += (o, e) => {
 						controller.SeasonPickerSelectIndex(e);
-						FadeEpisodes.FadeTo(0);
+						episodeView.FadeTo(0);
 					};
 					FromToPicker.SelectedIndexChanged += (object o, int e) => {
 						controller.SelFromToPickerSelectIndex(e);
@@ -1247,8 +1247,8 @@ namespace CloudStreamForms
 		{
 			if (Core == null) return;
 
-			episodeView.RowHeight = Settings.EpDecEnabled ? 170 : 100;
-			Device.BeginInvokeOnMainThread(() => episodeView.HeightRequest = (((setNull ?? showState != 0) || epView.MyEpisodeResultCollection.Count == 0) ? 0 : ((overrideCount ?? epView.MyEpisodeResultCollection.Count) * (episodeView.RowHeight) + Settings.TransparentAddPaddingEnd + 20))); // + 40 
+		//	episodeView.RowHeight = Settings.EpDecEnabled ? 170 : 100;
+			//Device.BeginInvokeOnMainThread(() => episodeView.HeightRequest = (((setNull ?? showState != 0) || epView.MyEpisodeResultCollection.Count == 0) ? 0 : ((overrideCount ?? epView.MyEpisodeResultCollection.Count) * (episodeView.RowHeight) + Settings.TransparentAddPaddingEnd + 20))); // + 40 
 		}
 
 		private async void TrailerBtt_Clicked(object sender, EventArgs e)
@@ -1298,7 +1298,7 @@ namespace CloudStreamForms
 				// Recommendations.HeightRequest = (RecPosterHeight + Recommendations.RowSpacing) * (total / perCol);
 				Recommendations.HeightRequest = (RecPosterHeight + Recommendations.RowSpacing) * (total / perCol) - 7 + Recommendations.RowSpacing; // + + Settings.TransparentAddPaddingEnd
 				Recommendations.Padding = new Thickness(0, 0, 0, DescriptionLabel.Height + NameLabel.Height - 30);
-				FadeEpisodes.Padding = new Thickness(0, 0, 0, DescriptionLabel.Height);
+				episodeView.Margin = new Thickness(0, 0, 0, DescriptionLabel.Height);
 				if (isFromSizeChange) {
 					Recommendations.FadeTo(1, 75);
 				}
@@ -2285,7 +2285,7 @@ namespace CloudStreamForms
 			Device.BeginInvokeOnMainThread(() => {
 				Grid.SetRow(EpPickers, (state == 0) ? 1 : 0); // RECOMENATIONS
 
-				FadeEpisodes.Scale = (state == 0) ? 1 : 0;
+				episodeView.Scale = (state == 0) ? 1 : 0;
 				//episodeView.IsEnabled = state == 0;
 
 				trailerStack.Scale = (state == 2) ? 1 : 0;
