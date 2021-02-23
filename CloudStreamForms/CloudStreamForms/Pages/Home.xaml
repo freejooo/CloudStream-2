@@ -60,7 +60,7 @@
 					</CollectionView.ItemsLayout>
 					<CollectionView.ItemTemplate>
 						<DataTemplate>
-							<Grid cse:LongPressedEffect.Command="{Binding OpenCommand}">
+							<Grid cse:LongPressedEffect.Command="{Binding OpenCommand}" WidthRequest="200">
 								<Grid.Effects>
 									<cse:LongPressedEffect></cse:LongPressedEffect>
 								</Grid.Effects>
@@ -105,7 +105,7 @@
 											<ColumnDefinition Width="Auto" />
 										</Grid.ColumnDefinitions>
 
-										<Label Grid.Column="0" Text="{Binding Title}" VerticalOptions="Center" TextColor="#e6e6e6"></Label>
+										<Label Grid.Column="0" Text="{Binding Title}" VerticalOptions="Center" TextColor="#e6e6e6" MaxLines="1" LineBreakMode="TailTruncation"></Label>
 										<ff:CachedImage Grid.Column="2" Source="outline_info_white_48dp" Scale="0.8" InputTransparent="True" VerticalOptions="Center" WidthRequest="30" HeightRequest="30"  BackgroundColor="Transparent">
 
 										</ff:CachedImage>
@@ -117,18 +117,58 @@
 						</DataTemplate>
 					</CollectionView.ItemTemplate>
 				</CollectionView>
-			<!--	<Image x:Name="OffBar" Grid.Row="0" InputTransparent="True" VerticalOptions="Start" TranslationY="0"></Image>-->
+				<!--	<Image x:Name="OffBar" Grid.Row="0" InputTransparent="True" VerticalOptions="Start" TranslationY="0"></Image>-->
 				<StackLayout Grid.Row="3">
 					<Label Text="Bookmarks" Margin="10,0,10,10" TextColor="White" FontSize="Body" x:Name="BookTxt"></Label>
-					<Grid x:Name="Bookmarks" VerticalOptions="Start" HorizontalOptions="Fill" >
 
-					</Grid>
+					<CollectionView ItemsSource="{Binding HomeCollection}"  HeightRequest="0" 
+                             VerticalOptions="Start" VerticalScrollBarVisibility="Never" x:Name="BookmarkView">
+						<CollectionView.ItemsLayout>
+							<GridItemsLayout Orientation="Vertical" Span="3" HorizontalItemSpacing="5" VerticalItemSpacing="5"
+                        />
+						</CollectionView.ItemsLayout>
+						<CollectionView.ItemTemplate>
+							<DataTemplate>
+								<Grid cse:LongPressedEffect.Command="{Binding OpenCommand}" HeightRequest="200"  >
+									<Grid.Effects>
+										<cse:LongPressedEffect></cse:LongPressedEffect>
+									</Grid.Effects>
+
+									<Grid.RowDefinitions >
+										<RowDefinition Height="*" />
+									</Grid.RowDefinitions>
+
+									<!-- 92x72 * 1.5 + 20 height-->
+									<Frame HorizontalOptions="Fill" VerticalOptions="Fill" HasShadow="True" BackgroundColor="{Binding ExtraColor}" CornerRadius="5">
+									</Frame>
+									<StackLayout VerticalOptions="Fill" HorizontalOptions="Fill">
+										<ff:CachedImage HorizontalOptions="Fill" HeightRequest="170" Aspect="AspectFill" Source="{Binding PosterUrl}" InputTransparent="True" ff:LoadingPlaceholder="emtyLoadingPosterV2.png">
+											<ff:CachedImage.Transformations>
+												<ffTransformations:RoundedTransformation BorderSize="0" Radius="10" BorderHexColor="#303F9F" CropHeightRatio="1.5" >
+
+												</ffTransformations:RoundedTransformation>
+											</ff:CachedImage.Transformations>
+										</ff:CachedImage>
+										<Label TranslationY="-5" Text="{Binding Title}" VerticalOptions="Center" HeightRequest="50" HorizontalTextAlignment="Center" VerticalTextAlignment="Center" TextColor="#e6e6e6" MaxLines="2" LineBreakMode="TailTruncation" ></Label>
+									</StackLayout>
+									<Grid>
+										<Grid.ColumnDefinitions>
+											<ColumnDefinition Width="Auto"></ColumnDefinition>
+											<ColumnDefinition Width="*"></ColumnDefinition>
+										</Grid.ColumnDefinitions>
+
+										<Button BackgroundColor="#C0000000" Margin="1" Padding="2,0" ClassId="CUST" HeightRequest="20" VerticalOptions="Start" HorizontalOptions="Start" Text="{Binding NextEpisodeText}" IsVisible="{Binding ShowNextEpisode}"></Button>
+									</Grid>
+								</Grid>
+							</DataTemplate>
+						</CollectionView.ItemTemplate>
+					</CollectionView>
 				</StackLayout>
 			</Grid>
 		</ScrollView>
 		<Grid x:Name="Top100Stack" IsEnabled="True" IsVisible="True" HorizontalOptions="Fill" VerticalOptions="Fill">
 			<CollectionView ItemsSource="{Binding MyEpisodeResultCollection}" 
-                    x:Name="episodeView"   VerticalOptions="Start" VerticalScrollBarVisibility="Never"   ItemSizingStrategy="MeasureFirstItem"  >
+                    x:Name="episodeView"   VerticalOptions="Start" VerticalScrollBarVisibility="Never" >
 				<CollectionView.ItemsLayout>
 					<LinearItemsLayout Orientation="Vertical" />
 				</CollectionView.ItemsLayout>
@@ -189,7 +229,7 @@
 												<Label Text="{Binding Title}" TextColor="{Binding MainTextColor}" FontAttributes="Bold" FontSize="13"/>
 											</Grid>
 											<Grid Grid.Row="1"  Grid.Column="0" >
-												<Label Text="{Binding Description}"  TextColor="{Binding MainDarkTextColor}" MaxLines="4"  />
+												<Label Text="{Binding Description}"  TextColor="{Binding MainDarkTextColor}" MaxLines="3" LineBreakMode="TailTruncation" />
 											</Grid>
 										</Grid>
 									</Grid>

@@ -441,10 +441,10 @@ namespace CloudStreamForms
 				var ep = epis[i];
 
 				string title = ep.episode > 0 && ep.season > 0 ? $"S{ep.season}:E{ep.episode} {ep.episodeName}" : $"{ep.episodeName}";
-				const int MAX_TITLE_LENGHT = 20;
+				/*const int MAX_TITLE_LENGHT = 20;
 				if (title.Length > MAX_TITLE_LENGHT) {
 					title = title[0..MAX_TITLE_LENGHT] + "...";
-				}
+				}*/
 
 				epView.NextEpisodeCollection.Add(new HomeNextEpisode() {
 					ImdbId = ep.imdbId,
@@ -510,10 +510,10 @@ namespace CloudStreamForms
 					App.UpdateStatusBar();
 					App.UpdateBackground();
 				}
-				if (UpdateIsRequired) {
+				//if (UpdateIsRequired) {
 					UpdateBookmarks();
 					UpdateIsRequired = false;
-				}
+				//}
 
 				ViewGrid.IsVisible = Settings.Top100Enabled;
 				if (firstTimeNoBookmarks && !hasBookmarks && Settings.Top100Enabled) { // WILL REDIRECT TO TOP IMDb when no bookmarks
@@ -578,14 +578,15 @@ namespace CloudStreamForms
 
 				int perCol = ((width ?? Application.Current.MainPage.Width) < (height ?? Application.Current.MainPage.Height)) ? 3 : 6;
 
-				for (int i = 0; i < Bookmarks.Children.Count; i++) { // GRID
-					Grid.SetColumn(Bookmarks.Children[i], i % perCol);
-					Grid.SetRow(Bookmarks.Children[i], i / perCol);
-				}
 				// int row = (int)Math.Floor((Bookmarks.Children.Count - 1) / (double)perCol);
 				// Recommendations.HeightRequest = (RecPosterHeight + Recommendations.RowSpacing) * (total / perCol);
-				Bookmarks.HeightRequest = (bookmarkLabelTransY + RecPosterHeight + Bookmarks.RowSpacing) * (((Bookmarks.Children.Count - 1) / perCol) + 1) - 7 + Bookmarks.RowSpacing;
-				//Bookmarks.WidthRequest = Application.Current.MainPage.Width < Application.Current.MainPage.Height ? Application.Current.MainPage.Width : Application.Current.MainPage.Height;
+				var lay = new GridItemsLayout(perCol, ItemsLayoutOrientation.Vertical);
+				lay.VerticalItemSpacing = 5;
+				lay.HorizontalItemSpacing = 5;
+				BookmarkView.ItemsLayout = lay;
+
+				BookmarkView.HeightRequest = Math.Ceiling(bookmarkPosters.Count / (float)perCol) * 200 + 20; //(bookmarkLabelTransY + RecPosterHeight + Bookmarks.RowSpacing) * (((Bookmarks.Children.Count - 1) / perCol) + 1) - 7 + Bookmarks.RowSpacing;
+																						  //Bookmarks.WidthRequest = Application.Current.MainPage.Width < Application.Current.MainPage.Height ? Application.Current.MainPage.Width : Application.Current.MainPage.Height;
 				if (isFromSizeChange) {
 					await Task.Delay(100);
 					_ = BookHolder.FadeTo(1, 75);
@@ -634,14 +635,14 @@ namespace CloudStreamForms
 		void UpdateBookmarks()
 		{
 			try {
-				int height = 150;
-				Bookmarks.HeightRequest = height;
 				string[] keys = App.GetKeys<string>(App.BOOKMARK_DATA);
 				List<string> data = new List<string>();
 				bookmarkPosters = new List<BookmarkPoster>();
-				Bookmarks.Children.Clear();
 				updateLabels.Clear();
 				IsBookmarked.Clear();
+				epView.HomeCollection.Clear();
+
+				var bgColor = Settings.ItemBackGroundColor.ToHex();
 
 				int index = 0;
 				bool allDone = false;
@@ -660,148 +661,34 @@ namespace CloudStreamForms
 							IsBookmarked.Add(id, true);
 							string posterURL = ConvertIMDbImagesToHD(posterUrl, 76, 113, 1.75);
 							if (CheckIfURLIsValid(posterURL)) {
-								Grid stackLayout = new Grid() { VerticalOptions = LayoutOptions.Start, };
-
-								stackLayout.Effects.Add(Effect.Resolve("CloudStreamForms.LongPressedEffect"));
 								var _b = new BookmarkPoster() { id = id, name = name, posterUrl = posterUrl };
 								bookmarkPosters.Add(_b);
 
-								LongPressedEffect.SetCommand(stackLayout, new Command(() => {
-									PushPageFromUrlAndName(_b.id, _b.name);
-								}));
-								var ff = new FFImageLoading.Forms.CachedImage {
-									Source = posterURL,
-									HeightRequest = RecPosterHeight,
-									WidthRequest = RecPosterWith,
-									BackgroundColor = Color.Transparent,
-									VerticalOptions = LayoutOptions.Start,
-									InputTransparent = true,
-									Transformations = {
-                            //  new FFImageLoading.Transformations.RoundedTransformation(10,1,1.5,10,"#303F9F")
-                                    new FFImageLoading.Transformations.RoundedTransformation(5, 1, 1.5, 0, "#303F9F")
-									},
-									//	InputTransparent = true,
-								};
-
-								// ================================================================ RECOMMENDATIONS CLICKED ================================================================
-								//stackLayout.SetValue(XamEffects.BorderView.CornerRadiusProperty, 20);
-
-								/*
-								var brView = new BorderView() { VerticalOptions = LayoutOptions.Fill, HorizontalOptions = LayoutOptions.Fill, CornerRadius = 5 };
-
-								brView.SetValue(XamEffects.TouchEffect.ColorProperty, Color.White);
-								Commands.SetTap(brView, new Command((o) => {
-									var z = (BookmarkPoster)o;
-									PushPageFromUrlAndName(z.id, z.name);
-								}));
-								Commands.SetTapParameter(brView, _b);*/
-
-
-								// var _color = Settings.BlackColor + 5;
-
-								Frame boxView = new Frame() {
-									BackgroundColor = Settings.ItemBackGroundColor,// Color.FromRgb(_color, _color, _color),
-																				   //	InputTransparent = true,
-									CornerRadius = 2,
-									HeightRequest = RecPosterHeight + bookmarkLabelTransY,
-									TranslationY = 0,
-									WidthRequest = RecPosterWith,
-									HasShadow = true,
-								};
-
-								stackLayout.Children.Add(boxView);
-								stackLayout.Children.Add(ff);
-								//stackLayout.Children.Add(imageButton);
-								stackLayout.Children.Add(new Label() { Text = name, VerticalOptions = LayoutOptions.Start, VerticalTextAlignment = TextAlignment.Center, HorizontalTextAlignment = TextAlignment.Center, HorizontalOptions = LayoutOptions.Center, Padding = 1, TextColor = Color.White, MaxLines = 2, ClassId = "OUTLINE", TranslationY = RecPosterHeight });
-								//stackLayout.Children.Add(brView);
-
-
+								bool showNext = false;
+								string nextTxt = "";
 								if (Settings.ShowNextEpisodeReleaseDate) {
 									CloudStreamCore.NextAiringEpisodeData? nextData = App.GetKey<NextAiringEpisodeData?>(App.NEXT_AIRING, id, null);
 									if (nextData.HasValue) {
+										showNext = true;
 										var nextAir = nextData.Value;
-										string nextTxt = GetAirDate(nextAir.airingAt);
-
-										var btt = new Button() {
-											//BackgroundColor = new Color(0.188, 0.247, 0.623, 0.8)
-											BackgroundColor = new Color(0, 0, 0, 0.4),
-											Text = nextTxt,
-											ClassId = "CUST",
-											TextColor = Color.White,
-											InputTransparent = true,
-											HeightRequest = 20,
-											FontSize = 11,
-											VerticalOptions = LayoutOptions.Start,
-											HorizontalOptions = LayoutOptions.End,
-											CornerRadius = 1,
-											Padding = 2,
-											Margin = 0,
-											Scale = 1,
-											TranslationX = 1,
-											WidthRequest = 60
-										};
-										updateLabels.Add(new UpdateLabel() { label = btt, id = id });
-										stackLayout.Children.Add(btt);
+										nextTxt = GetAirDate(nextAir.airingAt);
 									}
 								}
 
-								stackLayout.Opacity = 0;
-
-								async void WaitUntillComplete()
-								{
-									stackLayout.Opacity = 0;
-									while (!allDone) {
-										await Task.Delay(50);
-									}
-									await stackLayout.FadeTo(1, (uint)(200 + index * 50), Easing.Linear);
-								}
-
-								WaitUntillComplete();
-
-								index++;
-								//slay.Children.Add(stackLayout);
-								Bookmarks.Children.Add(stackLayout);
-
-								/*
-                                Grid stackLayout = new Grid();
-
-
-                                 var ff = new FFImageLoading.Forms.CachedImage {
-                                    Source = posterUrl,
-                                    HeightRequest = height,
-                                    WidthRequest = 87,
-                                    BackgroundColor = Color.Transparent,
-                                    VerticalOptions = LayoutOptions.Start,
-                                    Transformations = {
-                                    new FFImageLoading.Transformations.RoundedTransformation(1,1,1.5,0,"#303F9F")
-                                },
-                                    InputTransparent = true,
-                                };
-
-                                //Source = p.posterUrl
-
-                                stackLayout.Children.Add(ff);
-                                // stackLayout.Children.Add(imageButton);
-                                bookmarkPosters.Add(new BookmarkPoster() { id = id, name = name, posterUrl = posterUrl });
-                                Grid.SetColumn(stackLayout, Bookmarks.Children.Count);
-                                Bookmarks.Children.Add(stackLayout);
-
-                                // --- RECOMMENDATIONS CLICKED -----
-                                stackLayout.SetValue(XamEffects.TouchEffect.ColorProperty, Color.White);
-                                Commands.SetTap(stackLayout, new Command((o) => {
-                                    int z = (int)o;
-                                    PushPageFromUrlAndName(bookmarkPosters[z].id, bookmarkPosters[z].name);
-                                 }));
-                                Commands.SetTapParameter(stackLayout, i);*/
-
+								epView.HomeCollection.Add(new HomeBookmark() {
+									ExtraColor = bgColor,
+									ImdbId = id,
+									Title = name,
+									PosterUrl = posterUrl,
+									OpenCommand = new Command(() => {
+										PushPageFromUrlAndName(id, name);
+									}),
+									NextEpisodeText = nextTxt,
+									ShowNextEpisode = showNext,
+								});
 							}
 						}
-						// data.Add(App.GetKey("BookmarkData"))
 					}
-					//await Task.Delay(100);
-
-					//MScroll.HeightRequest = keys.Count > 0 ? 130 : 0;
-
 				}
 				allDone = true;
 				hasBookmarks = bookmarkPosters.Count > 0;
@@ -841,6 +728,7 @@ namespace CloudStreamForms
 		public ObservableCollection<EpisodeResult> MyEpisodeResultCollection { set { Added?.Invoke(null, null); _MyEpisodeResultCollection = value; } get { return _MyEpisodeResultCollection; } }
 
 		public ObservableCollection<HomeNextEpisode> NextEpisodeCollection { set; get; }
+		public ObservableCollection<HomeBookmark> HomeCollection { set; get; }
 
 		public event EventHandler Added;
 
@@ -848,6 +736,7 @@ namespace CloudStreamForms
 		{
 			MyEpisodeResultCollection = new ObservableCollection<EpisodeResult>();
 			NextEpisodeCollection = new ObservableCollection<HomeNextEpisode>();
+			HomeCollection = new ObservableCollection<HomeBookmark>();
 		}
 	}
 
@@ -876,5 +765,14 @@ namespace CloudStreamForms
 				public string imdbId;
 				public string parentImdbId;*/
 	}
-
+	public class HomeBookmark
+	{
+		public string ExtraColor { get; set; }
+		public string ImdbId { set; get; }
+		public string Title { get; set; }
+		public string PosterUrl { get; set; }
+		public string NextEpisodeText { get; set; }
+		public bool ShowNextEpisode { get; set; }
+		public Command OpenCommand { get; set; }
+	}
 }
