@@ -37,8 +37,8 @@ namespace CloudStreamForms.Droid.Renderers
 				//    var pager = (ViewPager)rel.GetChildAt(0);
 				var view = (BottomNavigationView)rel.GetChildAt(1);
 
-
 				var _f = (BottomNavigationMenuView)view.GetChildAt(0);
+				
 				var fontFace = Typeface.CreateFromAsset(context.Assets, path);
 				for (int i = 0; i < _f.ChildCount; i++) {
 					var item = (BottomNavigationItemView)_f.GetChildAt(i);

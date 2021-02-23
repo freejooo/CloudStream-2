@@ -9,13 +9,20 @@
              xmlns:cloudstreamforms="clr-namespace:CloudStreamForms" xmlns:cse="clr-namespace:CloudStreamForms.Effects"
 			 mc:Ignorable="d"
              x:Class="CloudStreamForms.Home">
-	<StackLayout x:Name="MainStack" >
-
-		<Label x:Name="TitleName" Margin="3" Text="Home" Padding="0,10,0,5" HorizontalOptions="Center"  FontSize="25"   TextColor="#ffffff" ></Label>
+	<Grid x:Name="MainStack" >
+		<Grid.RowDefinitions>
+			<RowDefinition Height="Auto"></RowDefinition>
+			<RowDefinition Height="Auto"></RowDefinition>
+			<RowDefinition Height="Auto"></RowDefinition>
+			<RowDefinition Height="Auto"></RowDefinition>
+			<RowDefinition Height="Auto"></RowDefinition>
+			<RowDefinition Height="Auto"></RowDefinition>
+		</Grid.RowDefinitions>
+		<Label Grid.Row="0" x:Name="TitleName" Margin="3" Text="Home" Padding="0,10,0,5" HorizontalOptions="Center"  FontSize="25"   TextColor="#ffffff" ></Label>
 
 		<!--TextColor="#303F9F"-->
 		<!--   <Label Text="Bookmarks" FontAttributes="Italic" TranslationX="10" VerticalOptions="Start" HorizontalOptions="FillAndExpand" FontSize="Small"  x:Name="BTxt"></Label>-->
-		<Grid x:Name="ViewGrid" HeightRequest="35" MinimumHeightRequest="50" >
+		<Grid Grid.Row="1" x:Name="ViewGrid" HeightRequest="50" MinimumHeightRequest="50" >
 			<Grid.ColumnDefinitions>
 				<ColumnDefinition Width="*"></ColumnDefinition>
 				<ColumnDefinition Width="*"></ColumnDefinition>
@@ -34,11 +41,10 @@
 			<xe:BorderView Grid.Column="3" xe:TouchEffect.Color="#0FFFFFFF" CornerRadius="0" x:Name="TrendingBtt">
 				<Label Text="Trending" FontSize="17" VerticalOptions="Center" Scale="0.9"  HorizontalTextAlignment="Center" MinimumHeightRequest="50" TextColor="White" x:Name="TrendingLbl"></Label>
 			</xe:BorderView>
-
 		</Grid>
-		<ProgressBar   x:Name="LoadingIndicator"  HorizontalOptions="Fill" IsVisible="false" IsEnabled="False" ClassId="id" HeightRequest="15" Margin="-7.5" VerticalOptions="Start" InputTransparent="True"></ProgressBar>
+		<ProgressBar Grid.Row="2" x:Name="LoadingIndicator"  HorizontalOptions="Fill" IsVisible="false" IsEnabled="False" ClassId="id" HeightRequest="15" Margin="-7.5" VerticalOptions="Start" InputTransparent="True"></ProgressBar>
 
-		<ScrollView VerticalScrollBarVisibility="Never" Orientation="Vertical" Grid.Row="3" x:Name="BookHolder">
+		<ScrollView Grid.Row="3" VerticalScrollBarVisibility="Never" Orientation="Vertical" x:Name="BookHolder" Margin="0,-12,0,0">
 			<Grid VerticalOptions="Start">
 				<Grid.RowDefinitions>
 					<RowDefinition Height="Auto"></RowDefinition>
@@ -48,12 +54,12 @@
 				</Grid.RowDefinitions>
 				<Image x:Name="baseImg" IsVisible="False" VerticalOptions="Fill" HorizontalOptions="Fill" Scale="0.6" BackgroundColor="Transparent" AbsoluteLayout.LayoutBounds="0, 0, 1, 1" AbsoluteLayout.LayoutFlags="All"  InputTransparent="True" TranslationY="-40"></Image>
 				<Label x:Name="baseTxt" IsVisible="False" AbsoluteLayout.LayoutBounds="0, 0, 1, 1" AbsoluteLayout.LayoutFlags="All"  VerticalOptions="Center" HorizontalOptions="Center" TextColor="#434343" ClassId="CUST" FontAttributes="Bold" FontSize="18" TranslationY="80" InputTransparent="True" Text="No Bookmarks"></Label>
-				<Grid x:Name="FastTxt" Grid.Row="1" HeightRequest="50">
+				<Grid x:Name="FastTxt" Grid.Row="1" HeightRequest="50" >
 					<Button Text="Clear" TextColor="Black" ClassId="CUST" HeightRequest="30" Margin="10" WidthRequest="70" FontSize="Body" HorizontalOptions="End" BackgroundColor="White" x:Name="FastTxtBtt"></Button>
 					<Label Text="Resume Watching" VerticalOptions="Center" Margin="10" TextColor="White" FontSize="Body" InputTransparent="True" ></Label>
 				</Grid>
 
-				<CollectionView ItemsSource="{Binding NextEpisodeCollection}"  HeightRequest="160" Grid.Row="2" Margin="0,-5"
+				<CollectionView ItemsSource="{Binding NextEpisodeCollection}"  HeightRequest="160" Grid.Row="2" 
                              VerticalOptions="Start" VerticalScrollBarVisibility="Never" x:Name="NextEpisodeView">
 					<CollectionView.ItemsLayout>
 						<LinearItemsLayout Orientation="Horizontal" />
@@ -166,7 +172,7 @@
 				</StackLayout>
 			</Grid>
 		</ScrollView>
-		<Grid x:Name="Top100Stack" IsEnabled="True" IsVisible="True" HorizontalOptions="Fill" VerticalOptions="Fill">
+		<Grid Grid.Row="4" x:Name="Top100Stack" IsEnabled="True" IsVisible="True" HorizontalOptions="Fill" VerticalOptions="Fill"  Margin="0,-22,0,0" >
 			<CollectionView ItemsSource="{Binding MyEpisodeResultCollection}" 
                     x:Name="episodeView"   VerticalOptions="Start" VerticalScrollBarVisibility="Never" >
 				<CollectionView.ItemsLayout>
@@ -241,5 +247,9 @@
 			</CollectionView>
 			<Button    x:Name="MovieTypePickerBtt"  VerticalOptions="End" HorizontalOptions="End" InputTransparent="False" Margin="10" WidthRequest="100" Text="Sci-Fi" TextColor="#e7e7e7" FontAttributes="Bold" FontSize="Body" CornerRadius="5" HeightRequest="40" BackgroundColor="#252525" ></Button>
 		</Grid>
-	</StackLayout>
+		<!--BackgroundColor="Red" Opacity="0.5"-->
+		<Grid  Grid.Row="2" InputTransparent="True" HeightRequest="10" TranslationY="0" >
+			<Image x:Name="OffBar" InputTransparent="True" VerticalOptions="Start" ></Image>
+		</Grid>
+	</Grid>
 </ContentPage>
