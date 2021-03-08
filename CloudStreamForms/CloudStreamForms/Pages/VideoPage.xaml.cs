@@ -938,7 +938,6 @@ namespace CloudStreamForms
 					UpdateVideoStatus();
 				};
 
-
 				void UpdateIcons()
 				{
 					Device.BeginInvokeOnMainThread(() => {

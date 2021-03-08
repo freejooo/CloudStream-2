@@ -91,9 +91,9 @@ namespace CloudStreamForms
 
 			Device.BeginInvokeOnMainThread(() => {
 				MySearchResultCollection.Clear();
-				for (int i = 0; i < mainCore.activeSearchResults.Count; i++) {
-					bool isBook = Home.IsBookmarked.ContainsKey(mainCore.activeSearchResults[i].url);
-					string extra = mainCore.activeSearchResults[i].extra;
+				for (int i = 0; i < e.Count; i++) {
+					bool isBook = Home.IsBookmarked.ContainsKey(e[i].url);
+					string extra = e[i].extra;
 					if (extra != "") {
 						extra = " - " + extra;
 					}
@@ -105,9 +105,9 @@ namespace CloudStreamForms
 						IsBookmarked = isBook,
 						ExtraColor = isBook ? bgBlue : bgColor,
 						Id = i,
-						Title = mainCore.activeSearchResults[i].name + extra,
-						Extra = mainCore.activeSearchResults[i].year,
-						Poster = CloudStreamForms.Core.CloudStreamCore.ConvertIMDbImagesToHD(mainCore.activeSearchResults[i].posterUrl, 40, 60, multi: 2)
+						Title = e[i].name + extra,
+						Extra = e[i].year,
+						Poster = ConvertIMDbImagesToHD(e[i].posterUrl, 40, 60, multi: 2)
 					});
 				}
 			});

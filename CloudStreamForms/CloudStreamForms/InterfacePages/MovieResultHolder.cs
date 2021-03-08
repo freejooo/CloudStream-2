@@ -170,7 +170,7 @@ namespace CloudStreamForms.InterfacePages
 			tId = id.Replace("https://imdb.com/title/", "");
 			ChangeText(LabelType.NameLabel, name);
 			ChangeText(LabelType.YearLabel, year);
-			core.GetImdbTitle(new Poster() { year = year, name = name, url = id });
+			core.GetImdbTitle(new Poster() { year = year, name = name, url = id }, autoSearchTrailer: Settings.SearchTrailes);
 		}
 
 		public void Init(Movie movie)

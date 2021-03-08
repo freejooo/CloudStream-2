@@ -4860,43 +4860,7 @@ namespace CloudStreamForms.Core
 								error("EROROOROROROOR::" + _ex);
 							}
 
-							/*
-                            while (_d.Contains(lookFor) && !done) { // TO FIX MY HERO ACADIMEA CHOOSING THE SECOND SEASON BECAUSE IT WAS FIRST SEARCHRESULT
-                                string name = FindHTML(_d, lookFor, "\"");
-                                print("NAME FOUND: " + name);
-                                if (!name.EndsWith("Specials")) {
-                                    string _url = FindHTML(_d, "url\":\"", "\"").Replace("\\/", "/");
-                                    string startYear = FindHTML(_d, "start_year\":", ",");
-                                    string aired = FindHTML(_d, "aired\":\"", "\"");
-                                    string _aired = FindHTML(aired, ", ", " ", readToEndOfFile: true);
-                                    string score = FindHTML(_d, "score\":\"", "\"");
-                                    print("SCORE:" + score);
-                                    if (!name.Contains(" Season") && year == _aired && score != "N\\/A") {
-                                        print("URL FOUND: " + _url);
-                                        print(_d);
-                                        url = _url;
-                                        done = true;
-                                        currentSelectedYear = _aired;
-                                    }
-
-                                }
-                                _d = RemoveOne(_d, lookFor);
-                                _d = RemoveOne(_d, "\"id\":");
-                            }*/
-
-							/*
-
-                            string d = DownloadString("https://myanimelist.net/search/all?q=" + activeMovie.title.name);
-
-                            if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
-                            d = RemoveOne(d, " <div class=\"picSurround di-tc thumb\">"); // DONT DO THIS USE https://myanimelist.net/search/prefix.json?type=anime&keyword=my%20hero%20acadimea
-                            string url = "";//"https://myanimelist.net/anime/" + FindHTML(d, "<a href=\"https://myanimelist.net/anime/", "\"");
-                            */
-
 							if (url == "") return;
-							/*
-                            WebClient webClient = new WebClient();
-                            webClient.Encoding = Encoding.UTF8;*/
 
 							string d = DownloadString(url);
 							if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
@@ -5123,7 +5087,6 @@ namespace CloudStreamForms.Core
 
 							Parallel.For(0, animeProviders.Length, (int i) => {
 								if (Settings.IsProviderActive(animeProviders[i].Name)) {
-									print("STARTEDANIME: " + animeProviders[i].ToString() + "|" + i);
 									lock (threadLock) {
 										FishProgressLoaded?.Invoke(null, new FishLoaded() { name = animeProviders[i].Name, progressProcentage = ((double)count) / providerCount, maxProgress = providerCount, currentProgress = count });
 									}
@@ -5164,15 +5127,6 @@ namespace CloudStreamForms.Core
 
 					if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
 
-
-					/*
-                    for (int i = 0; i < animeProviders.Length; i++) {
-                        print("STARTEDANIME: " + animeProviders[i].ToString() + "|" + i); 
-                        animeProviders[i].FishMainLink(currentSelectedYear, tempThred, activeMovie.title.MALData);
-                        fishProgressLoaded?.Invoke(null, new FishLoaded() { name = animeProviders[i].Name, progress = (i + 1.0) / animeProviders.Length });
-                        if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
-                    }*/
-
 					FishMALNotification();
 					if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
 					MALData md = activeMovie.title.MALData;
@@ -5180,8 +5134,6 @@ namespace CloudStreamForms.Core
 					activeMovie.title.MALData.done = true;
 
 					MalDataLoaded?.Invoke(null, activeMovie.title.MALData);
-
-					//print(sequel + "|" + realSquel + "|" + sqlLink);
 				}
 				catch (Exception _ex) {
 					error(_ex);
@@ -5357,23 +5309,37 @@ namespace CloudStreamForms.Core
 				activeMovie.title.id = __id;
 			}
 			// TurnNullMovieToActive(movie);
-			TempThread tempThred = CreateThread(2);
-			StartThread("Imdb", () => {
-				try {
-					string d = "";
-					List<string> keyWords = new List<string>();
+			List<string> keyWords = new List<string>();
+			string url = "https://imdb.com/title/" + imdb.url.Replace("https://imdb.com/title/", "") + "/";
+			bool keyWordsLoaded = false;
 
-					if (fetchData) {
-						string url = "https://imdb.com/title/" + imdb.url.Replace("https://imdb.com/title/", "") + "/";
-						d = GetHTML(url); // DOWNLOADSTRING WILL GET THE LOCAL LAUNGEGE, AND NOT EN, THAT WILL MESS WITH RECOMENDATIONDS, GetHTML FIXES THAT
-						if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
-
-						string _d = DownloadString(url + "keywords", tempThred);
-						if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
+			if (fetchData) {
+				TempThread tempThredKeywords = CreateThread(2);
+				StartThread("Imdb keywords", () => {
+					try {
+						string _d = DownloadString(url + "keywords", tempThredKeywords);
+						if (!GetThredActive(tempThredKeywords)) { return; }; // COPY UPDATE PROGRESS
 						const string _lookFor = "data-item-keyword=\"";
 						while (_d.Contains(_lookFor)) {
 							keyWords.Add(FindHTML(_d, _lookFor, "\""));
 							_d = RemoveOne(_d, _lookFor);
+						}
+					}
+					finally {
+						keyWordsLoaded = true;
+					}
+				});
+			}
+
+			TempThread tempThred = CreateThread(2);
+			StartThread("Imdb", () => {
+				try {
+					string d = "";
+
+					if (fetchData) {
+						d = GetHTML(url); // DOWNLOADSTRING WILL GET THE LOCAL LAUNGEGE, AND NOT EN, THAT WILL MESS WITH RECOMENDATIONDS, GetHTML FIXES THAT
+						while (!keyWordsLoaded) {
+							Thread.Sleep(40);
 						}
 					}
 					if (d != "" || !fetchData) {
@@ -6536,9 +6502,16 @@ namespace CloudStreamForms.Core
 				if (en) {
 					myWebHeaderCollection.Add("Accept-Language", "en;q=0.8");
 				}
+
 				request.AutomaticDecompression = DecompressionMethods.GZip;
 				request.UserAgent = USERAGENT;
 				request.Referer = url;
+
+				print("REQUEST::: " + url);
+#if DEBUG
+				Stopwatch s = Stopwatch.StartNew();
+#endif
+
 				//  request.TransferEncoding = "UTF8";
 				//request.AddRange(1212416);
 
@@ -6548,6 +6521,9 @@ namespace CloudStreamForms.Core
 				using (StreamReader reader = new StreamReader(stream, Encoding.UTF8)) {
 					try {
 						html = reader.ReadToEnd();
+#if DEBUG
+						print($"GET::: {url} {s.ElapsedMilliseconds}ms");
+#endif
 					}
 					catch (Exception) {
 						return "";
@@ -7223,12 +7199,19 @@ namespace CloudStreamForms.Core
 
 				print("REQUEST::: " + url);
 
+#if DEBUG
+				Stopwatch s = Stopwatch.StartNew();
+#endif
 				using (var webResponse = await webRequest.GetResponseAsync()) {
 					try {
 						using StreamReader httpWebStreamReader = new StreamReader(webResponse.GetResponseStream(), encoding);
 						try {
 							if (tempThred != null) { if (!GetThredActive((TempThread)tempThred)) { return ""; }; } //  done = true; 
-							return await httpWebStreamReader.ReadToEndAsync();
+							string response = await httpWebStreamReader.ReadToEndAsync();
+#if DEBUG
+							print($"GET::: {url} {s.ElapsedMilliseconds}ms");
+#endif
+							return response;
 						}
 						catch (Exception _ex) {
 							print("FATAL ERROR DLOAD3: " + _ex + "|" + url);
@@ -7276,12 +7259,19 @@ namespace CloudStreamForms.Core
 
 				print("REQUEST::: " + url);
 
+#if DEBUG
+				Stopwatch s = Stopwatch.StartNew();
+#endif
 				using (var webResponse = webRequest.GetResponse()) {
 					try {
 						using StreamReader httpWebStreamReader = new StreamReader(webResponse.GetResponseStream(), encoding);
 						try {
 							if (tempThred != null) { if (!GetThredActive((TempThread)tempThred)) { return ""; }; } //  done = true; 
-							return httpWebStreamReader.ReadToEnd();
+							string response = httpWebStreamReader.ReadToEnd();
+#if DEBUG
+							print($"GET::: {url} {s.ElapsedMilliseconds}ms");
+#endif
+							return response;
 						}
 						catch (Exception _ex) {
 							print("FATAL ERROR DLOAD3: " + _ex + "|" + url);
@@ -8116,15 +8106,13 @@ idMal
 										//  popularity = f.popularity,
 										relations = f.relations,
 										season = f.season,
-										//status = f.status,
+										//status = f.status, //TODO this
 										synonyms = f.synonyms,
 										title = f.title,
 										idMal = f.idMal,
 										//type = f.type,
 										//volumes = f.volumes,
 									}
-
-
 									);
 								//AniList_anime_link
 								break;
@@ -8284,9 +8272,9 @@ idMal
 				return null;
 			}
 		}
-
 	}
 }
+
 namespace AniListAPI
 {
 	using System.Collections.Generic;

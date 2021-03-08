@@ -44,6 +44,15 @@ namespace CloudStreamForms
 			get {
 				return App.GetKey("Settings", nameof(LoadingMiliSec), 5000);
 			}
+		}	
+
+		public static bool SearchTrailes {
+			set {
+				App.SetKey("Settings", nameof(SearchTrailes), value);
+			}
+			get {
+				return App.GetKey("Settings", nameof(SearchTrailes), false);
+			}
 		}
 
 		public static int PreferedVideoPlayer {
