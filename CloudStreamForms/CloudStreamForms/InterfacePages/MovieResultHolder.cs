@@ -11,7 +11,7 @@ namespace CloudStreamForms.InterfacePages
 {
 	class MovieResultHolder
 	{
-		const int MAX_EPS_PER = 50;
+		public const int MAX_EPS_PER = 50;
 		bool IsDead { get { return core == null; } }
 
 		public int MaxTrailers = 4;

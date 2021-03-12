@@ -1627,7 +1627,8 @@ namespace CloudStreamForms
 			Device.BeginInvokeOnMainThread(() => {
 				if (Core == null) return;
 				if (item.HasValue) {
-					epView.MyEpisodeResultCollection[item.Value] = (UpdateLoad((EpisodeResult)_e[item.Value].Clone(), checkColor));
+					int id = item.Value % MAX_EPS_PER;
+					epView.MyEpisodeResultCollection[id] = (UpdateLoad((EpisodeResult)_e[id].Clone(), checkColor));
 				}
 				else {
 					epView.MyEpisodeResultCollection.Clear();
