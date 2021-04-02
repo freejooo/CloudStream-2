@@ -1502,7 +1502,7 @@ namespace CloudStreamForms.Core
 						}
 					}
 
-				endloop:
+					endloop:
 					print(slug + "|" + animeTitle);
 				}
 				/*
@@ -1839,7 +1839,7 @@ namespace CloudStreamForms.Core
 								}
 							}
 						}
-					animesimpleouterloop:;
+						animesimpleouterloop:;
 					}
 				}
 				catch (Exception _ex) {
@@ -2067,7 +2067,7 @@ namespace CloudStreamForms.Core
 							}
 						}
 					}
-				kissanimefreeouterloop:;
+					kissanimefreeouterloop:;
 				}
 			}
 
@@ -5595,6 +5595,7 @@ namespace CloudStreamForms.Core
 
 							int maxEpisode = 0;
 							string id = activeMovie.title.id;
+							Stopwatch _s = Stopwatch.StartNew();
 							Parallel.For(0, years.Count, (i) => {
 								try {
 									string partURL = "https://www.imdb.com/title/" + id + "/episodes/_ajax?year=" + years[i];
@@ -5613,6 +5614,7 @@ namespace CloudStreamForms.Core
 											var image = ep.QuerySelector("> div.image > a > div");
 											string _id = image.GetAttributeValue("data-const", "");
 											var img = image.QuerySelector("> img");
+											var div = image.QuerySelector("> div").InnerText;
 											string posterUrl = img == null ? "" : img.GetAttributeValue("src", "");
 
 											int epNumber = info.QuerySelector("> meta").GetAttributeValue("content", 0);
@@ -5623,8 +5625,11 @@ namespace CloudStreamForms.Core
 											if (epNumber > localMax) {
 												localMax = epNumber;
 											}
-											lock (dataLock) {
-												localEps[epNumber] = new Episode() { date = airDate, name = name, id = _id, posterUrl = posterUrl, rating = rating, description = descript };
+											if (!div.Contains("Ep0")) // Episode offset is fucked if ep0
+											{
+												lock (dataLock) {
+													localEps[epNumber] = new Episode() { date = airDate, name = name, id = _id, posterUrl = posterUrl, rating = rating, description = descript };
+												}
 											}
 										}
 										catch (Exception _ex) {
@@ -5642,12 +5647,15 @@ namespace CloudStreamForms.Core
 								catch (Exception _ex) {
 									error(_ex);
 								}
+								finally {
+									print($"FFFMMS::::::{i} | {_s.ElapsedMilliseconds}");
+								}
 								/*lock (dataLock) {
 									data[i] = d;
 								}*/
 							});
 							if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
-
+							print($"MMS:::::: {_s.ElapsedMilliseconds}");
 							activeMovie.episodes = new List<Episode>();
 
 							for (int i = 1; i < maxEpisode; i++) {
@@ -5679,18 +5687,28 @@ namespace CloudStreamForms.Core
 							activeMovie.episodes = new List<Episode>();
 
 							Stopwatch _ss = Stopwatch.StartNew();
+							var doc = new HtmlAgilityPack.HtmlDocument();
+							doc.LoadHtml(d);
+							//print(d);
+							var episodes = doc.QuerySelectorAll("div.list_item");
 
-							for (int q = 1; q <= eps; q++) {
-								string lookFor = "?ref_=ttep_ep" + q;
+							for (int q = 0; q < episodes.Count; q++) {
+								var ep = episodes[q];
+
+								//string lookFor = "?ref_=ttep_ep" + q;
 								try {
-									d = d[d.IndexOf(lookFor)..];
-									string name = FindHTML(d, "title=\"", "\"", decodeToNonHtml: true);
-									string id = FindHTML(d, "div data-const=\"", "\"");
-									string rating = FindHTML(d, "<span class=\"ipl-rating-star__rating\">", "<");
-									string descript = FindHTML(d, "<div class=\"item_description\" itemprop=\"description\">", "<", decodeToNonHtml: true).Replace("\n", "").Replace("  ", "");
-									string date = FindHTML(d, "<div class=\"airdate\">", "<").Replace("\n", "").Replace("  ", "");
-									string posterUrl = FindHTML(d, "src=\"", "\"");
-									string divEpisode = FindHTML(d, "<div>", "<");
+									var info = ep.QuerySelector("> div.info");
+									var image = ep.QuerySelector("> div.image > a > div");
+									string _id = image.GetAttributeValue("data-const", "");
+									var img = image.QuerySelector("> img");
+									var div = image.QuerySelector("> div").InnerText;
+									string posterUrl = img == null ? "" : img.GetAttributeValue("src", "");
+
+									int epNumber = info.QuerySelector("> meta").GetAttributeValue("content", 0);
+									string airDate = info.QuerySelector("> div.airdate").InnerText.Replace("  ", "").Replace("\n", "");
+									string rating = info.QuerySelector("> div.ipl-rating-widget > div.ipl-rating-star > span.ipl-rating-star__rating").InnerText;
+									string name = info.QuerySelector("> strong > a").InnerText;
+									string descript = info.QuerySelector("> div.item_description").InnerText.Replace("  ", "").Replace("\n", "");
 
 									//print("ADDED EP::::" + name + "|" + q);
 
@@ -5701,9 +5719,9 @@ namespace CloudStreamForms.Core
 									if (descript == "Know what this is about?") {
 										descript = "";
 									}
-									if (!divEpisode.Contains("Ep0")) // Episode offset is fucked if ep0
+									if (!div.Contains("Ep0")) // Episode offset is fucked if ep0
 									{
-										activeMovie.episodes.Add(new Episode() { date = date, name = name, description = descript, rating = rating, posterUrl = posterUrl, id = id });
+										activeMovie.episodes.Add(new Episode() { date = airDate, name = name, description = descript, rating = rating, posterUrl = posterUrl, id = _id });
 									}
 
 								}
