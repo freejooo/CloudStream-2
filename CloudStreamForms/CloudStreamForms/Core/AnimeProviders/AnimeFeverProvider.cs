@@ -48,19 +48,26 @@ namespace CloudStreamForms.Core.AnimeProviders
 						if (nextIsVideoUrl) {
 							nextIsVideoUrl = false;
 							string[] data = CoreHelpers.GetStringRegex("BANDWIDTH=?, RESOLUTION=?, AUDIO=\"?\"", videoData);
-							if (data == null) continue;
-							string key = data[2];
-							if (data != null) {
-								if (streams.ContainsKey(key)) {
-									var _stream = streams[key];
-									_stream.mainUrl = line;
-									_stream.name = data[1];
-									streams[key] = _stream;
-								}
-								else {
-									error("FATAL EX MISSMATCH IN ANIMEFEBEER:: " + d);
-								}
+							if (data == null) {
+								data = CoreHelpers.GetStringRegex("BANDWIDTH=?, RESOLUTION=?", videoData);
 							}
+
+							if (data == null) continue;
+
+							string key = data.Length > 2 ? data[2] : "DEF" + data[1];
+							if (streams.ContainsKey(key) || key.StartsWith("DEF")) {
+								AnimbeFeverVideo _stream =
+									_stream = streams.ContainsKey(key) ? streams[key] : new AnimbeFeverVideo();
+
+
+								_stream.mainUrl = line;
+								_stream.name = data[1];
+								streams[key] = _stream;
+							}
+							else {
+								error("FATAL EX MISSMATCH IN ANIMEFEBEER:: " + d);
+							}
+
 						}
 						else {
 							if (line.StartsWith("#EXT-X-STREAM-INF:BANDWIDTH")) { // VIDEO
@@ -115,13 +122,15 @@ namespace CloudStreamForms.Core.AnimeProviders
 							baseUrl = _stream.mainUrl,
 							priority = videoPrio,
 							audioStreams = _stream.audioStreams,
-							referer = ((string[])extraData)[normalEpisode]
+							referer = "https://www.animefever.tv/"//((string[])extraData)[normalEpisode]
 						};
 						AddPotentialLink(normalEpisode, basicLink);
 					}
 				}
 			}
-			catch (Exception) { }
+			catch (Exception _ex) {
+				error(_ex);
+			}
 		}
 
 		public override NonBloatSeasonData GetSeasonData(MALSeason ms, TempThread tempThread, string year, object storedData)
@@ -145,7 +154,7 @@ namespace CloudStreamForms.Core.AnimeProviders
 							if (langs.Contains("eng")) {
 								setData.dubEpisodes[index] = (epInfo.id.ToString());
 							}
-							if (langs.Contains("jap")) {
+							if (langs.Contains("jap") || langs.Contains("jpn")) {
 								setData.subEpisodes[index] = (epInfo.id.ToString());
 							}
 							referers[index] = $"https://www.animefever.tv/series/{subData.id}-{subData.slug}/episode/{epInfo.id}-episode-{index + 1}-{epInfo.slug}";

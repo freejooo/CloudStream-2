@@ -60,6 +60,14 @@ namespace CloudStreamForms.Core.AnimeProviders
 			//public string link; // VIDSTREAM LINK
 			//public string totalepisode;
 		}
+
+		[System.Serializable]
+		public struct ArrayAnimeEpisodeRoot2
+		{
+			public List<string> links;
+			//public string link; // VIDSTREAM LINK
+			//public string totalepisode;
+		}
 #pragma warning restore CS0649
 
 		readonly static string[] videoRez = {
@@ -81,11 +89,20 @@ namespace CloudStreamForms.Core.AnimeProviders
 			try {
 				string d = DownloadString(episodeLink, tempThred, referer: "https://www.arrayanime.com/");
 				if (!d.IsClean()) return;
-				ArrayAnimeEpisodeRoot episodeResult = JsonConvert.DeserializeObject<ArrayAnimeEpisodeRoot>(d);
-				foreach (var link in episodeResult.links) {
-					int prio = GetPrioFromName(link.name);
-					AddPotentialLink(normalEpisode, link.link, Name, 5 + prio, videoRez[prio]);
+				try {
+					ArrayAnimeEpisodeRoot episodeResult = JsonConvert.DeserializeObject<ArrayAnimeEpisodeRoot>(d);
+					foreach (var link in episodeResult.links) {
+						int prio = GetPrioFromName(link.name);
+						AddPotentialLink(normalEpisode, link.link, Name, 5 + prio, videoRez[prio]);
+					}
 				}
+				catch (System.Exception) {
+					ArrayAnimeEpisodeRoot2 episodeResult = JsonConvert.DeserializeObject<ArrayAnimeEpisodeRoot2>(d);
+					foreach (var link in episodeResult.links) {
+						AddPotentialLink(normalEpisode, link, Name, 5);
+					}
+				}
+				
 				//TODO ADD VIDSTREAM episodeResult.link
 			}
 			catch (System.Exception _ex) {

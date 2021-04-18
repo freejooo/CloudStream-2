@@ -120,12 +120,10 @@ namespace CloudStreamForms
 			button = _Button;
 			bgColor = button.BackgroundColor;
 			ItemsSource = __ItemSource;
-			print("fontTes1111t: " + _Button.Text + "|" + fontTest);
 
 			button.Clicked += async (o, e) => {
 				//  await ActionPopup.DisplayEntry(InputPopupResult.decimalNumber, "ms", "Audio Delay",offset:50,setText:"0",confirmText:"Set Delay");
 				// await ActionPopup.DisplayEntry(InputPopupResult.url, "https://youtu.be/", "Youtube link",confirmText:"Download")
-				print("fontTest: " + _Button.Text + "|" + fontTest);
 				await PopupNavigation.Instance.PushAsync(new SelectPopup(ItemsSource, SelectedIndex, title, fontTest: fontTest));
 				SelectPopup.OnSelectedChanged += (_o, _e) => {
 					SelectedIndex = _e;

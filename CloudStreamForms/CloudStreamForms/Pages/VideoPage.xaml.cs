@@ -1138,7 +1138,6 @@ namespace CloudStreamForms
 
 				Player.EncounteredError += (o, e) => {
 					error(_libVLC.LastLibVLCError);
-					print("ERROR LOADING MDDD: ");
 					ErrorWhenLoading();
 				};
 
@@ -1177,7 +1176,6 @@ namespace CloudStreamForms
 
 		async void ErrorWhenLoading()
 		{
-			print("ERROR UCCURED");
 			if (currentVideo.isSingleMirror || currentVideo.isDownloadFile) {
 				ShowVideoToast($"Error Loading");
 			}
@@ -1448,8 +1446,7 @@ namespace CloudStreamForms
 				if (GetPlayerLenght() == -1) return;
 				if (!GetPlayerIsSeekable()) return;
 			}
-			catch (Exception _ex) {
-				print("ERRORIN TOUCH: " + _ex);
+			catch (Exception) {
 				return;
 			}
 
@@ -2008,7 +2005,6 @@ namespace CloudStreamForms
 		private void TouchEffect_TouchAction(object sender, TouchTracking.TouchActionEventArgs args)
 		{
 			if (!isShown) return;
-			print("TOUCH ACCTION0");
 			bool lockActionOnly = false;
 
 			void CheckLock()
@@ -2036,8 +2032,7 @@ namespace CloudStreamForms
 			try {
 				CheckLock();
 			}
-			catch (Exception _ex) {
-				print("ERRORIN TOUCH: " + _ex);
+			catch (Exception) {
 				lockActionOnly = true;
 			}
 

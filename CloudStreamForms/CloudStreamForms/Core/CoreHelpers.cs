@@ -288,7 +288,7 @@ namespace CloudStreamForms.Core
 
 				foreach (var sp in splt) {
 					string[] sps = sp.Split(splitChar);
-					rex += $".*{sps[0]}(.*?){sps[1]}";
+					rex += $".*{sps[0]}(.*){sps[1]}"; // (.*?)
 				}
 				rex = rex.Replace("\"", "\\\"");
 

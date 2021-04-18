@@ -192,7 +192,8 @@ namespace CloudStreamForms.Core.BaseProviders
 
 		public string GetAnimeFeverEpisodeStream(int id)
 		{
-			string qry = $"  https://www.animefever.tv/video/{id}/stream.m3u8";
+						 //https://www.animefever.tv/video/49144/stream/video.m3u8
+			string qry = $"https://www.animefever.tv/video/{id}/stream/video.m3u8";
 			string d = core.DownloadString(qry, referer: "https://www.animefever.tv/series",
 				headerName: headerName, headerValue: headerValue);
 

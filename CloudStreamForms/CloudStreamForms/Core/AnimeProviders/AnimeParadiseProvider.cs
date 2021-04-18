@@ -27,7 +27,7 @@ namespace CloudStreamForms.Core.AnimeProviders
 					string fileId = FindHTML(main, "fileId=", "\"");
 					if (fileId == "") return;
 
-					d = DownloadString($"https://stream.animeparadise.cc/sources?fileId={fileId}", referer: $"https://stream.animeparadise.cc/embed.html?fileId={fileId}");
+					d = DownloadString($"https://stream.animeparadise.org/sources?fileId={fileId}", referer: $"https://stream.animeparadise.org/embed.html?fileId={fileId}");
 				}
 				else {
 					d = DownloadString(episodeLink);
@@ -38,8 +38,10 @@ namespace CloudStreamForms.Core.AnimeProviders
 				var videos = JsonConvert.DeserializeObject<AnimeParadiseVideoFile[]>(d);
 				int prio = 10;
 				foreach (var video in videos) {
-					AddPotentialLink(normalEpisode, video.file, "AnimeParadise", prio, video.label);
-					prio--;
+					if(video.episode == episode) {
+						AddPotentialLink(normalEpisode, video.url, "AnimeParadise", prio);
+						prio--;
+					}
 				}
 			}
 			catch (Exception _ex) {
@@ -51,9 +53,12 @@ namespace CloudStreamForms.Core.AnimeProviders
 		[System.Serializable]
 		public struct AnimeParadiseVideoFile
 		{
+			public string url;
+			public int episode;
+			/*
 			public string file;
 			public string label;
-			public string type;
+			public string type;*/
 		}
 #pragma warning restore CS0649
 
@@ -72,8 +77,8 @@ namespace CloudStreamForms.Core.AnimeProviders
 			try {
 				string search = malData.engName.Replace("-", " ");
 				List<AnimeParadiseData> data = new List<AnimeParadiseData>();
-				string searchQry = "https://animeparadise.cc/search.php?query=" + search;
-				string d = DownloadString(searchQry, referer: (IsNewApi ? "https://animeparadise.cc/" : "https://animeparadise.cc/index.php"));
+				string searchQry = "https://animeparadise.org/search.php?query=" + search;
+				string d = DownloadString(searchQry, referer: (IsNewApi ? "https://animeparadise.org/" : "https://animeparadise.org/index.php"));
 				if (d == "") {
 					return null;
 				}
@@ -121,7 +126,7 @@ namespace CloudStreamForms.Core.AnimeProviders
 					(ToLowerAndReplace(ms.name, false).StartsWith(ToLowerAndReplace(subData.name, false)) ||
 					 ToLowerAndReplace(ms.engName, false).StartsWith(ToLowerAndReplace(subData.name, false)))) { // THIS IS BECAUSE SEASON IS SEPERATED FROM NAME
 					try {
-						string d = DownloadString("https://animeparadise.cc/anime.php?s=" + subData.id, referer: subData.referer);
+						string d = DownloadString("https://animeparadise.org/anime.php?s=" + subData.id, referer: subData.referer);
 						var doc = new HtmlAgilityPack.HtmlDocument();
 						doc.LoadHtml(d);
 						var nodes = doc.QuerySelectorAll("h1.title");
@@ -129,7 +134,7 @@ namespace CloudStreamForms.Core.AnimeProviders
 						int lastEp = int.Parse(nodes[^1].InnerText);
 
 						for (int i = 1; i <= lastEp; i++) {
-							string s = IsNewApi ? $"https://animeparadise.cc/apis/fetchsources.php?s={subData.id}&ep={i}" : $"https://animeparadise.cc/watch.php?s={subData.id}&ep={i}";
+							string s = IsNewApi ? $"https://animeparadise.org/apis/fetchsources.php?s={subData.id}&ep={i}" : $"https://animeparadise.org/watch.php?s={subData.id}&ep={i}";
 							if (subData.isDub) {
 								setData.dubEpisodes.Add(s);
 							}

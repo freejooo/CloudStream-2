@@ -35,6 +35,24 @@ namespace CloudStreamForms.Core.AnimeProviders
 					AddPotentialLink(normalEpisode, link, Name, 7, size);
 				}
 			}
+
+			var f1 = FindHTML(d, "src = \'", "\'");
+			if(f1.IsClean()) {
+				AddPotentialLink(normalEpisode, f1, Name, 7);
+			}
+
+			if(d.Contains("genovids.php")) {
+				var id = FindHTML(d, "data: {id: \'", "\'");
+				if(id.IsClean()) {
+					var s = core.PostRequest("https://genoanime.com/player/genovids.php", src, $"id={id}").Replace("\\","");
+					if(s.IsClean()) {
+						var link = FindHTML(s, "src\":\"", "\"");
+						if (link.IsClean()) {
+							AddPotentialLink(normalEpisode, link, Name, 7);
+						}
+					}
+				}
+			}
 		}
 
 		[System.Serializable]

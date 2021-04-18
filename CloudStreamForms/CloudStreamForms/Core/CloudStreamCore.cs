@@ -63,10 +63,37 @@ namespace CloudStreamForms.Core
 		{
 			coreCreation = DateTime.Now;
 			// INACTIVE // new DubbedAnimeNetProvider(this)
+			var animeProvidersWorking = new IAnimeProvider[] {
+				
 
+			};
 			animeProviders = new IAnimeProvider[] {
+				// === TESTED AS OF 2021-04-18 ===
+				new ShiroProvider(this,"https://shiro.is", "Shiro"),
+				new GogoAnimeProvider(this),
+				new DubbedAnimeProvider(this),
+				//new AnimeFlixProvider(this), // NO STATUS
+				new AnimekisaProvider(this),
+				new VidstreamingAnimeProvider(this),
+				new FourAnimeProvider(this),
+				new AnimeParadiseProvider(this),
+				new GenoanimeProvider(this),
+				new ArrayAnimeProvider(this),
+				//new AnimeSimpleProvider(this), // CAN GET WORKING
+				//new TheMovieProvider(this), // WORKS BUT TOO FEW TITLES
+
+				// === END ===
+
+
+
+				//new AnimeFeverProvider(this), // TOKEN IS WACK
+								//new ShiroProvider(this,"https://shiro.is", "Shiro"),
+				//new TwistMoeProvider(this),
+				//new KissFreeAnimeProvider(this),
+								
+
+				/*
 				new TwistMoeProvider(this),
-				new AnimeFeverProvider(this),
 				new GogoAnimeProvider(this),
 				//new KickassAnimeProvider(this), // Cloudflare ?
 				new DubbedAnimeProvider(this),
@@ -80,11 +107,10 @@ namespace CloudStreamForms.Core
               //  new NineAnimeBloatFreeProvider(this), // RECAPTCHA Link extraction
 				new FourAnimeProvider(this),
 				new AnimeParadiseProvider(this),
-				new ShiroProvider(this,"https://www.dubbedanime.vip", "DubbedVip"),
-				new ShiroProvider(this,"https://shiro.is", "Shiro"),
+				//new ShiroProvider(this,"https://www.dubbedanime.vip", "DubbedVip"), // NOT WORKING
 				new YugenaniProvider(this),
 				new GenoanimeProvider(this),
-				new ArrayAnimeProvider(this),
+				new ArrayAnimeProvider(this),*/
 			};
 			movieProviders = new IMovieProvider[] {
 				new FilesClubMovieProvider(this),
@@ -1049,7 +1075,7 @@ namespace CloudStreamForms.Core
 		{
 			public override string Name => "GogoAnime";
 			public GogoAnimeProvider(CloudStreamCore _core) : base(_core) { }
-			const string MainSite = "https://www1.gogoanime.movie/";
+			const string MainSite = "https://www1.gogoanime.ai/";
 			public override void GetHasDubSub(MALSeason data, out bool dub, out bool sub)
 			{
 				dub = data.gogoData.dubExists;
@@ -1058,9 +1084,7 @@ namespace CloudStreamForms.Core
 
 			public override void FishMainLink(string year, TempThread tempThred, MALData malData)
 			{
-				print("start");
 				if (ActiveMovie.title.MALData.japName != "error") {
-					print("DOWNLOADING");
 					string d = DownloadString($"{MainSite}/search.html?keyword=" + ActiveMovie.title.MALData.japName.Substring(0, Math.Min(5, ActiveMovie.title.MALData.japName.Length)), tempThred);
 					if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
 					string look = "<p class=\"name\"><a href=\"/category/";
@@ -1137,18 +1161,6 @@ namespace CloudStreamForms.Core
 						}
 						d = d.Substring(d.IndexOf(look) + 1, d.Length - d.IndexOf(look) - 1);
 					}
-					for (int i = 0; i < ActiveMovie.title.MALData.seasonData.Count; i++) {
-						for (int q = 0; q < ActiveMovie.title.MALData.seasonData[i].seasons.Count; q++) {
-							var ms = ActiveMovie.title.MALData.seasonData[i].seasons[q];
-
-							if (ms.gogoData.dubExists) {
-								print(i + ". " + ms.name + " | Dub E " + ms.gogoData.dubUrl);
-							}
-							if (ms.gogoData.subExists) {
-								print(i + ". " + ms.name + " | Sub E " + ms.gogoData.subUrl);
-							}
-						}
-					}
 				}
 			}
 
@@ -1190,8 +1202,7 @@ namespace CloudStreamForms.Core
 							}
 							string subMax = FindHTML(d, "class=\"active\" ep_start = \'", ">");
 							string maxEp = FindHTML(subMax, "ep_end = \'", "\'");//FindHTML(d, "<a href=\"#\" class=\"active\" ep_start = \'0\' ep_end = \'", "\'");
-							print(i + "MAXEP" + maxEp);
-							print(baseUrls[i]);
+
 							int _epCount = (int)Math.Floor(decimal.Parse(maxEp));
 							//max += _epCount;
 							try {
@@ -1282,7 +1293,7 @@ namespace CloudStreamForms.Core
 							print("DSTRING:>> " + dstring);
 							string d = DownloadString(dstring, tempThred);
 
-							AddEpisodesFromMirrors(tempThred, d, normalEpisode, " GoGo", " GoGo");
+							AddEpisodesFromMirrors(tempThred, d, normalEpisode);
 						}
 					}
 				}
@@ -1813,6 +1824,7 @@ namespace CloudStreamForms.Core
 				try {
 					string search = ActiveMovie.title.name;
 					string d = DownloadString("https://ww1.animesimple.com/search?q=" + search);
+					print("FFA:" + d);
 					const string lookFor = "cutoff-fix\" href=\"";
 					while (d.Contains(lookFor)) {
 						string href = FindHTML(d, lookFor, "\"");
@@ -5131,6 +5143,7 @@ namespace CloudStreamForms.Core
 					if (!GetThredActive(tempThred)) { return; }; // COPY UPDATE PROGRESS
 					MALData md = activeMovie.title.MALData;
 
+
 					activeMovie.title.MALData.done = true;
 
 					MalDataLoaded?.Invoke(null, activeMovie.title.MALData);
@@ -5729,7 +5742,6 @@ namespace CloudStreamForms.Core
 									error(_ex);
 								}
 							}
-							print("ELAPSED TIME FOR FF::: " + _ss.ElapsedMilliseconds);
 						}
 
 						EpisodeHalfLoaded?.Invoke(null, activeMovie.episodes);
@@ -6001,6 +6013,8 @@ namespace CloudStreamForms.Core
 		{
 			string mainD = d.ToString();
 
+			//TODO ADD streamsb
+
 			var links = GetAllFilesRegex(mainD);
 			int vidCommonPrio = 8;
 			foreach (var link in links) {
@@ -6097,15 +6111,18 @@ namespace CloudStreamForms.Core
 
 				// https://vidstreaming.io/download?id= ; CAPTCHA ON DLOAD
 				List<VidStreamingNames> names = new List<VidStreamingNames>() {
-				new VidStreamingNames("Vidstreaming","//vidstreaming.io/streaming.php?","https://vidstreaming.io/download?id="),
-				new VidStreamingNames("VidNode","//vidnode.net/load.php?id=","https://vidnode.net/download?id="),
-				new VidStreamingNames("VidNode","//vidnode.net/streaming.php?id=","https://vidnode.net/download?id="),
-				new VidStreamingNames("VidLoad","//vidstreaming.io/load.php?id=","https://vidstreaming.io/download?id="),
-				new VidStreamingNames("VidCloud","//vidcloud9.com/download?id=","https://vidcloud9.com/download?id="),
-				new VidStreamingNames("VidCloud","//vidcloud9.com/streaming.php?id=","https://vidcloud9.com/download?id="),
-				new VidStreamingNames("VidCloud","//vidcloud9.com/load.php?id=","https://vidcloud9.com/download?id="),
-				new VidStreamingNames("VidstreamingLoad","//vidstreaming.io/loadserver.php?id=","https://vidstreaming.io/download?id="),
-			};
+					new VidStreamingNames("Vidstreaming","//vidstreaming.io/streaming.php?","https://vidstreaming.io/download?id="),
+					new VidStreamingNames("VidNode","//vidnode.net/load.php?id=","https://vidnode.net/download?id="),
+					new VidStreamingNames("VidNode","//vidnode.net/streaming.php?id=","https://vidnode.net/download?id="),
+					new VidStreamingNames("VidLoad","//vidstreaming.io/load.php?id=","https://vidstreaming.io/download?id="),
+					new VidStreamingNames("VidCloud","//vidcloud9.com/download?id=","https://vidcloud9.com/download?id="),
+					new VidStreamingNames("VidCloud","//vidcloud9.com/streaming.php?id=","https://vidcloud9.com/download?id="),
+					new VidStreamingNames("VidCloud","//vidcloud9.com/load.php?id=","https://vidcloud9.com/download?id="),
+					new VidStreamingNames("VidstreamingLoad","//vidstreaming.io/loadserver.php?id=","https://vidstreaming.io/download?id="),
+					new VidStreamingNames("GoGoPlay","//gogo-play.net/streaming.php?id=","https://gogo-play.net/download?id="),
+					new VidStreamingNames("GoGoPlay","//gogo-play.net/loadserver.php?id=","https://gogo-play.net/download?id="),
+					new VidStreamingNames("GoGoStream","//gogo-stream.com/streaming.php?id=","https://gogo-stream.com/download?id="),
+				};
 
 				for (int i = 0; i < names.Count; i++) {
 					vid = FindHTML(d, names[i].compareUrl, "\"");
@@ -6751,7 +6768,6 @@ namespace CloudStreamForms.Core
 
 		public bool AddPotentialLink(int normalEpisode, BasicLink basicLink)
 		{
-			print("ADDING LINK::: " + basicLink.baseUrl);
 			lock (cachedLinksLock) {
 				string id = (activeMovie.title.IsMovie ? activeMovie.title.id : activeMovie.episodes[normalEpisode].id);
 				var link = GetCachedLink(id);
@@ -6759,6 +6775,7 @@ namespace CloudStreamForms.Core
 				if (holder.links.Select(t => t.baseUrl).Contains(basicLink.baseUrl)) return false;
 				LinkAdded?.Invoke(null, id);
 				holder.links.Add(basicLink);
+				print("ADDED LINK::: " + basicLink.baseUrl);
 				return true;
 			}
 		}

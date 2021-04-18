@@ -1445,30 +1445,27 @@ namespace CloudStreamForms
 					int errorCount = 0;
 					const int maxErrorcount = 1;
 					bool gotError = false;
-				checkerror:;
+					checkerror:;
 					if (episodeResult == null) {
 						gotError = true;
 					}
 					else {
-						if (episodeResult.GetMirrosUrls() == null) {
-							gotError = true;
+
+						if (episodeResult.GetBasicLinks().Count > 0) {
+							if (autoPlay) {
+								if (MainChrome.IsConnectedToChromeDevice) {
+									ChromecastAt(0, episodeResult);
+								}
+								else {
+									PlayEpisode(episodeResult);
+								}
+							}
+							//episodeResult.GetHasLoadedLinks() = true;
 						}
 						else {
-							if (episodeResult.GetMirrosUrls().Count > 0) {
-								if (autoPlay) {
-									if (MainChrome.IsConnectedToChromeDevice) {
-										ChromecastAt(0, episodeResult);
-									}
-									else {
-										PlayEpisode(episodeResult);
-									}
-								}
-								//episodeResult.GetHasLoadedLinks() = true;
-							}
-							else {
-								gotError = true;
-							}
+							gotError = true;
 						}
+
 					}
 					if (gotError) {
 						if (errorCount < maxErrorcount) {

@@ -53,7 +53,7 @@ namespace CloudStreamForms.Core.AnimeProviders
 					string slug = subData.slug;
 
 					for (int i = 1; i <= subData.episodes; i++) {
-						episodes.Add($"https://ani.api-web.site/anime-episode/slug/{slug}-episode-{i}?token={Token}");
+						episodes.Add($"https://tapi.{shiroBase._siteUrl.Replace("https://", "")}/anime-episode/slug/{slug}-episode-{i}?token={Token}");
 					}
 
 					if (subData.isDub) {

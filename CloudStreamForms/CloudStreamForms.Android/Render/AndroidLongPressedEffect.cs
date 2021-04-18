@@ -153,7 +153,7 @@ namespace CloudStreamForms.Droid.Effects
 		{
 			var command = LongPressedEffect.GetCommand(Element);
 
-			System.Console.WriteLine("ACTION:" + e.Event.Action + "|" + e.Event.Action.HasFlag(Android.Views.MotionEventActions.Cancel));
+			//System.Console.WriteLine("ACTION:" + e.Event.Action + "|" + e.Event.Action.HasFlag(Android.Views.MotionEventActions.Cancel));
 			e.Handled = true;
 
 			switch (e.Event.Action) {

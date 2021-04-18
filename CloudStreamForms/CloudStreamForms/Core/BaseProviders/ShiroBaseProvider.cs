@@ -87,7 +87,7 @@ namespace CloudStreamForms.Core.BaseProviders
 				}
 
 				string shiroToken = GetShiroToken();
-				string d = DownloadString($"https://ani.api-web.site/advanced?search={search}&type={(_isMovieProvider ? "movie" : "tv")}&token={shiroToken}");
+				string d = DownloadString($"https://tapi.{_siteUrl.Replace("https://", "")}/advanced?search={search}&type={(_isMovieProvider ? "movie" : "tv")}&token={shiroToken}");
 
 				var data = JsonConvert.DeserializeObject<ShiroRoot>(d);
 				var ret = data.Data.Nav.Nav[0].Items.Where(t => t.type == (_isMovieProvider ? "movie" : "TV")).Select(t => new RealShiroItem() {
