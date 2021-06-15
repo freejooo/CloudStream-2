@@ -44,7 +44,7 @@ namespace CloudStreamForms.Core.MovieProviders
 		{
 			foreach (var item in (RealShiroItem?[])metadata) {
 				if (item != null) {
-					shiroBase.LoadLink($"https://ani.api-web.site/anime-episode/slug/{item.Value.slug}-episode-1?token={Token}", normalEpisode, tempThred, item.Value.isDub, $"{item.Value.slug}-episode-1");
+					shiroBase.LoadLink($"https://tapi.shiro.is/anime-episode/slug/{item.Value.slug}-episode-1?token={Token}", normalEpisode, tempThred, item.Value.isDub, $"{item.Value.slug}-episode-1");
 				}
 			}
 		}
